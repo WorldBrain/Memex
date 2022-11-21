@@ -2,7 +2,10 @@ import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type Storex from '@worldbrain/storex'
 import type { ServerStorageModules } from 'src/storage/types'
-import type { RemotePageActivityIndicatorInterface } from './types'
+import type {
+    FollowedList,
+    RemotePageActivityIndicatorInterface,
+} from './types'
 import type {
     SharedList,
     SharedListReference,
@@ -110,21 +113,18 @@ export class PageActivityIndicatorBackground {
         ]
     }
 
-    async syncFollowedListsAndEntries(opts?: { now?: number }): Promise<void> {
+    async syncFollowedLists(): Promise<void> {
         const userId = await this.deps.getCurrentUserId()
         if (userId == null) {
             return
         }
-        const now = opts?.now ?? Date.now()
-        const { contentSharing } = await this.deps.getServerStorage()
-
         const sharedLists = await this.getAllUserFollowedSharedListsFromServer({
             id: userId,
             type: 'user-reference',
         })
         const existingFollowedListsLookup = await this.storage.findAllFollowedLists()
 
-        // Do a run over the existing followedLists, to remove any that no longer have assoc. sharedLists existing
+        // Remove any local followedLists that don't have an associated remote sharedList (carry over from old implementation, b)
         for (const followedList of existingFollowedListsLookup.values()) {
             if (
                 !sharedLists.find((list) => list.id === followedList.sharedList)
@@ -136,22 +136,38 @@ export class PageActivityIndicatorBackground {
         }
 
         for (const sharedList of sharedLists) {
+            if (!existingFollowedListsLookup.get(sharedList.id)) {
+                await this.storage.createFollowedList(
+                    sharedListToFollowedList(sharedList),
+                )
+            }
+        }
+    }
+
+    async syncFollowedListEntries(opts?: { now?: number }): Promise<void> {
+        const userId = await this.deps.getCurrentUserId()
+        if (userId == null) {
+            return
+        }
+        const now = opts?.now ?? Date.now()
+        const { contentSharing } = await this.deps.getServerStorage()
+
+        const existingFollowedListsLookup = await this.storage.findAllFollowedLists()
+
+        for (const followedList of existingFollowedListsLookup.values()) {
             const listReference: SharedListReference = {
                 type: 'shared-list-reference',
-                id: sharedList.id,
+                id: followedList.sharedList,
             }
             const existingFollowedListEntryLookup = await this.storage.findAllFollowedListEntries(
                 {
-                    sharedList: sharedList.id,
+                    sharedList: followedList.sharedList,
                 },
-            )
-            const localFollowedList = existingFollowedListsLookup.get(
-                sharedList.id,
             )
             const sharedListEntries = await contentSharing.getListEntriesByList(
                 {
                     listReference,
-                    from: localFollowedList?.lastSync,
+                    from: followedList.lastSync,
                 },
             )
             const sharedAnnotationListEntries = await contentSharing.getAnnotationListEntries(
@@ -244,18 +260,10 @@ export class PageActivityIndicatorBackground {
                 }
             }
 
-            if (localFollowedList == null) {
-                await this.storage.createFollowedList(
-                    sharedListToFollowedList(sharedList, {
-                        lastSync: now,
-                    }),
-                )
-            } else {
-                await this.storage.updateFollowedListLastSync({
-                    sharedList: sharedList.id,
-                    lastSync: now,
-                })
-            }
+            await this.storage.updateFollowedListLastSync({
+                sharedList: followedList.sharedList,
+                lastSync: now,
+            })
         }
     }
 }

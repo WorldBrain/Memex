@@ -152,9 +152,27 @@ describe('Page activity indicator background module tests', () => {
                 'getPageActivityStatus'
             ]('https://test.com/c'),
         ).toEqual('no-activity')
-        await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { now: 1 },
-        )
+
+        await backgroundModules.pageActivityIndicator.syncFollowedLists()
+        expect(
+            await backgroundModules.pageActivityIndicator[
+                'getPageActivityStatus'
+            ]('https://test.com/a'),
+        ).toEqual('no-activity')
+        expect(
+            await backgroundModules.pageActivityIndicator[
+                'getPageActivityStatus'
+            ]('https://test.com/b'),
+        ).toEqual('no-activity')
+        expect(
+            await backgroundModules.pageActivityIndicator[
+                'getPageActivityStatus'
+            ]('https://test.com/c'),
+        ).toEqual('no-activity')
+
+        await backgroundModules.pageActivityIndicator.syncFollowedListEntries({
+            now: 1,
+        })
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
@@ -176,9 +194,9 @@ describe('Page activity indicator background module tests', () => {
             .collection('sharedAnnotationListEntry')
             .deleteObjects({})
 
-        await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { now: 2 },
-        )
+        await backgroundModules.pageActivityIndicator.syncFollowedListEntries({
+            now: 2,
+        })
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
@@ -203,9 +221,9 @@ describe('Page activity indicator background module tests', () => {
                 normalizedPageUrl: 'test.com/b',
             })
 
-        await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-            { now: 2 },
-        )
+        await backgroundModules.pageActivityIndicator.syncFollowedListEntries({
+            now: 2,
+        })
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
@@ -241,7 +259,7 @@ describe('Page activity indicator background module tests', () => {
                     .findAllObjects({}),
             ).toEqual([])
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 1 },
             )
 
@@ -271,7 +289,7 @@ describe('Page activity indicator background module tests', () => {
                     .findAllObjects({}),
             ).toEqual([])
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 1 },
             )
 
@@ -309,7 +327,20 @@ describe('Page activity indicator background module tests', () => {
                     .findAllObjects({}),
             ).toEqual([])
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(calcExpectedLists(ownListIds, { lastSync: undefined }))
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 1 },
             )
 
@@ -325,7 +356,8 @@ describe('Page activity indicator background module tests', () => {
             ).toEqual(calcExpectedListEntries(ownListIds))
 
             // Do it again to assert idempotency
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 2 },
             )
 
@@ -367,7 +399,20 @@ describe('Page activity indicator background module tests', () => {
                     .findAllObjects({}),
             ).toEqual([])
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(calcExpectedLists(ownListIds, { lastSync: undefined }))
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 1 },
             )
 
@@ -412,7 +457,7 @@ describe('Page activity indicator background module tests', () => {
                     .createObject(entry)
             }
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 2 },
             )
 
@@ -472,7 +517,20 @@ describe('Page activity indicator background module tests', () => {
                     .findAllObjects({}),
             ).toEqual([])
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(calcExpectedLists(ownListIds, { lastSync: undefined }))
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 1 },
             )
 
@@ -521,7 +579,7 @@ describe('Page activity indicator background module tests', () => {
                     uploadedWhen: 1,
                 })
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 2 },
             )
 
@@ -572,7 +630,7 @@ describe('Page activity indicator background module tests', () => {
                     uploadedWhen: 3,
                 })
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 3 },
             )
 
@@ -616,7 +674,7 @@ describe('Page activity indicator background module tests', () => {
                     sharedList: DATA.sharedLists[1].id,
                 })
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 4 },
             )
 
@@ -680,7 +738,20 @@ describe('Page activity indicator background module tests', () => {
                     .findAllObjects({}),
             ).toEqual([])
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(calcExpectedLists(ownListIds, { lastSync: undefined }))
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 1 },
             )
 
@@ -689,7 +760,6 @@ describe('Page activity indicator background module tests', () => {
                     .collection('followedList')
                     .findAllObjects({}),
             ).toEqual(calcExpectedLists(ownListIds, { lastSync: 1 }))
-
             expect(
                 await storageManager
                     .collection('followedListEntry')
@@ -703,15 +773,13 @@ describe('Page activity indicator background module tests', () => {
                 .deleteOneObject({ id: DATA.sharedLists[0].id })
             ownListIds.delete(DATA.sharedLists[0].id)
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-                { now: 2 },
-            )
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
 
             expect(
                 await storageManager
                     .collection('followedList')
                     .findAllObjects({}),
-            ).toEqual(calcExpectedLists(ownListIds, { lastSync: 2 }))
+            ).toEqual(calcExpectedLists(ownListIds, { lastSync: 1 }))
             expect(
                 await storageManager
                     .collection('followedListEntry')
@@ -739,7 +807,21 @@ describe('Page activity indicator background module tests', () => {
                     .findAllObjects({}),
             ).toEqual([])
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(
+                calcExpectedLists(followedListIds, { lastSync: undefined }),
+            )
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 1 },
             )
 
@@ -748,7 +830,6 @@ describe('Page activity indicator background module tests', () => {
                     .collection('followedList')
                     .findAllObjects({}),
             ).toEqual(calcExpectedLists(followedListIds, { lastSync: 1 }))
-
             expect(
                 await storageManager
                     .collection('followedListEntry')
@@ -780,7 +861,21 @@ describe('Page activity indicator background module tests', () => {
                     .findAllObjects({}),
             ).toEqual([])
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(
+                calcExpectedLists(followedListIds, { lastSync: undefined }),
+            )
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 1 },
             )
 
@@ -804,7 +899,22 @@ describe('Page activity indicator background module tests', () => {
                 })
             followedListIds.delete(Number(DATA.activityFollows[2].objectId))
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(calcExpectedLists(followedListIds, { lastSync: 1 }))
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual(calcExpectedListEntries(followedListIds))
+
+            // Do it again to assert idempotency
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 2 },
             )
 
@@ -813,22 +923,6 @@ describe('Page activity indicator background module tests', () => {
                     .collection('followedList')
                     .findAllObjects({}),
             ).toEqual(calcExpectedLists(followedListIds, { lastSync: 2 }))
-            expect(
-                await storageManager
-                    .collection('followedListEntry')
-                    .findAllObjects({}),
-            ).toEqual(calcExpectedListEntries(followedListIds))
-
-            // Do it again to assert idempotency
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-                { now: 3 },
-            )
-
-            expect(
-                await storageManager
-                    .collection('followedList')
-                    .findAllObjects({}),
-            ).toEqual(calcExpectedLists(followedListIds, { lastSync: 3 }))
             expect(
                 await storageManager
                     .collection('followedListEntry')
@@ -858,7 +952,22 @@ describe('Page activity indicator background module tests', () => {
                     .findAllObjects({}),
             ).toEqual([])
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(
+                calcExpectedLists(expectedListIds, { lastSync: undefined }),
+            )
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 1 },
             )
 
@@ -874,7 +983,8 @@ describe('Page activity indicator background module tests', () => {
             ).toEqual(calcExpectedListEntries(expectedListIds))
 
             // Do it again to assert idempotency
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 2 },
             )
 
@@ -916,7 +1026,22 @@ describe('Page activity indicator background module tests', () => {
                     .findAllObjects({}),
             ).toEqual([])
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(
+                calcExpectedLists(expectedListIds, { lastSync: undefined }),
+            )
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 1 },
             )
 
@@ -944,15 +1069,13 @@ describe('Page activity indicator background module tests', () => {
             expectedListIds.delete(Number(DATA.activityFollows[2].objectId))
             expectedListIds.delete(DATA.sharedLists[0].id)
 
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-                { now: 2 },
-            )
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
 
             expect(
                 await storageManager
                     .collection('followedList')
                     .findAllObjects({}),
-            ).toEqual(calcExpectedLists(expectedListIds, { lastSync: 2 }))
+            ).toEqual(calcExpectedLists(expectedListIds, { lastSync: 1 }))
             expect(
                 await storageManager
                     .collection('followedListEntry')
@@ -960,15 +1083,13 @@ describe('Page activity indicator background module tests', () => {
             ).toEqual(calcExpectedListEntries(expectedListIds))
 
             // Do it again to assert idempotency
-            await backgroundModules.pageActivityIndicator.syncFollowedListsAndEntries(
-                { now: 3 },
-            )
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
 
             expect(
                 await storageManager
                     .collection('followedList')
                     .findAllObjects({}),
-            ).toEqual(calcExpectedLists(expectedListIds, { lastSync: 3 }))
+            ).toEqual(calcExpectedLists(expectedListIds, { lastSync: 1 }))
             expect(
                 await storageManager
                     .collection('followedListEntry')
