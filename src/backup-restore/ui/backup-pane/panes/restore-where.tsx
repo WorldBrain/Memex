@@ -9,7 +9,7 @@ import {
     checkServerStatus,
     changeBackupPath,
 } from '../../utils'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const STYLES = require('../../styles.css')

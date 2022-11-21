@@ -3,7 +3,7 @@ import classNames from 'classnames'
 import { BackupUIState } from 'src/backup-restore/ui/backup-status-bar/BackupStatusBarContainer'
 import StatusOverlay from 'src/backup-restore/ui/backup-status-bar/components/StatusOverlay'
 import { BackupTimes } from 'src/backup-restore/types'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 const styles = require('./StatusBar.css')
 

@@ -6,7 +6,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import browser from 'webextension-polyfill'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 // tutorial step like in the mockup
 export type TutorialStepContent = {

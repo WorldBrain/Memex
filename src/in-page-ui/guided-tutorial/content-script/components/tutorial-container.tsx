@@ -9,7 +9,7 @@ import { ThemeProvider } from 'styled-components'
 import styled, { css } from 'styled-components'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import { tutorialContents, TutorialCardContent } from './tutorial-cards-content'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { windowWhen } from 'rxjs/operator/windowWhen'
 
 // card container (hold cycling logic)

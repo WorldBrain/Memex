@@ -10,7 +10,7 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { SyncStatusIcon } from './sync-status-icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import type { SyncStatusIconState } from '../types'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { ColorThemeKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 

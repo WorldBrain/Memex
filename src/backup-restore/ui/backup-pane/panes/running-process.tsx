@@ -5,7 +5,7 @@ const localStyles = require('./running-process.css')
 import { ProgressBar } from 'src/common-ui/components'
 import LoadingBlocker from '../../../../common-ui/components/loading-blocker'
 import { FailedOverlay } from '../components/overlays'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from 'src/backup-restore/background/types'

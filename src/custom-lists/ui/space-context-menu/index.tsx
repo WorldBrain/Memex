@@ -8,7 +8,7 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import Margin from 'src/dashboard-refactor/components/Margin'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { ButtonTooltip } from 'src/common-ui/components'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
@@ -70,22 +70,13 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             return (
                 <ShareSectionContainer onClick={wrapClick}>
                     <PrimaryAction
-                        label={
-                            <ButtonLabel>
-                                {' '}
-                                <Icon
-                                    color="backgroundColor"
-                                    heightAndWidth="16px"
-                                    path={icons.link}
-                                    hoverOff
-                                />{' '}
-                                Share Space
-                            </ButtonLabel>
-                        }
+                        icon={'link'}
+                        label={'Share Space'}
                         onClick={wrapClick((e) =>
                             this.processEvent('shareSpace', null),
                         )}
                         fontSize="14px"
+                        width="100%"
                     />
                 </ShareSectionContainer>
             )

@@ -4,7 +4,7 @@ import styled, { css } from 'styled-components'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'

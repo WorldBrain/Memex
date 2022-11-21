@@ -6,7 +6,7 @@ import {
     changeBackupPath,
 } from '../../utils'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'

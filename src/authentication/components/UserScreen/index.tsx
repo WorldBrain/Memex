@@ -14,7 +14,7 @@ import type { State, Event, Dependencies } from './types'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic from './logic'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 
 // interface Props {

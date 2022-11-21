@@ -11,7 +11,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import AuthDialog from 'src/authentication/components/AuthDialog'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 export interface Props
     extends Pick<
