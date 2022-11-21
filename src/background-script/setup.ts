@@ -415,6 +415,12 @@ export function createBackgroundModules(options: {
         prefix: 'personalCloud.',
     })
 
+    const pageActivityIndicator = new PageActivityIndicatorBackground({
+        storageManager,
+        getCurrentUserId,
+        getServerStorage,
+    })
+
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
         storageManager,
         syncSettingsStore,
@@ -588,6 +594,7 @@ export function createBackgroundModules(options: {
             tabManagement,
             personalCloud,
             notifications,
+            pageActivityIndicator,
         },
     })
 
@@ -604,11 +611,7 @@ export function createBackgroundModules(options: {
         search,
         eventLog: new EventLogBackground({ storageManager }),
         activityIndicator,
-        pageActivityIndicator: new PageActivityIndicatorBackground({
-            storageManager,
-            getCurrentUserId,
-            getServerStorage,
-        }),
+        pageActivityIndicator,
         customLists,
         tags,
         bookmarks,
