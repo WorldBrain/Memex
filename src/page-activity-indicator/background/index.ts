@@ -73,6 +73,8 @@ export class PageActivityIndicatorBackground {
     deleteFollowedListAndAllEntries: PageActivityIndicatorStorage['deleteFollowedListAndAllEntries'] = (
         data,
     ) => this.storage.deleteFollowedListAndAllEntries(data)
+    deleteAllFollowedListsData: PageActivityIndicatorStorage['deleteAllFollowedListsData'] = () =>
+        this.storage.deleteAllFollowedListsData()
 
     private async getAllUserFollowedSharedListsFromServer(
         userReference: UserReference,

@@ -1096,5 +1096,57 @@ describe('Page activity indicator background module tests', () => {
                     .findAllObjects({}),
             ).toEqual(calcExpectedListEntries(expectedListIds))
         })
+
+        it('should be able to delete all followedList and followedListEntries in one swoop', async () => {
+            const { backgroundModules, storageManager } = await setupTest({
+                testData: { follows: true, ownLists: true },
+            })
+
+            const expectedListIds = new Set([
+                DATA.sharedLists[0].id,
+                DATA.sharedLists[1].id,
+                DATA.sharedLists[3].id,
+            ])
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual([])
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
+                { now: 1 },
+            )
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(calcExpectedLists(expectedListIds, { lastSync: 1 }))
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual(calcExpectedListEntries(expectedListIds))
+
+            await backgroundModules.pageActivityIndicator.deleteAllFollowedListsData()
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual([])
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+        })
     })
 })

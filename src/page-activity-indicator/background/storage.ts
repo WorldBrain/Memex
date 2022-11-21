@@ -89,6 +89,16 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                         },
                     ],
                 },
+                deleteAllFollowedLists: {
+                    collection: 'followedList',
+                    operation: 'deleteObjects',
+                    args: {},
+                },
+                deleteAllFollowedListEntries: {
+                    collection: 'followedListEntry',
+                    operation: 'deleteObjects',
+                    args: {},
+                },
                 deleteFollowedList: {
                     collection: 'followedList',
                     operation: 'deleteObject',
@@ -225,5 +235,10 @@ export default class PageActivityIndicatorStorage extends StorageModule {
         await this.operation('deleteFollowedListEntries', {
             followedList: data.sharedList,
         })
+    }
+
+    async deleteAllFollowedListsData(): Promise<void> {
+        await this.operation('deleteAllFollowedLists', {})
+        await this.operation('deleteAllFollowedListEntries', {})
     }
 }
