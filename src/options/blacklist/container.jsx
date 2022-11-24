@@ -1,4 +1,6 @@
 import React, { Component } from 'react'
+import styled from 'styled-components'
+
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
@@ -11,6 +13,7 @@ import * as actions from './actions'
 import * as selectors from './selectors'
 import styles from './components/base.css'
 import settingsStyle from 'src/options/settings/components/settings.css'
+import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 
 class BlacklistContainer extends Component {
     static propTypes = {
@@ -102,13 +105,11 @@ class BlacklistContainer extends Component {
     renderAddBlacklistSites = () =>
         this.props.blacklist.length ? (
             <div>
-                <div className={settingsStyle.subSubTitle}>
-                    List of blocked pages
-                </div>
-                <p className={settingsStyle.infoText}>
-                    You are currently not logging visits on URLs that have the
-                    following text in them.
-                </p>
+                <SectionTitle>List of blocked pages</SectionTitle>
+                <InfoText>
+                    The ribbon will not open on URLs that have the following
+                    text in them.
+                </InfoText>
             </div>
         ) : (
             false
@@ -127,7 +128,7 @@ class BlacklistContainer extends Component {
         if (this.props.isInputAlreadyStored) {
             return (
                 <div className={styles.blacklistAlert}>
-                    "{this.props.inputVal}" is already blacklisted
+                    <b>Already blocked</b> "{this.props.inputVal}"
                 </div>
             )
         }
@@ -135,11 +136,14 @@ class BlacklistContainer extends Component {
 
     render() {
         return (
-            <React.Fragment>
+            <SettingSection
+                title={'Blocklist for Quick Action Ribbon'}
+                subSubTitle={'Prevent the ribbon to open on any matchin urls'}
+                icon={'block'}
+            >
                 <div>
-                    <div className={settingsStyle.subSubTitle}>
-                        Ignore a new domain/url:
-                    </div>
+                    <SectionTitle>Ignore a new domain/url:</SectionTitle>
+                    <InfoText></InfoText>
                     {this.renderError()}
                     {this.renderBlacklistInputRow()}
                     <div className={settingsStyle.whiteSpacer30} />
@@ -148,7 +152,7 @@ class BlacklistContainer extends Component {
                         {this.renderBlacklistRows()}
                     </BlacklistTable>
                 </div>
-                {this.props.showRemoveModal && (
+                {/* {this.props.showRemoveModal && (
                     <BlacklistRemoveModal
                         isLoading={this.props.isLoading}
                         matchedCount={this.props.matchedDocCount}
@@ -156,8 +160,8 @@ class BlacklistContainer extends Component {
                         onCancel={this.props.hideModal}
                         onConfirm={this.handleRemoveMatching}
                     />
-                )}
-            </React.Fragment>
+                )} */}
+            </SettingSection>
         )
     }
 }
@@ -190,3 +194,16 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(BlacklistContainer)
+
+const SectionTitle = styled.div`
+    font-size: 16px;
+    color: ${(props) => props.theme.colors.normalText};
+    font-weight: bold;
+`
+
+const InfoText = styled.div`
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.greyScale8};
+    font-weight: 300;
+    margin-bottom: 10px;
+`

@@ -34,8 +34,6 @@ export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
             return null
         }
 
-        console.log(this.props.location && this.props.location)
-
         return (
             <NotifBanner
                 mainText="Memex updated"

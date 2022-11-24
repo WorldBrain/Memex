@@ -46,6 +46,7 @@ import { setupPdfViewerListeners } from './pdf-detection'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
+import browser from 'webextension-polyfill'
 // import { maybeRenderTutorial } from 'src/in-page-ui/guided-tutorial/content-script'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
@@ -343,8 +344,33 @@ export async function main(
         }
     }
 
+    // Blocklist enforcement
+    const url = pageInfo._href
+    const blocklistObject = await browser.storage.local.get('blacklist')
+
+    let isAllowedPage = true
+
+    if (blocklistObject) {
+        if (blocklistObject['blacklist']?.length > 0) {
+            const blockListJSON = JSON.parse(blocklistObject['blacklist'])
+
+            blockListJSON?.map((entry) => {
+                if (url.match(entry.expression)) {
+                    isAllowedPage = false
+                }
+            })
+        }
+    } else {
+        return await browser.storage.local.set({ blacklist: {} })
+    }
+
     const isSidebarEnabled = await sidebarUtils.getSidebarState()
-    if (isSidebarEnabled && (pageInfo.isPdf ? isPdfViewerRunning : true)) {
+
+    if (
+        isSidebarEnabled &&
+        isAllowedPage &&
+        (pageInfo.isPdf ? isPdfViewerRunning : true)
+    ) {
         await inPageUI.loadComponent('ribbon')
     }
 

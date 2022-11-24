@@ -27,6 +27,8 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import ExtraButtonsPanel from './extra-buttons-panel'
 import FeedPanel from './feed-panel'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import browser from 'webextension-polyfill'
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
@@ -49,6 +51,7 @@ export interface Props extends RibbonSubcomponentProps {
 
 interface State {
     shortcutsReady: boolean
+    blockListValue: string
 }
 
 export default class Ribbon extends Component<Props, State> {
@@ -62,7 +65,10 @@ export default class Ribbon extends Component<Props, State> {
     private openOptionsTabRPC
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
 
-    state: State = { shortcutsReady: false }
+    state: State = {
+        shortcutsReady: false,
+        blockListValue: this.getDomain(window.location.href),
+    }
 
     constructor(props: Props) {
         super(props)
@@ -257,6 +263,44 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
+    private getDomain(url) {
+        const withoutProtocol = url.split('//')[1]
+
+        if (withoutProtocol.startsWith('www.')) {
+            return withoutProtocol.split('www.')[1].split('/')[0]
+        } else {
+            return withoutProtocol.split('/')[0]
+        }
+    }
+
+    async addItemToBlockList(value) {
+        // fetch current list
+        const blockList = await browser.storage.local.get('blacklist')
+        const currentBlockListJSON = blockList['blacklist']
+        const currentBlockList = !currentBlockListJSON
+            ? []
+            : JSON.parse(currentBlockListJSON)
+
+        const expression = value.replace(/\s+/g, '').replace('.', '\\.')
+
+        // define new entry
+        const newEntry = {
+            expression: expression,
+            dateAdded: Date.now(),
+        }
+
+        // write new list
+        currentBlockList.push(newEntry)
+        const serialized = JSON.stringify(currentBlockList)
+        return browser.storage.local.set({ blacklist: serialized })
+
+        // const currentBlockListJSON = JSON.parse(currentBlocklist['blacklist'])}
+        // const newBlockListString = JSON.stringify(newBlockList[0])
+        // const newBlockListFinal = { 'blacklist': "[" + newBlockListString + "]}" }
+
+        // await browser.storage.local.set(newBlockListFinal)
+    }
+
     private renderExtraButtons() {
         if (!this.props.showExtraButtons) {
             return
@@ -270,6 +314,53 @@ export default class Ribbon extends Component<Props, State> {
                 <ExtraButtonsPanel
                     closePanel={() => this.props.toggleShowExtraButtons()}
                 >
+                    <BlockListArea>
+                        <BlockListTitleArea>
+                            <Icon
+                                filePath={'block'}
+                                heightAndWidth="16px"
+                                hoverOff
+                            />
+                            <InfoText>Disable Ribbon on this page</InfoText>
+                            <Icon
+                                onClick={() =>
+                                    this.openOptionsTabRPC('blocklist')
+                                }
+                                filePath={'settings'}
+                                heightAndWidth={'14px'}
+                                color={'purple'}
+                            />
+                        </BlockListTitleArea>
+                        <TextBoxArea>
+                            <TextField
+                                value={this.state.blockListValue}
+                                onChange={(event) =>
+                                    this.setState({
+                                        blockListValue: (event.target as HTMLInputElement)
+                                            .value,
+                                    })
+                                }
+                                width="fill-available"
+                            />
+                            <Icon
+                                heightAndWidth="22px"
+                                filePath="plus"
+                                color="purple"
+                                onClick={() => {
+                                    this.addItemToBlockList(
+                                        this.state.blockListValue,
+                                    )
+                                    this.setState({
+                                        blockListValue: 'Added to block list',
+                                    })
+                                    setTimeout(
+                                        () => this.props.handleRemoveRibbon(),
+                                        2000,
+                                    )
+                                }}
+                            />
+                        </TextBoxArea>
+                    </BlockListArea>
                     <ExtraButtonRow
                         onClick={() => {
                             this.props.handleRibbonToggle()
@@ -277,21 +368,16 @@ export default class Ribbon extends Component<Props, State> {
                         }}
                     >
                         <Icon
-                            filePath={
-                                this.props.isRibbonEnabled
-                                    ? icons.ribbonOn
-                                    : icons.ribbonOff
-                            }
-                            heightAndWidth="16px"
+                            filePath={icons.quickActionRibbon}
+                            heightAndWidth="22px"
                             hoverOff
                         />
                         {this.props.isRibbonEnabled ? (
-                            <InfoText>Disable Sidebar</InfoText>
+                            <InfoText>Disable Ribbon</InfoText>
                         ) : (
-                            <InfoText>Enable Sidebar</InfoText>
+                            <InfoText>Enable Ribbon</InfoText>
                         )}
                     </ExtraButtonRow>
-
                     <ExtraButtonRow
                         onClick={this.props.highlights.handleHighlightsToggle}
                     >
@@ -301,7 +387,7 @@ export default class Ribbon extends Component<Props, State> {
                                     ? icons.highlighterFull
                                     : icons.highlighterEmpty
                             }
-                            heightAndWidth="16px"
+                            heightAndWidth="22px"
                             hoverOff
                         />
                         {this.props.isRibbonEnabled ? (
@@ -320,7 +406,7 @@ export default class Ribbon extends Component<Props, State> {
                                     ? icons.tooltipOn
                                     : icons.tooltipOff
                             }
-                            heightAndWidth="16px"
+                            heightAndWidth="22px"
                             hoverOff
                         />
                         {this.props.isRibbonEnabled ? (
@@ -336,7 +422,7 @@ export default class Ribbon extends Component<Props, State> {
                     >
                         <Icon
                             filePath={icons.helpIcon}
-                            heightAndWidth="16px"
+                            heightAndWidth="22px"
                             hoverOff
                         />
                         <InfoText>Tutorials</InfoText>
@@ -717,6 +803,31 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 }
+
+const BlockListArea = styled.div`
+    padding: 0px 10px 15px 5px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    display: flex;
+    flex-direction: column;
+    grid-gap: 5px;
+    align-items: flex-start;
+    margin-bottom: 5px;
+`
+
+const BlockListTitleArea = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    padding: 5px 10px;
+`
+
+const TextBoxArea = styled.div`
+    display: flex;
+    align-items: center;
+    padding: 0 0 0 10px;
+    width: fill-available;
+    grid-gap: 5px;
+`
 
 const UpperPart = styled.div``
 

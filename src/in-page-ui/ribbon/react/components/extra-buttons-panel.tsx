@@ -32,4 +32,6 @@ class ExtraButtonsPanel extends React.PureComponent<Props> {
 
 export default onClickOutside(ExtraButtonsPanel)
 
-const Div = styled.div``
+const Div = styled.div`
+    padding: 10px 0px;
+`

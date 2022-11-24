@@ -175,8 +175,6 @@ export const handleRender = async (
             container.insertBefore(target, container.firstChild)
         }
 
-        // console.log(containerIdentifier)
-
         // // If re-rendering remove the already present component
         // const component = document.getElementById('memexResults')
         // if (component) {
