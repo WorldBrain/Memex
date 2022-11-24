@@ -903,6 +903,11 @@ export class AnnotationsSidebarContainer<
                                     ? this.state.selectedSpace
                                     : this.state.selectedSpace
                             }
+                            selectedSpaceLocalId={
+                                document.URL.split('#').length > 1
+                                    ? this.state.selectedSpaceLocalId
+                                    : this.state.selectedSpaceLocalId
+                            }
                             onSelectSpace={(listId) =>
                                 this.handleSelectSpace(listId)
                             }
