@@ -26,7 +26,6 @@ export class NotifBanner extends React.PureComponent<Props> {
     }
 
     render() {
-        console.log(this.props.location)
         return (
             <ThemeProvider
                 theme={{
