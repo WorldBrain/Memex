@@ -117,10 +117,10 @@ export interface AnnotationsSidebarProps
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
 
-    // TODO: change to selectedSpaceId and figure how to get its name
     // Space, list or collection currently selected to be shown as part
     // of the isolated view or leaf page.
     selectedSpace: string
+    selectedSpaceLocalId: number
 
     //postShareHook: (shareInfo) => void
 }
@@ -883,6 +883,17 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
+    private renderAnnotationsEditableSelectedSpace(listId: string) {
+        const selectedSpaceAnnotations = this.props.annotations.filter(
+            (currentAnnotation) => {
+                return currentAnnotation.lists.includes(
+                    this.props.selectedSpaceLocalId,
+                )
+            },
+        )
+        return this.renderAnnotationsEditable(selectedSpaceAnnotations)
+    }
+
     private renderResultsBody() {
         if (this.props.isSearchLoading) {
             return this.renderLoader()
@@ -897,9 +908,8 @@ export class AnnotationsSidebar extends React.Component<
             <React.Fragment>
                 {this.props.selectedSpace ? (
                     <AnnotationsSectionStyled>
-                        {this.renderFollowedListNotes(
+                        {this.renderAnnotationsEditableSelectedSpace(
                             this.props.selectedSpace,
-                            true,
                         )}
                     </AnnotationsSectionStyled>
                 ) : this.props.isExpanded ? (
@@ -1051,7 +1061,7 @@ export class AnnotationsSidebar extends React.Component<
             <FollowedListNotesContainer
                 bottom={this.props.isExpanded ? '20px' : '0px'}
             >
-                {this.props.isExpanded && (
+                {(this.props.isExpanded || this.props.selectedSpace) && (
                     <>
                         {this.renderNewAnnotation()}
                         {annots.length > 1 && (
