@@ -147,6 +147,19 @@ export class AnnotationsSidebarContainer<
         this.processEvent('setPageUrl', { pageUrl })
     }
 
+    /**
+     * Handles AnnotationSidebar onSelectSpace event
+     *
+     * This handler will actually select the space change by asking our
+     * UILogic to emit the change. Sub-classes like AnnotationSidebarInPage
+     * may override this to notify other elements like the InPageUI.
+     *
+     * @param listId space ID being selected or null
+     */
+    protected handleSelectSpace(listId: string | null) {
+        this.processEvent('selectSpace', { listId })
+    }
+
     private handleClickOutside = (e) => {
         if (this.state.isLocked) {
             return
@@ -223,12 +236,16 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('setTagPickerAnnotationId', {
                     id: annotation.url,
                 }),
-            onListIconClick: () =>
+            onListIconClick: () => {
+                // TODO: why this has only the spaceId from the spaces tab?
+                console.debug('Select space now', followedListId)
+                this.handleSelectSpace('dtsCHjXTXjqtss9EjV3')
                 this.processEvent('setListPickerAnnotationId', {
                     id: annotation.url,
                     position: 'footer',
                     followedListId,
-                }),
+                })
+            },
         }
     }
 
@@ -795,9 +812,38 @@ export class AnnotationsSidebarContainer<
         )
     }
 
+    private renderSelectedSpacePill() {
+        console.debug('Rendering selected space pill')
+        const followedList = this.state.followedLists.byId[
+            this.state.selectedSpace
+        ]
+        return (
+            <div
+                style={{
+                    border: 'solid 2px blue',
+                    backgroundColor: 'yellow',
+                    color: 'blue',
+                    position: 'fixed',
+                    bottom: 15,
+                    right: 15,
+                    padding: 15,
+                    borderRadius: 5,
+                }}
+                onClick={() => this.showSidebar()}
+            >
+                Working on Memex space
+                <strong> {followedList.name} </strong>
+            </div>
+        )
+    }
+
     render() {
         if (this.state.showState === 'hidden') {
-            return null
+            if (this.state.selectedSpace) {
+                return this.renderSelectedSpacePill()
+            } else {
+                return null
+            }
         }
 
         const style = {
@@ -851,6 +897,20 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
+                            // TODO: determine selected space after anchor
+                            selectedSpace={
+                                document.URL.split('#').length > 1
+                                    ? this.state.selectedSpace
+                                    : this.state.selectedSpace
+                            }
+                            selectedSpaceLocalId={
+                                document.URL.split('#').length > 1
+                                    ? this.state.selectedSpaceLocalId
+                                    : this.state.selectedSpaceLocalId
+                            }
+                            onSelectSpace={(listId) =>
+                                this.handleSelectSpace(listId)
+                            }
                             // sidebarActions={null}
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}

@@ -7,6 +7,6 @@
     "stylelint.enable": true,
     "eslint.probe": ["javascript", "javascriptreact"],
     "tslint.enable": true,
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
     "typescript.tsdk": "node_modules/typescript/lib"
 }

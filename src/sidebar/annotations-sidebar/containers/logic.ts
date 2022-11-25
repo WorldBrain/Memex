@@ -1673,6 +1673,19 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
+    selectSpace: EventHandler<'selectSpace'> = ({ event }) => {
+        const localId =
+            event.listId === null
+                ? null
+                : this.options.annotationsCache.getListIdByRemoteId(
+                      event.listId,
+                  )
+        this.emitMutation({
+            selectedSpace: { $set: event.listId },
+            selectedSpaceLocalId: { $set: localId },
+        })
+    }
+
     setAnnotationShareModalShown: EventHandler<
         'setAnnotationShareModalShown'
     > = ({ event }) => {
