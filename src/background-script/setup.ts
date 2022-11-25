@@ -416,9 +416,11 @@ export function createBackgroundModules(options: {
     })
 
     const pageActivityIndicator = new PageActivityIndicatorBackground({
+        fetch,
         storageManager,
         getCurrentUserId,
         getServerStorage,
+        jobScheduler: jobScheduler.scheduler,
     })
 
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
@@ -765,6 +767,7 @@ export async function setupBackgroundModules(
     // await backgroundModules.pdfBg.setupRequestInterceptors()
     await backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
+    await backgroundModules.pageActivityIndicator.setup()
 
     // Ensure log-in state gotten from FB + trigger share queue processing, but don't wait for it
     await backgroundModules.auth.authService.refreshUserInfo()

@@ -1,5 +1,6 @@
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { LIST_TIMESTAMP_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import * as DATA from './index.test.data'
 import {
@@ -7,6 +8,7 @@ import {
     sharedListToFollowedList,
 } from './utils'
 import type { FollowedListEntry } from './types'
+import { PERIODIC_SYNC_JOB_NAME } from '.'
 
 const calcExpectedLists = (
     expectedListIds: Set<AutoPk>,
@@ -130,6 +132,26 @@ async function setupTest(opts: {
 }
 
 describe('Page activity indicator background module tests', () => {
+    it('should schedule periodic sync list entries alarm', async () => {
+        const { backgroundModules } = await setupTest({})
+
+        expect(backgroundModules.jobScheduler.scheduler['jobs'].size).toBe(0)
+        await backgroundModules.pageActivityIndicator.setup()
+        expect(backgroundModules.jobScheduler.scheduler['jobs'].size).toBe(1)
+        expect(
+            backgroundModules.jobScheduler.scheduler['jobs'].get(
+                PERIODIC_SYNC_JOB_NAME,
+            ),
+        ).toEqual({
+            name: PERIODIC_SYNC_JOB_NAME,
+            periodInMinutes: 15,
+            job:
+                backgroundModules.pageActivityIndicator[
+                    'syncFollowedListEntriesWithNewActivity'
+                ],
+        })
+    })
+
     it('should be able to derive page activity status from stored followedLists data', async () => {
         const { backgroundModules, getServerStorage } = await setupTest({
             testData: { follows: true, ownLists: true },
@@ -239,6 +261,52 @@ describe('Page activity indicator background module tests', () => {
                 'getPageActivityStatus'
             ]('https://test.com/c'),
         ).toEqual('no-activity')
+    })
+
+    it('should be able to delete all followedList and followedListEntries in one swoop', async () => {
+        const { backgroundModules, storageManager } = await setupTest({
+            testData: { follows: true, ownLists: true },
+        })
+
+        const expectedListIds = new Set([
+            DATA.sharedLists[0].id,
+            DATA.sharedLists[1].id,
+            DATA.sharedLists[3].id,
+        ])
+
+        expect(
+            await storageManager.collection('followedList').findAllObjects({}),
+        ).toEqual([])
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual([])
+
+        await backgroundModules.pageActivityIndicator.syncFollowedLists()
+        await backgroundModules.pageActivityIndicator.syncFollowedListEntries({
+            now: 1,
+        })
+
+        expect(
+            await storageManager.collection('followedList').findAllObjects({}),
+        ).toEqual(calcExpectedLists(expectedListIds, { lastSync: 1 }))
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual(calcExpectedListEntries(expectedListIds))
+
+        await backgroundModules.pageActivityIndicator.deleteAllFollowedListsData()
+
+        expect(
+            await storageManager.collection('followedList').findAllObjects({}),
+        ).toEqual([])
+        expect(
+            await storageManager
+                .collection('followedListEntry')
+                .findAllObjects({}),
+        ).toEqual([])
     })
 
     describe('pull sync followed lists tests', () => {
@@ -1097,15 +1165,19 @@ describe('Page activity indicator background module tests', () => {
             ).toEqual(calcExpectedListEntries(expectedListIds))
         })
 
-        it('should be able to delete all followedList and followedListEntries in one swoop', async () => {
-            const { backgroundModules, storageManager } = await setupTest({
-                testData: { follows: true, ownLists: true },
+        it('should be able to sync new entries of only those followed lists which have had activity since last sync', async () => {
+            const {
+                backgroundModules,
+                storageManager,
+                getServerStorage,
+                fetch,
+            } = await setupTest({
+                testData: { ownLists: true },
             })
 
             const expectedListIds = new Set([
                 DATA.sharedLists[0].id,
                 DATA.sharedLists[1].id,
-                DATA.sharedLists[3].id,
             ])
 
             expect(
@@ -1120,6 +1192,20 @@ describe('Page activity indicator background module tests', () => {
             ).toEqual([])
 
             await backgroundModules.pageActivityIndicator.syncFollowedLists()
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(
+                calcExpectedLists(expectedListIds, { lastSync: undefined }),
+            )
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
             await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
                 { now: 1 },
             )
@@ -1135,18 +1221,119 @@ describe('Page activity indicator background module tests', () => {
                     .findAllObjects({}),
             ).toEqual(calcExpectedListEntries(expectedListIds))
 
-            await backgroundModules.pageActivityIndicator.deleteAllFollowedListsData()
+            // Add newer entry for one list + mock out Cloudflare fetch to return newer activity timestamp for that list
+            const serverStorage = await getServerStorage()
+            const newSharedListEntry = {
+                creator: DATA.users[1].id,
+                sharedList: DATA.sharedLists[0].id,
+                normalizedUrl: 'test.com/c',
+                originalUrl: 'https://test.com/c',
+                createdWhen: 2,
+                updatedWhen: 2,
+            }
+            await serverStorage.manager
+                .collection('sharedListEntry')
+                .createObject(newSharedListEntry)
+            fetch.mock('*', 200, {
+                response: [[DATA.sharedLists[0].id.toString(), 2]],
+                sendAsJson: true,
+            })
+
+            expect(fetch.calls()).toEqual([])
+
+            await backgroundModules.pageActivityIndicator[
+                'syncFollowedListEntriesWithNewActivity'
+            ]({ now: 3 })
+
+            expect(fetch.calls().length).toBe(1)
+            // TODO: This is the actual req. It does show up, but jest assert fails saying "Received: serializes to the same string"
+            // .toEqual([
+            //         LIST_TIMESTAMP_WORKER_URLS.staging + '/',
+            //         {
+            //             method: 'POST',
+            //             body: JSON.stringify({
+            //                 sharedListIds: [...expectedListIds].map((id) =>
+            //                     id.toString(),
+            //                 ),
+            //             }),
+            //         },
+            //     ],
+            // ])
+
+            // Assert only one list had lastSync updated
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual([
+                sharedListToFollowedList(DATA.sharedLists[0], { lastSync: 3 }),
+                sharedListToFollowedList(DATA.sharedLists[1], { lastSync: 1 }),
+            ])
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual(
+                calcExpectedListEntries(expectedListIds, {
+                    extraEntries: [
+                        sharedListEntryToFollowedListEntry(newSharedListEntry, {
+                            id: expect.any(Number),
+                            hasAnnotations: false,
+                        }),
+                    ],
+                }),
+            )
+
+            // Let's add an annotation to that new entry, to assert it also can update from just the annotation change
+            await serverStorage.manager
+                .collection('sharedAnnotationListEntry')
+                .createObject({
+                    creator: DATA.users[1].id,
+                    sharedList: DATA.sharedLists[0].id,
+                    normalizedPageUrl: 'test.com/c',
+                    updatedWhen: 4,
+                    createdWhen: 4,
+                    uploadedWhen: 4,
+                })
+            fetch.mock('*', 200, {
+                response: [[DATA.sharedLists[0].id.toString(), 4]],
+                overwriteRoutes: true,
+                sendAsJson: true,
+            })
+
+            expect(fetch.calls().length).toBe(1)
+
+            await backgroundModules.pageActivityIndicator[
+                'syncFollowedListEntriesWithNewActivity'
+            ]({ now: 5 })
+
+            expect(fetch.calls().length).toBe(2)
 
             expect(
                 await storageManager
                     .collection('followedList')
                     .findAllObjects({}),
-            ).toEqual([])
+            ).toEqual([
+                sharedListToFollowedList(DATA.sharedLists[0], { lastSync: 5 }),
+                sharedListToFollowedList(DATA.sharedLists[1], { lastSync: 1 }),
+            ])
             expect(
                 await storageManager
                     .collection('followedListEntry')
                     .findAllObjects({}),
-            ).toEqual([])
+            ).toEqual(
+                calcExpectedListEntries(expectedListIds, {
+                    extraEntries: [
+                        sharedListEntryToFollowedListEntry(
+                            { ...newSharedListEntry, updatedWhen: 5 },
+                            {
+                                id: expect.any(Number),
+                                hasAnnotations: true,
+                            },
+                        ),
+                    ],
+                }),
+            )
         })
     })
 })

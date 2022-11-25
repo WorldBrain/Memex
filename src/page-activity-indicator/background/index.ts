@@ -1,6 +1,7 @@
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type Storex from '@worldbrain/storex'
+import * as Raven from 'src/util/raven'
 import type { ServerStorageModules } from 'src/storage/types'
 import type {
     FollowedList,
@@ -17,14 +18,24 @@ import {
     sharedListEntryToFollowedListEntry,
     sharedListToFollowedList,
 } from './utils'
+import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
+import { LIST_TIMESTAMP_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import type {
+    SharedListTimestamp,
+    SharedListTimestampGetRequest,
+} from '@worldbrain/memex-common/lib/page-activity-indicator/backend/types'
 
 export interface PageActivityIndicatorDependencies {
+    fetch: typeof fetch
     storageManager: Storex
+    jobScheduler: JobScheduler
     getCurrentUserId: () => Promise<AutoPk | null>
     getServerStorage: () => Promise<
         Pick<ServerStorageModules, 'activityFollows' | 'contentSharing'>
     >
 }
+
+export const PERIODIC_SYNC_JOB_NAME = 'followed-list-entry-sync'
 
 export class PageActivityIndicatorBackground {
     storage: PageActivityIndicatorStorage
@@ -37,6 +48,82 @@ export class PageActivityIndicatorBackground {
 
         this.remoteFunctions = {
             getPageActivityStatus: this.getPageActivityStatus,
+        }
+    }
+
+    async setup(): Promise<void> {
+        await this.deps.jobScheduler.scheduleJob({
+            name: PERIODIC_SYNC_JOB_NAME,
+            periodInMinutes: 15,
+            job: this.syncFollowedListEntriesWithNewActivity,
+        })
+    }
+
+    private syncFollowedListEntriesWithNewActivity = async (opts?: {
+        now?: number
+    }) => {
+        const existingFollowedListsLookup = await this.storage.findAllFollowedLists()
+        if (!existingFollowedListsLookup.size) {
+            return
+        }
+
+        const workerUrl =
+            process.env.NODE_ENV === 'production'
+                ? LIST_TIMESTAMP_WORKER_URLS.production
+                : LIST_TIMESTAMP_WORKER_URLS.staging
+        const requestBody: SharedListTimestampGetRequest = {
+            sharedListIds: [...existingFollowedListsLookup.keys()].map((id) =>
+                id.toString(),
+            ),
+        }
+        const response = await this.deps.fetch(workerUrl, {
+            method: 'POST',
+            body: JSON.stringify(requestBody),
+        })
+
+        if (!response.ok) {
+            Raven.captureException(
+                new Error(
+                    `Could not reach Cloudflare worker to check sharedLists' timestamp - response text: ${await response.text()}`,
+                ),
+            )
+            return
+        }
+
+        const activityTimestamps: SharedListTimestamp[] = await response.json()
+        if (!Array.isArray(activityTimestamps)) {
+            Raven.captureException(
+                new Error(
+                    `Received unexpected response data from Cloudflare worker - data: ${activityTimestamps}`,
+                ),
+            )
+            return
+        }
+
+        if (!activityTimestamps.length) {
+            return
+        }
+
+        // Filter out lists which do have updates
+        const listActivityTimestampLookup = new Map(activityTimestamps)
+        const followedListsWithUpdates: FollowedList[] = []
+        for (const [
+            sharedListId,
+            followedList,
+        ] of existingFollowedListsLookup) {
+            if (
+                listActivityTimestampLookup.get(sharedListId.toString()) >
+                followedList.lastSync
+            ) {
+                followedListsWithUpdates.push(followedList)
+            }
+        }
+
+        if (followedListsWithUpdates.length > 0) {
+            await this.syncFollowedListEntries({
+                forFollowedLists: followedListsWithUpdates,
+                now: opts?.now,
+            })
         }
     }
 
@@ -146,7 +233,11 @@ export class PageActivityIndicatorBackground {
         }
     }
 
-    async syncFollowedListEntries(opts?: { now?: number }): Promise<void> {
+    async syncFollowedListEntries(opts?: {
+        now?: number
+        /** If defined, will constrain the sync to only these followedLists. Else will sync all. */
+        forFollowedLists?: FollowedList[]
+    }): Promise<void> {
         const userId = await this.deps.getCurrentUserId()
         if (userId == null) {
             return
@@ -154,9 +245,11 @@ export class PageActivityIndicatorBackground {
         const now = opts?.now ?? Date.now()
         const { contentSharing } = await this.deps.getServerStorage()
 
-        const existingFollowedListsLookup = await this.storage.findAllFollowedLists()
+        const followedLists =
+            opts?.forFollowedLists ??
+            (await this.storage.findAllFollowedLists()).values()
 
-        for (const followedList of existingFollowedListsLookup.values()) {
+        for (const followedList of followedLists) {
             const listReference: SharedListReference = {
                 type: 'shared-list-reference',
                 id: followedList.sharedList,
