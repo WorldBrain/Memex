@@ -158,7 +158,7 @@ export class AuthBackground {
 
         listenToWebAppMessage({
             awaitAuth: () => Promise.resolve(), //TODO: need to find out how to await auth here, maybe not necessary?
-            isLoggedIn: () => !!getCurrentUser(),
+            isLoggedIn: () => getCurrentUser().then((val) => !!val),
             generateLoginToken: () =>
                 generateLoginToken().then((obj) => obj.token),
             loginWithToken,

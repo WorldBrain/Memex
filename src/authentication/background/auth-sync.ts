@@ -32,7 +32,7 @@ function validGeneratedLoginToken(loginToken: any) {
 
 interface SyncProps {
     awaitAuth: () => Promise<void>
-    isLoggedIn: () => boolean
+    isLoggedIn: () => Promise<boolean>
     generateLoginToken: () => Promise<string>
     loginWithToken: (token: string) => Promise<void>
 }
@@ -60,7 +60,7 @@ function addListener(
     listener: (
         sendResponse: (obj: ReturnType<typeof packMessage>) => void,
         messageObj: ReturnType<typeof unpackMessage>,
-    ) => Promise<void>,
+    ) => void,
 ) {
     //@ts-ignore next-line
     chrome.runtime.onMessageExternal.addListener(
@@ -69,31 +69,34 @@ function addListener(
             if (!messageObj) {
                 return
             }
+            console.log(JSON.stringify(messageObj, null, 2))
             listener(sendResponse, messageObj)
         },
     )
 }
 
 function sendTokenToAppPath(generateLoginToken: () => Promise<string>) {
-    addListener(async (sendResponse, messageObj) => {
+    addListener((sendResponse, messageObj) => {
         if (messageObj.message !== ExtMessage.TOKEN_REQUEST) {
             return
         }
-        const loginToken = await generateLoginToken()
-        if (!validGeneratedLoginToken(loginToken)) {
-            return
-        }
-        sendResponse(packMessage(ExtMessage.TOKEN, loginToken))
+        generateLoginToken().then((loginToken) => {
+            if (!validGeneratedLoginToken(loginToken)) {
+                return
+            }
+            sendResponse(packMessage(ExtMessage.TOKEN, loginToken))
+        })
     })
 }
 
 function loginWithAppTokenPath(
     loginWithToken: (token: string) => Promise<void>,
 ) {
-    addListener(async (sendResponse, messageObj) => {
+    addListener((sendResponse, messageObj) => {
+        console.log(JSON.stringify(messageObj, null, 2))
         if (messageObj.message === ExtMessage.TOKEN) {
             if (messageObj.payload) {
-                await loginWithToken(messageObj.payload)
+                loginWithToken(messageObj.payload)
             }
         } else {
             sendResponse(packMessage(ExtMessage.TOKEN_REQUEST))
@@ -108,7 +111,8 @@ export async function listenToWebAppMessage({
     loginWithToken,
 }: SyncProps) {
     await awaitAuth()
-    if (isLoggedIn()) {
+    console.log(await isLoggedIn())
+    if (await isLoggedIn()) {
         sendTokenToAppPath(generateLoginToken)
     } else {
         loginWithAppTokenPath(loginWithToken)
