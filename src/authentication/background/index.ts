@@ -35,6 +35,7 @@ import { getAuth, sendPasswordResetEmail, updateEmail } from 'firebase/auth'
 import type { FirebaseError } from 'firebase/app'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { AuthServices } from 'src/services/types'
+import { listenToWebAppMessage } from './auth-sync'
 
 export class AuthBackground {
     authService: AuthService
@@ -144,6 +145,24 @@ export class AuthBackground {
                 )
             },
         }
+
+        const getCurrentUser = this.authService.getCurrentUser.bind(
+            this.authService,
+        )
+        const generateLoginToken = this.authService.generateLoginToken.bind(
+            this.authService,
+        )
+        const loginWithToken = this.authService.loginWithToken.bind(
+            this.authService,
+        )
+
+        listenToWebAppMessage({
+            awaitAuth: () => Promise.resolve(), //TODO: need to find out how to await auth here, maybe not necessary?
+            isLoggedIn: () => !!getCurrentUser(),
+            generateLoginToken: () =>
+                generateLoginToken().then((obj) => obj.token),
+            loginWithToken,
+        })
     }
 
     refreshUserInfo = async () => {

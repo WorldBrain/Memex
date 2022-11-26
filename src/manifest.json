@@ -7,8 +7,7 @@
         "scripts": ["lib/browser-polyfill.js", "background.js"]
     },
     "externally_connectable": {
-        "matches": ["*"],
-        "ids": ["memex-worldbrain-extension-id"]
+        "matches": ["http://localhost:3000/feed"]
     },
     "content_scripts": [
         {

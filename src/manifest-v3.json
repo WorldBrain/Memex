@@ -10,8 +10,7 @@
         "128": "./img/worldbrain-logo-narrow-bw.png"
     },
     "externally_connectable": {
-        "matches": ["*"],
-        "ids": ["memex-worldbrain-extension-id"]
+        "matches": ["http://localhost:3000/feed"]
     },
     "background": {
         "service_worker": "background.js"
