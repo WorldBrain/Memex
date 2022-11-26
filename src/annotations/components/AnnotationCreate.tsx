@@ -29,6 +29,7 @@ interface State {
     isTagPickerShown: boolean
     isListPickerShown: boolean
     toggleShowTutorial: boolean
+    youtubeShortcut: string
 }
 
 export interface AnnotationCreateEventProps {
@@ -89,6 +90,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         isTagPickerShown: false,
         isListPickerShown: false,
         toggleShowTutorial: false,
+        youtubeShortcut: '',
     }
 
     componentDidMount() {
@@ -338,7 +340,17 @@ export class AnnotationCreate extends React.Component<Props, State>
         )
     }
 
+    youtubeKeyBoardShortcut = async () => {
+        const shortcuts = await getKeyboardShortcutsState()
+        const shortcut = shortcuts['createAnnotation'].shortcut
+
+        this.setState({
+            youtubeShortcut: shortcut,
+        })
+    }
+
     render() {
+        this.youtubeKeyBoardShortcut()
         return (
             <>
                 <TextBoxContainerStyled>
@@ -355,6 +367,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             autoFocus={this.props.autoFocus}
                             placeholder={`Add private note.\n Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
                             isRibbonCommentBox={this.props.isRibbonCommentBox}
+                            youtubeShortcut={this.state.youtubeShortcut}
                         />
                     </Margin>
                     {this.props.comment !== '' && (

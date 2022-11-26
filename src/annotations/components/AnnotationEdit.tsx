@@ -5,9 +5,11 @@ import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-n
 import MemexEditor, {
     MemexEditorInstance,
 } from '@worldbrain/memex-common/lib/editor'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 
 interface State {
     editorHeight: string
+    youtubeShortcut: string
 }
 
 export interface AnnotationEditEventProps {
@@ -44,6 +46,7 @@ class AnnotationEdit extends React.Component<Props> {
 
     state: State = {
         editorHeight: '50px',
+        youtubeShortcut: '',
     }
 
     private editorRef: MemexEditorInstance
@@ -104,6 +107,15 @@ class AnnotationEdit extends React.Component<Props> {
         }
     }
 
+    youtubeKeyBoardShortcut = async () => {
+        const shortcuts = await getKeyboardShortcutsState()
+        const shortcut = shortcuts['createAnnotation'].shortcut
+
+        this.setState({
+            youtubeShortcut: shortcut,
+        })
+    }
+
     render() {
         return (
             <EditorContainer editorHeight={this.props.editorHeight}>
@@ -116,6 +128,7 @@ class AnnotationEdit extends React.Component<Props> {
                     placeholder={`Add Note. Click on ( ? ) for formatting help.`}
                     setEditorInstanceRef={(ref) => (this.editorRef = ref)}
                     autoFocus
+                    youtubeShortcut={this.state.youtubeShortcut}
                 />
             </EditorContainer>
         )

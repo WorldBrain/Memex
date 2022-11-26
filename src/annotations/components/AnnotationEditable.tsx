@@ -705,7 +705,7 @@ const ShareBtn = styled.div`
 `
 
 const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
-    margin-top: ${(props) => !props.hasHighlight && '5px'};
+    margin-top: ${(props) => !props.hasHighlight && '10px'};
 `
 
 const TagPickerWrapper = styled.div`

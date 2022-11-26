@@ -22,6 +22,7 @@ import {
 import { generateAnnotationUrl } from 'src/annotations/utils'
 import { AnalyticsEvent } from 'src/analytics/types'
 import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
+import { getYoutubeTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 
 const styles = require('src/highlighting/ui/styles.css')
 
@@ -136,7 +137,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 action: 'create',
             },
         )
-
+        const { pageUrl, title } = await params.getUrlAndTitle()
         const annotation = await this._saveAndRenderHighlight(params)
 
         if (annotation) {
@@ -166,14 +167,39 @@ export class HighlightRenderer implements HighlightRendererInterface {
         params: SaveAndRenderHighlightDeps,
     ): Promise<Annotation | null> {
         const selection = params.getSelection()
+        const { pageUrl, title } = await params.getUrlAndTitle()
 
-        if (!selection || selection.isCollapsed) {
+        // Enable support using annotation keyboard shortcuts to make notes on youtube videos without opening the sidebar first
+
+        let YoutubeTimeStamp = []
+        let hasYoutubeTimeStamp = false
+        let YoutubeTimeStampforComment = ''
+
+        if (pageUrl.includes('youtube.com/watch')) {
+            if (getYoutubeTimestamp().length === 2) {
+                YoutubeTimeStamp = getYoutubeTimestamp()
+                console.log(YoutubeTimeStamp)
+                hasYoutubeTimeStamp = getYoutubeTimestamp().length === 2
+                YoutubeTimeStampforComment = (
+                    '[' +
+                    YoutubeTimeStamp[1] +
+                    '](' +
+                    YoutubeTimeStamp[0] +
+                    ')' +
+                    ` `
+                ).toString()
+            }
+        }
+
+        //////////////
+
+        if ((!selection || selection.isCollapsed) && !hasYoutubeTimeStamp) {
             return null
         }
 
-        const { pageUrl, title } = await params.getUrlAndTitle()
         const anchor = await extractAnchorFromSelection(selection)
-        const body = anchor ? anchor.quote : ''
+        const body = anchor && anchor.quote
+        const hasSelectedText = anchor.quote.length
 
         let actualLists = []
         if (params.inPageUI.selectedSpace) {
@@ -186,12 +212,14 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
         const annotation: Annotation = {
             url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
-            body,
+            body: hasSelectedText ? anchor.quote : hasYoutubeTimeStamp && null,
             pageUrl,
             tags: [],
             lists: actualLists,
-            comment: '',
-            selector: anchor,
+            comment: hasSelectedText
+                ? ''
+                : hasYoutubeTimeStamp && YoutubeTimeStampforComment,
+            selector: hasSelectedText ? anchor : hasYoutubeTimeStamp && null,
             pageTitle: title,
         }
 
