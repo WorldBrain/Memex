@@ -779,27 +779,27 @@ export class AnnotationsSidebar extends React.Component<
                 >
                     {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
-                        // onClick={() =>
-                        //     this.props.expandFollowedListNotes(listId)
-                        // }
+                        onClick={() =>
+                            this.props.expandFollowedListNotes(listId)
+                        }
                         title={listData.name}
                     >
                         <FollowedListTitleContainer>
-                            <Icon
+                            {/* <Icon
                                 icon={icons.arrowRight}
                                 heightAndWidth="22px"
                                 rotation={listData.isExpanded && 90}
                                 onClick={() =>
                                     this.props.expandFollowedListNotes(listId)
                                 }
-                            />
+                            /> */}
                             <FollowedListTitle>
                                 {listData.name}
                             </FollowedListTitle>
                         </FollowedListTitleContainer>
                         <ButtonContainer>
                             <ActionButtons>
-                                <ButtonTooltip
+                                {/* <ButtonTooltip
                                     tooltipText="Select Space"
                                     position="left"
                                 >
@@ -810,7 +810,7 @@ export class AnnotationsSidebar extends React.Component<
                                             this.triggerSelectSpace(listId)
                                         }
                                     />
-                                </ButtonTooltip>
+                                </ButtonTooltip> */}
                                 <ButtonTooltip
                                     tooltipText="Go to Space"
                                     position="left"

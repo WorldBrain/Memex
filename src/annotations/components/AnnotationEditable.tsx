@@ -412,7 +412,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     image: icons.plus,
                     imageColor: 'purple',
                     onClick: footerDeps.onListIconClick,
-                    iconSize: '14px',
+                    iconSize: '16px',
                 },
                 // {
                 //     key: 'share-note-btn',
