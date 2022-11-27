@@ -1,8 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-
-import styles from './tooltip.css'
-
+import styled from 'styled-components'
 /*
 TODO:
 - Animate icons leaving out.
@@ -17,11 +15,20 @@ class AnimationWrapper extends React.Component {
 
     render() {
         return (
-            <div ref={this.setRef} className={styles.animationContainer}>
+            <AnimationContainer ref={this.setRef}>
                 {this.props.children}
-            </div>
+            </AnimationContainer>
         )
     }
 }
+
+const AnimationContainer = styled.div`
+    display: flex;
+    height: 100%;
+    align-items: center;
+    grid-gap: 10px;
+    background: ${(props) => props.theme.colors.greyScale1};
+    border-radius: 8px;
+`
 
 export default AnimationWrapper

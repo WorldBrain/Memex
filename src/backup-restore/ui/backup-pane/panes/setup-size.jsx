@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import localStyles from './setup-size.css'
 import LoadingBlocker from '../../../../common-ui/components/loading-blocker'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
 
 const settingsStyle = require('src/options/settings/components/settings.css')

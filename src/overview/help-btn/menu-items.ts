@@ -6,14 +6,14 @@ export const menuItems: MenuOptions = [
     {
         text: 'Get Early Bird Discount',
         link: 'https://links.memex.garden/announcements/pioneer-plan',
-        icon: icons.sunrise,
+        icon: icons.feed,
         top: true,
     },
     {
         text: 'Chat with us',
         link:
             'https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599',
-        icon: icons.commentEmpty,
+        icon: icons.chatWithUs,
     },
     {
         text: 'Tutorials and FAQs',

@@ -133,12 +133,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         return {
             mode,
             loadState: 'pristine',
-            isCloudEnabled: true,
             currentUser: null,
             modals: {
                 showLogin: false,
                 showSubscription: false,
-                showCloudOnboarding: false,
                 showDisplayNameSetup: false,
                 showNoteShareOnboarding: false,
                 confirmPrivatizeNoteArgs: null,
@@ -155,7 +153,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isListShareMenuShown: false,
                 isSortMenuShown: false,
                 isSearchCopyPasterShown: false,
-                isCloudUpgradeBannerShown: false,
                 isSubscriptionBannerShown: false,
                 pageData: {
                     allIds: [],
@@ -217,6 +214,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                     allListIds: [],
                     filteredListIds: [],
                 },
+                selectedListId: undefined,
+                showFeed: false,
             },
             syncMenu: {
                 isDisplayed: false,
@@ -255,7 +254,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     private async hydrateStateFromLocalStorage(
         previousState: State,
     ): Promise<State> {
-        const { personalCloudBG, localStorage } = this.options
+        const { localStorage } = this.options
         const {
             [CLOUD_STORAGE_KEYS.lastSeen]: cloudLastSynced,
             [STORAGE_KEYS.mobileAdSeen]: mobileAdSeen,
@@ -264,7 +263,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             STORAGE_KEYS.mobileAdSeen,
         ])
 
-        const isCloudEnabled = await personalCloudBG.isCloudSyncEnabled()
         const [
             listsSidebarLocked,
             onboardingMsgSeen,
@@ -278,12 +276,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         ])
 
         const mutation: UIMutation<State> = {
-            isCloudEnabled: { $set: isCloudEnabled },
             searchResults: {
                 showMobileAppAd: { $set: !mobileAdSeen },
                 shouldShowTagsUIs: { $set: !areTagsMigrated },
                 showOnboardingMsg: { $set: !onboardingMsgSeen },
-                isCloudUpgradeBannerShown: { $set: !isCloudEnabled },
                 isSubscriptionBannerShown: {
                     $set:
                         subBannerShownAfter != null &&
@@ -387,10 +383,16 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const listData: { [id: number]: ListData } = {}
 
                 localLists = localLists.sort((listDataA, listDataB) => {
-                    if (listDataA.name < listDataB.name) {
+                    if (
+                        listDataA.name.toLowerCase() <
+                        listDataB.name.toLowerCase()
+                    ) {
                         return -1
                     }
-                    if (listDataA.name > listDataB.name) {
+                    if (
+                        listDataA.name.toLowerCase() >
+                        listDataB.name.toLowerCase()
+                    ) {
                         return 1
                     }
                     return 0
@@ -492,7 +494,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState: State,
         mutation: UIMutation<State>,
     ) {
-        this.emitMutation({ ...mutation, mode: { $set: 'search' } })
+        mutation = {
+            ...mutation,
+            mode: { $set: 'search' },
+            listsSidebar: {
+                ...(mutation['listsSidebar'] ?? {}),
+                showFeed: { $set: false },
+            },
+        }
+
+        this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
         await this.runSearch(nextState)
     }
@@ -521,6 +532,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         : 'searchState']: { $set: taskState },
                 },
             }),
+
             async () => {
                 const searchState = this.withMutation(previousState, {
                     searchFilters,
@@ -558,7 +570,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                             : 'no-results'
                     }
                 }
-
                 this.emitMutation({
                     searchFilters,
                     searchResults: {
@@ -722,23 +733,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             modals: {
                 showNoteShareOnboarding: { $set: event.isShown },
-            },
-        })
-    }
-
-    setShowCloudOnboardingModal: EventHandler<
-        'setShowCloudOnboardingModal'
-    > = ({ event, previousState }) => {
-        if (previousState.currentUser == null) {
-            this.emitMutation({
-                modals: { showLogin: { $set: true } },
-            })
-            return
-        }
-
-        this.emitMutation({
-            modals: {
-                showCloudOnboarding: { $set: event.isShown },
             },
         })
     }
@@ -1080,7 +1074,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                         pages: {
                             byId: {
                                 [event.pageId]: {
-                                    isListPickerShown: { $set: event.isShown },
+                                    listPickerShowStatus: {
+                                        $apply: (prev) =>
+                                            prev === event.show
+                                                ? 'hide'
+                                                : event.show,
+                                    },
                                 },
                             },
                         },
@@ -1504,20 +1503,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    closeCloudOnboardingModal: EventHandler<'closeCloudOnboardingModal'> = ({
-        event,
-    }) => {
-        this.emitMutation({
-            searchResults: {
-                isCloudUpgradeBannerShown: { $set: !event.didFinish },
-            },
-            modals: {
-                showCloudOnboarding: { $set: false },
-            },
-            isCloudEnabled: { $set: event.didFinish },
-        })
-    }
-
     setListShareMenuShown: EventHandler<'setListShareMenuShown'> = async ({
         event,
     }) => {
@@ -1633,6 +1618,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
     }
+
     setNoteListPickerShown: EventHandler<'setNoteListPickerShown'> = ({
         event,
     }) => {
@@ -1641,7 +1627,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 noteData: {
                     byId: {
                         [event.noteId]: {
-                            isListPickerShown: { $set: event.isShown },
+                            listPickerShowStatus: {
+                                $apply: (prev) =>
+                                    prev === event.show ? 'hide' : event.show,
+                            },
                         },
                     },
                 },
@@ -2563,8 +2552,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: {
                         localLists: {
                             isAddInputShown: { $set: false },
-                            filteredListIds: { $push: [listId] },
+                            filteredListIds: { $unshift: [listId] },
                             allListIds: { $push: [listId] },
+                            isExpanded: { $set: true },
                         },
                         listData: {
                             [listId]: {
@@ -2813,7 +2803,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        // listNameEdit
         const { editingListId: listId } = previousState.listsSidebar
 
         if (!listId) {
@@ -2874,6 +2863,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
                 this.emitMutation({
                     listsSidebar: {
+                        editingListId: { $set: undefined },
                         editListErrorMessage: {
                             $set: null,
                         },
@@ -3077,6 +3067,35 @@ export class DashboardLogic extends UILogic<State, Events> {
             await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
             this.emitMutation({
                 listsSidebar: { hasFeedActivity: { $set: false } },
+            })
+        }
+    }
+
+    switchToFeed: EventHandler<'switchToFeed'> = async ({ previousState }) => {
+        this.emitMutation({
+            listsSidebar: {
+                showFeed: { $set: true },
+                selectedListId: { $set: SPECIAL_LIST_IDS.INBOX + 2 },
+            },
+        })
+        if (!(await this.ensureLoggedIn())) {
+            this.emitMutation({
+                listsSidebar: {
+                    showFeed: { $set: false },
+                    selectedListId: {
+                        $set: previousState.listsSidebar.selectedListId,
+                    },
+                },
+            })
+            return
+        }
+
+        if (previousState.listsSidebar.hasFeedActivity) {
+            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
+            this.emitMutation({
+                listsSidebar: {
+                    hasFeedActivity: { $set: false },
+                },
             })
         }
     }

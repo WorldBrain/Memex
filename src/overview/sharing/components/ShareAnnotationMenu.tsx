@@ -339,9 +339,9 @@ const LinkCopier = styled.button`
     justify-content: space-between;
     align-items: center;
     border: 0;
-    border-radius: 3px;
+    border-radius: 6px;
     height: 40px;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.darkhover};
     padding: 0 10px;
     outline: none;
     cursor: pointer;
@@ -356,6 +356,7 @@ const LinkCopier = styled.button`
 `
 
 const LinkBox = styled.div`
+    background: ${(props) => props.theme.colors.darkHover};
     display: flex;
     width: 100%;
     align-items: center;
@@ -375,7 +376,7 @@ const PrivacyContainer = styled.div<{ isLinkShown: boolean }>`
 
 const PrivacyTitle = styled.div`
     font-size: 14px;
-    font-weight: normal;
+    font-weight: 700;
     margin-bottom: 10px;
     color: ${(props) => props.theme.colors.normalText};
 `

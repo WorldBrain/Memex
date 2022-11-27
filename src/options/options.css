@@ -1,7 +1,7 @@
-@import url('/fonts/Inter/inter.css');
+@import url('/fonts/Satoshi/satoshi.css');
 
 * {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
 }
 
 body {

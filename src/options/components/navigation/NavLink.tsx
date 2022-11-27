@@ -51,6 +51,7 @@ class NavLink extends PureComponent<Props> {
 
 const Container = styled.div`
     width: 100%;
+    margin-bottom: 5px;
     & > a {
         display: flex;
         text-decoration: none;
@@ -62,10 +63,7 @@ const Container = styled.div`
 `
 
 const RouteTitle = styled.div<{ name: string; isActive: boolean }>`
-    color: ${(props) =>
-        props.isActive
-            ? props.theme.colors.darkerText
-            : props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
     font-weight: 400;
     text-align: left;
@@ -95,14 +93,26 @@ const RouteItem = styled.li<{ name: string; isActive: boolean }>`
     margin: 0 10px;
     border-radius: 5px;
 
+    ${(props) =>
+        props.isActive &&
+        css`
+            overflow: scroll;
+            background-color: ${(props) => props.theme.colors.activeBackground};
+
+            &:hover {
+                background-color: ${(props) =>
+                    props.theme.colors.activeBackground};
+                cursor: default;
+            }
+        `}
+
     & > a {
         display: flex;
         text-decoration: none;
     }
 
-    &: hover {
-        background-color: ${(props) =>
-            props.theme.colors.backgroundColorDarker};
+    &:hover {
+        background-color: ${(props) => props.theme.colors.lightHover};
     }
 
     ${(props) =>

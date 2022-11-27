@@ -4,6 +4,7 @@ import BackupSettingsContainer from '../backup-restore/ui/backup-pane'
 import Statistics from './statistics'
 import Settings from './settings'
 import UserScreen from 'src/authentication/components/UserScreen'
+import Blocklist from './blacklist'
 import React from 'react'
 import DashboardResultsContainer from 'src/overview/components/DashboardResultsContainer'
 
@@ -45,12 +46,12 @@ export default [
         component: UserScreen,
         icon: 'personFine.svg',
     },
-    // {
-    //     name: 'Blocklist',
-    //     pathname: '/blocklist',
-    //     component: SettingsContainer,
-    //     icon: 'block.svg',
-    // },
+    {
+        name: 'Blocklist',
+        pathname: '/blocklist',
+        component: Blocklist,
+        icon: 'block.svg',
+    },
     // {
     //     name: 'Privacy',
     //     pathname: '/privacy',

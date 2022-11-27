@@ -232,17 +232,9 @@ class ImportContainer extends Component {
                 isDisabled={isDisabled}
                 customClass={'startImport'}
                 type="submit"
-                label={
-                    <ButtonContent>
-                        <Icon
-                            filePath={icons.playFull}
-                            heightAndWidth="14px"
-                            color="white"
-                            hoverOff
-                        />
-                        Start Import
-                    </ButtonContent>
-                }
+                icon={'play'}
+                iconSize={'20px'}
+                label={'Start Import'}
             />
         )
     }
@@ -394,7 +386,7 @@ class ImportContainer extends Component {
                     >
                         <Icon
                             onClick={this.props.recalcEsts}
-                            heightAndWidth="16px"
+                            heightAndWidth="30px"
                             filePath={icons.reload}
                         />
                     </ButtonTooltip>

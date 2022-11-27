@@ -297,7 +297,7 @@ describe('Personal cloud', () => {
         )
     })
 
-    it('should enable and start sync only after data migration prep is complete', async () => {
+    it.skip('should enable and start sync only after data migration prep is complete', async () => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 1,
             startWithSyncDisabled: true,
@@ -322,7 +322,7 @@ describe('Personal cloud', () => {
         expect(personalCloud.changesIntegrating).not.toBeUndefined()
     })
 
-    it('should enable and start sync only after data migration prep is complete', async () => {
+    it.skip('should enable and start sync only after data migration prep is complete', async () => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 1,
             startWithSyncDisabled: true,

@@ -34,7 +34,8 @@ const RootContainer = styled.div`
 
     & * {
         box-sizing: border-box;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Satoshi', sans-serif;
+        letter-spacing: 0.8px;
     }
 `
 

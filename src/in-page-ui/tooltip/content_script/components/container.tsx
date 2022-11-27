@@ -3,10 +3,10 @@ import onClickOutside from 'react-onclickoutside'
 
 import Tooltip from './tooltip'
 import {
-    CopiedComponent,
-    CreatingLinkComponent,
-    DoneComponent,
-    ErrorComponent,
+    // CopiedComponent,
+    // CreatingLinkComponent,
+    // DoneComponent,
+    // ErrorComponent,
     InitialComponent,
 } from './tooltip-states'
 
@@ -97,15 +97,15 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         this.setState({ showingCloseMessage: true })
     }
 
-    createLink = async () => {
-        this.setState({
-            tooltipState: 'running',
-        })
-        await this.props.createAndCopyDirectLink()
-        this.setState({
-            tooltipState: 'copied',
-        })
-    }
+    // createLink = async () => {
+    //     this.setState({
+    //         tooltipState: 'running',
+    //     })
+    //     await this.props.createAndCopyDirectLink()
+    //     this.setState({
+    //         tooltipState: 'copied',
+    //     })
+    // }
 
     private createAnnotation: React.MouseEventHandler = async (e) => {
         e.preventDefault()
@@ -139,6 +139,10 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         }
     }
 
+    private addtoSpace: React.MouseEventHandler = async (e) => {
+        await this.props.createAnnotation(false, true)
+    }
+
     openSettings = (event) => {
         event.preventDefault()
         this.props.openSettings()
@@ -151,18 +155,19 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                     <InitialComponent
                         createHighlight={this.createHighlight}
                         createAnnotation={this.createAnnotation}
+                        addtoSpace={this.addtoSpace}
                         closeTooltip={this.closeTooltip}
                         state={this.state.tooltipState}
                     />
                 )
-            case 'running':
-                return <CreatingLinkComponent />
-            case 'copied':
-                return <CopiedComponent />
-            case 'done':
-                return <DoneComponent />
-            default:
-                return <ErrorComponent />
+            // case 'running':
+            //     return <CreatingLinkComponent />
+            // case 'copied':
+            //     return <CopiedComponent />
+            // case 'done':
+            //     return <DoneComponent />
+            // default:
+            //     return <ErrorComponent />
         }
     }
 

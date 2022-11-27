@@ -58,25 +58,71 @@ class CollectionsButton extends PureComponent<Props> {
                 }
                 disabled={this.props.isDisabled}
             >
-                <SectionCircle>
-                    <Icon
-                        filePath={
-                            this.props.pageListsIds.length > 0
-                                ? icons.collectionsFull
-                                : icons.collectionsEmpty
-                        }
-                        heightAndWidth="18px"
-                        hoverOff
-                    />
-                </SectionCircle>
+                <Icon
+                    filePath={
+                        this.props.pageListsIds.length > 0
+                            ? icons.collectionsFull
+                            : icons.collectionsEmpty
+                    }
+                    heightAndWidth="22px"
+                    hoverOff
+                    color={
+                        this.props.pageListsIds.length > 0
+                            ? 'purple'
+                            : 'iconColor'
+                    }
+                />
                 <ButtonInnerContent>
-                    Add to Spaces
-                    <SubTitle>{this.state.highlightInfo}</SubTitle>
+                    Add Page to Spaces
+                    <ShortCutContainer>
+                        <ShortCutBlock>
+                            <ShortCutText>
+                                {this.state.highlightInfo?.split('+')[0]}
+                            </ShortCutText>
+                        </ShortCutBlock>
+                        +
+                        <ShortCutBlock>
+                            <ShortCutText>
+                                {this.state.highlightInfo?.split('+')[1]}
+                            </ShortCutText>
+                        </ShortCutBlock>
+                    </ShortCutContainer>
                 </ButtonInnerContent>
             </ButtonItem>
         )
     }
 }
+
+const ShortCutContainer = styled.div`
+    display: flex;
+    align-items: center;
+    color: ${(props) => props.theme.colors.greyScale9};
+    grid-gap: 3px;
+`
+
+const ShortCutText = styled.div`
+    display: block;
+    font-weight: 400;
+    color: ${(props) => props.theme.colors.greyScale9};
+    letter-spacing: 1px;
+    margin-right: -1px;
+
+    &:first-letter {
+        text-transform: capitalize;
+    }
+`
+
+const ShortCutBlock = styled.div`
+    border-radius: 5px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale10};
+    color: ${(props) => props.theme.colors.greyScale9};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 18px;
+    padding: 0px 6px;
+    font-size: 10px;
+`
 
 const SectionCircle = styled.div`
     background: ${(props) => props.theme.colors.backgroundHighlight}80;
@@ -95,13 +141,13 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     border-radius: 8px;
     align-items: center;
     justify-content: flex-start;
-    padding: 5px 10px;
-    margin: 0px 10px;
+    padding: 0px 10px;
+    margin: 0px 10px 10px 10px;
     height: 50px;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
     &:hover {
-        background: ${(props) => props.theme.colors.backgroundColorDarker};
+        background: ${(props) => props.theme.colors.lightHover};
     }
 
     & * {
@@ -112,12 +158,13 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
 const ButtonInnerContent = styled.div`
     display: flex;
     grid-gap: 5px;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     font-size: 14px;
-    font-weight: 600;
-    color: ${(props) => props.theme.colors.darkerText};
+    font-weight: 500;
+    width: 100%;
+    color: ${(props) => props.theme.colors.normalText};
 `
 
 const SubTitle = styled.div`

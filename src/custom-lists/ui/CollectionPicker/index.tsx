@@ -183,7 +183,38 @@ class SpacePicker extends StatefulUIElement<
 
     renderEmptyList() {
         if (this.state.newEntryName.length > 0 && !this.props.filterMode) {
-            return
+            return (
+                <EmptyListsView>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.collectionsEmpty}
+                            heightAndWidth="16px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>No Space found</SectionTitle>
+                </EmptyListsView>
+            )
+        }
+
+        if (
+            this.state.query.length > 0 &&
+            this.state.displayEntries.length === 0
+        ) {
+            return (
+                <EmptyListsView>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.collectionsEmpty}
+                            heightAndWidth="16px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>No Space found</SectionTitle>
+                </EmptyListsView>
+            )
         }
 
         if (this.state.query === '') {
@@ -338,7 +369,7 @@ class SpacePicker extends StatefulUIElement<
         if (this.state.loadingSuggestions === 'running') {
             return (
                 <LoadingBox>
-                    <LoadingIndicator size={25} />
+                    <LoadingIndicator size={30} />
                 </LoadingBox>
             )
         }
@@ -365,24 +396,20 @@ class SpacePicker extends StatefulUIElement<
                     }
                 />
                 <EntryList ref={this.displayListRef}>
-                    {this.state.query === '' && (
-                        <EntryListHeader>Recently used</EntryListHeader>
-                    )}
+                    {!(
+                        (this.state.query === '' &&
+                            !this.state.displayEntries.length) ||
+                        this.state.query.length > 0
+                    ) && <EntryListHeader>Recently used</EntryListHeader>}
                     {!this.state.displayEntries.length
                         ? this.renderEmptyList()
                         : this.state.displayEntries.map(this.renderListRow)}
                 </EntryList>
                 {this.shouldShowAddNewEntry && (
                     <AddNewEntry
-                        resultItem={
-                            <ListResultItem>
-                                {this.state.newEntryName}
-                            </ListResultItem>
-                        }
+                        resultItem={this.state.newEntryName}
                         onPress={this.handleNewListPress}
-                    >
-                        {this.renderNewListAllTabsButton()}
-                    </AddNewEntry>
+                    />
                 )}
             </>
         )
@@ -405,13 +432,16 @@ class SpacePicker extends StatefulUIElement<
 const EntryListHeader = styled.div`
     padding: 5px 10px;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.subText};
+    color: ${(props) => props.theme.colors.darkText};
+    font-weight: 400;
+    margin-bottom: -2px;
 `
 
 const EntryList = styled.div`
     position: relative;
     overflow-y: auto;
     max-height: 280px;
+    padding-bottom: 5px;
 
     scrollbar-width: none;
 
@@ -421,42 +451,41 @@ const EntryList = styled.div`
 `
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
+    background: ${(props) => props.theme.colors.darkhover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale6};
+    border-radius: 8px;
     height: 30px;
     width: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 5px;
+`
+
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
 `
 
 const SectionTitle = styled.div`
     color: ${(props) => props.theme.colors.darkerText};
     font-size: 14px;
     font-weight: bold;
-`
-
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
-    font-size: 14px;
-    font-weight: 400;
-    text-align: center;
-    line-height: 18px;
+    margin-top: 10px;
 `
 
 const LoadingBox = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 150px;
+    height: 300px;
     width: 100%;
 `
 
 const OuterSearchBox = styled.div`
-    background: ${(props) => props.theme.background};
     border-radius: 12px;
-    padding: 10px 0px;
+    padding: 5px 5px 5px 5px;
 `
 
 const EmptyListsView = styled.div`
@@ -470,9 +499,20 @@ const EmptyListsView = styled.div`
 
 const EntryRowContainer = styled.div`
     display: flex;
-    flex=direction: row;
+    flex-direction: row;
     align-items: center;
-    margin: 0px 10px;
+    margin: 0 5px;
+    border-radius: 6px;
+
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        background: transparent;
+    }
+
+    &:active {
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        background: transparent;
+    }
 `
 
 const SpaceContextMenuBtn = styled.div`

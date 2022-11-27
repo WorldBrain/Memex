@@ -1,24 +1,23 @@
 .memex-highlight {
-    background: #d4e8ff;
-    transition: all 0.1s;
+    background: #c6f0d4;
     cursor: pointer;
+    color: #0e0f15;
 
     &.medium {
-        background: #ffff3c66;
+        background: #6ae394;
     }
 
     &.dark {
-        background: #ffff3c66;
+        background: #6ae394;
     }
 
     &.tmp {
-        background: #ffff3c66;
+        background: #6ae394;
     }
 }
 
 .memex-highlight-tmp {
-    background: #ffff3c66;
-    transition: all 0.1s;
+    background: #6ae394;
     cursor: pointer;
 }
 

@@ -37,9 +37,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         isLockable: true,
         theme: {
             ...theme,
-            rightOffsetPx: 0,
+            rightOffsetPx: 50,
             canClickAnnotations: true,
-            paddingRight: 40,
+            paddingRight: 0,
         },
     }
 
@@ -147,7 +147,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
 
             if (annotationMode === 'edit_spaces') {
-                this.processEvent('setListPickerAnnotationId', { id: url })
+                this.processEvent('setListPickerAnnotationId', {
+                    id: url,
+                    position: 'footer',
+                })
             }
         }
 
@@ -185,6 +188,21 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         }
 
         this.forceUpdate()
+    }
+
+    /**
+     * Handles AnnotationSidebar onSelectSpace event
+     *
+     * This method specializes super method of AnnotationSidebarContainer so
+     * we propagate the selected space to InPageUI. The idea is that our
+     * global script will have access to such state there then.
+     *
+     * @param listId space ID being selected or null
+     */
+    protected handleSelectSpace(listId: string | null) {
+        super.handleSelectSpace(listId)
+        console.debug('Propagating selected space to InPageUI state', listId)
+        this.props.inPageUI.selectedSpace = listId
     }
 
     private handleInPageUIStateChange: SharedInPageUIEvents['stateChanged'] = ({
@@ -290,16 +308,16 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         )
     }
 
-    protected renderTopBanner() {
-        return (
-            <UpdateNotifBanner
-                theme={{
-                    ...theme,
-                    position: 'fixed',
-                    width: 'fill-available',
-                    iconSize: '20px',
-                }}
-            />
-        )
-    }
+    // protected renderTopBanner() {
+    //     return (
+    //         <UpdateNotifBanner
+    //             theme={{
+    //                 ...theme,
+    //                 position: 'fixed',
+    //                 width: 'fill-available',
+    //                 iconSize: '20px',
+    //             }}
+    //         />
+    //     )
+    // }
 }

@@ -15,14 +15,24 @@ export interface Props {
 }
 
 export const ToggleSwitchButton = (props: Props) => (
-    <div className={styles.switchBlocks}>
-        <ButtonTooltip tooltipText={props.toggleHoverText} position="leftBig">
+    <div>
+        {!props.toggleHoverText ? (
             <Checkbox
                 isChecked={props.isEnabled}
                 handleChange={props.onToggleClick}
-                mode={'radio'}
                 size={20}
             />
-        </ButtonTooltip>
+        ) : (
+            <ButtonTooltip
+                tooltipText={props.toggleHoverText}
+                position="leftBig"
+            >
+                <Checkbox
+                    isChecked={props.isEnabled}
+                    handleChange={props.onToggleClick}
+                    size={20}
+                />
+            </ButtonTooltip>
+        )}
     </div>
 )

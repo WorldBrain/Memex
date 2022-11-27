@@ -7,8 +7,8 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import colors from 'src/dashboard-refactor/colors'
 
 export interface Props {
-    onClick: React.MouseEventHandler<HTMLButtonElement>
-    isEnabled: boolean
+    onClick?: React.MouseEventHandler<HTMLButtonElement>
+    isEnabled?: boolean
 }
 
 export default class ExpandAllNotes extends PureComponent<Props> {
@@ -26,8 +26,9 @@ export default class ExpandAllNotes extends PureComponent<Props> {
                     >
                         <Icon
                             path={icons.expand}
-                            heightAndWidth="16px"
+                            heightAndWidth="24px"
                             onClick={this.props.onClick}
+                            color={'greyScale8'}
                         />
                     </ButtonTooltip>
                 ) : (
@@ -37,8 +38,9 @@ export default class ExpandAllNotes extends PureComponent<Props> {
                     >
                         <Icon
                             path={icons.compress}
-                            heightAndWidth="16px"
+                            heightAndWidth="24px"
                             onClick={this.props.onClick}
+                            color={'greyScale8'}
                         />
                     </ButtonTooltip>
                 )}

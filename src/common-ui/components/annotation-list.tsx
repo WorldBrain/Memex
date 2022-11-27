@@ -405,73 +405,74 @@ class AnnotationList extends Component<Props, State> {
     }
 
     private renderAnnotations() {
-        return this.state.annotations.map((annot) => (
-            <AnnotationEditable
-                getListDetailsById={(i) => ({
-                    name: 'dead code',
-                    isShared: false,
-                })}
-                key={annot.url}
-                {...annot}
-                body={annot.body}
-                comment={annot.comment}
-                className={styles.annotation}
-                createdWhen={annot.createdWhen!}
-                isShared={false}
-                isBulkShareProtected={false}
-                mode={this.state.annotationModes[annot.url]}
-                onGoToAnnotation={this.handleGoToAnnotation(annot)}
-                renderShareMenuForAnnotation={() => this.renderShareMenu(annot)}
-                renderCopyPasterForAnnotation={() =>
-                    this.renderCopyPasterManager(annot)
-                }
-                renderTagsPickerForAnnotation={() =>
-                    this.renderTagPicker(annot)
-                }
-                renderListsPickerForAnnotation={() =>
-                    this.renderListPicker(annot)
-                }
-                annotationEditDependencies={{
-                    comment: this.state.editForms[annot.url].commentText,
-                    onCommentChange: (commentText) =>
-                        this.handleEditFormUpdate(annot.url, () => ({
-                            commentText,
-                        })),
-                    onEditCancel: this.handleEditCancel(
-                        annot.url,
-                        annot.comment,
-                    ),
-                    onEditConfirm: () => this.handleEditAnnotation(annot.url),
-                }}
-                annotationFooterDependencies={{
-                    onEditIconClick: () =>
-                        this.setState({
-                            annotationModes: {
-                                [annot.url]: 'edit',
-                            },
-                        }),
-                    onDeleteCancel: this.handleEditCancel(
-                        annot.url,
-                        annot.comment,
-                    ),
-                    onDeleteConfirm: this.handleDeleteAnnotation(annot.url),
-                    onDeleteIconClick: () =>
-                        this.setState({
-                            annotationModes: { [annot.url]: 'delete' },
-                        }),
-                    onTagIconClick: this.handleTagPickerClick(annot.url),
-                    onListIconClick: this.handleListPickerClick(annot.url),
-                    onShareClick: this.handleShareClick(annot.url),
-                    onCopyPasterBtnClick:
-                        this.props.setActiveCopyPasterAnnotationId != null
-                            ? () =>
-                                  this.props.setActiveCopyPasterAnnotationId(
-                                      annot.url,
-                                  )
-                            : undefined,
-                }}
-            />
-        ))
+        return null
+        // return this.state.annotations.map((annot) => (
+        //     <AnnotationEditable
+        //         getListDetailsById={(i) => ({
+        //             name: 'dead code',
+        //             isShared: false,
+        //         })}
+        //         key={annot.url}
+        //         {...annot}
+        //         body={annot.body}
+        //         comment={annot.comment}
+        //         className={styles.annotation}
+        //         createdWhen={annot.createdWhen!}
+        //         isShared={false}
+        //         isBulkShareProtected={false}
+        //         mode={this.state.annotationModes[annot.url]}
+        //         onGoToAnnotation={this.handleGoToAnnotation(annot)}
+        //         renderShareMenuForAnnotation={() => this.renderShareMenu(annot)}
+        //         renderCopyPasterForAnnotation={() =>
+        //             this.renderCopyPasterManager(annot)
+        //         }
+        //         renderTagsPickerForAnnotation={() =>
+        //             this.renderTagPicker(annot)
+        //         }
+        //         renderListsPickerForAnnotation={() =>
+        //             this.renderListPicker(annot)
+        //         }
+        //         annotationEditDependencies={{
+        //             comment: this.state.editForms[annot.url].commentText,
+        //             onCommentChange: (commentText) =>
+        //                 this.handleEditFormUpdate(annot.url, () => ({
+        //                     commentText,
+        //                 })),
+        //             onEditCancel: this.handleEditCancel(
+        //                 annot.url,
+        //                 annot.comment,
+        //             ),
+        //             onEditConfirm: () => this.handleEditAnnotation(annot.url),
+        //         }}
+        //         annotationFooterDependencies={{
+        //             onEditIconClick: () =>
+        //                 this.setState({
+        //                     annotationModes: {
+        //                         [annot.url]: 'edit',
+        //                     },
+        //                 }),
+        //             onDeleteCancel: this.handleEditCancel(
+        //                 annot.url,
+        //                 annot.comment,
+        //             ),
+        //             onDeleteConfirm: this.handleDeleteAnnotation(annot.url),
+        //             onDeleteIconClick: () =>
+        //                 this.setState({
+        //                     annotationModes: { [annot.url]: 'delete' },
+        //                 }),
+        //             onTagIconClick: this.handleTagPickerClick(annot.url),
+        //             onListIconClick: this.handleListPickerClick(annot.url),
+        //             onShareClick: this.handleShareClick(annot.url),
+        //             onCopyPasterBtnClick:
+        //                 this.props.setActiveCopyPasterAnnotationId != null
+        //                     ? () =>
+        //                           this.props.setActiveCopyPasterAnnotationId(
+        //                               annot.url,
+        //                           )
+        //                     : undefined,
+        //         }}
+        //     />
+        // ))
     }
 
     render() {

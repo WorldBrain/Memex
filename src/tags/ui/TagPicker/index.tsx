@@ -27,7 +27,7 @@ import { TagResultItem } from './components/TagResultItem'
 import { EntrySelectedTag } from './components/EntrySelectedTag'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 import { tags } from 'src/util/remote-functions-background'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import colors from 'src/dashboard-refactor/colors'
 
 export type { TagPickerDependencies }

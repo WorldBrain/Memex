@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 import colors from 'src/dashboard-refactor/colors'
@@ -51,7 +51,7 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
                 onMouseLeave={this.setHoverState(false)}
             >
                 <Icon
-                    heightAndWidth="18px"
+                    heightAndWidth="20px"
                     icon={this.props.icon}
                     hoverOff
                     color={this.props.isSelected ? 'purple' : null}
@@ -69,27 +69,13 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
                         {this.props.description}
                     </PrivacyOptionSubTitle>
                 </PrivacyOptionBox>
-                {this.props.hasProtectedOption && this.state.isHovered && (
-                    <ButtonTooltip
-                        tooltipText={
-                            <span>
-                                <strong>Protect Status</strong>
-                                <br />
-                                No status change in bulk action.
-                                <br />
-                                {this.props.shortcut && (
-                                    <i>{this.protectedModeShortcut}</i>
-                                )}
-                            </span>
-                        }
-                        position="left"
-                    >
-                        <Icon
-                            onClick={this.handleProtectedClick}
-                            heightAndWidth="14px"
-                            filePath={icons.lock}
-                        />
-                    </ButtonTooltip>
+                {this.props.isSelected && (
+                    <Icon
+                        heightAndWidth="18px"
+                        filePath={icons.check}
+                        color={'purple'}
+                        hoverOff
+                    />
                 )}
             </PrivacyOptionItem>
         )
@@ -107,12 +93,18 @@ const PrivacyOptionItem = styled(Margin)`
     padding: 10px 10px;
     width: fill-available;
     grid-gap: 10px;
-    border-radius: 5px;
-    background-color: ${(props) =>
-        props.isSelected && props.theme.colors.backgroundColorDarker};
+    border-radius: 12px;
+    margin-bottom: 2px;
+
+    ${(props) =>
+        props.isSelected &&
+        css`
+            outline: none;
+            background-color: ${(props) => props.theme.colors.darkhover};
+        `}
 
     &:hover {
-        background-color: ${(props) => props.theme.colors.backgroundColor};
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
     }
 
     &:last-child {
@@ -136,31 +128,34 @@ const PrivacyOptionBox = styled.div`
 
 const PrivacyOptionTitleBox = styled.div`
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: center;
     flex-direction: row;
     height: 16px;
-    grid-gap: 5px;
+    grid-gap: 8px;
 `
 
 const PrivacyOptionTitle = styled.div`
-    font-size: 13px;
+    font-size: 12px;
     font-weight: bold;
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.normalText};
 `
 
 const PrivacyOptionShortcut = styled.div`
     font-size: 10px;
-    font-weight: 300;
+    font-weight: 400;
+    padding: 2px 4px;
     color: ${(props) => props.theme.colors.normalText};
+    border: 1px solid ${(props) => props.theme.colors.greyScale9};
+    border-radius: 4px;
 `
 
 const PrivacyOptionSubTitle = styled.div`
     font-size: 12px;
-    font-weight: normal;
+    font-weight: 400;
     white-space: nowrap;
     width: 100%;
     text-overflow: ellipsis;
     overflow: hidden;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.darkText};
 `

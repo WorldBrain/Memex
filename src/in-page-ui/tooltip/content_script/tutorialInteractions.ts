@@ -24,6 +24,10 @@ export const insertTutorial = async () => {
     ) {
         tutorialTarget = document.createElement('div')
         tutorialTarget.setAttribute('id', 'memex-guided-tutorial')
+        tutorialTarget.setAttribute(
+            'style',
+            'display: flex; height: 100vh; width: 100vw; justify-content: center; align-items: center;',
+        )
         document.body.appendChild(tutorialTarget)
 
         showTutorial = await setupTutorialUIContainer(tutorialTarget, {

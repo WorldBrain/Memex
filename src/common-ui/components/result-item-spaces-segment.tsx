@@ -5,6 +5,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { padding } from 'polished'
 
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     showEditBtn: boolean
@@ -13,12 +14,17 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     onListClick?: (tag: number) => void
     renderSpacePicker?: () => JSX.Element
     filteredbyListID?: number
+    tabIndex?: number
+    padding?: string
+    newLineOrientation?: boolean
 }
 
 interface ButtonProps {
     hasNoLists: boolean
     onEditBtnClick?: React.MouseEventHandler
     renderSpacePicker?: () => JSX.Element
+    tabIndex?: number
+    newLineOrientation?: boolean
 }
 
 export class AddSpacesButton extends React.Component<
@@ -40,27 +46,18 @@ export class AddSpacesButton extends React.Component<
                         // this.setState({ showPicker: !this.state.showPicker })
                         this.props.onEditBtnClick?.(e)
                     }}
+                    tabIndex={this.props.tabIndex}
                 >
-                    {this.props.hasNoLists ? (
-                        <EditIconContainerWithText>
-                            <Icon
-                                filePath={icons.plus}
-                                height={'10px'}
-                                color={'purple'}
-                                hoverOff
-                            />
-                            Add to Spaces
-                        </EditIconContainerWithText>
-                    ) : (
-                        <EditIconContainer>
-                            <Icon
-                                filePath={icons.plus}
-                                height={'10px'}
-                                color={'purple'}
-                                hoverOff
-                            />
-                        </EditIconContainer>
-                    )}
+                    <EditIconContainer>
+                        <Icon
+                            filePath={icons.plus}
+                            height={'10px'}
+                            color={'purple'}
+                            hoverOff
+                        />
+                    </EditIconContainer>
+                    {(this.props.hasNoLists ||
+                        this.props.newLineOrientation === true) && <>Spaces</>}
                 </AddSpacesButtonContainer>
                 {this.props.renderSpacePicker && (
                     <SpacePickerWrapper
@@ -81,6 +78,7 @@ const SpacePickerButtonWrapper = styled.div`
     display: flex;
     flex-direction: column;
     cursor: pointer;
+    margin-top: 1px;
 `
 
 const SpacePickerWrapper = styled.div`
@@ -96,45 +94,51 @@ export default function ListsSegment({
     onEditBtnClick,
     renderSpacePicker,
     filteredbyListID,
+    tabIndex,
+    newLineOrientation,
     ...props
 }: Props) {
     return (
-        <Container onClick={onEditBtnClick} {...props}>
-            <ListsContainer>
+        <Container padding={padding} onClick={onEditBtnClick} {...props}>
+            <ListsContainer newLineOrientation={newLineOrientation === true}>
                 <AddSpacesButton
                     hasNoLists={lists.length === 0}
                     // onEditBtnClick={onEditBtnClick}
                     renderSpacePicker={renderSpacePicker}
+                    tabIndex={tabIndex}
+                    newLineOrientation={newLineOrientation}
                 />
-                {lists
-                    .filter(
-                        (l) =>
-                            !Object.values(SPECIAL_LIST_IDS).includes(l.id) &&
-                            l.id !== filteredbyListID,
-                    )
-                    .slice(0)
-                    .map((space) => {
-                        return (
-                            <ListSpaceContainer
-                                key={space.id}
-                                onClick={
-                                    onListClick
-                                        ? () => onListClick(space.id)
-                                        : undefined
-                                }
-                            >
-                                {' '}
-                                {space.isShared && (
-                                    <Icon
-                                        heightAndWidth="12px"
-                                        hoverOff
-                                        icon="people"
-                                        color="white"
-                                    />
-                                )}
-                                {space.name}
-                                {/* TODO: uncomment when collection context menu is done */}
-                                {/* {showEditBtn && (
+                <SpacesListContainer>
+                    {lists
+                        .filter(
+                            (l) =>
+                                !Object.values(SPECIAL_LIST_IDS).includes(
+                                    l.id,
+                                ) && l.id !== filteredbyListID,
+                        )
+                        .slice(0)
+                        .map((space) => {
+                            return (
+                                <ListSpaceContainer
+                                    key={space.id}
+                                    onClick={
+                                        onListClick
+                                            ? () => onListClick(space.id)
+                                            : undefined
+                                    }
+                                >
+                                    {' '}
+                                    {space.isShared && (
+                                        <Icon
+                                            heightAndWidth="16px"
+                                            hoverOff
+                                            icon="peopleFine"
+                                            color="greyScale8"
+                                        />
+                                    )}
+                                    {space.name}
+                                    {/* TODO: uncomment when collection context menu is done */}
+                                    {/* {showEditBtn && (
                             <ListPillSettingButton
                                 onClick={() => {
                                     // open the space context modal
@@ -143,26 +147,35 @@ export default function ListsSegment({
                                 {' ... '}
                             </ListPillSettingButton>
                         )} */}
-                            </ListSpaceContainer>
-                        )
-                    })}
+                                </ListSpaceContainer>
+                            )
+                        })}
+                </SpacesListContainer>
             </ListsContainer>
         </Container>
     )
 }
 
-const Container = styled.div`
-    display: grid;
+const SpacesListContainer = styled.div`
+    width: fill-available;
+    display: flex;
+    flex-wrap: wrap;
+`
+
+const Container = styled.div<{ padding: string }>`
+    display: flex;
     grid-gap: 10px;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-start;
-    padding: 5px 15px;
+    padding: ${(props) =>
+        props.padding ? props.padding : '0px 10px 5px 10px'};
     min-height: 24px;
     height: fit-content;
     grid-auto-flow: column;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    //border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
     pointer-events: auto;
     z-index: 1000;
+    width: fill-available;
 `
 
 const ButtonBox = styled.div`
@@ -175,10 +188,10 @@ const ButtonBox = styled.div`
 `
 
 const EditIconContainer = styled.div`
-    border: 1px dashed ${(props) => props.theme.colors.lineLightGrey};
-    height: 20px;
-    width: 20px;
-    border-radius: 50px;
+    border: 1px solid ${(props) => props.theme.colors.lineGrey};
+    height: 24px;
+    width: 24px;
+    border-radius: 3px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -210,7 +223,6 @@ const EditIconContainerWithText = styled.div`
 `
 
 const AddSpacesButtonContainer = styled.div`
-    background-color: white;
     font-size: 12px;
     font-weight: 400;
     justify-content: center;
@@ -220,27 +232,30 @@ const AddSpacesButtonContainer = styled.div`
     align-items: center;
     white-space: nowrap;
     font-family: 'Poppins', sans-serif;
+    color: ${(props) => props.theme.colors.normalText};
+    grid-gap: 5px;
 `
-const ListsContainer = styled.div`
+const ListsContainer = styled.div<{ newLineOrientation }>`
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    align-items: flex-start;
+    flex-direction: ${(props) => (props.newLineOrientation ? 'column' : 'row')};
 `
 
 const ListSpaceContainer = styled.div`
-    background-color: ${(props) => props.theme.colors.purple};
-    color: #fff;
+    background-color: ${(props) => props.theme.colors.lightHover};
+    color: ${(props) => props.theme.colors.greyScale9};
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 12px;
-    font-weight: 400;
+    font-weight: 500;
+    letter-spacing: 0.6px;
     height: 20px;
     margin: 2px 4px 2px 0;
     display: flex;
     cursor: pointer;
     align-items: center;
     white-space: nowrap;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
 `
 
 const ListPillSettingButton = styled.button`

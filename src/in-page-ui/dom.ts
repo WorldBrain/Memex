@@ -61,8 +61,9 @@ export function createShadowRootIfSupported(
         var innerHTML = ''
         innerHTML += '<style>'
         innerHTML +=
-            ':host {all: initial} :host * {font-family: "Inter", sans-serif; line-height: initial}'
-        innerHTML += '</style>'
+            ':host {all: initial, font-family: "Satoshi"} :host * {font-family: "Satoshi", sans-serif; line-height: initial}'
+        innerHTML +=
+            '</style> <link rel="stylesheet" href="/fonts/Satoshi/satoshi.css" />'
         shadow.innerHTML = innerHTML
 
         shadow.appendChild(rootElement)

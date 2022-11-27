@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 import { Loader, Search as SearchIcon } from '@styled-icons/feather'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
@@ -12,7 +12,7 @@ interface Props {
     onKeyPress: (key: KeyEvent) => void
     searchInputPlaceholder: string
     value: string
-    before: JSX.Element
+    before?: JSX.Element
     searchInputRef?: (e: HTMLTextAreaElement | HTMLInputElement) => void
     showPlaceholder?: boolean
     loading?: boolean
@@ -83,7 +83,7 @@ const StyledSearchIcon = styled(SearchIcon)`
 
 const SearchBox = styled.div`
     align-items: center;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.darkhover};
     border-radius: 3px;
     color: ${(props) => props.theme.colors.normalText};
     display: flex;
@@ -96,7 +96,12 @@ const SearchBox = styled.div`
     margin-bottom: 4px;
     grid-gap: 5px;
     min-height: 20px;
-    height: 24px;
+
+    ${(props) =>
+        props.isFocused &&
+        css`
+            outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        `}
 `
 
 const SearchInput = styled(TextInputControlled)`
@@ -109,7 +114,7 @@ const SearchInput = styled(TextInputControlled)`
     display: flex;
     flex: 1;
     color: ${(props) => props.theme.colors.normalText};
-    font-family: 'Inter'
+    font-family: 'Satoshi';
     font-size: 14px;
     height: fill-available;
     width: fill-available;

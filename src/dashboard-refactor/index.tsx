@@ -1,10 +1,9 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import browser from 'webextension-polyfill'
 import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
 import { createGlobalStyle } from 'styled-components'
-import type { UIMutation } from 'ui-logic-core'
-
+import { sizeConstants } from 'src/dashboard-refactor/constants'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
 import { RootState, Events, DashboardDependencies, ListSource } from './types'
@@ -19,17 +18,15 @@ import SubscribeModal from 'src/authentication/components/Subscription/Subscribe
 import Onboarding from 'src/overview/onboarding'
 import { HelpBtn } from 'src/overview/help-btn'
 import FiltersBar from './header/filters-bar'
+import SidebarToggle from './header/sidebar-toggle'
+import { Rnd } from 'react-rnd'
 import { AnnotationsSidebarInDashboardResults as NotesSidebar } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { AnnotationsSidebarContainer as NotesSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
 import {
     AnnotationsCacheInterface,
     createAnnotationsCache,
 } from 'src/annotations/annotations-cache'
-import {
-    updatePickerValues,
-    areSearchFiltersEmpty,
-    stateToSearchParams,
-} from './util'
+import { updatePickerValues, stateToSearchParams } from './util'
 import analytics from 'src/analytics'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { deriveStatusIconColor } from './header/sync-status-menu/util'
@@ -37,11 +34,9 @@ import { FILTER_PICKERS_LIMIT } from './constants'
 import DragElement from './components/DragElement'
 import Margin from './components/Margin'
 import { getFeedUrl, getListShareUrl } from 'src/content-sharing/utils'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { Props as ListDetailsProps } from './search-results/components/list-details'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
-import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import PdfLocator from './components/PdfLocator'
 import ConfirmModal from 'src/common-ui/components/ConfirmModal'
@@ -56,8 +51,15 @@ import {
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
 import type { ListDetailsGetter } from 'src/annotations/types'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import SearchCopyPaster from './search-results/components/search-copy-paster'
+import ExpandAllNotes from './search-results/components/expand-all-notes'
 
 export interface Props extends DashboardDependencies {}
+
+export interface State extends RootState {
+    sidebarWidth: string
+}
 
 export class DashboardContainer extends StatefulUIElement<
     Props,
@@ -78,7 +80,6 @@ export class DashboardContainer extends StatefulUIElement<
         | 'localStorage'
         | 'contentConversationsBG'
         | 'activityIndicatorBG'
-        | 'personalCloudBG'
         | 'contentShareBG'
         | 'syncSettingsBG'
         | 'annotationsBG'
@@ -98,7 +99,6 @@ export class DashboardContainer extends StatefulUIElement<
         localStorage: browser.storage.local,
         contentConversationsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
-        personalCloudBG: runInBackground(),
         contentShareBG: runInBackground(),
         syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
@@ -119,6 +119,8 @@ export class DashboardContainer extends StatefulUIElement<
     private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
         window.location.hash = '#/' + route
     }
+
+    private SidebarContainer = React.createRef()
 
     constructor(props: Props) {
         super(props, new DashboardLogic(props))
@@ -292,6 +294,8 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <FiltersBar
+                spaceSidebarWidth={this.state.sidebarWidth}
+                spaceSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 searchFilters={searchFilters}
                 isDisplayed={searchFilters.searchFiltersOpen}
                 showTagsFilter={searchFilters.isTagFilterActive}
@@ -398,16 +402,46 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderHeader() {
         const {
-            isCloudEnabled,
             searchFilters,
             listsSidebar,
             currentUser,
             syncMenu,
+            searchResults,
         } = this.state
         const syncStatusIconState = deriveStatusIconColor(this.state)
         return (
             <HeaderContainer
                 searchBarProps={{
+                    renderExpandButton: () => (
+                        <ExpandAllNotes
+                            isEnabled={searchResultUtils.areAllNotesShown(
+                                searchResults,
+                            )}
+                            onClick={() =>
+                                this.processEvent('setAllNotesShown', null)
+                            }
+                        />
+                    ),
+                    renderCopyPasterButton: () => (
+                        <SearchCopyPaster
+                            searchType={searchResults.searchType}
+                            searchParams={stateToSearchParams(this.state)}
+                            isCopyPasterShown={
+                                searchResults.isSearchCopyPasterShown
+                            }
+                            isCopyPasterBtnShown
+                            hideCopyPaster={() =>
+                                this.processEvent('setSearchCopyPasterShown', {
+                                    isShown: false,
+                                })
+                            }
+                            toggleCopyPaster={() =>
+                                this.processEvent('setSearchCopyPasterShown', {
+                                    isShown: !searchResults.isSearchCopyPasterShown,
+                                })
+                            }
+                        />
+                    ),
                     searchQuery: searchFilters.searchQuery,
                     searchFiltersOpen: searchFilters.searchFiltersOpen,
                     onSearchFiltersOpen: () =>
@@ -444,17 +478,12 @@ export class DashboardContainer extends StatefulUIElement<
                 syncStatusIconState={syncStatusIconState}
                 syncStatusMenuProps={{
                     ...syncMenu,
-                    isCloudEnabled,
                     syncStatusIconState,
                     isLoggedIn: currentUser != null,
                     outsideClickIgnoreClass:
                         HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
                     onLoginClick: () =>
                         this.processEvent('setShowLoginModal', {
-                            isShown: true,
-                        }),
-                    onMigrateClick: () =>
-                        this.processEvent('setShowCloudOnboardingModal', {
                             isShown: true,
                         }),
                     onClickOutside: () =>
@@ -466,6 +495,7 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: !syncMenu.isDisplayed,
                         }),
                 }}
+                sidebarWidth={this.state.sidebarWidth}
             />
         )
     }
@@ -488,13 +518,14 @@ export class DashboardContainer extends StatefulUIElement<
                 openFeedUrl={() =>
                     this.processEvent('clickFeedActivityIndicator', null)
                 }
+                switchToFeed={() => this.processEvent('switchToFeed', null)}
                 onAllSavedSelection={() =>
-                    this.processEvent('resetFilters', null)
+                    this.processEvent('setSelectedListId', { listId: null })
                 }
-                isAllSavedSelected={areSearchFiltersEmpty(this.state)}
-                onListSelection={(listId) =>
+                isAllSavedSelected={null}
+                onListSelection={(listId) => {
                     this.processEvent('setSelectedListId', { listId })
-                }
+                }}
                 peekState={{
                     isSidebarPeeking: listsSidebar.isSidebarPeeking,
                     setSidebarPeekState: (isPeeking) => () =>
@@ -505,13 +536,16 @@ export class DashboardContainer extends StatefulUIElement<
                 searchBarProps={{
                     searchQuery: listsSidebar.searchQuery,
                     sidebarLockedState: lockedState,
-                    hasPerfectMatch: true,
                     onCreateNew: (value) =>
                         this.processEvent('confirmListCreate', { value }),
                     onSearchQueryChange: (query) =>
                         this.processEvent('setListQueryValue', { query }),
                     onInputClear: () =>
                         this.processEvent('setListQueryValue', { query: '' }),
+                    localLists: this.listsStateToProps(
+                        listsSidebar.localLists.filteredListIds,
+                        'local-lists',
+                    ),
                 }}
                 listsGroups={[
                     {
@@ -627,15 +661,7 @@ export class DashboardContainer extends StatefulUIElement<
                 onDismissSubscriptionBanner={() =>
                     this.processEvent('dismissSubscriptionBanner', null)
                 }
-                showCloudOnboardingModal={() =>
-                    this.processEvent('setShowCloudOnboardingModal', {
-                        isShown: true,
-                    })
-                }
                 noResultsType={searchResults.noResultsType}
-                filterSearchByTag={(tag) =>
-                    this.processEvent('addIncludedTag', { tag })
-                }
                 paginateSearch={() =>
                     this.processEvent('search', { paginate: true })
                 }
@@ -706,13 +732,17 @@ export class DashboardContainer extends StatefulUIElement<
                                 pageId
                             ].isTagPickerShown,
                         }),
-                    onListPickerBtnClick: (day, pageId) => () =>
+                    onListPickerFooterBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageListPickerShown', {
                             day,
                             pageId,
-                            isShown: !searchResults.results[day].pages.byId[
-                                pageId
-                            ].isListPickerShown,
+                            show: 'footer',
+                        }),
+                    onListPickerBarBtnClick: (day, pageId) => () =>
+                        this.processEvent('setPageListPickerShown', {
+                            day,
+                            pageId,
+                            show: 'lists-bar',
                         }),
                     onCopyPasterBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageCopyPasterShown', {
@@ -897,11 +927,15 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: !searchResults.noteData.byId[noteId]
                                 .isTagPickerShown,
                         }),
-                    onListPickerBtnClick: (noteId) => () =>
+                    onListPickerBarBtnClick: (noteId) => () =>
                         this.processEvent('setNoteListPickerShown', {
                             noteId,
-                            isShown: !searchResults.noteData.byId[noteId]
-                                .isListPickerShown,
+                            show: 'lists-bar',
+                        }),
+                    onListPickerFooterBtnClick: (noteId) => () =>
+                        this.processEvent('setNoteListPickerShown', {
+                            noteId,
+                            show: 'footer',
                         }),
                     onCopyPasterBtnClick: (noteId) => () =>
                         this.processEvent('setNoteCopyPasterShown', {
@@ -970,20 +1004,6 @@ export class DashboardContainer extends StatefulUIElement<
                             keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                         }),
                 }}
-                searchCopyPasterProps={{
-                    searchType: searchResults.searchType,
-                    searchParams: stateToSearchParams(this.state),
-                    isCopyPasterShown: searchResults.isSearchCopyPasterShown,
-                    isCopyPasterBtnShown: true,
-                    hideCopyPaster: () =>
-                        this.processEvent('setSearchCopyPasterShown', {
-                            isShown: false,
-                        }),
-                    toggleCopyPaster: () =>
-                        this.processEvent('setSearchCopyPasterShown', {
-                            isShown: !searchResults.isSearchCopyPasterShown,
-                        }),
-                }}
             />
         )
     }
@@ -1046,6 +1066,7 @@ export class DashboardContainer extends StatefulUIElement<
                     deleteDocs={() =>
                         this.processEvent('confirmListDelete', null)
                     }
+                    icon={icons.collectionsEmpty}
                 />
             )
         }
@@ -1151,23 +1172,15 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (modalsState.showCloudOnboarding) {
-            return (
-                <CloudOnboardingModal
-                    services={this.props.services}
-                    backupBG={this.props.backupBG}
-                    syncSettingsBG={this.props.syncSettingsBG}
-                    personalCloudBG={this.props.personalCloudBG}
-                    onModalClose={(args) =>
-                        this.processEvent('closeCloudOnboardingModal', {
-                            didFinish: !!args.didFinish,
-                        })
-                    }
-                />
-            )
-        }
-
         return null
+    }
+
+    private whichFeed = () => {
+        if (process.env.NODE_ENV === 'production') {
+            return 'https://memex.social/feed'
+        } else {
+            return 'https://staging.memex.social/feed'
+        }
     }
 
     render() {
@@ -1175,23 +1188,142 @@ export class DashboardContainer extends StatefulUIElement<
         // <GlobalStyle />
         const { listsSidebar, mode } = this.state
         if (mode === 'onboarding') {
-            return (
-                <Onboarding
-                    authBG={this.props.authBG}
-                    personalCloudBG={this.props.personalCloudBG}
-                />
-            )
+            return <Onboarding authBG={this.props.authBG} />
         }
+
+        const lockedState = {
+            isSidebarLocked: listsSidebar.isSidebarLocked,
+            toggleSidebarLockedState: () =>
+                this.processEvent('setSidebarLocked', {
+                    isLocked: !listsSidebar.isSidebarLocked,
+                }),
+        }
+
+        const sidebarToggleHoverState = {
+            isHovered: listsSidebar.isSidebarToggleHovered,
+            onHoverEnter: () =>
+                this.processEvent('setSidebarToggleHovered', {
+                    isHovered: true,
+                }),
+            onHoverLeave: () =>
+                this.processEvent('setSidebarToggleHovered', {
+                    isHovered: false,
+                }),
+        }
+
+        const style = {
+            display:
+                !listsSidebar.isSidebarPeeking && !listsSidebar.isSidebarLocked
+                    ? 'none'
+                    : 'flex',
+            top: listsSidebar.isSidebarPeeking ? '20px' : '0',
+            height: listsSidebar.isSidebarPeeking ? '90vh' : '100vh',
+            position: listsSidebar.isSidebarPeeking ? 'fixed' : 'sticky',
+        }
+
+        const isPeeking = listsSidebar.isSidebarPeeking
 
         return (
             <Container>
-                {this.renderHeader()}
-                {this.renderFiltersBar()}
-                <Margin bottom="5px" />
-                {this.renderListsSidebar()}
-                {mode === 'locate-pdf'
-                    ? this.renderPdfLocator()
-                    : this.renderSearchResults()}
+                <SidebarHeaderContainer>
+                    <SidebarToggleBox>
+                        <SidebarToggle
+                            sidebarLockedState={lockedState}
+                            hoverState={sidebarToggleHoverState}
+                        />
+                        <ActivityIndicator
+                            hasActivities={listsSidebar.hasFeedActivity}
+                        />
+                    </SidebarToggleBox>
+                </SidebarHeaderContainer>
+                <MainFrame>
+                    <PeekTrigger
+                        onMouseEnter={(isPeeking) => {
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking,
+                            })
+                        }}
+                        onDragEnter={(isPeeking) => {
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking,
+                            })
+                        }}
+                    />
+                    <ListSidebarContent
+                        ref={this.SidebarContainer}
+                        style={style}
+                        size={{
+                            height: listsSidebar.isSidebarPeeking
+                                ? '90vh'
+                                : '100vh',
+                        }}
+                        peeking={listsSidebar.isSidebarPeeking}
+                        position={{
+                            x:
+                                listsSidebar.isSidebarLocked &&
+                                `$sizeConstants.header.heightPxpx`,
+                        }}
+                        locked={listsSidebar.isSidebarLocked}
+                        onMouseEnter={() => {
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking,
+                            })
+                        }}
+                        onMouseLeave={(isPeeking) => {
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking: false,
+                            })
+                        }}
+                        default={{ width: 300 }}
+                        resizeHandleClasses={{
+                            right: 'sidebarResizeHandleSidebar',
+                        }}
+                        resizeGrid={[1, 0]}
+                        dragAxis={'none'}
+                        minWidth={'250px'}
+                        maxWidth={'500px'}
+                        disableDragging={'true'}
+                        enableResizing={{
+                            top: false,
+                            right: true,
+                            bottom: false,
+                            left: false,
+                            topRight: false,
+                            bottomRight: false,
+                            bottomLeft: false,
+                            topLeft: false,
+                        }}
+                        onResize={(e, direction, ref, delta, position) => {
+                            this.setState({ sidebarWidth: ref.style.width })
+                        }}
+                    >
+                        {this.renderListsSidebar()}
+                    </ListSidebarContent>
+                    <MainContent>
+                        {this.state.listsSidebar.showFeed ? (
+                            <FeedContainer>
+                                <TitleContainer>
+                                    <SectionTitle>Activity Feed</SectionTitle>
+                                    <SectionDescription>
+                                        Updates from Spaces you follow or
+                                        conversation you participate in
+                                    </SectionDescription>
+                                </TitleContainer>
+                                <FeedFrame src={this.whichFeed()} />
+                            </FeedContainer>
+                        ) : (
+                            <>
+                                {this.renderHeader()}
+                                {this.renderFiltersBar()}
+                                {mode === 'locate-pdf'
+                                    ? this.renderPdfLocator()
+                                    : this.renderSearchResults()}
+                            </>
+                        )}
+                    </MainContent>
+                </MainFrame>
+
+                {/* <Margin bottom="5px" /> */}
                 {this.renderModals()}
                 <NotesSidebar
                     tags={this.props.tagsBG}
@@ -1230,23 +1362,186 @@ export class DashboardContainer extends StatefulUIElement<
 const GlobalStyle = createGlobalStyle`
 
     * {
-        font-family: 'Inter', sans-serif;,
+        font-family: 'Satoshi', sans-serif;
+        letter-spacing: 0.8px;
     }
 
     body {
-        font-family: 'Inter', sans-serif;';
+        font-family: 'Satoshi', sans-serif;
+        letter-spacing: 0.8px;
     }
 `
 
+const ListSidebarContent = styled(Rnd)<{
+    locked: boolean
+    peeking: boolean
+}>`
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    z-index: 3000;
+    z-index: 2147483645;
+    left: 0px;
+
+    ${(props) =>
+        props.locked &&
+        css`
+            height: 100%;
+            background-color: ${(props) =>
+                props.theme.colors.backgroundColorDarker};
+            border-right: solid 1px ${(props) => props.theme.colors.lineGrey};
+            padding-top: ${sizeConstants.header.heightPx}px;
+        `}
+    ${(props) =>
+        props.peeking &&
+        css`
+            position: fixed;
+            height: max-content;
+            background-color: ${(props) =>
+                props.theme.colors.backgroundColorDarker};
+            //box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
+            margin-top: 50px;
+            margin-bottom: 9px;
+            margin-left: 10px;
+            height: 90vh;
+            top: 20px;
+            border-radius: 8px;
+            animation: slide-in ease-in-out;
+            animation-duration: 0.15s;
+        `}
+    ${(props) =>
+        !props.peeking &&
+        !props.locked &&
+        css`
+            display: none;
+        `}
+
+
+        @keyframes slide-in {
+            0% {
+                left: -200px;
+                opacity: 0%;
+            }
+            100% {
+                left: 0px;
+                opacity: 100%;
+            }
+        }
+`
+
+// const ListSidebarContent = styled.div`
+//     width: fit-content;
+//     block-size: fit-content;
+// `
+
+const FeedContainer = styled.div`
+    display: flex;
+    width: fill-available;
+    height: 100%;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    grid-gap: 20px;
+    margin-top: 60px;
+    max-width: 800px;
+`
+
+const FeedFrame = styled.iframe`
+    width: fill-available;
+    min-height: 100vh;
+    height: 100%;
+    border: none;
+`
+
+const TitleContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    grid-gap: 10px;
+    width: fill-available;
+    padding: 0 30px;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 24px;
+    font-weight: bold;
+`
+const SectionDescription = styled.div`
+    color: ${(props) => props.theme.colors.greyScale8};
+    font-size: 16px;
+    font-weight: 300;
+`
+
+const MainContent = styled.div`
+    width: 100%;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    height: 100%;
+`
+
+const MainFrame = styled.div`
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    height: 100%;
+`
+
 const Container = styled.div`
-display: flex;
-flex-direction: column;
-width: fill-available;
-background-color: ${(props) => props.theme.colors.backgroundColor};
-min-height: 100vh;
-height: 100%;
+    display: flex;
+    flex-direction: column;
+    width: fill-available;
+    background-color: ${(props) => props.theme.colors.backgroundColor};
+    min-height: 100vh;
+    height: 100%;
 
     & * {
-        font-family: 'Inter', sans-serif;,
+        font-family: 'Satoshi', sans-serif;,
+    }
+`
+
+const PeekTrigger = styled.div`
+    height: 100vh;
+    width: 10px;
+    position: fixed;
+    background: transparent;
+`
+
+const SidebarToggleBox = styled(Margin)`
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+`
+
+const ActivityIndicator = styled.div<{ hasActivities }>`
+    border-radius: 20px;
+    height: 10px;
+    width: 10px;
+    margin-left: -24px;
+    border: ${(props) =>
+        props.hasActivities && '2px solid' + props.theme.colors.purple};
+    background: ${(props) => props.hasActivities && props.theme.colors.purple};
+`
+
+const SidebarHeaderContainer = styled.div`
+    height: 100%;
+    width: ${sizeConstants.listsSidebar.widthPx}px;
+    display: flex;
+    position: sticky;
+    top: 0px;
+    z-index: 10000000000000;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 1;
+
+    & div {
+        justify-content: flex-start;
     }
 `

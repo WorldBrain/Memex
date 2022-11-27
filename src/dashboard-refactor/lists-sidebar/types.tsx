@@ -58,6 +58,7 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         listCreateState: TaskState
         listEditState: TaskState
         listShareLoadingState: TaskState
+        showFeed?: boolean
     }
 
 export type Events = UIEvent<{
@@ -92,6 +93,7 @@ export type Events = UIEvent<{
     updateSelectedListDescription: { description: string }
 
     clickFeedActivityIndicator: null
+    switchToFeed: null
 }>
 
 export type ListNameHighlightIndices = [number, number]

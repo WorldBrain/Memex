@@ -11,9 +11,6 @@ import './datepicker-overrides.css'
 import DatePickerInput from './datepicker-input'
 import styled from 'styled-components'
 
-const styles = require('./DateRangeSelection.css')
-// const stylesPro = require('../../tooltips/components/tooltip.css')
-
 export interface DateRangeSelectionProps {
     env?: 'inpage' | 'overview'
     startDate: number
@@ -265,14 +262,9 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                 {/* <div className={styles.dateRangeSelection} id="date-picker">
                     <img src="/img/to-icon.png" className={styles.toIcon} />
                 </div> */}
-                <div
-                    className={classnames(
-                        styles.pickerContainer,
-                        styles.borderRight,
-                    )}
-                >
-                    <div className={styles.dateTitleContainer}>
-                        <DateTitle className={styles.dateTitle}>From</DateTitle>
+                <PickerContainer>
+                    <DateTitleContainer>
+                        <DateTitle>From</DateTitle>
                         <DatePickerInput
                             autoFocus
                             value={this.state.startDateText || startDateText}
@@ -288,13 +280,12 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                                 isStartDate: true,
                             })}
                         />
-                    </div>
-                    <div className={styles.datePickerDiv}>
+                    </DateTitleContainer>
+                    <DatePickerDiv>
                         <DatePicker
                             ref={(dp) => {
                                 this.startDatePicker = dp
                             }}
-                            className={styles.datePicker}
                             dateFormat={FORMAT}
                             isClearable
                             selected={startDate && moment(startDate)}
@@ -305,11 +296,11 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                             })}
                             inline
                         />
-                    </div>
-                </div>
-                <div className={styles.pickerContainer}>
-                    <div className={styles.dateTitleContainer}>
-                        <DateTitle className={styles.dateTitle}>To</DateTitle>
+                    </DatePickerDiv>
+                </PickerContainer>
+                <PickerContainer>
+                    <DateTitleContainer>
+                        <DateTitle>To</DateTitle>
                         <DatePickerInput
                             value={this.state.endDateText || endDateText}
                             name="to"
@@ -324,13 +315,12 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                                 isStartDate: false,
                             })}
                         />
-                    </div>
-                    <div className={styles.datePickerDiv}>
+                    </DateTitleContainer>
+                    <DatePickerDiv>
                         <DatePicker
                             ref={(dp) => {
                                 this.endDatePicker = dp
                             }}
-                            className={styles.datePicker}
                             dateFormat={FORMAT}
                             isClearable
                             selected={endDate && moment(endDate)}
@@ -342,8 +332,8 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                             })}
                             inline
                         />
-                    </div>
-                </div>
+                    </DatePickerDiv>
+                </PickerContainer>
             </DateRangeDiv>
         )
     }
@@ -351,15 +341,126 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
 
 const DateRangeDiv = styled.div`
     display: flex;
-    background: white;
+    background: ${(props) => props.theme.colors.greyScale1};
     align-items: flex-start;
     border-radius: 12px;
+
+    .react-datepicker {
+        background: ${(props) => props.theme.colors.lightHover};
+    }
+
+    .react-datepicker__current-month {
+        color: ${(props) => props.theme.colors.normalText};
+        font-weight: bold;
+    }
+
+    .react-datepicker__header .react-datepicker__day-name {
+        color: ${(props) => props.theme.colors.greyScale8};
+    }
+
+    .react-datepicker__day--outside-month {
+        color: ${(props) => props.theme.colors.greyScale6} !important;
+    }
+
+    .react-datepicker__day--disabled {
+        color: ${(props) => props.theme.colors.greyScale6} !important;
+    }
+
+    .react-datepicker__day--selected {
+        background: ${(props) => props.theme.colors.purple} !important;
+        border-radius: 3px;
+        color: ${(props) => props.theme.colors.black} !important;
+    }
+
+    .react-datepicker__day {
+        color: ${(props) => props.theme.colors.normalText};
+        font-weight: bold;
+
+        &:hover {
+            border-radius: 3px;
+            color: ${(props) => props.theme.colors.normalText};
+            background: ${(props) => props.theme.colors.darkhover};
+        }
+    }
+
+    .react-datepicker__navigation--next {
+        mask-image: url('/img/arrowRight.svg') !important;
+        mask-repeat: no-repeat !important;
+        transform: rotate(0deg);
+        mask-size: 18px !important;
+        mask-position: center !important;
+        background: ${(props) => props.theme.colors.iconColor};
+        height: 20px !important;
+        width: 20px !important;
+    }
+
+    .react-datepicker__navigation--previous {
+        mask-image: url('/img/arrowLeft.svg') !important;
+        mask-repeat: no-repeat !important;
+        mask-size: 18px !important;
+        transform: rotate(0deg);
+        mask-position: center !important;
+        background: ${(props) => props.theme.colors.iconColor};
+        height: 20px !important;
+        width: 20px !important;
+    }
 `
 
 const DateTitle = styled.span`
     color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 600;
+`
+
+const ToIcon = styled.div`
+    width: 5px;
+    height: 8px;
+    margin-top: 1px;
+`
+
+const PickerContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px 15px 0px;
+    background: ${(props) => props.theme.colors.greyScale1};
+    border-radius: 20px;
+`
+
+const DatePickerDiv = styled.div`
+    margin-top: 20px;
+    background: ${(props) => props.theme.colors.greyScale1};
+
+    & div {
+        background: ${(props) => props.theme.colors.greyScale1};
+    }
+`
+
+const ClearFilters = styled.div`
+    background-image: url('/img/removeIcon.svg');
+    background-size: 10px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    margin-left: 5px;
+    outline: none;
+    border: none;
+`
+
+const DateTitleContainer = styled.div`
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+`
+
+const DatepickerInput = styled.div`
+    display: flex;
+    align-items: center;
+`
+
+const BorderRight = styled.div`
+    border-right: 1px solid color9;
 `
 
 export default onClickOutside(DateRangeSelection)

@@ -31,6 +31,8 @@ export interface Props {
         },
     ) => void | Promise<void>
     renderCollectionsPicker?: () => React.ReactNode
+    tabIndex?: number
+    shortcutText?: string
 }
 
 interface State {
@@ -123,10 +125,11 @@ export default class AnnotationSaveBtn extends React.PureComponent<
 
         return (
             <HoverBox
-                withRelativeContainer
-                left={'0px'}
+                right={'20px'}
                 padding={'0px'}
-                top={'5px'}
+                top={'25px'}
+                width={'fit-content'}
+                zIndex={10010000}
             >
                 <DropdownMenuBtn
                     width={'340px'}
@@ -174,41 +177,38 @@ export default class AnnotationSaveBtn extends React.PureComponent<
     render() {
         return (
             <>
-                <SaveBtn>
-                    <SaveBtnText
+                <SaveBtn tabIndex={this.props.tabIndex}>
+                    <SaveBtnArrow
                         onClick={() =>
-                            this.props.onSave(
-                                !!this.props.isShared,
-                                !!this.props.isProtected,
-                                { mainBtnPressed: true },
-                            )
+                            this.setState({
+                                isShareMenuShown: !this.state.isShareMenuShown,
+                            })
                         }
                     >
                         <Icon
-                            hoverOff
-                            heightAndWidth="14px"
-                            filePath={
-                                getShareButtonData(
-                                    this.props.isShared,
-                                    this.props.isProtected,
-                                    this.props.hasSharedLists,
-                                ).icon
-                            }
-                        />{' '}
-                        Save
-                    </SaveBtnText>
-                    <SaveBtnArrow horizontal="1px">
-                        <Icon
-                            onClick={() =>
-                                this.setState({
-                                    isShareMenuShown: !this.state
-                                        .isShareMenuShown,
-                                })
-                            }
                             heightAndWidth="12px"
                             filePath={icons.triangle}
+                            hoverOff
                         />
+                        {this.props.isShared ? 'Public' : 'Private'}
                     </SaveBtnArrow>
+                    <ButtonTooltip
+                        tooltipText={this.props.shortcutText}
+                        position="bottom"
+                    >
+                        <Icon
+                            heightAndWidth="22px"
+                            icon={icons.check}
+                            color={'purple'}
+                            onClick={() =>
+                                this.props.onSave(
+                                    !!this.props.isShared,
+                                    !!this.props.isProtected,
+                                    { mainBtnPressed: true },
+                                )
+                            }
+                        />
+                    </ButtonTooltip>
                 </SaveBtn>
                 {this.renderShareMenu()}
             </>
@@ -216,21 +216,54 @@ export default class AnnotationSaveBtn extends React.PureComponent<
     }
 }
 
+const SaveBtnArrow = styled.div`
+    width: fit-content;
+    border-radius: 3px;
+    z-index: 10;
+    display: none;
+    padding: 0 0 0 5px;
+    margin-right: 10px;
+    font-weight: 400;
+    color: ${(props) => props.theme.colors.normalText};
+    grid-gap: 5px;
+    font-size: 12px;
+
+    & * {
+        cursor: pointer;
+    }
+`
+
 const SaveBtn = styled.div`
     flex-direction: row;
-    align-item: center;
+    align-items: center;
     box-sizing: border-box;
     cursor: pointer;
+    padding-right: 5px;
     font-size: 14px;
     border: none;
     outline: none;
-    margin-right: 5px;
+    margin-right: 3px;
     background: transparent;
     border-radius: 3px;
     font-weight: 700;
-    border 1px solid ${(props) => props.theme.colors.lightgrey};
+    /* border 1px solid ${(props) => props.theme.colors.lightgrey}; */
     display: grid;
     grid-auto-flow: column;
+
+    &:hover {
+        background: ${(props) => props.theme.colors.lightHover};
+    }
+
+    &:hover ${SaveBtnArrow}{
+        display: flex;
+        cursor: pointer;
+        justify-content: center;
+        align-items: center;
+
+        &:hover {
+            background: ${(props) => props.theme.colors.lightHover};
+        }
+    }
 `
 
 const SaveBtnText = styled.span`
@@ -248,11 +281,4 @@ const SaveBtnText = styled.span`
     & * {
         cursor: pointer;
     }
-`
-
-const SaveBtnArrow = styled(Margin)`
-    width: 24px;
-    border-radius: 3px;
-    z-index: 10;
-    margin: 3px 3px 3px 0px;
 `

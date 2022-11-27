@@ -5,9 +5,13 @@
 
 .table {
     border-collapse: collapse;
-    background: white;
-    width: 100%;
+    width: fill-available;
     font-size: 14px;
+    display: flex;
+
+    & tbody {
+        width: fill-available;
+    }
 
     & th,
     & td {
@@ -18,7 +22,6 @@
 
     & th {
         background: #333;
-        color: white;
         font-weight: 200;
         font-size: 0.7em;
         letter-spacing: 0.2em;

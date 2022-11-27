@@ -9,7 +9,7 @@ import {
     TrialInfo,
 } from 'src/authentication/components/Subscription/pricing.style'
 import styled from 'styled-components'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'

@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import * as icons from 'src/common-ui/components/design-library/icons'
 import { ConfirmModal, ConfirmModalProps } from '../../../common-ui/components'
 
 export interface Props extends ConfirmModalProps {
@@ -16,10 +16,8 @@ class DeleteConfirmModal extends PureComponent<Props> {
         this._action = React.createRef()
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if (this._action.current) {
-            this._action.current.focus()
-        }
+    componentDidMount() {
+        this._action.current.focus()
     }
 
     render() {
@@ -30,11 +28,14 @@ class DeleteConfirmModal extends PureComponent<Props> {
                 {...modalProps}
                 message={this.props.message}
                 submessage={this.props.submessage}
+                type={'alert'}
+                icon={icons.trash}
             >
                 <PrimaryAction
                     label="Delete"
                     onClick={deleteDocs}
                     innerRef={this._action}
+                    tabIndex={0}
                 />
             </ConfirmModal>
         )

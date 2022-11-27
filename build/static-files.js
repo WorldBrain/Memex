@@ -4,7 +4,10 @@ import { buildingManifestV3 } from './util'
  * Everything in here gets injected into the generated HTML as link/script tags.
  * See: https://github.com/jharris4/html-webpack-include-assets-plugin#example
  */
-export const htmlAssets = ['fonts/Inter/inter.css', 'lib/browser-polyfill.js']
+export const htmlAssets = [
+    'fonts/Satoshi/satoshi.css',
+    'lib/browser-polyfill.js',
+]
 
 /**
  * Set the manifest version to be equal to `package.json` version.
@@ -84,8 +87,8 @@ export const copyPatterns = [
         to: 'fonts/[name].[ext]',
     },
     {
-        from: 'fonts/Inter/*',
-        to: 'fonts/Inter/[name].[ext]',
+        from: 'fonts/Satoshi/*',
+        to: 'fonts/Satoshi/[name].[ext]',
     },
     {
         from:

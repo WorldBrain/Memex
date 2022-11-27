@@ -6,6 +6,8 @@ export const logoSmall = browser.runtime.getURL(
 export const logoHorizontal = browser.runtime.getURL(
     '/img/memexLogoHorizontal.png',
 )
+export const memexLogoGrey = browser.runtime.getURL('/img/memexLogoGrey.svg')
+
 export const settings = browser.runtime.getURL('/img/settings.svg')
 
 export const discord = browser.runtime.getURL('/img/discord.svg')
@@ -35,13 +37,13 @@ export const helpIcon = browser.runtime.getURL('/img/help.svg')
 export const searchIcon = browser.runtime.getURL('/img/search.svg')
 export const commentAdd = browser.runtime.getURL('/img/comment_add.svg')
 export const commentEdit = browser.runtime.getURL('/img/comment_edit.svg')
-export const compress = browser.runtime.getURL('/img/compress-alt.svg')
-export const expand = browser.runtime.getURL('/img/expand-alt.svg')
+export const compress = browser.runtime.getURL('/img/compress.svg')
+export const expand = browser.runtime.getURL('/img/expand.svg')
 export const play = browser.runtime.getURL('/img/play.svg')
 export const playFull = browser.runtime.getURL('/img/playFull.svg')
 export const pause = browser.runtime.getURL('/img/pause.svg')
 export const stop = browser.runtime.getURL('/img/stop.svg')
-export const warning = browser.runtime.getURL('/img/warning_red.svg')
+export const warning = browser.runtime.getURL('/img/info.svg')
 export const integrate = browser.runtime.getURL('/img/integrate.svg')
 export const noNote = browser.runtime.getURL('/img/noNote.svg')
 export const lockFine = browser.runtime.getURL('/img/lockFine.svg')
@@ -49,6 +51,9 @@ export const mail = browser.runtime.getURL('/img/mail.svg')
 export const inbox = browser.runtime.getURL('/img/inbox.svg')
 export const emptyCircle = browser.runtime.getURL('/img/emptyCircle.svg')
 export const sadFace = browser.runtime.getURL('/img/sadFace.svg')
+export const quickActionRibbon = browser.runtime.getURL(
+    '/img/quickActionRibbon.svg',
+)
 export const ribbonOn = browser.runtime.getURL('/img/ribbonOn.svg')
 export const ribbonOff = browser.runtime.getURL('/img/ribbonOff.svg')
 export const tooltipOn = browser.runtime.getURL('/img/tooltipOn.svg')
@@ -59,6 +64,9 @@ export const command = browser.runtime.getURL('/img/command.svg')
 export const clock = browser.runtime.getURL('/img/clock.svg')
 export const twitter = browser.runtime.getURL('/img/twitter.svg')
 export const sunrise = browser.runtime.getURL('/img/sunrise.svg')
+export const feed = browser.runtime.getURL('/img/feed.svg')
+export const cursor = browser.runtime.getURL('/img/cursor.svg')
+export const highlight = browser.runtime.getURL('/img/highlights.svg')
 export const commentEditFull = browser.runtime.getURL(
     '/img/comment_edit_full.svg',
 )
@@ -73,6 +81,7 @@ export const collectionsFull = browser.runtime.getURL(
 )
 export const folder = browser.runtime.getURL('/img/folder.svg')
 export const triangle = browser.runtime.getURL('/img/chevron-down.svg')
+export const chatWithUs = browser.runtime.getURL('/img/chatWithUs.svg')
 export const plus = browser.runtime.getURL('/img/plus.svg')
 export const plusIcon = browser.runtime.getURL('/img/plus.svg')
 export const backup = browser.runtime.getURL('/img/backup.svg')
@@ -87,7 +96,7 @@ export const copy = browser.runtime.getURL('/img/copy.svg')
 export const edit = browser.runtime.getURL('/img/edit.svg')
 export const remove = browser.runtime.getURL('/img/remove.svg')
 export const removeX = browser.runtime.getURL('/img/removeX.svg')
-export const pin = browser.runtime.getURL('/img/thumbtack.svg')
+export const pin = browser.runtime.getURL('/img/pin.svg')
 export const share = browser.runtime.getURL('/img/share.svg')
 export const shareWhite = browser.runtime.getURL('/img/shareWhite.svg')
 export const shareEmpty = browser.runtime.getURL('/img/shareEmpty.svg')
@@ -114,6 +123,9 @@ export const addPeople = browser.runtime.getURL('/img/addPeople.svg')
 export const peoplePlusFine = browser.runtime.getURL('/img/peoplePlusFine.svg')
 export const people = ''
 export const arrowRight = browser.runtime.getURL('/img/arrowRight.svg')
+export const longArrowRight = browser.runtime.getURL('/img/longArrowRight.svg')
+export const stars = browser.runtime.getURL('/img/stars.svg')
+export const arrowLeft = browser.runtime.getURL('/img/arrowLeft.svg')
 export const reload = browser.runtime.getURL('/img/reload.svg')
 export const longArrow = browser.runtime.getURL('/img/longarrow.svg')
 export const link = browser.runtime.getURL('/img/link.svg')
@@ -131,17 +143,17 @@ export const webMonetizationLogo = browser.runtime.getURL(
 export const webMonetizationLogoConfirmed = browser.runtime.getURL(
     '/img/web-monetization-logo-confirmed.svg',
 )
-
-// import tagFull from '/img/tag_full.svg'
-// import tagEmpty from '/img/tag_empty.svg'
-// import heartFull from '/img/heart_full.svg'
-// import heartEmpty from '/img/heart_empty.svg'
-
 export const coilIcon = null
 export const threadIcon = null
 export const newFeed = null
 export const checkedRound = null
 export const bell = null
 export const arrowDown = null
-export const youtubeLogo = null
-export const spotifyLogo = null
+export const youtubeLogo = browser.runtime.getURL('/img/youtube-logo.svg')
+export const spotifyLogo = browser.runtime.getURL('/img/spotify-logo.svg')
+export const macLogo = browser.runtime.getURL('/img/apple_logo.svg')
+export const winLogo = browser.runtime.getURL('/img/windows_logo.svg')
+export const linuxLogo = browser.runtime.getURL('/img/linux_logo.svg')
+export const twitterThin = browser.runtime.getURL('/img/youtube-logo.svg')
+export const invite = browser.runtime.getURL('/img/invite.svg')
+export const block = browser.runtime.getURL('/img/block.svg')

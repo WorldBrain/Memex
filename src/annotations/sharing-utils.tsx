@@ -14,26 +14,16 @@ export function getShareButtonData(
     }
     if (isShared && isBulkShareProtected) {
         return {
-            icon: icons.sharedProtected,
-            label: (
-                <span>
-                    Public
-                    <br />& Protected
-                </span>
-            ),
+            icon: icons.lock,
+            label: 'Public',
         }
     } else if (isShared && !isBulkShareProtected) {
         return { icon: icons.globe, label: 'Public' }
     } else if (!isShared && isBulkShareProtected) {
         return {
-            icon: icons.lockFine,
-            label: (
-                <span>
-                    Private
-                    <br />& Protected
-                </span>
-            ),
+            icon: icons.lock,
+            label: 'Private',
         }
     }
-    return { icon: icons.personFine, label: 'Share' }
+    return { icon: icons.personFine, label: 'Private' }
 }

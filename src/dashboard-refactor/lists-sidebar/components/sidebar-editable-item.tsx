@@ -64,15 +64,16 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
                     />
                     <ActionButtonBox right="5px">
                         <Icon
-                            filePath={icons.check}
+                            filePath={icons.removeX}
                             heightAndWidth="14px"
-                            onClick={this.handleConfirm}
-                        />
-                        <Icon
-                            filePath={icons.close}
-                            heightAndWidth="12px"
                             onClick={this.handleCancel}
                             padding={'5px'}
+                        />
+                        <Icon
+                            filePath={icons.check}
+                            heightAndWidth="16px"
+                            onClick={this.handleConfirm}
+                            color={'purple'}
                         />
                     </ActionButtonBox>
                 </Container>
@@ -98,7 +99,11 @@ const EditableListTitle = styled.input`
     outline: none;
     border: none;
     color: ${(props) => props.theme.colors.normalText};
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.darkhover};
+
+    &:focus-within {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+    }
 `
 
 const ActionButtonBox = styled(Margin)`

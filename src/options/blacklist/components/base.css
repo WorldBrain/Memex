@@ -26,7 +26,9 @@
 
 .blacklistAlert {
     font-size: 12px;
-    font-weight: bold;
+    font-weight: 300;
     color: rgb(255, 74, 85);
     margin: 10px 0px 10px 0;
+    width: fill-available;
+    line-break: anywhere;
 }

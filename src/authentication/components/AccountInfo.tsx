@@ -14,13 +14,14 @@ import UpdateEmail from 'src/overview/sharing/components/UpdateEmail'
 import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import Logic from './UserScreen/logic'
 import type { State, Event, Dependencies } from './UserScreen/types'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 
 const styles = require('./styles.css')
 
@@ -57,17 +58,10 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
             <FullPage>
                 {this.state.currentUser != null ? (
                     <>
-                        <PioneerPlanBanner width={'fill-available'} />
-                        <Section>
-                            <SectionCircle>
-                                <Icon
-                                    filePath={icons.personFine}
-                                    heightAndWidth="34px"
-                                    color="purple"
-                                    hoverOff
-                                />
-                            </SectionCircle>
-                            <SectionTitle>My Account</SectionTitle>
+                        <SettingSection
+                            title={'My Account'}
+                            icon={'personFine'}
+                        >
                             <FieldsContainer>
                                 <DisplayNameBox>
                                     <DisplayNameSetup authBG={auth} />
@@ -78,27 +72,17 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                         email={this.state.currentUser.email}
                                     />
                                 </DisplayNameBox>
-                                <DisplayNameBox>
-                                    <TextInputContainerDisabled>
-                                        <Icon
-                                            filePath={icons.personFine}
-                                            heightAndWidth="20px"
-                                            hoverOff
-                                        />
-                                        <TextInput
-                                            type={'text'}
-                                            name={'User ID'}
-                                            defaultValue={
-                                                this.state.currentUser.id
-                                            }
-                                            readOnly
-                                        />
-                                    </TextInputContainerDisabled>
-                                    <InfoText>
-                                        Your internal user ID for support
-                                        requests
-                                    </InfoText>
-                                </DisplayNameBox>
+                                <UserIdField>
+                                    <Icon
+                                        filePath={icons.personFine}
+                                        heightAndWidth="20px"
+                                        hoverOff
+                                    />
+                                    {this.state.currentUser.id}
+                                </UserIdField>
+                                <InfoText>
+                                    Your internal user ID for support requests
+                                </InfoText>
                                 <PrimaryAction
                                     label="Reset Password"
                                     onClick={() => {
@@ -112,14 +96,14 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                     font-size="14px"
                                 />
                             </FieldsContainer>
-                        </Section>
+                        </SettingSection>
                     </>
                 ) : (
-                    <Section>
+                    <SettingSection title={'My Account'} icon={'personFine'}>
                         <LoadingIndicatorBox>
                             <LoadingIndicator />
                         </LoadingIndicatorBox>
-                    </Section>
+                    </SettingSection>
                 )}
             </FullPage>
         )
@@ -138,8 +122,8 @@ const FieldsContainer = styled.div`
     grid-gap: 20px;
     flex-direction: column;
     align-items: flex-start;
-    width: 400px;
-    margin-top: 30px;
+    width: 440px;
+    margin-top: 15px;
 `
 
 const Section = styled.div`
@@ -150,79 +134,27 @@ const Section = styled.div`
     margin-bottom: 30px;
 `
 
-const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 10px;
-`
-
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
-    height: 80px;
-    width: 80px;
-    margin-bottom: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const DisplayNameContainer = styled.div`
-    display: grid;
-    grid-gap: 5px;
-    grid-auto-flow: row;
-    justify-content: flex-start;
-    align-items: center;
-`
-
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
-    font-size: 12px;
+    color: ${(props) => props.theme.colors.darkText};
+    font-size: 14px;
     opacity: 0.7;
     padding-left: 10px;
-    margin-top: 5px;
+    margin-top: -15px;
+    margin-bottom: 15px;
 `
 
-const TextInputContainer = styled.div`
+const UserIdField = styled.div`
     display: flex;
     grid-auto-flow: column;
     grid-gap: 10px;
     align-items: center;
     justify-content: flex-start;
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
-    height: 50px;
-    border-radius: 8px;
-    width: fill-available;
-    padding: 0 15px;
-`
-
-const TextInputContainerDisabled = styled.div`
-    display: flex;
-    grid-auto-flow: column;
-    grid-gap: 10px;
-    align-items: center;
-    justify-content: flex-start;
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
-    height: 50px;
-    border-radius: 8px;
-    width: fill-available;
-    padding: 0 15px;
-`
-
-const TextInput = styled.input`
-    outline: none;
-    height: fill-available;
-    width: fill-available;
-    color: ${(props) =>
-        props.readOnly
-            ? props.theme.colors.lighterText
-            : props.theme.colors.normalText};
-    font-size: 14px;
-    border: none;
+    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    color: ${(props) => props.theme.colors.greyScale8};
     background: transparent;
-
-    &::placeholder {
-        color: ${(props) => props.theme.colors.lighterText};
-    }
+    height: 50px;
+    border-radius: 8px;
+    width: fill-available;
+    padding: 0 15px;
+    font-size: 14px;
 `

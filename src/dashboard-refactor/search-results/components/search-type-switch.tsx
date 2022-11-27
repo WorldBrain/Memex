@@ -21,25 +21,27 @@ export default class SearchTypeSwitch extends PureComponent<Props> {
                     disabled={this.props.searchType === 'pages'}
                 >
                     <Icon
-                        path={
+                        path={icons.cursor}
+                        color={
                             this.props.searchType === 'pages'
-                                ? icons.heartFull
-                                : icons.heartEmpty
+                                ? 'purple'
+                                : 'iconColor'
                         }
                         heightAndWidth="16px"
                         hoverOff
                     />{' '}
-                    Pages
+                    Web
                 </SearchTypeBtn>
                 <SearchTypeBtn
                     onClick={this.props.onNotesSearchSwitch}
                     disabled={this.props.searchType === 'notes'}
                 >
                     <Icon
-                        path={
+                        path={icons.highlight}
+                        color={
                             this.props.searchType === 'notes'
-                                ? icons.highlighterFull
-                                : icons.highlighterEmpty
+                                ? 'purple'
+                                : 'iconColor'
                         }
                         heightAndWidth="16px"
                         hoverOff
@@ -68,9 +70,14 @@ const SearchTypeBtn = styled.button`
     border: none;
     align-items: center;
     background-color: transparent;
+    border-radius: 3px;
+
+    &:hover {
+        background: ${(props) => props.theme.colors.darkhover};
+    }
 
     &:disabled {
         cursor: auto;
-        color: ${(props) => props.theme.colors.darkText};
+        background: ${(props) => props.theme.colors.lightHover};
     }
 `

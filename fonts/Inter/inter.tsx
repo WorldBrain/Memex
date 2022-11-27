@@ -21,117 +21,117 @@ const InterBlackItalic = require('./Inter-BlackItalic.woff')
 
 export default createGlobalStyle`
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  normal;
         font-weight: 100;
         src: url(${InterThin}) format("woff");
     }
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  italic;
         font-weight: 100;
         src: url(${InterThinItalic}) format("woff");
     }
     
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  normal;
         font-weight: 200;
         src: url(${InterExtraLight}) format("woff");
     }
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  italic;
         font-weight: 200;
         src: url(${InterExtraLightItalic}) format("woff");
     }
     
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  normal;
         font-weight: 300;
         src: url(${InterLight}) format("woff");
     }
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  italic;
         font-weight: 300;
         src: url(${InterLightItalic}) format("woff");
     }
     
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  normal;
         font-weight: 400;
         src: url(${InterRegular}) format("woff");
     }
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  italic;
         font-weight: 400;
         src: url(${InterItalic}) format("woff");
     }
     
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  normal;
         font-weight: 500;
         src: url(${InterMedium}) format("woff");
     }
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  italic;
         font-weight: 500;
         src: url(${InterMediumItalic}) format("woff");
     }
     
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  normal;
         font-weight: 600;
         src: url(${InterSemiBold}) format("woff");
     }
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  italic;
         font-weight: 600;
         src: url(${InterSemiBoldItalic}) format("woff");
     }
     
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  normal;
         font-weight: 700;
         src: url(${InterBold}) format("woff");
     }
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  italic;
         font-weight: 700;
         src: url(${InterBoldItalic}) format("woff");
     }
     
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  normal;
         font-weight: 800;
         src: url(${InterExtraBold}) format("woff");
     }
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  italic;
         font-weight: 800;
         src: url(${InterExtraBoldItalic}) format("woff");
     }
     
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  normal;
         font-weight: 900;
         src: url(${InterBlack}) format("woff");
     }
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Satoshi';
         font-style:  italic;
         font-weight: 900;
         src: url(${InterBlackItalic}) format("woff");

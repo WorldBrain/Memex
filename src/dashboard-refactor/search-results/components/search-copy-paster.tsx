@@ -13,12 +13,12 @@ import { BackgroundSearchParams } from 'src/search/background/types'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 
 export interface Props {
-    searchType: SearchType
-    isCopyPasterShown: boolean
-    isCopyPasterBtnShown: boolean
-    searchParams: BackgroundSearchParams
-    hideCopyPaster: React.MouseEventHandler
-    toggleCopyPaster: React.MouseEventHandler
+    searchType?: SearchType
+    isCopyPasterShown?: boolean
+    isCopyPasterBtnShown?: boolean
+    searchParams?: BackgroundSearchParams
+    hideCopyPaster?: React.MouseEventHandler
+    toggleCopyPaster?: React.MouseEventHandler
 }
 
 export default function SearchCopyPaster(props: Props) {
@@ -36,8 +36,9 @@ export default function SearchCopyPaster(props: Props) {
             <ButtonTooltip tooltipText="Copy Search Results" position="bottom">
                 <Icon
                     path={icons.copy}
-                    heightAndWidth="16px"
+                    heightAndWidth="22px"
                     onClick={props.toggleCopyPaster}
+                    color={'greyScale8'}
                 />
             </ButtonTooltip>
             {props.isCopyPasterShown && (

@@ -36,13 +36,13 @@ import type { PDFRemoteInterface } from 'src/pdf/background/types'
 export interface RootState {
     loadState: TaskState
     currentUser: AuthenticatedUser | null
-    isCloudEnabled: boolean
     mode: 'search' | 'locate-pdf' | 'onboarding'
     syncMenu: SyncModalState
     searchResults: SearchResultsState
     searchFilters: SearchFiltersState
     listsSidebar: ListsSidebarState
     modals: DashboardModalsState
+    sidebarWidth?: string
 }
 
 export type Events = UIEvent<
@@ -52,7 +52,6 @@ export type Events = UIEvent<
         ListsSidebarEvents &
         SyncModalEvents & {
             search: { paginate?: boolean }
-            closeCloudOnboardingModal: { didFinish: boolean }
         }
 >
 
@@ -65,7 +64,6 @@ export interface DashboardDependencies {
     backupBG: BackupInterface<'caller'>
     contentShareBG: ContentSharingInterface
     contentConversationsBG: ContentConversationsInterface
-    personalCloudBG: PersonalCloudRemoteInterface
     listsBG: RemoteCollectionsInterface
     searchBG: SearchInterface
     annotationsBG: AnnotationInterface<'caller'>
@@ -112,7 +110,6 @@ export interface DashboardModalsState {
     shareListId?: number
     showLogin?: boolean
     showSubscription?: boolean
-    showCloudOnboarding?: boolean
     showDisplayNameSetup?: boolean
     showNoteShareOnboarding?: boolean
 
@@ -128,7 +125,6 @@ export type DashboardModalsEvents = UIEvent<{
     setShareListId: { listId?: number }
     setShowLoginModal: { isShown: boolean }
     setShowSubscriptionModal: { isShown: boolean }
-    setShowCloudOnboardingModal: { isShown: boolean }
     setShowDisplayNameSetupModal: { isShown: boolean }
     setShowNoteShareOnboardingModal: { isShown: boolean }
 

@@ -51,7 +51,6 @@ export function insertIndentedNewLine({ el }: InsertTabProps) {
     let indentationString = ''
 
     for (let i = 0; i < lineText.length; ++i) {
-        console.log(lineText.charAt(i))
         if (lineText.charAt(i) === ' ') {
             i++
         } else {

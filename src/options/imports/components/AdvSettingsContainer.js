@@ -15,7 +15,7 @@ const mapDispatchToProps = (dispatch) => ({
     onConcurrencyChange: (event) =>
         dispatch(actions.setConcurrencyLevel(+event.target.value)),
     onPrevFailedToggle: (event) =>
-        dispatch(actions.setPrevFailed(event.target.checked)),
+        dispatch(actions.setPrevFailed(!event.target.checked)),
     onIndexTitleToggle: (event) => dispatch(actions.toggleIndexTitle()),
 })
 
