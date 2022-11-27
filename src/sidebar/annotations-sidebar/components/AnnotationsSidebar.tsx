@@ -1305,7 +1305,7 @@ export class AnnotationsSidebar extends React.Component<
                         ) : (
                             <>
                                 {this.renderTopBarSwitcher()}
-                                {this.renderSharePageButton()}
+                                {/* {this.renderSharePageButton()} */}
                             </>
                         )}
                     </>
