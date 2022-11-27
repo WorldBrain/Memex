@@ -149,7 +149,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             if (annotationMode === 'edit_spaces') {
                 this.processEvent('setListPickerAnnotationId', {
                     id: url,
-                    position: 'footer',
+                    position: 'lists-bar',
                 })
             }
         }
