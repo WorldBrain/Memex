@@ -494,6 +494,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState: State,
         mutation: UIMutation<State>,
     ) {
+        this.emitMutation({
+            searchResults: {
+                searchState: { $set: 'running' },
+            },
+        })
+
         mutation = {
             ...mutation,
             mode: { $set: 'search' },

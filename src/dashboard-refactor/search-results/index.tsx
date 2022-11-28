@@ -177,46 +177,35 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 listPickerRenderLocation={noteData.listPickerShowStatus}
                 renderListsPickerForAnnotation={() =>
                     noteData.listPickerShowStatus !== 'hide' && (
-                        <HoverBox
-                            withRelativeContainer
-                            top="20px"
-                            right={
-                                noteData.listPickerShowStatus === 'footer'
-                                    ? '0px'
-                                    : undefined
+                        <CollectionPicker
+                            initialSelectedListIds={() => listsToDisplay}
+                            onClickOutside={
+                                noteData.listPickerShowStatus === 'lists-bar'
+                                    ? interactionProps.onListPickerBarBtnClick
+                                    : interactionProps.onListPickerFooterBtnClick
                             }
-                        >
-                            <CollectionPicker
-                                initialSelectedListIds={() => listsToDisplay}
-                                onClickOutside={
-                                    noteData.listPickerShowStatus ===
-                                    'lists-bar'
-                                        ? interactionProps.onListPickerBarBtnClick
-                                        : interactionProps.onListPickerFooterBtnClick
-                                }
-                                selectEntry={(listId) =>
-                                    interactionProps.updateLists({
-                                        added: listId,
-                                        deleted: null,
-                                        selected: [],
-                                        options: {
-                                            showExternalConfirmations: true,
-                                        },
-                                    })
-                                }
-                                unselectEntry={(listId) =>
-                                    interactionProps.updateLists({
-                                        added: null,
-                                        deleted: listId,
-                                        selected: [],
-                                        options: {
-                                            showExternalConfirmations: true,
-                                        },
-                                    })
-                                }
-                                createNewEntry={interactionProps.createNewList}
-                            />
-                        </HoverBox>
+                            selectEntry={(listId) =>
+                                interactionProps.updateLists({
+                                    added: listId,
+                                    deleted: null,
+                                    selected: [],
+                                    options: {
+                                        showExternalConfirmations: true,
+                                    },
+                                })
+                            }
+                            unselectEntry={(listId) =>
+                                interactionProps.updateLists({
+                                    added: null,
+                                    deleted: listId,
+                                    selected: [],
+                                    options: {
+                                        showExternalConfirmations: true,
+                                    },
+                                })
+                            }
+                            createNewEntry={interactionProps.createNewList}
+                        />
                     )
                 }
                 renderShareMenuForAnnotation={() =>

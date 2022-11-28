@@ -6,6 +6,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { padding } from 'polished'
+import { NewHoverBox } from '@worldbrain/memex-common/lib/common-ui/components/hover-box'
 
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     showEditBtn: boolean
@@ -38,28 +39,46 @@ export class AddSpacesButton extends React.Component<
         }
     }
 
+    addSpacesButtonRef = React.createRef<HTMLDivElement>()
+
     render() {
         return (
             <SpacePickerButtonWrapper>
                 <AddSpacesButtonContainer
-                    onClick={(e) => {
-                        // this.setState({ showPicker: !this.state.showPicker })
-                        this.props.onEditBtnClick?.(e)
-                    }}
                     tabIndex={this.props.tabIndex}
+                    ref={this.addSpacesButtonRef}
                 >
-                    <EditIconContainer>
-                        <Icon
-                            filePath={icons.plus}
-                            height={'10px'}
-                            color={'purple'}
-                            hoverOff
-                        />
-                    </EditIconContainer>
+                    <NewHoverBox
+                        referenceEl={this.addSpacesButtonRef.current}
+                        componentToOpen={
+                            this.props.renderSpacePicker
+                                ? this.props.renderSpacePicker()
+                                : null
+                        }
+                        placement={'bottom-start'}
+                        offsetX={10}
+                        //closeComponent={this.hideListPicker}
+                    >
+                        <EditIconContainer
+                            onClick={(e) => {
+                                // this.setState({ showPicker: !this.state.showPicker })
+                                this.props.onEditBtnClick?.(e)
+                            }}
+                        >
+                            <Icon
+                                filePath={icons.plus}
+                                height={'10px'}
+                                color={'purple'}
+                                hoverOff
+                            />
+                        </EditIconContainer>
+                    </NewHoverBox>
                     {(this.props.hasNoLists ||
                         this.props.newLineOrientation === true) && <>Spaces</>}
                 </AddSpacesButtonContainer>
-                {this.props.renderSpacePicker && (
+
+                {/* {this.props.renderSpacePicker && (
+                    
                     <SpacePickerWrapper
                         onClick={(e) => {
                             e.preventDefault()
@@ -68,7 +87,7 @@ export class AddSpacesButton extends React.Component<
                     >
                         {this.props.renderSpacePicker()}
                     </SpacePickerWrapper>
-                )}
+                )} */}
             </SpacePickerButtonWrapper>
         )
     }
@@ -99,11 +118,11 @@ export default function ListsSegment({
     ...props
 }: Props) {
     return (
-        <Container padding={padding} onClick={onEditBtnClick} {...props}>
+        <Container padding={padding} {...props}>
             <ListsContainer newLineOrientation={newLineOrientation === true}>
                 <AddSpacesButton
                     hasNoLists={lists.length === 0}
-                    // onEditBtnClick={onEditBtnClick}
+                    onEditBtnClick={onEditBtnClick}
                     renderSpacePicker={renderSpacePicker}
                     tabIndex={tabIndex}
                     newLineOrientation={newLineOrientation}

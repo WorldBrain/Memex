@@ -470,10 +470,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                         creationInfo={this.creationInfo}
                         actions={this.calcFooterActions()}
                     />
-                    {this.props.listPickerRenderLocation === 'footer' &&
-                        this.props.renderListsPickerForAnnotation(
-                            this.props.url,
-                        )}
                 </DefaultFooterStyled>
             )
         }
@@ -571,36 +567,34 @@ export default class AnnotationEditable extends React.Component<Props> {
                             {/* Collections button for annotations. To be added later. */}
 
                             {(this.props.lists.length > 0 ||
-                                this.props.mode === 'edit') &&
-                                this.props.renderListsPickerForAnnotation && (
-                                    <ListsSegment
-                                        tabIndex={0}
-                                        lists={this.displayLists}
-                                        onMouseEnter={this.props.onListsHover}
-                                        showEditBtn={
-                                            this.props.hoverState === 'lists'
-                                        }
-                                        onListClick={undefined}
-                                        onEditBtnClick={
-                                            this.props
-                                                .annotationEditDependencies
-                                                ?.onListsBarPickerBtnClick
-                                        }
-                                        renderSpacePicker={() =>
-                                            this.props
-                                                .listPickerRenderLocation ===
-                                                'lists-bar' &&
-                                            this.props.renderListsPickerForAnnotation(
-                                                this.props.url,
-                                            )
-                                        }
-                                        padding={
-                                            this.props.mode === 'edit'
-                                                ? '5px 15px 10px 15px'
-                                                : '0px 15px 10px 15px'
-                                        }
-                                    />
-                                )}
+                                this.props.mode === 'edit') && (
+                                <ListsSegment
+                                    tabIndex={0}
+                                    lists={this.displayLists}
+                                    onMouseEnter={this.props.onListsHover}
+                                    showEditBtn={
+                                        this.props.hoverState === 'lists'
+                                    }
+                                    onListClick={undefined}
+                                    onEditBtnClick={
+                                        this.props.annotationEditDependencies
+                                            ?.onListsBarPickerBtnClick
+                                    }
+                                    renderSpacePicker={() =>
+                                        this.props.listPickerRenderLocation ===
+                                        'lists-bar'
+                                            ? this.props.renderListsPickerForAnnotation(
+                                                  this.props.url,
+                                              )
+                                            : null
+                                    }
+                                    padding={
+                                        this.props.mode === 'edit'
+                                            ? '5px 15px 10px 15px'
+                                            : '0px 15px 10px 15px'
+                                    }
+                                />
+                            )}
                             {this.renderFooter()}
                             {this.props.renderCopyPasterForAnnotation && (
                                 <CopyPasterWrapper>
