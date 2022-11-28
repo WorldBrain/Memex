@@ -98,17 +98,9 @@ export default class PageResultView extends PureComponent<Props> {
         return this.props.onListPickerBarBtnClick
     }
 
-    private renderSpacePicker = () => (
-        <div onMouseLeave={this.listPickerBtnClickHandler}>
-            <HoverBox
-                padding={'10px 0 0 0'}
-                withRelativeContainer
-                right={
-                    this.props.listPickerShowStatus === 'footer'
-                        ? '0px'
-                        : undefined
-                }
-            >
+    private renderSpacePicker = () => {
+        return (
+            <div onMouseLeave={this.listPickerBtnClickHandler}>
                 <CollectionPicker
                     selectEntry={(listId) =>
                         this.props.onListPickerUpdate({
@@ -128,47 +120,47 @@ export default class PageResultView extends PureComponent<Props> {
                     initialSelectedListIds={() => this.props.lists}
                     onClickOutside={this.listPickerBtnClickHandler}
                 />
-            </HoverBox>
-        </div>
-    )
+            </div>
+        )
+    }
 
     private renderPopouts() {
-        if (this.props.isTagPickerShown) {
+        if (this.props.listPickerShowStatus === 'footer') {
             return (
-                <HoverBox top="-40px" left="0" withRelativeContainer>
-                    <TagPicker
-                        onUpdateEntrySelection={this.props.onTagPickerUpdate}
-                        initialSelectedEntries={() => this.props.tags}
-                        onClickOutside={this.props.onTagPickerBtnClick}
-                    />
-                </HoverBox>
+                <CollectionPicker
+                    selectEntry={(listId) =>
+                        this.props.onListPickerUpdate({
+                            added: listId,
+                            deleted: null,
+                            selected: [],
+                        })
+                    }
+                    unselectEntry={(listId) =>
+                        this.props.onListPickerUpdate({
+                            added: null,
+                            deleted: listId,
+                            selected: [],
+                        })
+                    }
+                    createNewEntry={this.props.createNewList}
+                    initialSelectedListIds={() => this.props.lists}
+                    onClickOutside={this.listPickerBtnClickHandler}
+                />
             )
         }
 
         if (this.props.isCopyPasterShown) {
             return (
-                <HoverBox padding={'0px'} right="0" withRelativeContainer>
-                    <PageNotesCopyPaster
-                        normalizedPageUrls={[this.props.normalizedUrl]}
-                        onClickOutside={this.props.onCopyPasterBtnClick}
-                    />
-                </HoverBox>
+                <PageNotesCopyPaster
+                    normalizedPageUrls={[this.props.normalizedUrl]}
+                    onClickOutside={this.props.onCopyPasterBtnClick}
+                />
             )
         }
 
         if (this.props.isShareMenuShown) {
-            return (
-                <HoverBox
-                    padding={'0px'}
-                    width="330px"
-                    right="0"
-                    withRelativeContainer
-                >
-                    <AllNotesShareMenu {...this.props.shareMenuProps} />
-                </HoverBox>
-            )
+            return <AllNotesShareMenu {...this.props.shareMenuProps} />
         }
-
         return null
     }
 
@@ -221,11 +213,15 @@ export default class PageResultView extends PureComponent<Props> {
                     image: icons.trash,
                     onClick: this.props.onTrashBtnClick,
                     tooltipText: 'Delete Page & all related content',
+                    componentToOpen: null,
                 },
                 {
                     key: 'copy-paste-page-btn',
                     image: icons.copy,
                     onClick: this.props.onCopyPasterBtnClick,
+                    componentToOpen: this.props.isCopyPasterShown
+                        ? this.renderPopouts()
+                        : null,
                     tooltipText: 'Copy Page',
                 },
                 // {
@@ -239,6 +235,10 @@ export default class PageResultView extends PureComponent<Props> {
                     image: icons.plus,
                     imageColor: 'purple',
                     ButtonText: 'Spaces',
+                    componentToOpen:
+                        this.props.listPickerShowStatus === 'footer'
+                            ? this.renderPopouts()
+                            : null,
                     iconSize: '14px',
                     onClick: this.props.onListPickerFooterBtnClick,
                 },
@@ -254,6 +254,7 @@ export default class PageResultView extends PureComponent<Props> {
                         ].length.toString(),
                     imageColor: 'purple',
                     onClick: this.props.onNotesBtnClick,
+                    componentToOpen: null,
                     tooltipText: (
                         <span>
                             <strong>Add/View Notes</strong>
@@ -282,6 +283,7 @@ export default class PageResultView extends PureComponent<Props> {
                 imageColor: 'purple',
                 iconSize: '14px',
                 ButtonText: 'Spaces',
+                // onClick: this.props.onListPickerFooterBtnClick,
             },
             // {
             //     key: 'share-page-btn',
@@ -308,7 +310,6 @@ export default class PageResultView extends PureComponent<Props> {
 
     render() {
         const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
-
         return (
             <ItemBox
                 firstDivProps={{
@@ -347,10 +348,10 @@ export default class PageResultView extends PureComponent<Props> {
                             showEditBtn={this.props.hoverState === 'lists'}
                             onListClick={undefined}
                             onEditBtnClick={this.props.onListPickerBarBtnClick}
-                            renderSpacePicker={
-                                this.props.listPickerShowStatus ===
-                                    'lists-bar' && this.renderSpacePicker
-                            }
+                            // renderSpacePicker={
+                            //     this.props.listPickerShowStatus ===
+                            //         'lists-bar' && this.renderSpacePicker
+                            // }
                             filteredbyListID={this.props.filteredbyListID}
                             padding={'0px 20px 10px 20px'}
                         />
@@ -362,10 +363,9 @@ export default class PageResultView extends PureComponent<Props> {
                         creationInfo={{ createdWhen: this.props.displayTime }}
                         actions={this.calcFooterActions()}
                     />
-                    {this.props.listPickerShowStatus === 'footer' &&
-                        this.renderSpacePicker()}
+                    {/* {this.props.listPickerShowStatus === 'footer' &&
+                        this.renderSpacePicker()} */}
                 </StyledPageResult>
-                <PopoutContainer>{this.renderPopouts()}</PopoutContainer>
             </ItemBox>
         )
     }

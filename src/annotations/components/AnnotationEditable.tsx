@@ -360,37 +360,6 @@ export default class AnnotationEditable extends React.Component<Props> {
             if (appendRepliesToggle) {
                 return [repliesToggle]
             }
-
-            // if (this.props.lists.length === 0) {
-            //     return [
-            //         {
-            //             key: 'add-spaces-btn',
-            //             image: icons.plus,
-            //             imageColor: 'purple',
-            //             // ButtonText: 'Spaces',
-            //             iconSize: '14px',
-            //         },
-            //         appendRepliesToggle && repliesToggle,
-            //     ]
-            // }
-
-            // if (isShared || isBulkShareProtected) {
-            //     return [
-            //         {
-            //             key: 'share-note-btn',
-            //             isDisabled: true,
-            //             image: shareIconData.icon,
-            //         },
-            //     ]
-            // }
-
-            // return [
-            //     {
-            //         key: 'share-note-btn',
-            //         isDisabled: true,
-            //         image: shareIconData.icon,
-            //     },
-            // ]
         }
 
         if (hoverState != null) {
@@ -413,6 +382,12 @@ export default class AnnotationEditable extends React.Component<Props> {
                     imageColor: 'purple',
                     onClick: footerDeps.onListIconClick,
                     iconSize: '16px',
+                    componentToOpen:
+                        this.props.listPickerRenderLocation === 'footer'
+                            ? this.props.renderListsPickerForAnnotation(
+                                  this.props.url,
+                              )
+                            : null,
                 },
                 // {
                 //     key: 'share-note-btn',

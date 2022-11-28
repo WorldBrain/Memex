@@ -511,26 +511,15 @@ export class AnnotationsSidebarContainer<
         }
 
         return (
-            <PickerWrapper>
-                <HoverBox
-                    top="20px"
-                    right={state.position === 'footer' ? '0px' : undefined}
-                    padding={'10px 0 0 0'}
-                >
-                    <ClickAway
-                        onClickAway={() =>
-                            this.processEvent('resetListPickerAnnotationId', {})
-                        }
-                    >
-                        <CollectionPicker
-                            {...this.getSpacePickerProps(
-                                currentAnnotation,
-                                true,
-                            )}
-                        />
-                    </ClickAway>
-                </HoverBox>
-            </PickerWrapper>
+            <ClickAway
+                onClickAway={() =>
+                    this.processEvent('resetListPickerAnnotationId', {})
+                }
+            >
+                <CollectionPicker
+                    {...this.getSpacePickerProps(currentAnnotation, true)}
+                />
+            </ClickAway>
         )
     }
 
