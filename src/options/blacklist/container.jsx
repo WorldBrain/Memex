@@ -8,7 +8,6 @@ import { OutLink } from 'src/common-ui/containers'
 import BlacklistTable from './components/BlacklistTable'
 import BlacklistRow from './components/BlacklistRow'
 import BlacklistInputRow from './components/BlacklistInputRow'
-import BlacklistRemoveModal from './components/BlacklistRemoveModal'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import styles from './components/base.css'
@@ -143,7 +142,7 @@ class BlacklistContainer extends Component {
             >
                 <div>
                     <SectionTitle>Ignore a new domain/url:</SectionTitle>
-                    <InfoText></InfoText>
+                    <InfoText />
                     {this.renderError()}
                     {this.renderBlacklistInputRow()}
                     <div className={settingsStyle.whiteSpacer30} />
