@@ -1,4 +1,4 @@
-import React, { Component, KeyboardEventHandler } from 'react'
+import React, { Component, createRef, KeyboardEventHandler } from 'react'
 import qs from 'query-string'
 import styled, { css } from 'styled-components'
 
@@ -29,6 +29,7 @@ import ExtraButtonsPanel from './extra-buttons-panel'
 import FeedPanel from './feed-panel'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import browser from 'webextension-polyfill'
+import { NewHoverBox } from '@worldbrain/memex-common/lib/common-ui/components/hover-box'
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
@@ -64,6 +65,10 @@ export default class Ribbon extends Component<Props, State> {
     private openOverviewTabRPC
     private openOptionsTabRPC
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
+
+    private spacePickerRef = createRef<HTMLElement>()
+    private settingsButtonRef = createRef<HTMLElement>()
+    private tutorialButtonRef = createRef<HTMLElement>()
 
     state: State = {
         shortcutsReady: false,
@@ -171,34 +176,18 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     private renderCollectionsPicker() {
-        if (!this.props.lists.showListsPicker) {
-            return null
-        }
-
         return (
-            <HoverBox
-                padding="10px 0"
-                position="absolute"
-                top="30px"
-                right="40px"
-            >
-                <BlurredSidebarOverlay
-                    onOutsideClick={this.hideListPicker}
-                    skipRendering={!this.props.sidebar.isSidebarOpen}
-                >
-                    <CollectionPicker
-                        {...this.props.lists}
-                        spacesBG={this.props.spacesBG}
-                        contentSharingBG={this.props.contentSharingBG}
-                        actOnAllTabs={this.props.lists.listAllTabs}
-                        initialSelectedListIds={
-                            this.props.lists.fetchInitialListSelections
-                        }
-                        onEscapeKeyDown={this.hideListPicker}
-                        handleClickOutside={this.hideListPicker}
-                    />
-                </BlurredSidebarOverlay>
-            </HoverBox>
+            <CollectionPicker
+                {...this.props.lists}
+                spacesBG={this.props.spacesBG}
+                contentSharingBG={this.props.contentSharingBG}
+                actOnAllTabs={this.props.lists.listAllTabs}
+                initialSelectedListIds={
+                    this.props.lists.fetchInitialListSelections
+                }
+                onEscapeKeyDown={this.hideListPicker}
+                handleClickOutside={this.hideListPicker}
+            />
         )
     }
 
@@ -454,38 +443,6 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
-    private renderTagsUIs() {
-        if (!this.props.tagging.shouldShowTagsUIs) {
-            return false
-        }
-
-        return (
-            <>
-                <ButtonTooltip
-                    tooltipText={this.getTooltipText('addTag')}
-                    position="leftNarrow"
-                >
-                    <Icon
-                        onClick={() =>
-                            this.props.tagging.setShowTagsPicker(
-                                !this.props.tagging.showTagsPicker,
-                            )
-                        }
-                        color={'greyScale9'}
-                        heightAndWidth="22px"
-                        filePath={
-                            this.props.tagging.pageHasTags ||
-                            this.props.tagging.tags.length > 0
-                                ? icons.tagFull
-                                : icons.tagEmpty
-                        }
-                    />
-                </ButtonTooltip>
-                {this.renderTagsPicker()}
-            </>
-        )
-    }
-
     render() {
         if (!this.state.shortcutsReady) {
             return false
@@ -628,11 +585,21 @@ export default class Ribbon extends Component<Props, State> {
                                             />
                                         </HoverBox>
                                     )}
-                                    <ButtonTooltip
+                                    <NewHoverBox
+                                        referenceEl={
+                                            this.spacePickerRef.current
+                                        }
+                                        componentToOpen={
+                                            this.props.lists.showListsPicker
+                                                ? this.renderCollectionsPicker()
+                                                : null
+                                        }
                                         tooltipText={this.getTooltipText(
                                             'addToCollection',
                                         )}
-                                        position="leftNarrow"
+                                        placement={'left-start'}
+                                        offsetX={10}
+                                        closeComponent={this.hideListPicker}
                                     >
                                         <Icon
                                             onClick={() =>
@@ -654,9 +621,9 @@ export default class Ribbon extends Component<Props, State> {
                                                     ? icons.collectionsFull
                                                     : icons.collectionsEmpty
                                             }
+                                            ref={this.spacePickerRef}
                                         />
-                                    </ButtonTooltip>
-                                    {this.renderCollectionsPicker()}
+                                    </NewHoverBox>
                                     {!this.props.sidebar.isSidebarOpen && (
                                         <ButtonTooltip
                                             tooltipText={
@@ -718,9 +685,19 @@ export default class Ribbon extends Component<Props, State> {
                             <BottomSection
                                 sidebaropen={this.props.sidebar.isSidebarOpen}
                             >
-                                <ButtonTooltip
-                                    tooltipText="Settings"
-                                    position="leftNarrow"
+                                <NewHoverBox
+                                    referenceEl={this.settingsButtonRef.current}
+                                    componentToOpen={
+                                        this.props.showExtraButtons
+                                            ? this.renderExtraButtons()
+                                            : null
+                                    }
+                                    tooltipText={'Settings'}
+                                    placement={'left-start'}
+                                    offsetX={10}
+                                    closeComponent={
+                                        this.props.toggleShowExtraButtons
+                                    }
                                 >
                                     <Icon
                                         onClick={() =>
@@ -729,21 +706,23 @@ export default class Ribbon extends Component<Props, State> {
                                         color={'darkText'}
                                         heightAndWidth="22px"
                                         filePath={icons.settings}
+                                        ref={this.settingsButtonRef}
                                     />
-                                </ButtonTooltip>
-                                {this.props.showExtraButtons && (
-                                    <HoverBox
-                                        position="absolute"
-                                        bottom="0px"
-                                        right="45px"
-                                        padding={'0px'}
-                                    >
-                                        {this.renderExtraButtons()}
-                                    </HoverBox>
-                                )}
-                                <ButtonTooltip
-                                    tooltipText="Quick Tutorial & Help"
-                                    position="leftNarrow"
+                                </NewHoverBox>
+                                <NewHoverBox
+                                    referenceEl={this.tutorialButtonRef.current}
+                                    componentToOpen={
+                                        this.props.showTutorial
+                                            ? this.renderTutorial()
+                                            : null
+                                    }
+                                    tooltipText={'Tutorial'}
+                                    placement={'left-start'}
+                                    offsetX={10}
+                                    closeComponent={
+                                        this.props.toggleShowTutorial
+                                    }
+                                    width={'420px'}
                                 >
                                     <Icon
                                         onClick={() =>
@@ -752,19 +731,9 @@ export default class Ribbon extends Component<Props, State> {
                                         color={'darkText'}
                                         heightAndWidth="22px"
                                         filePath={icons.helpIcon}
+                                        ref={this.tutorialButtonRef}
                                     />
-                                </ButtonTooltip>
-                                {this.props.showTutorial && (
-                                    <HoverBox
-                                        position="absolute"
-                                        bottom="0px"
-                                        right="45px"
-                                        padding={'0px'}
-                                        width={'400px'}
-                                    >
-                                        {this.renderTutorial()}
-                                    </HoverBox>
-                                )}
+                                </NewHoverBox>
                                 {!this.props.sidebar.isSidebarOpen && (
                                     <ButtonTooltip
                                         tooltipText={
@@ -818,7 +787,7 @@ const BlockListTitleArea = styled.div`
     display: flex;
     align-items: center;
     grid-gap: 10px;
-    padding: 5px 10px;
+    padding: 0px 10px 5px 10px;
 `
 
 const TextBoxArea = styled.div`
