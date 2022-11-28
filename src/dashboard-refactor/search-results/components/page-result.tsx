@@ -26,6 +26,7 @@ import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
+import { NewHoverBox } from 'src/util/hover-box'
 
 export interface Props
     extends PageData,
@@ -42,6 +43,8 @@ export interface Props
 }
 
 export default class PageResultView extends PureComponent<Props> {
+    private spaceBtnRef = React.createRef<HTMLDivElement>()
+
     private get fullUrl(): string {
         return this.props.type === 'pdf'
             ? this.props.fullPdfUrl!
@@ -99,37 +102,29 @@ export default class PageResultView extends PureComponent<Props> {
     }
 
     private renderSpacePicker = () => (
-        <div onMouseLeave={this.listPickerBtnClickHandler}>
-            <HoverBox
-                padding={'10px 0 0 0'}
-                withRelativeContainer
-                right={
-                    this.props.listPickerShowStatus === 'footer'
-                        ? '0px'
-                        : undefined
+        // <div onMouseLeave={this.listPickerBtnClickHandler}>
+        <NewHoverBox referenceEl={this.spaceBtnRef.current}>
+            <CollectionPicker
+                selectEntry={(listId) =>
+                    this.props.onListPickerUpdate({
+                        added: listId,
+                        deleted: null,
+                        selected: [],
+                    })
                 }
-            >
-                <CollectionPicker
-                    selectEntry={(listId) =>
-                        this.props.onListPickerUpdate({
-                            added: listId,
-                            deleted: null,
-                            selected: [],
-                        })
-                    }
-                    unselectEntry={(listId) =>
-                        this.props.onListPickerUpdate({
-                            added: null,
-                            deleted: listId,
-                            selected: [],
-                        })
-                    }
-                    createNewEntry={this.props.createNewList}
-                    initialSelectedListIds={() => this.props.lists}
-                    onClickOutside={this.listPickerBtnClickHandler}
-                />
-            </HoverBox>
-        </div>
+                unselectEntry={(listId) =>
+                    this.props.onListPickerUpdate({
+                        added: null,
+                        deleted: listId,
+                        selected: [],
+                    })
+                }
+                createNewEntry={this.props.createNewList}
+                initialSelectedListIds={() => this.props.lists}
+                onClickOutside={this.listPickerBtnClickHandler}
+            />
+        </NewHoverBox>
+        // </div>
     )
 
     private renderPopouts() {
@@ -240,6 +235,7 @@ export default class PageResultView extends PureComponent<Props> {
                     imageColor: 'purple',
                     ButtonText: 'Spaces',
                     iconSize: '14px',
+                    ref: this.spaceBtnRef,
                     onClick: this.props.onListPickerFooterBtnClick,
                 },
                 {
