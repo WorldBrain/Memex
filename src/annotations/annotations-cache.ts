@@ -276,7 +276,6 @@ export interface AnnotationsCacheInterface {
     getAnnotationByRemoteId: (
         remoteId: string | number,
     ) => CachedAnnotation | null
-    getListIdByRemoteId: (remoteId: string | number) => number
     updateLists: (
         args: ModifiedList & {
             annotationId: string
@@ -368,18 +367,6 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
 
     getAnnotationByRemoteId = (remoteId: string | number): CachedAnnotation =>
         this.annotations.find((annot) => annot.remoteId === remoteId) ?? null
-
-    getListIdByRemoteId = (remoteId: string | number): number => {
-        const knownLocalIds = Object.keys(this.listData).map(Number)
-        const matchingLocalId = knownLocalIds.find(
-            (localId) => this.listData[localId].remoteId === remoteId,
-        )
-        console.debug('Found localListId for remoteListId', {
-            localListId: matchingLocalId,
-            remoteListId: remoteId,
-        })
-        return matchingLocalId
-    }
 
     setAnnotations: AnnotationsCacheInterface['setAnnotations'] = (
         annotations,

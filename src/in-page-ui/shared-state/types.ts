@@ -51,7 +51,6 @@ export interface ShouldSetUpOptions {
 export interface SharedInPageUIInterface {
     events: TypedEventEmitter<SharedInPageUIEvents>
     componentsShown: InPageUIComponentShowState
-    selectedSpace: string | null
 
     // Ribbon
     showRibbon(options?: { action?: InPageUIRibbonAction }): Promise<void>

@@ -32,9 +32,7 @@ export interface HighlighterEvents {
     showHighlights: () => void
 }
 
-export interface AnnotationsSidebarInPageEvents extends HighlighterEvents {
-    selectSpace: (listId: string) => void
-}
+export interface AnnotationsSidebarInPageEvents extends HighlighterEvents {}
 
 export interface AnnotationStorageInterface {}
 

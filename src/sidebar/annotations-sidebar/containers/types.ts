@@ -143,13 +143,6 @@ export interface SidebarContainerState
     sidebarWidth: string
     isolatedView?: string | null // if null show default view
 
-    // Indicates what is the currently selected space in the leaf screen
-    // for the side bar, also known as the isolated view. When a space
-    // is selected, all operations default to use that selected space
-    // except if explicity told otherwise.
-    selectedSpace?: string | null
-    selectedSpaceLocalId?: number | null
-
     annotationSharingAccess: AnnotationSharingAccess
 
     showAllNotesCopyPaster: boolean
@@ -297,9 +290,6 @@ interface SidebarEvents {
     loadFollowedListNotes: { listId: string }
     expandFollowedListNotes: { listId: string }
     toggleIsolatedListView: { listId: string }
-
-    // Selected space management
-    selectSpace: { listId: string | null }
 
     updateAnnotationShareInfo: {
         annotationUrl: string

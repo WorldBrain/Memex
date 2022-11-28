@@ -155,19 +155,13 @@ export async function main(
         createAnnotation: (analyticsEvent?: AnalyticsEvent<'Annotations'>) => (
             shouldShare: boolean,
             showSpacePicker?: boolean,
-        ) => {
-            // TODO: use inPageUI.selectedSpace to create the annotation in the right scope
-            console.debug(
-                'Creating annotation under selected space',
-                inPageUI.selectedSpace,
-            )
-            return highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
+        ) =>
+            highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
                 ...annotationFunctionsParams,
                 showSpacePicker,
                 analyticsEvent,
                 shouldShare,
-            })
-        },
+            }),
     }
 
     // 4. Create a contentScriptRegistry object with functions for each content script

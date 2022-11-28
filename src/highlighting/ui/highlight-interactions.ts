@@ -201,15 +201,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const body = anchor && anchor.quote
         const hasSelectedText = anchor.quote.length
 
-        let actualLists = []
-        if (params.inPageUI.selectedSpace) {
-            const remoteSelectedListId = params.inPageUI.selectedSpace
-            const localSelectedListId = params.annotationsCache.getListIdByRemoteId(
-                remoteSelectedListId,
-            )
-            actualLists = [localSelectedListId]
-        }
-
         const annotation: Annotation = {
             url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
             body: hasSelectedText ? anchor.quote : hasYoutubeTimeStamp && null,
@@ -222,8 +213,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
             selector: hasSelectedText ? anchor : hasYoutubeTimeStamp && null,
             pageTitle: title,
         }
-
-        console.debug('AnnotationsCache:', params.annotationsCache)
 
         try {
             await Promise.all([
