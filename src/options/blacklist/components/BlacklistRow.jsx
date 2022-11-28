@@ -3,8 +3,6 @@ import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
-import styles from './BlacklistRow.css'
-
 const BlacklistRow = ({ expression, onDeleteClicked }) => (
     <TR>
         <TD>

@@ -58,7 +58,7 @@ export async function main(
         loadRemotely?: boolean
         getContentFingerprints?: GetContentFingerprints
     } = {},
-) {
+): Promise<SharedInPageUIState> {
     params.loadRemotely = params.loadRemotely ?? true
     const isPdfViewerRunning = params.getContentFingerprints != null
     if (isPdfViewerRunning) {
@@ -367,7 +367,7 @@ export async function main(
             })
         }
     } else {
-        return await browser.storage.local.set({ blacklist: {} })
+        await browser.storage.local.set({ blacklist: {} })
     }
 
     const isSidebarEnabled = await sidebarUtils.getSidebarState()
