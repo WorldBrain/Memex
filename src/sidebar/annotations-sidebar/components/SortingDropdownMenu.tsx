@@ -63,7 +63,7 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
 }
 
 const SortingContainer = styled.div`
-    padding: 10px;
+    padding: 5px;
 `
 
 const SortingTitle = styled.div`

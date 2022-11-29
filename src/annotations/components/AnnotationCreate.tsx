@@ -11,7 +11,6 @@ import MemexEditor, {
 } from '@worldbrain/memex-common/lib/editor'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { ClickAway } from 'src/util/click-away-wrapper'
-import TagPicker from 'src/tags/ui/TagPicker'
 import SaveBtn from './save-btn'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { NoteResultHoverState, FocusableComponent } from './types'
@@ -38,7 +37,7 @@ interface State {
 export interface AnnotationCreateEventProps {
     onSave: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
     onCancel: () => void
-    onTagsUpdate: (tags: string[]) => void
+    onTagsUpdate?: (tags: string[]) => void
     onCommentChange: (text: string) => void
     getListDetailsById: ListDetailsGetter
     onTagsHover?: React.MouseEventHandler
@@ -56,7 +55,7 @@ export interface AnnotationCreateGeneralProps {
     hide?: () => void
     autoFocus?: boolean
     comment: string
-    tags: string[]
+    tags?: string[]
     lists: number[]
     onTagClick?: (tag: string) => void
     hoverState: NoteResultHoverState
@@ -208,33 +207,6 @@ export class AnnotationCreate extends React.Component<Props, State>
         // }
     }
 
-    private renderTagPicker() {
-        const { tags, onTagsUpdate } = this.props
-        const setPickerShown = (isTagPickerShown: boolean) =>
-            this.setState({ isTagPickerShown })
-
-        const tagPicker = !this.state.isTagPickerShown ? null : (
-            <HoverBox left="10px">
-                <ClickAway onClickAway={() => setPickerShown(false)}>
-                    <TagPicker
-                        {...this.props}
-                        loadDefaultSuggestions={
-                            this.props.loadDefaultTagSuggestions
-                        }
-                        queryEntries={this.props.tagQueryEntries}
-                        onUpdateEntrySelection={async ({ selected }) =>
-                            onTagsUpdate(selected)
-                        }
-                        initialSelectedEntries={() => tags}
-                        onEscapeKeyDown={() => setPickerShown(false)}
-                    />
-                </ClickAway>
-            </HoverBox>
-        )
-
-        return <div>{tagPicker}</div>
-    }
-
     private renderSharedCollectionsPicker = () => {
         const { lists } = this.props
 
@@ -284,28 +256,50 @@ export class AnnotationCreate extends React.Component<Props, State>
 
         return (
             <DefaultFooterStyled>
-                <DeletionBox>
-                    <SaveActionBar>
-                        <BtnContainerStyled>
-                            <ButtonTooltip tooltipText="esc" position="bottom">
-                                <Icon
-                                    onClick={this.handleCancel}
-                                    icon={icons.removeX}
-                                    color={'normalText'}
-                                    heightAndWidth="20px"
-                                />
-                            </ButtonTooltip>
-                            <SaveBtn
-                                onSave={this.handleSave}
-                                hasSharedLists={this.hasSharedLists}
-                                renderCollectionsPicker={
-                                    this.renderSharedCollectionsPicker
-                                }
-                                shortcutText={`${AnnotationCreate.MOD_KEY} + Enter`}
+                <BtnContainerStyled>
+                    <NewHoverBox
+                        referenceEl={this.markdownbuttonRef.current}
+                        componentToOpen={
+                            this.state.toggleShowTutorial
+                                ? this.renderMarkdownHelpButton()
+                                : null
+                        }
+                        placement={'bottom-end'}
+                        offsetX={10}
+                        closeComponent={() => this.toggleShowTutorial()}
+                        width={'420px'}
+                        strategy={'fixed'}
+                        bigClosingScreen
+                    >
+                        <MarkdownButtonContainer
+                            onClick={() => this.toggleShowTutorial()}
+                            ref={this.markdownbuttonRef}
+                        >
+                            Formatting
+                            <Icon
+                                filePath={icons.helpIcon}
+                                heightAndWidth={'20px'}
+                                hoverOff
                             />
-                        </BtnContainerStyled>
-                    </SaveActionBar>
-                </DeletionBox>
+                        </MarkdownButtonContainer>
+                    </NewHoverBox>
+                    <ButtonTooltip tooltipText="esc" position="bottom">
+                        <Icon
+                            onClick={this.handleCancel}
+                            icon={icons.removeX}
+                            color={'normalText'}
+                            heightAndWidth="20px"
+                        />
+                    </ButtonTooltip>
+                    <SaveBtn
+                        onSave={this.handleSave}
+                        hasSharedLists={this.hasSharedLists}
+                        renderCollectionsPicker={
+                            this.renderSharedCollectionsPicker
+                        }
+                        shortcutText={`${AnnotationCreate.MOD_KEY} + Enter`}
+                    />
+                </BtnContainerStyled>
             </DefaultFooterStyled>
         )
     }
@@ -351,38 +345,8 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     this.state.isListPickerShown &&
                                     this.renderCollectionsPicker
                                 }
-                                padding={'0px 10px 5px 10px'}
                             />
                             <SaveActionBar>
-                                <NewHoverBox
-                                    referenceEl={this.markdownbuttonRef.current}
-                                    componentToOpen={
-                                        this.state.toggleShowTutorial
-                                            ? this.renderMarkdownHelpButton()
-                                            : null
-                                    }
-                                    placement={'bottom-end'}
-                                    offsetX={10}
-                                    closeComponent={() =>
-                                        this.toggleShowTutorial()
-                                    }
-                                    width={'420px'}
-                                    strategy={'fixed'}
-                                >
-                                    <MarkdownButtonContainer
-                                        onClick={() =>
-                                            this.toggleShowTutorial()
-                                        }
-                                        ref={this.markdownbuttonRef}
-                                    >
-                                        Formatting
-                                        <Icon
-                                            filePath={icons.helpIcon}
-                                            heightAndWidth={'20px'}
-                                            hoverOff
-                                        />
-                                    </MarkdownButtonContainer>
-                                </NewHoverBox>
                                 {this.renderActionButtons()}
                             </SaveActionBar>
                         </FooterContainer>
@@ -436,14 +400,6 @@ const DefaultFooterStyled = styled.div`
     }
 `
 
-const DeletionBox = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    /* border-top: 1px solid #f0f0f0; */
-    padding: 5px 15px 5px 15px;
-`
-
 const FooterContainer = styled.div`
     display: flex;
     justify-content: space-between;
@@ -457,15 +413,9 @@ const SaveActionBar = styled.div`
     justify-content: flex-end;
     align-items: center;
     position: absolute;
-    right: 6px;
+    right: 20px;
     z-index: 1001;
     grid-gap: 10px;
-`
-
-const TagsActionBar = styled.div`
-    display: flex;
-    justify-content: end-start;
-    align-items: center;
 `
 
 const MarkdownButtonContainer = styled.div`
@@ -487,15 +437,6 @@ const MarkdownButtonContainer = styled.div`
     }
 `
 
-const MarkdownButton = styled.img`
-    display: flex;
-    height: 16px;
-    opacity: 0.8;
-    mask-position: center center;
-    margin-left: 10px;
-    cursor: pointer;
-`
-
 const TextBoxContainerStyled = styled.div`
     box-shadow: none;
     cursor: default;
@@ -510,69 +451,4 @@ const TextBoxContainerStyled = styled.div`
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
     }
-`
-
-const StyledTextArea = styled.textarea`
-    background-color: white;
-    box-sizing: border-box;
-    resize: vertical;
-    font-weight: 400;
-    font-size: 14px;
-    color: #222;
-    font-family: ${(props) => props.theme.fonts.primary};
-    border-radius: 3px;
-    border: none;
-    padding: 10px 7px;
-    height: ${(props) => (props.value === '' ? '40px' : '150px')};
-    width: auto;
-    min-height: 70px;
-
-    &::placeholder {
-        color: ${(props) => props.theme.colors.primary};
-        opacity: 0.5;
-    }
-
-    &:focus {
-        outline: none;
-        box-shadow: none;
-        border: none;
-    }
-
-    &:focus {
-        outline: none;
-    }
-`
-
-const FooterStyled = styled.div`
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-    align-items: center;
-    animation: slideIn 0.2s ease-in-out;
-    animation-fill-mode: forwards;
-`
-
-const CancelBtnStyled = styled.div`
-    box-sizing: border-box;
-    cursor: pointer;
-    font-size: 14px;
-    border: none;
-    outline: none;
-    padding: 3px 5px;
-    background: transparent;
-    border-radius: 3px;
-    color: red;
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.backgroundColor};
-
-    &:focus {
-        background-color: #79797945;
-    }
-`
-
-const Flex = styled.div`
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
 `

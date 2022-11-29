@@ -18,6 +18,8 @@ import {
     PRIVATIZE_ANNOT_NEGATIVE_LABEL,
 } from 'src/overview/sharing/constants'
 
+import { NewHoverBox } from '@worldbrain/memex-common/lib/common-ui/components/hover-box'
+
 export interface Props {
     isShared?: boolean
     isProtected?: boolean
@@ -48,6 +50,8 @@ export default class AnnotationSaveBtn extends React.PureComponent<
     State
 > {
     static MOD_KEY = getKeyName({ key: 'mod' })
+
+    privacySelectionButtonRef = React.createRef<HTMLDivElement>()
 
     state: State = {
         confirmationMode: null,
@@ -118,59 +122,74 @@ export default class AnnotationSaveBtn extends React.PureComponent<
         )
     }
 
+    private renderShareMenuOptions() {
+        return this.state.confirmationMode == null ? (
+            <PrivacyOptionsContainer>
+                <PrivacyOptionsTitle>
+                    Save with privacy settings
+                </PrivacyOptionsTitle>
+                <SharePrivacyOption
+                    hasProtectedOption
+                    icon="webLogo"
+                    title="Public"
+                    shortcut={`shift+${getKeyName({
+                        key: 'mod',
+                    })}+enter`}
+                    description="Auto-added to Spaces this page is shared to"
+                    onClick={this.saveWithShareIntent(true)}
+                    isSelected={this.props.isShared}
+                />
+                <SharePrivacyOption
+                    hasProtectedOption
+                    icon="person"
+                    title="Private"
+                    shortcut={`${getKeyName({
+                        key: 'mod',
+                    })}+enter`}
+                    description="Private to you, until shared (in bulk)"
+                    onClick={this.handleSetPrivate}
+                    isSelected={!this.props.isShared}
+                />
+            </PrivacyOptionsContainer>
+        ) : (
+            this.renderConfirmationMode()
+        )
+    }
+
     private renderShareMenu() {
         if (!this.state.isShareMenuShown) {
             return null
         }
 
         return (
-            <HoverBox
-                right={'20px'}
-                padding={'0px'}
-                top={'25px'}
-                width={'fit-content'}
-                zIndex={10010000}
+            <NewHoverBox
+                referenceEl={this.privacySelectionButtonRef.current}
+                componentToOpen={
+                    this.state.isShareMenuShown
+                        ? this.renderShareMenuOptions()
+                        : null
+                }
+                placement={'bottom-end'}
+                offsetX={15}
+                closeComponent={() =>
+                    this.setState({
+                        confirmationMode: null,
+                        isShareMenuShown: false,
+                    })
+                }
+                strategy={'fixed'}
+                bigClosingScreen
             >
-                <DropdownMenuBtn
-                    width={'340px'}
-                    onClickOutside={() =>
+                <Icon
+                    onClick={() =>
                         this.setState({
-                            confirmationMode: null,
-                            isShareMenuShown: false,
+                            isShareMenuShown: true,
                         })
                     }
-                    theme={{ leftMenuOffset: '-110px' }}
-                >
-                    {this.state.confirmationMode == null ? (
-                        <>
-                            <SharePrivacyOption
-                                hasProtectedOption
-                                icon="webLogo"
-                                title="Public"
-                                shortcut={`shift+${getKeyName({
-                                    key: 'mod',
-                                })}+enter`}
-                                description="Auto-added to Spaces this page is shared to"
-                                onClick={this.saveWithShareIntent(true)}
-                                isSelected={this.props.isShared}
-                            />
-                            <SharePrivacyOption
-                                hasProtectedOption
-                                icon="person"
-                                title="Private"
-                                shortcut={`${getKeyName({
-                                    key: 'mod',
-                                })}+enter`}
-                                description="Private to you, until shared (in bulk)"
-                                onClick={this.handleSetPrivate}
-                                isSelected={!this.props.isShared}
-                            />
-                        </>
-                    ) : (
-                        this.renderConfirmationMode()
-                    )}
-                </DropdownMenuBtn>
-            </HoverBox>
+                    filePath={'arrowDown'}
+                    ref={this.privacySelectionButtonRef}
+                />
+            </NewHoverBox>
         )
     }
 
@@ -216,6 +235,10 @@ export default class AnnotationSaveBtn extends React.PureComponent<
     }
 }
 
+const PrivacyOptionsContainer = styled.div`
+    padding: 10px;
+`
+
 const SaveBtnArrow = styled.div`
     width: fit-content;
     border-radius: 3px;
@@ -242,7 +265,6 @@ const SaveBtn = styled.div`
     font-size: 14px;
     border: none;
     outline: none;
-    margin-right: 3px;
     background: transparent;
     border-radius: 3px;
     font-weight: 700;
@@ -266,19 +288,14 @@ const SaveBtn = styled.div`
     }
 `
 
-const SaveBtnText = styled.span`
+const PrivacyOptionsTitle = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    display: flex;
-    padding: 3px 5px 3px 10px;
-    grid-auto-flow: column;
-    grid-gap: 5px;
-    width: fit-content;
-    color: ${(props) => props.theme.colors.darkerText};
-
-    & * {
-        cursor: pointer;
-    }
+    justify-content: flex-start;
+    color: ${(props) => props.theme.colors.normalText};
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 10px;
+    padding-left: 5px;
 `

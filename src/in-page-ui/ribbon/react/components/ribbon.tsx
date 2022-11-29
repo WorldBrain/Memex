@@ -3,7 +3,7 @@ import qs from 'query-string'
 import styled, { css } from 'styled-components'
 
 import extractQueryFilters from 'src/util/nlp-time-filter'
-import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
+import { ButtonTooltip } from 'src/common-ui/components/'
 import {
     shortcuts,
     ShortcutElData,
@@ -15,7 +15,6 @@ import type {
 } from 'src/in-page-ui/keyboard-shortcuts/types'
 import { HighlightInteractionsInterface } from 'src/highlighting/types'
 import { RibbonSubcomponentProps } from './types'
-import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import AnnotationCreate from 'src/annotations/components/AnnotationCreate'
 import BlurredSidebarOverlay from 'src/in-page-ui/sidebar/react/components/blurred-overlay'
@@ -23,7 +22,6 @@ import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickT
 import { FeedActivityDot } from 'src/activity-indicator/ui'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import ExtraButtonsPanel from './extra-buttons-panel'
 import FeedPanel from './feed-panel'
@@ -64,11 +62,14 @@ export default class Ribbon extends Component<Props, State> {
     private shortcutsData: Map<string, ShortcutElData>
     private openOverviewTabRPC
     private openOptionsTabRPC
+    getFeedInfo
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
 
     private spacePickerRef = createRef<HTMLDivElement>()
     private settingsButtonRef = createRef<HTMLDivElement>()
     private tutorialButtonRef = createRef<HTMLDivElement>()
+    private feedButtonRef = createRef<HTMLDivElement>()
+    private sidebarButtonRef = createRef<HTMLDivElement>()
 
     state: State = {
         shortcutsReady: false,
@@ -87,6 +88,7 @@ export default class Ribbon extends Component<Props, State> {
             'openOverviewTab',
         )
         this.openOptionsTabRPC = this.props.getRemoteFunction('openOptionsTab')
+        this.getFeedInfo = this.props.getRemoteFunction('getFeedInfo')
     }
 
     async componentDidMount() {
@@ -142,37 +144,8 @@ export default class Ribbon extends Component<Props, State> {
             : source
     }
 
-    private hideTagPicker = () => {
-        this.props.tagging.setShowTagsPicker(false)
-    }
     private hideListPicker = () => {
         this.props.lists.setShowListsPicker(false)
-    }
-
-    private renderTagsPicker() {
-        if (!this.props.tagging.showTagsPicker) {
-            return null
-        }
-
-        return (
-            <HoverBox position="absolute" top="160px" right="40px">
-                <BlurredSidebarOverlay
-                    onOutsideClick={this.hideTagPicker}
-                    skipRendering={!this.props.sidebar.isSidebarOpen}
-                >
-                    <TagPicker
-                        {...this.props.tagging}
-                        onUpdateEntrySelection={this.props.tagging.updateTags}
-                        actOnAllTabs={this.props.tagging.tagAllTabs}
-                        initialSelectedEntries={
-                            this.props.tagging.fetchInitialTagSelections
-                        }
-                        onEscapeKeyDown={this.hideTagPicker}
-                        handleClickOutside={this.hideTagPicker}
-                    />
-                </BlurredSidebarOverlay>
-            </HoverBox>
-        )
     }
 
     private renderCollectionsPicker() {
@@ -219,7 +192,7 @@ export default class Ribbon extends Component<Props, State> {
         }
     }
 
-    private renderFeedInfo() {
+    renderFeedInfo() {
         if (!this.props.showFeed) {
             return
         }
@@ -415,6 +388,32 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
+    renderCommentBox() {
+        return (
+            <CommentBoxContainer
+                hasComment={this.props.commentBox.commentText.length > 0}
+            >
+                <AnnotationCreate
+                    ref={(ref) => (this.annotationCreateRef = ref)}
+                    hide={() => this.props.commentBox.setShowCommentBox(false)}
+                    onSave={this.props.commentBox.saveComment}
+                    onCancel={this.props.commentBox.cancelComment}
+                    onCommentChange={this.props.commentBox.changeComment}
+                    comment={this.props.commentBox.commentText}
+                    lists={this.props.commentBox.lists}
+                    getListDetailsById={this.props.getListDetailsById}
+                    createNewList={this.props.lists.createNewEntry}
+                    addPageToList={this.props.lists.selectEntry}
+                    removePageFromList={this.props.lists.unselectEntry}
+                    isRibbonCommentBox
+                    spacesBG={this.props.spacesBG}
+                    contentSharingBG={this.props.contentSharingBG}
+                    autoFocus
+                />
+            </CommentBoxContainer>
+        )
+    }
+
     render() {
         if (!this.state.shortcutsReady) {
             return false
@@ -434,33 +433,36 @@ export default class Ribbon extends Component<Props, State> {
                         this.props.sidebar.isSidebarOpen) && (
                         <React.Fragment>
                             <UpperPart>
-                                <FeedIndicatorBox
-                                    isSidebarOpen={
-                                        this.props.sidebar.isSidebarOpen
+                                <NewHoverBox
+                                    referenceEl={this.feedButtonRef.current}
+                                    componentToOpen={
+                                        this.props.showFeed
+                                            ? this.renderFeedInfo()
+                                            : null
                                     }
-                                    onClick={() => this.props.toggleFeed()}
+                                    tooltipText={this.getTooltipText(
+                                        'addToCollection',
+                                    )}
+                                    placement={'left-start'}
+                                    offsetX={10}
+                                    width={'600px'}
+                                    closeComponent={() =>
+                                        this.props.toggleFeed()
+                                    }
+                                    bigClosingScreen
                                 >
-                                    <ButtonTooltip
-                                        tooltipText={'View Feed Updates'}
-                                        position="leftNarrow"
+                                    <FeedIndicatorBox
+                                        isSidebarOpen={
+                                            this.props.sidebar.isSidebarOpen
+                                        }
+                                        onClick={() => this.props.toggleFeed()}
                                     >
                                         <FeedActivityDot
                                             key="activity-feed-indicator"
                                             {...this.props.activityIndicator}
                                         />
-                                    </ButtonTooltip>
-                                </FeedIndicatorBox>
-                                {this.props.showFeed && (
-                                    <HoverBox
-                                        withRelativeContainer
-                                        right="45px"
-                                        height={'600px'}
-                                        width={'500px'}
-                                        padding={'0px'}
-                                    >
-                                        {this.renderFeedInfo()}
-                                    </HoverBox>
-                                )}
+                                    </FeedIndicatorBox>
+                                </NewHoverBox>
                                 <HorizontalLine
                                     sidebaropen={
                                         this.props.sidebar.isSidebarOpen
@@ -490,73 +492,6 @@ export default class Ribbon extends Component<Props, State> {
                                             }
                                         />
                                     </ButtonTooltip>
-                                    {this.props.commentBox.showCommentBox && (
-                                        <HoverBox
-                                            position="absolute"
-                                            top="115px"
-                                            right="40px"
-                                            padding={'0px'}
-                                        >
-                                            <AnnotationCreate
-                                                {...this.props.tagging}
-                                                ref={(ref) =>
-                                                    (this.annotationCreateRef = ref)
-                                                }
-                                                hide={() =>
-                                                    this.props.commentBox.setShowCommentBox(
-                                                        false,
-                                                    )
-                                                }
-                                                onSave={
-                                                    this.props.commentBox
-                                                        .saveComment
-                                                }
-                                                onCancel={
-                                                    this.props.commentBox
-                                                        .cancelComment
-                                                }
-                                                onTagsUpdate={
-                                                    this.props.commentBox
-                                                        .updateCommentBoxTags
-                                                }
-                                                onCommentChange={
-                                                    this.props.commentBox
-                                                        .changeComment
-                                                }
-                                                comment={
-                                                    this.props.commentBox
-                                                        .commentText
-                                                }
-                                                tags={
-                                                    this.props.commentBox.tags
-                                                }
-                                                lists={
-                                                    this.props.commentBox.lists
-                                                }
-                                                getListDetailsById={
-                                                    this.props
-                                                        .getListDetailsById
-                                                }
-                                                createNewList={
-                                                    this.props.lists
-                                                        .createNewEntry
-                                                }
-                                                addPageToList={
-                                                    this.props.lists.selectEntry
-                                                }
-                                                removePageFromList={
-                                                    this.props.lists
-                                                        .unselectEntry
-                                                }
-                                                isRibbonCommentBox
-                                                spacesBG={this.props.spacesBG}
-                                                contentSharingBG={
-                                                    this.props.contentSharingBG
-                                                }
-                                                autoFocus
-                                            />
-                                        </HoverBox>
-                                    )}
                                     <NewHoverBox
                                         referenceEl={
                                             this.spacePickerRef.current
@@ -572,6 +507,7 @@ export default class Ribbon extends Component<Props, State> {
                                         placement={'left-start'}
                                         offsetX={10}
                                         closeComponent={this.hideListPicker}
+                                        bigClosingScreen
                                     >
                                         <Icon
                                             onClick={() =>
@@ -597,19 +533,22 @@ export default class Ribbon extends Component<Props, State> {
                                         />
                                     </NewHoverBox>
                                     {!this.props.sidebar.isSidebarOpen && (
-                                        <ButtonTooltip
-                                            tooltipText={
-                                                <span>
-                                                    {this.getTooltipText(
-                                                        'toggleSidebar',
-                                                    )}
-                                                    <br />{' '}
-                                                    <SubText>
-                                                        Shift+Click to add note
-                                                    </SubText>
-                                                </span>
+                                        <NewHoverBox
+                                            referenceEl={
+                                                this.sidebarButtonRef.current
                                             }
-                                            position="leftNarrow"
+                                            componentToOpen={
+                                                this.props.commentBox
+                                                    .showCommentBox
+                                                    ? this.renderCommentBox()
+                                                    : null
+                                            }
+                                            tooltipText={this.getTooltipText(
+                                                'toggleSidebar',
+                                            )}
+                                            placement={'left-start'}
+                                            offsetX={10}
+                                            bigClosingScreen
                                         >
                                             <Icon
                                                 onClick={(e) =>
@@ -628,7 +567,7 @@ export default class Ribbon extends Component<Props, State> {
                                                           icons.commentEmpty
                                                 }
                                             />
-                                        </ButtonTooltip>
+                                        </NewHoverBox>
                                     )}
                                     <ButtonTooltip
                                         tooltipText={this.getTooltipText(
@@ -670,6 +609,8 @@ export default class Ribbon extends Component<Props, State> {
                                     closeComponent={
                                         this.props.toggleShowExtraButtons
                                     }
+                                    bigClosingScreen
+                                    width={'300px'}
                                 >
                                     <Icon
                                         onClick={() =>
@@ -695,6 +636,7 @@ export default class Ribbon extends Component<Props, State> {
                                         this.props.toggleShowTutorial
                                     }
                                     width={'420px'}
+                                    bigClosingScreen
                                 >
                                     <Icon
                                         onClick={() =>
@@ -783,13 +725,12 @@ const BottomSection = styled.div<{ sidebaropen: boolean }>`
 `
 
 const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
-    display: flex;
     flex-direction: column;
     justify-content: center;
     align-self: center;
     width: 24px;
     height: 400px;
-
+    display: flex;
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
     text-align: start;
@@ -802,6 +743,7 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
     ${(props) =>
         props.isPeeking &&
         css`
+            display: flex;
             align-items: flex-end;
             width: 44px;
             padding-right: 25px;
@@ -810,8 +752,8 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
     ${(props) =>
         props.isSidebarOpen &&
         css`
+            display: none;
             box-shadow: none;
-            display: flex;
             justify-content: center;
             height: 105vh;
             width: 40px;
@@ -863,13 +805,13 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
     ${(props) =>
         props.isSidebarOpen &&
         css`
+            display: none;
             box-shadow: none;
             height: 90%;
             top: 0px;
             width: 40px;
             justify-content: space-between;
             padding-top: 17px;
-            display: flex;
             background: transparent;
             border: none;
             align-items: center;
@@ -890,15 +832,6 @@ const ExtraButtonRow = styled.div`
     &:hover {
         background: ${(props) => props.theme.colors.backgroundColorDarker};
     }
-`
-
-const GeneralActions = styled.div`
-    display: grid;
-    grid-gap: 5px;
-    margin-top: 15px;
-    grid-auto-flow: row;
-    align-items: center;
-    justify-content: center;
 `
 
 const HorizontalLine = styled.div<{ sidebaropen: boolean }>`
@@ -982,4 +915,16 @@ const SectionDescription = styled.div`
     color: ${(props) => props.theme.colors.greyScale8};
     font-size: 14px;
     font-weight: 300;
+`
+const CommentBoxContainer = styled.div<{ hasComment: boolean }>`
+    padding: 5px 5px;
+    width: 350px;
+
+    & > div {
+        margin: 0;
+
+        & > div:first-child {
+            margin: ${(props) => (props.hasComment ? '0 0 10px 0' : '0')};
+        }
+    }
 `

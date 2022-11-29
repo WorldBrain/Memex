@@ -25,7 +25,7 @@ const ButtonBox = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
     font-weight: bold;
     flex: 1;

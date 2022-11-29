@@ -1,8 +1,8 @@
 import React from 'react'
 import styled, { ThemeProvider, css } from 'styled-components'
-
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ClickAway } from 'src/util/click-away-wrapper'
-import ButtonTooltip, { Props as ButtonTooltipProps } from './button-tooltip'
+import { Props as ButtonTooltipProps } from './button-tooltip'
 
 export interface MenuItemProps {
     name: string
@@ -99,8 +99,13 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
             >
                 <MenuItemName isSelected={this.state.selected === i}>
                     {props.name}
-                    {props.isDisabled && props.soonAvailable && (
-                        <SoonPill>Coming Soon</SoonPill>
+                    {this.state.selected === i && (
+                        <Icon
+                            filePath="check"
+                            color="purple"
+                            heightAndWidth="18px"
+                            hoverOff
+                        />
                     )}
                 </MenuItemName>
                 {props.info && <MenuItemInfo>{props.info}</MenuItemInfo>}
@@ -156,15 +161,6 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
     }
 }
 
-const MenuContainer = styled.div`
-    position: relative;
-    flex: 1;
-    align-items: center;
-    display: flex;
-    width: 100%;
-    height: 100%;
-`
-
 const MenuItem = styled.div<{ isSelected }>`
     background: ${(props) => props.isSelected && props.theme.colors.darkhover};
     padding: 10px 10px;
@@ -172,11 +168,13 @@ const MenuItem = styled.div<{ isSelected }>`
     width: fill-available;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    border-radius: 12px;
+    white-space: nowrap;
+    border-radius: 6px;
     margin: 0 10px;
     cursor: ${(props) => !props.isSelected && 'pointer'};
+    width: 142px;
 
     &:first-child {
         margin-top: 10px;
@@ -189,8 +187,14 @@ const MenuItem = styled.div<{ isSelected }>`
     ${(props) =>
         !props.isSelected &&
         css`
+            cursor: pointer;
+
             &:hover {
                 outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+            }
+
+            & * {
+                cursor: pointer;
             }
         `};
 `
@@ -201,44 +205,21 @@ const MenuTitle = styled.div`
     font-size: 14px;
 `
 
-const SoonPill = styled.span`
-    background: ${(props) => props.theme.colors.purple};
-    color: #fff;
-    padding: 2px 5px;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 5px;
-    font-size: 10px;
-`
-
 const MenuItemName = styled.div<{ isSelected }>`
-    font-weight: ${(props) => (props.isSelected ? '500' : '400')};
     color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
     display: flex;
     align-items: center;
+    grid-gap: 5px;
+    justify-content: space-between;
+    width: -webkit-fill-available;
+    height: 24px;
 `
 
 const MenuItemInfo = styled.div`
     font-weight: 400;
     font-size: 14px;
     padding-top: 5px;
-`
-
-const MenuBtn = styled.div<{ isOpen: boolean }>`
-    box-sizing: border-box;
-    cursor: pointer;
-    font-size: 14px;
-    border: none;
-    outline: none;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
 `
 
 const Menu = styled.div<{ leftPosition: string }>`

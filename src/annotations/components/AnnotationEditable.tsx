@@ -362,7 +362,12 @@ export default class AnnotationEditable extends React.Component<Props> {
             }
         }
 
-        if (hoverState != null) {
+        if (
+            hoverState != null ||
+            (hoverState != null &&
+                (this.props.renderCopyPasterForAnnotation ||
+                    this.props.listPickerRenderLocation === 'footer'))
+        ) {
             return [
                 {
                     key: 'delete-note-btn',
@@ -375,13 +380,17 @@ export default class AnnotationEditable extends React.Component<Props> {
                     image: icons.copy,
                     onClick: footerDeps.onCopyPasterBtnClick,
                     tooltipText: 'Copy Note',
+                    componentToOpen: this.props.renderCopyPasterForAnnotation
+                        ? this.props.renderCopyPasterForAnnotation(
+                              this.props.url,
+                          )
+                        : null,
                 },
                 {
                     key: 'add-spaces-btn',
                     image: icons.plus,
                     imageColor: 'purple',
                     onClick: footerDeps.onListIconClick,
-                    iconSize: '16px',
                     componentToOpen:
                         this.props.listPickerRenderLocation === 'footer'
                             ? this.props.renderListsPickerForAnnotation(
@@ -596,13 +605,13 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 />
                             )}
                             {this.renderFooter()}
-                            {this.props.renderCopyPasterForAnnotation && (
+                            {/* {this.props.renderCopyPasterForAnnotation && (
                                 <CopyPasterWrapper>
                                     {this.props.renderCopyPasterForAnnotation(
                                         this.props.url,
                                     )}
                                 </CopyPasterWrapper>
-                            )}
+                            )} */}
                             {this.props.renderShareMenuForAnnotation && (
                                 <ShareMenuWrapper>
                                     {this.props.renderShareMenuForAnnotation(

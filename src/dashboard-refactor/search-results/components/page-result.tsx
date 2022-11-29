@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React, { PureComponent, createRef } from 'react'
 import styled from 'styled-components'
 import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom, {
@@ -63,6 +63,10 @@ export default class PageResultView extends PureComponent<Props> {
         }
         return ''
     }
+
+    private spacePickerRef = createRef<HTMLElement>()
+    private settingsButtonRef = createRef<HTMLElement>()
+    private tutorialButtonRef = createRef<HTMLElement>()
 
     private get hasNotes(): boolean {
         return (
@@ -322,11 +326,11 @@ export default class PageResultView extends PureComponent<Props> {
                     {this.renderRemoveFromListBtn()}
                     <PageContentBox
                         onMouseOver={this.props.onMainContentHover}
-                        onMouseLeave={
-                            this.props.listPickerShowStatus !== 'hide'
-                                ? this.listPickerBtnClickHandler
-                                : undefined
-                        }
+                        // onMouseLeave={
+                        //     this.props.listPickerShowStatus !== 'hide'
+                        //         ? this.listPickerBtnClickHandler
+                        //         : undefined
+                        // }
                         href={this.fullUrl}
                         target="_blank"
                         tabIndex={-1}
@@ -364,31 +368,11 @@ export default class PageResultView extends PureComponent<Props> {
                         creationInfo={{ createdWhen: this.props.displayTime }}
                         actions={this.calcFooterActions()}
                     />
-                    {/* {this.props.listPickerShowStatus === 'footer' &&
-                        this.renderSpacePicker()} */}
                 </StyledPageResult>
             </ItemBox>
         )
     }
 }
-
-const DomainContainer = styled.div`
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    grid-gap: 3px;
-`
-
-const PDFIcon = styled.div`
-    border: 1px solid rgb(184, 184, 184);
-    border-radius: 5px;
-    padding: 0 8px;
-    font-weight: 500;
-    color: black;
-    margin-right: 10px;
-`
-
-const PopoutContainer = styled.div``
 
 const StyledPageResult = styled.div`
     display: flex;
@@ -416,75 +400,10 @@ const RemoveFromListBtn = styled.div`
     cursor: pointer;
 `
 
-const FavIconPlaceholder = styled.div`
-    border-radius: 2px;
-`
-
-const FavIconBox = styled.div`
-    width: 20px;
-    height: 20px;
-    margin-right: 5px;
-`
-const FavIconImg = styled.img`
-    width: 100%;
-    height: 100%;
-    border-radius: 2px;
-`
-
 const PageContentBox = styled.a<{ hasSpaces: boolean }>`
     display: flex;
     flex-direction: column;
     cursor: pointer;
     text-decoration: none;
     border-radius: 10px;
-`
-
-const AddSpaceButtonContainer = styled.div`
-    margin-left: 1rem;
-`
-
-const ResultContent = styled(Margin)`
-    display: grid;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    cursor: pointer;
-    grid-auto-flow: column;
-    grid-gap: 15px;
-    height: 34px;
-`
-
-const PageTitle = styled(Margin)`
-    font-size: 16px;
-    font-weight: 500;
-    color: ${(props) => props.theme.colors.normalText};
-    justify-content: flex-start;
-    line-break: ${(props) => (props.isUrl ? 'anywhere' : 'unset')};
-`
-const PageUrl = styled.span`
-    font-size: 14px;
-    font-weight: 400;
-    color: ${(props) => props.theme.colors.darkerText};
-    display: flex;
-    height: 20px;
-    align-items: center;
-`
-
-const EditIconContainerWithText = styled.div`
-    height: 20px;
-    width: fit-content;
-    border-radius: 3px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    padding: 0 3px 0 1px;
-    grid-gap: 3px;
-    font-size: 12px;
-    opacity: 0.8;
-    color: ${(props) => props.theme.colors.normalText};
-
-    & * {
-        cursor: pointer;
-    }
 `

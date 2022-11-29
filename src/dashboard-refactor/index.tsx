@@ -1224,7 +1224,7 @@ export class DashboardContainer extends StatefulUIElement<
         const isPeeking = listsSidebar.isSidebarPeeking
 
         return (
-            <Container>
+            <Container id={'dashboardContainer'}>
                 <SidebarHeaderContainer>
                     <SidebarToggleBox>
                         <SidebarToggle

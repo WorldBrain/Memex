@@ -8,6 +8,7 @@ import { ClickAway } from 'src/util/click-away-wrapper'
 import { isLoading } from 'src/overview/results/selectors'
 
 const CopyPasterWrapper = styled.div`
+    min-width: 250px;
     & * {
         font-family: 'Satoshi', sans-serif;
     }

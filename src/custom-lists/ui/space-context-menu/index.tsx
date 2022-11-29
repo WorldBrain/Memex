@@ -60,7 +60,6 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     }
 
     private renderShareLinks() {
-        console.log(this.state.inviteLinks)
         if (!this.state.inviteLinks.length) {
             return (
                 <ShareSectionContainer onClick={wrapClick}>
@@ -196,9 +195,11 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             this.state.inviteLinksLoadState === 'running'
         ) {
             return (
-                <LoadingContainer>
-                    <LoadingIndicator size={30} />
-                </LoadingContainer>
+                <ContextMenuContainer>
+                    <LoadingContainer>
+                        <LoadingIndicator size={30} />
+                    </LoadingContainer>
+                </ContextMenuContainer>
             )
         }
 
@@ -246,6 +247,12 @@ const ContextMenuContainer = styled.div`
     display: flex;
     grid-gap: 5px;
     flex-direction: column;
+    width: fill-available;
+    padding: 15px;
+    min-height: 200px;
+    height: fit-content;
+    justify-content: center;
+    align-items: flex-start;
 `
 
 const SectionTitle = styled.div`
@@ -262,6 +269,7 @@ const DeleteBox = styled.div`
     grid-gap: 10px;
     justify-content: center;
     flex-direction: column;
+    width: fill-available;
 `
 
 const PermissionArea = styled.div`
@@ -279,13 +287,15 @@ const IconContainer = styled.div`
 
 const LoadingContainer = styled.div`
     display: flex;
-    height: 126px;
+    height: fill-available;
     justify-content: center;
     align-items: center;
+    width: fill-available;
 `
 
 const ShareSectionContainer = styled.div`
     margin-bottom: 10px;
+    width: fill-available;
 `
 
 const ButtonLabel = styled.div`

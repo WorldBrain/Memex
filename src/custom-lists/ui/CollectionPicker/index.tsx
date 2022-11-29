@@ -379,7 +379,7 @@ class SpacePicker extends StatefulUIElement<
                 {this.state.contextMenuListId ? (
                     this.renderSpaceContextMenu()
                 ) : (
-                    <>
+                    <PickerContainer>
                         <PickerSearchInput
                             searchInputPlaceholder={
                                 this.props.searchInputPlaceholder ??
@@ -422,7 +422,7 @@ class SpacePicker extends StatefulUIElement<
                                 onPress={this.handleNewListPress}
                             />
                         )}
-                    </>
+                    </PickerContainer>
                 )}
             </>
         )
@@ -498,6 +498,12 @@ const LoadingBox = styled.div`
 
 const OuterSearchBox = styled.div`
     border-radius: 12px;
+    width: 300px;
+`
+const PickerContainer = styled.div`
+    border-radius: 12px;
+    width: fill-available;
+    padding: 15px;
 `
 
 const EmptyListsView = styled.div`

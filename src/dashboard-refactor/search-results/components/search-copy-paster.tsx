@@ -10,7 +10,8 @@ import {
 } from 'src/copy-paster'
 import { SearchType } from '../types'
 import { BackgroundSearchParams } from 'src/search/background/types'
-import { Icon } from 'src/dashboard-refactor/styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { NewHoverBox } from '@worldbrain/memex-common/lib/common-ui/components/hover-box'
 
 export interface Props {
     searchType?: SearchType
@@ -21,40 +22,42 @@ export interface Props {
     toggleCopyPaster?: React.MouseEventHandler
 }
 
-export default function SearchCopyPaster(props: Props) {
-    if (!props.isCopyPasterBtnShown) {
-        return null
-    }
-
+function renderCopyPaster(props: Props) {
     const CopyPaster =
         props.searchType === 'notes'
             ? AnnotationSearchCopyPaster
             : PageSearchCopyPaster
 
     return (
+        <CopyPaster
+            searchParams={props.searchParams}
+            onClickOutside={props.hideCopyPaster}
+        />
+    )
+}
+
+export default function SearchCopyPaster(props: Props) {
+    // this.copypasterButtonRef = React.useRef<HTMLElement>(null)
+
+    return (
         <>
-            <ButtonTooltip tooltipText="Copy Search Results" position="bottom">
+            <NewHoverBox
+                componentToOpen={
+                    props.isCopyPasterShown ? renderCopyPaster(props) : null
+                }
+                placement={'bottom'}
+                offsetX={10}
+                closeComponent={props.toggleCopyPaster}
+                bigClosingScreen
+            >
                 <Icon
-                    path={icons.copy}
+                    filePath={icons.copy}
                     heightAndWidth="22px"
                     onClick={props.toggleCopyPaster}
-                    color={'greyScale8'}
+                    active={props.isCopyPasterShown}
+                    padding={'6px'}
                 />
-            </ButtonTooltip>
-            {props.isCopyPasterShown && (
-                <HoverBox
-                    position={'absolute'}
-                    withRelativeContainer
-                    top="25px"
-                    left="-155px"
-                    padding={'0px'}
-                >
-                    <CopyPaster
-                        searchParams={props.searchParams}
-                        onClickOutside={props.hideCopyPaster}
-                    />
-                </HoverBox>
-            )}
+            </NewHoverBox>
         </>
     )
 }

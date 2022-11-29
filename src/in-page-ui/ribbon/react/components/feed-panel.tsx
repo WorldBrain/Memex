@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
 
 interface Props {
-    closePanel: () => void
+    closePanel?: () => void
 }
 
 class FeedPanel extends React.PureComponent<Props> {

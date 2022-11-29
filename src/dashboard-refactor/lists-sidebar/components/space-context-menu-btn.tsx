@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { Icon } from 'src/dashboard-refactor/styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ClickAway } from 'src/util/click-away-wrapper'
 import SpaceContextMenu, {
     Props as SpaceContextMenuProps,
@@ -49,28 +49,21 @@ export default class SpaceContextMenuButton extends PureComponent<
                     ) : null
                 }
                 placement={'right-start'}
-                offsetX={10}
+                offsetX={30}
+                offsetY={-10}
                 closeComponent={this.toggleMenu}
                 strategy={'fixed'}
-                width={'250px'}
+                width={'300px'}
+                bigClosingScreen
             >
-                <MoreIconBackground
+                <Icon
                     onClick={this.toggleMenu}
+                    heightAndWidth="14px"
+                    filePath={icons.dots}
+                    active={this.props.isMenuDisplayed}
                     ref={this.spaceContextMenuButton}
-                >
-                    <Icon heightAndWidth="14px" path={icons.dots} />
-                </MoreIconBackground>
+                />
             </NewHoverBox>
         )
     }
 }
-
-const MoreIconBackground = styled.div`
-    border-radius: 3px;
-    padding: 2px;
-    height: 20px;
-    width: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`

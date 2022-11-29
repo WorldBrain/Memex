@@ -170,6 +170,8 @@ export class SidebarContainerLogic extends UILogic<
 
             isExpanded: true,
             isExpandedSharedSpaces: false,
+            isFeedShown: false,
+
             sidebarWidth: '450px',
             loadState: 'pristine',
             noteCreateState: 'pristine',
@@ -1362,6 +1364,21 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
+    expandFeed: EventHandler<'expandFeed'> = async ({
+        event,
+        previousState,
+    }) => {
+        const { isExpanded: wasExpanded, annotations } = previousState
+
+        const mutation: UIMutation<SidebarContainerState> = {
+            isExpanded: { $set: false },
+            isFeedShown: { $set: true },
+            isExpandedSharedSpaces: { $set: false },
+        }
+
+        this.emitMutation(mutation)
+    }
+
     expandMyNotes: EventHandler<'expandMyNotes'> = async ({
         event,
         previousState,
@@ -1372,6 +1389,8 @@ export class SidebarContainerLogic extends UILogic<
 
         const mutation: UIMutation<SidebarContainerState> = {
             isExpanded: { $set: !wasExpanded },
+            isFeedShown: { $set: false },
+            isExpandedSharedSpaces: { $set: false },
         }
         this.emitMutation(mutation)
 
@@ -1411,6 +1430,8 @@ export class SidebarContainerLogic extends UILogic<
 
         const mutation: UIMutation<SidebarContainerState> = {
             isExpandedSharedSpaces: { $set: !wasExpanded },
+            isExpanded: { $set: false },
+            isFeedShown: { $set: false },
         }
         this.emitMutation(mutation)
 

@@ -140,6 +140,7 @@ export interface SidebarContainerState
     isWidthLocked: boolean
     isExpanded: boolean
     isExpandedSharedSpaces: boolean
+    isFeedShown: boolean
     sidebarWidth: string
     isolatedView?: string | null // if null show default view
 
@@ -206,6 +207,7 @@ interface SidebarEvents {
 
     sortAnnotations: { sortingFn: AnnotationsSorter }
 
+    expandFeed: null
     expandMyNotes: null
     expandSharedSpaces: { listIds: string[] }
 

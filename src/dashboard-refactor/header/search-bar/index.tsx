@@ -5,7 +5,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 
 import { fonts } from '../../styles'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { Icon } from 'src/dashboard-refactor/styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ButtonTooltip } from 'src/common-ui/components'
 
 export interface SearchBarProps {
@@ -55,8 +55,9 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             <IconContainer>
                                 <Margin right="5px">
                                     <Icon
-                                        heightAndWidth="22px"
-                                        path={icons.removeX}
+                                        heightAndWidth="24px"
+                                        filePath={icons.removeX}
+                                        padding={'6px'}
                                         onClick={() => this.handleClearSearch()}
                                     />
                                 </Margin>
@@ -66,7 +67,8 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                                 <Margin right="5px">
                                     <Icon
                                         heightAndWidth="22px"
-                                        path={icons.searchIcon}
+                                        filePath={icons.searchIcon}
+                                        padding={'5px'}
                                     />
                                 </Margin>
                             </IconContainer>
@@ -91,9 +93,9 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                                 tooltipText={'Clear Filters'}
                             >
                                 <Icon
-                                    path={icons.removeX}
+                                    filePath={icons.removeX}
                                     heightAndWidth="22px"
-                                    color={'greyScale8'}
+                                    padding={'6px'}
                                 />
                             </ButtonTooltip>
                         ) : (
@@ -102,9 +104,9 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                                 tooltipText={'Apply Filters'}
                             >
                                 <Icon
-                                    path={icons.filterIcon}
+                                    filePath={icons.filterIcon}
                                     heightAndWidth="24px"
-                                    color={'greyScale8'}
+                                    padding={'5px'}
                                 />
                             </ButtonTooltip>
                         )}
