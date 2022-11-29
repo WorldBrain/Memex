@@ -184,16 +184,23 @@ export class HighlightRenderer implements HighlightRendererInterface {
         }
 
         const anchor = await extractAnchorFromSelection(selection)
-        const body = anchor ? anchor.quote : ''
+        const body = anchor && anchor.quote
+        const hasSelectedText = anchor.quote.length
 
         const annotation: Annotation = {
             url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
-            body,
+            body: hasSelectedText
+                ? anchor.quote
+                : youtubeTimestampForComment && null,
             pageUrl,
             tags: [],
             lists: [],
-            comment: youtubeTimestampForComment,
-            selector: anchor,
+            comment: hasSelectedText
+                ? ''
+                : youtubeTimestampForComment && youtubeTimestampForComment,
+            selector: hasSelectedText
+                ? anchor
+                : youtubeTimestampForComment && null,
             pageTitle: title,
         }
 
