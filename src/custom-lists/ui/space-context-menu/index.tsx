@@ -440,18 +440,18 @@ const MenuButton = styled.div`
 
 // probably want to use timing function to get this really looking good. This is just quick and dirty
 
-const blinkingAnimation = keyframes`
- 0% {
-    background-color: ${(props) => props.theme.colors.lightHover};
- }
- 50% {
- background-color: transparent;
- }
- 100% {
-    background-color: ${(props) => props.theme.colors.lightHover};
- }
+// const blinkingAnimation = keyframes`
+//  0% {
+//     background-color: ${(props) => props.theme.colors.lightHover};
+//  }
+//  50% {
+//  background-color: transparent;
+//  }
+//  100% {
+//     background-color: ${(props) => props.theme.colors.lightHover};
+//  }
 
-`
+// `
 
 const LinkAndRoleBox = styled.div<{
     viewportBreakpoint: string

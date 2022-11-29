@@ -361,7 +361,7 @@ export async function main(
             })
         }
     } else {
-        return await browser.storage.local.set({ blacklist: {} })
+        await browser.storage.local.set({ blacklist: {} })
     }
 
     const isSidebarEnabled = await sidebarUtils.getSidebarState()

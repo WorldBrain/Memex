@@ -141,11 +141,11 @@ const MainContent = styled.div<{
     grid-gap: 50px;
 
     ${(props) =>
-        props.location === 'sidebar' ||
-        (props.location === 'search' &&
-            css`
-                grid-gap: 20px;
-            `)}
+        props.location === 'sidebar' || props.location === 'search'
+            ? css`
+                  grid-gap: 20px;
+              `
+            : ''}
 `
 const MainText = styled.span`
     font-size: 16px;

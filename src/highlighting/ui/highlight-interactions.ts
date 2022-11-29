@@ -206,7 +206,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
             body: hasSelectedText ? anchor.quote : hasYoutubeTimeStamp && null,
             pageUrl,
             tags: [],
-            lists: actualLists,
+            lists: [],
             comment: hasSelectedText
                 ? ''
                 : hasYoutubeTimeStamp && YoutubeTimeStampforComment,
