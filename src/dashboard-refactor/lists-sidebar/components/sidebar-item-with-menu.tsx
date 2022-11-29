@@ -495,17 +495,3 @@ const NewItemsCountInnerDiv = styled.div`
     line-height: 14px;
     padding: 2px 0px;
 `
-
-// probably want to use timing function to get this really looking good. This is just quick and dirty
-
-// const blinkingAnimation = keyframes`
-//  0% {
-//     background-color: ${(props) => props.theme.colors.backgroundColorDarker};
-//  }
-//  50% {
-//     background-color: transparent;
-//  }
-//  100% {
-//     background-color: ${(props) => props.theme.colors.backgroundColorDarker};
-//  }
-// `

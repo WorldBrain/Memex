@@ -195,7 +195,8 @@ const Row = styled.div<{ isFocused }>`
     width: 100%;
     cursor: pointer;
     border-radius: 5px;
-    padding: 0 10px;
+    padding: 0 5px;
+    margin: 0 2px;
     color: ${(props) => props.isFocused && props.theme.colors.normalText};
 
     &:last-child {

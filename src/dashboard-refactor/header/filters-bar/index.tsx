@@ -17,136 +17,10 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import { NewHoverBox } from '@worldbrain/memex-common/lib/common-ui/components/hover-box'
 
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
-
-const DateHelp = styled.div`
-    color: ${(props) => props.theme.colors.darkText};
-`
-
-const DateText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
-`
-
-const Container = styled.div<{ hidden: boolean }>`
-    height: 50px;
-    width: 100%;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
-    justify-content: center;
-    position: sticky;
-    top: 60px;
-    background: ${(props) => props.theme.colors.backgroundColor};
-    z-index: 2147483640;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
-
-    ${(props) =>
-        css`
-            display: ${props.hidden ? 'none' : 'flex'};
-        `};
-`
-
-const FilterBtnsContainer = styled.div<{ sidebarWidth; spaceSidebarLocked }>`
-    max-width: 800px;
-    flex: 1;
-    position: relative;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    grid-gap: 7px;
-
-    @media screen and (max-width: 900px) {
-        margin-left: ${(props) => props.spaceSidebarLocked && '24px'};
-    }
-`
-
-const PickersContainer = styled.div`
-    position: relative;
-    top: 30px;
-`
-
-const DomainScroll = styled.div`
-    overflow: scroll;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    width: 200px;
-
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-`
-
-const FilterSelectButton = styled.div<{ filterActive: boolean }>`
-    width: fit-content;
-    display: grid;
-    grid-gap: 5px;
-    grid-auto-flow: column;
-    align-items: center;
-    padding: 3px 12px;
-    background: ${(props) => props.theme.colors.greyScale1};
-    border-radius: 8px;
-    white-space: nowrap;
-    max-width: fit-content;
-    font-size: 13px;
-
-    &:hover {
-        background: ${(props) => props.theme.colors.lightHover};
-    }
-
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-
-    cursor: pointer;
-    height: 30px;
-    color: ${(props) =>
-        props.filterActive
-            ? props.theme.colors.normalText
-            : props.theme.colors.normalText};
-`
-
-const TextSpan = styled.span`
-    font-family: ${fonts.primary.name};
-    font-weight: ${fonts.primary.weight.normal};
-    line-height: 15px;
-`
-
-const CounterPill = styled.div`
-    background: ${(props) => props.theme.colors.purple};
-    color: ${(props) => props.theme.colors.black};
-    border-radius: 3px;
-    height: 20px;
-    padding: 0 5px;
-    width: fit-content;
-    margin-left: 5px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-`
-
-const TagPill = styled.div`
-    display: flex;
-    justify-content: center;
-    padding: 2px 6px;
-    background: ${(props) => props.theme.colors.purple};
-    color: white;
-    border-radius: 3px;
-`
-
-const DomainPill = styled.div`
-    display: flex;
-    justify-content: center;
-    padding: 2px 6px;
-    color: ${(props) => props.theme.colors.normalText};
-    border-radius: 3px;
-`
 
 export interface FiltersBarProps {
     searchFilters: any
@@ -184,19 +58,25 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             | SpacePickerDependencies
             | DateRangeSelectionProps
             | DomainPickerDependencies,
+        ref: React.RefObject<HTMLDivElement>,
     ) => (
         <Margin vertical="7px" width="auto">
             <FilterSelectButton
                 selected={isShown}
                 onClick={onToggle}
                 className={`${name}-picker-button`}
-                filterActive={isFiltered}
+                filterActive={isShown || isFiltered}
+                ref={ref}
             >
                 <Icon path={filterIcons} heightAndWidth="16px" hoverOff />
                 {this.renderFilterInfo(filterProps, name, isFiltered, label)}
             </FilterSelectButton>
         </Margin>
     )
+
+    spaceFilterButtonRef = React.createRef<HTMLDivElement>()
+    dateFilterButtonRef = React.createRef<HTMLDivElement>()
+    domainFilterButtonRef = React.createRef<HTMLDivElement>()
 
     private renderFilterInfo = (
         filterProps: any,
@@ -278,75 +158,34 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     private renderDatePicker = () => {
-        if (!this.props.showDatesFilter) {
-            return false
-        }
-
         return (
-            <HoverBox
-                padding={'0px'}
-                position="absolute"
-                top={'50px'}
-                width="auto"
-            >
-                <DatePicker
-                    {...this.props.datePickerProps}
-                    outsideClickIgnoreClass="date-picker-button"
-                />
-            </HoverBox>
-        )
-    }
-
-    private renderTagPicker = () => {
-        if (!this.props.showTagsFilter) {
-            return false
-        }
-
-        return (
-            <HoverBox left="195px" position="absolute" top="50px">
-                <TagPicker
-                    {...this.props.tagPickerProps}
-                    searchInputPlaceholder="Add tag filters"
-                    removeToolTipText="Remove filter"
-                    outsideClickIgnoreClass="tag-picker-button"
-                    filterMode
-                />
-            </HoverBox>
+            <DatePicker
+                {...this.props.datePickerProps}
+                outsideClickIgnoreClass="date-picker-button"
+            />
         )
     }
 
     private renderSpacePicker = () => {
-        if (!this.props.showSpaceFilter) {
-            return false
-        }
-
         return (
-            <HoverBox left="195px" position="absolute" top="50px">
-                <SpacePicker
-                    {...this.props.spacePickerProps}
-                    searchInputPlaceholder="Add Space filters"
-                    removeTooltipText="Remove Space filter"
-                    outsideClickIgnoreClass="space-picker-button"
-                    filterMode
-                />
-            </HoverBox>
+            <SpacePicker
+                {...this.props.spacePickerProps}
+                searchInputPlaceholder="Add Space filters"
+                removeTooltipText="Remove Space filter"
+                outsideClickIgnoreClass="space-picker-button"
+                filterMode
+            />
         )
     }
 
     private renderDomainPicker = () => {
-        if (!this.props.showDomainsFilter) {
-            return false
-        }
-
         return (
-            <HoverBox left="90px" position="absolute" top="50px">
-                <DomainPicker
-                    {...this.props.domainPickerProps}
-                    searchInputPlaceholder="Add domain filters"
-                    removeToolTipText="Remove filter"
-                    outsideClickIgnoreClass="domain-picker-button"
-                />
-            </HoverBox>
+            <DomainPicker
+                {...this.props.domainPickerProps}
+                searchInputPlaceholder="Add domain filters"
+                removeToolTipText="Remove filter"
+                outsideClickIgnoreClass="domain-picker-button"
+            />
         )
     }
 
@@ -358,41 +197,207 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                         sidebarWidth={this.props.spaceSidebarWidth}
                         spaceSidebarLocked={this.props.spaceSidebarLocked}
                     >
-                        {this.renderFilterSelectButton(
-                            'Date',
-                            'date',
-                            this.props.toggleDatesFilter,
-                            this.props.showDatesFilter,
-                            this.props.areDatesFiltered,
-                            icons.date,
-                            this.props.datePickerProps,
-                        )}
-                        {this.renderDatePicker()}
-                        {this.renderFilterSelectButton(
-                            'Domains',
-                            'domain',
-                            this.props.toggleDomainsFilter,
-                            this.props.showDomainsFilter,
-                            this.props.areDomainsFiltered,
-                            icons.globe,
-                            this.props.domainPickerProps,
-                        )}
-                        {this.renderSpacePicker()}
-                        {this.renderFilterSelectButton(
-                            'Spaces',
-                            'space',
-                            this.props.toggleSpaceFilter,
-                            this.props.showSpaceFilter,
-                            this.props.areSpacesFiltered,
-                            this.props.areSpacesFiltered
-                                ? icons.collectionsFull
-                                : icons.collectionsEmpty,
-                            this.props.spacePickerProps,
-                        )}
-                        {this.renderDomainPicker()}
+                        <NewHoverBox
+                            referenceEl={this.dateFilterButtonRef.current}
+                            componentToOpen={
+                                this.props.showDatesFilter
+                                    ? this.renderDatePicker()
+                                    : null
+                            }
+                            placement={'bottom-start'}
+                            offsetX={10}
+                            closeComponent={this.props.toggleDatesFilter}
+                        >
+                            {this.renderFilterSelectButton(
+                                'Date',
+                                'date',
+                                this.props.toggleDatesFilter,
+                                this.props.showDatesFilter,
+                                this.props.areDatesFiltered,
+                                icons.date,
+                                this.props.datePickerProps,
+                                this.dateFilterButtonRef,
+                            )}
+                        </NewHoverBox>
+                        <NewHoverBox
+                            referenceEl={this.domainFilterButtonRef.current}
+                            componentToOpen={
+                                this.props.showDomainsFilter
+                                    ? this.renderDomainPicker()
+                                    : null
+                            }
+                            placement={'bottom-start'}
+                            offsetX={10}
+                            closeComponent={this.props.toggleDomainsFilter}
+                        >
+                            {this.renderFilterSelectButton(
+                                'Domains',
+                                'domain',
+                                this.props.toggleDomainsFilter,
+                                this.props.showDomainsFilter,
+                                this.props.areDomainsFiltered,
+                                icons.globe,
+                                this.props.domainPickerProps,
+                                this.domainFilterButtonRef,
+                            )}
+                        </NewHoverBox>
+                        <NewHoverBox
+                            referenceEl={this.spaceFilterButtonRef.current}
+                            componentToOpen={
+                                this.props.showSpaceFilter
+                                    ? this.renderSpacePicker()
+                                    : null
+                            }
+                            placement={'bottom-start'}
+                            offsetX={10}
+                            closeComponent={this.props.toggleSpaceFilter}
+                        >
+                            {this.renderFilterSelectButton(
+                                'Spaces',
+                                'space',
+                                this.props.toggleSpaceFilter,
+                                this.props.showSpaceFilter,
+                                this.props.areSpacesFiltered,
+                                this.props.areSpacesFiltered
+                                    ? icons.collectionsFull
+                                    : icons.collectionsEmpty,
+                                this.props.spacePickerProps,
+                                this.spaceFilterButtonRef,
+                            )}
+                        </NewHoverBox>
                     </FilterBtnsContainer>
                 </Container>
             </>
         )
     }
 }
+
+const DateHelp = styled.div`
+    color: ${(props) => props.theme.colors.darkText};
+`
+
+const DateText = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+`
+
+const Container = styled.div<{ hidden: boolean }>`
+    height: 50px;
+    width: 100%;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    justify-content: center;
+    position: sticky;
+    top: 60px;
+    background: ${(props) => props.theme.colors.backgroundColor};
+    z-index: 2147483640;
+    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+
+    ${(props) =>
+        css`
+            display: ${props.hidden ? 'none' : 'flex'};
+        `};
+`
+
+const FilterBtnsContainer = styled.div<{ sidebarWidth; spaceSidebarLocked }>`
+    max-width: 800px;
+    flex: 1;
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    grid-gap: 7px;
+
+    @media screen and (max-width: 900px) {
+        margin-left: ${(props) => props.spaceSidebarLocked && '24px'};
+    }
+`
+
+const PickersContainer = styled.div`
+    position: relative;
+    top: 30px;
+`
+
+const DomainScroll = styled.div`
+    overflow: scroll;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    width: 200px;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+`
+
+const FilterSelectButton = styled.div<{ filterActive: boolean }>`
+    width: fit-content;
+    display: grid;
+    grid-gap: 5px;
+    grid-auto-flow: column;
+    align-items: center;
+    padding: 3px 12px;
+    background: ${(props) => props.theme.colors.greyScale1};
+    border-radius: 8px;
+    white-space: nowrap;
+    max-width: fit-content;
+    font-size: 13px;
+    color: ${(props) => props.theme.colors.normalText};
+
+    &:hover {
+        background: ${(props) => props.theme.colors.lightHover};
+    }
+
+    ${(props) =>
+        props.filterActive &&
+        css`
+            background: ${(props) => props.theme.colors.lightHover};
+        `}
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    cursor: pointer;
+    height: 30px;
+`
+
+const TextSpan = styled.span`
+    font-family: ${fonts.primary.name};
+    font-weight: ${fonts.primary.weight.normal};
+    line-height: 15px;
+`
+
+const CounterPill = styled.div`
+    background: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.black};
+    border-radius: 3px;
+    height: 20px;
+    padding: 0 5px;
+    width: fit-content;
+    margin-left: 5px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`
+
+const TagPill = styled.div`
+    display: flex;
+    justify-content: center;
+    padding: 2px 6px;
+    background: ${(props) => props.theme.colors.purple};
+    color: white;
+    border-radius: 3px;
+`
+
+const DomainPill = styled.div`
+    display: flex;
+    justify-content: center;
+    padding: 2px 6px;
+    color: ${(props) => props.theme.colors.normalText};
+    border-radius: 3px;
+`

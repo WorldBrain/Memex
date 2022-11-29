@@ -110,6 +110,4 @@ const Container = styled.div<Props>`
     justify-content: center;
     align-items: flex-start;
     background-color: transparent;
-    padding: 10px;
-    margin-top: 5px;
 `

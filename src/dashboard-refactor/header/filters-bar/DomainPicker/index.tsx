@@ -223,7 +223,6 @@ const LoadingBox = styled.div`
 
 const OuterSearchBox = styled.div`
     border-radius: 12px;
-    padding: 5px 5px 5px 5px;
 `
 
 const EmptyDomainsView = styled.div`

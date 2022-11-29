@@ -348,10 +348,11 @@ export default class PageResultView extends PureComponent<Props> {
                             showEditBtn={this.props.hoverState === 'lists'}
                             onListClick={undefined}
                             onEditBtnClick={this.props.onListPickerBarBtnClick}
-                            // renderSpacePicker={
-                            //     this.props.listPickerShowStatus ===
-                            //         'lists-bar' && this.renderSpacePicker
-                            // }
+                            renderSpacePicker={
+                                this.props.listPickerShowStatus === 'lists-bar'
+                                    ? this.renderSpacePicker
+                                    : null
+                            }
                             filteredbyListID={this.props.filteredbyListID}
                             padding={'0px 20px 10px 20px'}
                         />

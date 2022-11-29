@@ -396,7 +396,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <ResultBox
-                zIndex={index}
+                zIndex={
+                    interactionProps.onMainContentHover
+                        ? index + this.props.searchResults.length
+                        : index
+                }
                 bottom="10px"
                 key={day.toString() + pageId}
             >

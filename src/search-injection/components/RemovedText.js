@@ -23,7 +23,6 @@ const RemoveContainer = styled.div`
 
 RemovedText.propTypes = {
     undo: PropTypes.func.isRequired,
-    // position: PropTypes.string.isRequired,
 }
 
 export default RemovedText

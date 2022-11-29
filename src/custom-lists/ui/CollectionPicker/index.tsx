@@ -376,40 +376,53 @@ class SpacePicker extends StatefulUIElement<
 
         return (
             <>
-                {this.renderSpaceContextMenu()}
-                <PickerSearchInput
-                    searchInputPlaceholder={
-                        this.props.searchInputPlaceholder ??
-                        'Search & Add Spaces'
-                    }
-                    showPlaceholder={this.state.selectedListIds.length === 0}
-                    searchInputRef={this.handleSetSearchInputRef}
-                    onChange={this.handleSearchInputChanged}
-                    onKeyPress={this.handleKeyPress}
-                    value={this.state.query}
-                    loading={this.state.loadingQueryResults === 'running'}
-                    before={
-                        <EntrySelectedList
-                            entries={this.selectedDisplayEntries}
-                            onPress={this.handleSelectedListPress}
+                {this.state.contextMenuListId ? (
+                    this.renderSpaceContextMenu()
+                ) : (
+                    <>
+                        <PickerSearchInput
+                            searchInputPlaceholder={
+                                this.props.searchInputPlaceholder ??
+                                'Search & Add Spaces'
+                            }
+                            showPlaceholder={
+                                this.state.selectedListIds.length === 0
+                            }
+                            searchInputRef={this.handleSetSearchInputRef}
+                            onChange={this.handleSearchInputChanged}
+                            onKeyPress={this.handleKeyPress}
+                            value={this.state.query}
+                            loading={
+                                this.state.loadingQueryResults === 'running'
+                            }
+                            before={
+                                <EntrySelectedList
+                                    entries={this.selectedDisplayEntries}
+                                    onPress={this.handleSelectedListPress}
+                                />
+                            }
                         />
-                    }
-                />
-                <EntryList ref={this.displayListRef}>
-                    {!(
-                        (this.state.query === '' &&
-                            !this.state.displayEntries.length) ||
-                        this.state.query.length > 0
-                    ) && <EntryListHeader>Recently used</EntryListHeader>}
-                    {!this.state.displayEntries.length
-                        ? this.renderEmptyList()
-                        : this.state.displayEntries.map(this.renderListRow)}
-                </EntryList>
-                {this.shouldShowAddNewEntry && (
-                    <AddNewEntry
-                        resultItem={this.state.newEntryName}
-                        onPress={this.handleNewListPress}
-                    />
+                        <EntryList ref={this.displayListRef}>
+                            {!(
+                                (this.state.query === '' &&
+                                    !this.state.displayEntries.length) ||
+                                this.state.query.length > 0
+                            ) && (
+                                <EntryListHeader>Recently used</EntryListHeader>
+                            )}
+                            {!this.state.displayEntries.length
+                                ? this.renderEmptyList()
+                                : this.state.displayEntries.map(
+                                      this.renderListRow,
+                                  )}
+                        </EntryList>
+                        {this.shouldShowAddNewEntry && (
+                            <AddNewEntry
+                                resultItem={this.state.newEntryName}
+                                onPress={this.handleNewListPress}
+                            />
+                        )}
+                    </>
                 )}
             </>
         )
@@ -430,7 +443,7 @@ class SpacePicker extends StatefulUIElement<
 }
 
 const EntryListHeader = styled.div`
-    padding: 5px 10px;
+    padding: 5px 5px;
     font-size: 12px;
     color: ${(props) => props.theme.colors.darkText};
     font-weight: 400;
@@ -502,16 +515,6 @@ const EntryRowContainer = styled.div`
     align-items: center;
     margin: 0 2px;
     border-radius: 6px;
-
-    &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
-        background: transparent;
-    }
-
-    &:active {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
-        background: transparent;
-    }
 `
 
 const SpaceContextMenuBtn = styled.div`
