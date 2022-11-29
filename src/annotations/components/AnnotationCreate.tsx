@@ -29,7 +29,7 @@ interface State {
     isTagPickerShown: boolean
     isListPickerShown: boolean
     toggleShowTutorial: boolean
-    youtubeShortcut: string
+    youtubeShortcut: string | null
 }
 
 export interface AnnotationCreateEventProps {
@@ -90,13 +90,14 @@ export class AnnotationCreate extends React.Component<Props, State>
         isTagPickerShown: false,
         isListPickerShown: false,
         toggleShowTutorial: false,
-        youtubeShortcut: '',
+        youtubeShortcut: null,
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         if (this.props.autoFocus) {
             this.focus()
         }
+        await this.setYoutubeKeyboardShortcut()
     }
 
     private get displayLists(): Array<{
@@ -340,17 +341,13 @@ export class AnnotationCreate extends React.Component<Props, State>
         )
     }
 
-    youtubeKeyBoardShortcut = async () => {
+    private setYoutubeKeyboardShortcut = async () => {
         const shortcuts = await getKeyboardShortcutsState()
-        const shortcut = shortcuts['createAnnotation'].shortcut
-
-        this.setState({
-            youtubeShortcut: shortcut,
-        })
+        const youtubeShortcut = shortcuts.createAnnotation.shortcut
+        this.setState({ youtubeShortcut })
     }
 
     render() {
-        this.youtubeKeyBoardShortcut()
         return (
             <>
                 <TextBoxContainerStyled>
