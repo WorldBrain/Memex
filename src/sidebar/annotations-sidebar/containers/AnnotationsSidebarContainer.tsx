@@ -656,41 +656,46 @@ export class AnnotationsSidebarContainer<
                     width={this.state.sidebarWidth}
                     sidebarContext={this.props.sidebarContext}
                 >
-                    <TopArea>
-                        <IconBoundary>
-                            <Icon
-                                heightAndWidth="16px"
-                                filePath={
-                                    'heartEmpty'
-                                    // this.props.bookmark.isBookmarked
-                                    //     ? icons.heartFull
-                                    //     : icons.heartEmpty
-                                }
-                            />
-                        </IconBoundary>
-                        <IconBoundary>
-                            <Icon
-                                heightAndWidth="16px"
-                                filePath={
-                                    'collectionsEmpty'
-                                    // this.props.bookmark.isBookmarked
-                                    //     ? icons.heartFull
-                                    //     : icons.heartEmpty
-                                }
-                            />
-                        </IconBoundary>
-                        <IconBoundary>
-                            <Icon
-                                heightAndWidth="16px"
-                                filePath={
-                                    'heartEmpty'
-                                    // this.props.bookmark.isBookmarked
-                                    //     ? icons.heartFull
-                                    //     : icons.heartEmpty
-                                }
-                            />
-                        </IconBoundary>
-                    </TopArea>
+                    {this.props.sidebarContext !== 'dashboard' && (
+                        <TopArea>
+                            <IconBoundary>
+                                <Icon
+                                    heightAndWidth="16px"
+                                    filePath={
+                                        'heartEmpty'
+                                        // this.props.bookmark.isBookmarked
+                                        //     ? icons.heartFull
+                                        //     : icons.heartEmpty
+                                    }
+                                />
+                            </IconBoundary>
+                            <IconBoundary>
+                                <Icon
+                                    onClick={() =>
+                                        this.ribbonRef.current.testexternal()
+                                    }
+                                    heightAndWidth="16px"
+                                    filePath={
+                                        'collectionsEmpty'
+                                        // this.props.bookmark.isBookmarked
+                                        //     ? icons.heartFull
+                                        //     : icons.heartEmpty
+                                    }
+                                />
+                            </IconBoundary>
+                            <IconBoundary>
+                                <Icon
+                                    heightAndWidth="16px"
+                                    filePath={
+                                        'searchIcon'
+                                        // this.props.bookmark.isBookmarked
+                                        //     ? icons.heartFull
+                                        //     : icons.heartEmpty
+                                    }
+                                />
+                            </IconBoundary>
+                        </TopArea>
+                    )}
 
                     <BottomArea>
                         {this.state.isLocked ? (
@@ -720,37 +725,38 @@ export class AnnotationsSidebarContainer<
                                 </IconBoundary>
                             </ButtonTooltip>
                         )}
-                        {!this.state.isWidthLocked ? (
-                            <ButtonTooltip
-                                tooltipText="Adjust Page Width"
-                                position="left"
-                            >
-                                <IconBoundary>
-                                    <Icon
-                                        filePath={icons.compress}
-                                        heightAndWidth="16px"
-                                        onClick={() =>
-                                            this.toggleSidebarWidthLock()
-                                        }
-                                    />
-                                </IconBoundary>
-                            </ButtonTooltip>
-                        ) : (
-                            <ButtonTooltip
-                                tooltipText="Full page width"
-                                position="left"
-                            >
-                                <IconBoundary>
-                                    <Icon
-                                        filePath={icons.expand}
-                                        heightAndWidth="16px"
-                                        onClick={() =>
-                                            this.toggleSidebarWidthLock()
-                                        }
-                                    />
-                                </IconBoundary>
-                            </ButtonTooltip>
-                        )}
+                        {this.props.sidebarContext !== 'dashboard' &&
+                            (!this.state.isWidthLocked ? (
+                                <ButtonTooltip
+                                    tooltipText="Adjust Page Width"
+                                    position="left"
+                                >
+                                    <IconBoundary>
+                                        <Icon
+                                            filePath={icons.compress}
+                                            heightAndWidth="16px"
+                                            onClick={() =>
+                                                this.toggleSidebarWidthLock()
+                                            }
+                                        />
+                                    </IconBoundary>
+                                </ButtonTooltip>
+                            ) : (
+                                <ButtonTooltip
+                                    tooltipText="Full page width"
+                                    position="left"
+                                >
+                                    <IconBoundary>
+                                        <Icon
+                                            filePath={icons.expand}
+                                            heightAndWidth="16px"
+                                            onClick={() =>
+                                                this.toggleSidebarWidthLock()
+                                            }
+                                        />
+                                    </IconBoundary>
+                                </ButtonTooltip>
+                            ))}
                         <ButtonTooltip
                             tooltipText="Close (ESC)"
                             position="left"
