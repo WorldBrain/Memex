@@ -1,4 +1,6 @@
 import * as React from 'react'
+import { createRef } from 'react'
+
 import styled from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
 
@@ -24,6 +26,7 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import type { ListDetailsGetter } from '../types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
+import { NewHoverBox } from '@worldbrain/memex-common/lib/common-ui/components/hover-box'
 
 interface State {
     isTagPickerShown: boolean
@@ -83,6 +86,8 @@ export class AnnotationCreate extends React.Component<Props, State>
         tags: [],
         hoverState: null,
     }
+
+    private markdownbuttonRef = createRef<HTMLElement>()
 
     private editor: MemexEditorInstance
 
@@ -255,28 +260,18 @@ export class AnnotationCreate extends React.Component<Props, State>
             this.setState({ isListPickerShown })
 
         return (
-            <div>
-                {this.state.isListPickerShown && (
-                    <HoverBox padding={'10px 0 0 0'}>
-                        <ClickAway onClickAway={() => setPickerShown(false)}>
-                            {this.renderSharedCollectionsPicker()}
-                        </ClickAway>
-                    </HoverBox>
-                )}
-            </div>
+            <ClickAway onClickAway={() => setPickerShown(false)}>
+                {this.renderSharedCollectionsPicker()}
+            </ClickAway>
         )
     }
 
     private renderMarkdownHelpButton() {
         return (
-            <MarkdownButtonContainer onClick={() => this.toggleShowTutorial()}>
-                Formatting
-                <Icon
-                    filePath={icons.helpIcon}
-                    heightAndWidth={'20px'}
-                    hoverOff
-                />
-            </MarkdownButtonContainer>
+            <QuickTutorial
+                markdownHelpOnTop={true}
+                getKeyboardShortcutsState={getKeyboardShortcutsState}
+            />
         )
     }
 
@@ -289,34 +284,8 @@ export class AnnotationCreate extends React.Component<Props, State>
 
         return (
             <DefaultFooterStyled>
-                {/* <Flex>
-                    <SaveBtn
-                        onSave={this.handleSave}
-                        hasSharedLists={this.hasSharedLists}
-                        renderCollectionsPicker={
-                            this.renderSharedCollectionsPicker
-                        }
-                    />
-                    <ButtonTooltip tooltipText="esc" position="bottom">
-                        <CancelBtnStyled onClick={this.handleCancel}>
-                            Cancel
-                        </CancelBtnStyled>
-                    </ButtonTooltip>
-                </Flex> */}
-                <ShareBtn tabIndex={0}>
-                    {' '}
-                    {/* onClick={footerDeps.onShareClick} */}
-                    {/* <Icon
-                            icon={shareIconData.icon}
-                            hoverOff
-                            color={'iconColor'}
-                            heightAndWidth="18px"
-                        />
-                        {shareIconData.label} */}
-                </ShareBtn>
                 <DeletionBox>
                     <SaveActionBar>
-                        {this.renderMarkdownHelpButton()}
                         <BtnContainerStyled>
                             <ButtonTooltip tooltipText="esc" position="bottom">
                                 <Icon
@@ -378,65 +347,47 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 onEditBtnClick={() =>
                                     this.setState({ isListPickerShown: true })
                                 }
-                                renderSpacePicker={this.renderCollectionsPicker}
+                                renderSpacePicker={
+                                    this.state.isListPickerShown &&
+                                    this.renderCollectionsPicker
+                                }
                                 padding={'0px 10px 5px 10px'}
                             />
-                            {/* <TagsSegment
-                                tags={this.props.tags}
-                                onMouseEnter={this.props.onTagsHover}
-                                showEditBtn={this.props.hoverState === 'tags'}
-                                onTagClick={this.props.onTagClick}
-                                onEditBtnClick={() =>
-                                    setPickerShown(!this.state.isTagPickerShown)
-                                }
-                            /> */}
                             <SaveActionBar>
+                                <NewHoverBox
+                                    referenceEl={this.markdownbuttonRef.current}
+                                    componentToOpen={
+                                        this.state.toggleShowTutorial
+                                            ? this.renderMarkdownHelpButton()
+                                            : null
+                                    }
+                                    placement={'bottom-end'}
+                                    offsetX={10}
+                                    closeComponent={() =>
+                                        this.toggleShowTutorial()
+                                    }
+                                    width={'420px'}
+                                    strategy={'fixed'}
+                                >
+                                    <MarkdownButtonContainer
+                                        onClick={() =>
+                                            this.toggleShowTutorial()
+                                        }
+                                        ref={this.markdownbuttonRef}
+                                    >
+                                        Formatting
+                                        <Icon
+                                            filePath={icons.helpIcon}
+                                            heightAndWidth={'20px'}
+                                            hoverOff
+                                        />
+                                    </MarkdownButtonContainer>
+                                </NewHoverBox>
                                 {this.renderActionButtons()}
-                                {/* {this.renderMarkdownHelpButton()} */}
                             </SaveActionBar>
                         </FooterContainer>
                     )}
                 </TextBoxContainerStyled>
-                {this.state.toggleShowTutorial && (
-                    <ClickAway
-                        onClickAway={() =>
-                            this.setState({ toggleShowTutorial: false })
-                        }
-                    >
-                        <HoverBox
-                            top={
-                                this.props.contextLocation === 'dashboard'
-                                    ? 'unset'
-                                    : '10px'
-                            }
-                            bottom={
-                                this.props.contextLocation === 'dashboard'
-                                    ? '60px'
-                                    : 'unset'
-                            }
-                            right={
-                                this.props.contextLocation === 'dashboard'
-                                    ? '20px'
-                                    : '0px'
-                            }
-                            width="430px"
-                            position={
-                                this.props.contextLocation === 'dashboard'
-                                    ? 'fixed'
-                                    : 'relative'
-                            }
-                            height="430px"
-                            overflow="scroll"
-                        >
-                            <QuickTutorial
-                                markdownHelpOnTop={true}
-                                getKeyboardShortcutsState={
-                                    getKeyboardShortcutsState
-                                }
-                            />
-                        </HoverBox>
-                    </ClickAway>
-                )}
             </>
         )
     }
@@ -508,6 +459,7 @@ const SaveActionBar = styled.div`
     position: absolute;
     right: 6px;
     z-index: 1001;
+    grid-gap: 10px;
 `
 
 const TagsActionBar = styled.div`
