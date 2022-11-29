@@ -671,9 +671,8 @@ export class AnnotationsSidebarContainer<
                             </IconBoundary>
                             <IconBoundary>
                                 <Icon
-                                    onClick={() =>
-                                        this.ribbonRef.current.testexternal()
-                                    }
+                                    // onClick={() =>
+                                    // }
                                     heightAndWidth="16px"
                                     filePath={
                                         'collectionsEmpty'
