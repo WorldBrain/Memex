@@ -43,6 +43,7 @@ import { getLocalStorage } from 'src/util/storage'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
+import { NewHoverBox } from '@worldbrain/memex-common/lib/common-ui/components/hover-box'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
@@ -134,6 +135,9 @@ export class AnnotationsSidebar extends React.Component<
     private annotationEditRefs: {
         [annotationUrl: string]: React.RefObject<_AnnotationEditable>
     } = {}
+    private sortDropDownButtonRef = React.createRef<HTMLDivElement>()
+    private copyButtonRef = React.createRef<HTMLDivElement>()
+    private bulkEditButtonRef = React.createRef<HTMLDivElement>()
 
     state: AnnotationsSidebarState = {
         searchText: '',
@@ -245,59 +249,35 @@ export class AnnotationsSidebar extends React.Component<
 
     private renderCopyPasterManager(annotationUrls) {
         return (
-            <HoverBox padding={'0px'}>
-                <PageNotesCopyPaster
-                    copyPaster={this.props.copyPaster}
-                    annotationUrls={annotationUrls}
-                    normalizedPageUrls={this.props.normalizedPageUrls}
-                    onClickOutside={() =>
-                        this.setState({ showAllNotesCopyPaster: false })
-                    }
-                />
-            </HoverBox>
+            <PageNotesCopyPaster
+                copyPaster={this.props.copyPaster}
+                annotationUrls={annotationUrls}
+                normalizedPageUrls={this.props.normalizedPageUrls}
+                onClickOutside={() =>
+                    this.setState({ showAllNotesCopyPaster: false })
+                }
+            />
         )
     }
 
     private renderAllNotesCopyPaster() {
-        if (!this.state.showAllNotesCopyPaster) {
-            return null
-        }
-
         const annotUrls = this.props.annotationUrls()
-        return (
-            <CopyPasterWrapperTopBar>
-                {this.renderCopyPasterManager(annotUrls)}
-            </CopyPasterWrapperTopBar>
-        )
+        return this.renderCopyPasterManager(annotUrls)
     }
 
     private renderAllNotesShareMenu() {
-        if (!this.state.showAllNotesShareMenu) {
-            return null
-        }
-
         return (
-            <ShareMenuWrapperTopBar>
-                <ClickAway
-                    onClickAway={() =>
-                        this.setState({ showAllNotesShareMenu: false })
-                    }
-                >
-                    <HoverBox padding={'0px'} width="340px">
-                        <AllNotesShareMenu
-                            contentSharingBG={this.props.contentSharing}
-                            annotationsBG={this.props.annotationsShareAll}
-                            normalizedPageUrl={this.props.normalizedPageUrl}
-                            copyLink={async (link) => {
-                                this.props.copyPageLink(link)
-                            }}
-                            postBulkShareHook={(shareState) =>
-                                this.props.postBulkShareHook(shareState)
-                            }
-                        />
-                    </HoverBox>
-                </ClickAway>
-            </ShareMenuWrapperTopBar>
+            <AllNotesShareMenu
+                contentSharingBG={this.props.contentSharing}
+                annotationsBG={this.props.annotationsShareAll}
+                normalizedPageUrl={this.props.normalizedPageUrl}
+                copyLink={async (link) => {
+                    this.props.copyPageLink(link)
+                }}
+                postBulkShareHook={(shareState) =>
+                    this.props.postBulkShareHook(shareState)
+                }
+            />
         )
     }
 
@@ -1107,27 +1087,15 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderSortingMenuDropDown() {
-        if (!this.state.showSortDropDown) {
-            return null
-        }
-
         return (
-            <HoverBox
-                width={'fit-content'}
-                right={'-40px'}
-                top={'15px'}
-                padding={'10px'}
-                withRelativeContainer
-            >
-                <SortingDropdownMenuBtn
-                    onMenuItemClick={(sortingFn) =>
-                        this.props.onMenuItemClick(sortingFn)
-                    }
-                    onClickOutSide={() =>
-                        this.setState({ showSortDropDown: false })
-                    }
-                />
-            </HoverBox>
+            <SortingDropdownMenuBtn
+                onMenuItemClick={(sortingFn) =>
+                    this.props.onMenuItemClick(sortingFn)
+                }
+                onClickOutSide={() =>
+                    this.setState({ showSortDropDown: false })
+                }
+            />
         )
     }
 
@@ -1152,10 +1120,23 @@ export class AnnotationsSidebar extends React.Component<
     private renderTopBarActionButtons() {
         return (
             <TopBarActionBtns>
-                {this.renderAllNotesShareMenu()}
-                {this.renderAllNotesCopyPaster()}
-                {this.renderSortingMenuDropDown()}
-                <ButtonTooltip tooltipText="Sort Annotations" position="bottom">
+                <NewHoverBox
+                    referenceEl={this.sortDropDownButtonRef.current}
+                    componentToOpen={
+                        this.state.showSortDropDown
+                            ? this.renderSortingMenuDropDown()
+                            : null
+                    }
+                    placement={'bottom-end'}
+                    offsetX={10}
+                    closeComponent={() =>
+                        this.setState({
+                            showSortDropDown: false,
+                        })
+                    }
+                    width={'fit-content'}
+                    strategy={'fixed'}
+                >
                     <Icon
                         filePath={icons.sort}
                         onClick={() =>
@@ -1165,11 +1146,25 @@ export class AnnotationsSidebar extends React.Component<
                         }
                         height="18px"
                         width="20px"
+                        ref={this.sortDropDownButtonRef}
                     />
-                </ButtonTooltip>
-                <ButtonTooltip
-                    tooltipText={'Copy All Notes'}
-                    position="bottomSidebar"
+                </NewHoverBox>
+                <NewHoverBox
+                    referenceEl={this.copyButtonRef.current}
+                    componentToOpen={
+                        this.state.showAllNotesCopyPaster
+                            ? this.renderAllNotesCopyPaster()
+                            : null
+                    }
+                    placement={'bottom-end'}
+                    offsetX={10}
+                    closeComponent={() =>
+                        this.setState({
+                            showAllNotesCopyPaster: false,
+                        })
+                    }
+                    strategy={'fixed'}
+                    width={'fit-content'}
                 >
                     <Icon
                         filePath={icons.copy}
@@ -1178,23 +1173,40 @@ export class AnnotationsSidebar extends React.Component<
                                 showAllNotesCopyPaster: true,
                             })
                         }
-                        heightAndWidth="16px"
+                        height="18px"
+                        width="20px"
+                        ref={this.copyButtonRef}
                     />
-                </ButtonTooltip>
-                <ButtonTooltip
-                    tooltipText="Bulk-edit note privacy"
-                    position="bottomRightEdge"
+                </NewHoverBox>
+                <NewHoverBox
+                    referenceEl={this.bulkEditButtonRef.current}
+                    componentToOpen={
+                        this.state.showAllNotesShareMenu
+                            ? this.renderAllNotesShareMenu()
+                            : null
+                    }
+                    placement={'bottom-end'}
+                    offsetX={10}
+                    closeComponent={() =>
+                        this.setState({
+                            showAllNotesShareMenu: false,
+                        })
+                    }
+                    strategy={'fixed'}
+                    width={'fit-content'}
                 >
                     <Icon
+                        filePath={icons.multiEdit}
                         onClick={() =>
                             this.setState({
                                 showAllNotesShareMenu: true,
                             })
                         }
-                        heightAndWidth="16px"
-                        filePath={icons.multiEdit}
+                        height="18px"
+                        width="20px"
+                        ref={this.bulkEditButtonRef}
                     />
-                </ButtonTooltip>
+                </NewHoverBox>
             </TopBarActionBtns>
         )
     }
@@ -1205,7 +1217,7 @@ export class AnnotationsSidebar extends React.Component<
                 <TopBar>
                     <>
                         {this.renderTopBarSwitcher()}
-                        {this.renderSharePageButton()}
+                        {/* {this.renderSharePageButton()} */}
                         {/* {this.props.sidebarActions()} */}
                     </>
                     {this.state.showPageSpacePicker && (

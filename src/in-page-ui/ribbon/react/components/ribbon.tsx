@@ -66,9 +66,9 @@ export default class Ribbon extends Component<Props, State> {
     private openOptionsTabRPC
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
 
-    private spacePickerRef = createRef<HTMLElement>()
-    private settingsButtonRef = createRef<HTMLElement>()
-    private tutorialButtonRef = createRef<HTMLElement>()
+    private spacePickerRef = createRef<HTMLDivElement>()
+    private settingsButtonRef = createRef<HTMLDivElement>()
+    private tutorialButtonRef = createRef<HTMLDivElement>()
 
     state: State = {
         shortcutsReady: false,

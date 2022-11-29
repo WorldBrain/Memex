@@ -43,7 +43,7 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
 
     render() {
         return (
-            <>
+            <SortingContainer>
                 <SortingTitle>Sort Notes</SortingTitle>
                 <DropdownMenuBtn
                     onMenuItemClick={this.props.onMenuItemClick}
@@ -57,10 +57,14 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
                     }}
                     onClickOutside={this.props.onClickOutSide}
                 />
-            </>
+            </SortingContainer>
         )
     }
 }
+
+const SortingContainer = styled.div`
+    padding: 10px;
+`
 
 const SortingTitle = styled.div`
     color: ${(props) => props.theme.colors.normalText};
