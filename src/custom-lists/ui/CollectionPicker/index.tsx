@@ -485,7 +485,6 @@ const LoadingBox = styled.div`
 
 const OuterSearchBox = styled.div`
     border-radius: 12px;
-    padding: 5px 5px 5px 5px;
 `
 
 const EmptyListsView = styled.div`
@@ -501,7 +500,7 @@ const EntryRowContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin: 0 5px;
+    margin: 0 2px;
     border-radius: 6px;
 
     &:hover {
