@@ -28,8 +28,8 @@ import type { ListDetailsGetter } from 'src/annotations/types'
 import ExtraButtonsPanel from './extra-buttons-panel'
 import FeedPanel from './feed-panel'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import browser from 'webextension-polyfill'
 import { NewHoverBox } from '@worldbrain/memex-common/lib/common-ui/components/hover-box'
+import { addUrlToBlacklist } from 'src/blacklist/utils'
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
@@ -252,7 +252,7 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
-    private getDomain(url) {
+    private getDomain(url: string) {
         const withoutProtocol = url.split('//')[1]
 
         if (withoutProtocol.startsWith('www.')) {
@@ -260,34 +260,6 @@ export default class Ribbon extends Component<Props, State> {
         } else {
             return withoutProtocol.split('/')[0]
         }
-    }
-
-    async addItemToBlockList(value) {
-        // fetch current list
-        const blockList = await browser.storage.local.get('blacklist')
-        const currentBlockListJSON = blockList['blacklist']
-        const currentBlockList = !currentBlockListJSON
-            ? []
-            : JSON.parse(currentBlockListJSON)
-
-        const expression = value.replace(/\s+/g, '').replace('.', '\\.')
-
-        // define new entry
-        const newEntry = {
-            expression: expression,
-            dateAdded: Date.now(),
-        }
-
-        // write new list
-        currentBlockList.push(newEntry)
-        const serialized = JSON.stringify(currentBlockList)
-        return browser.storage.local.set({ blacklist: serialized })
-
-        // const currentBlockListJSON = JSON.parse(currentBlocklist['blacklist'])}
-        // const newBlockListString = JSON.stringify(newBlockList[0])
-        // const newBlockListFinal = { 'blacklist': "[" + newBlockListString + "]}" }
-
-        // await browser.storage.local.set(newBlockListFinal)
     }
 
     private renderExtraButtons() {
@@ -310,7 +282,7 @@ export default class Ribbon extends Component<Props, State> {
                                 heightAndWidth="16px"
                                 hoverOff
                             />
-                            <InfoText>Disable Ribbon on this page</InfoText>
+                            <InfoText>Disable Ribbon on this site</InfoText>
                             <Icon
                                 onClick={() =>
                                     this.openOptionsTabRPC('blocklist')
@@ -335,13 +307,13 @@ export default class Ribbon extends Component<Props, State> {
                                 heightAndWidth="22px"
                                 filePath="plus"
                                 color="purple"
-                                onClick={() => {
-                                    this.addItemToBlockList(
-                                        this.state.blockListValue,
-                                    )
+                                onClick={async () => {
                                     this.setState({
                                         blockListValue: 'Added to block list',
                                     })
+                                    await addUrlToBlacklist(
+                                        this.state.blockListValue,
+                                    )
                                     setTimeout(
                                         () => this.props.handleRemoveRibbon(),
                                         2000,
