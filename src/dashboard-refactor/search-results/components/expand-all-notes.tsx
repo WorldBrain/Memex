@@ -17,7 +17,6 @@ export default class ExpandAllNotes extends PureComponent<Props> {
     }
 
     render() {
-        console.log(this.props.isEnabled)
         return !this.props.isEnabled || this.props.isEnabled == null ? (
             <TooltipBox tooltipText="Expand all annotations" placement="bottom">
                 <Icon
