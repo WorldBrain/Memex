@@ -4,8 +4,7 @@ import Dropdown from './Dropdown'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { ButtonTooltip } from 'src/common-ui/components'
-import browser from 'webextension-polyfill'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const Results = (props) => {
     // const searchEngineClass = `${props.searchEngine}_${props.position}`
@@ -29,8 +28,8 @@ const Results = (props) => {
                 </UpdateNotifBannerBox>
                 <TopBarArea hideResults={props.hideResults}>
                     <ResultsBox>
-                        <ButtonTooltip
-                            position={'right'}
+                        <TooltipBox
+                            placement={'bottom'}
                             tooltipText={
                                 props.hideResults
                                     ? 'Show Results'
@@ -44,13 +43,13 @@ const Results = (props) => {
                                 heightAndWidth="22px"
                                 onClick={props.toggleHideResults}
                             />
-                        </ButtonTooltip>
+                        </TooltipBox>
                         <TotalCount>{props.totalCount}</TotalCount>
                         <ResultsText>Memex Results</ResultsText>
                     </ResultsBox>
                     <IconArea>
-                        <ButtonTooltip
-                            position={'bottom'}
+                        <TooltipBox
+                            placement={'bottom'}
                             tooltipText={'Go to Dashboard'}
                         >
                             <Icon
@@ -59,10 +58,10 @@ const Results = (props) => {
                                 padding="5px"
                                 onClick={props.seeMoreResults}
                             />
-                        </ButtonTooltip>
+                        </TooltipBox>
                         <SettingsButtonContainer>
-                            <ButtonTooltip
-                                position={'bottom'}
+                            <TooltipBox
+                                placement={'bottom'}
                                 tooltipText={'Settings'}
                             >
                                 <Icon
@@ -71,7 +70,7 @@ const Results = (props) => {
                                     padding="5px"
                                     onClick={props.toggleDropdown}
                                 />
-                            </ButtonTooltip>
+                            </TooltipBox>
                             {props.dropdown && (
                                 <Dropdown
                                     remove={props.removeResults}

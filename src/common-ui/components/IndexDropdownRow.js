@@ -2,9 +2,9 @@ import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import cx from 'classnames'
-import { ButtonTooltip } from '.'
 import IndexDropdownUserRow from './IndexDropdownUserRow'
 import styles from './IndexDropdown.css'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 /**
  * @augments {PureComponent<{onClick: any, scrollIntoView: any, isForSidebar: any}, {isForAnnotation: bool}, *>}
@@ -74,11 +74,11 @@ class IndexDropdownRow extends PureComponent {
         })
     }
 
-    handleClick = e => {
+    handleClick = (e) => {
         !this.props.excActive && this.props.onClick()
     }
 
-    handleExcClick = e => {
+    handleExcClick = (e) => {
         e.stopPropagation()
         this.props.onExcClick()
     }
@@ -100,7 +100,7 @@ class IndexDropdownRow extends PureComponent {
     render() {
         return (
             <div
-                ref={ref => (this.ref = ref)}
+                ref={(ref) => (this.ref = ref)}
                 className={cx(this.mainClass, {
                     [styles.isNew]: this.props.isNew,
                     [styles.isUser]: this.props.source === 'user',
@@ -132,12 +132,12 @@ class IndexDropdownRow extends PureComponent {
                     {!this.props.allowAdd &&
                         this.props.isForSidebar &&
                         !this.props.active && (
-                            <ButtonTooltip
+                            <TooltipBox
                                 tooltipText="Exclude from search"
-                                position="left"
+                                placement="left"
                             >
                                 <span
-                                    ref={ref => (this.excRef = ref)}
+                                    ref={(ref) => (this.excRef = ref)}
                                     className={cx({
                                         [styles.excludeInactive]:
                                             this.state.displayExcIcon &&
@@ -145,7 +145,7 @@ class IndexDropdownRow extends PureComponent {
                                         [styles.excluded]: this.props.excActive,
                                     })}
                                 />
-                            </ButtonTooltip>
+                            </TooltipBox>
                         )}
                 </span>
             </div>

@@ -11,33 +11,6 @@ class PageResultItem extends PureComponent<Omit<Props, 'goToAnnotation'>> {
         nullImg: '/img/null-icon.png',
     }
 
-    // private renderScreenshot() {
-    //     if (!this.props.isOverview || !this.props.areScreenshotsEnabled) {
-    //         return null
-    //     }
-
-    //     return (
-    //         <div className={styles.screenshotContainer}>
-    //             {this.props.screenshot == null ? (
-    //                 <ButtonTooltip
-    //                     position="CenterCenter"
-    //                     tooltipText="Screenshots are not captured when importing, or when you switch away from a tab too quickly."
-    //                 >
-    //                     <img
-    //                         className={styles.screenshot}
-    //                         src={this.props.nullImg}
-    //                     />
-    //                 </ButtonTooltip>
-    //             ) : (
-    //                 <img
-    //                     className={styles.screenshot}
-    //                     src={this.props.screenshot}
-    //                 />
-    //             )}
-    //         </div>
-    //     )
-    // }
-
     render() {
         return (
             <React.Fragment>

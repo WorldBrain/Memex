@@ -1,5 +1,5 @@
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 100;
     src: url('Inter-Thin.woff2') format('woff2'),
@@ -7,7 +7,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: italic;
     font-weight: 100;
     src: url('Inter-ThinItalic.woff2') format('woff2'),
@@ -15,7 +15,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 200;
     src: url('Inter-ExtraLight.woff2') format('woff2'),
@@ -23,7 +23,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: italic;
     font-weight: 200;
     src: url('Inter-ExtraLightItalic.woff2') format('woff2'),
@@ -31,7 +31,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 300;
     src: url('Inter-Light.woff2') format('woff2'),
@@ -39,7 +39,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: italic;
     font-weight: 300;
     src: url('Inter-LightItalic.woff2') format('woff2'),
@@ -47,7 +47,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 400;
     src: url('Inter-Regular.woff2') format('woff2'),
@@ -55,7 +55,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: italic;
     font-weight: 400;
     src: url('Inter-Italic.woff2') format('woff2'),
@@ -63,7 +63,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 500;
     src: url('Inter-Medium.woff2') format('woff2'),
@@ -71,7 +71,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: italic;
     font-weight: 500;
     src: url('Inter-MediumItalic.woff2') format('woff2'),
@@ -79,7 +79,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 600;
     src: url('Inter-SemiBold.woff2') format('woff2'),
@@ -87,7 +87,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: italic;
     font-weight: 600;
     src: url('Inter-SemiBoldItalic.woff2') format('woff2'),
@@ -95,7 +95,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 700;
     src: url('Inter-Bold.woff2') format('woff2'),
@@ -103,7 +103,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: italic;
     font-weight: 700;
     src: url('Inter-BoldItalic.woff2') format('woff2'),
@@ -111,7 +111,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 800;
     src: url('Inter-ExtraBold.woff2') format('woff2'),
@@ -119,7 +119,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: italic;
     font-weight: 800;
     src: url('Inter-ExtraBoldItalic.woff2') format('woff2'),
@@ -127,7 +127,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 900;
     src: url('Inter-Black.woff2') format('woff2'),
@@ -135,7 +135,7 @@
 }
 
 @font-face {
-    font-family: 'Satoshi';
+    font-family: 'Inter';
     font-style: italic;
     font-weight: 900;
     src: url('Inter-BlackItalic.woff2') format('woff2'),
@@ -146,7 +146,7 @@
 Variable font.
 Usage:
 
-  html { font-family: 'Satoshi', sans-serif; }
+  html { font-family: 'Inter', sans-serif; }
   @supports (font-variation-settings: normal) {
     html { font-family: 'Inter var', sans-serif; }
   }

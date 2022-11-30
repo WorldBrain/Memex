@@ -1,7 +1,6 @@
 import React, { SyntheticEvent } from 'react'
 import styled, { css } from 'styled-components'
 import { Layers } from '@styled-icons/feather'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { DisplayEntry } from '../types'

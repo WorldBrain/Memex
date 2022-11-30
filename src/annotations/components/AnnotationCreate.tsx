@@ -4,13 +4,10 @@ import { createRef } from 'react'
 import styled from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
 
-import { ButtonTooltip } from 'src/common-ui/components'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import MemexEditor, {
     MemexEditorInstance,
 } from '@worldbrain/memex-common/lib/editor'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import { ClickAway } from 'src/util/click-away-wrapper'
 import SaveBtn from './save-btn'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { NoteResultHoverState, FocusableComponent } from './types'
@@ -25,7 +22,8 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import type { ListDetailsGetter } from '../types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { NewHoverBox } from '@worldbrain/memex-common/lib/common-ui/components/hover-box'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
 interface State {
     isTagPickerShown: boolean
@@ -87,6 +85,7 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private markdownbuttonRef = createRef<HTMLElement>()
+    private spacePickerButtonRef = createRef<HTMLElement>()
 
     private editor: MemexEditorInstance
 
@@ -207,43 +206,56 @@ export class AnnotationCreate extends React.Component<Props, State>
         // }
     }
 
-    private renderSharedCollectionsPicker = () => {
-        const { lists } = this.props
-
-        const setPickerShown = (isListPickerShown: boolean) =>
-            this.setState({ isListPickerShown })
-
-        return (
-            <CollectionPicker
-                initialSelectedListIds={() => lists}
-                onEscapeKeyDown={() => setPickerShown(false)}
-                unselectEntry={this.props.removePageFromList}
-                createNewEntry={this.props.createNewList}
-                selectEntry={this.props.addPageToList}
-                contentSharingBG={this.props.contentSharingBG}
-                spacesBG={this.props.spacesBG}
-            />
-        )
+    private toggleSpacePicker() {
+        this.setState({ isListPickerShown: !this.state.isListPickerShown })
     }
 
-    private renderCollectionsPicker = () => {
-        // Not used yet but will be used for the "Add to collection" button
-        const setPickerShown = (isListPickerShown: boolean) =>
-            this.setState({ isListPickerShown })
+    private renderSpacePicker = () => {
+        const { lists } = this.props
+
+        if (!this.state.isListPickerShown) {
+            return
+        }
 
         return (
-            <ClickAway onClickAway={() => setPickerShown(false)}>
-                {this.renderSharedCollectionsPicker()}
-            </ClickAway>
+            <PopoutBox
+                targetElementRef={this.spacePickerButtonRef.current}
+                placement={'bottom-start'}
+                offsetX={10}
+                closeComponent={() => this.toggleSpacePicker()}
+            >
+                <CollectionPicker
+                    initialSelectedListIds={() => lists}
+                    onEscapeKeyDown={() => this.toggleSpacePicker()}
+                    unselectEntry={this.props.removePageFromList}
+                    createNewEntry={this.props.createNewList}
+                    selectEntry={this.props.addPageToList}
+                    contentSharingBG={this.props.contentSharingBG}
+                    spacesBG={this.props.spacesBG}
+                />
+            </PopoutBox>
         )
     }
 
     private renderMarkdownHelpButton() {
+        if (!this.state.toggleShowTutorial) {
+            return
+        }
+
         return (
-            <QuickTutorial
-                markdownHelpOnTop={true}
-                getKeyboardShortcutsState={getKeyboardShortcutsState}
-            />
+            <PopoutBox
+                targetElementRef={this.markdownbuttonRef.current}
+                placement={'bottom-start'}
+                offsetX={10}
+                closeComponent={() => this.toggleShowTutorial()}
+                width={'420px'}
+                bigClosingScreen
+            >
+                <QuickTutorial
+                    markdownHelpOnTop={true}
+                    getKeyboardShortcutsState={getKeyboardShortcutsState}
+                />
+            </PopoutBox>
         )
     }
 
@@ -257,49 +269,37 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <DefaultFooterStyled>
                 <BtnContainerStyled>
-                    <NewHoverBox
-                        referenceEl={this.markdownbuttonRef.current}
-                        componentToOpen={
-                            this.state.toggleShowTutorial
-                                ? this.renderMarkdownHelpButton()
-                                : null
-                        }
-                        placement={'bottom-end'}
-                        offsetX={10}
-                        closeComponent={() => this.toggleShowTutorial()}
-                        width={'420px'}
-                        strategy={'fixed'}
-                        bigClosingScreen
+                    <MarkdownButtonContainer
+                        onClick={() => this.toggleShowTutorial()}
+                        ref={this.markdownbuttonRef}
                     >
-                        <MarkdownButtonContainer
-                            onClick={() => this.toggleShowTutorial()}
-                            ref={this.markdownbuttonRef}
-                        >
-                            Formatting
-                            <Icon
-                                filePath={icons.helpIcon}
-                                heightAndWidth={'20px'}
-                                hoverOff
-                            />
-                        </MarkdownButtonContainer>
-                    </NewHoverBox>
-                    <ButtonTooltip tooltipText="esc" position="bottom">
+                        Formatting
                         <Icon
-                            onClick={this.handleCancel}
-                            icon={icons.removeX}
-                            color={'normalText'}
-                            heightAndWidth="20px"
+                            filePath={icons.helpIcon}
+                            heightAndWidth={'20px'}
+                            hoverOff
                         />
-                    </ButtonTooltip>
-                    <SaveBtn
-                        onSave={this.handleSave}
-                        hasSharedLists={this.hasSharedLists}
-                        renderCollectionsPicker={
-                            this.renderSharedCollectionsPicker
-                        }
-                        shortcutText={`${AnnotationCreate.MOD_KEY} + Enter`}
-                    />
+                    </MarkdownButtonContainer>
+                    <SaveCancelArea>
+                        <TooltipBox
+                            tooltipText="Cancel Edit (esc)"
+                            placement="bottom"
+                        >
+                            <Icon
+                                onClick={this.handleCancel}
+                                icon={icons.removeX}
+                                color={'normalText'}
+                                heightAndWidth="20px"
+                            />
+                        </TooltipBox>
+                        <SaveBtn
+                            onSave={this.handleSave}
+                            hasSharedLists={this.hasSharedLists}
+                            shortcutText={`${AnnotationCreate.MOD_KEY} + Enter`}
+                        />
+                    </SaveCancelArea>
                 </BtnContainerStyled>
+                {this.renderMarkdownHelpButton()}
             </DefaultFooterStyled>
         )
     }
@@ -341,11 +341,10 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 onEditBtnClick={() =>
                                     this.setState({ isListPickerShown: true })
                                 }
-                                renderSpacePicker={
-                                    this.state.isListPickerShown &&
-                                    this.renderCollectionsPicker
-                                }
+                                spacePickerButtonRef={this.spacePickerButtonRef}
+                                renderSpacePicker={this.renderSpacePicker}
                             />
+                            {this.renderSpacePicker()}
                             <SaveActionBar>
                                 {this.renderActionButtons()}
                             </SaveActionBar>
@@ -358,6 +357,13 @@ export class AnnotationCreate extends React.Component<Props, State>
 }
 
 export default onClickOutside(AnnotationCreate)
+
+const SaveCancelArea = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    justify-content: space-between;
+`
 
 const DeleteConfirmStyled = styled.span`
     box-sizing: border-box;
@@ -405,15 +411,14 @@ const FooterContainer = styled.div`
     justify-content: space-between;
     align-items: flex-start;
     z-index: 998;
-    width: 100%;
+    width: fill-available;
 `
 
 const SaveActionBar = styled.div`
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    position: absolute;
-    right: 20px;
+
     z-index: 1001;
     grid-gap: 10px;
 `

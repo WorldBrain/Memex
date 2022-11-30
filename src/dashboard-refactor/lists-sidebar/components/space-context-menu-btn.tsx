@@ -3,11 +3,11 @@ import styled from 'styled-components'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { ClickAway } from 'src/util/click-away-wrapper'
 import SpaceContextMenu, {
     Props as SpaceContextMenuProps,
 } from 'src/custom-lists/ui/space-context-menu'
-import { NewHoverBox } from '@worldbrain/memex-common/lib/common-ui/components/hover-box'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 export interface Props
     extends Omit<
         SpaceContextMenuProps,
@@ -35,19 +35,14 @@ export default class SpaceContextMenuButton extends PureComponent<
         return this.props.toggleMenu(e)
     }
 
-    render() {
+    renderContextMenu() {
+        if (!this.props.isMenuDisplayed) {
+            return
+        }
+
         return (
-            <NewHoverBox
-                referenceEl={this.spaceContextMenuButton.current}
-                componentToOpen={
-                    this.props.isMenuDisplayed ? (
-                        <SpaceContextMenu
-                            ref={this.contextMenuRef}
-                            {...this.props}
-                            {...this.state}
-                        />
-                    ) : null
-                }
+            <PopoutBox
+                targetElementRef={this.spaceContextMenuButton.current}
                 placement={'right-start'}
                 offsetX={30}
                 offsetY={-10}
@@ -56,14 +51,33 @@ export default class SpaceContextMenuButton extends PureComponent<
                 width={'300px'}
                 bigClosingScreen
             >
-                <Icon
-                    onClick={this.toggleMenu}
-                    heightAndWidth="14px"
-                    filePath={icons.dots}
-                    active={this.props.isMenuDisplayed}
-                    ref={this.spaceContextMenuButton}
+                <SpaceContextMenu
+                    ref={this.contextMenuRef}
+                    {...this.props}
+                    {...this.state}
                 />
-            </NewHoverBox>
+            </PopoutBox>
+        )
+    }
+
+    render() {
+        return (
+            <>
+                <TooltipBox
+                    tooltipText={'Share & Edit'}
+                    placement={'bottom'}
+                    strategy={'fixed'}
+                >
+                    <Icon
+                        onClick={this.toggleMenu}
+                        heightAndWidth="14px"
+                        filePath={icons.dots}
+                        active={this.props.isMenuDisplayed}
+                        containerRef={this.spaceContextMenuButton}
+                    />
+                </TooltipBox>
+                {this.renderContextMenu()}
+            </>
         )
     }
 }

@@ -13,11 +13,10 @@ import DatePicker, {
 import type { SearchFilterLabel, SearchFilterType } from '../types'
 import { DomainPickerDependencies } from './DomainPicker/logic'
 import { TagPickerDependencies } from 'src/tags/ui/TagPicker/logic'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
-import { NewHoverBox } from '@worldbrain/memex-common/lib/common-ui/components/hover-box'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
@@ -46,6 +45,10 @@ export interface FiltersBarProps {
 }
 
 export default class FiltersBar extends PureComponent<FiltersBarProps> {
+    spaceFilterButtonRef = React.createRef<HTMLDivElement>()
+    dateFilterButtonRef = React.createRef<HTMLDivElement>()
+    domainFilterButtonRef = React.createRef<HTMLDivElement>()
+
     private renderFilterSelectButton = (
         label: SearchFilterLabel,
         name: SearchFilterType,
@@ -58,7 +61,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             | SpacePickerDependencies
             | DateRangeSelectionProps
             | DomainPickerDependencies,
-        ref: React.RefObject<HTMLDivElement>,
+        componentRef: React.RefObject<HTMLDivElement>,
     ) => (
         <Margin vertical="7px" width="auto">
             <FilterSelectButton
@@ -66,17 +69,13 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 onClick={onToggle}
                 className={`${name}-picker-button`}
                 filterActive={isShown || isFiltered}
-                ref={ref}
+                ref={componentRef}
             >
                 <Icon path={filterIcons} heightAndWidth="16px" hoverOff />
                 {this.renderFilterInfo(filterProps, name, isFiltered, label)}
             </FilterSelectButton>
         </Margin>
     )
-
-    spaceFilterButtonRef = React.createRef<HTMLDivElement>()
-    dateFilterButtonRef = React.createRef<HTMLDivElement>()
-    domainFilterButtonRef = React.createRef<HTMLDivElement>()
 
     private renderFilterInfo = (
         filterProps: any,
@@ -158,34 +157,67 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
     }
 
     private renderDatePicker = () => {
+        if (!this.props.showDatesFilter) {
+            return
+        }
+
         return (
-            <DatePicker
-                {...this.props.datePickerProps}
-                outsideClickIgnoreClass="date-picker-button"
-            />
+            <PopoutBox
+                targetElementRef={this.dateFilterButtonRef.current}
+                placement={'bottom-start'}
+                offsetX={10}
+                closeComponent={this.props.toggleDatesFilter}
+            >
+                <DatePicker
+                    {...this.props.datePickerProps}
+                    outsideClickIgnoreClass="date-picker-button"
+                />
+            </PopoutBox>
         )
     }
 
     private renderSpacePicker = () => {
+        if (!this.props.showSpaceFilter) {
+            return
+        }
+
         return (
-            <SpacePicker
-                {...this.props.spacePickerProps}
-                searchInputPlaceholder="Add Space filters"
-                removeTooltipText="Remove Space filter"
-                outsideClickIgnoreClass="space-picker-button"
-                filterMode
-            />
+            <PopoutBox
+                targetElementRef={this.spaceFilterButtonRef.current}
+                placement={'bottom-start'}
+                offsetX={10}
+                closeComponent={this.props.toggleSpaceFilter}
+            >
+                <SpacePicker
+                    {...this.props.spacePickerProps}
+                    searchInputPlaceholder="Add Space filters"
+                    removeTooltipText="Remove Space filter"
+                    outsideClickIgnoreClass="space-picker-button"
+                    filterMode
+                />
+            </PopoutBox>
         )
     }
 
     private renderDomainPicker = () => {
+        if (!this.props.showDomainsFilter) {
+            return
+        }
+
         return (
-            <DomainPicker
-                {...this.props.domainPickerProps}
-                searchInputPlaceholder="Add domain filters"
-                removeToolTipText="Remove filter"
-                outsideClickIgnoreClass="domain-picker-button"
-            />
+            <PopoutBox
+                targetElementRef={this.domainFilterButtonRef.current}
+                placement={'bottom-start'}
+                offsetX={10}
+                closeComponent={this.props.toggleDomainsFilter}
+            >
+                <DomainPicker
+                    {...this.props.domainPickerProps}
+                    searchInputPlaceholder="Add domain filters"
+                    removeToolTipText="Remove filter"
+                    outsideClickIgnoreClass="domain-picker-button"
+                />
+            </PopoutBox>
         )
     }
 
@@ -197,75 +229,43 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                         sidebarWidth={this.props.spaceSidebarWidth}
                         spaceSidebarLocked={this.props.spaceSidebarLocked}
                     >
-                        <NewHoverBox
-                            referenceEl={this.dateFilterButtonRef.current}
-                            componentToOpen={
-                                this.props.showDatesFilter
-                                    ? this.renderDatePicker()
-                                    : null
-                            }
-                            placement={'bottom-start'}
-                            offsetX={10}
-                            closeComponent={this.props.toggleDatesFilter}
-                        >
-                            {this.renderFilterSelectButton(
-                                'Date',
-                                'date',
-                                this.props.toggleDatesFilter,
-                                this.props.showDatesFilter,
-                                this.props.areDatesFiltered,
-                                icons.date,
-                                this.props.datePickerProps,
-                                this.dateFilterButtonRef,
-                            )}
-                        </NewHoverBox>
-                        <NewHoverBox
-                            referenceEl={this.domainFilterButtonRef.current}
-                            componentToOpen={
-                                this.props.showDomainsFilter
-                                    ? this.renderDomainPicker()
-                                    : null
-                            }
-                            placement={'bottom-start'}
-                            offsetX={10}
-                            closeComponent={this.props.toggleDomainsFilter}
-                        >
-                            {this.renderFilterSelectButton(
-                                'Domains',
-                                'domain',
-                                this.props.toggleDomainsFilter,
-                                this.props.showDomainsFilter,
-                                this.props.areDomainsFiltered,
-                                icons.globe,
-                                this.props.domainPickerProps,
-                                this.domainFilterButtonRef,
-                            )}
-                        </NewHoverBox>
-                        <NewHoverBox
-                            referenceEl={this.spaceFilterButtonRef.current}
-                            componentToOpen={
-                                this.props.showSpaceFilter
-                                    ? this.renderSpacePicker()
-                                    : null
-                            }
-                            placement={'bottom-start'}
-                            offsetX={10}
-                            closeComponent={this.props.toggleSpaceFilter}
-                        >
-                            {this.renderFilterSelectButton(
-                                'Spaces',
-                                'space',
-                                this.props.toggleSpaceFilter,
-                                this.props.showSpaceFilter,
-                                this.props.areSpacesFiltered,
-                                this.props.areSpacesFiltered
-                                    ? icons.collectionsFull
-                                    : icons.collectionsEmpty,
-                                this.props.spacePickerProps,
-                                this.spaceFilterButtonRef,
-                            )}
-                        </NewHoverBox>
+                        {this.renderFilterSelectButton(
+                            'Date',
+                            'date',
+                            this.props.toggleDatesFilter,
+                            this.props.showDatesFilter,
+                            this.props.areDatesFiltered,
+                            icons.date,
+                            this.props.datePickerProps,
+                            this.dateFilterButtonRef,
+                        )}
+
+                        {this.renderFilterSelectButton(
+                            'Domains',
+                            'domain',
+                            this.props.toggleDomainsFilter,
+                            this.props.showDomainsFilter,
+                            this.props.areDomainsFiltered,
+                            icons.globe,
+                            this.props.domainPickerProps,
+                            this.domainFilterButtonRef,
+                        )}
+                        {this.renderFilterSelectButton(
+                            'Spaces',
+                            'space',
+                            this.props.toggleSpaceFilter,
+                            this.props.showSpaceFilter,
+                            this.props.areSpacesFiltered,
+                            this.props.areSpacesFiltered
+                                ? icons.collectionsFull
+                                : icons.collectionsEmpty,
+                            this.props.spacePickerProps,
+                            this.spaceFilterButtonRef,
+                        )}
                     </FilterBtnsContainer>
+                    {this.renderDomainPicker()}
+                    {this.renderSpacePicker()}
+                    {this.renderDatePicker()}
                 </Container>
             </>
         )

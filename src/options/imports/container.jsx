@@ -2,8 +2,6 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-
-import ButtonTooltip from '../../common-ui/components/button-tooltip'
 import * as selectors from './selectors'
 import * as actions from './actions'
 import * as constants from './constants'
@@ -23,6 +21,7 @@ import { SecondaryAction } from 'src/common-ui/components/design-library/actions
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import styled from 'styled-components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 class ImportContainer extends Component {
     static propTypes = {
@@ -380,16 +379,16 @@ class ImportContainer extends Component {
         <ButtonBar helpText={this.renderHelpText()} {...this.props}>
             {this.props.shouldRenderEsts && (
                 <React.Fragment>
-                    <ButtonTooltip
+                    <TooltipBox
                         tooltipText="Recalculate Numbers"
-                        position="bottom"
+                        placement="bottom"
                     >
                         <Icon
                             onClick={this.props.recalcEsts}
                             heightAndWidth="30px"
                             filePath={icons.reload}
                         />
-                    </ButtonTooltip>
+                    </TooltipBox>
                 </React.Fragment>
             )}
             {this.props.isRunning && this.renderCancelButton()}

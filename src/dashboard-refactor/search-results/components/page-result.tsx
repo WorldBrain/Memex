@@ -21,11 +21,12 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import AllNotesShareMenu, {
     Props as ShareMenuProps,
 } from 'src/overview/sharing/AllNotesShareMenu'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
 export interface Props
     extends PageData,
@@ -47,6 +48,9 @@ export default class PageResultView extends PureComponent<Props> {
             ? this.props.fullPdfUrl!
             : this.props.fullUrl
     }
+
+    spacePickerButtonRef = React.createRef<HTMLElement>()
+    copyPasterButtonRef = React.createRef<HTMLElement>()
 
     private get domain(): string {
         let fullUrl: URL
@@ -102,66 +106,90 @@ export default class PageResultView extends PureComponent<Props> {
         return this.props.onListPickerBarBtnClick
     }
 
-    private renderSpacePicker = () => {
-        return (
-            <div onMouseLeave={this.listPickerBtnClickHandler}>
-                <CollectionPicker
-                    selectEntry={(listId) =>
-                        this.props.onListPickerUpdate({
-                            added: listId,
-                            deleted: null,
-                            selected: [],
-                        })
-                    }
-                    unselectEntry={(listId) =>
-                        this.props.onListPickerUpdate({
-                            added: null,
-                            deleted: listId,
-                            selected: [],
-                        })
-                    }
-                    createNewEntry={this.props.createNewList}
-                    initialSelectedListIds={() => this.props.lists}
-                    onClickOutside={this.listPickerBtnClickHandler}
-                />
-            </div>
-        )
+    private renderSpacePicker() {
+        if (this.props.listPickerShowStatus === 'lists-bar') {
+            return (
+                <PopoutBox
+                    targetElementRef={this.spacePickerButtonRef.current}
+                    placement={'bottom-start'}
+                    offsetX={10}
+                    bigClosingScreen
+                >
+                    <CollectionPicker
+                        selectEntry={(listId) =>
+                            this.props.onListPickerUpdate({
+                                added: listId,
+                                deleted: null,
+                                selected: [],
+                            })
+                        }
+                        unselectEntry={(listId) =>
+                            this.props.onListPickerUpdate({
+                                added: null,
+                                deleted: listId,
+                                selected: [],
+                            })
+                        }
+                        createNewEntry={this.props.createNewList}
+                        initialSelectedListIds={() => this.props.lists}
+                        onClickOutside={this.listPickerBtnClickHandler}
+                    />
+                </PopoutBox>
+            )
+        }
+
+        if (this.props.listPickerShowStatus === 'footer') {
+            return (
+                <PopoutBox
+                    targetElementRef={this.spacePickerButtonRef.current}
+                    placement={'bottom-end'}
+                    offsetX={10}
+                    bigClosingScreen
+                >
+                    <CollectionPicker
+                        selectEntry={(listId) =>
+                            this.props.onListPickerUpdate({
+                                added: listId,
+                                deleted: null,
+                                selected: [],
+                            })
+                        }
+                        unselectEntry={(listId) =>
+                            this.props.onListPickerUpdate({
+                                added: null,
+                                deleted: listId,
+                                selected: [],
+                            })
+                        }
+                        createNewEntry={this.props.createNewList}
+                        initialSelectedListIds={() => this.props.lists}
+                        onClickOutside={this.listPickerBtnClickHandler}
+                    />
+                </PopoutBox>
+            )
+        }
+    }
+
+    private renderCopyPaster() {
+        if (this.props.isCopyPasterShown) {
+            return (
+                <PopoutBox
+                    targetElementRef={this.copyPasterButtonRef.current}
+                    placement={'bottom'}
+                    offsetX={10}
+                    bigClosingScreen
+                    strategy={'fixed'}
+                >
+                    <PageNotesCopyPaster
+                        normalizedPageUrls={[this.props.normalizedUrl]}
+                        onClickOutside={this.props.onCopyPasterBtnClick}
+                    />
+                </PopoutBox>
+            )
+        }
     }
 
     private renderPopouts() {
-        if (this.props.listPickerShowStatus === 'footer') {
-            return (
-                <CollectionPicker
-                    selectEntry={(listId) =>
-                        this.props.onListPickerUpdate({
-                            added: listId,
-                            deleted: null,
-                            selected: [],
-                        })
-                    }
-                    unselectEntry={(listId) =>
-                        this.props.onListPickerUpdate({
-                            added: null,
-                            deleted: listId,
-                            selected: [],
-                        })
-                    }
-                    createNewEntry={this.props.createNewList}
-                    initialSelectedListIds={() => this.props.lists}
-                    onClickOutside={this.listPickerBtnClickHandler}
-                />
-            )
-        }
-
-        if (this.props.isCopyPasterShown) {
-            return (
-                <PageNotesCopyPaster
-                    normalizedPageUrls={[this.props.normalizedUrl]}
-                    onClickOutside={this.props.onCopyPasterBtnClick}
-                />
-            )
-        }
-
         if (this.props.isShareMenuShown) {
             return <AllNotesShareMenu {...this.props.shareMenuProps} />
         }
@@ -178,16 +206,16 @@ export default class PageResultView extends PureComponent<Props> {
 
         return (
             <RemoveFromListBtn onClick={this.props.onRemoveFromListBtnClick}>
-                <ButtonTooltip
+                <TooltipBox
                     tooltipText={
                         this.props.filteredbyListID === SPECIAL_LIST_IDS.INBOX
                             ? 'Remove from Inbox'
                             : 'Remove from Space'
                     }
-                    position="left"
+                    placement="left"
                 >
                     <Icon heightAndWidth="12px" path={icons.close} />
-                </ButtonTooltip>
+                </TooltipBox>
             </RemoveFromListBtn>
         )
     }
@@ -223,9 +251,7 @@ export default class PageResultView extends PureComponent<Props> {
                     key: 'copy-paste-page-btn',
                     image: icons.copy,
                     onClick: this.props.onCopyPasterBtnClick,
-                    componentToOpen: this.props.isCopyPasterShown
-                        ? this.renderPopouts()
-                        : null,
+                    ref: this.copyPasterButtonRef,
                     tooltipText: 'Copy Page',
                 },
                 // {
@@ -239,12 +265,9 @@ export default class PageResultView extends PureComponent<Props> {
                     image: icons.plus,
                     imageColor: 'purple',
                     ButtonText: 'Spaces',
-                    componentToOpen:
-                        this.props.listPickerShowStatus === 'footer'
-                            ? this.renderPopouts()
-                            : null,
                     iconSize: '14px',
                     onClick: this.props.onListPickerFooterBtnClick,
+                    ref: this.spacePickerButtonRef,
                 },
                 {
                     key: 'expand-notes-btn',
@@ -280,6 +303,7 @@ export default class PageResultView extends PureComponent<Props> {
                 key: 'copy-paste-page-btn',
                 isDisabled: true,
                 image: icons.copy,
+                ref: this.copyPasterButtonRef,
             },
             {
                 key: 'add-spaces-btn',
@@ -287,6 +311,7 @@ export default class PageResultView extends PureComponent<Props> {
                 imageColor: 'purple',
                 iconSize: '14px',
                 ButtonText: 'Spaces',
+                ref: this.spacePickerButtonRef,
                 // onClick: this.props.onListPickerFooterBtnClick,
             },
             // {
@@ -316,6 +341,7 @@ export default class PageResultView extends PureComponent<Props> {
         const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
         return (
             <ItemBox
+                onMouseOver={this.props.onMainContentHover}
                 firstDivProps={{
                     onMouseLeave: this.props.onUnhover,
                     onDragStart: this.props.onPageDrag,
@@ -364,10 +390,13 @@ export default class PageResultView extends PureComponent<Props> {
                     <ItemBoxBottom
                         firstDivProps={{
                             onMouseEnter: this.props.onFooterHover,
+                            onMouseOver: this.props.onFooterHover,
                         }}
                         creationInfo={{ createdWhen: this.props.displayTime }}
                         actions={this.calcFooterActions()}
                     />
+                    {this.renderSpacePicker()}
+                    {this.renderCopyPaster()}
                 </StyledPageResult>
             </ItemBox>
         )

@@ -21,14 +21,12 @@ import EntryRow, {
 } from 'src/common-ui/GenericPicker/components/EntryRow'
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
-import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { TagResultItem } from './components/TagResultItem'
 import { EntrySelectedTag } from './components/EntrySelectedTag'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 import { tags } from 'src/util/remote-functions-background'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import colors from 'src/dashboard-refactor/colors'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export type { TagPickerDependencies }
 
@@ -145,15 +143,15 @@ class TagPicker extends StatefulUIElement<
     renderNewTagAllTabsButton = () =>
         this.props.actOnAllTabs && (
             <IconStyleWrapper show>
-                <ButtonTooltip
+                <TooltipBox
                     tooltipText="Tag all tabs in window"
-                    position="left"
+                    placement="left"
                 >
                     <ActOnAllTabsButton
                         size={20}
                         onClick={this.handleNewTagAllPress}
                     />
-                </ButtonTooltip>
+                </TooltipBox>
             </IconStyleWrapper>
         )
 

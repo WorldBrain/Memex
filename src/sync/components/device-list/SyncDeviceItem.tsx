@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { SyncDevice } from 'src/sync/components/types'
 import styled from 'styled-components'
 import { formatTime } from 'src/util/time'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import {
     colorDisabled,
     colorPrimary,

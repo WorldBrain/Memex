@@ -8,11 +8,11 @@ import { Props as EditableItemProps } from './sidebar-editable-item'
 import { ListData, ListNameHighlightIndices } from '../types'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import SpaceContextMenuButton from './space-context-menu-btn'
-import { ButtonTooltip } from 'src/common-ui/components'
 import {
     contentSharing,
     collections,
 } from 'src/util/remote-functions-background'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export interface Props {
     className?: string
@@ -186,9 +186,9 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
 
         const collaborationIcon = this.props.isCollaborative && (
             <>
-                <ButtonTooltip tooltipText={'Shared Space'} position="bottom">
+                <TooltipBox tooltipText={'Shared Space'} placement="bottom">
                     <Icon heightAndWidth="14px" icon={'people'} hoverOff />
-                </ButtonTooltip>
+                </TooltipBox>
             </>
         )
 

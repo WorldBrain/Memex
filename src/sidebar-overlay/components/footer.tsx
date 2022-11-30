@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ButtonTooltip } from 'src/common-ui/components/'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 
 const styles = require('./footer.css')
@@ -33,7 +33,7 @@ const Footer = ({
             )}
         </div>
         <div className={styles.savecancel}>
-            <ButtonTooltip tooltipText={`${MOD_KEY} + Enter`} position="top">
+            <TooltipBox tooltipText={`${MOD_KEY} + Enter`} placement="top">
                 <button
                     className={actionBtnClassName}
                     onClick={(e) => {
@@ -43,7 +43,7 @@ const Footer = ({
                 >
                     {actionBtnText}ss
                 </button>
-            </ButtonTooltip>
+            </TooltipBox>
             <button
                 className={cancelBtnClassName}
                 onClick={(e) => {

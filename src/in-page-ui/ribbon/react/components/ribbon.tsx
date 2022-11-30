@@ -3,7 +3,6 @@ import qs from 'query-string'
 import styled, { css } from 'styled-components'
 
 import extractQueryFilters from 'src/util/nlp-time-filter'
-import { ButtonTooltip } from 'src/common-ui/components/'
 import {
     shortcuts,
     ShortcutElData,
@@ -26,8 +25,9 @@ import type { ListDetailsGetter } from 'src/annotations/types'
 import ExtraButtonsPanel from './extra-buttons-panel'
 import FeedPanel from './feed-panel'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import { NewHoverBox } from '@worldbrain/memex-common/lib/common-ui/components/hover-box'
 import { addUrlToBlacklist } from 'src/blacklist/utils'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
@@ -63,10 +63,10 @@ export default class Ribbon extends Component<Props, State> {
     private openOverviewTabRPC
     private openOptionsTabRPC
     getFeedInfo
+    settingsButtonRef
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
 
     private spacePickerRef = createRef<HTMLDivElement>()
-    private settingsButtonRef = createRef<HTMLDivElement>()
     private tutorialButtonRef = createRef<HTMLDivElement>()
     private feedButtonRef = createRef<HTMLDivElement>()
     private sidebarButtonRef = createRef<HTMLDivElement>()
@@ -89,6 +89,8 @@ export default class Ribbon extends Component<Props, State> {
         )
         this.openOptionsTabRPC = this.props.getRemoteFunction('openOptionsTab')
         this.getFeedInfo = this.props.getRemoteFunction('getFeedInfo')
+
+        this.settingsButtonRef = createRef<HTMLDivElement>()
     }
 
     async componentDidMount() {
@@ -148,19 +150,31 @@ export default class Ribbon extends Component<Props, State> {
         this.props.lists.setShowListsPicker(false)
     }
 
-    private renderCollectionsPicker() {
+    private renderSpacePicker() {
+        if (!this.props.lists.showListsPicker) {
+            return
+        }
+
         return (
-            <CollectionPicker
-                {...this.props.lists}
-                spacesBG={this.props.spacesBG}
-                contentSharingBG={this.props.contentSharingBG}
-                actOnAllTabs={this.props.lists.listAllTabs}
-                initialSelectedListIds={
-                    this.props.lists.fetchInitialListSelections
-                }
-                onEscapeKeyDown={this.hideListPicker}
-                handleClickOutside={this.hideListPicker}
-            />
+            <PopoutBox
+                targetElementRef={this.spacePickerRef.current}
+                placement={'left-start'}
+                offsetX={10}
+                closeComponent={this.hideListPicker}
+                bigClosingScreen
+            >
+                <CollectionPicker
+                    {...this.props.lists}
+                    spacesBG={this.props.spacesBG}
+                    contentSharingBG={this.props.contentSharingBG}
+                    actOnAllTabs={this.props.lists.listAllTabs}
+                    initialSelectedListIds={
+                        this.props.lists.fetchInitialListSelections
+                    }
+                    onEscapeKeyDown={this.hideListPicker}
+                    handleClickOutside={this.hideListPicker}
+                />
+            </PopoutBox>
         )
     }
 
@@ -170,9 +184,13 @@ export default class Ribbon extends Component<Props, State> {
         }
 
         return (
-            <BlurredSidebarOverlay
-                onOutsideClick={() => this.props.toggleShowTutorial()}
-                skipRendering={!this.props.sidebar.isSidebarOpen}
+            <PopoutBox
+                targetElementRef={this.tutorialButtonRef.current}
+                placement={'left-start'}
+                offsetX={10}
+                closeComponent={this.props.toggleShowTutorial}
+                width={'420px'}
+                bigClosingScreen
             >
                 <QuickTutorial
                     getKeyboardShortcutsState={getKeyboardShortcutsState}
@@ -180,7 +198,7 @@ export default class Ribbon extends Component<Props, State> {
                     onSettingsClick={() => this.openOptionsTabRPC('settings')}
                     onEscapeKeyDown={() => this.props.toggleShowTutorial()}
                 />
-            </BlurredSidebarOverlay>
+            </PopoutBox>
         )
     }
 
@@ -198,9 +216,14 @@ export default class Ribbon extends Component<Props, State> {
         }
 
         return (
-            <BlurredSidebarOverlay
-                onOutsideClick={() => this.props.toggleFeed()}
-                skipRendering={!this.props.sidebar.isSidebarOpen}
+            <PopoutBox
+                targetElementRef={this.feedButtonRef.current}
+                placement={'left-start'}
+                offsetX={0}
+                offsetY={-15}
+                width={'600px'}
+                closeComponent={() => this.props.toggleFeed()}
+                bigClosingScreen
             >
                 <FeedPanel closePanel={() => this.props.toggleFeed()}>
                     <FeedContainer>
@@ -221,7 +244,7 @@ export default class Ribbon extends Component<Props, State> {
                         <FeedFrame src={this.whichFeed()} />
                     </FeedContainer>
                 </FeedPanel>
-            </BlurredSidebarOverlay>
+            </PopoutBox>
         )
     }
 
@@ -245,172 +268,196 @@ export default class Ribbon extends Component<Props, State> {
                 onOutsideClick={() => this.props.toggleShowExtraButtons()}
                 skipRendering={!this.props.sidebar.isSidebarOpen}
             >
-                <ExtraButtonsPanel
-                    closePanel={() => this.props.toggleShowExtraButtons()}
+                <PopoutBox
+                    targetElementRef={this.settingsButtonRef.current}
+                    placement={'left-start'}
+                    offsetX={10}
+                    width={'300px'}
                 >
-                    <BlockListArea>
-                        <BlockListTitleArea>
+                    <ExtraButtonsPanel
+                        closePanel={() => this.props.toggleShowExtraButtons()}
+                    >
+                        <BlockListArea>
+                            <BlockListTitleArea>
+                                <Icon
+                                    filePath={'block'}
+                                    heightAndWidth="16px"
+                                    hoverOff
+                                />
+                                <InfoText>Disable Ribbon on this site</InfoText>
+                                <Icon
+                                    onClick={() =>
+                                        this.openOptionsTabRPC('blocklist')
+                                    }
+                                    filePath={'settings'}
+                                    heightAndWidth={'14px'}
+                                    color={'purple'}
+                                />
+                            </BlockListTitleArea>
+                            <TextBoxArea>
+                                <TextField
+                                    value={this.state.blockListValue}
+                                    onChange={(event) =>
+                                        this.setState({
+                                            blockListValue: (event.target as HTMLInputElement)
+                                                .value,
+                                        })
+                                    }
+                                    width="fill-available"
+                                />
+                                <Icon
+                                    heightAndWidth="22px"
+                                    filePath="plus"
+                                    color="purple"
+                                    onClick={async () => {
+                                        this.setState({
+                                            blockListValue:
+                                                'Added to block list',
+                                        })
+                                        await addUrlToBlacklist(
+                                            this.state.blockListValue,
+                                        )
+                                        setTimeout(
+                                            () =>
+                                                this.props.handleRemoveRibbon(),
+                                            2000,
+                                        )
+                                    }}
+                                />
+                            </TextBoxArea>
+                        </BlockListArea>
+                        <ExtraButtonRow
+                            onClick={() => {
+                                this.props.handleRibbonToggle()
+                                this.props.sidebar.closeSidebar()
+                            }}
+                        >
                             <Icon
-                                filePath={'block'}
+                                filePath={icons.quickActionRibbon}
+                                heightAndWidth="22px"
+                                hoverOff
+                            />
+                            {this.props.isRibbonEnabled ? (
+                                <InfoText>Disable Ribbon</InfoText>
+                            ) : (
+                                <InfoText>Enable Ribbon</InfoText>
+                            )}
+                        </ExtraButtonRow>
+                        <ExtraButtonRow
+                            onClick={
+                                this.props.highlights.handleHighlightsToggle
+                            }
+                        >
+                            <Icon
+                                filePath={
+                                    this.props.highlights.areHighlightsEnabled
+                                        ? icons.highlighterFull
+                                        : icons.highlighterEmpty
+                                }
+                                heightAndWidth="22px"
+                                hoverOff
+                            />
+                            {this.props.isRibbonEnabled ? (
+                                <InfoText>Hide Highlights</InfoText>
+                            ) : (
+                                <InfoText>Show Highlights</InfoText>
+                            )}
+                        </ExtraButtonRow>
+
+                        <ExtraButtonRow
+                            onClick={this.props.tooltip.handleTooltipToggle}
+                        >
+                            <Icon
+                                filePath={
+                                    this.props.tooltip.isTooltipEnabled
+                                        ? icons.tooltipOn
+                                        : icons.tooltipOff
+                                }
+                                heightAndWidth="22px"
+                                hoverOff
+                            />
+                            {this.props.isRibbonEnabled ? (
+                                <InfoText>Hide Highlighter Tooltip</InfoText>
+                            ) : (
+                                <InfoText>Show Highlighter Tooltip</InfoText>
+                            )}
+                        </ExtraButtonRow>
+                        <ExtraButtonRow
+                            onClick={() =>
+                                window.open('https://worldbrain.io/tutorials')
+                            }
+                        >
+                            <Icon
+                                filePath={icons.helpIcon}
+                                heightAndWidth="22px"
+                                hoverOff
+                            />
+                            <InfoText>Tutorials</InfoText>
+                        </ExtraButtonRow>
+                        <ExtraButtonRow
+                            onClick={() => this.openOptionsTabRPC('settings')}
+                        >
+                            <Icon
+                                filePath={icons.settings}
                                 heightAndWidth="16px"
                                 hoverOff
                             />
-                            <InfoText>Disable Ribbon on this site</InfoText>
-                            <Icon
-                                onClick={() =>
-                                    this.openOptionsTabRPC('blocklist')
-                                }
-                                filePath={'settings'}
-                                heightAndWidth={'14px'}
-                                color={'purple'}
-                            />
-                        </BlockListTitleArea>
-                        <TextBoxArea>
-                            <TextField
-                                value={this.state.blockListValue}
-                                onChange={(event) =>
-                                    this.setState({
-                                        blockListValue: (event.target as HTMLInputElement)
-                                            .value,
-                                    })
-                                }
-                                width="fill-available"
-                            />
-                            <Icon
-                                heightAndWidth="22px"
-                                filePath="plus"
-                                color="purple"
-                                onClick={async () => {
-                                    this.setState({
-                                        blockListValue: 'Added to block list',
-                                    })
-                                    await addUrlToBlacklist(
-                                        this.state.blockListValue,
-                                    )
-                                    setTimeout(
-                                        () => this.props.handleRemoveRibbon(),
-                                        2000,
-                                    )
-                                }}
-                            />
-                        </TextBoxArea>
-                    </BlockListArea>
-                    <ExtraButtonRow
-                        onClick={() => {
-                            this.props.handleRibbonToggle()
-                            this.props.sidebar.closeSidebar()
-                        }}
-                    >
-                        <Icon
-                            filePath={icons.quickActionRibbon}
-                            heightAndWidth="22px"
-                            hoverOff
-                        />
-                        {this.props.isRibbonEnabled ? (
-                            <InfoText>Disable Ribbon</InfoText>
-                        ) : (
-                            <InfoText>Enable Ribbon</InfoText>
-                        )}
-                    </ExtraButtonRow>
-                    <ExtraButtonRow
-                        onClick={this.props.highlights.handleHighlightsToggle}
-                    >
-                        <Icon
-                            filePath={
-                                this.props.highlights.areHighlightsEnabled
-                                    ? icons.highlighterFull
-                                    : icons.highlighterEmpty
+                            <InfoText>Settings</InfoText>
+                        </ExtraButtonRow>
+                        <ExtraButtonRow
+                            onClick={() =>
+                                window.open('https://worldbrain.io/feedback')
                             }
-                            heightAndWidth="22px"
-                            hoverOff
-                        />
-                        {this.props.isRibbonEnabled ? (
-                            <InfoText>Hide Highlights</InfoText>
-                        ) : (
-                            <InfoText>Show Highlights</InfoText>
-                        )}
-                    </ExtraButtonRow>
-
-                    <ExtraButtonRow
-                        onClick={this.props.tooltip.handleTooltipToggle}
-                    >
-                        <Icon
-                            filePath={
-                                this.props.tooltip.isTooltipEnabled
-                                    ? icons.tooltipOn
-                                    : icons.tooltipOff
-                            }
-                            heightAndWidth="22px"
-                            hoverOff
-                        />
-                        {this.props.isRibbonEnabled ? (
-                            <InfoText>Hide Highlighter Tooltip</InfoText>
-                        ) : (
-                            <InfoText>Show Highlighter Tooltip</InfoText>
-                        )}
-                    </ExtraButtonRow>
-                    <ExtraButtonRow
-                        onClick={() =>
-                            window.open('https://worldbrain.io/tutorials')
-                        }
-                    >
-                        <Icon
-                            filePath={icons.helpIcon}
-                            heightAndWidth="22px"
-                            hoverOff
-                        />
-                        <InfoText>Tutorials</InfoText>
-                    </ExtraButtonRow>
-                    <ExtraButtonRow
-                        onClick={() => this.openOptionsTabRPC('settings')}
-                    >
-                        <Icon
-                            filePath={icons.settings}
-                            heightAndWidth="16px"
-                            hoverOff
-                        />
-                        <InfoText>Settings</InfoText>
-                    </ExtraButtonRow>
-                    <ExtraButtonRow
-                        onClick={() =>
-                            window.open('https://worldbrain.io/feedback')
-                        }
-                    >
-                        <Icon
-                            filePath={icons.sadFace}
-                            heightAndWidth="16px"
-                            hoverOff
-                        />
-                        <InfoText>Feature Requests & Bugs</InfoText>
-                    </ExtraButtonRow>
-                </ExtraButtonsPanel>
+                        >
+                            <Icon
+                                filePath={icons.sadFace}
+                                heightAndWidth="16px"
+                                hoverOff
+                            />
+                            <InfoText>Feature Requests & Bugs</InfoText>
+                        </ExtraButtonRow>
+                    </ExtraButtonsPanel>
+                </PopoutBox>
             </BlurredSidebarOverlay>
         )
     }
 
     renderCommentBox() {
+        if (!this.props.commentBox.showCommentBox) {
+            return
+        }
+
         return (
-            <CommentBoxContainer
-                hasComment={this.props.commentBox.commentText.length > 0}
+            <PopoutBox
+                targetElementRef={this.sidebarButtonRef.current}
+                placement={'left-start'}
+                offsetX={10}
+                bigClosingScreen
             >
-                <AnnotationCreate
-                    ref={(ref) => (this.annotationCreateRef = ref)}
-                    hide={() => this.props.commentBox.setShowCommentBox(false)}
-                    onSave={this.props.commentBox.saveComment}
-                    onCancel={this.props.commentBox.cancelComment}
-                    onCommentChange={this.props.commentBox.changeComment}
-                    comment={this.props.commentBox.commentText}
-                    lists={this.props.commentBox.lists}
-                    getListDetailsById={this.props.getListDetailsById}
-                    createNewList={this.props.lists.createNewEntry}
-                    addPageToList={this.props.lists.selectEntry}
-                    removePageFromList={this.props.lists.unselectEntry}
-                    isRibbonCommentBox
-                    spacesBG={this.props.spacesBG}
-                    contentSharingBG={this.props.contentSharingBG}
-                    autoFocus
-                />
-            </CommentBoxContainer>
+                <CommentBoxContainer
+                    hasComment={this.props.commentBox.commentText.length > 0}
+                >
+                    <AnnotationCreate
+                        ref={(ref) => (this.annotationCreateRef = ref)}
+                        hide={() =>
+                            this.props.commentBox.setShowCommentBox(false)
+                        }
+                        onSave={this.props.commentBox.saveComment}
+                        onCancel={this.props.commentBox.cancelComment}
+                        onCommentChange={this.props.commentBox.changeComment}
+                        comment={this.props.commentBox.commentText}
+                        lists={this.props.commentBox.lists}
+                        getListDetailsById={this.props.getListDetailsById}
+                        createNewList={this.props.lists.createNewEntry}
+                        addPageToList={this.props.lists.selectEntry}
+                        removePageFromList={this.props.lists.unselectEntry}
+                        isRibbonCommentBox
+                        spacesBG={this.props.spacesBG}
+                        contentSharingBG={this.props.contentSharingBG}
+                        autoFocus
+                    />
+                </CommentBoxContainer>
+            </PopoutBox>
         )
     }
 
@@ -418,7 +465,6 @@ export default class Ribbon extends Component<Props, State> {
         if (!this.state.shortcutsReady) {
             return false
         }
-
         return (
             <OuterRibbon
                 isPeeking={this.props.isExpanded}
@@ -433,47 +479,42 @@ export default class Ribbon extends Component<Props, State> {
                         this.props.sidebar.isSidebarOpen) && (
                         <React.Fragment>
                             <UpperPart>
-                                <NewHoverBox
-                                    referenceEl={this.feedButtonRef.current}
-                                    componentToOpen={
-                                        this.props.showFeed
-                                            ? this.renderFeedInfo()
-                                            : null
+                                <TooltipBox
+                                    targetElementRef={
+                                        this.feedButtonRef.current
                                     }
-                                    tooltipText={this.getTooltipText(
-                                        'addToCollection',
-                                    )}
-                                    placement={'left-start'}
-                                    offsetX={10}
-                                    width={'600px'}
-                                    closeComponent={() =>
-                                        this.props.toggleFeed()
-                                    }
-                                    bigClosingScreen
+                                    tooltipText={'Show Feed'}
+                                    placement={'left'}
+                                    offsetX={0}
                                 >
                                     <FeedIndicatorBox
                                         isSidebarOpen={
                                             this.props.sidebar.isSidebarOpen
                                         }
                                         onClick={() => this.props.toggleFeed()}
+                                        ref={this.feedButtonRef}
                                     >
                                         <FeedActivityDot
                                             key="activity-feed-indicator"
                                             {...this.props.activityIndicator}
                                         />
                                     </FeedIndicatorBox>
-                                </NewHoverBox>
+                                </TooltipBox>
                                 <HorizontalLine
                                     sidebaropen={
                                         this.props.sidebar.isSidebarOpen
                                     }
                                 />
                                 <PageAction>
-                                    <ButtonTooltip
+                                    <TooltipBox
+                                        targetElementRef={
+                                            this.spacePickerRef.current
+                                        }
                                         tooltipText={this.getTooltipText(
                                             'createBookmark',
                                         )}
-                                        position="leftNarrow"
+                                        placement={'left'}
+                                        offsetX={10}
                                     >
                                         <Icon
                                             onClick={() =>
@@ -491,23 +532,16 @@ export default class Ribbon extends Component<Props, State> {
                                                     : icons.heartEmpty
                                             }
                                         />
-                                    </ButtonTooltip>
-                                    <NewHoverBox
-                                        referenceEl={
+                                    </TooltipBox>
+                                    <TooltipBox
+                                        targetElementRef={
                                             this.spacePickerRef.current
-                                        }
-                                        componentToOpen={
-                                            this.props.lists.showListsPicker
-                                                ? this.renderCollectionsPicker()
-                                                : null
                                         }
                                         tooltipText={this.getTooltipText(
                                             'addToCollection',
                                         )}
-                                        placement={'left-start'}
+                                        placement={'left'}
                                         offsetX={10}
-                                        closeComponent={this.hideListPicker}
-                                        bigClosingScreen
                                     >
                                         <Icon
                                             onClick={() =>
@@ -529,26 +563,19 @@ export default class Ribbon extends Component<Props, State> {
                                                     ? icons.collectionsFull
                                                     : icons.collectionsEmpty
                                             }
-                                            ref={this.spacePickerRef}
+                                            containerRef={this.spacePickerRef}
                                         />
-                                    </NewHoverBox>
+                                    </TooltipBox>
                                     {!this.props.sidebar.isSidebarOpen && (
-                                        <NewHoverBox
-                                            referenceEl={
+                                        <TooltipBox
+                                            targetElementRef={
                                                 this.sidebarButtonRef.current
-                                            }
-                                            componentToOpen={
-                                                this.props.commentBox
-                                                    .showCommentBox
-                                                    ? this.renderCommentBox()
-                                                    : null
                                             }
                                             tooltipText={this.getTooltipText(
                                                 'toggleSidebar',
                                             )}
-                                            placement={'left-start'}
+                                            placement={'left'}
                                             offsetX={10}
-                                            bigClosingScreen
                                         >
                                             <Icon
                                                 onClick={(e) =>
@@ -566,14 +593,18 @@ export default class Ribbon extends Component<Props, State> {
                                                           // ? icons.commentFull
                                                           icons.commentEmpty
                                                 }
+                                                containerRef={
+                                                    this.sidebarButtonRef
+                                                }
                                             />
-                                        </NewHoverBox>
+                                        </TooltipBox>
                                     )}
-                                    <ButtonTooltip
+                                    <TooltipBox
                                         tooltipText={this.getTooltipText(
                                             'openDashboard',
                                         )}
-                                        position="leftNarrow"
+                                        placement={'left'}
+                                        offsetX={10}
                                     >
                                         <Icon
                                             onClick={() =>
@@ -583,7 +614,7 @@ export default class Ribbon extends Component<Props, State> {
                                             heightAndWidth="22px"
                                             filePath={icons.searchIcon}
                                         />
-                                    </ButtonTooltip>
+                                    </TooltipBox>
                                 </PageAction>
                             </UpperPart>
                             {!this.props.sidebar.isSidebarOpen && (
@@ -596,47 +627,28 @@ export default class Ribbon extends Component<Props, State> {
                             <BottomSection
                                 sidebaropen={this.props.sidebar.isSidebarOpen}
                             >
-                                <NewHoverBox
-                                    referenceEl={this.settingsButtonRef.current}
-                                    componentToOpen={
-                                        this.props.showExtraButtons
-                                            ? this.renderExtraButtons()
-                                            : null
+                                <Icon
+                                    onClick={() =>
+                                        this.props.toggleShowExtraButtons()
                                     }
-                                    tooltipText={'Settings'}
-                                    placement={'left-start'}
+                                    color={'darkText'}
+                                    heightAndWidth="22px"
+                                    filePath={icons.settings}
+                                    containerRef={this.settingsButtonRef}
+                                />
+                                <TooltipBox
+                                    targetElementRef={
+                                        this.spacePickerRef.current
+                                    }
+                                    tooltipText={
+                                        <span>
+                                            Keyboard Shortcuts
+                                            <br />
+                                            and Help
+                                        </span>
+                                    }
+                                    placement={'left'}
                                     offsetX={10}
-                                    closeComponent={
-                                        this.props.toggleShowExtraButtons
-                                    }
-                                    bigClosingScreen
-                                    width={'300px'}
-                                >
-                                    <Icon
-                                        onClick={() =>
-                                            this.props.toggleShowExtraButtons()
-                                        }
-                                        color={'darkText'}
-                                        heightAndWidth="22px"
-                                        filePath={icons.settings}
-                                        ref={this.settingsButtonRef}
-                                    />
-                                </NewHoverBox>
-                                <NewHoverBox
-                                    referenceEl={this.tutorialButtonRef.current}
-                                    componentToOpen={
-                                        this.props.showTutorial
-                                            ? this.renderTutorial()
-                                            : null
-                                    }
-                                    tooltipText={'Tutorial'}
-                                    placement={'left-start'}
-                                    offsetX={10}
-                                    closeComponent={
-                                        this.props.toggleShowTutorial
-                                    }
-                                    width={'420px'}
-                                    bigClosingScreen
                                 >
                                     <Icon
                                         onClick={() =>
@@ -645,11 +657,11 @@ export default class Ribbon extends Component<Props, State> {
                                         color={'darkText'}
                                         heightAndWidth="22px"
                                         filePath={icons.helpIcon}
-                                        ref={this.tutorialButtonRef}
+                                        containerRef={this.tutorialButtonRef}
                                     />
-                                </NewHoverBox>
+                                </TooltipBox>
                                 {!this.props.sidebar.isSidebarOpen && (
-                                    <ButtonTooltip
+                                    <TooltipBox
                                         tooltipText={
                                             <span>
                                                 Close sidebar this once.
@@ -659,7 +671,8 @@ export default class Ribbon extends Component<Props, State> {
                                                 </SubText>
                                             </span>
                                         }
-                                        position="leftNarrow"
+                                        placement={'left'}
+                                        offsetX={10}
                                     >
                                         <Icon
                                             onClick={(event) => {
@@ -676,11 +689,16 @@ export default class Ribbon extends Component<Props, State> {
                                             heightAndWidth="22px"
                                             filePath={icons.removeX}
                                         />
-                                    </ButtonTooltip>
+                                    </TooltipBox>
                                 )}
                             </BottomSection>
                         </React.Fragment>
                     )}
+                    {this.renderExtraButtons()}
+                    {this.renderSpacePicker()}
+                    {this.renderTutorial()}
+                    {this.renderFeedInfo()}
+                    {this.renderCommentBox()}
                 </InnerRibbon>
             </OuterRibbon>
         )

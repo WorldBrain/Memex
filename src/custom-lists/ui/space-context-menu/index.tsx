@@ -9,7 +9,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -83,8 +83,8 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         <Margin key={link}>
                             <LinkAndRoleBox viewportBreakpoint="normal">
                                 <PermissionArea>
-                                    <ButtonTooltip
-                                        position={'right'}
+                                    <TooltipBox
+                                        placement={'right'}
                                         tooltipText={
                                             sharedListRoleIDToString(roleID) ===
                                             'Contributor' ? (
@@ -107,7 +107,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                             {sharedListRoleIDToString(roleID) +
                                                 ' Access'}
                                         </PermissionText>
-                                    </ButtonTooltip>
+                                    </TooltipBox>
                                 </PermissionArea>
                                 <CopyLinkBox>
                                     <LinkBox
@@ -249,7 +249,7 @@ const ContextMenuContainer = styled.div`
     flex-direction: column;
     width: fill-available;
     padding: 15px;
-    min-height: 200px;
+    min-height: fit-content;
     height: fit-content;
     justify-content: center;
     align-items: flex-start;
@@ -287,7 +287,7 @@ const IconContainer = styled.div`
 
 const LoadingContainer = styled.div`
     display: flex;
-    height: fill-available;
+    height: 170px;
     justify-content: center;
     align-items: center;
     width: fill-available;

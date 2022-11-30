@@ -2,7 +2,6 @@ import React from 'react'
 import styled, { ThemeProvider, css } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ClickAway } from 'src/util/click-away-wrapper'
-import { Props as ButtonTooltipProps } from './button-tooltip'
 
 export interface MenuItemProps {
     name: string
@@ -24,7 +23,6 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     onMenuItemClick?: (itemProps: T) => void
     theme?: ThemeProps
     keepSelectedState?: boolean
-    tooltipProps?: ButtonTooltipProps
     initSelectedIndex?: number
     btnId?: string
     menuTitle?: string
@@ -111,28 +109,6 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                 {props.info && <MenuItemInfo>{props.info}</MenuItemInfo>}
             </MenuItem>
         ))
-
-    // private renderMenuBtn = () => {
-    //     const btn = (
-    //         <MenuBtn
-    //             isOpen={this.state.isOpen}
-    //             id={this.props.btnId}
-    //             onClick={this.toggleMenu}
-    //         >
-    //             {this.props.btnChildren}
-    //         </MenuBtn>
-    //     )
-
-    //     if (this.props.tooltipProps) {
-    //         return (
-    //             <ButtonTooltip {...this.props.tooltipProps}>
-    //                 {btn}
-    //             </ButtonTooltip>
-    //         )
-    //     }
-
-    //     return btn
-    // }
 
     render() {
         return (

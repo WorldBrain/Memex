@@ -1,9 +1,9 @@
 import React from 'react'
 import PropTypes, { string } from 'prop-types'
-import ButtonTooltip from '../../../../common-ui/components/button-tooltip'
 import AnimationWrapper from './AnimationWrapper'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import styled from 'styled-components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const MemexTooltip = styled.div`  
     height: 34px;
@@ -96,16 +96,16 @@ export default Tooltip
 
 export function _renderButtons({ closeTooltip, state }) {
     return (
-        <ButtonTooltip
+        <TooltipBox
             tooltipText="Close. Disable in Toolbar (R)"
-            position="rightContentTooltip"
+            placement="rightContentTooltip"
         >
             <Icon
                 filePath={'removeX'}
                 heightAndWidth="20px"
                 color={'darkerIconColor'}
             />
-        </ButtonTooltip>
+        </TooltipBox>
     )
 }
 

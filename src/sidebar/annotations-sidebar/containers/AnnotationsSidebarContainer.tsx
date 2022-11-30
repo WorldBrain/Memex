@@ -19,7 +19,8 @@ import type {
     SidebarContainerEvents,
     AnnotationEventContext,
 } from './types'
-import { ButtonTooltip, ConfirmModal } from 'src/common-ui/components'
+import { ConfirmModal } from 'src/common-ui/components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import type { Annotation, ListDetailsGetter } from 'src/annotations/types'
 import {
@@ -421,52 +422,6 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderTagsPickerForAnnotation = (currentAnnotationId: string) => {
-        if (this.state.activeTagPickerAnnotationId !== currentAnnotationId) {
-            return null
-        }
-
-        const annot = this.props.annotationsCache.getAnnotationById(
-            currentAnnotationId,
-        )
-
-        return (
-            <PickerWrapper>
-                <HoverBox left="0px" top="-40px" position="absolute">
-                    <ClickAway
-                        onClickAway={() =>
-                            this.processEvent(
-                                'resetTagPickerAnnotationId',
-                                null,
-                            )
-                        }
-                    >
-                        <TagPicker
-                            initialSelectedEntries={() => annot.tags}
-                            queryEntries={(query) =>
-                                this.props.tags.searchForTagSuggestions({
-                                    query,
-                                })
-                            }
-                            loadDefaultSuggestions={
-                                this.props.tags.fetchInitialTagSuggestions
-                            }
-                            onUpdateEntrySelection={this.handleTagsUpdate(
-                                currentAnnotationId,
-                            )}
-                            onEscapeKeyDown={() =>
-                                this.processEvent(
-                                    'resetTagPickerAnnotationId',
-                                    null,
-                                )
-                            }
-                        />
-                    </ClickAway>
-                </HoverBox>
-            </PickerWrapper>
-        )
-    }
-
     private renderListPickerForAnnotation = (followedListId?: string) => (
         currentAnnotationId: string,
     ) => {
@@ -698,9 +653,9 @@ export class AnnotationsSidebarContainer<
 
                     <BottomArea>
                         {this.state.isLocked ? (
-                            <ButtonTooltip
+                            <TooltipBox
                                 tooltipText="Unlock sidebar"
-                                position="left"
+                                placement="left"
                             >
                                 <IconBoundary>
                                     <Icon
@@ -709,11 +664,11 @@ export class AnnotationsSidebarContainer<
                                         onClick={this.toggleSidebarLock}
                                     />
                                 </IconBoundary>
-                            </ButtonTooltip>
+                            </TooltipBox>
                         ) : (
-                            <ButtonTooltip
+                            <TooltipBox
                                 tooltipText="Lock sidebar open"
-                                position="left"
+                                placement="left"
                             >
                                 <IconBoundary>
                                     <Icon
@@ -722,13 +677,13 @@ export class AnnotationsSidebarContainer<
                                         onClick={this.toggleSidebarLock}
                                     />
                                 </IconBoundary>
-                            </ButtonTooltip>
+                            </TooltipBox>
                         )}
                         {this.props.sidebarContext !== 'dashboard' &&
                             (!this.state.isWidthLocked ? (
-                                <ButtonTooltip
+                                <TooltipBox
                                     tooltipText="Adjust Page Width"
-                                    position="left"
+                                    placement="left"
                                 >
                                     <IconBoundary>
                                         <Icon
@@ -739,11 +694,11 @@ export class AnnotationsSidebarContainer<
                                             }
                                         />
                                     </IconBoundary>
-                                </ButtonTooltip>
+                                </TooltipBox>
                             ) : (
-                                <ButtonTooltip
+                                <TooltipBox
                                     tooltipText="Full page width"
-                                    position="left"
+                                    placement="left"
                                 >
                                     <IconBoundary>
                                         <Icon
@@ -754,12 +709,9 @@ export class AnnotationsSidebarContainer<
                                             }
                                         />
                                     </IconBoundary>
-                                </ButtonTooltip>
+                                </TooltipBox>
                             ))}
-                        <ButtonTooltip
-                            tooltipText="Close (ESC)"
-                            position="left"
-                        >
+                        <TooltipBox tooltipText="Close (ESC)" placement="left">
                             <IconBoundary>
                                 <Icon
                                     filePath={icons.removeX}
@@ -767,7 +719,7 @@ export class AnnotationsSidebarContainer<
                                     onClick={() => this.hideSidebar()}
                                 />
                             </IconBoundary>
-                        </ButtonTooltip>
+                        </TooltipBox>
                     </BottomArea>
                 </TopBarActionBtns>
                 <FooterArea>
@@ -810,59 +762,59 @@ export class AnnotationsSidebarContainer<
                     sidebarContext={this.props.sidebarContext}
                 >
                     {this.state.isLocked ? (
-                        <ButtonTooltip
+                        <TooltipBox
                             tooltipText="Unlock sidebar"
-                            position="bottom"
+                            placement="bottom"
                         >
                             <Icon
                                 filePath={icons.arrowRight}
                                 heightAndWidth="26px"
                                 onClick={this.toggleSidebarLock}
                             />
-                        </ButtonTooltip>
+                        </TooltipBox>
                     ) : (
-                        <ButtonTooltip
+                        <TooltipBox
                             tooltipText="Lock sidebar open"
-                            position="bottom"
+                            placement="bottom"
                         >
                             <Icon
                                 filePath={icons.arrowLeft}
                                 heightAndWidth="26px"
                                 onClick={this.toggleSidebarLock}
                             />
-                        </ButtonTooltip>
+                        </TooltipBox>
                     )}
                     {!this.state.isWidthLocked ? (
-                        <ButtonTooltip
+                        <TooltipBox
                             tooltipText="Adjust Page Width"
-                            position="bottom"
+                            placement="bottom"
                         >
                             <Icon
                                 filePath={icons.compress}
                                 heightAndWidth="26px"
                                 onClick={() => this.toggleSidebarWidthLock()}
                             />
-                        </ButtonTooltip>
+                        </TooltipBox>
                     ) : (
-                        <ButtonTooltip
+                        <TooltipBox
                             tooltipText="Full page width"
-                            position="bottom"
+                            placement="bottom"
                         >
                             <Icon
                                 filePath={icons.expand}
                                 heightAndWidth="26px"
                                 onClick={() => this.toggleSidebarWidthLock()}
                             />
-                        </ButtonTooltip>
+                        </TooltipBox>
                     )}
-                    <ButtonTooltip tooltipText="Close (ESC)" position="bottom">
+                    <TooltipBox tooltipText="Close (ESC)" placement="bottom">
                         <Icon
                             filePath={icons.removeX}
                             heightAndWidth="22px"
                             onClick={() => this.hideSidebar()}
                             padding={'5px'}
                         />
-                    </ButtonTooltip>
+                    </TooltipBox>
                 </TopBarActionBtns>
             </>
         )
@@ -1009,11 +961,7 @@ export class AnnotationsSidebarContainer<
                             renderShareMenuForAnnotation={
                                 this.renderShareMenuForAnnotation
                             }
-                            renderTagsPickerForAnnotation={
-                                this.state.shouldShowTagsUIs
-                                    ? this.renderTagsPickerForAnnotation
-                                    : undefined
-                            }
+                            renderTagsPickerForAnnotation={undefined}
                             renderListsPickerForAnnotation={
                                 this.renderListPickerForAnnotation
                             }

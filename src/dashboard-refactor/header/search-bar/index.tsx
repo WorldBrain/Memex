@@ -6,7 +6,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import { fonts } from '../../styles'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export interface SearchBarProps {
     placeholder?: string
@@ -88,8 +88,8 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                 <ActionButtons>
                     <FilterButton left="15px" onClick={onSearchFiltersOpen}>
                         {searchFiltersOpen ? (
-                            <ButtonTooltip
-                                position={'bottom'}
+                            <TooltipBox
+                                placement={'bottom'}
                                 tooltipText={'Clear Filters'}
                             >
                                 <Icon
@@ -97,10 +97,10 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                                     heightAndWidth="22px"
                                     padding={'6px'}
                                 />
-                            </ButtonTooltip>
+                            </TooltipBox>
                         ) : (
-                            <ButtonTooltip
-                                position={'bottom'}
+                            <TooltipBox
+                                placement={'bottom'}
                                 tooltipText={'Apply Filters'}
                             >
                                 <Icon
@@ -108,7 +108,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                                     heightAndWidth="24px"
                                     padding={'5px'}
                                 />
-                            </ButtonTooltip>
+                            </TooltipBox>
                         )}
                     </FilterButton>
                     {renderCopyPasterButton()}
@@ -172,9 +172,7 @@ const Input = styled.input`
 
 const FilterButton = styled(Margin)`
     width: max-content;
-    ${textStyles}
     font-size: 12px;
-    line-height: 15px;
     cursor: pointer;
     width: auto;
     white-space: nowrap;

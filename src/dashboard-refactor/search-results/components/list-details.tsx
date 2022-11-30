@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { fonts } from '../../styles'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import MemexEditor from '@worldbrain/memex-common/lib/editor'
@@ -110,9 +110,9 @@ export default class ListDetails extends PureComponent<Props, State> {
                     <SaveActionBar>
                         {this.renderMarkdownHelpButton()}
                         <BtnContainerStyled>
-                            <ButtonTooltip
+                            <TooltipBox
                                 tooltipText={`${ListDetails.MOD_KEY} + Enter`}
-                                position="bottom"
+                                placement="bottom"
                             >
                                 <Icon
                                     heightAndWidth="22px"
@@ -122,8 +122,8 @@ export default class ListDetails extends PureComponent<Props, State> {
                                         this.finishEdit({ shouldSave: true })
                                     }
                                 />
-                            </ButtonTooltip>
-                            <ButtonTooltip tooltipText="esc" position="bottom">
+                            </TooltipBox>
+                            <TooltipBox tooltipText="esc" placement="bottom">
                                 <Icon
                                     heightAndWidth="22px"
                                     icon={icons.removeX}
@@ -134,7 +134,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                         })
                                     }
                                 />
-                            </ButtonTooltip>
+                            </TooltipBox>
                         </BtnContainerStyled>
                     </SaveActionBar>
                 </DescriptionEditorContainer>
@@ -178,7 +178,7 @@ export default class ListDetails extends PureComponent<Props, State> {
         )
 
         return (
-            <ButtonTooltip position="bottom" tooltipText={tooltipText}>
+            <TooltipBox placement="bottom" tooltipText={tooltipText}>
                 <Icon
                     hoverOff={!this.props.isOwnedList}
                     onClick={() =>
@@ -190,7 +190,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                     icon={'edit'}
                     defaultBackground
                 />
-            </ButtonTooltip>
+            </TooltipBox>
         )
     }
 
@@ -256,9 +256,9 @@ export default class ListDetails extends PureComponent<Props, State> {
                                             />
                                         </>
                                     ) : (
-                                        <ButtonTooltip
+                                        <TooltipBox
                                             tooltipText="Invite people to this Space"
-                                            position="bottom"
+                                            placement="bottom"
                                         >
                                             <PrimaryAction
                                                 onClick={
@@ -283,7 +283,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                 backgroundColor={'darkhover'}
                                                 fontColor={'normalText'}
                                             />
-                                        </ButtonTooltip>
+                                        </TooltipBox>
                                     )}
                                 </BtnsContainer>
                             )}

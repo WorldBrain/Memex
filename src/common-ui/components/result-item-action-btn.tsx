@@ -1,13 +1,11 @@
 import React, { MouseEventHandler } from 'react'
 import cx from 'classnames'
-
-import ButtonTooltip, { TooltipPosition } from './button-tooltip'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const styles = require('./result-item.css')
 
 export interface Props {
     tooltipText: string
-    tooltipPosition?: TooltipPosition
     onClick: MouseEventHandler<HTMLButtonElement>
     imgSrc: string
     className?: string
@@ -16,10 +14,7 @@ export interface Props {
 }
 
 const ResultItemActionBtn: React.SFC<Props> = (props) => (
-    <ButtonTooltip
-        position={props.tooltipPosition ?? 'bottom'}
-        tooltipText={props.tooltipText}
-    >
+    <TooltipBox placement={'bottom'} tooltipText={props.tooltipText}>
         <button
             className={props.permanent ? styles.permanentButton : styles.button}
             onClick={props.onClick}
@@ -30,7 +25,7 @@ const ResultItemActionBtn: React.SFC<Props> = (props) => (
                 className={cx(styles.img, props.className)}
             />
         </button>
-    </ButtonTooltip>
+    </TooltipBox>
 )
 
 export default ResultItemActionBtn

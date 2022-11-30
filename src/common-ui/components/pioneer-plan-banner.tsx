@@ -4,9 +4,9 @@ import styled from 'styled-components'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import ButtonTooltip from '@worldbrain/memex-common/lib/common-ui/components/button-tooltip'
 import { colorDarkText } from 'src/common-ui/components/design-library/colors'
 import DismissibleResultsMessage from 'src/dashboard-refactor/search-results/components/dismissible-results-message'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const PioneerPlanContainer = styled.div`
     display: flex;
@@ -89,8 +89,8 @@ const PioneerPlanBanner = ({
                 onClick={() => window.open(upgradeUrl)}
             />
             {props.showCloseButton && (
-                <ButtonTooltip
-                    position="bottom"
+                <TooltipBox
+                    placement="bottom"
                     tooltipText="Find this message again in your account settings."
                 >
                     <Icon
@@ -98,7 +98,7 @@ const PioneerPlanBanner = ({
                         height="12px"
                         onClick={props.onHideClick}
                     />
-                </ButtonTooltip>
+                </TooltipBox>
             )}
         </PioneerPlanButtonBox>
     </DismissibleResultsMessage>

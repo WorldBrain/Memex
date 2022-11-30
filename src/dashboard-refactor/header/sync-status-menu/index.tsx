@@ -390,12 +390,9 @@ const HelpTextBlockLink = styled.a<{
     bold: boolean
 }>`
     height: 18px;
-    ${textStyles}
     font-size: 12px;
-    line-height: 15px;
     display: flex;
     align-items: center;
-    color: ${colors.midGrey};
     padding-left: 5px;
 `
 
@@ -403,7 +400,6 @@ const TextBlockSmall = styled.div`
     font-weight: 300;
     color: ${(props) => props.theme.colors.greyScale8};
     font-size: 14px;
-    line-height: 16px;
     text-align: left;
     white-space: nowrap;
 `

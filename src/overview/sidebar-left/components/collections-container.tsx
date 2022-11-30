@@ -1,11 +1,10 @@
 import React, { PureComponent } from 'react'
 import { connect, MapStateToProps, MapDispatchToProps } from 'react-redux'
 import cx from 'classnames'
-
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { actions as acts, selectors } from 'src/overview/sidebar-left'
 import { selectors as filters } from 'src/search-filters'
 import { RootState } from 'src/options/types'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const styles = require('./collections-button.css')
 
@@ -54,13 +53,13 @@ class CollectionsButton extends PureComponent<Props, State> {
                 onMouseLeave={this.handleMouseLeaveIcon}
                 onClick={() => this.handleOpenCloseLockSidebar()}
             >
-                <ButtonTooltip
+                <TooltipBox
                     tooltipText={
                         this.props.isSidebarLocked
                             ? 'Close Sidebar'
                             : 'Keep Sidebar Open'
                     }
-                    position="bottom"
+                    placement="bottom"
                 >
                     <div
                         className={cx(styles.showListBtn, {
@@ -74,7 +73,7 @@ class CollectionsButton extends PureComponent<Props, State> {
                         onDragEnter={this.handleMouseEnterIcon}
                         onDragLeave={this.handleMouseLeaveIcon}
                     />
-                </ButtonTooltip>
+                </TooltipBox>
                 {this.props.filteredListName && (
                     <div className={styles.filteredListName}>
                         {this.props.filteredListName}

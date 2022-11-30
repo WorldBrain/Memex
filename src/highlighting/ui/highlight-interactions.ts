@@ -170,7 +170,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
         // Enable support using annotation keyboard shortcuts to make notes on youtube videos without opening the sidebar first
 
-        let youtubeTimestampForComment = ''
+        let youtubeTimestampForComment
         if (pageUrl.includes('youtube.com/watch')) {
             const [videoURLWithTime, humanTimestamp] = getYoutubeTimestamp()
             youtubeTimestampForComment = `[${humanTimestamp}](${videoURLWithTime})`
@@ -184,16 +184,25 @@ export class HighlightRenderer implements HighlightRendererInterface {
         }
 
         const anchor = await extractAnchorFromSelection(selection)
-        const body = anchor ? anchor.quote : ''
+        const body = anchor && anchor.quote
+        const hasSelectedText = anchor.quote.length
 
         const annotation: Annotation = {
             url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
-            body,
+            body: hasSelectedText
+                ? anchor.quote
+                : youtubeTimestampForComment && undefined,
             pageUrl,
             tags: [],
             lists: [],
-            comment: youtubeTimestampForComment,
-            selector: anchor,
+            comment: hasSelectedText
+                ? ''
+                : youtubeTimestampForComment
+                ? youtubeTimestampForComment
+                : undefined,
+            selector: hasSelectedText
+                ? anchor
+                : youtubeTimestampForComment && undefined,
             pageTitle: title,
         }
 
