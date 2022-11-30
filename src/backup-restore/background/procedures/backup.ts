@@ -95,6 +95,7 @@ export default class BackupProcedure {
         this.events = null
         this.info.state = 'cancelled'
         await this.completionPromise
+        await this.storage.forgetAllChanges()
         await new Promise((resolve) => {
             setTimeout(resolve, 1000)
         })
@@ -143,6 +144,7 @@ export default class BackupProcedure {
             if (process.env.STORE_BACKUP_TIME !== 'false') {
                 await this.localBackupSettings.set('lastBackup', backupTime)
             }
+            await this.localBackupSettings.set('lastBackupFinished', backupTime)
         }
 
         setTimeout(async () => {

@@ -29,10 +29,7 @@ export default function RestoreRunning({
                     eventMessageName="restore-event"
                     preparingStepLabel="Preparing restore"
                     synchingStepLabel="Restoring your Memex backup"
-                    renderHeader={renderHeader}
-                    renderFailMessage={renderFailMessage}
                     localBackupSettings={localBackupSettings}
-                    renderSuccessMessage={renderSuccessMessage}
                     onFinish={onFinish}
                 />
             </div>

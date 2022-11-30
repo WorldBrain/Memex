@@ -5,7 +5,7 @@ import { AuthError } from '@worldbrain/memex-common/lib/authentication/types'
 import SimpleTextInput from '@worldbrain/memex-common/lib/common-ui/components/simple-text-input'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { StatefulUIElement } from 'src/util/ui-logic'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -13,7 +13,6 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import Logic from './logic'
 import type { State, Event, Dependencies } from './types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { PrimaryButton } from 'src/common-ui/components/primary-button'
 
 export interface Props extends Dependencies {}
 
@@ -109,7 +108,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                 </TextInputContainer>
                                 <TextInputContainer>
                                     <Icon
-                                        filePath={icons.lockFine}
+                                        filePath={icons.lock}
                                         heightAndWidth="20px"
                                         hoverOff
                                     />
@@ -185,7 +184,12 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                             )
                                         }
                                         label={'Sign Up'}
-                                        fontSize={'14px'}
+                                        fontSize={'16px'}
+                                        fontColor={'black'}
+                                        backgroundColor={'purple'}
+                                        icon={'longArrowRight'}
+                                        iconSize={'22px'}
+                                        iconPosition={'right'}
                                     />
                                 </ConfirmContainer>
                                 {this.state.error && (
@@ -286,7 +290,12 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                             )
                                         }
                                         label={'Login'}
-                                        fontSize={'14px'}
+                                        fontSize={'16px'}
+                                        fontColor={'black'}
+                                        backgroundColor={'purple'}
+                                        icon={'longArrowRight'}
+                                        iconSize={'22px'}
+                                        iconPosition={'right'}
                                     />
                                 </ConfirmContainer>
                                 {this.state.error && (
@@ -354,8 +363,13 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                                 this.state.email.includes('.')
                                             )
                                         }
-                                        label={'Login'}
-                                        fontSize={'14px'}
+                                        label={'Send Reset Email'}
+                                        fontSize={'16px'}
+                                        fontColor={'black'}
+                                        backgroundColor={'purple'}
+                                        icon={'longArrowRight'}
+                                        iconSize={'22px'}
+                                        iconPosition={'right'}
                                     />
                                 </ConfirmContainer>
                                 {this.state.error && (
@@ -483,13 +497,14 @@ const LoadingBox = styled.div`
 `
 
 const AuthErrorMessage = styled.div`
-    background-color: ${(props) => props.theme.colors.warning};
+    background-color: ${(props) => props.theme.colors.warning}10;
     font-size: 14px;
     padding-left: 10px;
     margin-top: 5px;
-    color: white;
-    padding: 20px;
-    border-radius: 8px;
+    color: ${(props) => props.theme.colors.warning};
+    border: 1px solid ${(props) => props.theme.colors.warning};
+    padding: 15px;
+    border-radius: 5px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -543,10 +558,9 @@ const DisplayNameContainer = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.darkText};
     font-size: 12px;
-    opacity: 0.7;
-    padding-left: 10px;
+    text-align: center;
 `
 
 const FeatureInfoBox = styled.div`
@@ -558,6 +572,7 @@ const FeatureInfoBox = styled.div`
 `
 
 const ConfirmContainer = styled.div`
+    margin-top: 15px;
     & > div {
         width: 100%;
         border-radius: 8px;
@@ -570,24 +585,28 @@ const TextInputContainer = styled.div`
     grid-gap: 10px;
     align-items: center;
     justify-content: flex-start;
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
-    height: 50px;
+    background: ${(props) => props.theme.colors.darkhover};
+    height: 44px;
     border-radius: 8px;
     width: 350px;
     padding: 0 15px;
+    &:focus-within {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+    }
 `
 
 const TextInput = styled(SimpleTextInput)`
     outline: none;
     height: fill-available;
     width: fill-available;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
+    font-weight: 300;
     border: none;
     background: transparent;
 
     &::placeholder {
-        color: ${(props) => props.theme.colors.lighterText};
+        color: ${(props) => props.theme.colors.greyScale8};
     }
 `
 
@@ -595,6 +614,7 @@ const WelcomeContainer = styled.div`
     display: flex;
     justify-content: space-between;
     overflow: hidden;
+    background-color: ${(props) => props.theme.colors.backgroundColor};
 `
 
 const LeftSide = styled.div`
@@ -603,6 +623,7 @@ const LeftSide = styled.div`
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    background-color: ${(props) => props.theme.colors.backgroundColor};
 
     @media (max-width: 1000px) {
         width: 100%;
@@ -670,7 +691,7 @@ const TitleSmall = styled.div`
 `
 
 const StyledAuthDialog = styled.div`
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -692,7 +713,7 @@ const EmailPasswordLogin = styled.div`
 `
 
 const EmailPasswordError = styled.div`
-    color: white;
+    color: ${(props) => props.theme.colors.warning};
     text-align: center;
 `
 

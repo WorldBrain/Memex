@@ -1,5 +1,5 @@
 import * as React from 'react'
-import styled, { ThemeProvider } from 'styled-components'
+import styled, { ThemeProvider, css } from 'styled-components'
 import { createGlobalStyle } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -52,6 +52,7 @@ import {
     SELECT_SPACE_NEGATIVE_LABEL,
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
+import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -146,6 +147,19 @@ export class AnnotationsSidebarContainer<
         this.processEvent('setPageUrl', { pageUrl })
     }
 
+    /**
+     * Handles AnnotationSidebar onSelectSpace event
+     *
+     * This handler will actually select the space change by asking our
+     * UILogic to emit the change. Sub-classes like AnnotationSidebarInPage
+     * may override this to notify other elements like the InPageUI.
+     *
+     * @param listId space ID being selected or null
+     */
+    protected handleSelectSpace(listId: string | null) {
+        this.processEvent('selectSpace', { listId })
+    }
+
     private handleClickOutside = (e) => {
         if (this.state.isLocked) {
             return
@@ -222,16 +236,23 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('setTagPickerAnnotationId', {
                     id: annotation.url,
                 }),
-            onListIconClick: () =>
+            onListIconClick: () => {
+                // TODO: why this has only the spaceId from the spaces tab?
+                console.debug('Select space now', followedListId)
+                this.handleSelectSpace('dtsCHjXTXjqtss9EjV3')
                 this.processEvent('setListPickerAnnotationId', {
                     id: annotation.url,
+                    position: 'footer',
                     followedListId,
-                }),
+                })
+            },
         }
     }
 
     protected bindAnnotationEditProps = (
         annotation: Pick<Annotation, 'url' | 'isShared'>,
+        /** This needs to be defined for footer events for annots in followed lists states  */
+        followedListId?: string,
     ): AnnotationEditEventProps & AnnotationEditGeneralProps => {
         const { editForms } = this.state
         // Should only ever be undefined for a moment, between creating a new annot state and
@@ -240,6 +261,12 @@ export class AnnotationsSidebarContainer<
 
         return {
             comment: form.commentText,
+            onListsBarPickerBtnClick: () =>
+                this.processEvent('setListPickerAnnotationId', {
+                    id: annotation.url,
+                    position: 'lists-bar',
+                    followedListId,
+                }),
             onCommentChange: (comment) =>
                 this.processEvent('changeEditCommentText', {
                     annotationUrl: annotation.url,
@@ -474,16 +501,24 @@ export class AnnotationsSidebarContainer<
         const state =
             followedListId != null
                 ? this.state.followedLists.byId[followedListId]
-                      .activeListPickerAnnotationId
-                : this.state.activeListPickerAnnotationId
+                      .activeListPickerState
+                : this.state.activeListPickerState
 
-        if (state !== currentAnnotationId || currentAnnotation == null) {
+        if (
+            state == null ||
+            state.annotationId !== currentAnnotationId ||
+            currentAnnotation == null
+        ) {
             return null
         }
 
         return (
             <PickerWrapper>
-                <HoverBox top="7px" padding={'0px'}>
+                <HoverBox
+                    top="20px"
+                    right={state.position === 'footer' ? '0px' : undefined}
+                    padding={'10px 0 0 0'}
+                >
                     <ClickAway
                         onClickAway={() =>
                             this.processEvent('resetListPickerAnnotationId', {})
@@ -624,6 +659,89 @@ export class AnnotationsSidebarContainer<
         return null
     }
 
+    private renderTopSideBar() {
+        if (this.props.skipTopBarRender) {
+            return null
+        }
+
+        return (
+            <>
+                <TopBarActionBtns
+                    width={this.state.sidebarWidth}
+                    sidebarContext={this.props.sidebarContext}
+                >
+                    {this.state.isLocked ? (
+                        <ButtonTooltip
+                            tooltipText="Unlock sidebar"
+                            position="left"
+                        >
+                            <IconBoundary>
+                                <Icon
+                                    filePath={icons.arrowRight}
+                                    heightAndWidth="16px"
+                                    onClick={this.toggleSidebarLock}
+                                />
+                            </IconBoundary>
+                        </ButtonTooltip>
+                    ) : (
+                        <ButtonTooltip
+                            tooltipText="Lock sidebar open"
+                            position="left"
+                        >
+                            <IconBoundary>
+                                <Icon
+                                    filePath={icons.arrowLeft}
+                                    heightAndWidth="16px"
+                                    onClick={this.toggleSidebarLock}
+                                />
+                            </IconBoundary>
+                        </ButtonTooltip>
+                    )}
+                    {!this.state.isWidthLocked ? (
+                        <ButtonTooltip
+                            tooltipText="Adjust Page Width"
+                            position="left"
+                        >
+                            <IconBoundary>
+                                <Icon
+                                    filePath={icons.compress}
+                                    heightAndWidth="16px"
+                                    onClick={() =>
+                                        this.toggleSidebarWidthLock()
+                                    }
+                                />
+                            </IconBoundary>
+                        </ButtonTooltip>
+                    ) : (
+                        <ButtonTooltip
+                            tooltipText="Full page width"
+                            position="left"
+                        >
+                            <IconBoundary>
+                                <Icon
+                                    filePath={icons.expand}
+                                    heightAndWidth="16px"
+                                    onClick={() =>
+                                        this.toggleSidebarWidthLock()
+                                    }
+                                />
+                            </IconBoundary>
+                        </ButtonTooltip>
+                    )}
+                    <ButtonTooltip tooltipText="Close (ESC)" position="left">
+                        <IconBoundary>
+                            <Icon
+                                filePath={icons.removeX}
+                                heightAndWidth="16px"
+                                onClick={() => this.hideSidebar()}
+                            />
+                        </IconBoundary>
+                    </ButtonTooltip>
+                </TopBarActionBtns>
+            </>
+        )
+    }
+
     private renderTopBar() {
         if (this.props.skipTopBarRender) {
             return null
@@ -635,76 +753,104 @@ export class AnnotationsSidebarContainer<
                     width={this.state.sidebarWidth}
                     sidebarContext={this.props.sidebarContext}
                 >
-                    <ButtonTooltip
-                        tooltipText="Close (ESC)"
-                        position="rightCentered"
-                    >
-                        <Icon
-                            filePath={icons.close}
-                            heightAndWidth="16px"
-                            onClick={() => this.hideSidebar()}
-                        />
-                    </ButtonTooltip>
                     {this.state.isLocked ? (
                         <ButtonTooltip
                             tooltipText="Unlock sidebar"
-                            position="rightCentered"
+                            position="bottom"
                         >
                             <Icon
-                                filePath={icons.doubleArrow}
-                                heightAndWidth="16px"
-                                rotation={180}
+                                filePath={icons.arrowRight}
+                                heightAndWidth="26px"
                                 onClick={this.toggleSidebarLock}
                             />
                         </ButtonTooltip>
                     ) : (
                         <ButtonTooltip
                             tooltipText="Lock sidebar open"
-                            position="rightCentered"
+                            position="bottom"
                         >
                             <Icon
-                                filePath={icons.doubleArrow}
-                                heightAndWidth="16px"
+                                filePath={icons.arrowLeft}
+                                heightAndWidth="26px"
                                 onClick={this.toggleSidebarLock}
                             />
                         </ButtonTooltip>
                     )}
                     {!this.state.isWidthLocked ? (
                         <ButtonTooltip
-                            tooltipText="Adjusted Page Width"
-                            position="rightCentered"
+                            tooltipText="Adjust Page Width"
+                            position="bottom"
                         >
                             <Icon
                                 filePath={icons.compress}
-                                heightAndWidth="16px"
+                                heightAndWidth="26px"
                                 onClick={() => this.toggleSidebarWidthLock()}
                             />
                         </ButtonTooltip>
                     ) : (
                         <ButtonTooltip
                             tooltipText="Full page width"
-                            position="rightCentered"
+                            position="bottom"
                         >
                             <Icon
                                 filePath={icons.expand}
-                                heightAndWidth="16px"
+                                heightAndWidth="26px"
                                 onClick={() => this.toggleSidebarWidthLock()}
                             />
                         </ButtonTooltip>
                     )}
+                    <ButtonTooltip tooltipText="Close (ESC)" position="bottom">
+                        <Icon
+                            filePath={icons.removeX}
+                            heightAndWidth="22px"
+                            onClick={() => this.hideSidebar()}
+                            padding={'5px'}
+                        />
+                    </ButtonTooltip>
                 </TopBarActionBtns>
             </>
         )
     }
 
+    private renderSelectedSpacePill() {
+        console.debug('Rendering selected space pill')
+        const followedList = this.state.followedLists.byId[
+            this.state.selectedSpace
+        ]
+        return (
+            <div
+                style={{
+                    border: 'solid 2px blue',
+                    backgroundColor: 'yellow',
+                    color: 'blue',
+                    position: 'fixed',
+                    bottom: 15,
+                    right: 15,
+                    padding: 15,
+                    borderRadius: 5,
+                }}
+                onClick={() => this.showSidebar()}
+            >
+                Working on Memex space
+                <strong> {followedList.name} </strong>
+            </div>
+        )
+    }
+
     render() {
         if (this.state.showState === 'hidden') {
-            return null
+            if (this.state.selectedSpace) {
+                return this.renderSelectedSpacePill()
+            } else {
+                return null
+            }
         }
 
         const style = {
             height: '100%',
             position: 'relative',
+            right: '0px',
+            left: 'unset',
         } as const
 
         return (
@@ -712,7 +858,10 @@ export class AnnotationsSidebarContainer<
                 <GlobalStyle sidebarWidth={this.state.sidebarWidth} />
                 <ContainerStyled
                     className={classNames('ignore-react-onclickoutside')}
+                    sidebarContext={this.props.sidebarContext}
+                    isShown={this.state.showState}
                 >
+                    {this.renderTopSideBar()}
                     <Rnd
                         style={style}
                         default={{
@@ -725,7 +874,7 @@ export class AnnotationsSidebarContainer<
                         className="sidebar-draggable"
                         resizeGrid={[1, 0]}
                         dragAxis={'none'}
-                        minWidth={'340px'}
+                        minWidth={'380px'}
                         maxWidth={'1000px'}
                         disableDragging={true}
                         enableResizing={{
@@ -746,187 +895,180 @@ export class AnnotationsSidebarContainer<
                             )
                         }}
                     >
-                        <SidebarContainerWithTopBar>
-                            {this.renderTopBar()}
-                            <AnnotationsSidebar
-                                {...this.state}
-                                getListDetailsById={this.getListDetailsById}
-                                sidebarContext={this.props.sidebarContext}
-                                ref={this.sidebarRef as any}
-                                openCollectionPage={(remoteListId) =>
-                                    window.open(
-                                        getListShareUrl({ remoteListId }),
-                                        '_blank',
-                                    )
-                                }
-                                onMenuItemClick={({ sortingFn }) =>
-                                    this.processEvent('sortAnnotations', {
-                                        sortingFn,
-                                    })
-                                }
-                                annotationUrls={() =>
-                                    this.state.annotations.map((a) => a.url)
-                                }
-                                normalizedPageUrls={[
-                                    normalizeUrl(this.state.pageUrl),
-                                ]}
-                                normalizedPageUrl={normalizeUrl(
-                                    this.state.pageUrl,
-                                )}
-                                onClickOutsideCopyPaster={() =>
-                                    this.processEvent(
-                                        'resetCopyPasterAnnotationId',
-                                        null,
-                                    )
-                                }
-                                copyPaster={this.props.copyPaster}
-                                contentSharing={this.props.contentSharing}
-                                annotationsShareAll={this.props.annotations}
-                                copyPageLink={(link) => {
-                                    this.processEvent('copyNoteLink', { link })
-                                }}
-                                postBulkShareHook={(shareInfo) =>
-                                    this.processEvent(
-                                        'updateAllAnnotationsShareInfo',
-                                        shareInfo,
-                                    )
-                                }
-                                onCopyBtnClick={() =>
-                                    this.handleCopyAllNotesClick
-                                }
-                                onShareAllNotesClick={() =>
-                                    this.handleCopyAllNotesClick
-                                }
-                                sharingAccess={
-                                    this.state.annotationSharingAccess
-                                }
-                                needsWaypoint={!this.state.noResults}
-                                appendLoader={
-                                    this.state.secondarySearchState ===
-                                    'running'
-                                }
-                                annotationModes={
-                                    this.state.annotationModes.pageAnnotations
-                                }
-                                setActiveAnnotationUrl={(annotationUrl) => () =>
-                                    this.processEvent(
-                                        'setActiveAnnotationUrl',
-                                        {
-                                            annotationUrl,
-                                        },
-                                    )}
-                                isAnnotationCreateShown={
-                                    this.state.showCommentBox
-                                }
-                                annotationCreateProps={this.getCreateProps()}
-                                bindAnnotationFooterEventProps={(
-                                    annotation,
-                                    followedlistId,
-                                ) =>
-                                    this.bindAnnotationFooterEventProps(
-                                        annotation,
-                                        followedlistId,
-                                    )
-                                }
-                                bindAnnotationEditProps={
-                                    this.bindAnnotationEditProps
-                                }
-                                handleScrollPagination={() =>
-                                    this.processEvent('paginateSearch', null)
-                                }
-                                isSearchLoading={
-                                    this.state.annotationsLoadState ===
-                                        'running' ||
-                                    this.state.loadState === 'running'
-                                }
-                                onClickOutside={this.handleClickOutside}
-                                theme={this.props.theme}
-                                renderCopyPasterForAnnotation={
-                                    this.renderCopyPasterManagerForAnnotation
-                                }
-                                renderShareMenuForAnnotation={
-                                    this.renderShareMenuForAnnotation
-                                }
-                                renderTagsPickerForAnnotation={
-                                    this.state.shouldShowTagsUIs
-                                        ? this.renderTagsPickerForAnnotation
-                                        : undefined
-                                }
-                                renderListsPickerForAnnotation={
-                                    this.renderListPickerForAnnotation
-                                }
-                                expandMyNotes={() =>
-                                    this.processEvent('expandMyNotes', null)
-                                }
-                                expandSharedSpaces={(listIds) =>
-                                    this.processEvent('expandSharedSpaces', {
-                                        listIds,
-                                    })
-                                }
-                                expandFollowedListNotes={(listId) =>
-                                    this.processEvent(
-                                        'expandFollowedListNotes',
-                                        {
-                                            listId,
-                                        },
-                                    )
-                                }
-                                toggleIsolatedListView={(listId) =>
-                                    this.processEvent(
-                                        'toggleIsolatedListView',
-                                        {
-                                            listId,
-                                        },
-                                    )
-                                }
-                                bindSharedAnnotationEventHandlers={(
-                                    annotationReference,
-                                    sharedListReference,
-                                ) => ({
-                                    onReplyBtnClick: () =>
-                                        this.processEvent(
-                                            'toggleAnnotationReplies',
-                                            {
-                                                annotationReference,
-                                                sharedListReference,
-                                            },
-                                        ),
-                                    onNewReplyInitiate: () =>
-                                        this.processEvent(
-                                            'initiateNewReplyToAnnotation',
-                                            {
-                                                annotationReference,
-                                                sharedListReference,
-                                            },
-                                        ),
-                                    onNewReplyCancel: () =>
-                                        this.processEvent(
-                                            'cancelNewReplyToAnnotation',
-                                            {
-                                                annotationReference,
-                                                sharedListReference,
-                                            },
-                                        ),
-                                    onNewReplyConfirm: () =>
-                                        this.processEvent(
-                                            'confirmNewReplyToAnnotation',
-                                            {
-                                                annotationReference,
-                                                sharedListReference,
-                                            },
-                                        ),
-                                    onNewReplyEdit: ({ content }) =>
-                                        this.processEvent(
-                                            'editNewReplyToAnnotation',
-                                            {
-                                                annotationReference,
-                                                sharedListReference,
-                                                content,
-                                            },
-                                        ),
+                        <AnnotationsSidebar
+                            {...this.state}
+                            // TODO: determine selected space after anchor
+                            selectedSpace={
+                                document.URL.split('#').length > 1
+                                    ? this.state.selectedSpace
+                                    : this.state.selectedSpace
+                            }
+                            selectedSpaceLocalId={
+                                document.URL.split('#').length > 1
+                                    ? this.state.selectedSpaceLocalId
+                                    : this.state.selectedSpaceLocalId
+                            }
+                            onSelectSpace={(listId) =>
+                                this.handleSelectSpace(listId)
+                            }
+                            // sidebarActions={null}
+                            getListDetailsById={this.getListDetailsById}
+                            sidebarContext={this.props.sidebarContext}
+                            ref={this.sidebarRef as any}
+                            openCollectionPage={(remoteListId) =>
+                                window.open(
+                                    getListShareUrl({ remoteListId }),
+                                    '_blank',
+                                )
+                            }
+                            onMenuItemClick={({ sortingFn }) =>
+                                this.processEvent('sortAnnotations', {
+                                    sortingFn,
+                                })
+                            }
+                            annotationUrls={() =>
+                                this.state.annotations.map((a) => a.url)
+                            }
+                            normalizedPageUrls={[
+                                normalizeUrl(this.state.pageUrl),
+                            ]}
+                            normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
+                            onClickOutsideCopyPaster={() =>
+                                this.processEvent(
+                                    'resetCopyPasterAnnotationId',
+                                    null,
+                                )
+                            }
+                            copyPaster={this.props.copyPaster}
+                            contentSharing={this.props.contentSharing}
+                            annotationsShareAll={this.props.annotations}
+                            copyPageLink={(link) => {
+                                this.processEvent('copyNoteLink', { link })
+                            }}
+                            postBulkShareHook={(shareInfo) =>
+                                this.processEvent(
+                                    'updateAllAnnotationsShareInfo',
+                                    shareInfo,
+                                )
+                            }
+                            onCopyBtnClick={() => this.handleCopyAllNotesClick}
+                            onShareAllNotesClick={() =>
+                                this.handleCopyAllNotesClick
+                            }
+                            sharingAccess={this.state.annotationSharingAccess}
+                            needsWaypoint={!this.state.noResults}
+                            appendLoader={
+                                this.state.secondarySearchState === 'running'
+                            }
+                            annotationModes={
+                                this.state.annotationModes.pageAnnotations
+                            }
+                            setActiveAnnotationUrl={(annotationUrl) => () =>
+                                this.processEvent('setActiveAnnotationUrl', {
+                                    annotationUrl,
                                 })}
-                            />
-                        </SidebarContainerWithTopBar>
+                            isAnnotationCreateShown={this.state.showCommentBox}
+                            annotationCreateProps={this.getCreateProps()}
+                            bindAnnotationFooterEventProps={(
+                                annotation,
+                                followedListId,
+                            ) =>
+                                this.bindAnnotationFooterEventProps(
+                                    annotation,
+                                    followedListId,
+                                )
+                            }
+                            bindAnnotationEditProps={
+                                this.bindAnnotationEditProps
+                            }
+                            handleScrollPagination={() =>
+                                this.processEvent('paginateSearch', null)
+                            }
+                            isSearchLoading={
+                                this.state.annotationsLoadState === 'running' ||
+                                this.state.loadState === 'running'
+                            }
+                            onClickOutside={this.handleClickOutside}
+                            theme={this.props.theme}
+                            renderCopyPasterForAnnotation={
+                                this.renderCopyPasterManagerForAnnotation
+                            }
+                            renderShareMenuForAnnotation={
+                                this.renderShareMenuForAnnotation
+                            }
+                            renderTagsPickerForAnnotation={
+                                this.state.shouldShowTagsUIs
+                                    ? this.renderTagsPickerForAnnotation
+                                    : undefined
+                            }
+                            renderListsPickerForAnnotation={
+                                this.renderListPickerForAnnotation
+                            }
+                            expandMyNotes={() =>
+                                this.processEvent('expandMyNotes', null)
+                            }
+                            expandSharedSpaces={(listIds) =>
+                                this.processEvent('expandSharedSpaces', {
+                                    listIds,
+                                })
+                            }
+                            expandFollowedListNotes={(listId) =>
+                                this.processEvent('expandFollowedListNotes', {
+                                    listId,
+                                })
+                            }
+                            toggleIsolatedListView={(listId) =>
+                                this.processEvent('toggleIsolatedListView', {
+                                    listId,
+                                })
+                            }
+                            bindSharedAnnotationEventHandlers={(
+                                annotationReference,
+                                sharedListReference,
+                            ) => ({
+                                onReplyBtnClick: () =>
+                                    this.processEvent(
+                                        'toggleAnnotationReplies',
+                                        {
+                                            annotationReference,
+                                            sharedListReference,
+                                        },
+                                    ),
+                                onNewReplyInitiate: () =>
+                                    this.processEvent(
+                                        'initiateNewReplyToAnnotation',
+                                        {
+                                            annotationReference,
+                                            sharedListReference,
+                                        },
+                                    ),
+                                onNewReplyCancel: () =>
+                                    this.processEvent(
+                                        'cancelNewReplyToAnnotation',
+                                        {
+                                            annotationReference,
+                                            sharedListReference,
+                                        },
+                                    ),
+                                onNewReplyConfirm: () =>
+                                    this.processEvent(
+                                        'confirmNewReplyToAnnotation',
+                                        {
+                                            annotationReference,
+                                            sharedListReference,
+                                        },
+                                    ),
+                                onNewReplyEdit: ({ content }) =>
+                                    this.processEvent(
+                                        'editNewReplyToAnnotation',
+                                        {
+                                            annotationReference,
+                                            sharedListReference,
+                                            content,
+                                        },
+                                    ),
+                            })}
+                        />
                     </Rnd>
                 </ContainerStyled>
                 {this.renderModals()}
@@ -952,6 +1094,11 @@ const SidebarContainerWithTopBar = styled.div`
 const GlobalStyle = createGlobalStyle<{
     sidebarWidth: string
 }>`
+
+    & * {
+        font-family: 'Satoshi'
+    }
+
     .sidebar-draggable {
         height: 100% !important;
     }
@@ -960,7 +1107,7 @@ const GlobalStyle = createGlobalStyle<{
     width: 4px;
     height: 100vh;
     position: absolute;
-    top: 66px;
+    top: 0px;
 
         &:hover {
         background: #5671cf30;
@@ -1018,27 +1165,64 @@ const PickerWrapper = styled.div`
     z-index: 5;
 `
 
-const ContainerStyled = styled.div`
+const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     height: 100%;
     overflow-x: visible;
     position: fixed;
     padding: 0px 0px 10px 0px;
 
     right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
-    top: ${({ theme }: Props) => theme?.topOffsetPx ?? 0}px;
+    top: calc(${({ theme }: Props) => theme?.topOffsetPx ?? 0}px);
     padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
 
-    z-index: 2147483646; /* This is to combat pages setting high values on certain elements under the sidebar */
+    z-index: ${(props) =>
+        props.sidebarContext === 'dashboard'
+            ? '2147483640'
+            : '2147483646'}; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: ${(props) => props.theme.colors.backgroundColor};
-    transition: all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1) 0s;
     border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    box-sizing: content-box;
+    animation: ${(props) =>
+        props.sidebarContext === 'in-page' && 'slide-in ease-out'};
+    animation-duration: 0.05s;
+    /* transition : all 2s ease; */
+    // place it initially at -100%
 
     &:: -webkit-scrollbar {
         display: none;
     }
 
     scrollbar-width: none;
+
+    ${(props) =>
+        props.isShown !== 'visible' &&
+        css`
+            transition: all 2s ease;
+            transform: translateX(-600px);
+        `}
+
+    @keyframes slide-in {
+        0% {
+            right: -450px;
+            opacity: 0%;
+        }
+        100% {
+            right: 0px;
+            opacity: 100%;
+        }
+    }
+
+    @keyframes slide-out {
+        0% {
+            right: 0px;
+            opacity: 100%;
+        }
+        100% {
+            right: -450px;
+            opacity: 0%;
+        }
+    }
 `
 
 const TopBarContainerStyled = styled.div`
@@ -1058,19 +1242,22 @@ const TopBarContainerStyled = styled.div`
 `
 
 const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
-    display: grid;
-    justify-content: flex-start;
-    margin-left: -25px;
+    display: flex;
+    grid-gap: 5px;
     align-items: center;
+    flex-direction: column;
     gap: 8px;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
-    border-radius: 0 0 0 5px;
-    padding: 5px 1px 5px 3px;
-    z-index: 10000;
-    right: 4px;
-    position: relative;
-    border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    position: absolute;
+    top: 17px;
+    margin-left: -12px;
+`
+
+const IconBoundary = styled.div`
+    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-radius: 5px;
+    height: fit-content;
+    width: fit-content;
+    background: ${(props) => props.theme.colors.backgroundColor};
 `
 
 const CloseBtn = styled.button`

@@ -14,7 +14,6 @@ export interface Props extends Omit<OverlayProps, 'onClick'> {
 class Modal extends PureComponent<Props> {
     render() {
         const { onClose, ignoreClickOutside, ...props } = this.props
-
         return (
             <Overlay
                 onClick={ignoreClickOutside ? undefined : onClose}
@@ -23,8 +22,8 @@ class Modal extends PureComponent<Props> {
                 {onClose && (
                     <CloseContainer>
                         <Icon
-                            filePath={icons.close}
-                            heightAndWidth="16px"
+                            filePath={icons.removeX}
+                            heightAndWidth="22px"
                             onClick={onClose}
                         />
                     </CloseContainer>

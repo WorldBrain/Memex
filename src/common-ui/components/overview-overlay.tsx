@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { CancelAction } from 'src/common-ui/components/design-library/actions/CancelAction'
 import {
     WhiteSpacer20,

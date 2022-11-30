@@ -33,7 +33,7 @@ const KeyboardInput = styled.input`
     align-items: center;
     justify-content: center;
     color: ${(props) => props.theme.colors.darkerText};
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
+    border: 1px solid ${(props) => props.theme.colors.lightHover};
     outline: none;
     text-align: center;
     border-radius: 5px;
@@ -49,13 +49,14 @@ const Label = styled.div`
 
 const LabelMain = styled.div`
     font-size: 14px;
-    font-weight: 500;
-    color: ${(props) => props.theme.colors.darkerText};
+    font-weight: 300;
+    color: ${(props) => props.theme.colors.normalText};
 `
 
 const SubLabel = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.darkText};
     font-size: 14px;
+    font-weight: 300;
 `
 
 Concurrency.propTypes = {

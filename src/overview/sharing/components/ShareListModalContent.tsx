@@ -10,7 +10,7 @@ import {
     TypographyHeadingSmall,
 } from 'src/common-ui/components/design-library/typography'
 import { TaskState } from 'ui-logic-core/lib/types'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { Modal } from 'src/common-ui/components'
 

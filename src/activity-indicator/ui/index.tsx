@@ -43,28 +43,39 @@ export class FeedActivityDot extends StatefulUIElement<Props, State, Events> {
 
     render() {
         if (this.state.isShown) {
-            return (
-                <Dot
-                    unread={this.state.hasFeedActivity ? 1 : 0}
-                    onClick={this.handleFeedIndicatorClick}
-                />
-            )
+            if (this.state.hasFeedActivity) {
+                return (
+                    <OuterRing>
+                        <Dot
+                            unread={this.state.hasFeedActivity ? 1 : 0}
+                            // onClick={this.handleFeedIndicatorClick}
+                        />
+                    </OuterRing>
+                )
+            } else {
+                return <OuterRing />
+            }
         }
 
         return null
     }
 }
 
-const Dot = styled.div<{ unread: boolean }>`
-    border-radius: 10px;
+const OuterRing = styled.div`
     width: 14px;
     height: 14px;
-    background: ${(props) =>
-        props.unread ? props.theme.colors.purple : 'unset'};
-    border: 2px solid
-        ${(props) =>
-            props.unread
-                ? props.theme.colors.purple
-                : props.theme.colors.lineGrey};
+    border: 2px solid ${(props) => props.theme.colors.iconColor};
+    cursor: pointer;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const Dot = styled.div<{ unread: boolean }>`
+    border-radius: 10px;
+    width: 10px;
+    height: 10px;
+    background: ${(props) => props.theme.colors.purple};
     cursor: pointer;
 `

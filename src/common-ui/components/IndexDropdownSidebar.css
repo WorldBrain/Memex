@@ -1,8 +1,12 @@
 @value colors: 'src/common-ui/colors.css';
-@value color11, color14, color4, color6, color9 from colors;
+@value color11,
+color14,
+color4,
+color6,
+color9 from colors;
 
 .tagContainer * {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
 }
 
 .menuItem {

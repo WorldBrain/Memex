@@ -1,11 +1,11 @@
-@import url('/fonts/Inter/inter.css');
+@import url('/fonts/Satoshi/satoshi.css');
 
 :root {
     --memex-green: #4abf9d;
 }
 
 .MEMEX_CONTAINER * {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
 }
 
 .MEMEX_CONTAINER {
@@ -55,7 +55,8 @@
 
 .links {
     color: #3a2f45;
-    text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
+    text-decoration: none !important;
+    /* stylelint-disable-line declaration-no-important */
     font-size: 16px;
     display: inline-block;
     font-weight: 600;
@@ -257,8 +258,10 @@
 
 .upgradeButton {
     padding: 5px 25px;
-    color: white !important; /* stylelint-disable-line declaration-no-important */
-    text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
+    color: white !important;
+    /* stylelint-disable-line declaration-no-important */
+    text-decoration: none !important;
+    /* stylelint-disable-line declaration-no-important */
     background-color: #3eb995;
     margin-bottom: 10px;
     border-radius: 2px;

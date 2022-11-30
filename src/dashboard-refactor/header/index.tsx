@@ -10,7 +10,6 @@ import { fonts } from '../styles'
 import { Icon } from '../styled-components'
 import Margin from '../components/Margin'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
-import SidebarToggle from './sidebar-toggle'
 import type { SidebarLockedState } from '../lists-sidebar/types'
 import type { HoverState } from '../types'
 import { SyncStatusIcon } from './sync-status-menu/sync-status-icon'
@@ -20,15 +19,17 @@ const Container = styled.div`
     width: 100%;
     position: sticky;
     top: 0;
+    left: 150px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    background: #fff;
-    z-index: 2147483646;
+    justify-content: center;
+    background-color: ${(props) => props.theme.colors.backgroundColor};
+    z-index: 2147483641;
+    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lineGrey};
 `
 
-const SearchSection = styled(Margin)`
+const SearchSection = styled(Margin)<{ sidebarWidth: string }>`
     justify-content: flex-start !important;
     max-width: 825px !important;
 
@@ -59,6 +60,8 @@ const RightHeader = styled.div`
     align-items: center;
     justify-content: flex-end;
     flex: 1;
+    position: absolute;
+    right: 10px;
 `
 
 const SyncStatusHeaderBox = styled.div`
@@ -91,7 +94,7 @@ const SyncStatusHeaderBox = styled.div`
 const SyncStatusHeaderText = styled.span<{
     textCentered: boolean
 }>`
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
     font-weight: 500;
     color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
@@ -99,51 +102,16 @@ const SyncStatusHeaderText = styled.span<{
     overflow: hidden;
     ${(props) => (props.textCentered ? 'text-align: center;' : '')}
 
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 900px) {
         display: none;
     }
 `
 
-const SidebarHeaderContainer = styled.div`
-    height: 100%;
-    width: ${sizeConstants.listsSidebar.widthPx}px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    flex: 1;
+const ActionButtons = styled.div``
 
-    & div {
-        justify-content: flex-start;
-    }
-`
-
-const CollectionTitle = styled.p`
-    margin: 0;
-    font-family: ${fonts.primary.name};
-    font-weight: ${fonts.primary.weight.bold};
-    line-height: 21px;
-    width: 100%;
-    display: flex;
-`
-
-const ActivityIndicator = styled.div<{ hasActivities }>`
-    border-radius: 20px;
-    height: 10px;
-    width: 10px;
-    margin-left: -24px;
-    border: ${(props) =>
-        props.hasActivities
-            ? '2px solid' + props.theme.colors.purple
-            : '1px solid' + props.theme.colors.lightgrey};
-    background: ${(props) => props.hasActivities && props.theme.colors.purple};
-`
-
-const SidebarToggleBox = styled(Margin)`
-    width: fit-content;
-    display: flex;
-    align-items: center;
-`
+// const PlaceholderContainer = styled.div`
+//     left: 150px;
+// `
 
 export interface HeaderProps {
     sidebarLockedState: SidebarLockedState
@@ -153,9 +121,12 @@ export interface HeaderProps {
     syncStatusMenuProps: SyncStatusMenuProps
     syncStatusIconState: SyncStatusIconState
     activityStatus?: boolean
+    sidebarWidth?: string
 }
 
-export default class Header extends PureComponent<HeaderProps> {
+export type Props = HeaderProps & {}
+
+export default class Header extends PureComponent<Props> {
     static SYNC_MENU_TOGGLE_BTN_CLASS = 'sync-menu-toggle-btn'
 
     render() {
@@ -167,19 +138,18 @@ export default class Header extends PureComponent<HeaderProps> {
         } = this.props
         return (
             <Container>
-                <SidebarHeaderContainer>
-                    <SidebarToggleBox>
-                        <SidebarToggle
-                            sidebarLockedState={this.props.sidebarLockedState}
-                            hoverState={this.props.sidebarToggleHoverState}
-                        />
-                        <ActivityIndicator
-                            hasActivities={this.props.activityStatus}
-                        />
-                    </SidebarToggleBox>
-                </SidebarHeaderContainer>
-                <SearchSection vertical="auto" left="24px">
-                    <SearchBar {...searchBarProps} />
+                {/* <PlaceholderContainer /> */}
+                <SearchSection
+                    sidebarWidth={this.props.sidebarWidth}
+                    vertical="auto"
+                    left="24px"
+                >
+                    <SearchBar
+                        {...searchBarProps}
+                        sidebarLockedState={
+                            this.props.sidebarLockedState.isSidebarLocked
+                        }
+                    />
                 </SearchSection>
                 <RightHeader>
                     <SyncStatusHeaderBox
@@ -196,7 +166,7 @@ export default class Header extends PureComponent<HeaderProps> {
                         horizontal="17px"
                         onClick={() => window.open(SETTINGS_URL, '_self')}
                     >
-                        <Icon heightAndWidth="18px" path={icons.settings} />
+                        <Icon heightAndWidth="22px" path={icons.settings} />
                     </SettingsSection>
                     <SyncStatusMenu
                         {...syncStatusMenuProps}

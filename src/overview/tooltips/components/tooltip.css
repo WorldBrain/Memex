@@ -1,5 +1,6 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color6 from colors;
+@value color4,
+color6 from colors;
 
 .container {
     composes: toolTips from 'src/common-ui/elements.css';
@@ -11,7 +12,7 @@
     background: #fff;
     height: fit-content;
     padding: 6px 30px 35px 30px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
     font-weight: 400;
     color: color4;
     font-size: 16px;

@@ -14,6 +14,7 @@ import LinkButton from './components/LinkButton'
 import CopyPDFLinkButton from './components/CopyPDFLinkButton'
 import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
+import { SidebarOpenButton } from './sidebar-open-button'
 import {
     selectors as tagsSelectors,
     acts as tagActs,
@@ -294,7 +295,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 <SpacePickerContainer>
                     <BackContainer
                         onClick={this.props.toggleShowCollectionsPicker}
-                        header={'Add to Spaces'}
+                        header={'Add Page to Spaces'}
                     />
                     <CollectionPicker
                         selectEntry={(listId) =>
@@ -322,19 +323,58 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
         return (
             <PopupContainerContainer>
-                <FeedActivitySection>
-                    <FeedActivitySectionInnerContainer
-                        onClick={() => window.open(this.whichFeed(), '_blank')}
-                    >
-                        <FeedActivityDot
-                            key="activity-feed-indicator"
-                            activityIndicatorBG={this.activityIndicatorBG}
-                            openFeedUrl={() =>
-                                window.open(this.whichFeed(), '_blank')
-                            }
+                <FeedActivitySection
+                    onClick={() => window.open(this.whichFeed(), '_blank')}
+                >
+                    <FeedActivitySectionInnerContainer>
+                        <Icon
+                            icon={icons.feed}
+                            heightAndWidth="22px"
+                            hoverOff
                         />
                         Activity Feed
                     </FeedActivitySectionInnerContainer>
+                    <FeedActivityDot
+                        key="activity-feed-indicator"
+                        activityIndicatorBG={this.activityIndicatorBG}
+                        openFeedUrl={() =>
+                            window.open(this.whichFeed(), '_blank')
+                        }
+                    />
+                </FeedActivitySection>
+                {this.maybeRenderBlurredNotice()}
+                <BookmarkButton closePopup={this.closePopup} />
+                <CollectionsButton pageListsIds={this.state.pageListIds} />
+                {this.state.shouldShowTagsUIs && <TagsButton />}
+                <SpacerLine />
+                {this.isCurrentPagePDF === true && (
+                    <PDFReaderButton
+                        pdfMode={this.getPDFMode()}
+                        //closePopup={this.closePopup}
+                        onBtnClick={() =>
+                            this.processEvent('togglePDFReader', null)
+                        }
+                        onToggleClick={() => {
+                            this.processEvent('togglePDFReaderEnabled', null)
+                        }}
+                        isEnabled={this.state.isPDFReaderEnabled}
+                    />
+                )}
+                {this.getPDFMode() === 'reader' && (
+                    <CopyPDFLinkButton
+                        currentPageUrl={this.state.currentPageUrl}
+                    />
+                )}
+                <LinkButton goToDashboard={this.onSearchClick} />
+                <SidebarOpenButton closePopup={this.closePopup} />
+                <QuickSettingsContainer>
+                    Quick Settings <SpacerLine />
+                </QuickSettingsContainer>
+
+                <SidebarButton closePopup={this.closePopup} />
+                <TooltipButton closePopup={this.closePopup} />
+                <Footer>
+                    <MemexLogo />
                     <ButtonContainer>
                         <Icon
                             onClick={() =>
@@ -354,34 +394,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         />
                         {/*<NotifButton />*/}
                     </ButtonContainer>
-                </FeedActivitySection>
-                {this.maybeRenderBlurredNotice()}
-                <BookmarkButton closePopup={this.closePopup} />
-                <CollectionsButton pageListsIds={this.state.pageListIds} />
-                {this.state.shouldShowTagsUIs && <TagsButton />}
-                <hr />
-                <LinkButton goToDashboard={this.onSearchClick} />
-
-                <hr />
-
-                <SidebarButton closePopup={this.closePopup} />
-                <TooltipButton closePopup={this.closePopup} />
-                <PDFReaderButton
-                    pdfMode={this.getPDFMode()}
-                    //closePopup={this.closePopup}
-                    onBtnClick={() =>
-                        this.processEvent('togglePDFReader', null)
-                    }
-                    onToggleClick={() => {
-                        this.processEvent('togglePDFReaderEnabled', null)
-                    }}
-                    isEnabled={this.state.isPDFReaderEnabled}
-                />
-                {this.getPDFMode() === 'reader' && (
-                    <CopyPDFLinkButton
-                        currentPageUrl={this.state.currentPageUrl}
-                    />
-                )}
+                </Footer>
             </PopupContainerContainer>
         )
     }
@@ -391,7 +404,45 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 }
 
-const PopupContainerContainer = styled.div``
+const MemexLogo = styled.div`
+    background-image: url('/img/memexLogoGrey.svg');
+    background-position: left center;
+    height: 24px;
+    width: 110px;
+    display: flex;
+    justify-content: flex-start;
+    outline: none;
+    border: none;
+    background-repeat: no-repeat;
+`
+
+const QuickSettingsContainer = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    color: ${(props) => props.theme.colors.darkText};
+    white-space: nowrap;
+    align-items: center;
+    padding-left: 20px;
+`
+
+const SpacerLine = styled.hr`
+    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    width: 100%;
+`
+
+const Footer = styled.div`
+    height: 40px;
+    display: flex;
+    padding: 0 15px 0 20px;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid ${(props) => props.theme.colors.lightHover};
+`
+
+const PopupContainerContainer = styled.div`
+    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    border: 1px solid ${(props) => props.theme.colors.lightHover};
+`
 
 const ButtonContainer = styled.div`
     display: flex;
@@ -406,10 +457,10 @@ const FeedActivitySectionInnerContainer = styled.div`
     font-size: 14px;
     justify-content: flex-start;
     cursor: pointer;
-    color: ${(props) => props.theme.colors.darkerText};
-    font-weight: 700;
+    color: ${(props) => props.theme.colors.normalText};
+    font-weight: 500;
     flex: 1;
-    max-width: 50%;
+    width: fill-available;
 `
 
 const NoticeTitle = styled.div`
@@ -427,6 +478,7 @@ const LoadingBox = styled.div`
     height: 200px;
     justify-content: center;
     align-items: center;
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
 `
 
 const NoticeSubTitle = styled.div`
@@ -443,7 +495,7 @@ const BlurredNotice = styled.div<{
     browser: string
     location: string
 }>`
-    position absolute;
+    position: absolute;
     height: ${(props) =>
         props.browser === 'firefox' && props.location === 'local'
             ? '90%'
@@ -485,8 +537,13 @@ const FeedActivitySection = styled.div`
     height: 50px;
     border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
     align-items: center;
-    padding: 0px 10px 0px 24px;
+    padding: 0px 20px 0px 20px;
     grid-auto-flow: column;
+    width: fill-available;
+
+    & * {
+        cursor: pointer;
+    }
 
     // &:hover {
     //     background-color: ${(props) => props.theme.colors.backgroundColor};
@@ -513,6 +570,8 @@ const LinkButtonBox = styled.img`
 const SpacePickerContainer = styled.div`
     display: flex;
     flex-direction: column;
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    min-height: 500px;
 `
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({

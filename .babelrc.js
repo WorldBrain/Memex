@@ -7,6 +7,12 @@ const stage1Plugins = [
     ['@babel/plugin-proposal-pipeline-operator', { proposal: 'minimal' }],
     ['@babel/plugin-proposal-nullish-coalescing-operator', { loose: false }],
     '@babel/plugin-proposal-do-expressions',
+    [
+        'babel-plugin-styled-components',
+        {
+            fileName: false,
+        },
+    ],
 ]
 
 module.exports = {

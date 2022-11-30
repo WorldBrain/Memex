@@ -1,12 +1,12 @@
-@import url('/fonts/Inter/inter.css');
+@import url('/fonts/Satoshi/satoshi.css');
 
 :host * {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
 }
 
 .extraPanel {
     all: initial;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
     font-size: 12px;
 }
 

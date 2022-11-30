@@ -187,12 +187,6 @@ export class PersonalCloudBackground {
 
     private isCloudSyncEnabled = () => this.options.settingStore.get('isSetUp')
 
-    private async startCloudSyncIfEnabled() {
-        if (await this.isCloudSyncEnabled()) {
-            await this.startSync()
-        }
-    }
-
     triggerSyncContinuation() {
         this.options.backend.triggerSyncContinuation()
     }
@@ -213,7 +207,7 @@ export class PersonalCloudBackground {
             await this.createOrLoadDeviceId(userId)
         }
 
-        await this.startCloudSyncIfEnabled()
+        await this.startSync()
     }
 
     async observeAuthChanges() {
@@ -221,7 +215,7 @@ export class PersonalCloudBackground {
             await this.handleAuthChange(nextUser?.id)
 
             if (nextUser) {
-                await this.startCloudSyncIfEnabled()
+                await this.startSync()
             }
         }
     }

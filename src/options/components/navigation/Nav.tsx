@@ -24,11 +24,12 @@ const Root = styled.div`
     flex-direction: column;
     justify-content: space-between;
     border-right: 1px solid ${(props) => props.theme.colors.lineGrey};
-    background: white;
+    background-color: ${(props) => props.theme.colors.greyScale1};
 `
 
 const NavItem = styled.ul`
     padding-inline-start: 0px;
+    color: ${(props) => props.theme.colors.normalText};
 `
 
 export default Nav

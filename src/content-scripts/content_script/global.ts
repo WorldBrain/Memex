@@ -47,6 +47,7 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
+import browser from 'webextension-polyfill'
 // import { maybeRenderTutorial } from 'src/in-page-ui/guided-tutorial/content-script'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
@@ -58,7 +59,7 @@ export async function main(
         loadRemotely?: boolean
         getContentFingerprints?: GetContentFingerprints
     } = {},
-) {
+): Promise<SharedInPageUIState> {
     params.loadRemotely = params.loadRemotely ?? true
     const isPdfViewerRunning = params.getContentFingerprints != null
     if (isPdfViewerRunning) {
@@ -158,13 +159,19 @@ export async function main(
         createAnnotation: (analyticsEvent?: AnalyticsEvent<'Annotations'>) => (
             shouldShare: boolean,
             showSpacePicker?: boolean,
-        ) =>
-            highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
+        ) => {
+            // TODO: use inPageUI.selectedSpace to create the annotation in the right scope
+            console.debug(
+                'Creating annotation under selected space',
+                inPageUI.selectedSpace,
+            )
+            return highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
                 ...annotationFunctionsParams,
                 showSpacePicker,
                 analyticsEvent,
                 shouldShare,
-            }),
+            })
+        },
     }
 
     // 4. Create a contentScriptRegistry object with functions for each content script
@@ -347,13 +354,37 @@ export async function main(
         }
     }
 
+    // Blocklist enforcement
+    const url = pageInfo._href
+    const blocklistObject = await browser.storage.local.get('blacklist')
+
+    let isAllowedPage = true
+
+    if (blocklistObject) {
+        if (blocklistObject['blacklist']?.length > 0) {
+            const blockListJSON = JSON.parse(blocklistObject['blacklist'])
+
+            blockListJSON?.map((entry) => {
+                if (url.match(entry.expression)) {
+                    isAllowedPage = false
+                }
+            })
+        }
+    } else {
+        await browser.storage.local.set({ blacklist: {} })
+    }
+
     const isSidebarEnabled =
         (await sidebarUtils.getSidebarState()) &&
         (pageInfo.isPdf ? isPdfViewerRunning : true)
     const pageActivityStatus = await pageActivityIndicatorBG.getPageActivityStatus(
         fullPageUrl,
     )
-    if (isSidebarEnabled || pageActivityStatus === 'has-annotations') {
+
+    if (
+        (isSidebarEnabled && isAllowedPage) ||
+        pageActivityStatus === 'has-annotations'
+    ) {
         await inPageUI.loadComponent('ribbon', {
             keepRibbonHidden: !isSidebarEnabled,
             showPageActivityIndicator: pageActivityStatus === 'has-annotations',

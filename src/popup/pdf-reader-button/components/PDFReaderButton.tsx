@@ -30,25 +30,13 @@ class PDFreaderButton extends PureComponent<Props> {
         return (
             <ButtonItem>
                 <ButtonInnerContainer onClick={this.props.onBtnClick}>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.pdf}
-                            heightAndWidth="18px"
-                            hoverOff
-                        />
-                    </SectionCircle>
+                    <Icon filePath={icons.pdf} heightAndWidth="22px" hoverOff />
                     <ButtonInnerContent>
                         {this.props.pdfMode === 'reader'
-                            ? 'Close Memex PDF reader'
+                            ? 'Exit Memex PDF reader'
                             : 'Open Memex PDF reader'}
-                        <SubTitle>One-time open current PDF</SubTitle>
                     </ButtonInnerContent>
                 </ButtonInnerContainer>
-                <ToggleSwitchButton
-                    toggleHoverText={'Open every PDF with the reader'}
-                    isEnabled={this.props.isEnabled}
-                    onToggleClick={this.props.onToggleClick}
-                />
             </ButtonItem>
         )
     }
@@ -75,14 +63,14 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     width: fill-available;
     align-items: center;
     justify-content: space-between;
-    padding: 5px 10px;
-    margin: 0px 10px;
+    padding: 0px 10px;
+    margin: 5px 10px 0 10px;
     border-radius: 8px;
     height: 50px;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
     &:hover {
-        background: ${(props) => props.theme.colors.backgroundColorDarker};
+        background: ${(props) => props.theme.colors.lightHover};
     }
 
     & * {
@@ -101,8 +89,8 @@ const ButtonInnerContent = styled.div`
     justify-content: center;
     align-items: flex-start;
     font-size: 14px;
-    font-weight: 600;
-    color: ${(props) => props.theme.colors.darkerText};
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.normalText};
 `
 
 const SubTitle = styled.div`

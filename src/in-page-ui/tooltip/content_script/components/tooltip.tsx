@@ -1,18 +1,12 @@
 import React from 'react'
-import PropTypes from 'prop-types'
+import PropTypes, { string } from 'prop-types'
 import ButtonTooltip from '../../../../common-ui/components/button-tooltip'
 import AnimationWrapper from './AnimationWrapper'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import browser from 'webextension-polyfill'
 import styled from 'styled-components'
 
-const close = browser.runtime.getURL('/img/close.svg')
-// const commentEmpty = browser.runtime.getURL('/img/commentEmpty.svg')
-// const highlighterSmall = browser.runtime.getURL('/img/highlighterSmall.svg')
-
-const MemexTooltip = styled.div`
+const MemexTooltip = styled.div`  
     height: 34px;
-    width: 95px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -24,28 +18,44 @@ const MemexTooltip = styled.div`
     background-color: #fff;
     transform: translate(-50%, 50%);
     z-index: 100000;
-    opacity: 1;
-    transition: all 1s ease-in-out;
-    border: 1px solid #f0f0f0;
+    animation: slide-in ease-out;
+    animation-duration: 0.05s;
+    /* transition: all 1s ease-in-out; */
+    width: fit-content;
+    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    background: ${(props) => props.theme.colors.greyScale1};
 
     &::after {
         box-sizing: content-box;
         left: calc(50% - 4px);
-        top: -4px;
+        top: -5px;
         content: ' ';
-        height: 6px;
-        width: 6px;
+        height: 8px;
+        width: 8px;
         position: absolute;
         pointer-events: none;
         border-bottom-color: transparent;
         border-left-color: transparent;
         transform: rotate(-45deg);
-        background-color: #fff;
-        transition: all 0.2s ease-in;
-        transition-delay: 0.3s;
-        border-top: 1px solid #f0f0f0;
-        border-right: 1px solid #f0f0f0;
+        background: ${(props) => props.theme.colors.greyScale1};
+        /* transition: all 0.2s ease-in;
+        transition-delay: 0.3s; */
+        border-top: 1px solid ${(props) => props.theme.colors.lightHover};
+        border-right: 1px solid ${(props) => props.theme.colors.lightHover};
+        border-radius: 1px;
+        bo
     }
+
+    @keyframes slide-in {
+            0% { 
+                opacity: 0%;
+                margin-top: -15px;
+            }
+            100% {
+                opacity: 100%;
+                margin-top: 5px;
+            }
+        }
 `
 
 // const deriveTooltipClass = (state) =>
@@ -63,8 +73,10 @@ const Tooltip = ({
     openSettings,
 }) => (
     <MemexTooltip
+        left={x}
+        top={y}
         // className={deriveTooltipClass(state)}
-        style={{ left: x, top: y, height: 28, width: 95 }}
+        style={{ left: x, top: y }}
         id="memex-tooltip"
     >
         <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
@@ -89,7 +101,7 @@ export function _renderButtons({ closeTooltip, state }) {
             position="rightContentTooltip"
         >
             <Icon
-                filePath={close}
+                filePath={'removeX'}
                 heightAndWidth="20px"
                 color={'darkerIconColor'}
             />

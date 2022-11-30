@@ -24,7 +24,6 @@ export default class TutorialStep extends React.Component<Props> {
                         </ShortcutLabel>
                     )}
                 </CardBodyHeader>
-                <TutorialText>{this.props.text}</TutorialText>
             </React.Fragment>
         )
     }
@@ -58,7 +57,6 @@ const CardSubTitle = styled.div`
     font-size: 1.7em;
     font-weight: bold;
     text-align: left;
-    padding: 5px 0 0 0;
     line-height: 30x;
     border-bottom: 0px;
     width: 100%;

@@ -117,7 +117,7 @@ class DomainPicker extends StatefulUIElement<
                         />
                     </SectionCircle>
                     <SectionTitle>No Domains to filter</SectionTitle>
-                    <InfoText>Save your first page or annotation</InfoText>
+                    <InfoText>Save a first page or annotation</InfoText>
                 </EmptyDomainsView>
             )
         }
@@ -141,7 +141,7 @@ class DomainPicker extends StatefulUIElement<
         if (this.state.loadingSuggestions) {
             return (
                 <LoadingBox>
-                    <LoadingIndicator />
+                    <LoadingIndicator size={30} />
                 </LoadingBox>
             )
         }
@@ -156,13 +156,13 @@ class DomainPicker extends StatefulUIElement<
                     onKeyPress={this.handleKeyPress}
                     value={this.state.query}
                     loading={this.state.loadingQueryResults}
-                    before={
-                        <EntrySelectedList
-                            dataAttributeName="domain-name"
-                            entriesSelected={this.selectedDisplayEntries}
-                            onPress={this.handleSelectedDomainPress}
-                        />
-                    }
+                    // before={
+                    //     <EntrySelectedList
+                    //         dataAttributeName="domain-name"
+                    //         entriesSelected={this.selectedDisplayEntries}
+                    //         onPress={this.handleSelectedDomainPress}
+                    //     />
+                    // }
                 />
                 <EntryResultsList
                     entries={this.state.displayEntries}
@@ -190,18 +190,19 @@ class DomainPicker extends StatefulUIElement<
 }
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
+    background: ${(props) => props.theme.colors.darkhover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale6};
+    border-radius: 8px;
     height: 30px;
     width: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 5px;
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.normalText};
+    margin-top: 10px;
     font-size: 14px;
     font-weight: bold;
 `
@@ -216,13 +217,13 @@ const LoadingBox = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    height: 300px;
     width: 100%;
 `
 
 const OuterSearchBox = styled.div`
-    background: ${(props) => props.theme.background};
     border-radius: 12px;
+    padding: 5px 5px 5px 5px;
 `
 
 const EmptyDomainsView = styled.div`
@@ -238,7 +239,7 @@ const DomainResultItem = styled.div`
     display: flex;
     border-radius: 4px;
     color: ${(props) => props.theme.colors.normalText};
-    padding: 0 8px;
+    padding: 0px;
     margin: 2px 4px 2px 0;
     font-weight: 400;
     font-size: 14px;

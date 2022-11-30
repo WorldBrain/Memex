@@ -43,10 +43,10 @@ export default class DismissibleResultsMessage extends React.PureComponent<
 }
 
 const Container = styled.div`
-    background: #ffffff;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
     border-radius: 12px;
     padding: 50px;
+    background: ${(props) => props.theme.colors.backgroundColorDarker};
 
     // composes: fadeIn from 'src/common-ui/elements.css';
     animation: fadeIn 500ms ease;
@@ -55,8 +55,9 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     position: relative;
-    margin: 20px 0 40px 0;
+    margin: 50px 0 40px 0;
     width: fill-available;
+    border: 1px solid ${(props) => props.theme.colors.lightHover};
 `
 
 const DismissButton = styled.div`

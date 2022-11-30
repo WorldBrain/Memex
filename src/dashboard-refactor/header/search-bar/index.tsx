@@ -1,13 +1,121 @@
-import React, { PureComponent } from 'react'
-import styled from 'styled-components'
+import React, { PureComponent, ReactElement } from 'react'
+import styled, { css } from 'styled-components'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 
-import colors from '../../colors'
-import styles, { fonts } from '../../styles'
+import { fonts } from '../../styles'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import { ButtonTooltip } from 'src/common-ui/components'
+
+export interface SearchBarProps {
+    placeholder?: string
+    searchQuery: string
+    searchFiltersOpen: boolean
+    onSearchQueryChange(queryString: string): void
+    onSearchFiltersOpen(): void
+    onInputClear(): void
+    renderCopyPasterButton: () => ReactElement
+    renderExpandButton: () => ReactElement
+    sidebarLockedState?: boolean
+}
+
+export default class SearchBar extends PureComponent<SearchBarProps> {
+    private inputRef = React.createRef<HTMLInputElement>()
+
+    componentDidMount() {
+        this.inputRef.current.focus()
+    }
+
+    handleChange: React.KeyboardEventHandler = (evt) => {
+        // need to amend getFilterStrings function to pull through search terms as well, then
+        // bundle them in an object to send with the onSearchQueryChange func
+        this.props.onSearchQueryChange((evt.target as HTMLInputElement).value)
+    }
+
+    handleClearSearch() {
+        this.props.onInputClear()
+        this.inputRef.current.focus()
+    }
+
+    render() {
+        const {
+            searchFiltersOpen,
+            searchQuery,
+            sidebarLockedState,
+            onSearchFiltersOpen,
+            renderCopyPasterButton,
+            renderExpandButton,
+        } = this.props
+        return (
+            <Margin vertical="auto">
+                <SearchBarContainer isClosed={!sidebarLockedState}>
+                    <FullWidthMargin>
+                        {!!searchQuery ? (
+                            <IconContainer>
+                                <Margin right="5px">
+                                    <Icon
+                                        heightAndWidth="22px"
+                                        path={icons.removeX}
+                                        onClick={() => this.handleClearSearch()}
+                                    />
+                                </Margin>
+                            </IconContainer>
+                        ) : (
+                            <IconContainer>
+                                <Margin right="5px">
+                                    <Icon
+                                        heightAndWidth="22px"
+                                        path={icons.searchIcon}
+                                    />
+                                </Margin>
+                            </IconContainer>
+                        )}
+                        <Input
+                            ref={this.inputRef}
+                            placeholder={
+                                this.props.placeholder ??
+                                'Search your saved pages and notes'
+                            }
+                            value={searchQuery}
+                            onChange={this.handleChange}
+                            autoComplete="off"
+                        />
+                    </FullWidthMargin>
+                </SearchBarContainer>
+                <ActionButtons>
+                    <FilterButton left="15px" onClick={onSearchFiltersOpen}>
+                        {searchFiltersOpen ? (
+                            <ButtonTooltip
+                                position={'bottom'}
+                                tooltipText={'Clear Filters'}
+                            >
+                                <Icon
+                                    path={icons.removeX}
+                                    heightAndWidth="22px"
+                                    color={'greyScale8'}
+                                />
+                            </ButtonTooltip>
+                        ) : (
+                            <ButtonTooltip
+                                position={'bottom'}
+                                tooltipText={'Apply Filters'}
+                            >
+                                <Icon
+                                    path={icons.filterIcon}
+                                    heightAndWidth="24px"
+                                    color={'greyScale8'}
+                                />
+                            </ButtonTooltip>
+                        )}
+                    </FilterButton>
+                    {renderCopyPasterButton()}
+                    {renderExpandButton()}
+                </ActionButtons>
+            </Margin>
+        )
+    }
+}
 
 const textStyles = `
     font-family: ${fonts.primary.name};
@@ -16,16 +124,25 @@ const textStyles = `
     color: ${(props) => props.theme.colors.normalText};
 `
 
-const SearchBarContainer = styled.div`
+const SearchBarContainer = styled.div<{ isClosed: boolean }>`
     height: 44px;
     max-width: 450px;
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.darkhover};
     border-radius: 5px;
     padding: 0px 15px;
+    flex: 1;
+
+    @media screen and (max-width: 900px) {
+        margin-left: ${(props) => props.isClosed && '50px'};
+    }
+
+    &:focus-within {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+    }
 `
 
 const Input = styled.input`
@@ -34,15 +151,20 @@ const Input = styled.input`
     line-height: 18px;
     border: none;
     background-color: transparent;
+    height: 44px;
     color: ${(props) => props.theme.colors.normalText};
-    font-weight: ${fonts.primary.weight.normal};
+    font-weight: 400;
 
     &::placeholder {
-        opacity: 0.6;
+        color: ${(props) => props.theme.colors.greyScale8};
     }
 
     &:focus {
         outline: none;
+    }
+
+    &:focus ${SearchBarContainer} {
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
     }
 `
 
@@ -80,96 +202,11 @@ const StyledIcon = styled(Icon)`
     opacity: 0.7;
     cursor: pointer;
 `
-export interface SearchBarProps {
-    placeholder?: string
-    searchQuery: string
-    searchFiltersOpen: boolean
-    onSearchQueryChange(queryString: string): void
-    onSearchFiltersOpen(): void
-    onInputClear(): void
-}
 
-export default class SearchBar extends PureComponent<SearchBarProps> {
-    private inputRef = React.createRef<HTMLInputElement>()
-
-    componentDidMount() {
-        this.inputRef.current.focus()
-    }
-
-    handleChange: React.KeyboardEventHandler = (evt) => {
-        // need to amend getFilterStrings function to pull through search terms as well, then
-        // bundle them in an object to send with the onSearchQueryChange func
-        this.props.onSearchQueryChange((evt.target as HTMLInputElement).value)
-    }
-
-    handleClearSearch() {
-        this.props.onInputClear()
-        this.inputRef.current.focus()
-    }
-
-    render() {
-        const {
-            searchFiltersOpen,
-            searchQuery,
-            onSearchFiltersOpen,
-        } = this.props
-        return (
-            <Margin vertical="auto">
-                <SearchBarContainer>
-                    <FullWidthMargin>
-                        {!!searchQuery ? (
-                            <IconContainer>
-                                <Margin right="5px">
-                                    <Icon
-                                        heightAndWidth="14px"
-                                        path={icons.removeX}
-                                        onClick={() => this.handleClearSearch()}
-                                    />
-                                </Margin>
-                            </IconContainer>
-                        ) : (
-                            <IconContainer>
-                                <Margin right="5px">
-                                    <Icon
-                                        heightAndWidth="16px"
-                                        path={icons.searchIcon}
-                                    />
-                                </Margin>
-                            </IconContainer>
-                        )}
-                        <Input
-                            ref={this.inputRef}
-                            placeholder={
-                                this.props.placeholder ??
-                                'Search your saved pages and notes'
-                            }
-                            value={searchQuery}
-                            onChange={this.handleChange}
-                            autoComplete="off"
-                        />
-                    </FullWidthMargin>
-                </SearchBarContainer>
-                <FilterButton left="15px" onClick={onSearchFiltersOpen}>
-                    {searchFiltersOpen ? (
-                        <ButtonTooltip
-                            position={'bottom'}
-                            tooltipText={'Clear Filters'}
-                        >
-                            <Icon path={icons.removeX} heightAndWidth="16px" />
-                        </ButtonTooltip>
-                    ) : (
-                        <ButtonTooltip
-                            position={'bottom'}
-                            tooltipText={'Apply Filters'}
-                        >
-                            <Icon
-                                path={icons.filterIcon}
-                                heightAndWidth="20px"
-                            />
-                        </ButtonTooltip>
-                    )}
-                </FilterButton>
-            </Margin>
-        )
-    }
-}
+const ActionButtons = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    grid-gap: 15px;
+    flex: 1;
+`

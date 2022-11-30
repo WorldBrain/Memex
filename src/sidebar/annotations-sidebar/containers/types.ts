@@ -98,6 +98,10 @@ export interface FollowedListAnnotation {
     creatorId: string
 }
 
+export type ListPickerShowState =
+    | { annotationId: string; position: 'footer' | 'lists-bar' }
+    | undefined
+
 export type FollowedListState = SharedAnnotationList & {
     isExpanded: boolean
     isContributable: boolean
@@ -106,8 +110,8 @@ export type FollowedListState = SharedAnnotationList & {
     conversationsLoadState: TaskState
     activeShareMenuAnnotationId: string | undefined
     activeCopyPasterAnnotationId: string | undefined
-    activeListPickerAnnotationId: string | undefined
     annotationModes: { [annotationId: string]: AnnotationMode }
+    activeListPickerState: ListPickerShowState
 }
 
 interface SidebarFollowedListsState {
@@ -139,12 +143,19 @@ export interface SidebarContainerState
     sidebarWidth: string
     isolatedView?: string | null // if null show default view
 
+    // Indicates what is the currently selected space in the leaf screen
+    // for the side bar, also known as the isolated view. When a space
+    // is selected, all operations default to use that selected space
+    // except if explicity told otherwise.
+    selectedSpace?: string | null
+    selectedSpaceLocalId?: number | null
+
     annotationSharingAccess: AnnotationSharingAccess
 
     showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
-    activeListPickerAnnotationId: string | undefined
     activeTagPickerAnnotationId: string | undefined
+    activeListPickerState: ListPickerShowState
 
     pageUrl?: string
     annotations: Annotation[]
@@ -287,6 +298,9 @@ interface SidebarEvents {
     expandFollowedListNotes: { listId: string }
     toggleIsolatedListView: { listId: string }
 
+    // Selected space management
+    selectSpace: { listId: string | null }
+
     updateAnnotationShareInfo: {
         annotationUrl: string
         keepListsIfUnsharing?: boolean
@@ -305,7 +319,11 @@ interface SidebarEvents {
     setAllNotesCopyPasterShown: { shown: boolean }
     setCopyPasterAnnotationId: { id: string; followedListId?: string }
     setTagPickerAnnotationId: { id: string }
-    setListPickerAnnotationId: { id: string; followedListId?: string }
+    setListPickerAnnotationId: {
+        id: string
+        position: 'footer' | 'lists-bar'
+        followedListId?: string
+    }
     resetTagPickerAnnotationId: null
     resetCopyPasterAnnotationId: null
     resetListPickerAnnotationId: { id?: string }

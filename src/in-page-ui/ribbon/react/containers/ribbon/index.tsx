@@ -126,6 +126,10 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 showExtraButtons={this.state.areExtraButtonsShown}
                 showTutorial={this.state.areTutorialShown}
+                showFeed={this.state.showFeed}
+                toggleFeed={() => {
+                    this.processEvent('toggleFeed', null)
+                }}
                 isExpanded={this.props.state === 'visible'}
                 getRemoteFunction={this.props.getRemoteFunction}
                 // annotationsManager={this.props.annotationsManager}

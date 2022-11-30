@@ -28,7 +28,7 @@ export class HelpMenu extends React.PureComponent<Props> {
                 {icon && (
                     <Icon
                         filePath={icon}
-                        heightAndWidth="16px"
+                        heightAndWidth="22px"
                         hoverOff
                         color={top ? 'purple' : null}
                     />
@@ -49,7 +49,7 @@ export class HelpMenu extends React.PureComponent<Props> {
                 right={'20px'}
                 bottom={'60px'}
                 padding={'10px'}
-                width={'240px'}
+                width={'260px'}
             >
                 {this.props.menuOptions.map((opt, i) =>
                     opt === '-'
@@ -66,12 +66,10 @@ const MenuItem = styled.div<{ top }>`
     border-radius: 5px;
     border: none;
     list-style: none;
-    background-color: ${(props) =>
-        props.top && props.theme.colors.backgroundHighlight};
+    background-color: ${(props) => props.top && props.theme.colors.lightHover};
 
     &:hover {
-        background-color: ${(props) =>
-            props.theme.colors.backgroundColorDarker};
+        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
     }
 `
 
@@ -97,10 +95,10 @@ const ItemSeparator = styled.hr`
 const FooterText = styled.div`
     height: 20px;
     display: flex;
+    font-size: 14px;
     align-items: center;
-    font-weight 400;
-    color: ${(props) => props.theme.colors.lighterText};
+    font-weight: 300;
+    color: ${(props) => props.theme.colors.darkText};
     padding: 5px 10px 0 10px;
     margin-top: 5px;
-    border-top: 1px solid ${(props) => props.theme.colors.lightgrey};
 `

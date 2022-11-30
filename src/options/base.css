@@ -1,15 +1,17 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color6 from colors;
+@value color4,
+color6 from colors;
 
-@import url('/fonts/Inter/inter.css');
+@import url('/fonts/Satoshi/satoshi.css');
 
 body {
     margin: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
 }
 
 * {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    letter-spacing: 0.8px;
 }
 
 .root {
@@ -20,7 +22,7 @@ body {
 
     & * {
         box-sizing: border-box;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Satoshi', sans-serif;
     }
 }
 

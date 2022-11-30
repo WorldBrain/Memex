@@ -69,7 +69,7 @@ class TextTruncated extends React.Component<Props, State> {
                                         ? icons.expand
                                         : icons.compress
                                 }
-                                heightAndWidth={'10px'}
+                                heightAndWidth={'16px'}
                                 hoverOff
                             />
                             {this.state.isTruncated ? 'Show More' : 'Show Less'}
@@ -85,6 +85,7 @@ const TruncatedBox = styled.div`
     display: flex;
     flex-direction: column;
     width: 100%;
+    justify-content: flex-end;
 `
 
 const ToggleMoreButtonStyled = styled.div`
@@ -92,17 +93,17 @@ const ToggleMoreButtonStyled = styled.div`
     cursor: pointer;
     padding: 2px 5px;
     border-radius: 3px;
-    font-size 12px;
+    font-size: 12px;
     color: grey;
     line-height: 18px;
     color: ${(props) => props.theme.colors.lighterText};
     display: flex;
     grid-gap: 5px;
     align-items: center;
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
 
-    &: hover {
-        background-color: ${(props) =>
-            props.theme.colors.backgroundColorDarker};
+    &:hover {
+        background-color: ${(props) => props.theme.colors.lightHover};
     }
 
     & * {
@@ -112,9 +113,10 @@ const ToggleMoreButtonStyled = styled.div`
 
 const ToggleMoreBox = styled.div`
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
+    flex-direction: row;
+    justify-self: flex-end;
+    align-self: flex-end;
+    position: absolute;
     cursor: pointer;
 `
 

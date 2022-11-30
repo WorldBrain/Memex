@@ -120,7 +120,7 @@ const Row = styled.div`
     }
 
     &:hover {
-        background-color: ${(props) => props.theme.colors.backgroundColor};
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
 
         ${ActionsContainer} { // if DeleteButtonContainer is not under an hovered ContainerSection
             display: flex;
@@ -135,7 +135,7 @@ const Title = styled.div`
     cursor: pointer;
     text-align: left;
 
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;

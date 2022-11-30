@@ -21,6 +21,7 @@ import type {
     EditForm,
     EditForms,
     FollowedListState,
+    ListPickerShowState,
 } from './types'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
@@ -193,7 +194,7 @@ export class SidebarContainerLogic extends UILogic<
             showAllNotesCopyPaster: false,
             activeCopyPasterAnnotationId: undefined,
             activeTagPickerAnnotationId: undefined,
-            activeListPickerAnnotationId: undefined,
+            activeListPickerState: undefined,
 
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
@@ -577,33 +578,40 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        if (event.followedListId != null) {
-            const newId =
-                previousState.followedLists.byId[event.followedListId]
-                    ?.activeListPickerAnnotationId === event.id
-                    ? undefined
-                    : event.id
+        const getNextState = (prev: ListPickerShowState): ListPickerShowState =>
+            !prev ||
+            prev.annotationId !== event.id ||
+            prev.position !== event.position
+                ? {
+                      annotationId: event.id,
+                      position: event.position,
+                  }
+                : undefined
 
+        if (event.followedListId != null) {
             this.emitMutation({
-                activeListPickerAnnotationId: { $set: undefined },
+                activeListPickerState: { $set: undefined },
                 followedLists: {
                     byId: {
                         [event.followedListId]: {
-                            activeListPickerAnnotationId: { $set: newId },
+                            activeListPickerState: {
+                                $set: getNextState(
+                                    previousState.followedLists.byId[
+                                        event.followedListId
+                                    ].activeListPickerState,
+                                ),
+                            },
                         },
                     },
                 },
             })
-            return
+        } else {
+            this.emitMutation({
+                activeListPickerState: {
+                    $set: getNextState(previousState.activeListPickerState),
+                },
+            })
         }
-
-        const newId =
-            previousState.activeListPickerAnnotationId === event.id
-                ? undefined
-                : event.id
-        this.emitMutation({
-            activeListPickerAnnotationId: { $set: newId },
-        })
     }
 
     // TODO: type properly
@@ -630,9 +638,9 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         this.emitMutation({
-            activeListPickerAnnotationId: { $set: undefined },
+            activeListPickerState: { $set: undefined },
             ...this.applyStateMutationForAllFollowedLists(previousState, {
-                activeListPickerAnnotationId: { $set: undefined },
+                activeListPickerState: { $set: undefined },
             }),
         })
     }
@@ -1347,7 +1355,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationsLoadState: 'pristine',
             conversationsLoadState: 'pristine',
             activeCopyPasterAnnotationId: undefined,
-            activeListPickerAnnotationId: undefined,
+            activeListPickerState: undefined,
             activeShareMenuAnnotationId: undefined,
             annotationModes: initAnnotStates('default'),
             annotationEditForms: initAnnotStates({ ...INIT_FORM_STATE }),
@@ -1663,6 +1671,19 @@ export class SidebarContainerLogic extends UILogic<
                         }),
                 }),
         )
+    }
+
+    selectSpace: EventHandler<'selectSpace'> = ({ event }) => {
+        const localId =
+            event.listId === null
+                ? null
+                : this.options.annotationsCache.getListIdByRemoteId(
+                      event.listId,
+                  )
+        this.emitMutation({
+            selectedSpace: { $set: event.listId },
+            selectedSpaceLocalId: { $set: localId },
+        })
     }
 
     setAnnotationShareModalShown: EventHandler<

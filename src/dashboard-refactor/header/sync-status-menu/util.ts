@@ -2,10 +2,9 @@ import type { RootState } from '../../types'
 
 export const deriveStatusIconColor = ({
     currentUser,
-    isCloudEnabled,
     syncMenu: { pendingLocalChangeCount, pendingRemoteChangeCount },
 }: RootState): 'green' | 'red' | 'yellow' => {
-    if (currentUser == null || !isCloudEnabled) {
+    if (currentUser == null) {
         return 'red'
     }
 

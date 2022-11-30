@@ -15,7 +15,7 @@ import {
     Container,
 } from '../components/shared-components'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { SUPPORT_EMAIL } from 'src/constants'
 import checkBrowser from 'src/util/check-browser'
 import styled from 'styled-components'

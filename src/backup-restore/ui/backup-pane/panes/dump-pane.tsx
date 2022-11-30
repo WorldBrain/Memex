@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import classNames from 'classnames'
 
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./overview.css')

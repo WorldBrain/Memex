@@ -1,5 +1,10 @@
 @value colors: 'src/common-ui/colors.css';
-@value color11, color12, color14, color4, color6, color9 from colors;
+@value color11,
+color12,
+color14,
+color4,
+color6,
+color9 from colors;
 
 .menuItem {
     composes: hoverColor from 'src/common-ui/colors.css';
@@ -53,7 +58,8 @@
     font-weight: 400;
     color: black;
     padding: 0;
-    background-color: transparent !important; /* stylelint-disable-line declaration-no-important */
+    background-color: transparent !important;
+    /* stylelint-disable-line declaration-no-important */
 }
 
 .isNewNoteInvisible {
@@ -118,7 +124,7 @@
     &:placeholder-shown {
         font-style: italic;
         font-weight: 500;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Satoshi', sans-serif;
     }
 
     &::placeholder {
@@ -152,7 +158,7 @@
     }
 
     & * {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Satoshi', sans-serif;
     }
 }
 

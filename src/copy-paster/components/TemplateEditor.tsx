@@ -11,7 +11,7 @@ const FlexContainer = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 5px 15px 10px 15px;
+    padding: 0px 15px 10px 15px;
 `
 
 const TextInputBox = styled.div`
@@ -67,10 +67,10 @@ const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 10px 15px 10px 15px;
+    padding: 10px 20px 10px 20px;
     height: 30px;
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const SectionTitle = styled.div`
@@ -86,7 +86,12 @@ const TextInput = styled.input`
     color: ${(props) => props.theme.colors.darkerText};
     font-size: 14px;
     border: none;
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    background: ${(props) => props.theme.colors.darkhover};
+
+    &:focus-within {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+        color: ${(props) => props.theme.colors.normalText};
+    }
 
     &::placeholder {
         color: ${(props) => props.theme.colors.lighterText};
@@ -100,11 +105,16 @@ const TextArea = styled.textarea`
     color: ${(props) => props.theme.colors.darkerText};
     font-size: 14px;
     border: none;
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    background: ${(props) => props.theme.colors.darkhover};
     margin: 0;
 
+    &:focus-within {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+        color: ${(props) => props.theme.colors.normalText};
+    }
+
     &::placeholder {
-        color: ${(props) => props.theme.colors.lighterText};
+        color: ${(props) => props.theme.colors.greyScale8};
     }
 `
 
@@ -120,6 +130,13 @@ const HowtoBox = styled.div`
     & * {
         cursor: pointer;
     }
+`
+
+const ButtonBox = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    align-items: center;
+    justify-self: flex-end;
 `
 
 interface TemplateEditorProps {
@@ -146,21 +163,24 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
         return (
             <>
                 <Header>
-                    <Icon
-                        filePath={icons.close}
-                        heightAndWidth="12px"
-                        padding={'6px'}
-                        onClick={this.props.onClickCancel}
-                    />
                     <SectionTitle>
                         {this.props.isNew ? 'Add New' : 'Edit'}
                     </SectionTitle>
-                    <Icon
-                        filePath={icons.check}
-                        color="purple"
-                        heightAndWidth="16px"
-                        onClick={this.props.onClickSave}
-                    />
+                    <ButtonBox>
+                        <Icon
+                            filePath={icons.removeX}
+                            heightAndWidth="18px"
+                            padding={'5px'}
+                            onClick={this.props.onClickCancel}
+                        />
+
+                        <Icon
+                            filePath={icons.check}
+                            color="purple"
+                            heightAndWidth="20px"
+                            onClick={this.props.onClickSave}
+                        />
+                    </ButtonBox>
                 </Header>
 
                 <TextInputBox>

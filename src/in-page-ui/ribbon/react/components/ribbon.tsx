@@ -1,7 +1,6 @@
 import React, { Component, KeyboardEventHandler } from 'react'
-import cx from 'classnames'
 import qs from 'query-string'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import { Tooltip, ButtonTooltip } from 'src/common-ui/components/'
@@ -27,8 +26,9 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import ExtraButtonsPanel from './extra-buttons-panel'
-
-const styles = require('./ribbon.css')
+import FeedPanel from './feed-panel'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import browser from 'webextension-polyfill'
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
@@ -45,10 +45,13 @@ export interface Props extends RibbonSubcomponentProps {
     handleRemoveRibbon: () => void
     highlighter: Pick<HighlightInteractionsInterface, 'removeHighlights'>
     hideOnMouseLeave?: boolean
+    toggleFeed: () => void
+    showFeed: boolean
 }
 
 interface State {
     shortcutsReady: boolean
+    blockListValue: string
 }
 
 export default class Ribbon extends Component<Props, State> {
@@ -62,7 +65,10 @@ export default class Ribbon extends Component<Props, State> {
     private openOptionsTabRPC
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
 
-    state: State = { shortcutsReady: false }
+    state: State = {
+        shortcutsReady: false,
+        blockListValue: this.getDomain(window.location.href),
+    }
 
     constructor(props: Props) {
         super(props)
@@ -170,7 +176,12 @@ export default class Ribbon extends Component<Props, State> {
         }
 
         return (
-            <HoverBox padding="0px" position="absolute" top="30px" right="40px">
+            <HoverBox
+                padding="10px 0"
+                position="absolute"
+                top="30px"
+                right="40px"
+            >
                 <BlurredSidebarOverlay
                     onOutsideClick={this.hideListPicker}
                     skipRendering={!this.props.sidebar.isSidebarOpen}
@@ -211,6 +222,85 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
+    private whichFeed = () => {
+        if (process.env.NODE_ENV === 'production') {
+            return 'https://memex.social/feed'
+        } else {
+            return 'https://staging.memex.social/feed'
+        }
+    }
+
+    private renderFeedInfo() {
+        if (!this.props.showFeed) {
+            return
+        }
+
+        return (
+            <BlurredSidebarOverlay
+                onOutsideClick={() => this.props.toggleFeed()}
+                skipRendering={!this.props.sidebar.isSidebarOpen}
+            >
+                <FeedPanel closePanel={() => this.props.toggleFeed()}>
+                    <FeedContainer>
+                        <TitleContainer>
+                            <Icon
+                                heightAndWidth="30px"
+                                filePath="feed"
+                                hoverOff
+                            />
+                            <TitleContent>
+                                <SectionTitle>Activity Feed</SectionTitle>
+                                <SectionDescription>
+                                    Updates from Spaces you follow or
+                                    conversation you participate in
+                                </SectionDescription>
+                            </TitleContent>
+                        </TitleContainer>
+                        <FeedFrame src={this.whichFeed()} />
+                    </FeedContainer>
+                </FeedPanel>
+            </BlurredSidebarOverlay>
+        )
+    }
+
+    private getDomain(url) {
+        const withoutProtocol = url.split('//')[1]
+
+        if (withoutProtocol.startsWith('www.')) {
+            return withoutProtocol.split('www.')[1].split('/')[0]
+        } else {
+            return withoutProtocol.split('/')[0]
+        }
+    }
+
+    async addItemToBlockList(value) {
+        // fetch current list
+        const blockList = await browser.storage.local.get('blacklist')
+        const currentBlockListJSON = blockList['blacklist']
+        const currentBlockList = !currentBlockListJSON
+            ? []
+            : JSON.parse(currentBlockListJSON)
+
+        const expression = value.replace(/\s+/g, '').replace('.', '\\.')
+
+        // define new entry
+        const newEntry = {
+            expression: expression,
+            dateAdded: Date.now(),
+        }
+
+        // write new list
+        currentBlockList.push(newEntry)
+        const serialized = JSON.stringify(currentBlockList)
+        return browser.storage.local.set({ blacklist: serialized })
+
+        // const currentBlockListJSON = JSON.parse(currentBlocklist['blacklist'])}
+        // const newBlockListString = JSON.stringify(newBlockList[0])
+        // const newBlockListFinal = { 'blacklist': "[" + newBlockListString + "]}" }
+
+        // await browser.storage.local.set(newBlockListFinal)
+    }
+
     private renderExtraButtons() {
         if (!this.props.showExtraButtons) {
             return
@@ -224,6 +314,53 @@ export default class Ribbon extends Component<Props, State> {
                 <ExtraButtonsPanel
                     closePanel={() => this.props.toggleShowExtraButtons()}
                 >
+                    <BlockListArea>
+                        <BlockListTitleArea>
+                            <Icon
+                                filePath={'block'}
+                                heightAndWidth="16px"
+                                hoverOff
+                            />
+                            <InfoText>Disable Ribbon on this page</InfoText>
+                            <Icon
+                                onClick={() =>
+                                    this.openOptionsTabRPC('blocklist')
+                                }
+                                filePath={'settings'}
+                                heightAndWidth={'14px'}
+                                color={'purple'}
+                            />
+                        </BlockListTitleArea>
+                        <TextBoxArea>
+                            <TextField
+                                value={this.state.blockListValue}
+                                onChange={(event) =>
+                                    this.setState({
+                                        blockListValue: (event.target as HTMLInputElement)
+                                            .value,
+                                    })
+                                }
+                                width="fill-available"
+                            />
+                            <Icon
+                                heightAndWidth="22px"
+                                filePath="plus"
+                                color="purple"
+                                onClick={() => {
+                                    this.addItemToBlockList(
+                                        this.state.blockListValue,
+                                    )
+                                    this.setState({
+                                        blockListValue: 'Added to block list',
+                                    })
+                                    setTimeout(
+                                        () => this.props.handleRemoveRibbon(),
+                                        2000,
+                                    )
+                                }}
+                            />
+                        </TextBoxArea>
+                    </BlockListArea>
                     <ExtraButtonRow
                         onClick={() => {
                             this.props.handleRibbonToggle()
@@ -231,21 +368,16 @@ export default class Ribbon extends Component<Props, State> {
                         }}
                     >
                         <Icon
-                            filePath={
-                                this.props.isRibbonEnabled
-                                    ? icons.ribbonOn
-                                    : icons.ribbonOff
-                            }
-                            heightAndWidth="16px"
+                            filePath={icons.quickActionRibbon}
+                            heightAndWidth="22px"
                             hoverOff
                         />
                         {this.props.isRibbonEnabled ? (
-                            <InfoText>Disable Sidebar</InfoText>
+                            <InfoText>Disable Ribbon</InfoText>
                         ) : (
-                            <InfoText>Enable Sidebar</InfoText>
+                            <InfoText>Enable Ribbon</InfoText>
                         )}
                     </ExtraButtonRow>
-
                     <ExtraButtonRow
                         onClick={this.props.highlights.handleHighlightsToggle}
                     >
@@ -255,7 +387,7 @@ export default class Ribbon extends Component<Props, State> {
                                     ? icons.highlighterFull
                                     : icons.highlighterEmpty
                             }
-                            heightAndWidth="16px"
+                            heightAndWidth="22px"
                             hoverOff
                         />
                         {this.props.isRibbonEnabled ? (
@@ -274,7 +406,7 @@ export default class Ribbon extends Component<Props, State> {
                                     ? icons.tooltipOn
                                     : icons.tooltipOff
                             }
-                            heightAndWidth="16px"
+                            heightAndWidth="22px"
                             hoverOff
                         />
                         {this.props.isRibbonEnabled ? (
@@ -290,7 +422,7 @@ export default class Ribbon extends Component<Props, State> {
                     >
                         <Icon
                             filePath={icons.helpIcon}
-                            heightAndWidth="16px"
+                            heightAndWidth="22px"
                             hoverOff
                         />
                         <InfoText>Tutorials</InfoText>
@@ -339,8 +471,8 @@ export default class Ribbon extends Component<Props, State> {
                                 !this.props.tagging.showTagsPicker,
                             )
                         }
-                        color={'darkerIconColor'}
-                        heightAndWidth="18px"
+                        color={'greyScale9'}
+                        heightAndWidth="22px"
                         filePath={
                             this.props.tagging.pageHasTags ||
                             this.props.tagging.tags.length > 0
@@ -360,187 +492,24 @@ export default class Ribbon extends Component<Props, State> {
         }
 
         return (
-            <div
-                className={cx(styles.ribbon, {
-                    [styles.ribbonExpanded]: this.props.isExpanded,
-                    [styles.ribbonSidebarOpen]: this.props.sidebar
-                        .isSidebarOpen,
-                })}
+            <OuterRibbon
+                isPeeking={this.props.isExpanded}
+                isSidebarOpen={this.props.sidebar.isSidebarOpen}
             >
-                <div
+                <InnerRibbon
                     ref={this.props.setRef}
-                    className={cx(styles.innerRibbon, {
-                        [styles.innerRibbonExpanded]: this.props.isExpanded,
-                        [styles.innerRibbonSidebarOpen]: this.props.sidebar
-                            .isSidebarOpen,
-                    })}
+                    isPeeking={this.props.isExpanded}
+                    isSidebarOpen={this.props.sidebar.isSidebarOpen}
                 >
                     {(this.props.isExpanded ||
                         this.props.sidebar.isSidebarOpen) && (
                         <React.Fragment>
-                            <PageAction>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'createBookmark',
-                                    )}
-                                    position="leftNarrow"
-                                >
-                                    <Icon
-                                        onClick={() =>
-                                            this.props.bookmark.toggleBookmark()
-                                        }
-                                        heightAndWidth="18px"
-                                        color={'darkerIconColor'}
-                                        filePath={
-                                            this.props.bookmark.isBookmarked
-                                                ? icons.heartFull
-                                                : icons.heartEmpty
-                                        }
-                                    />
-                                </ButtonTooltip>
-                                {this.props.commentBox.showCommentBox && (
-                                    <HoverBox
-                                        position="absolute"
-                                        top="115px"
-                                        right="40px"
-                                        padding={'0px'}
-                                    >
-                                        <AnnotationCreate
-                                            {...this.props.tagging}
-                                            ref={(ref) =>
-                                                (this.annotationCreateRef = ref)
-                                            }
-                                            hide={() =>
-                                                this.props.commentBox.setShowCommentBox(
-                                                    false,
-                                                )
-                                            }
-                                            onSave={
-                                                this.props.commentBox
-                                                    .saveComment
-                                            }
-                                            onCancel={
-                                                this.props.commentBox
-                                                    .cancelComment
-                                            }
-                                            onTagsUpdate={
-                                                this.props.commentBox
-                                                    .updateCommentBoxTags
-                                            }
-                                            onCommentChange={
-                                                this.props.commentBox
-                                                    .changeComment
-                                            }
-                                            comment={
-                                                this.props.commentBox
-                                                    .commentText
-                                            }
-                                            tags={this.props.commentBox.tags}
-                                            lists={this.props.commentBox.lists}
-                                            getListDetailsById={
-                                                this.props.getListDetailsById
-                                            }
-                                            createNewList={
-                                                this.props.lists.createNewEntry
-                                            }
-                                            addPageToList={
-                                                this.props.lists.selectEntry
-                                            }
-                                            removePageFromList={
-                                                this.props.lists.unselectEntry
-                                            }
-                                            isRibbonCommentBox
-                                            spacesBG={this.props.spacesBG}
-                                            contentSharingBG={
-                                                this.props.contentSharingBG
-                                            }
-                                            autoFocus
-                                        />
-                                    </HoverBox>
-                                )}
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'addToCollection',
-                                    )}
-                                    position="leftNarrow"
-                                >
-                                    <Icon
-                                        onClick={() =>
-                                            this.props.lists.setShowListsPicker(
-                                                !this.props.lists
-                                                    .showListsPicker,
-                                            )
-                                        }
-                                        heightAndWidth="18px"
-                                        color={'darkerIconColor'}
-                                        filePath={
-                                            this.props.lists.pageListIds
-                                                .length > 0
-                                                ? icons.collectionsFull
-                                                : icons.collectionsEmpty
-                                        }
-                                    />
-                                </ButtonTooltip>
-                                {this.renderCollectionsPicker()}
-                                {this.renderTagsUIs()}
-                            </PageAction>
-                            <HorizontalLine
-                                sidebaropen={this.props.sidebar.isSidebarOpen}
-                            />
-                            <PageAction>
-                                <ButtonTooltip
-                                    tooltipText={this.getTooltipText(
-                                        'openDashboard',
-                                    )}
-                                    position="leftNarrow"
-                                >
-                                    <Icon
-                                        onClick={() =>
-                                            this.openOverviewTabRPC()
-                                        }
-                                        heightAndWidth="18px"
-                                        color={'darkerIconColor'}
-                                        filePath={icons.searchIcon}
-                                    />
-                                </ButtonTooltip>
-                                {!this.props.sidebar.isSidebarOpen && (
-                                    <ButtonTooltip
-                                        tooltipText={
-                                            <span>
-                                                {this.getTooltipText(
-                                                    'toggleSidebar',
-                                                )}
-                                                <br />{' '}
-                                                <SubText>
-                                                    Shift+Click to add note
-                                                </SubText>
-                                            </span>
-                                        }
-                                        position="leftNarrow"
-                                    >
-                                        <Icon
-                                            onClick={(e) =>
-                                                this.handleCommentIconBtnClick(
-                                                    e,
-                                                )
-                                            }
-                                            color={'darkerIconColor'}
-                                            heightAndWidth="18px"
-                                            filePath={
-                                                this.props.commentBox
-                                                    .isCommentSaved
-                                                    ? icons.saveIcon
-                                                    : // : this.props.hasAnnotations
-                                                      // ? icons.commentFull
-                                                      icons.commentEmpty
-                                            }
-                                        />
-                                    </ButtonTooltip>
-                                )}
+                            <UpperPart>
                                 <FeedIndicatorBox
                                     isSidebarOpen={
                                         this.props.sidebar.isSidebarOpen
                                     }
+                                    onClick={() => this.props.toggleFeed()}
                                 >
                                     <ButtonTooltip
                                         tooltipText={'View Feed Updates'}
@@ -552,11 +521,203 @@ export default class Ribbon extends Component<Props, State> {
                                         />
                                     </ButtonTooltip>
                                 </FeedIndicatorBox>
-                            </PageAction>
-                            <HorizontalLine
+                                {this.props.showFeed && (
+                                    <HoverBox
+                                        withRelativeContainer
+                                        right="45px"
+                                        height={'600px'}
+                                        width={'500px'}
+                                        padding={'0px'}
+                                    >
+                                        {this.renderFeedInfo()}
+                                    </HoverBox>
+                                )}
+                                <HorizontalLine
+                                    sidebaropen={
+                                        this.props.sidebar.isSidebarOpen
+                                    }
+                                />
+                                <PageAction>
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'createBookmark',
+                                        )}
+                                        position="leftNarrow"
+                                    >
+                                        <Icon
+                                            onClick={() =>
+                                                this.props.bookmark.toggleBookmark()
+                                            }
+                                            color={
+                                                this.props.bookmark.isBookmarked
+                                                    ? 'purple'
+                                                    : 'greyScale9'
+                                            }
+                                            heightAndWidth="22px"
+                                            filePath={
+                                                this.props.bookmark.isBookmarked
+                                                    ? icons.heartFull
+                                                    : icons.heartEmpty
+                                            }
+                                        />
+                                    </ButtonTooltip>
+                                    {this.props.commentBox.showCommentBox && (
+                                        <HoverBox
+                                            position="absolute"
+                                            top="115px"
+                                            right="40px"
+                                            padding={'0px'}
+                                        >
+                                            <AnnotationCreate
+                                                {...this.props.tagging}
+                                                ref={(ref) =>
+                                                    (this.annotationCreateRef = ref)
+                                                }
+                                                hide={() =>
+                                                    this.props.commentBox.setShowCommentBox(
+                                                        false,
+                                                    )
+                                                }
+                                                onSave={
+                                                    this.props.commentBox
+                                                        .saveComment
+                                                }
+                                                onCancel={
+                                                    this.props.commentBox
+                                                        .cancelComment
+                                                }
+                                                onTagsUpdate={
+                                                    this.props.commentBox
+                                                        .updateCommentBoxTags
+                                                }
+                                                onCommentChange={
+                                                    this.props.commentBox
+                                                        .changeComment
+                                                }
+                                                comment={
+                                                    this.props.commentBox
+                                                        .commentText
+                                                }
+                                                tags={
+                                                    this.props.commentBox.tags
+                                                }
+                                                lists={
+                                                    this.props.commentBox.lists
+                                                }
+                                                getListDetailsById={
+                                                    this.props
+                                                        .getListDetailsById
+                                                }
+                                                createNewList={
+                                                    this.props.lists
+                                                        .createNewEntry
+                                                }
+                                                addPageToList={
+                                                    this.props.lists.selectEntry
+                                                }
+                                                removePageFromList={
+                                                    this.props.lists
+                                                        .unselectEntry
+                                                }
+                                                isRibbonCommentBox
+                                                spacesBG={this.props.spacesBG}
+                                                contentSharingBG={
+                                                    this.props.contentSharingBG
+                                                }
+                                                autoFocus
+                                            />
+                                        </HoverBox>
+                                    )}
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'addToCollection',
+                                        )}
+                                        position="leftNarrow"
+                                    >
+                                        <Icon
+                                            onClick={() =>
+                                                this.props.lists.setShowListsPicker(
+                                                    !this.props.lists
+                                                        .showListsPicker,
+                                                )
+                                            }
+                                            color={
+                                                this.props.lists.pageListIds
+                                                    .length > 0
+                                                    ? 'purple'
+                                                    : 'greyScale9'
+                                            }
+                                            heightAndWidth="22px"
+                                            filePath={
+                                                this.props.lists.pageListIds
+                                                    .length > 0
+                                                    ? icons.collectionsFull
+                                                    : icons.collectionsEmpty
+                                            }
+                                        />
+                                    </ButtonTooltip>
+                                    {this.renderCollectionsPicker()}
+                                    {!this.props.sidebar.isSidebarOpen && (
+                                        <ButtonTooltip
+                                            tooltipText={
+                                                <span>
+                                                    {this.getTooltipText(
+                                                        'toggleSidebar',
+                                                    )}
+                                                    <br />{' '}
+                                                    <SubText>
+                                                        Shift+Click to add note
+                                                    </SubText>
+                                                </span>
+                                            }
+                                            position="leftNarrow"
+                                        >
+                                            <Icon
+                                                onClick={(e) =>
+                                                    this.handleCommentIconBtnClick(
+                                                        e,
+                                                    )
+                                                }
+                                                color={'greyScale9'}
+                                                heightAndWidth="22px"
+                                                filePath={
+                                                    this.props.commentBox
+                                                        .isCommentSaved
+                                                        ? icons.saveIcon
+                                                        : // : this.props.hasAnnotations
+                                                          // ? icons.commentFull
+                                                          icons.commentEmpty
+                                                }
+                                            />
+                                        </ButtonTooltip>
+                                    )}
+                                    <ButtonTooltip
+                                        tooltipText={this.getTooltipText(
+                                            'openDashboard',
+                                        )}
+                                        position="leftNarrow"
+                                    >
+                                        <Icon
+                                            onClick={() =>
+                                                this.openOverviewTabRPC()
+                                            }
+                                            color={'greyScale9'}
+                                            heightAndWidth="22px"
+                                            filePath={icons.searchIcon}
+                                        />
+                                    </ButtonTooltip>
+                                </PageAction>
+                            </UpperPart>
+                            {!this.props.sidebar.isSidebarOpen && (
+                                <HorizontalLine
+                                    sidebaropen={
+                                        this.props.sidebar.isSidebarOpen
+                                    }
+                                />
+                            )}
+                            <BottomSection
                                 sidebaropen={this.props.sidebar.isSidebarOpen}
-                            />
-                            <PageAction>
+                            >
                                 <ButtonTooltip
                                     tooltipText="Settings"
                                     position="leftNarrow"
@@ -565,16 +726,16 @@ export default class Ribbon extends Component<Props, State> {
                                         onClick={() =>
                                             this.props.toggleShowExtraButtons()
                                         }
-                                        color={'darkerIconColor'}
-                                        heightAndWidth="18px"
+                                        color={'darkText'}
+                                        heightAndWidth="22px"
                                         filePath={icons.settings}
                                     />
                                 </ButtonTooltip>
                                 {this.props.showExtraButtons && (
                                     <HoverBox
                                         position="absolute"
-                                        top="200px"
-                                        right="40px"
+                                        bottom="0px"
+                                        right="45px"
                                         padding={'0px'}
                                     >
                                         {this.renderExtraButtons()}
@@ -588,16 +749,16 @@ export default class Ribbon extends Component<Props, State> {
                                         onClick={() =>
                                             this.props.toggleShowTutorial()
                                         }
-                                        color={'darkerIconColor'}
-                                        heightAndWidth="18px"
+                                        color={'darkText'}
+                                        heightAndWidth="22px"
                                         filePath={icons.helpIcon}
                                     />
                                 </ButtonTooltip>
                                 {this.props.showTutorial && (
                                     <HoverBox
                                         position="absolute"
-                                        top="230px"
-                                        right="40px"
+                                        bottom="0px"
+                                        right="45px"
                                         padding={'0px'}
                                         width={'400px'}
                                     >
@@ -628,21 +789,152 @@ export default class Ribbon extends Component<Props, State> {
                                                     this.props.handleRemoveRibbon()
                                                 }
                                             }}
-                                            color={'darkerIconColor'}
-                                            heightAndWidth="14px"
-                                            filePath={icons.close}
-                                            padding={'6px'}
+                                            color={'darkText'}
+                                            heightAndWidth="22px"
+                                            filePath={icons.removeX}
                                         />
                                     </ButtonTooltip>
                                 )}
-                            </PageAction>
+                            </BottomSection>
                         </React.Fragment>
                     )}
-                </div>
-            </div>
+                </InnerRibbon>
+            </OuterRibbon>
         )
     }
 }
+
+const BlockListArea = styled.div`
+    padding: 0px 10px 15px 5px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    display: flex;
+    flex-direction: column;
+    grid-gap: 5px;
+    align-items: flex-start;
+    margin-bottom: 5px;
+`
+
+const BlockListTitleArea = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    padding: 5px 10px;
+`
+
+const TextBoxArea = styled.div`
+    display: flex;
+    align-items: center;
+    padding: 0 0 0 10px;
+    width: fill-available;
+    grid-gap: 5px;
+`
+
+const UpperPart = styled.div``
+
+const BottomSection = styled.div<{ sidebaropen: boolean }>`
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 0px;
+`
+
+const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: center;
+    width: 24px;
+    height: 400px;
+
+    /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
+    line-height: normal;
+    text-align: start;
+    align-items: center;
+    background: transparent;
+    z-index: 2147483644;
+    animation: slide-in ease-out;
+    animation-duration: 0.05s;
+
+    ${(props) =>
+        props.isPeeking &&
+        css`
+            align-items: flex-end;
+            width: 44px;
+            padding-right: 25px;
+        `}
+
+    ${(props) =>
+        props.isSidebarOpen &&
+        css`
+            box-shadow: none;
+            display: flex;
+            justify-content: center;
+            height: 105vh;
+            width: 40px;
+            border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
+            align-items: flex-start;
+            padding: 0 5px;
+            background: ${(props) => props.theme.colors.backgroundColor};
+
+            & .removeSidebar {
+                visibility: hidden;
+                display: none;
+            }
+        `}
+
+        @keyframes slide-in {
+        0% {
+            right: -600px;
+            opacity: 0%;
+        }
+        100% {
+            right: 0px;
+            opacity: 100%;
+        }
+    }
+`
+
+const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
+    position: absolute;
+    top: 20px;
+    width: 44px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 0;
+    display: none;
+    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    border: 1px solid ${(props) => props.theme.colors.lineGrey};
+
+    ${(props) =>
+        props.isPeeking &&
+        css`
+            border-radius: 8px;
+            display: flex;
+            box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
+            background: ${(props) => props.theme.colors.backgroundColorDarker};
+        }
+    `}
+
+    ${(props) =>
+        props.isSidebarOpen &&
+        css`
+            box-shadow: none;
+            height: 90%;
+            top: 0px;
+            width: 40px;
+            justify-content: space-between;
+            padding-top: 17px;
+            display: flex;
+            background: transparent;
+            border: none;
+            align-items: center;
+            background: ${(props) => props.theme.colors.backgroundColor};
+        `}
+`
 
 const ExtraButtonRow = styled.div`
     height: 40px;
@@ -670,17 +962,18 @@ const GeneralActions = styled.div`
 
 const HorizontalLine = styled.div<{ sidebaropen: boolean }>`
     width: 100%;
-    margin: 10px 0;
+    margin: 5px 0;
     height: 1px;
-    background-color: ${(props) => !props.sidebaropen && '#f0f0f0'};
+    background-color: ${(props) => props.theme.colors.lightHover};
 `
 
 const PageAction = styled.div`
     display: grid;
-    grid-gap: 5px;
+    grid-gap: 10px;
     grid-auto-flow: row;
     align-items: center;
     justify-content: center;
+    padding: 10px;
 `
 
 const SubText = styled.span`
@@ -690,12 +983,62 @@ const SubText = styled.span`
 const FeedIndicatorBox = styled.div<{ isSidebarOpen: boolean }>`
     display: flex;
     justify-content: center;
-    margin-top: 5px;
-    margin-left: ${(props) => props.isSidebarOpen && '-2px'};
+    margin: ${(props) => (props.isSidebarOpen ? '2px 0 15px' : '10px 0')};
 `
 
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
     font-weight: 400;
+`
+
+const FeedFrame = styled.iframe`
+    width: fill-available;
+    height: 600px;
+    border: none;
+    border-radius: 10px;
+`
+
+const FeedContainer = styled.div`
+    display: flex;
+    width: fill-available;
+    height: 580px;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    grid-gap: 20px;
+    padding-top: 20px;
+    max-width: 800px;
+    background: ${(props) => props.theme.colors.backgroundColor};
+    border-radius: 10px;
+`
+
+const TitleContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    grid-gap: 15px;
+    width: fill-available;
+    padding: 0 20px 20px 20px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+`
+const TitleContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    grid-gap: 10px;
+    width: fill-available;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 20px;
+    font-weight: bold;
+`
+const SectionDescription = styled.div`
+    color: ${(props) => props.theme.colors.greyScale8};
+    font-size: 14px;
+    font-weight: 300;
 `

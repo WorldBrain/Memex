@@ -235,21 +235,13 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsA.state.searchResults.isSubscriptionBannerShown,
         ).toBe(false)
-        expect(
-            searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
-        ).toBe(false)
         expect(searchResultsA.state.searchResults.shouldShowTagsUIs).toBe(false)
-        expect(searchResultsA.state.isCloudEnabled).toBe(true)
         await searchResultsA.processEvent('init', null)
         expect(searchResultsA.state.listsSidebar.isSidebarLocked).toBe(false)
         expect(
             searchResultsA.state.searchResults.isSubscriptionBannerShown,
         ).toBe(true)
-        expect(
-            searchResultsA.state.searchResults.isCloudUpgradeBannerShown,
-        ).toBe(true)
         expect(searchResultsA.state.searchResults.shouldShowTagsUIs).toBe(true)
-        expect(searchResultsA.state.isCloudEnabled).toBe(false)
 
         const {
             searchResults: searchResultsB,
@@ -270,21 +262,13 @@ describe('Dashboard Refactor misc logic', () => {
         expect(
             searchResultsB.state.searchResults.isSubscriptionBannerShown,
         ).toBe(false)
-        expect(
-            searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
-        ).toBe(false)
         expect(searchResultsB.state.searchResults.shouldShowTagsUIs).toBe(false)
-        expect(searchResultsB.state.isCloudEnabled).toBe(true)
         await searchResultsB.processEvent('init', null)
         expect(searchResultsB.state.listsSidebar.isSidebarLocked).toBe(true)
         expect(
             searchResultsB.state.searchResults.isSubscriptionBannerShown,
         ).toBe(false)
-        expect(
-            searchResultsB.state.searchResults.isCloudUpgradeBannerShown,
-        ).toBe(false)
         expect(searchResultsB.state.searchResults.shouldShowTagsUIs).toBe(false)
-        expect(searchResultsB.state.isCloudEnabled).toBe(true)
     })
 
     // it('should get sharing access state during init logic', async ({
@@ -409,48 +393,5 @@ describe('Dashboard Refactor misc logic', () => {
         expect(await getLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY)).toBe(
             false,
         )
-    })
-
-    it('should hide banner and set cloud enabled flag on migration finish', async ({
-        device,
-    }) => {
-        const { searchResults } = await setupTest(device)
-
-        const initState = () =>
-            searchResults.processMutation({
-                modals: { showCloudOnboarding: { $set: true } },
-                searchResults: { isCloudUpgradeBannerShown: { $set: true } },
-                isCloudEnabled: { $set: false },
-            })
-
-        initState()
-
-        expect(searchResults.state.isCloudEnabled).toBe(false)
-        expect(
-            searchResults.state.searchResults.isCloudUpgradeBannerShown,
-        ).toBe(true)
-        expect(searchResults.state.modals.showCloudOnboarding).toBe(true)
-
-        await searchResults.processEvent('closeCloudOnboardingModal', {
-            didFinish: false,
-        })
-
-        expect(searchResults.state.isCloudEnabled).toBe(false)
-        expect(
-            searchResults.state.searchResults.isCloudUpgradeBannerShown,
-        ).toBe(true)
-        expect(searchResults.state.modals.showCloudOnboarding).toBe(false)
-
-        initState()
-
-        await searchResults.processEvent('closeCloudOnboardingModal', {
-            didFinish: true,
-        })
-
-        expect(searchResults.state.isCloudEnabled).toBe(true)
-        expect(
-            searchResults.state.searchResults.isCloudUpgradeBannerShown,
-        ).toBe(false)
-        expect(searchResults.state.modals.showCloudOnboarding).toBe(false)
     })
 })
