@@ -24,6 +24,7 @@ import type {
     SharedListTimestamp,
     SharedListTimestampGetRequest,
 } from '@worldbrain/memex-common/lib/page-activity-indicator/backend/types'
+import { SHARED_LIST_TIMESTAMP_GET_ROUTE } from '@worldbrain/memex-common/lib/page-activity-indicator/backend/constants'
 
 export interface PageActivityIndicatorDependencies {
     fetch: typeof fetch
@@ -76,10 +77,13 @@ export class PageActivityIndicatorBackground {
                 id.toString(),
             ),
         }
-        const response = await this.deps.fetch(workerUrl, {
-            method: 'POST',
-            body: JSON.stringify(requestBody),
-        })
+        const response = await this.deps.fetch(
+            workerUrl + SHARED_LIST_TIMESTAMP_GET_ROUTE,
+            {
+                method: 'POST',
+                body: JSON.stringify(requestBody),
+            },
+        )
 
         if (!response.ok) {
             Raven.captureException(
