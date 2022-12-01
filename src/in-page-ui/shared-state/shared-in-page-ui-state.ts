@@ -23,6 +23,13 @@ export interface SharedInPageUIDependencies {
     unloadComponent: (component: InPageUIComponent) => void
 }
 
+/**
+ * This class controls the UI state for main components of a given page.
+ *
+ * All main UI components lke the sidebar and ribbon should receive a shared
+ * instance of this class and will subscribe to changes against it.
+ *
+ */
 export class SharedInPageUIState implements SharedInPageUIInterface {
     contentSharingEvents: TypedRemoteEventEmitter<'contentSharing'>
     events = new EventEmitter() as TypedEventEmitter<SharedInPageUIEvents>
@@ -38,6 +45,21 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         tooltip: false,
         highlights: false,
     }
+
+    /**
+     * Keep track of currently selected space for other UI elements to follow.
+     *
+     * Other main UI components may be interested in this to know, for
+     * instance, how what is the selected space for creating new annotations.
+     *
+     * The actual original source of truth for this is the
+     * AnnotationSidebarContainer selectedSpace state value. That is
+     * propagated to AnnotationSidebarInPage using selectedSpaceChanged
+     * UIlogic event, which will then update this value here.
+     *
+     */
+    selectedSpace: string | null = null
+
     _pendingEvents: {
         sidebarAction?: {
             emittedWhen: number
