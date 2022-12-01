@@ -9,7 +9,7 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 
 interface State {
     editorHeight: string
-    youtubeShortcut: string
+    youtubeShortcut: string | null
 }
 
 export interface AnnotationEditEventProps {
@@ -46,7 +46,11 @@ class AnnotationEdit extends React.Component<Props> {
 
     state: State = {
         editorHeight: '50px',
-        youtubeShortcut: '',
+        youtubeShortcut: null,
+    }
+
+    async componentDidMount() {
+        await this.youtubeKeyboardShortcut()
     }
 
     private editorRef: MemexEditorInstance
@@ -107,13 +111,10 @@ class AnnotationEdit extends React.Component<Props> {
         }
     }
 
-    youtubeKeyBoardShortcut = async () => {
+    private youtubeKeyboardShortcut = async () => {
         const shortcuts = await getKeyboardShortcutsState()
-        const shortcut = shortcuts['createAnnotation'].shortcut
-
-        this.setState({
-            youtubeShortcut: shortcut,
-        })
+        const youtubeShortcut = shortcuts.createAnnotation.shortcut
+        this.setState({ youtubeShortcut })
     }
 
     render() {

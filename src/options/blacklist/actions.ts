@@ -3,7 +3,7 @@ import { createAction } from 'redux-act'
 import analytics from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
-import { STORAGE_KEY } from './constants'
+import { INPAGE_UI_BLACKLIST_STORAGE_KEY as STORAGE_KEY } from 'src/blacklist/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications } from 'src/util/remote-functions-background'
 import * as Raven from 'src/util/raven'
@@ -35,11 +35,10 @@ export const initBlacklist = () => async (dispatch) => {
         const { [STORAGE_KEY]: blacklist } = await globalThis[
             'browser'
         ].storage.local.get({
-            [STORAGE_KEY]: '[]',
+            [STORAGE_KEY]: [],
         })
 
-        const parsedBlacklist = JSON.parse(blacklist)
-        dispatch(setBlacklist(parsedBlacklist))
+        dispatch(setBlacklist(blacklist))
     } catch (err) {
         Raven.captureException(err)
         dispatch(setBlacklist([]))
@@ -66,7 +65,7 @@ export const addToBlacklist = (expression) => async (dispatch, getState) => {
     dispatch(setModalShow(true))
     try {
         await globalThis['browser'].storage.local.set({
-            [STORAGE_KEY]: JSON.stringify([newEntry, ...oldBlacklist]),
+            [STORAGE_KEY]: [newEntry, ...oldBlacklist],
         })
         const count = await getMatchingPageCount(expression)
 
@@ -94,7 +93,7 @@ export const removeFromBlacklist = (index) => async (dispatch, getState) => {
     ]
 
     await globalThis['browser'].storage.local.set({
-        [STORAGE_KEY]: JSON.stringify(newBlacklist),
+        [STORAGE_KEY]: newBlacklist,
     })
 
     dispatch(

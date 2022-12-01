@@ -241,10 +241,13 @@ export async function main() {
     __debugCounter++
 }
 
-main().catch((err) => {
+main().catch((originalError) => {
     const error = new Error(
-        `Error occurred during background script setup: ${err.message} - debug counter: ${__debugCounter}`,
+        `Error occurred during background script setup: ${originalError.message} - debug counter: ${__debugCounter}`,
     )
+    if (originalError.stack) {
+        error.stack = originalError.stack
+    }
     captureException(error)
-    throw err
+    throw originalError
 })

@@ -1,6 +1,5 @@
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 
-import { checkWithBlacklist } from 'src/blacklist/background/interface'
 import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
 import DataSources from './data-sources'

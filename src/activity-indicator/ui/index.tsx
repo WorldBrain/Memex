@@ -21,11 +21,13 @@ export default class FeedActivityIndicator extends StatefulUIElement<
     render() {
         if (this.state.isShown) {
             return (
-                <StaticListItem
-                    listName="Feed"
-                    unreadCount={this.state.hasFeedActivity ? 1 : 0}
-                    onListItemClick={this.handleFeedIndicatorClick}
-                />
+                <div>
+                    <StaticListItem
+                        listName="Feed"
+                        unreadCount={this.state.hasFeedActivity ? 1 : 0}
+                        onListItemClick={this.handleFeedIndicatorClick}
+                    />
+                </div>
             )
         }
 

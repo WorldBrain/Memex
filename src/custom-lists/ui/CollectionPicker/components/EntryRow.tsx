@@ -1,10 +1,10 @@
 import React, { SyntheticEvent } from 'react'
 import styled, { css } from 'styled-components'
 import { Layers } from '@styled-icons/feather'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import type { SpaceDisplayEntry } from '../logic'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export interface Props extends SpaceDisplayEntry {
     onPress?: (entry: SpaceDisplayEntry) => void
@@ -91,9 +91,9 @@ class EntryRow extends React.Component<Props> {
                 <NameWrapper>
                     {resultItem}
                     {remoteId != null && (
-                        <ButtonTooltip
+                        <TooltipBox
                             tooltipText={'Shared Space'}
-                            position="bottom"
+                            placement="bottom"
                         >
                             <Icon
                                 heightAndWidth="14px"
@@ -102,7 +102,7 @@ class EntryRow extends React.Component<Props> {
                                 hoverOff
                                 color="lighterText"
                             />
-                        </ButtonTooltip>
+                        </TooltipBox>
                     )}
                 </NameWrapper>
                 <IconStyleWrapper>
@@ -117,18 +117,18 @@ class EntryRow extends React.Component<Props> {
                     )}
                     {focused && onPressActOnAll && (
                         <ButtonContainer>
-                            <ButtonTooltip
+                            <TooltipBox
                                 tooltipText={
                                     this.props.actOnAllTooltipText ?? ''
                                 }
-                                position="left"
+                                placement="left"
                             >
                                 <Icon
                                     filePath={icons.multiEdit}
                                     heightAndWidth="16px"
                                     onClick={this.handleActOnAllPress}
                                 />
-                            </ButtonTooltip>
+                            </TooltipBox>
                         </ButtonContainer>
                     )}
                     {selected ? (
@@ -195,7 +195,9 @@ const Row = styled.div<{ isFocused }>`
     width: 100%;
     cursor: pointer;
     border-radius: 5px;
-    padding: 0 10px;
+    padding: 0 7px;
+    margin: 0 2px;
+    overflow: visible;
     color: ${(props) => props.isFocused && props.theme.colors.normalText};
 
     &:last-child {

@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import cx from 'classnames'
-import { ButtonTooltip } from 'src/common-ui/components/'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const styles = require('./search-filters.css')
 
@@ -31,15 +31,15 @@ class SearchFilters extends PureComponent<Props, State> {
                         {this.props.hashtagsFilter}
                         {this.props.contentFilter}
                     </div>
-                    <ButtonTooltip
+                    <TooltipBox
                         tooltipText="Close Filter Bar"
-                        position="bottom"
+                        placement="bottom"
                     >
                         <div
                             className={cx(styles.button, styles.arrow)}
                             onClick={() => this.props.toggleFilterBar()}
                         />
-                    </ButtonTooltip>
+                    </TooltipBox>
                 </div>
             </div>
         )

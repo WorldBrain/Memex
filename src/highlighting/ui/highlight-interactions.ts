@@ -137,7 +137,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 action: 'create',
             },
         )
-        const { pageUrl, title } = await params.getUrlAndTitle()
         const annotation = await this._saveAndRenderHighlight(params)
 
         if (annotation) {
@@ -171,29 +170,16 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
         // Enable support using annotation keyboard shortcuts to make notes on youtube videos without opening the sidebar first
 
-        let YoutubeTimeStamp = []
-        let hasYoutubeTimeStamp = false
-        let YoutubeTimeStampforComment = ''
-
+        let youtubeTimestampForComment
         if (pageUrl.includes('youtube.com/watch')) {
-            if (getYoutubeTimestamp().length === 2) {
-                YoutubeTimeStamp = getYoutubeTimestamp()
-                console.log(YoutubeTimeStamp)
-                hasYoutubeTimeStamp = getYoutubeTimestamp().length === 2
-                YoutubeTimeStampforComment = (
-                    '[' +
-                    YoutubeTimeStamp[1] +
-                    '](' +
-                    YoutubeTimeStamp[0] +
-                    ')' +
-                    ` `
-                ).toString()
-            }
+            const [videoURLWithTime, humanTimestamp] = getYoutubeTimestamp()
+            youtubeTimestampForComment = `[${humanTimestamp}](${videoURLWithTime})`
         }
 
-        //////////////
-
-        if ((!selection || selection.isCollapsed) && !hasYoutubeTimeStamp) {
+        if (
+            (!selection || selection.isCollapsed) &&
+            !youtubeTimestampForComment
+        ) {
             return null
         }
 
@@ -201,29 +187,24 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const body = anchor && anchor.quote
         const hasSelectedText = anchor.quote.length
 
-        let actualLists = []
-        if (params.inPageUI.selectedSpace) {
-            const remoteSelectedListId = params.inPageUI.selectedSpace
-            const localSelectedListId = params.annotationsCache.getListIdByRemoteId(
-                remoteSelectedListId,
-            )
-            actualLists = [localSelectedListId]
-        }
-
         const annotation: Annotation = {
             url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
-            body: hasSelectedText ? anchor.quote : hasYoutubeTimeStamp && null,
+            body: hasSelectedText
+                ? anchor.quote
+                : youtubeTimestampForComment && undefined,
             pageUrl,
             tags: [],
-            lists: actualLists,
+            lists: [],
             comment: hasSelectedText
                 ? ''
-                : hasYoutubeTimeStamp && YoutubeTimeStampforComment,
-            selector: hasSelectedText ? anchor : hasYoutubeTimeStamp && null,
+                : youtubeTimestampForComment
+                ? youtubeTimestampForComment
+                : undefined,
+            selector: hasSelectedText
+                ? anchor
+                : youtubeTimestampForComment && undefined,
             pageTitle: title,
         }
-
-        console.debug('AnnotationsCache:', params.annotationsCache)
 
         try {
             await Promise.all([

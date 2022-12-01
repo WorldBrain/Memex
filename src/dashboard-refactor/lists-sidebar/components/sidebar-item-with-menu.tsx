@@ -8,11 +8,11 @@ import { Props as EditableItemProps } from './sidebar-editable-item'
 import { ListData, ListNameHighlightIndices } from '../types'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import SpaceContextMenuButton from './space-context-menu-btn'
-import { ButtonTooltip } from 'src/common-ui/components'
 import {
     contentSharing,
     collections,
 } from 'src/util/remote-functions-background'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export interface Props {
     className?: string
@@ -186,9 +186,9 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
 
         const collaborationIcon = this.props.isCollaborative && (
             <>
-                <ButtonTooltip tooltipText={'Shared Space'} position="bottom">
+                <TooltipBox tooltipText={'Shared Space'} placement="bottom">
                     <Icon heightAndWidth="14px" icon={'people'} hoverOff />
-                </ButtonTooltip>
+                </TooltipBox>
             </>
         )
 
@@ -494,18 +494,4 @@ const NewItemsCountInnerDiv = styled.div`
     font-size: 12px;
     line-height: 14px;
     padding: 2px 0px;
-`
-
-// probably want to use timing function to get this really looking good. This is just quick and dirty
-
-const blinkingAnimation = keyframes`
- 0% {
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
- }
- 50% {
-    background-color: transparent;
- }
- 100% {
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
- }
 `

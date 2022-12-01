@@ -1,9 +1,6 @@
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import React from 'react'
 import { Checkbox, CheckboxToggle } from 'src/common-ui/components'
-import { ButtonTooltip } from 'src/common-ui/components'
-
-import Button from './Button'
-import ToggleSwitch from './ToggleSwitch'
 
 const styles = require('./ToggleSwitchButton.css')
 
@@ -23,16 +20,13 @@ export const ToggleSwitchButton = (props: Props) => (
                 size={20}
             />
         ) : (
-            <ButtonTooltip
-                tooltipText={props.toggleHoverText}
-                position="leftBig"
-            >
+            <TooltipBox tooltipText={props.toggleHoverText} placement="left">
                 <Checkbox
                     isChecked={props.isEnabled}
                     handleChange={props.onToggleClick}
                     size={20}
                 />
-            </ButtonTooltip>
+            </TooltipBox>
         )}
     </div>
 )

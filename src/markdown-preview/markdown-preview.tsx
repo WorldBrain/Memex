@@ -2,7 +2,7 @@ import React from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 
-import { ButtonTooltip } from 'src/common-ui/components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 
 export interface MainInputProps<T = HTMLInputElement | HTMLTextAreaElement> {
@@ -122,14 +122,14 @@ export class MarkdownPreview extends React.Component<Props, State> {
                     <PreviewButtonContainer>
                         {this.props.renderSecondaryBtn()}
                         {this.showPreviewBtn && (
-                            <ButtonTooltip
+                            <TooltipBox
                                 tooltipText={`Control + Enter`}
-                                position="bottomSidebar"
+                                placement="bottom"
                             >
                                 <PreviewBtn onClick={this.togglePreview}>
                                     Preview Markdown
                                 </PreviewBtn>
-                            </ButtonTooltip>
+                            </TooltipBox>
                         )}
                     </PreviewButtonContainer>
                     <EditorContainer>{this.renderEditor()}</EditorContainer>

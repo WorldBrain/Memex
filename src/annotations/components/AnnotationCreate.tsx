@@ -1,15 +1,13 @@
 import * as React from 'react'
+import { createRef } from 'react'
+
 import styled from 'styled-components'
 import onClickOutside from 'react-onclickoutside'
 
-import { ButtonTooltip } from 'src/common-ui/components'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import MemexEditor, {
     MemexEditorInstance,
 } from '@worldbrain/memex-common/lib/editor'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import { ClickAway } from 'src/util/click-away-wrapper'
-import TagPicker from 'src/tags/ui/TagPicker'
 import SaveBtn from './save-btn'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { NoteResultHoverState, FocusableComponent } from './types'
@@ -24,18 +22,20 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import type { ListDetailsGetter } from '../types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
 interface State {
     isTagPickerShown: boolean
     isListPickerShown: boolean
     toggleShowTutorial: boolean
-    youtubeShortcut: string
+    youtubeShortcut: string | null
 }
 
 export interface AnnotationCreateEventProps {
     onSave: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
     onCancel: () => void
-    onTagsUpdate: (tags: string[]) => void
+    onTagsUpdate?: (tags: string[]) => void
     onCommentChange: (text: string) => void
     getListDetailsById: ListDetailsGetter
     onTagsHover?: React.MouseEventHandler
@@ -53,7 +53,7 @@ export interface AnnotationCreateGeneralProps {
     hide?: () => void
     autoFocus?: boolean
     comment: string
-    tags: string[]
+    tags?: string[]
     lists: number[]
     onTagClick?: (tag: string) => void
     hoverState: NoteResultHoverState
@@ -84,19 +84,23 @@ export class AnnotationCreate extends React.Component<Props, State>
         hoverState: null,
     }
 
+    private markdownbuttonRef = createRef<HTMLElement>()
+    private spacePickerButtonRef = createRef<HTMLElement>()
+
     private editor: MemexEditorInstance
 
     state: State = {
         isTagPickerShown: false,
         isListPickerShown: false,
         toggleShowTutorial: false,
-        youtubeShortcut: '',
+        youtubeShortcut: null,
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         if (this.props.autoFocus) {
             this.focus()
         }
+        await this.setYoutubeKeyboardShortcut()
     }
 
     private get displayLists(): Array<{
@@ -202,80 +206,56 @@ export class AnnotationCreate extends React.Component<Props, State>
         // }
     }
 
-    private renderTagPicker() {
-        const { tags, onTagsUpdate } = this.props
-        const setPickerShown = (isTagPickerShown: boolean) =>
-            this.setState({ isTagPickerShown })
-
-        const tagPicker = !this.state.isTagPickerShown ? null : (
-            <HoverBox left="10px">
-                <ClickAway onClickAway={() => setPickerShown(false)}>
-                    <TagPicker
-                        {...this.props}
-                        loadDefaultSuggestions={
-                            this.props.loadDefaultTagSuggestions
-                        }
-                        queryEntries={this.props.tagQueryEntries}
-                        onUpdateEntrySelection={async ({ selected }) =>
-                            onTagsUpdate(selected)
-                        }
-                        initialSelectedEntries={() => tags}
-                        onEscapeKeyDown={() => setPickerShown(false)}
-                    />
-                </ClickAway>
-            </HoverBox>
-        )
-
-        return <div>{tagPicker}</div>
+    private toggleSpacePicker() {
+        this.setState({ isListPickerShown: !this.state.isListPickerShown })
     }
 
-    private renderSharedCollectionsPicker = () => {
+    private renderSpacePicker = () => {
         const { lists } = this.props
 
-        const setPickerShown = (isListPickerShown: boolean) =>
-            this.setState({ isListPickerShown })
+        if (!this.state.isListPickerShown) {
+            return
+        }
 
         return (
-            <CollectionPicker
-                initialSelectedListIds={() => lists}
-                onEscapeKeyDown={() => setPickerShown(false)}
-                unselectEntry={this.props.removePageFromList}
-                createNewEntry={this.props.createNewList}
-                selectEntry={this.props.addPageToList}
-                contentSharingBG={this.props.contentSharingBG}
-                spacesBG={this.props.spacesBG}
-            />
-        )
-    }
-
-    private renderCollectionsPicker = () => {
-        // Not used yet but will be used for the "Add to collection" button
-        const setPickerShown = (isListPickerShown: boolean) =>
-            this.setState({ isListPickerShown })
-
-        return (
-            <div>
-                {this.state.isListPickerShown && (
-                    <HoverBox padding={'10px 0 0 0'}>
-                        <ClickAway onClickAway={() => setPickerShown(false)}>
-                            {this.renderSharedCollectionsPicker()}
-                        </ClickAway>
-                    </HoverBox>
-                )}
-            </div>
+            <PopoutBox
+                targetElementRef={this.spacePickerButtonRef.current}
+                placement={'bottom-start'}
+                offsetX={10}
+                closeComponent={() => this.toggleSpacePicker()}
+            >
+                <CollectionPicker
+                    initialSelectedListIds={() => lists}
+                    onEscapeKeyDown={() => this.toggleSpacePicker()}
+                    unselectEntry={this.props.removePageFromList}
+                    createNewEntry={this.props.createNewList}
+                    selectEntry={this.props.addPageToList}
+                    contentSharingBG={this.props.contentSharingBG}
+                    spacesBG={this.props.spacesBG}
+                />
+            </PopoutBox>
         )
     }
 
     private renderMarkdownHelpButton() {
+        if (!this.state.toggleShowTutorial) {
+            return
+        }
+
         return (
-            <MarkdownButtonContainer onClick={() => this.toggleShowTutorial()}>
-                Formatting
-                <Icon
-                    filePath={icons.helpIcon}
-                    heightAndWidth={'20px'}
-                    hoverOff
+            <PopoutBox
+                targetElementRef={this.markdownbuttonRef.current}
+                placement={'bottom-start'}
+                offsetX={10}
+                closeComponent={() => this.toggleShowTutorial()}
+                width={'420px'}
+                bigClosingScreen
+            >
+                <QuickTutorial
+                    markdownHelpOnTop={true}
+                    getKeyboardShortcutsState={getKeyboardShortcutsState}
                 />
-            </MarkdownButtonContainer>
+            </PopoutBox>
         )
     }
 
@@ -288,69 +268,49 @@ export class AnnotationCreate extends React.Component<Props, State>
 
         return (
             <DefaultFooterStyled>
-                {/* <Flex>
-                    <SaveBtn
-                        onSave={this.handleSave}
-                        hasSharedLists={this.hasSharedLists}
-                        renderCollectionsPicker={
-                            this.renderSharedCollectionsPicker
-                        }
-                    />
-                    <ButtonTooltip tooltipText="esc" position="bottom">
-                        <CancelBtnStyled onClick={this.handleCancel}>
-                            Cancel
-                        </CancelBtnStyled>
-                    </ButtonTooltip>
-                </Flex> */}
-                <ShareBtn tabIndex={0}>
-                    {' '}
-                    {/* onClick={footerDeps.onShareClick} */}
-                    {/* <Icon
-                            icon={shareIconData.icon}
+                <BtnContainerStyled>
+                    <MarkdownButtonContainer
+                        onClick={() => this.toggleShowTutorial()}
+                        ref={this.markdownbuttonRef}
+                    >
+                        Formatting
+                        <Icon
+                            filePath={icons.helpIcon}
+                            heightAndWidth={'20px'}
                             hoverOff
-                            color={'iconColor'}
-                            heightAndWidth="18px"
                         />
-                        {shareIconData.label} */}
-                </ShareBtn>
-                <DeletionBox>
-                    <SaveActionBar>
-                        {this.renderMarkdownHelpButton()}
-                        <BtnContainerStyled>
-                            <ButtonTooltip tooltipText="esc" position="bottom">
-                                <Icon
-                                    onClick={this.handleCancel}
-                                    icon={icons.removeX}
-                                    color={'normalText'}
-                                    heightAndWidth="20px"
-                                />
-                            </ButtonTooltip>
-                            <SaveBtn
-                                onSave={this.handleSave}
-                                hasSharedLists={this.hasSharedLists}
-                                renderCollectionsPicker={
-                                    this.renderSharedCollectionsPicker
-                                }
-                                shortcutText={`${AnnotationCreate.MOD_KEY} + Enter`}
+                    </MarkdownButtonContainer>
+                    <SaveCancelArea>
+                        <TooltipBox
+                            tooltipText="Cancel Edit (esc)"
+                            placement="bottom"
+                        >
+                            <Icon
+                                onClick={this.handleCancel}
+                                icon={icons.removeX}
+                                color={'normalText'}
+                                heightAndWidth="20px"
                             />
-                        </BtnContainerStyled>
-                    </SaveActionBar>
-                </DeletionBox>
+                        </TooltipBox>
+                        <SaveBtn
+                            onSave={this.handleSave}
+                            hasSharedLists={this.hasSharedLists}
+                            shortcutText={`${AnnotationCreate.MOD_KEY} + Enter`}
+                        />
+                    </SaveCancelArea>
+                </BtnContainerStyled>
+                {this.renderMarkdownHelpButton()}
             </DefaultFooterStyled>
         )
     }
 
-    youtubeKeyBoardShortcut = async () => {
+    private setYoutubeKeyboardShortcut = async () => {
         const shortcuts = await getKeyboardShortcutsState()
-        const shortcut = shortcuts['createAnnotation'].shortcut
-
-        this.setState({
-            youtubeShortcut: shortcut,
-        })
+        const youtubeShortcut = shortcuts.createAnnotation.shortcut
+        this.setState({ youtubeShortcut })
     }
 
     render() {
-        this.youtubeKeyBoardShortcut()
         return (
             <>
                 <TextBoxContainerStyled>
@@ -381,71 +341,29 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 onEditBtnClick={() =>
                                     this.setState({ isListPickerShown: true })
                                 }
-                                renderSpacePicker={this.renderCollectionsPicker}
-                                padding={'0px 10px 5px 10px'}
+                                spacePickerButtonRef={this.spacePickerButtonRef}
+                                renderSpacePicker={this.renderSpacePicker}
                             />
-                            {/* <TagsSegment
-                                tags={this.props.tags}
-                                onMouseEnter={this.props.onTagsHover}
-                                showEditBtn={this.props.hoverState === 'tags'}
-                                onTagClick={this.props.onTagClick}
-                                onEditBtnClick={() =>
-                                    setPickerShown(!this.state.isTagPickerShown)
-                                }
-                            /> */}
+                            {this.renderSpacePicker()}
                             <SaveActionBar>
                                 {this.renderActionButtons()}
-                                {/* {this.renderMarkdownHelpButton()} */}
                             </SaveActionBar>
                         </FooterContainer>
                     )}
                 </TextBoxContainerStyled>
-                {this.state.toggleShowTutorial && (
-                    <ClickAway
-                        onClickAway={() =>
-                            this.setState({ toggleShowTutorial: false })
-                        }
-                    >
-                        <HoverBox
-                            top={
-                                this.props.contextLocation === 'dashboard'
-                                    ? 'unset'
-                                    : '10px'
-                            }
-                            bottom={
-                                this.props.contextLocation === 'dashboard'
-                                    ? '60px'
-                                    : 'unset'
-                            }
-                            right={
-                                this.props.contextLocation === 'dashboard'
-                                    ? '20px'
-                                    : '0px'
-                            }
-                            width="430px"
-                            position={
-                                this.props.contextLocation === 'dashboard'
-                                    ? 'fixed'
-                                    : 'relative'
-                            }
-                            height="430px"
-                            overflow="scroll"
-                        >
-                            <QuickTutorial
-                                markdownHelpOnTop={true}
-                                getKeyboardShortcutsState={
-                                    getKeyboardShortcutsState
-                                }
-                            />
-                        </HoverBox>
-                    </ClickAway>
-                )}
             </>
         )
     }
 }
 
 export default onClickOutside(AnnotationCreate)
+
+const SaveCancelArea = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    justify-content: space-between;
+`
 
 const DeleteConfirmStyled = styled.span`
     box-sizing: border-box;
@@ -488,35 +406,21 @@ const DefaultFooterStyled = styled.div`
     }
 `
 
-const DeletionBox = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    /* border-top: 1px solid #f0f0f0; */
-    padding: 5px 15px 5px 15px;
-`
-
 const FooterContainer = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     z-index: 998;
-    width: 100%;
+    width: fill-available;
 `
 
 const SaveActionBar = styled.div`
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    position: absolute;
-    right: 6px;
-    z-index: 1001;
-`
 
-const TagsActionBar = styled.div`
-    display: flex;
-    justify-content: end-start;
-    align-items: center;
+    z-index: 1001;
+    grid-gap: 10px;
 `
 
 const MarkdownButtonContainer = styled.div`
@@ -538,15 +442,6 @@ const MarkdownButtonContainer = styled.div`
     }
 `
 
-const MarkdownButton = styled.img`
-    display: flex;
-    height: 16px;
-    opacity: 0.8;
-    mask-position: center center;
-    margin-left: 10px;
-    cursor: pointer;
-`
-
 const TextBoxContainerStyled = styled.div`
     box-shadow: none;
     cursor: default;
@@ -561,69 +456,4 @@ const TextBoxContainerStyled = styled.div`
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
     }
-`
-
-const StyledTextArea = styled.textarea`
-    background-color: white;
-    box-sizing: border-box;
-    resize: vertical;
-    font-weight: 400;
-    font-size: 14px;
-    color: #222;
-    font-family: ${(props) => props.theme.fonts.primary};
-    border-radius: 3px;
-    border: none;
-    padding: 10px 7px;
-    height: ${(props) => (props.value === '' ? '40px' : '150px')};
-    width: auto;
-    min-height: 70px;
-
-    &::placeholder {
-        color: ${(props) => props.theme.colors.primary};
-        opacity: 0.5;
-    }
-
-    &:focus {
-        outline: none;
-        box-shadow: none;
-        border: none;
-    }
-
-    &:focus {
-        outline: none;
-    }
-`
-
-const FooterStyled = styled.div`
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-    align-items: center;
-    animation: slideIn 0.2s ease-in-out;
-    animation-fill-mode: forwards;
-`
-
-const CancelBtnStyled = styled.div`
-    box-sizing: border-box;
-    cursor: pointer;
-    font-size: 14px;
-    border: none;
-    outline: none;
-    padding: 3px 5px;
-    background: transparent;
-    border-radius: 3px;
-    color: red;
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.backgroundColor};
-
-    &:focus {
-        background-color: #79797945;
-    }
-`
-
-const Flex = styled.div`
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
 `

@@ -14,7 +14,6 @@ import AddNewEntry from './components/AddNewEntry'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import EntryRow, { IconStyleWrapper } from './components/EntryRow'
 import * as Colors from 'src/common-ui/components/design-library/colors'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { EntrySelectedList } from './components/EntrySelectedList'
 import { ListResultItem } from './components/ListResultItem'
 import {
@@ -25,6 +24,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 class SpacePicker extends StatefulUIElement<
     SpacePickerDependencies,
@@ -168,16 +168,16 @@ class SpacePicker extends StatefulUIElement<
     renderNewListAllTabsButton = () =>
         this.props.actOnAllTabs && (
             <IconStyleWrapper show>
-                <ButtonTooltip
+                <TooltipBox
                     tooltipText="Add all tabs in window to Space"
-                    position="left"
+                    placement="left"
                 >
                     <Icon
                         filePath={icons.multiEdit}
                         heightAndWidth="20px"
                         onClick={this.handleNewListAllPress}
                     />
-                </ButtonTooltip>
+                </TooltipBox>
             </IconStyleWrapper>
         )
 
@@ -376,40 +376,53 @@ class SpacePicker extends StatefulUIElement<
 
         return (
             <>
-                {this.renderSpaceContextMenu()}
-                <PickerSearchInput
-                    searchInputPlaceholder={
-                        this.props.searchInputPlaceholder ??
-                        'Search & Add Spaces'
-                    }
-                    showPlaceholder={this.state.selectedListIds.length === 0}
-                    searchInputRef={this.handleSetSearchInputRef}
-                    onChange={this.handleSearchInputChanged}
-                    onKeyPress={this.handleKeyPress}
-                    value={this.state.query}
-                    loading={this.state.loadingQueryResults === 'running'}
-                    before={
-                        <EntrySelectedList
-                            entries={this.selectedDisplayEntries}
-                            onPress={this.handleSelectedListPress}
+                {this.state.contextMenuListId ? (
+                    this.renderSpaceContextMenu()
+                ) : (
+                    <PickerContainer>
+                        <PickerSearchInput
+                            searchInputPlaceholder={
+                                this.props.searchInputPlaceholder ??
+                                'Search & Add Spaces'
+                            }
+                            showPlaceholder={
+                                this.state.selectedListIds.length === 0
+                            }
+                            searchInputRef={this.handleSetSearchInputRef}
+                            onChange={this.handleSearchInputChanged}
+                            onKeyPress={this.handleKeyPress}
+                            value={this.state.query}
+                            loading={
+                                this.state.loadingQueryResults === 'running'
+                            }
+                            before={
+                                <EntrySelectedList
+                                    entries={this.selectedDisplayEntries}
+                                    onPress={this.handleSelectedListPress}
+                                />
+                            }
                         />
-                    }
-                />
-                <EntryList ref={this.displayListRef}>
-                    {!(
-                        (this.state.query === '' &&
-                            !this.state.displayEntries.length) ||
-                        this.state.query.length > 0
-                    ) && <EntryListHeader>Recently used</EntryListHeader>}
-                    {!this.state.displayEntries.length
-                        ? this.renderEmptyList()
-                        : this.state.displayEntries.map(this.renderListRow)}
-                </EntryList>
-                {this.shouldShowAddNewEntry && (
-                    <AddNewEntry
-                        resultItem={this.state.newEntryName}
-                        onPress={this.handleNewListPress}
-                    />
+                        <EntryList ref={this.displayListRef}>
+                            {!(
+                                (this.state.query === '' &&
+                                    !this.state.displayEntries.length) ||
+                                this.state.query.length > 0
+                            ) && (
+                                <EntryListHeader>Recently used</EntryListHeader>
+                            )}
+                            {!this.state.displayEntries.length
+                                ? this.renderEmptyList()
+                                : this.state.displayEntries.map(
+                                      this.renderListRow,
+                                  )}
+                        </EntryList>
+                        {this.shouldShowAddNewEntry && (
+                            <AddNewEntry
+                                resultItem={this.state.newEntryName}
+                                onPress={this.handleNewListPress}
+                            />
+                        )}
+                    </PickerContainer>
                 )}
             </>
         )
@@ -430,7 +443,7 @@ class SpacePicker extends StatefulUIElement<
 }
 
 const EntryListHeader = styled.div`
-    padding: 5px 10px;
+    padding: 5px 5px;
     font-size: 12px;
     color: ${(props) => props.theme.colors.darkText};
     font-weight: 400;
@@ -485,7 +498,12 @@ const LoadingBox = styled.div`
 
 const OuterSearchBox = styled.div`
     border-radius: 12px;
-    padding: 5px 5px 5px 5px;
+    width: 300px;
+`
+const PickerContainer = styled.div`
+    border-radius: 12px;
+    width: fill-available;
+    padding: 15px;
 `
 
 const EmptyListsView = styled.div`
@@ -501,18 +519,8 @@ const EntryRowContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin: 0 5px;
+    margin: 0 2px;
     border-radius: 6px;
-
-    &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
-        background: transparent;
-    }
-
-    &:active {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
-        background: transparent;
-    }
 `
 
 const SpaceContextMenuBtn = styled.div`

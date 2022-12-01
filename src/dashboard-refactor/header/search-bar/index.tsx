@@ -5,8 +5,8 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 
 import { fonts } from '../../styles'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { Icon } from 'src/dashboard-refactor/styled-components'
-import { ButtonTooltip } from 'src/common-ui/components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export interface SearchBarProps {
     placeholder?: string
@@ -55,8 +55,9 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             <IconContainer>
                                 <Margin right="5px">
                                     <Icon
-                                        heightAndWidth="22px"
-                                        path={icons.removeX}
+                                        heightAndWidth="24px"
+                                        filePath={icons.removeX}
+                                        padding={'6px'}
                                         onClick={() => this.handleClearSearch()}
                                     />
                                 </Margin>
@@ -66,7 +67,8 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                                 <Margin right="5px">
                                     <Icon
                                         heightAndWidth="22px"
-                                        path={icons.searchIcon}
+                                        filePath={icons.searchIcon}
+                                        padding={'5px'}
                                     />
                                 </Margin>
                             </IconContainer>
@@ -86,27 +88,27 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                 <ActionButtons>
                     <FilterButton left="15px" onClick={onSearchFiltersOpen}>
                         {searchFiltersOpen ? (
-                            <ButtonTooltip
-                                position={'bottom'}
+                            <TooltipBox
+                                placement={'bottom'}
                                 tooltipText={'Clear Filters'}
                             >
                                 <Icon
-                                    path={icons.removeX}
+                                    filePath={icons.removeX}
                                     heightAndWidth="22px"
-                                    color={'greyScale8'}
+                                    padding={'6px'}
                                 />
-                            </ButtonTooltip>
+                            </TooltipBox>
                         ) : (
-                            <ButtonTooltip
-                                position={'bottom'}
+                            <TooltipBox
+                                placement={'bottom'}
                                 tooltipText={'Apply Filters'}
                             >
                                 <Icon
-                                    path={icons.filterIcon}
+                                    filePath={icons.filterIcon}
                                     heightAndWidth="24px"
-                                    color={'greyScale8'}
+                                    padding={'5px'}
                                 />
-                            </ButtonTooltip>
+                            </TooltipBox>
                         )}
                     </FilterButton>
                     {renderCopyPasterButton()}
@@ -170,9 +172,7 @@ const Input = styled.input`
 
 const FilterButton = styled(Margin)`
     width: max-content;
-    ${textStyles}
     font-size: 12px;
-    line-height: 15px;
     cursor: pointer;
     width: auto;
     white-space: nowrap;

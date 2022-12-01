@@ -1,9 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const CreateButtons = styled.div`
     display: flex;
@@ -42,57 +42,57 @@ export const InitialComponent = ({
 }) => (
     <CreateButtons>
         <ButtonDiv onClick={createHighlight}>
-            <ButtonTooltip
+            <TooltipBox
                 tooltipText={
                     <AnnotationTooltipText>
                         <strong>Highlight</strong>
                         <br />+ shift to share
                     </AnnotationTooltipText>
                 }
-                position="bottomHighlighter"
+                placement="bottom"
             >
                 <Icon
                     filePath={'highlight'}
                     heightAndWidth="18px"
                     color={'greyScale9'}
                 />
-            </ButtonTooltip>
+            </TooltipBox>
         </ButtonDiv>
         <ButtonDiv onClick={createAnnotation}>
-            <ButtonTooltip
+            <TooltipBox
                 tooltipText={
                     <AnnotationTooltipText>
                         <strong>Annotate</strong>
                         <br />+ shift to share
                     </AnnotationTooltipText>
                 }
-                position="bottomHighlighter"
+                placement="bottom"
             >
                 <Icon
                     filePath={'commentAdd'}
                     heightAndWidth="18px"
                     color={'greyScale9'}
                 />
-            </ButtonTooltip>
+            </TooltipBox>
         </ButtonDiv>
         <ButtonDiv onClick={addtoSpace}>
-            <ButtonTooltip
+            <TooltipBox
                 tooltipText={
                     <AnnotationTooltipText>
                         <strong>Add Highlight to Space</strong>
                     </AnnotationTooltipText>
                 }
-                position="bottomHighlighter"
+                placement="bottom"
             >
                 <Icon
                     filePath={icons.collectionsEmpty}
                     heightAndWidth="18px"
                     color={'greyScale9'}
                 />
-            </ButtonTooltip>
+            </TooltipBox>
         </ButtonDiv>
         <ButtonDiv onClick={closeTooltip}>
-            <ButtonTooltip
+            <TooltipBox
                 tooltipText={
                     <AnnotationTooltipText>
                         <strong>Close Highlighter</strong>
@@ -100,7 +100,7 @@ export const InitialComponent = ({
                         Disable in Settings
                     </AnnotationTooltipText>
                 }
-                position="bottomHighlighter"
+                placement="bottom"
             >
                 <Icon
                     filePath={'removeX'}
@@ -108,7 +108,7 @@ export const InitialComponent = ({
                     onClick={closeTooltip}
                     color={'darkerIconColor'}
                 />
-            </ButtonTooltip>
+            </TooltipBox>
         </ButtonDiv>
     </CreateButtons>
 )

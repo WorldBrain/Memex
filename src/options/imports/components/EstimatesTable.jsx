@@ -3,12 +3,12 @@ import PropTypes from 'prop-types'
 import { LoadingIndicator, Checkbox } from 'src/common-ui/components'
 import { IMPORT_TYPE as TYPE, IMPORT_SERVICES as SERVICES } from '../constants'
 import classNames from 'classnames'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import localStyles from './Import.css'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Margin from 'src/dashboard-refactor/components/Margin'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const EstimatesTable = ({
     onAllowHistoryClick,
@@ -72,9 +72,9 @@ const EstimatesTable = ({
                         {allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE && (
                             <>
                                 <Margin left="5px" />
-                                <ButtonTooltip
+                                <TooltipBox
                                     tooltipText="How can I get that file?"
-                                    position="right"
+                                    placement="right"
                                 >
                                     <Icon
                                         filePath={icons.helpIcon}
@@ -85,7 +85,7 @@ const EstimatesTable = ({
                                             )
                                         }}
                                     />
-                                </ButtonTooltip>
+                                </TooltipBox>
                             </>
                         )}
                     </UploaderBox>

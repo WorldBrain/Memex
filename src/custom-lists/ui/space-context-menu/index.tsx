@@ -9,7 +9,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -48,14 +48,8 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         copyToClipboard,
     }
 
-    private containerElRef = React.createRef<HTMLDivElement>()
-
     constructor(props: Props) {
         super(props, new Logic(props))
-    }
-
-    getContainerRect(): DOMRect | null {
-        return this.containerElRef?.current?.getBoundingClientRect() ?? null
     }
 
     private handleWebViewOpen: React.MouseEventHandler = (e) => {
@@ -86,11 +80,11 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             <ShareSectionContainer onClick={wrapClick}>
                 {this.state.inviteLinks.map(
                     ({ link, showCopyMsg, roleID }, linkIndex) => (
-                        <Margin horizontal="5px" bottom="3px" key={link}>
+                        <Margin key={link}>
                             <LinkAndRoleBox viewportBreakpoint="normal">
                                 <PermissionArea>
-                                    <ButtonTooltip
-                                        position={'right'}
+                                    <TooltipBox
+                                        placement={'right'}
                                         tooltipText={
                                             sharedListRoleIDToString(roleID) ===
                                             'Contributor' ? (
@@ -113,7 +107,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                             {sharedListRoleIDToString(roleID) +
                                                 ' Access'}
                                         </PermissionText>
-                                    </ButtonTooltip>
+                                    </TooltipBox>
                                 </PermissionArea>
                                 <CopyLinkBox>
                                     <LinkBox
@@ -201,9 +195,11 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             this.state.inviteLinksLoadState === 'running'
         ) {
             return (
-                <LoadingContainer>
-                    <LoadingIndicator size={30} />
-                </LoadingContainer>
+                <ContextMenuContainer>
+                    <LoadingContainer>
+                        <LoadingIndicator size={30} />
+                    </LoadingContainer>
+                </ContextMenuContainer>
             )
         }
 
@@ -212,7 +208,13 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             wrapClick(() => this.processEvent('deleteSpace', null))
 
         return (
-            <>
+            <ContextMenuContainer>
+                {this.props.remoteListId && (
+                    <SectionTitle>Sharing Links</SectionTitle>
+                )}
+                {this.renderShareLinks()}
+
+                <SectionTitle>Edit Space</SectionTitle>
                 <EditArea>
                     <EditableMenuItem
                         {...this.props.editableProps}
@@ -232,55 +234,42 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                     </Margin>
                     Delete
                 </MenuButton>
-                {this.props.remoteListId && (
-                    <SectionTitle>Sharing Links</SectionTitle>
-                )}
-                {this.renderShareLinks()}
-            </>
+            </ContextMenuContainer>
         )
     }
 
     render() {
-        return (
-            <ModalRoot
-                ref={this.containerElRef}
-                fixedPosition={this.props.fixedPositioning}
-            >
-                {!this.props.fixedPositioning && (
-                    <Overlay
-                        onClick={wrapClick((e) => this.props.onClose(true))}
-                    />
-                )}
-                <ModalContent
-                    // onMouseLeave={closeModal}
-                    x={this.props.xPosition}
-                    y={this.props.yPosition}
-                    fixedPosition={this.props.fixedPositioning}
-                >
-                    <MenuContainer>{this.renderMainContent()}</MenuContainer>
-                </ModalContent>
-            </ModalRoot>
-        )
+        return <MenuContainer>{this.renderMainContent()}</MenuContainer>
     }
 }
+
+const ContextMenuContainer = styled.div`
+    display: flex;
+    grid-gap: 5px;
+    flex-direction: column;
+    width: fill-available;
+    padding: 15px;
+    min-height: fit-content;
+    height: fit-content;
+    justify-content: center;
+    align-items: flex-start;
+`
 
 const SectionTitle = styled.div`
     font-size: 14px;
     color: ${(props) => props.theme.colors.normalText};
     font-weight: 600;
-    margin-top: 10px;
     width: 100%;
     display: flex;
     justify-content: flex-start;
-    padding-left: 15px;
 `
 
 const DeleteBox = styled.div`
-    padding: 20px;
     display: flex;
     grid-gap: 10px;
     justify-content: center;
     flex-direction: column;
+    width: fill-available;
 `
 
 const PermissionArea = styled.div`
@@ -298,13 +287,15 @@ const IconContainer = styled.div`
 
 const LoadingContainer = styled.div`
     display: flex;
-    height: 126px;
+    height: 170px;
     justify-content: center;
     align-items: center;
+    width: fill-available;
 `
 
 const ShareSectionContainer = styled.div`
-    padding: 10px;
+    margin-bottom: 10px;
+    width: fill-available;
 `
 
 const ButtonLabel = styled.div`
@@ -323,12 +314,7 @@ const ModalRoot = styled.div<{ fixedPosition: boolean }>`
         props.fixedPosition
             ? ''
             : `
-    z-index: 1000;
     border-radius: 12px;
-    height: 100%;
-    width: 100%;
-    position: relative;
-    width: 100%;
 `}
     background-color: ${(props) => props.theme.colors.backgroundColorDarker};
     ${(props) =>
@@ -343,68 +329,22 @@ const ModalRoot = styled.div<{ fixedPosition: boolean }>`
 /* Modal content */
 
 const ModalContent = styled.div<{
-    x: number
-    y: number
     fixedPosition: boolean
 }>`
-    z-index: 999;
-    position: fixed;
     text-align: center;
-    border-radius: 4px;
-    width: 300px;
-    bottom: ${(props) => (props.x && props.y ? props.y + 'px' : 'unset')};
-    right: ${(props) => (props.x && props.y ? props.x + 'px' : 'unset')};
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
-`
-
-const Overlay = styled.div`
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 995;
-    border-radius: 5px;
-    backdrop-filter: ${(props) =>
-        props.x && props.y ? 'backdrop-filter: blur(3px)' : 'unset'};
 `
 
 const MenuContainer = styled.div`
     display: flex;
     flex-direction: column;
-    width: 100%;
-    max-width: 350px;
-    position: absolute;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
-    border: 1px solid ${(props) => props.theme.colors.lineGrey};
-    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
     border-radius: 12px;
-    z-index: 1;
-`
-
-const IconBox = styled.div<Props>`
-    display: ${(props) =>
-        props.hasActivity ||
-        props.newItemsCount ||
-        props.dropReceivingState?.isDraggedOver ||
-        props.dropReceivingState?.wasPageDropped
-            ? 'flex'
-            : 'None'};
-
-    height: 100%;
-    align-items: center;
-    justify-content: flex-end;
-    padding-right: 10px;
-    padding-left: 5px;
 `
 
 const TitleBox = styled.div`
     display: flex;
     flex: 1;
     height: 100%;
-    padding-left: 15px;
     align-items: center;
-    padding-right: 10px;
     font-weight: bold;
     color: ${(props) => props.theme.colors.normalText};
     justify-content: center;
@@ -423,7 +363,6 @@ const MenuButton = styled.div`
     align-items: center;
     cursor: pointer;
     padding: 0px 5px;
-    margin: 5px 5px;
     border-radius: 5px;
 
     &:hover {
@@ -438,21 +377,6 @@ const MenuButton = styled.div`
     }
 `
 
-// probably want to use timing function to get this really looking good. This is just quick and dirty
-
-const blinkingAnimation = keyframes`
- 0% {
-    background-color: ${(props) => props.theme.colors.lightHover};
- }
- 50% {
- background-color: transparent;
- }
- 100% {
-    background-color: ${(props) => props.theme.colors.lightHover};
- }
-
-`
-
 const LinkAndRoleBox = styled.div<{
     viewportBreakpoint: string
 }>`
@@ -461,6 +385,7 @@ const LinkAndRoleBox = styled.div<{
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 5px;
+    grid-gap: 5px;
 
     ${(props) =>
         (props.viewportBreakpoint === 'small' ||
@@ -494,7 +419,6 @@ const LinkBox = styled(Margin)`
     text-align: left;
     height: 30px;
     cursor: pointer;
-    padding-right: 10px;
     color: ${(props) => props.theme.colors.normalText};
     border: 1px solid ${(props) => props.theme.colors.lineGrey};
     background: ${(props) => props.theme.colors.darkhover};

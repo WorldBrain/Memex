@@ -101,6 +101,7 @@ const ToggleMoreButtonStyled = styled.div`
     grid-gap: 5px;
     align-items: center;
     background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    margin-top: -25px;
 
     &:hover {
         background-color: ${(props) => props.theme.colors.lightHover};
@@ -116,7 +117,7 @@ const ToggleMoreBox = styled.div`
     flex-direction: row;
     justify-self: flex-end;
     align-self: flex-end;
-    position: absolute;
+    position: relative;
     cursor: pointer;
 `
 

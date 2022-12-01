@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { ButtonTooltip } from '.'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     tags: string[]
@@ -23,7 +23,7 @@ export default function TagsSegment({
         return (
             <Container {...props}>
                 <WarningBox>
-                    <ButtonTooltip
+                    <TooltipBox
                         tooltipText={
                             <span>
                                 Tags will soon be deprecated & merged into
@@ -32,7 +32,7 @@ export default function TagsSegment({
                                 Click to learn more
                             </span>
                         }
-                        position={'right'}
+                        placement={'right'}
                     >
                         <Icon
                             filePath={icons.alertRound}
@@ -44,7 +44,7 @@ export default function TagsSegment({
                                 )
                             }
                         />
-                    </ButtonTooltip>
+                    </TooltipBox>
                 </WarningBox>
                 <EditIconContainerWithText onClick={onEditBtnClick}>
                     <Icon

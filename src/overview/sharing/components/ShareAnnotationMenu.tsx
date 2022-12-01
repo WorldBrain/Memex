@@ -298,6 +298,7 @@ const InfoText = styled.div`
 
 const Menu = styled.div`
     padding: 5px 0px;
+    width: 330px;
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
@@ -379,6 +380,7 @@ const PrivacyTitle = styled.div`
     font-weight: 700;
     margin-bottom: 10px;
     color: ${(props) => props.theme.colors.normalText};
+    white-space: nowrap;
 `
 
 const PrivacyOptionContainer = styled(Margin)`

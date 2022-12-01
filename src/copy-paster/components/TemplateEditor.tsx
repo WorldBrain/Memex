@@ -15,6 +15,8 @@ const FlexContainer = styled.div`
 `
 
 const TextInputBox = styled.div`
+    display: flex;
+    flex-direction: column;
     padding: 10px 10px;
 `
 
@@ -74,7 +76,7 @@ const Header = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.normalText};
     font-size: 14px;
     font-weight: bold;
 `

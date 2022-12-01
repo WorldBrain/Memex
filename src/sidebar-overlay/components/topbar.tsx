@@ -1,6 +1,6 @@
 import * as React from 'react'
 import cx from 'classnames'
-import { ButtonTooltip } from 'src/common-ui/components/'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import CloseButton from './close-button'
 import SearchBox from './search-box'
 
@@ -31,15 +31,15 @@ const Topbar = ({
 }: Props) => (
     <div className={styles.topbar}>
         {props.env === 'overview' && (
-            <ButtonTooltip tooltipText="Close (ESC)" position="rightCentered">
+            <TooltipBox tooltipText="Close (ESC)" placement="right">
                 <CloseButton
                     title="Close sidebar once. Disable via Memex icon in the extension toolbar."
-                    clickHandler={e => {
+                    clickHandler={(e) => {
                         e.stopPropagation()
                         handleCloseBtnClick()
                     }}
                 />
-            </ButtonTooltip>
+            </TooltipBox>
         )}
         {props.env === 'inpage' && (
             <React.Fragment>
@@ -58,37 +58,34 @@ const Topbar = ({
                 >
                     Filters
                     {props.showClearFiltersBtn && (
-                        <ButtonTooltip
-                            position="bottom"
+                        <TooltipBox
+                            placement="bottom"
                             tooltipText={'Clear filters'}
                         >
                             <span
                                 className={styles.clearFilters}
                                 onClick={props.handleClearFiltersBtnClick}
                             />
-                        </ButtonTooltip>
+                        </TooltipBox>
                     )}
                 </button>
             </React.Fragment>
         )}
         {props.env === 'overview' && (
-        <div className={styles.right}>
-            {/* Button to add a comment. */}
-            <ButtonTooltip
-                tooltipText="Add notes to page"
-                position="leftNarrow"
-            >
-                <button
-                    className={cx(styles.button, styles.comments, {
-                        [styles.disabled]: disableAddCommentBtn,
-                    })}
-                    onClick={e => {
-                        e.stopPropagation()
-                        handleAddCommentBtnClick()
-                    }}
-                />
-            </ButtonTooltip>
-        </div>
+            <div className={styles.right}>
+                {/* Button to add a comment. */}
+                <TooltipBox tooltipText="Add notes to page" placement="left">
+                    <button
+                        className={cx(styles.button, styles.comments, {
+                            [styles.disabled]: disableAddCommentBtn,
+                        })}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            handleAddCommentBtnClick()
+                        }}
+                    />
+                </TooltipBox>
+            </div>
         )}
     </div>
 )

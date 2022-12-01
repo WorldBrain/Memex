@@ -1,6 +1,6 @@
 import * as React from 'react'
 import classNames from 'classnames'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { maxPossibleTags } from 'src/sidebar/annotations-sidebar/utils'
 import { ClickHandler } from 'src/sidebar/annotations-sidebar/types'
 
@@ -73,7 +73,7 @@ class TagHolder extends React.Component<Props, State> {
 
         return (
             <div className={styles.tagHolderContainer} onClick={clickHandler}>
-                <ButtonTooltip tooltipText="Add Tags" position="bottomSidebar">
+                <TooltipBox tooltipText="Add Tags" placement="bottom">
                     <div className={styles.tagHolder} onClick={clickHandler}>
                         <span
                             className={classNames(
@@ -84,7 +84,7 @@ class TagHolder extends React.Component<Props, State> {
                             <span className={styles.tagIcon} />
                         </span>
                     </div>
-                </ButtonTooltip>
+                </TooltipBox>
             </div>
         )
     }

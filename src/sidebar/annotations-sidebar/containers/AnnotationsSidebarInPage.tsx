@@ -37,7 +37,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         isLockable: true,
         theme: {
             ...theme,
-            rightOffsetPx: 50,
+            rightOffsetPx: 0,
             canClickAnnotations: true,
             paddingRight: 0,
         },
@@ -149,7 +149,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             if (annotationMode === 'edit_spaces') {
                 this.processEvent('setListPickerAnnotationId', {
                     id: url,
-                    position: 'footer',
+                    position: 'lists-bar',
                 })
             }
         }
@@ -188,21 +188,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         }
 
         this.forceUpdate()
-    }
-
-    /**
-     * Handles AnnotationSidebar onSelectSpace event
-     *
-     * This method specializes super method of AnnotationSidebarContainer so
-     * we propagate the selected space to InPageUI. The idea is that our
-     * global script will have access to such state there then.
-     *
-     * @param listId space ID being selected or null
-     */
-    protected handleSelectSpace(listId: string | null) {
-        super.handleSelectSpace(listId)
-        console.debug('Propagating selected space to InPageUI state', listId)
-        this.props.inPageUI.selectedSpace = listId
     }
 
     private handleInPageUIStateChange: SharedInPageUIEvents['stateChanged'] = ({

@@ -66,8 +66,8 @@ const StyledPrimaryActionLinkText = styled(TypographyActionText)<{
     font-size: ${(props) => (props.fontSize ? props.fontSize : 14)}px;
     color: ${(props) =>
         props.fontColor ? props.fontColor : props.theme.colors.purple};
-    font-weight: 600;
-    font-family: 'Satoshi';
+    font-weight: 500;
+    font-family: 'Satoshi', sans-serif;
 `
 export const PrimaryAction = ({
     label,

@@ -39,17 +39,16 @@ import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import DismissibleResultsMessage from './components/dismissible-results-message'
 import MobileAppAd from 'src/sync/components/device-list/mobile-app-ad'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import ListDetails, {
     Props as ListDetailsProps,
 } from './components/list-details'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import ListShareMenu from 'src/overview/sharing/ListShareMenu'
-import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from 'src/annotations/types'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -177,46 +176,35 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 listPickerRenderLocation={noteData.listPickerShowStatus}
                 renderListsPickerForAnnotation={() =>
                     noteData.listPickerShowStatus !== 'hide' && (
-                        <HoverBox
-                            withRelativeContainer
-                            top="20px"
-                            right={
-                                noteData.listPickerShowStatus === 'footer'
-                                    ? '0px'
-                                    : undefined
+                        <CollectionPicker
+                            initialSelectedListIds={() => listsToDisplay}
+                            onClickOutside={
+                                noteData.listPickerShowStatus === 'lists-bar'
+                                    ? interactionProps.onListPickerBarBtnClick
+                                    : interactionProps.onListPickerFooterBtnClick
                             }
-                        >
-                            <CollectionPicker
-                                initialSelectedListIds={() => listsToDisplay}
-                                onClickOutside={
-                                    noteData.listPickerShowStatus ===
-                                    'lists-bar'
-                                        ? interactionProps.onListPickerBarBtnClick
-                                        : interactionProps.onListPickerFooterBtnClick
-                                }
-                                selectEntry={(listId) =>
-                                    interactionProps.updateLists({
-                                        added: listId,
-                                        deleted: null,
-                                        selected: [],
-                                        options: {
-                                            showExternalConfirmations: true,
-                                        },
-                                    })
-                                }
-                                unselectEntry={(listId) =>
-                                    interactionProps.updateLists({
-                                        added: null,
-                                        deleted: listId,
-                                        selected: [],
-                                        options: {
-                                            showExternalConfirmations: true,
-                                        },
-                                    })
-                                }
-                                createNewEntry={interactionProps.createNewList}
-                            />
-                        </HoverBox>
+                            selectEntry={(listId) =>
+                                interactionProps.updateLists({
+                                    added: listId,
+                                    deleted: null,
+                                    selected: [],
+                                    options: {
+                                        showExternalConfirmations: true,
+                                    },
+                                })
+                            }
+                            unselectEntry={(listId) =>
+                                interactionProps.updateLists({
+                                    added: null,
+                                    deleted: listId,
+                                    selected: [],
+                                    options: {
+                                        showExternalConfirmations: true,
+                                    },
+                                })
+                            }
+                            createNewEntry={interactionProps.createNewList}
+                        />
                     )
                 }
                 renderShareMenuForAnnotation={() =>
@@ -329,9 +317,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         <NoteTopBarBox
                             leftSide={
                                 <TopBarRightSideWrapper>
-                                    <ButtonTooltip
+                                    <TooltipBox
                                         tooltipText="Sort Annotations"
-                                        position="bottom"
+                                        placement="bottom"
                                     >
                                         <Icon
                                             filePath={icons.sort}
@@ -341,7 +329,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                                             height="18px"
                                             width="20px"
                                         />
-                                    </ButtonTooltip>
+                                    </TooltipBox>
                                     {this.renderSortingMenuDropDown(
                                         normalizedUrl,
                                         day,
@@ -407,7 +395,13 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <ResultBox
-                zIndex={index}
+                zIndex={
+                    interactionProps.onMainContentHover
+                        ? index +
+                          this.props.results[day].pages.allIds.length +
+                          1
+                        : index
+                }
                 bottom="10px"
                 key={day.toString() + pageId}
             >
@@ -657,16 +651,16 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <>
-                <ButtonTooltip
+                <TooltipBox
                     tooltipText="Bulk-change privacy of annotations in this Space"
-                    position="bottom"
+                    placement="bottom"
                 >
                     <Icon
                         filePath={icons.multiEdit}
                         height="16px"
                         onClick={this.props.toggleListShareMenu}
                     />
-                </ButtonTooltip>
+                </TooltipBox>
                 {this.props.isListShareMenuShown && (
                     <HoverBox
                         width="340px"

@@ -1,12 +1,9 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
-
-import colors from '../colors'
 import { SidebarLockedState } from '../lists-sidebar/types'
 import { Icon } from '../styled-components'
 import { HoverState } from '../types'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { ButtonTooltip } from 'src/common-ui/components'
 
 const arrowStyles = `
     left: 2px;

@@ -140,15 +140,9 @@ export interface SidebarContainerState
     isWidthLocked: boolean
     isExpanded: boolean
     isExpandedSharedSpaces: boolean
-    sidebarWidth: string
+    isFeedShown: boolean
+    sidebarWidth?: string
     isolatedView?: string | null // if null show default view
-
-    // Indicates what is the currently selected space in the leaf screen
-    // for the side bar, also known as the isolated view. When a space
-    // is selected, all operations default to use that selected space
-    // except if explicity told otherwise.
-    selectedSpace?: string | null
-    selectedSpaceLocalId?: number | null
 
     annotationSharingAccess: AnnotationSharingAccess
 
@@ -204,15 +198,17 @@ export interface SidebarContainerState
 }
 
 interface SidebarEvents {
-    show: null
+    show: { existingWidthState: string }
     hide: null
     lock: null
     unlock: null
     lockWidth: null
     unlockWidth: null
+    adjustSidebarWidth: { newWidth: string; isWidthLocked?: boolean }
 
     sortAnnotations: { sortingFn: AnnotationsSorter }
 
+    expandFeed: null
     expandMyNotes: null
     expandSharedSpaces: { listIds: string[] }
 
@@ -297,9 +293,6 @@ interface SidebarEvents {
     loadFollowedListNotes: { listId: string }
     expandFollowedListNotes: { listId: string }
     toggleIsolatedListView: { listId: string }
-
-    // Selected space management
-    selectSpace: { listId: string | null }
 
     updateAnnotationShareInfo: {
         annotationUrl: string
