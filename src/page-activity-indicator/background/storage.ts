@@ -31,6 +31,7 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                     fields: {
                         creator: { type: 'string' },
                         entryTitle: { type: 'text' },
+                        followedList: { type: 'string' },
                         normalizedPageUrl: { type: 'string' },
                         hasAnnotations: { type: 'boolean' },
                         createdWhen: { type: 'timestamp' },
@@ -40,7 +41,6 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                         { field: 'normalizedPageUrl' },
                         { field: 'followedList' },
                     ],
-                    relationships: [{ childOf: 'followedList' }],
                 },
             },
             operations: {
@@ -60,7 +60,7 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                 findFollowedListEntries: {
                     collection: 'followedListEntry',
                     operation: 'findObjects',
-                    args: { followedList: '$followedList:number' },
+                    args: { followedList: '$followedList:string' },
                 },
                 findFollowedListEntriesByPage: {
                     collection: 'followedListEntry',
