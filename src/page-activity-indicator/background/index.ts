@@ -116,8 +116,9 @@ export class PageActivityIndicatorBackground {
             followedList,
         ] of existingFollowedListsLookup) {
             if (
+                followedList.lastSync == null ||
                 listActivityTimestampLookup.get(sharedListId.toString()) >
-                followedList.lastSync
+                    followedList.lastSync
             ) {
                 followedListsWithUpdates.push(followedList)
             }

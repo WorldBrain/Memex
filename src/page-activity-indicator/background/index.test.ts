@@ -1335,5 +1335,69 @@ describe('Page activity indicator background module tests', () => {
                 }),
             )
         })
+
+        it("should be able to sync entries for newly created followed lists which haven't been synced yet", async () => {
+            const {
+                backgroundModules,
+                storageManager,
+                getServerStorage,
+                fetch,
+            } = await setupTest({
+                testData: { ownLists: true },
+            })
+
+            const expectedListIds = new Set([
+                DATA.sharedLists[0].id,
+                DATA.sharedLists[1].id,
+            ])
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual([])
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(
+                calcExpectedLists(expectedListIds, { lastSync: undefined }),
+            )
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            fetch.mock('*', 200, {
+                response: [[...expectedListIds].map((id) => [id, 2])],
+                sendAsJson: true,
+            })
+
+            expect(fetch.calls()).toEqual([])
+            await backgroundModules.pageActivityIndicator[
+                'syncFollowedListEntriesWithNewActivity'
+            ]({ now: 1 })
+            expect(fetch.calls().length).toBe(1)
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(calcExpectedLists(expectedListIds, { lastSync: 1 }))
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual(calcExpectedListEntries(expectedListIds))
+        })
     })
 })

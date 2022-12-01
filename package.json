@@ -16,6 +16,7 @@
         "watch:prod": "npm run build:clean && webpack --watch --env.prod",
         "watch:notif": "webpack --watch --env.notifs",
         "watch:clean": "npm run cache:clean && npm run watch:notif",
+        "watch:clean:mv2": "npm run cache:clean && npm run watch:notif:mv2",
         "cache:clean": "rimraf ./node_modules/.cache",
         "stats": "webpack --profile -1json > stats.json",
         "postgres:start": "yarn postgres stop; sudo docker run --name storex-test-postgres -p 127.0.0.1:5435:5432/tcp -e POSTGRES_PASSWORD=storex -d postgres",
