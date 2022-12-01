@@ -137,6 +137,7 @@ export class AnnotationsSidebarContainer<
     }
 
     showSidebar() {
+        console.log('currentstate', this.state.sidebarWidth)
         this.processEvent('show', {
             existingWidthState: this.state.sidebarWidth
                 ? this.state.sidebarWidth
@@ -174,13 +175,18 @@ export class AnnotationsSidebarContainer<
         this.processEvent(this.state.isLocked ? 'unlock' : 'lock', null)
 
     toggleSidebarWidthLock = () => {
+        console.log('testlock')
         this.processEvent(
             this.state.isWidthLocked ? 'unlockWidth' : 'lockWidth',
             null,
         )
+
+        console.log(this.state.sidebarWidth)
         if (!this.state.isWidthLocked) {
             this.processEvent('adjustSidebarWidth', {
-                newWidth: this.state.sidebarWidth,
+                newWidth: this.state.sidebarWidth
+                    ? this.state.sidebarWidth
+                    : SIDEBAR_WIDTH_STORAGE_KEY,
                 isWidthLocked: true,
             })
         }

@@ -337,16 +337,19 @@ export class SidebarContainerLogic extends UILogic<
         if (event.isWidthLocked) {
             let SidebarWidth = toInteger(event.newWidth.replace('px', ''))
             let windowWidth = window.innerWidth
-            let width = (windowWidth - SidebarWidth - 15).toString()
+            let width = (windowWidth - SidebarWidth).toString()
             width = width + 'px'
             document.body.style.width = width
         }
     }
 
     show: EventHandler<'show'> = async ({ event }) => {
-        const width = event.existingWidthState
-            ? event.existingWidthState
-            : SIDEBAR_WIDTH_STORAGE_KEY
+        const width =
+            event.existingWidthState != null
+                ? event.existingWidthState
+                : SIDEBAR_WIDTH_STORAGE_KEY
+
+        console.log('width', width)
 
         this.emitMutation({
             showState: { $set: 'visible' },
