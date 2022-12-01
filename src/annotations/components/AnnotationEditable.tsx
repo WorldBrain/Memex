@@ -209,7 +209,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                     or double-click card
                                 </span>
                             }
-                            placement="leftBig"
+                            placement="left"
                         >
                             <HighlightAction>
                                 <Icon
