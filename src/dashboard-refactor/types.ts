@@ -42,7 +42,10 @@ export interface RootState {
     searchFilters: SearchFiltersState
     listsSidebar: ListsSidebarState
     modals: DashboardModalsState
-    sidebarWidth?: string
+    spaceSidebarWidth?: string
+    windowWidth?: number
+    mainContentWidth?: string
+    notesSidebarWidth?: string
 }
 
 export type Events = UIEvent<

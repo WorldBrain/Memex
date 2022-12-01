@@ -1014,7 +1014,7 @@ const TopBar = styled.div`
     height: 40px;
     background: ${(props) => props.theme.colors.backgroundColor};
     z-index: 11300;
-    padding: 15px 0px 10px 0px;
+    padding: 10px 0px 10px 0px;
     border-bottom: 1px solid ${(props) => props.theme.colors.darkhover};
 `
 
@@ -1414,7 +1414,13 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
     }
 
     scrollbar-width: none;
-    padding: 0 20px;
+    padding: 0 15px 0px 40px;
+
+    ${(props) =>
+        props.sidebarContext === 'dashboard' &&
+        css`
+            padding: 0 20px 0px 20px;
+        `};
 `
 
 const FeedFrame = styled.iframe`

@@ -39,7 +39,6 @@ export class AddSpacesButton extends React.Component<
     }
 
     render() {
-        console.log(this.props.spacePickerButtonRef)
         return (
             <SpacePickerButtonWrapper>
                 <AddSpacesButtonContainer

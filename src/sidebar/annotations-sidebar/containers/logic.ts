@@ -45,6 +45,7 @@ import {
 import { resolvablePromise } from 'src/util/promises'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { SharedAnnotationList } from 'src/custom-lists/background/types'
+import { toInteger } from 'lodash'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -171,8 +172,6 @@ export class SidebarContainerLogic extends UILogic<
             isExpanded: true,
             isExpandedSharedSpaces: false,
             isFeedShown: false,
-
-            sidebarWidth: '450px',
             loadState: 'pristine',
             noteCreateState: 'pristine',
             annotationsLoadState: 'pristine',
@@ -238,13 +237,6 @@ export class SidebarContainerLogic extends UILogic<
             'newStateIntent',
             this.annotationSubscription,
         )
-
-        const sidebarInitialWidth = await getLocalStorage(
-            SIDEBAR_WIDTH_STORAGE_KEY,
-        )
-        if (sidebarInitialWidth == null) {
-            await setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '450px')
-        }
 
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.annotationSubscription(annotationsCache.annotations)
@@ -339,20 +331,27 @@ export class SidebarContainerLogic extends UILogic<
         return false
     }
 
-    adjustSidebarWidth = (changes) => {
-        let SidebarWidth = changes[SIDEBAR_WIDTH_STORAGE_KEY].newValue.replace(
-            'px',
-            '',
-        )
-        SidebarWidth = parseFloat(SidebarWidth)
-        let windowWidth = window.innerWidth
-        let width = (windowWidth - SidebarWidth - 40).toString()
-        width = width + 'px'
-        document.body.style.width = width
+    adjustSidebarWidth: EventHandler<'adjustSidebarWidth'> = ({ event }) => {
+        this.emitMutation({ sidebarWidth: { $set: event.newWidth } })
+
+        if (event.isWidthLocked) {
+            let SidebarWidth = toInteger(event.newWidth.replace('px', ''))
+            let windowWidth = window.innerWidth
+            let width = (windowWidth - SidebarWidth - 15).toString()
+            width = width + 'px'
+            document.body.style.width = width
+        }
     }
 
-    show: EventHandler<'show'> = async () => {
-        this.emitMutation({ showState: { $set: 'visible' } })
+    show: EventHandler<'show'> = async ({ event }) => {
+        const width = event.existingWidthState
+            ? event.existingWidthState
+            : SIDEBAR_WIDTH_STORAGE_KEY
+
+        this.emitMutation({
+            showState: { $set: 'visible' },
+            sidebarWidth: { $set: width },
+        })
     }
 
     hide: EventHandler<'hide'> = () => {
@@ -360,7 +359,8 @@ export class SidebarContainerLogic extends UILogic<
             showState: { $set: 'hidden' },
             activeAnnotationUrl: { $set: null },
         })
-        document.body.style.width = window.innerWidth.toString() + 'px'
+
+        document.body.style.width = 'unset'
     }
 
     lock: EventHandler<'lock'> = () =>
@@ -369,24 +369,12 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ isLocked: { $set: false } })
 
     lockWidth: EventHandler<'lockWidth'> = () => {
-        getLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY).then((width) => {
-            let SidebarInitialAsInteger = parseFloat(
-                width.toString().replace('px', ''),
-            )
-            let WindowInitialWidth =
-                (window.innerWidth - SidebarInitialAsInteger - 40).toString() +
-                'px'
-            document.body.style.width = WindowInitialWidth
-        })
-
-        browser.storage.onChanged.addListener(this.adjustSidebarWidth)
-
+        // getLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY).then((width) => {
         this.emitMutation({ isWidthLocked: { $set: true } })
     }
 
     unlockWidth: EventHandler<'unlockWidth'> = () => {
-        document.body.style.width = window.innerWidth.toString() + 'px'
-        browser.storage.onChanged.removeListener(this.adjustSidebarWidth)
+        document.body.style.width = 'unset'
         this.emitMutation({ isWidthLocked: { $set: false } })
     }
 

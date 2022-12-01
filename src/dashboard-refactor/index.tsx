@@ -54,18 +54,21 @@ import type { ListDetailsGetter } from 'src/annotations/types'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import SearchCopyPaster from './search-results/components/search-copy-paster'
 import ExpandAllNotes from './search-results/components/expand-all-notes'
+import { toInteger } from 'lodash'
+import SyncStatusMenu, { SyncStatusMenuProps } from './header/sync-status-menu'
+import { SETTINGS_URL } from 'src/constants'
+import { SyncStatusIcon } from './header/sync-status-menu/sync-status-icon'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 export interface Props extends DashboardDependencies {}
-
-export interface State extends RootState {
-    sidebarWidth: string
-}
 
 export class DashboardContainer extends StatefulUIElement<
     Props,
     RootState,
     Events
 > {
+    static SYNC_MENU_TOGGLE_BTN_CLASS = 'sync-menu-toggle-btn'
+
     static MEMEX_SOCIAL_URL =
         process.env.NODE_ENV === 'production'
             ? 'https://memex.social'
@@ -120,10 +123,12 @@ export class DashboardContainer extends StatefulUIElement<
         window.location.hash = '#/' + route
     }
 
-    private SidebarContainer = React.createRef()
+    private SidebarContainer = React.createRef<HTMLElement>()
 
     constructor(props: Props) {
         super(props, new DashboardLogic(props))
+
+        setTimeout(() => this.setupWindowWidthListner(), 500)
 
         this.annotationsCache = createAnnotationsCache(
             {
@@ -134,6 +139,16 @@ export class DashboardContainer extends StatefulUIElement<
             },
             { skipPageIndexing: true },
         )
+    }
+
+    setupWindowWidthListner() {
+        this.processEvent('calculateMainContentWidth', {})
+
+        window.addEventListener('resize', () => {
+            this.processEvent('calculateMainContentWidth', {
+                windowWidth: window.innerWidth,
+            })
+        })
     }
 
     private getListDetailsById: ListDetailsGetter = (id) => ({
@@ -294,7 +309,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <FiltersBar
-                spaceSidebarWidth={this.state.sidebarWidth}
+                spaceSidebarWidth={this.state.spaceSidebarWidth}
                 spaceSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 searchFilters={searchFilters}
                 isDisplayed={searchFilters.searchFiltersOpen}
@@ -455,10 +470,16 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 sidebarLockedState={{
                     isSidebarLocked: listsSidebar.isSidebarLocked,
-                    toggleSidebarLockedState: () =>
+                    toggleSidebarLockedState: () => {
                         this.processEvent('setSidebarLocked', {
                             isLocked: !listsSidebar.isSidebarLocked,
-                        }),
+                        })
+                        this.processEvent('calculateMainContentWidth', {
+                            spaceSidebarWidth: !listsSidebar.isSidebarLocked
+                                ? '250px'
+                                : '0px',
+                        })
+                    },
                 }}
                 sidebarToggleHoverState={{
                     isHovered: listsSidebar.isSidebarToggleHovered,
@@ -495,7 +516,7 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: !syncMenu.isDisplayed,
                         }),
                 }}
-                sidebarWidth={this.state.sidebarWidth}
+                sidebarWidth={this.state.spaceSidebarWidth}
             />
         )
     }
@@ -505,10 +526,16 @@ export class DashboardContainer extends StatefulUIElement<
 
         const lockedState = {
             isSidebarLocked: listsSidebar.isSidebarLocked,
-            toggleSidebarLockedState: () =>
+            toggleSidebarLockedState: () => {
                 this.processEvent('setSidebarLocked', {
                     isLocked: !listsSidebar.isSidebarLocked,
-                }),
+                })
+                // this.processEvent('calculateMainContentWidth', {
+                //     spaceSidebarWidth: !listsSidebar.isSidebarLocked
+                //         ? '250px'
+                //         : '0px',
+                // })
+            },
         }
 
         return (
@@ -1183,6 +1210,63 @@ export class DashboardContainer extends StatefulUIElement<
         }
     }
 
+    private renderHeaderBar() {
+        // attempt at using the sync header in the dashboard top level, instad of header. leaving this here for now we may need it not sure
+        return (
+            <HeaderBar>
+                <RightHeader>
+                    <SyncStatusHeaderBox
+                        className={
+                            DashboardContainer.SYNC_MENU_TOGGLE_BTN_CLASS
+                        }
+                        onClick={() =>
+                            this.processEvent('setSyncStatusMenuDisplayState', {
+                                isShown: !this.state.syncMenu.isDisplayed,
+                            })
+                        }
+                    >
+                        <Margin>
+                            <SyncStatusIcon
+                                color={deriveStatusIconColor(this.state)}
+                            />
+                        </Margin>
+                        <SyncStatusHeaderText>Sync Status</SyncStatusHeaderText>
+                    </SyncStatusHeaderBox>
+                    <SettingsSection
+                        vertical="auto"
+                        horizontal="17px"
+                        onClick={() => window.open(SETTINGS_URL, '_self')}
+                    >
+                        <Icon heightAndWidth="22px" filePath={icons.settings} />
+                    </SettingsSection>
+                    <SyncStatusMenu
+                        syncStatusIconState={deriveStatusIconColor(this.state)}
+                        {...this.state.syncMenu}
+                        isLoggedIn={this.state.currentUser != null}
+                        outsideClickIgnoreClass={
+                            HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS
+                        }
+                        onLoginClick={() =>
+                            this.processEvent('setShowLoginModal', {
+                                isShown: true,
+                            })
+                        }
+                        onClickOutside={() =>
+                            this.processEvent('setSyncStatusMenuDisplayState', {
+                                isShown: false,
+                            })
+                        }
+                        onToggleDisplayState={() =>
+                            this.processEvent('setSyncStatusMenuDisplayState', {
+                                isShown: !this.state.syncMenu.isDisplayed,
+                            })
+                        }
+                    />
+                </RightHeader>
+            </HeaderBar>
+        )
+    }
+
     render() {
         // <GlobalFonts />
         // <GlobalStyle />
@@ -1193,10 +1277,16 @@ export class DashboardContainer extends StatefulUIElement<
 
         const lockedState = {
             isSidebarLocked: listsSidebar.isSidebarLocked,
-            toggleSidebarLockedState: () =>
+            toggleSidebarLockedState: () => {
                 this.processEvent('setSidebarLocked', {
                     isLocked: !listsSidebar.isSidebarLocked,
                 }),
+                    this.processEvent('calculateMainContentWidth', {
+                        spaceSidebarWidth: !listsSidebar.isSidebarLocked
+                            ? '250px'
+                            : '0px',
+                    })
+            },
         }
 
         const sidebarToggleHoverState = {
@@ -1293,13 +1383,17 @@ export class DashboardContainer extends StatefulUIElement<
                             bottomLeft: false,
                             topLeft: false,
                         }}
-                        onResize={(e, direction, ref, delta, position) => {
-                            this.setState({ sidebarWidth: ref.style.width })
+                        onResizeStop={(e, direction, ref, delta, position) => {
+                            this.processEvent('calculateMainContentWidth', {
+                                spaceSidebarWidth: ref.style.width,
+                            })
                         }}
                     >
                         {this.renderListsSidebar()}
                     </ListSidebarContent>
-                    <MainContent>
+                    {/* <ContentArea> */}
+                    {/* {this.renderHeaderBar()} */}
+                    <MainContent responsiveWidth={this.state.mainContentWidth}>
                         {this.state.listsSidebar.showFeed ? (
                             <FeedContainer>
                                 <TitleContainer>
@@ -1321,6 +1415,7 @@ export class DashboardContainer extends StatefulUIElement<
                             </>
                         )}
                     </MainContent>
+                    {/* </ContentArea> */}
                 </MainFrame>
 
                 {/* <Margin bottom="5px" /> */}
@@ -1348,6 +1443,18 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: true,
                         })
                     }
+                    setSidebarWidthforDashboard={(sidebarWidth) => {
+                        this.processMutation({
+                            notesSidebarWidth: { $set: sidebarWidth },
+                        })
+                        setTimeout(
+                            () =>
+                                this.processEvent('calculateMainContentWidth', {
+                                    notesSidebarWidth: sidebarWidth,
+                                }),
+                            50,
+                        )
+                    }}
                 />
                 <HelpBtn />
                 <DragElement
@@ -1370,6 +1477,44 @@ const GlobalStyle = createGlobalStyle`
         font-family: 'Satoshi', sans-serif;
         letter-spacing: 0.8px;
     }
+`
+
+const ContentArea = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: fill-available;
+    height: fill-available;
+`
+
+const HeaderBar = styled.div`
+    height: ${sizeConstants.header.heightPx}px;
+    width: fill-available;
+    position: sticky;
+    top: 0;
+    left: 150px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: ${(props) => props.theme.colors.backgroundColor};
+    z-index: 2147483640;
+    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lineGrey};
+`
+
+const MainContent = styled.div<{ responsiveWidth: string }>`
+    width: fill-available;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    height: 100%;
+
+    ${(props) =>
+        props.responsiveWidth &&
+        css<{ responsiveWidth: string }>`
+            width: ${(props) => props.responsiveWidth};
+        `};
 `
 
 const ListSidebarContent = styled(Rnd)<{
@@ -1474,15 +1619,6 @@ const SectionDescription = styled.div`
     font-weight: 300;
 `
 
-const MainContent = styled.div`
-    width: 100%;
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    height: 100%;
-`
-
 const MainFrame = styled.div`
     display: flex;
     flex-direction: row;
@@ -1543,5 +1679,74 @@ const SidebarHeaderContainer = styled.div`
 
     & div {
         justify-content: flex-start;
+    }
+`
+
+const SettingsSection = styled(Margin)`
+    width: min-content;
+    cursor: pointer;
+    height: 24px;
+    width: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px;
+
+    &:hover {
+        background-color: ${(props) =>
+            props.theme.colors.backgroundColorDarker};
+    }
+`
+
+const RightHeader = styled.div`
+    width: min-content;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    position: absolute;
+    right: 10px;
+`
+
+const SyncStatusHeaderBox = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 3px;
+    height: 24px;
+    grid-gap: 5px;
+
+    & > div {
+        width: auto;
+    }
+
+    &:hover {
+        background-color: ${(props) =>
+            props.theme.colors.backgroundColorDarker};
+    }
+
+    @media screen and (max-width: 768px) {
+        padding: 4px 4px 4px 4px;
+        margin-left: 15px;
+        width: 20px;
+    }
+`
+
+const SyncStatusHeaderText = styled.span<{
+    textCentered: boolean
+}>`
+    font-family: 'Satoshi', sans-serif;
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    ${(props) => (props.textCentered ? 'text-align: center;' : '')}
+
+    @media screen and (max-width: 900px) {
+        display: none;
     }
 `

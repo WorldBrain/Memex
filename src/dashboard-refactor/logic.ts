@@ -43,6 +43,7 @@ import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
+import ListsSidebar from './lists-sidebar'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -119,6 +120,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    private setupWindowWidthListner() {
+        window.addEventListener('resize', () => {
+            this.emitMutation({
+                windowWidth: { $set: window.innerWidth },
+            })
+        })
+
+        return window.innerWidth
+    }
+
     getInitialState(): State {
         let mode: State['mode'] = 'search'
         if (isDuringInstall(this.options.location)) {
@@ -130,10 +141,15 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.options.pdfViewerBG.openPdfViewerForNextPdf()
         }
 
+        const appWidth = this.setupWindowWidthListner()
+
         return {
             mode,
             loadState: 'pristine',
             currentUser: null,
+            notesSidebarWidth: '0px',
+            windowWidth: appWidth,
+
             modals: {
                 showLogin: false,
                 showSubscription: false,
@@ -289,6 +305,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 isSidebarLocked: { $set: listsSidebarLocked ?? true },
             },
+            spaceSidebarWidth: { $set: listsSidebarLocked ? '250px' : '0px' },
             syncMenu: {
                 lastSuccessfulSyncDate: {
                     $set:
@@ -2438,6 +2455,15 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* END - search filter event handlers */
 
     /* START - lists sidebar event handlers */
+    setNotesSidebarWidth: EventHandler<'setNotesSidebarWidth'> = async (
+        notesSidebarWidth,
+    ) => {
+        const sidebarWidth = notesSidebarWidth.event.notesSidebarWidth
+        this.emitMutation({
+            notesSidebarWidth: { $set: sidebarWidth },
+        })
+    }
+
     setSidebarLocked: EventHandler<'setSidebarLocked'> = async ({ event }) => {
         this.emitMutation({
             listsSidebar: {
@@ -2471,6 +2497,46 @@ export class DashboardLogic extends UILogic<State, Events> {
                     $set: !listsSidebar.isSidebarLocked && event.isHovered,
                 },
             },
+        })
+    }
+
+    // Set maincontentWidth based on changes to specific states
+
+    calculateMainContentWidth: EventHandler<
+        'calculateMainContentWidth'
+    > = async ({ previousState, event }) => {
+        // Calculate SpaceBarWidth
+
+        let spaceSidebarWidth
+        spaceSidebarWidth = event.spaceSidebarWidth
+            ? event.spaceSidebarWidth
+            : previousState.spaceSidebarWidth
+        spaceSidebarWidth = spaceSidebarWidth.replace('px', '')
+        spaceSidebarWidth = parseInt(spaceSidebarWidth)
+
+        // Calculate NotesSidebar Width
+        let notesSidebarWidth
+
+        notesSidebarWidth = event.notesSidebarWidth
+            ? event.notesSidebarWidth
+            : previousState.notesSidebarWidth
+        notesSidebarWidth = notesSidebarWidth.replace('px', '')
+        notesSidebarWidth = parseInt(notesSidebarWidth)
+
+        let windowWidth = event.windowWidth
+            ? event.windowWidth
+            : previousState.windowWidth
+
+        // Calculate total width of main content:
+
+        let mainContentWidth =
+            windowWidth - spaceSidebarWidth - notesSidebarWidth + 'px'
+
+        this.emitMutation({
+            mainContentWidth: { $set: mainContentWidth },
+            spaceSidebarWidth: { $set: spaceSidebarWidth + 'px' },
+            notesSidebarWidth: { $set: notesSidebarWidth + 'px' },
+            windowWidth: { $set: windowWidth },
         })
     }
 

@@ -61,7 +61,7 @@ export interface SyncStatusMenuProps extends RootState {
     pendingRemoteChangeCount: number
     onLoginClick: React.MouseEventHandler
     onClickOutside: React.MouseEventHandler
-    syncStatusIconState: SyncStatusIconState
+    syncStatusIconState?: SyncStatusIconState
     onToggleDisplayState: React.MouseEventHandler
 }
 

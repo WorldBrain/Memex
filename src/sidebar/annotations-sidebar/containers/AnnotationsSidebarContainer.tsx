@@ -62,6 +62,7 @@ const DEF_CONTEXT: { context: AnnotationEventContext } = {
 export interface Props extends SidebarContainerOptions {
     skipTopBarRender?: boolean
     isLockable?: boolean
+    setSidebarWidthforDashboard?: (sidebarWidth) => void
 }
 
 export class AnnotationsSidebarContainer<
@@ -89,6 +90,18 @@ export class AnnotationsSidebarContainer<
                 },
             }),
         )
+        this.listenToWindowChanges()
+    }
+
+    listenToWindowChanges() {
+        window.addEventListener('resize', () => {
+            if (this.state.isWidthLocked) {
+                this.processEvent('adjustSidebarWidth', {
+                    newWidth: this.state.sidebarWidth,
+                    isWidthLocked: true,
+                })
+            }
+        })
     }
 
     private createNewList = async (name: string) => {
@@ -116,6 +129,7 @@ export class AnnotationsSidebarContainer<
 
         if (this.state.showState === 'hidden' || isAlreadyOpenForOtherPage) {
             this.setPageUrl(pageId)
+
             this.showSidebar()
         } else if (this.state.showState === 'visible') {
             this.hideSidebar()
@@ -123,15 +137,37 @@ export class AnnotationsSidebarContainer<
     }
 
     showSidebar() {
-        setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '450px')
-        this.processEvent('show', null)
+        this.processEvent('show', {
+            existingWidthState: this.state.sidebarWidth
+                ? this.state.sidebarWidth
+                : undefined,
+        })
+
+        if (this.props.sidebarContext === 'dashboard') {
+            setTimeout(() => {
+                this.props.setSidebarWidthforDashboard(this.state.sidebarWidth)
+            }, 0)
+        }
+
+        if (this.state.isWidthLocked) {
+            this.processEvent('adjustSidebarWidth', {
+                newWidth: this.state.sidebarWidth,
+                isWidthLocked: true,
+            })
+        }
     }
 
     hideSidebar() {
-        if (this.state.isWidthLocked) {
-            setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '-40px') // the -40px is because in logic.ts in AdjustSidebarWidth I add a margin of 40px
-        }
+        // if (this.state.isWidthLocked) {
+        //     setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '-40px') // the -40px is because in logic.ts in AdjustSidebarWidth I add a margin of 40px
+        // }
         this.processEvent('hide', null)
+
+        if (this.props.sidebarContext === 'dashboard') {
+            setTimeout(() => {
+                this.props.setSidebarWidthforDashboard('0px')
+            }, 50)
+        }
     }
 
     toggleSidebarLock = () =>
@@ -142,6 +178,12 @@ export class AnnotationsSidebarContainer<
             this.state.isWidthLocked ? 'unlockWidth' : 'lockWidth',
             null,
         )
+        if (!this.state.isWidthLocked) {
+            this.processEvent('adjustSidebarWidth', {
+                newWidth: this.state.sidebarWidth,
+                isWidthLocked: true,
+            })
+        }
     }
 
     setPageUrl = (pageUrl: string) => {
@@ -162,7 +204,10 @@ export class AnnotationsSidebarContainer<
             return
         }
 
-        if (this.state.showState === 'visible') {
+        if (
+            this.state.showState === 'visible' &&
+            this.props.sidebarContext !== 'dashboard'
+        ) {
             this.hideSidebar()
         }
     }
@@ -652,33 +697,34 @@ export class AnnotationsSidebarContainer<
                     )}
 
                     <BottomArea>
-                        {this.state.isLocked ? (
-                            <TooltipBox
-                                tooltipText="Unlock sidebar"
-                                placement="left"
-                            >
-                                <IconBoundary>
-                                    <Icon
-                                        filePath={icons.arrowRight}
-                                        heightAndWidth="16px"
-                                        onClick={this.toggleSidebarLock}
-                                    />
-                                </IconBoundary>
-                            </TooltipBox>
-                        ) : (
-                            <TooltipBox
-                                tooltipText="Lock sidebar open"
-                                placement="left"
-                            >
-                                <IconBoundary>
-                                    <Icon
-                                        filePath={icons.arrowLeft}
-                                        heightAndWidth="16px"
-                                        onClick={this.toggleSidebarLock}
-                                    />
-                                </IconBoundary>
-                            </TooltipBox>
-                        )}
+                        {this.props.sidebarContext !== 'dashboard' &&
+                            (this.state.isLocked ? (
+                                <TooltipBox
+                                    tooltipText="Unlock sidebar"
+                                    placement="left"
+                                >
+                                    <IconBoundary>
+                                        <Icon
+                                            filePath={icons.arrowRight}
+                                            heightAndWidth="16px"
+                                            onClick={this.toggleSidebarLock}
+                                        />
+                                    </IconBoundary>
+                                </TooltipBox>
+                            ) : (
+                                <TooltipBox
+                                    tooltipText="Lock sidebar open"
+                                    placement="left"
+                                >
+                                    <IconBoundary>
+                                        <Icon
+                                            filePath={icons.arrowLeft}
+                                            heightAndWidth="16px"
+                                            onClick={this.toggleSidebarLock}
+                                        />
+                                    </IconBoundary>
+                                </TooltipBox>
+                            ))}
                         {this.props.sidebarContext !== 'dashboard' &&
                             (!this.state.isWidthLocked ? (
                                 <TooltipBox
@@ -722,30 +768,32 @@ export class AnnotationsSidebarContainer<
                         </TooltipBox>
                     </BottomArea>
                 </TopBarActionBtns>
-                <FooterArea>
-                    <IconBoundary>
-                        <Icon
-                            heightAndWidth="16px"
-                            filePath={
-                                'settings'
-                                // this.props.bookmark.isBookmarked
-                                //     ? icons.heartFull
-                                //     : icons.heartEmpty
-                            }
-                        />
-                    </IconBoundary>
-                    <IconBoundary>
-                        <Icon
-                            heightAndWidth="16px"
-                            filePath={
-                                'helpIcon'
-                                // this.props.bookmark.isBookmarked
-                                //     ? icons.heartFull
-                                //     : icons.heartEmpty
-                            }
-                        />
-                    </IconBoundary>
-                </FooterArea>
+                {this.props.sidebarContext !== 'dashboard' && (
+                    <FooterArea>
+                        <IconBoundary>
+                            <Icon
+                                heightAndWidth="16px"
+                                filePath={
+                                    'settings'
+                                    // this.props.bookmark.isBookmarked
+                                    //     ? icons.heartFull
+                                    //     : icons.heartEmpty
+                                }
+                            />
+                        </IconBoundary>
+                        <IconBoundary>
+                            <Icon
+                                heightAndWidth="16px"
+                                filePath={
+                                    'helpIcon'
+                                    // this.props.bookmark.isBookmarked
+                                    //     ? icons.heartFull
+                                    //     : icons.heartEmpty
+                                }
+                            />
+                        </IconBoundary>
+                    </FooterArea>
+                )}
             </>
         )
     }
@@ -846,14 +894,16 @@ export class AnnotationsSidebarContainer<
                         default={{
                             x: 0,
                             y: 0,
-                            width: 450,
+                            width: this.state.sidebarWidth
+                                ? this.state.sidebarWidth
+                                : SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
                             height: 'auto',
                         }}
                         resizeHandleWrapperClass={'sidebarResizeHandle'}
                         className="sidebar-draggable"
                         resizeGrid={[1, 0]}
                         dragAxis={'none'}
-                        minWidth={'380px'}
+                        minWidth={'470px'}
                         maxWidth={'1000px'}
                         disableDragging={true}
                         enableResizing={{
@@ -867,11 +917,18 @@ export class AnnotationsSidebarContainer<
                             topLeft: false,
                         }}
                         onResizeStop={(e, direction, ref, delta, position) => {
-                            this.setState({ sidebarWidth: ref.style.width })
-                            setLocalStorage(
-                                SIDEBAR_WIDTH_STORAGE_KEY,
-                                ref.style.width,
-                            )
+                            if (this.props.sidebarContext !== 'dashboard') {
+                                this.processEvent('adjustSidebarWidth', {
+                                    newWidth: ref.style.width,
+                                    isWidthLocked: this.state.isWidthLocked,
+                                })
+                            }
+
+                            if (this.props.sidebarContext === 'dashboard') {
+                                this.props.setSidebarWidthforDashboard(
+                                    ref.style.width,
+                                )
+                            }
                         }}
                     >
                         <AnnotationsSidebar
@@ -1092,12 +1149,12 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     padding: 0px 0px 10px 0px;
 
     right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
-    top: calc(${({ theme }: Props) => theme?.topOffsetPx ?? 0}px);
+    top: 0px;
     padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
 
     z-index: ${(props) =>
         props.sidebarContext === 'dashboard'
-            ? '2147483640'
+            ? '2147483641'
             : '2147483646'}; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: ${(props) => props.theme.colors.backgroundColor};
     border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
@@ -1151,8 +1208,16 @@ const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
     align-items: center;
     flex-direction: column;
     position: absolute;
-    top: 17px;
-    margin-left: -12px;
+    top: 12px;
+    margin-left: 8px;
+    z-index: 2;
+
+    ${(props) =>
+        props.sidebarContext === 'dashboard' &&
+        css`
+            top: 17px;
+            margin-left: -12px;
+        `};
 `
 
 const IconBoundary = styled.div`
@@ -1184,5 +1249,6 @@ const FooterArea = styled.div`
     grid-gap: 8px;
     position: absolute;
     bottom: 20px;
-    margin-left: -12px;
+    margin-left: 8px;
+    z-index: 2;
 `
