@@ -30,7 +30,7 @@ export interface MigrationProps {
     localStorage: Storage.LocalStorageArea
     bgModules: Pick<
         BackgroundModules,
-        'readwise' | 'syncSettings' | 'personalCloud'
+        'readwise' | 'syncSettings' | 'personalCloud' | 'pageActivityIndicator'
     >
     localExtSettingStore: SettingStore<LocalExtensionSettings>
     syncSettingsStore: SyncSettingsStore<'extension'>
@@ -49,6 +49,16 @@ export const MIGRATION_PREFIX = '@QnDMigration-'
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    /*
+     * This exists to seed initial local followedList collection data based on remote data, for the
+     * release of the page-activity indicator feature. Future changes to this collection should be
+     * handled by cloud sync.
+     */
+    [MIGRATION_PREFIX + 'trigger-init-followed-list-pull-sync']: async ({
+        bgModules,
+    }) => {
+        await bgModules.pageActivityIndicator.syncFollowedLists()
+    },
     [MIGRATION_PREFIX + 'migrate-tags-to-spaces']: async ({
         bgModules: { personalCloud },
         syncSettingsStore,

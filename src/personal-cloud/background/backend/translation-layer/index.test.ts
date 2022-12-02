@@ -14,8 +14,6 @@ import {
 } from './index.test.data'
 import {
     DataChangeType,
-    DataUsageAction,
-    ContentLocatorFormat,
     PersonalDeviceType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
@@ -36,6 +34,7 @@ import {
     initSqlUsage,
     InitSqlUsageParams,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
+import type { MockPushMessagingService } from 'src/tests/push-messaging'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -169,11 +168,17 @@ type DataChange = [
     /* info: */ any?,
 ]
 
+interface DataChangeAssertOpts {
+    skipChanges?: number
+    skipAssertTimestamp?: boolean
+    skipAssertDeviceId?: boolean
+}
+
 function dataChanges(
     remoteData: typeof REMOTE_TEST_DATA_V24,
     userId: number | string,
     changes: DataChange[],
-    options?: { skipChanges?: number; skipAssertTimestamp?: boolean },
+    options?: DataChangeAssertOpts,
 ) {
     let now = 554
     const advance = () => {
@@ -196,7 +201,9 @@ function dataChanges(
                 createdWhen: options?.skipAssertTimestamp
                     ? expect.anything()
                     : now,
-                createdByDevice: remoteData.personalDeviceInfo.first.id,
+                createdByDevice: options?.skipAssertDeviceId
+                    ? undefined
+                    : remoteData.personalDeviceInfo.first.id,
                 user: userId,
                 type: change[0],
                 collection: change[1],
@@ -217,7 +224,7 @@ function blockStats(params: { userId: number | string; usedBlocks: number }) {
     }
 }
 
-async function setup(options?: { runReadwiseTrigger?: boolean }) {
+async function setup(options?: { withStorageHooks?: boolean }) {
     const serverIdCapturer = new IdCapturer({
         postprocesessMerge: (params) => {
             // tag connections don't connect with the content they tag through a
@@ -260,7 +267,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
         getNow,
     } = await setupSyncBackgroundTest({
         deviceCount: 2,
-        serverChangeWatchSettings: options?.runReadwiseTrigger
+        serverChangeWatchSettings: options?.withStorageHooks
             ? storageHooksChangeWatcher
             : {
                   shouldWatchCollection: (collection) =>
@@ -270,6 +277,15 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
                   },
               },
     })
+
+    await setups[0].authService.loginWithEmailAndPassword(
+        TEST_USER.email,
+        'password',
+    )
+    await setups[1].authService.loginWithEmailAndPassword(
+        TEST_USER.email,
+        'password',
+    )
 
     let sqlUserId: number | string | undefined
     if (getSqlStorageMananager) {
@@ -304,6 +320,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
             return { user: sqlUserId ?? TEST_USER.id }
         }
     }
+
     return {
         serverIdCapturer,
         setups,
@@ -312,7 +329,7 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
         personalDataChanges: (
             remoteData: typeof REMOTE_TEST_DATA_V24,
             changes: DataChange[],
-            options?: { skipChanges?: number; skipAssertTimestamp?: boolean },
+            options?: DataChangeAssertOpts,
         ) => ({
             personalDataChange: dataChanges(
                 remoteData,
@@ -335,6 +352,24 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
                 getSqlStorageMananager,
                 collections,
                 options,
+            )
+        },
+        testSyncPushTrigger: (opts: {
+            wasTriggered: boolean
+            pushMessagingService?: MockPushMessagingService
+        }) => {
+            const pushMessagingService =
+                opts.pushMessagingService ?? setups[0].pushMessagingService
+            expect(pushMessagingService.sentMessages[0]).toEqual(
+                opts.wasTriggered
+                    ? {
+                          type: 'to-user',
+                          userId: TEST_USER.email,
+                          payload: {
+                              type: 'downloadClientUpdates',
+                          },
+                      }
+                    : undefined,
             )
         },
         testDownload: async (
@@ -403,7 +438,8 @@ async function setup(options?: { runReadwiseTrigger?: boolean }) {
 describe('Personal cloud translation layer', () => {
     describe(`from local schema version 26`, () => {
         it('should not download updates uploaded from the same device', async () => {
-            const { setups, testDownload } = await setup()
+            const { setups, testDownload, testSyncPushTrigger } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
@@ -415,14 +451,18 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorageManager,
                 getPersonalWhere,
                 personalDataChanges,
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+
+            testSyncPushTrigger({ wasTriggered: false })
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
+
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
@@ -454,6 +494,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
             ])
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should update pages', async () => {
@@ -466,7 +507,10 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager.collection('pages').updateObjects(
                 {
@@ -513,6 +557,7 @@ describe('Personal cloud translation layer', () => {
                     }
                 },
             ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should delete pages', async () => {
@@ -525,7 +570,10 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager.collection('pages').deleteObjects({
                 url: LOCAL_TEST_DATA_V24.pages.first.url,
@@ -560,6 +608,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'pages', where: { url: LOCAL_TEST_DATA_V24.pages.first.url } },
             ], { skip: 1 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create locators', async () => {
@@ -572,8 +621,10 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
 
+            testSyncPushTrigger({ wasTriggered: false })
             // Note we still want to insert the non-PDF pages here to test the different locators behavior
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
@@ -636,6 +687,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_b },
             ])
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should delete locators', async () => {
@@ -648,8 +700,10 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
 
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('pages')
@@ -711,6 +765,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Delete, collection: 'pages', where: { url: LOCAL_TEST_DATA_V24.pages.third.url } },
                 { type: PersonalCloudUpdateType.Delete, collection: 'locators', where: { id: LOCAL_TEST_DATA_V24.locators.third.id } },
             ])
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create bookmarks', async () => {
@@ -723,7 +778,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('bookmarks')
@@ -758,6 +815,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'bookmarks', object: LOCAL_TEST_DATA_V24.bookmarks.first },
             ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should delete bookmarks', async () => {
@@ -770,7 +828,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('bookmarks')
@@ -810,6 +870,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'bookmarks', where: changeInfo },
             ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create visits', async () => {
@@ -822,7 +883,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('visits')
@@ -861,6 +924,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'visits', object: LOCAL_TEST_DATA_V24.visits.first },
             ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should update visits', async () => {
@@ -873,10 +937,12 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             const updatedDuration =
                 LOCAL_TEST_DATA_V24.visits.first.duration * 2
 
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('visits')
@@ -931,6 +997,7 @@ describe('Personal cloud translation layer', () => {
                     }
                 },
             ], { skip: 3 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should delete visits', async () => {
@@ -943,8 +1010,10 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
 
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('visits')
@@ -1013,6 +1082,7 @@ describe('Personal cloud translation layer', () => {
                 ],
                 { skip: 2 },
             )
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create annotations', async () => {
@@ -1025,7 +1095,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -1070,6 +1142,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.second },
             ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should update annotation notes', async () => {
@@ -1082,7 +1155,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -1139,6 +1214,7 @@ describe('Personal cloud translation layer', () => {
                 ],
                 { skip: 3 },
             )
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should delete annotations', async () => {
@@ -1151,7 +1227,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -1200,6 +1278,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Delete, collection: 'annotations', where: { url: LOCAL_TEST_DATA_V24.annotations.first.url } },
                 { type: PersonalCloudUpdateType.Delete, collection: 'annotations', where: { url: LOCAL_TEST_DATA_V24.annotations.second.url } },
             ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create annotation privacy levels', async () => {
@@ -1212,7 +1291,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -1293,6 +1374,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.second },
             ], { skip: 4 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should update annotation privacy levels', async () => {
@@ -1305,7 +1387,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -1380,6 +1464,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED } },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED } },
             ], { skip: 3 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should update annotation privacy levels, re-sharing on update to shared privacy level', async () => {
@@ -1392,7 +1477,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -1482,6 +1569,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.SHARED } },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: { ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first, privacyLevel: AnnotationPrivacyLevels.SHARED } },
             ], { skip: 3 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should delete annotation privacy levels', async () => {
@@ -1494,7 +1582,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -1555,6 +1645,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'annotationPrivacyLevels', where: changeInfo },
             ], { skip: 5 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create custom lists', async () => {
@@ -1567,6 +1658,7 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('customLists')
@@ -1601,6 +1693,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.second },
             ], { skip: 0 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should update custom lists', async () => {
@@ -1613,6 +1706,7 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('customLists')
@@ -1664,6 +1758,7 @@ describe('Personal cloud translation layer', () => {
                 ],
                 { skip: 2 },
             )
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create custom list descriptions', async () => {
@@ -1676,6 +1771,7 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('customLists')
@@ -1725,6 +1821,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customListDescriptions', object: LOCAL_TEST_DATA_V24.customListDescriptions.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customListDescriptions', object: LOCAL_TEST_DATA_V24.customListDescriptions.second },
             ], { skip: 0 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create custom list descriptions for a shared list, updating the description field of the server-side shared list record', async () => {
@@ -1735,6 +1832,7 @@ describe('Personal cloud translation layer', () => {
                 testDownload,
                 getDatabaseContents,
                 getPersonalWhere,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('customLists')
@@ -1791,6 +1889,7 @@ describe('Personal cloud translation layer', () => {
                 getPersonalWhere,
                 personalDataChanges,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('customLists')
@@ -1847,6 +1946,7 @@ describe('Personal cloud translation layer', () => {
                 getPersonalWhere,
                 personalDataChanges,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('customLists')
@@ -1911,6 +2011,7 @@ describe('Personal cloud translation layer', () => {
                 ],
                 { skip: 4 },
             )
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should update custom list descriptions for a shared list, updating the description field of the server-side shared list record', async () => {
@@ -1921,6 +2022,7 @@ describe('Personal cloud translation layer', () => {
                 getPersonalWhere,
                 personalDataChanges,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('customLists')
@@ -1982,6 +2084,7 @@ describe('Personal cloud translation layer', () => {
                 getPersonalWhere,
                 personalDataChanges,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('customLists')
@@ -2028,6 +2131,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Delete, collection: 'customListDescriptions', where: { listId: LOCAL_TEST_DATA_V24.customListDescriptions.first.listId } },
                 { type: PersonalCloudUpdateType.Delete, collection: 'customListDescriptions', where: { listId: LOCAL_TEST_DATA_V24.customListDescriptions.second.listId } },
             ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create page list entries', async () => {
@@ -2040,7 +2144,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('customLists')
@@ -2084,6 +2190,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.second },
             ], { skip: 3 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should delete page list entries', async () => {
@@ -2096,7 +2203,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('customLists')
@@ -2146,6 +2255,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'pageListEntries', where: changeInfo },
             ], { skip: 4 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create shared list metadata', async () => {
@@ -2158,6 +2268,7 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('customLists')
@@ -2193,6 +2304,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
             ], { skip: 1 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should delete shared list metadata', async () => {
@@ -2205,6 +2317,7 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('customLists')
@@ -2247,6 +2360,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'sharedListMetadata', where: changeInfo },
             ], { skip: 1 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create annotation list entries', async () => {
@@ -2259,7 +2373,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('customLists')
@@ -2296,6 +2412,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'annotListEntries', object: LOCAL_TEST_DATA_V24.annotationListEntries.first },
             ], { skip: 4 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should delete annotation list entries', async () => {
@@ -2308,7 +2425,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('customLists')
@@ -2353,6 +2472,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'annotListEntries', where: changeInfo },
             ], { skip: 4 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create shared annotation metadata', async () => {
@@ -2365,7 +2485,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -2423,6 +2545,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.second },
             ], { skip: 4 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should update shared annotation metadata', async () => {
@@ -2435,7 +2558,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -2517,6 +2642,7 @@ describe('Personal cloud translation layer', () => {
                 ],
                 { skip: 6 },
             )
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should delete shared annotation metadata', async () => {
@@ -2529,7 +2655,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -2593,6 +2721,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'sharedAnnotationMetadata', where: changeInfo },
             ], { skip: 5 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create page tags', async () => {
@@ -2605,7 +2734,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('tags')
@@ -2646,6 +2777,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'tags', object: LOCAL_TEST_DATA_V24.tags.firstPageTag },
             ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should connect existing page tags', async () => {
@@ -2658,7 +2790,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('tags')
@@ -2715,6 +2849,7 @@ describe('Personal cloud translation layer', () => {
                 ],
                 { skip: 2 },
             )
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should remove page tags', async () => {
@@ -2727,7 +2862,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('tags')
@@ -2775,6 +2912,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.firstPageTag },
             ], { skip: 3 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('final tag removal for page should remove now-orphaned personalTag', async () => {
@@ -2787,7 +2925,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('tags')
@@ -2833,6 +2973,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.firstPageTag },
             ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should add annotation tags', async () => {
@@ -2845,7 +2986,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -2903,6 +3046,7 @@ describe('Personal cloud translation layer', () => {
                     object: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag
                 },
             ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should connect existing annotation tags', async () => {
@@ -2915,7 +3059,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -2985,6 +3131,7 @@ describe('Personal cloud translation layer', () => {
                 ],
                 { skip: 4 },
             )
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should remove annotation tags', async () => {
@@ -2997,7 +3144,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -3056,6 +3205,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag },
             ], { skip: 5 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('final tag removal for annotation should remove now-orphaned personalTag', async () => {
@@ -3068,7 +3218,9 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
             await setups[0].storageManager
                 .collection('annotations')
@@ -3122,6 +3274,7 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag },
             ], { skip: 3 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create text export template', async () => {
@@ -3134,6 +3287,7 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('templates')
@@ -3167,6 +3321,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'templates', object: LOCAL_TEST_DATA_V24.templates.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'templates', object: LOCAL_TEST_DATA_V24.templates.second },
             ], { skip: 0 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should update text export template', async () => {
@@ -3179,6 +3334,7 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('templates')
@@ -3250,6 +3406,7 @@ describe('Personal cloud translation layer', () => {
                 ],
                 { skip: 2 },
             )
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should delete text export template', async () => {
@@ -3262,6 +3419,7 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('templates')
@@ -3299,6 +3457,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Delete, collection: 'templates', where: { id: LOCAL_TEST_DATA_V24.templates.first.id } },
                 { type: PersonalCloudUpdateType.Delete, collection: 'templates', where: { id: LOCAL_TEST_DATA_V24.templates.second.id } },
             ], { skip: 0 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should create Memex extension settings', async () => {
@@ -3311,6 +3470,7 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('settings')
@@ -3350,6 +3510,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'settings', object: LOCAL_TEST_DATA_V24.settings.second },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'settings', object: LOCAL_TEST_DATA_V24.settings.third },
             ], { skip: 0 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should update Memex extension settings', async () => {
@@ -3362,6 +3523,7 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('settings')
@@ -3413,6 +3575,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'settings', object: LOCAL_TEST_DATA_V24.settings.third },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'settings', object: { ...LOCAL_TEST_DATA_V24.settings.first, value: updatedValue } },
             ], { skip: 0 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         it('should delete Memex extension settings', async () => {
@@ -3425,6 +3588,7 @@ describe('Personal cloud translation layer', () => {
                 personalBlockStats,
                 getDatabaseContents,
                 testDownload,
+                testSyncPushTrigger,
             } = await setup()
             await setups[0].storageManager
                 .collection('settings')
@@ -3477,6 +3641,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Delete, collection: 'settings', where: { key: LOCAL_TEST_DATA_V24.settings.first.key } },
                 { type: PersonalCloudUpdateType.Delete, collection: 'settings', where: { key: LOCAL_TEST_DATA_V24.settings.second.key } },
             ], { skip: 0 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
 
         describe(`translation layer twitter integration`, () => {
@@ -3487,6 +3652,7 @@ describe('Personal cloud translation layer', () => {
                     getDatabaseContents,
                     personalDataChanges,
                     getPersonalWhere,
+                    testSyncPushTrigger,
                 } = await setup()
 
                 await setups[0].storageManager
@@ -3533,6 +3699,7 @@ describe('Personal cloud translation layer', () => {
                     getDatabaseContents,
                     personalDataChanges,
                     getPersonalWhere,
+                    testSyncPushTrigger,
                 } = await setup()
 
                 const testTitleA = 'X on Twitter: "cool stuff"'
@@ -3586,6 +3753,7 @@ describe('Personal cloud translation layer', () => {
                     getDatabaseContents,
                     personalDataChanges,
                     getPersonalWhere,
+                    testSyncPushTrigger,
                 } = await setup()
 
                 const url = 'twitter.com/zzzzz'
@@ -3641,7 +3809,9 @@ describe('Personal cloud translation layer', () => {
                     personalDataChanges,
                     getDatabaseContents,
                     testDownload,
+                    testSyncPushTrigger,
                 } = await setup()
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
@@ -3690,6 +3860,7 @@ describe('Personal cloud translation layer', () => {
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.second },
                 ], { skip: 2 })
+                testSyncPushTrigger({ wasTriggered: true })
             })
 
             it('should update annotation notes, triggering readwise action create', async () => {
@@ -3701,7 +3872,9 @@ describe('Personal cloud translation layer', () => {
                     personalDataChanges,
                     getDatabaseContents,
                     testDownload,
+                    testSyncPushTrigger,
                 } = await setup()
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
@@ -3762,6 +3935,7 @@ describe('Personal cloud translation layer', () => {
                     ],
                     { skip: 3 },
                 )
+                testSyncPushTrigger({ wasTriggered: true })
             })
 
             it('should add annotation tags, triggering readwise action create', async () => {
@@ -3773,7 +3947,9 @@ describe('Personal cloud translation layer', () => {
                     personalDataChanges,
                     getDatabaseContents,
                     testDownload,
+                    testSyncPushTrigger,
                 } = await setup()
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
@@ -3836,6 +4012,7 @@ describe('Personal cloud translation layer', () => {
                         object: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag
                     },
                 ], { skip: 2 })
+                testSyncPushTrigger({ wasTriggered: true })
             })
 
             it('should remove annotation tags, triggering readwise action create', async () => {
@@ -3847,7 +4024,9 @@ describe('Personal cloud translation layer', () => {
                     personalDataChanges,
                     getDatabaseContents,
                     testDownload,
+                    testSyncPushTrigger,
                 } = await setup()
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
@@ -3918,6 +4097,7 @@ describe('Personal cloud translation layer', () => {
                 await testDownload([
                     { type: PersonalCloudUpdateType.Delete, collection: 'tags', where: LOCAL_TEST_DATA_V24.tags.firstAnnotationTag },
                 ], { skip: 5 })
+                testSyncPushTrigger({ wasTriggered: true })
             })
 
             it('should add annotation spaces, triggering readwise action create', async () => {
@@ -3929,7 +4109,9 @@ describe('Personal cloud translation layer', () => {
                     personalDataChanges,
                     getDatabaseContents,
                     testDownload,
+                    testSyncPushTrigger,
                 } = await setup()
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
@@ -4000,6 +4182,7 @@ describe('Personal cloud translation layer', () => {
                         object: LOCAL_TEST_DATA_V24.annotationListEntries.first
                     },
                 ], { skip: 2 })
+                testSyncPushTrigger({ wasTriggered: true })
             })
 
             it('should remove annotation spaces, triggering readwise action create', async () => {
@@ -4011,7 +4194,9 @@ describe('Personal cloud translation layer', () => {
                     personalDataChanges,
                     getDatabaseContents,
                     testDownload,
+                    testSyncPushTrigger,
                 } = await setup()
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
@@ -4095,6 +4280,7 @@ describe('Personal cloud translation layer', () => {
                         }
                     },
                 ], { skip: 6 })
+                testSyncPushTrigger({ wasTriggered: true })
             })
 
             it('should create annotations, triggering readwise highlight upload', async () => {
@@ -4102,9 +4288,11 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverStorageManager,
                     testFetches,
+                    testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
@@ -4150,9 +4338,11 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverStorageManager,
                     testFetches,
+                    testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
@@ -4196,9 +4386,11 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverStorageManager,
                     testFetches,
+                    testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
@@ -4246,9 +4438,11 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverStorageManager,
                     testFetches,
+                    testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
@@ -4327,9 +4521,11 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverStorageManager,
                     testFetches,
+                    testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
@@ -4382,9 +4578,11 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverStorageManager,
                     testFetches,
+                    testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 await setups[0].storageManager
@@ -4470,9 +4668,11 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverStorageManager,
                     testFetches,
+                    testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 const testTagWithSpaces = 'test tag spaces'
@@ -4556,8 +4756,9 @@ describe('Personal cloud translation layer', () => {
                     setups,
                     serverStorageManager,
                     testFetches,
+                    testSyncPushTrigger,
                 } = await setup({
-                    runReadwiseTrigger: true,
+                    withStorageHooks: true,
                 })
                 await insertReadwiseAPIKey(serverStorageManager, TEST_USER.id)
                 const {
@@ -4609,7 +4810,9 @@ describe('Personal cloud translation layer', () => {
                     personalBlockStats,
                     getDatabaseContents,
                     testDownload,
+                    testSyncPushTrigger,
                 } = await setup()
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 // Create + share list
                 await setups[0].storageManager
@@ -4727,6 +4930,7 @@ describe('Personal cloud translation layer', () => {
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.third },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.third },
                 ], { skip: 2 })
+                testSyncPushTrigger({ wasTriggered: true })
             })
 
             it('should index a remote PDF page, create a shared annotation, create and share a new list, then add that page to the list', async () => {
@@ -4737,7 +4941,9 @@ describe('Personal cloud translation layer', () => {
                     personalBlockStats,
                     getDatabaseContents,
                     testDownload,
+                    testSyncPushTrigger,
                 } = await setup()
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 // Create PDF page
                 await setups[0].storageManager
@@ -4855,6 +5061,7 @@ describe('Personal cloud translation layer', () => {
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.third },
                 ], { skip: 2 })
+                testSyncPushTrigger({ wasTriggered: true })
             })
 
             it('should index a local PDF page, create a shared annotation, create and share a new list, then add that page to the list', async () => {
@@ -4867,7 +5074,9 @@ describe('Personal cloud translation layer', () => {
                     personalBlockStats,
                     getDatabaseContents,
                     testDownload,
+                    testSyncPushTrigger,
                 } = await setup()
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 // Create PDF page
                 await setups[0].storageManager
@@ -4992,6 +5201,7 @@ describe('Personal cloud translation layer', () => {
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.fourth },
                 ], { skip: 2 })
+                testSyncPushTrigger({ wasTriggered: true })
             })
 
             it('should index a PDF page, create a shared annotation, create a new list, add that page to the list, then share the list', async () => {
@@ -5004,7 +5214,9 @@ describe('Personal cloud translation layer', () => {
                     personalBlockStats,
                     getDatabaseContents,
                     testDownload,
+                    testSyncPushTrigger,
                 } = await setup()
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 // Create PDF page
                 await setups[0].storageManager
@@ -5130,6 +5342,7 @@ describe('Personal cloud translation layer', () => {
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
                 ], { skip: 2 })
+                testSyncPushTrigger({ wasTriggered: true })
             })
 
             it('should index a page, create a shared list, create a private annotation, add page to list, then share the annotation', async () => {
@@ -5142,7 +5355,9 @@ describe('Personal cloud translation layer', () => {
                     personalBlockStats,
                     getDatabaseContents,
                     testDownload,
+                    testSyncPushTrigger,
                 } = await setup()
+                testSyncPushTrigger({ wasTriggered: false })
                 await insertTestPages(setups[0].storageManager)
                 // Create + share list
                 await setups[0].storageManager
@@ -5259,7 +5474,140 @@ describe('Personal cloud translation layer', () => {
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first },
                 ], { skip: 0 })
+                testSyncPushTrigger({ wasTriggered: true })
             })
+        })
+
+        it('should create followedList next sync download after following a sharedList', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                getPersonalWhere,
+                personalDataChanges,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup({ withStorageHooks: true })
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const serverStorage = await setups[0].getServerStorage()
+            await serverStorage.modules.activityFollows.storeFollow({
+                collection: 'sharedList',
+                userReference: { id: TEST_USER.id, type: 'user-reference' },
+                objectId: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+            })
+
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testFollowedLists = remoteData.personalFollowedList
+
+            expect(
+                await getDatabaseContents(['personalDataChange'], {
+                    getWhere: getPersonalWhere,
+                }),
+            ).toEqual({
+                ...personalDataChanges(
+                    remoteData,
+                    [
+                        [
+                            DataChangeType.Create,
+                            'personalFollowedList',
+                            testFollowedLists.first.id,
+                        ],
+                    ],
+                    {
+                        skipChanges: 2,
+                        skipAssertDeviceId: true,
+                        skipAssertTimestamp: true,
+                    },
+                ),
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'followedList', object: LOCAL_TEST_DATA_V24.followedList.first },
+            ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
+        it('should delete followedList next sync download after unfollowing a sharedList', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                getPersonalWhere,
+                personalDataChanges,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup({ withStorageHooks: true })
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const serverStorage = await setups[0].getServerStorage()
+            await serverStorage.modules.activityFollows.storeFollow({
+                collection: 'sharedList',
+                userReference: { id: TEST_USER.id, type: 'user-reference' },
+                objectId: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+            })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await serverStorage.modules.activityFollows.deleteFollow({
+                collection: 'sharedList',
+                userReference: { id: TEST_USER.id, type: 'user-reference' },
+                objectId: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+            })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testFollowedLists = remoteData.personalFollowedList
+
+            expect(
+                await getDatabaseContents(['personalDataChange'], {
+                    getWhere: getPersonalWhere,
+                }),
+            ).toEqual({
+                ...personalDataChanges(
+                    remoteData,
+                    [
+                        [
+                            DataChangeType.Create,
+                            'personalFollowedList',
+                            testFollowedLists.first.id,
+                        ],
+                        [
+                            DataChangeType.Delete,
+                            'personalFollowedList',
+                            testFollowedLists.first.id,
+                            {
+                                sharedList:
+                                    LOCAL_TEST_DATA_V24.sharedListMetadata.first
+                                        .remoteId,
+                            },
+                        ],
+                    ],
+                    {
+                        skipChanges: 2,
+                        skipAssertDeviceId: true,
+                        skipAssertTimestamp: true,
+                    },
+                ),
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'followedList', where: { sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId } },
+            ], { skip: 2 })
+            testSyncPushTrigger({ wasTriggered: true })
         })
     })
 })

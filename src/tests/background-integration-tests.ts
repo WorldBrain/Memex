@@ -40,11 +40,11 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { clearRemotelyCallableFunctions } from 'src/util/webextensionRPC'
-import { Services } from 'src/services/types'
+import { AuthServices, Services } from 'src/services/types'
 import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
-import { MockAlarmsApi } from 'src/job-scheduler/background/job-scheduler.test'
 import { createAuthServices } from 'src/services/local-services'
+import { MockPushMessagingService } from './push-messaging'
 
 fetchMock.restore()
 export interface BackgroundIntegrationTestSetupOpts {
@@ -58,6 +58,8 @@ export interface BackgroundIntegrationTestSetupOpts {
     startWithSyncDisabled?: boolean
     useDownloadTranslationLayer?: boolean
     services?: Services
+    pushMessagingService?: MockPushMessagingService
+    authServices?: AuthServices
 }
 
 export async function setupBackgroundIntegrationTest(
@@ -87,10 +89,12 @@ export async function setupBackgroundIntegrationTest(
         options?.getServerStorage ?? createLazyMemoryServerStorage()
     const serverStorage = await getServerStorage()
 
-    const authServices = createAuthServices({
-        backend: 'memory',
-        getServerStorage,
-    })
+    const authServices =
+        options?.authServices ??
+        createAuthServices({
+            backend: 'memory',
+            getServerStorage,
+        })
     const services =
         options?.services ??
         (await createServices({
@@ -173,6 +177,8 @@ export async function setupBackgroundIntegrationTest(
         )
     }
 
+    const pushMessagingService =
+        options?.pushMessagingService ?? new MockPushMessagingService()
     let nextServerId = 1337
     const userMessages = new MemoryUserMessageService()
     const backgroundModules = createBackgroundModules({
@@ -196,7 +202,10 @@ export async function setupBackgroundIntegrationTest(
         personalCloudBackend:
             options?.personalCloudBackend ??
             new StorexPersonalCloudBackend({
-                services,
+                services: {
+                    activityStreams: services.activityStreams,
+                    pushMessaging: new MockPushMessagingService(),
+                },
                 storageManager: serverStorage.manager,
                 storageModules: serverStorage.modules,
                 clientSchemaVersion: STORAGE_VERSIONS[25].version,
@@ -216,6 +225,7 @@ export async function setupBackgroundIntegrationTest(
             storageModules: serverStorage.modules,
             getCurrentUserId: async () =>
                 (await auth.authService.getCurrentUser()).id,
+            services: { pushMessaging: pushMessagingService },
         }),
         generateServerId: () => nextServerId++,
     })
@@ -267,6 +277,7 @@ export async function setupBackgroundIntegrationTest(
 
     return {
         storageManager,
+        pushMessagingService,
         persistentStorageManager,
         backgroundModules,
         browserLocalStorage,

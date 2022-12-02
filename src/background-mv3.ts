@@ -2,7 +2,6 @@ import browser from 'webextension-polyfill'
 import XMLHttpRequest from 'xhr-shim'
 import { getToken } from 'firebase/messaging'
 import { onBackgroundMessage, getMessaging } from 'firebase/messaging/sw'
-import { FCM_SYNC_TRIGGER_MSG } from '@worldbrain/memex-common/lib/personal-cloud/backend/constants'
 import {
     setupRpcConnection,
     setupRemoteFunctionsImplementations,
@@ -34,6 +33,8 @@ import type {
     DexieStorageBackend,
     IndexedDbImplementation,
 } from '@worldbrain/storex-backend-dexie'
+import type { PushMessagePayload } from '@worldbrain/memex-common/lib/push-messaging/types'
+import PushMessagingClient from './push-messaging/background'
 
 // This is here so the correct Service Worker `self` context is available. Maybe there's a better way to set this via tsconfig.
 declare var self: ServiceWorkerGlobalScope & {
@@ -129,11 +130,17 @@ async function main() {
     //  Doing this as all event listeners need to be set up synchronously, before any async logic happens. AND to avoid needing to update storex yet.
     ;(storageManager.backend as DexieStorageBackend)._onRegistryInitialized()
 
-    // Set up incoming FCM handling logic (same thing as SW `push` event)
-    onBackgroundMessage(getMessaging(), (payload) => {
-        if (payload.data?.type === FCM_SYNC_TRIGGER_MSG) {
-            backgroundModules.personalCloud.triggerSyncContinuation()
+    // Set up incoming FCM handling logic (`onBackgroundMessage` wraps the SW `push` event)
+    const pushMessagingClient = new PushMessagingClient({
+        bgModules: backgroundModules,
+    })
+    onBackgroundMessage(getMessaging(), async (message) => {
+        const payload = message.data as PushMessagePayload
+        if (payload == null) {
+            return
         }
+
+        await pushMessagingClient.handleIncomingMessage(payload)
     })
 
     await setupBackgroundModules(backgroundModules, storageManager)
@@ -163,6 +170,8 @@ async function main() {
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
         personalCloud: backgroundModules.personalCloud.remoteFunctions,
+        pageActivityIndicator:
+            backgroundModules.pageActivityIndicator.remoteFunctions,
         pdf: backgroundModules.pdfBg.remoteFunctions,
     })
     rpcManager.unpause()

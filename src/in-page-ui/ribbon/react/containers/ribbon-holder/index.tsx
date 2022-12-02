@@ -9,6 +9,7 @@ import {
 import { StatefulUIElement } from 'src/util/ui-logic'
 import RibbonContainer from '../ribbon'
 import { SharedInPageUIEvents } from 'src/in-page-ui/shared-state/types'
+import PageActivityIndicator from 'src/page-activity-indicator/ui/indicator'
 const styles = require('./styles.css')
 
 const RIBBON_HIDE_TIMEOUT = 700
@@ -153,26 +154,37 @@ export default class RibbonHolder extends StatefulUIElement<
     }
 
     showRibbon = () => this.processEvent('show', null)
-
     hideRibbon = () => this.processEvent('hide', null)
 
     render() {
         return (
-            <div
-                ref={this.handleHolderRef}
-                className={cx(styles.holder, {
-                    [styles.withSidebar]: this.state.isSidebarOpen,
-                })}
-            >
-                <RibbonContainer
-                    {...this.props.containerDependencies}
-                    setRef={this.handleRibbonRef}
-                    state={this.state.state}
-                    inPageUI={this.props.inPageUI}
-                    isSidebarOpen={this.state.isSidebarOpen}
-                    setRibbonShouldAutoHide={this.setAutoHide}
-                />
-            </div>
+            <>
+                {(!this.props.setUpOptions.keepRibbonHidden ||
+                    this.state.state === 'visible') && (
+                    <div
+                        ref={this.handleHolderRef}
+                        className={cx(styles.holder, {
+                            [styles.withSidebar]: this.state.isSidebarOpen,
+                        })}
+                    >
+                        <RibbonContainer
+                            {...this.props.containerDependencies}
+                            setRef={this.handleRibbonRef}
+                            state={this.state.state}
+                            inPageUI={this.props.inPageUI}
+                            isSidebarOpen={this.state.isSidebarOpen}
+                            setRibbonShouldAutoHide={this.setAutoHide}
+                        />
+                    </div>
+                )}
+                {this.props.setUpOptions.showPageActivityIndicator && (
+                    <PageActivityIndicator
+                        onGoToClick={() =>
+                            this.processEvent('openSidebarToSharedSpaces', null)
+                        }
+                    />
+                )}
+            </>
         )
     }
 }

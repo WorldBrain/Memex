@@ -822,6 +822,20 @@ export class AnnotationsSidebar extends React.Component<
                             </LoadingBox>
                         )}
                     </FollowedListSectionTitle>
+                    {/* {this.props.followedListLoadState === 'running' ? (
+                        <LoadingBox>
+                            <LoadingIndicator size={16} />{' '}
+                        </LoadingBox>
+                    ) : (
+                        <LoadingBox>
+                            <FollowedListNoteCount
+                                active={followedLists.allIds?.length > 0}
+                                left="5px"
+                            >
+                                {followedLists.allIds?.length ?? 0}
+                            </FollowedListNoteCount>
+                        </LoadingBox>
+                    )} */}
                 </FollowedListTitleContainer>
                 <FollowedListTitleContainerMyNotes left="5px">
                     <MyNotesClickableArea
