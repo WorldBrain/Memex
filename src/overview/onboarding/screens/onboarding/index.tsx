@@ -70,10 +70,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     )
                                 }}
                                 label={'Get Started'}
-                                fontSize={'20px'}
-                                backgroundColor={'purple'}
                                 icon={'longArrowRight'}
-                                iconPosition={'right'}
                             />
                         </ConfirmContainer>
                         {/* <GoToDashboard
