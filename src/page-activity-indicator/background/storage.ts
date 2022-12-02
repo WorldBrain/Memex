@@ -25,6 +25,8 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                             field: 'sharedList',
                         },
                     ],
+                    backup: false,
+                    watch: false,
                 },
                 followedListEntry: {
                     version: STORAGE_VERSIONS[27].version,
@@ -41,6 +43,8 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                         { field: 'normalizedPageUrl' },
                         { field: 'followedList' },
                     ],
+                    watch: false,
+                    backup: false,
                 },
             },
             operations: {
