@@ -20,7 +20,7 @@ export const ToggleSwitchButton = (props: Props) => (
                 size={20}
             />
         ) : (
-            <TooltipBox tooltipText={props.toggleHoverText} placement="leftBig">
+            <TooltipBox tooltipText={props.toggleHoverText} placement="left">
                 <Checkbox
                     isChecked={props.isEnabled}
                     handleChange={props.onToggleClick}

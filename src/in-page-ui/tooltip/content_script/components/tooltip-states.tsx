@@ -49,7 +49,7 @@ export const InitialComponent = ({
                         <br />+ shift to share
                     </AnnotationTooltipText>
                 }
-                placement="bottomHighlighter"
+                placement="bottom"
             >
                 <Icon
                     filePath={'highlight'}
@@ -66,7 +66,7 @@ export const InitialComponent = ({
                         <br />+ shift to share
                     </AnnotationTooltipText>
                 }
-                placement="bottomHighlighter"
+                placement="bottom"
             >
                 <Icon
                     filePath={'commentAdd'}
@@ -82,7 +82,7 @@ export const InitialComponent = ({
                         <strong>Add Highlight to Space</strong>
                     </AnnotationTooltipText>
                 }
-                placement="bottomHighlighter"
+                placement="bottom"
             >
                 <Icon
                     filePath={icons.collectionsEmpty}
@@ -100,7 +100,7 @@ export const InitialComponent = ({
                         Disable in Settings
                     </AnnotationTooltipText>
                 }
-                placement="bottomHighlighter"
+                placement="bottom"
             >
                 <Icon
                     filePath={'removeX'}

@@ -33,9 +33,6 @@ export class AddSpacesButton extends React.Component<
 > {
     constructor(props: ButtonProps) {
         super(props)
-        this.state = {
-            showPicker: false,
-        }
     }
 
     render() {
@@ -45,7 +42,6 @@ export class AddSpacesButton extends React.Component<
                     ref={this.props.spacePickerButtonRef}
                     tabIndex={this.props.tabIndex}
                     onClick={(e) => {
-                        // this.setState({ showPicker: !this.state.showPicker })
                         this.props.onEditBtnClick?.(e)
                     }}
                 >

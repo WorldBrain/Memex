@@ -95,7 +95,10 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
                             />
                         )}
                         {isHovered && (
-                            <TriggerArea onMouseEnter={onHoverEnter} />
+                            <TriggerArea
+                                onMouseEnter={onHoverEnter}
+                                onMouseLeave={onHoverLeave}
+                            />
                         )}
                     </>
                 ) : (

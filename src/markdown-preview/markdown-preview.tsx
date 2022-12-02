@@ -124,7 +124,7 @@ export class MarkdownPreview extends React.Component<Props, State> {
                         {this.showPreviewBtn && (
                             <TooltipBox
                                 tooltipText={`Control + Enter`}
-                                placement="bottomSidebar"
+                                placement="bottom"
                             >
                                 <PreviewBtn onClick={this.togglePreview}>
                                     Preview Markdown

@@ -31,7 +31,7 @@ const Topbar = ({
 }: Props) => (
     <div className={styles.topbar}>
         {props.env === 'overview' && (
-            <TooltipBox tooltipText="Close (ESC)" placement="rightCentered">
+            <TooltipBox tooltipText="Close (ESC)" placement="right">
                 <CloseButton
                     title="Close sidebar once. Disable via Memex icon in the extension toolbar."
                     clickHandler={(e) => {
@@ -74,10 +74,7 @@ const Topbar = ({
         {props.env === 'overview' && (
             <div className={styles.right}>
                 {/* Button to add a comment. */}
-                <TooltipBox
-                    tooltipText="Add notes to page"
-                    placement="leftNarrow"
-                >
+                <TooltipBox tooltipText="Add notes to page" placement="left">
                     <button
                         className={cx(styles.button, styles.comments, {
                             [styles.disabled]: disableAddCommentBtn,

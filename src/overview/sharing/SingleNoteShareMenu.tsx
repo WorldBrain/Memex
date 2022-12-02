@@ -254,7 +254,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
     render() {
         return (
-            <ClickAway onClickAway={this.props.closeShareMenu}>
+            <>
                 {this.state.confirmationMode == null ? (
                     <>
                         <ShareAnnotationMenu
@@ -309,12 +309,13 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                             unselectEntry={this.handleSpacePickerSelection(
                                 'unselect',
                             )}
+                            width={'fill-available'}
                         />
                     </>
                 ) : (
                     this.renderConfirmationMode()
                 )}
-            </ClickAway>
+            </>
         )
     }
 }

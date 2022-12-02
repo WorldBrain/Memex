@@ -30,9 +30,10 @@ export default class SpaceContextMenuButton extends PureComponent<
     private contextMenuRef: React.RefObject<SpaceContextMenu>
 
     private toggleMenu = (e) => {
+        this.props.toggleMenu(e)
         e.stopPropagation()
 
-        return this.props.toggleMenu(e)
+        return
     }
 
     renderContextMenu() {
@@ -46,7 +47,7 @@ export default class SpaceContextMenuButton extends PureComponent<
                 placement={'right-start'}
                 offsetX={30}
                 offsetY={-10}
-                closeComponent={this.toggleMenu}
+                closeComponent={(e) => this.toggleMenu(e)}
                 strategy={'fixed'}
                 width={'300px'}
                 bigClosingScreen
@@ -69,7 +70,7 @@ export default class SpaceContextMenuButton extends PureComponent<
                     strategy={'fixed'}
                 >
                     <Icon
-                        onClick={this.toggleMenu}
+                        onClick={(e) => this.toggleMenu(e)}
                         heightAndWidth="14px"
                         filePath={icons.dots}
                         active={this.props.isMenuDisplayed}

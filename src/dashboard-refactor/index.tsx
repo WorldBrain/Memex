@@ -424,6 +424,7 @@ export class DashboardContainer extends StatefulUIElement<
             searchResults,
         } = this.state
         const syncStatusIconState = deriveStatusIconColor(this.state)
+
         return (
             <HeaderContainer
                 searchBarProps={{
@@ -511,10 +512,12 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: false,
                         }),
-                    onToggleDisplayState: () =>
+                    onToggleDisplayState: () => {
+                        console.log('works')
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: !syncMenu.isDisplayed,
-                        }),
+                        })
+                    },
                 }}
                 sidebarWidth={this.state.spaceSidebarWidth}
             />

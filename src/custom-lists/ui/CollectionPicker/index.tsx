@@ -434,6 +434,7 @@ class SpacePicker extends StatefulUIElement<
                 <OuterSearchBox
                     onKeyPress={this.handleKeyPress}
                     onClick={this.handleOuterSearchBoxClick}
+                    width={this.props.width}
                 >
                     {this.renderMainContent()}
                 </OuterSearchBox>
@@ -498,7 +499,7 @@ const LoadingBox = styled.div`
 
 const OuterSearchBox = styled.div`
     border-radius: 12px;
-    width: 300px;
+    width: ${(props) => (props.width ? props.width : '300px')};
 `
 const PickerContainer = styled.div`
     border-radius: 12px;

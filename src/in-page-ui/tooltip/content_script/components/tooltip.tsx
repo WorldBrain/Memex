@@ -98,7 +98,7 @@ export function _renderButtons({ closeTooltip, state }) {
     return (
         <TooltipBox
             tooltipText="Close. Disable in Toolbar (R)"
-            placement="rightContentTooltip"
+            placement="right"
         >
             <Icon
                 filePath={'removeX'}

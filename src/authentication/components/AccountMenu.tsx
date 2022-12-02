@@ -74,9 +74,8 @@ const BottomLeft = styled.div`
         cursor: pointer;
     }
 
-    &: hover {
-        background-color: ${(props) =>
-            props.theme.colors.backgroundColorDarker};
+    &:hover {
+        border: 1px solid ${(props) => props.theme.colors.lightHover};
     }
 `
 
