@@ -58,7 +58,7 @@ export async function main(
         loadRemotely?: boolean
         getContentFingerprints?: GetContentFingerprints
     } = {},
-) {
+): Promise<SharedInPageUIState> {
     params.loadRemotely = params.loadRemotely ?? true
     const isPdfViewerRunning = params.getContentFingerprints != null
     if (isPdfViewerRunning) {
