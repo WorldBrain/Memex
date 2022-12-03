@@ -119,6 +119,12 @@ export function getTemplateDataFetchers({
                 .collection('annotations')
                 .findObjects({ url: { $in: annotationUrls } })
 
+            notes.sort(
+                (a, b) =>
+                    a.selector.descriptor.content[1].start -
+                    b.selector.descriptor.content[1].start,
+            )
+
             return notes.reduce(
                 (acc, note) => ({
                     ...acc,
@@ -137,6 +143,12 @@ export function getTemplateDataFetchers({
             const notes: Annotation[] = await storageManager
                 .collection('annotations')
                 .findObjects({ pageUrl: { $in: normalizedPageUrls } })
+
+            notes.sort(
+                (a, b) =>
+                    a.selector.descriptor.content[1].start -
+                    b.selector.descriptor.content[1].start,
+            )
 
             return notes.reduce(
                 (acc, note) => ({

@@ -1078,7 +1078,7 @@ const EmptyMessageContainer = styled.div`
     width: fill-available;
 `
 const AnnotationBox = styled.div<{ isActive: boolean; zIndex: number }>`
-    width: fill-available;
+    width: 99%;
     z-index: ${(props) => props.zIndex};
 `
 
@@ -1166,7 +1166,7 @@ const AnnotationContainer = styled(Margin)`
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: flex-start;
+    align-items: center;
     /* padding-bottom: 500px;
     overflow-y: scroll;
     overflow-x: visible; */
