@@ -641,6 +641,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                     <PopoutBox
                         targetElementRef={this.tutorialButtonRef.current}
                         placement={'bottom'}
+                        closeComponent={() => this.toggleShowTutorial()}
                     >
                         <QuickTutorial
                             markdownHelpOnTop={true}

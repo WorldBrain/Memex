@@ -2,7 +2,6 @@ import * as React from 'react'
 import { createRef } from 'react'
 
 import styled from 'styled-components'
-import onClickOutside from 'react-onclickoutside'
 
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import MemexEditor, {
@@ -356,7 +355,7 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 }
 
-export default onClickOutside(AnnotationCreate)
+export default AnnotationCreate
 
 const SaveCancelArea = styled.div`
     display: flex;

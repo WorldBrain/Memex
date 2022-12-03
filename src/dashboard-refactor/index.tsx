@@ -513,9 +513,9 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: false,
                         }),
                     onToggleDisplayState: () => {
-                        console.log('works')
+                        console.log('toggletriggered')
                         this.processEvent('setSyncStatusMenuDisplayState', {
-                            isShown: !syncMenu.isDisplayed,
+                            isShown: syncMenu.isDisplayed,
                         })
                     },
                 }}
@@ -1091,7 +1091,7 @@ export class DashboardContainer extends StatefulUIElement<
                 <DeleteConfirmModal
                     isShown
                     message="Delete this Space?"
-                    submessage="This does not delete the pages in it"
+                    submessage="This does NOT delete the pages in it"
                     onClose={() => this.processEvent('cancelListDelete', null)}
                     deleteDocs={() =>
                         this.processEvent('confirmListDelete', null)
@@ -1259,11 +1259,11 @@ export class DashboardContainer extends StatefulUIElement<
                                 isShown: false,
                             })
                         }
-                        onToggleDisplayState={() =>
-                            this.processEvent('setSyncStatusMenuDisplayState', {
-                                isShown: !this.state.syncMenu.isDisplayed,
-                            })
-                        }
+                        // onToggleDisplayState={() =>
+                        //     this.processEvent('setSyncStatusMenuDisplayState', {
+                        //         isShown: !this.state.syncMenu.isDisplayed,
+                        //     })
+                        // }
                     />
                 </RightHeader>
             </HeaderBar>

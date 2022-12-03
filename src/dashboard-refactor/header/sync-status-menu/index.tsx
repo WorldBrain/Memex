@@ -1,5 +1,4 @@
 import React, { PureComponent } from 'react'
-import onClickOutside from 'react-onclickoutside'
 import styled, { css } from 'styled-components'
 import moment from 'moment'
 
@@ -62,7 +61,7 @@ export interface SyncStatusMenuProps extends RootState {
     onLoginClick: React.MouseEventHandler
     onClickOutside: React.MouseEventHandler
     syncStatusIconState?: any
-    onToggleDisplayState: React.MouseEventHandler
+    onToggleDisplayState?: () => void
 }
 
 class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
@@ -242,7 +241,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
     }
 }
 
-export default onClickOutside(SyncStatusMenu)
+export default SyncStatusMenu
 
 const LoadingBox = styled.div`
     height: 100px;

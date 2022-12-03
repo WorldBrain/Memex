@@ -1,7 +1,6 @@
 import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import styled, { css } from 'styled-components'
-import onClickOutside from 'react-onclickoutside'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ConversationReplies } from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
 import type {
@@ -121,7 +120,8 @@ export interface AnnotationsSidebarProps
     copyPageLink: any
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
-    //postShareHook: (shareInfo) => void
+    //postShareHook: (shareInfo) => void+
+    setPopoutsActive: (popoutsOpen: boolean) => void
 }
 
 interface AnnotationsSidebarState {
@@ -146,6 +146,7 @@ export class AnnotationsSidebar extends React.Component<
     } = {}
     private sortDropDownButtonRef = React.createRef<HTMLDivElement>()
     private copyButtonRef = React.createRef<HTMLDivElement>()
+    private pageShareButtonRef = React.createRef<HTMLDivElement>()
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
 
     state: AnnotationsSidebarState = {
@@ -257,6 +258,22 @@ export class AnnotationsSidebar extends React.Component<
         return annotationCreateLists
     }
 
+    setPopoutsActive() {
+        if (
+            this.state.showAllNotesCopyPaster ||
+            this.state.isMarkdownHelpShown ||
+            this.state.showAllNotesShareMenu ||
+            this.state.showSortDropDown ||
+            this.state.showPageSpacePicker
+        ) {
+            console.log('settrue')
+            return this.props.setPopoutsActive(true)
+        } else {
+            console.log('setfalse')
+            return this.props.setPopoutsActive(false)
+        }
+    }
+
     private renderCopyPasterManager(annotationUrls) {
         if (!this.state.showAllNotesCopyPaster) {
             return
@@ -267,11 +284,11 @@ export class AnnotationsSidebar extends React.Component<
                 targetElementRef={this.copyButtonRef.current}
                 placement={'bottom-end'}
                 offsetX={5}
-                closeComponent={() =>
+                closeComponent={() => {
                     this.setState({
                         showAllNotesCopyPaster: false,
                     })
-                }
+                }}
                 strategy={'fixed'}
                 width={'fit-content'}
             >
@@ -916,17 +933,18 @@ export class AnnotationsSidebar extends React.Component<
             <>
                 <PrimaryAction
                     label={'Share Page'}
-                    onClick={() =>
-                        this.setState({
+                    onClick={async () => {
+                        await this.setState({
                             showPageSpacePicker: !this.state
                                 .showPageSpacePicker,
                         })
-                    }
+                        this.setPopoutsActive()
+                    }}
                     icon={'invite'}
                     type={'primary'}
                     size={'medium'}
+                    innerRef={this.pageShareButtonRef}
                 />
-                {/* <SpacePicker initialSelectedListIds={this.props.pag}  />} */}
             </>
         )
     }
@@ -940,11 +958,12 @@ export class AnnotationsSidebar extends React.Component<
                 <TopBarActionBtns>
                     <Icon
                         filePath={icons.sort}
-                        onClick={() =>
-                            this.setState({
+                        onClick={async () => {
+                            await this.setState({
                                 showSortDropDown: true,
                             })
-                        }
+                            this.setPopoutsActive()
+                        }}
                         height="18px"
                         width="20px"
                         containerRef={this.sortDropDownButtonRef}
@@ -952,11 +971,12 @@ export class AnnotationsSidebar extends React.Component<
                     />
                     <Icon
                         filePath={icons.copy}
-                        onClick={() =>
-                            this.setState({
+                        onClick={async () => {
+                            await this.setState({
                                 showAllNotesCopyPaster: true,
                             })
-                        }
+                            this.setPopoutsActive()
+                        }}
                         height="18px"
                         width="20px"
                         containerRef={this.copyButtonRef}
@@ -964,11 +984,12 @@ export class AnnotationsSidebar extends React.Component<
                     />
                     <Icon
                         filePath={icons.multiEdit}
-                        onClick={() =>
-                            this.setState({
+                        onClick={async () => {
+                            await this.setState({
                                 showAllNotesShareMenu: true,
                             })
-                        }
+                            this.setPopoutsActive()
+                        }}
                         active={this.state.showAllNotesShareMenu}
                         height="18px"
                         width="20px"
@@ -976,6 +997,26 @@ export class AnnotationsSidebar extends React.Component<
                     />
                 </TopBarActionBtns>
             </>
+        )
+    }
+
+    renderPageShareModal() {
+        if (!this.state.showPageSpacePicker) {
+            return
+        }
+        return (
+            <PopoutBox
+                targetElementRef={this.pageShareButtonRef.current}
+                placement={'bottom-end'}
+                closeComponent={() =>
+                    this.setState({
+                        showPageSpacePicker: !this.state.showPageSpacePicker,
+                    })
+                }
+                offsetX={10}
+            >
+                TOOD: Space picker goes here!
+            </PopoutBox>
         )
     }
 
@@ -988,24 +1029,15 @@ export class AnnotationsSidebar extends React.Component<
                         {this.renderSharePageButton()}
                         {/* {this.props.sidebarActions()} */}
                     </>
-                    {this.state.showPageSpacePicker && (
-                        <HoverBox
-                            padding="10px"
-                            right="0px"
-                            top="55px"
-                            width="250px"
-                        >
-                            TOOD: Space picker goes here!
-                        </HoverBox>
-                    )}
                 </TopBar>
+                {this.renderPageShareModal()}
                 {this.renderResultsBody()}
             </ResultBodyContainer>
         )
     }
 }
 
-export default onClickOutside(AnnotationsSidebar)
+export default AnnotationsSidebar
 
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css

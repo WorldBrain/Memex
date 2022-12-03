@@ -125,8 +125,20 @@ export class AnnotationsSidebarContainer<
     }
 
     listenToEsc = (event) => {
+        console.log(this.state.showAllNotesShareMenu)
         if (event.key === 'Escape') {
-            this.hideSidebar()
+            if (
+                this.state.showAllNotesCopyPaster ||
+                this.state.showAllNotesShareMenu ||
+                this.state.activeListPickerState ||
+                this.state.showAnnotationsShareModal ||
+                this.state.activeShareMenuNoteId ||
+                this.state.popoutsActive
+            ) {
+                return
+            } else {
+                this.hideSidebar()
+            }
         }
     }
     toggleSidebarShowForPageId(pageId: string) {
@@ -166,9 +178,6 @@ export class AnnotationsSidebarContainer<
 
     hideSidebar() {
         document.removeEventListener('keydown', this.listenToEsc, true)
-        // if (this.state.isWidthLocked) {
-        //     setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '-40px') // the -40px is because in logic.ts in AdjustSidebarWidth I add a margin of 40px
-        // }
         this.processEvent('hide', null)
 
         if (this.props.sidebarContext === 'dashboard') {
@@ -987,6 +996,11 @@ export class AnnotationsSidebarContainer<
                                     annotationUrl,
                                 })}
                             isAnnotationCreateShown={this.state.showCommentBox}
+                            setPopoutsActive={(isActive) => {
+                                console.log('popoutevent')
+                                console.log(isActive)
+                                this.processEvent('setPopoutsActive', isActive)
+                            }}
                             annotationCreateProps={this.getCreateProps()}
                             bindAnnotationFooterEventProps={(
                                 annotation,

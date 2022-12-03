@@ -172,7 +172,6 @@ export default class Ribbon extends Component<Props, State> {
                         this.props.lists.fetchInitialListSelections
                     }
                     onEscapeKeyDown={this.hideListPicker}
-                    handleClickOutside={this.hideListPicker}
                 />
             </PopoutBox>
         )
@@ -194,7 +193,6 @@ export default class Ribbon extends Component<Props, State> {
             >
                 <QuickTutorial
                     getKeyboardShortcutsState={getKeyboardShortcutsState}
-                    onClickOutside={() => this.props.toggleShowTutorial()}
                     onSettingsClick={() => this.openOptionsTabRPC('settings')}
                     onEscapeKeyDown={() => this.props.toggleShowTutorial()}
                 />

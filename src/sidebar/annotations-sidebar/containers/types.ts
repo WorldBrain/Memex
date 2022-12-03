@@ -188,6 +188,7 @@ export interface SidebarContainerState
     showLoginModal: boolean
     showDisplayNameSetupModal: boolean
     showAnnotationsShareModal: boolean
+    popoutsActive: boolean
 
     confirmPrivatizeNoteArgs: null | SidebarEvents['editAnnotation']
     confirmSelectNoteSpaceArgs: null | SidebarEvents['updateListsForAnnotation']
@@ -205,6 +206,7 @@ interface SidebarEvents {
     lockWidth: null
     unlockWidth: null
     adjustSidebarWidth: { newWidth: string; isWidthLocked?: boolean }
+    setPopoutsActive: boolean
 
     sortAnnotations: { sortingFn: AnnotationsSorter }
 

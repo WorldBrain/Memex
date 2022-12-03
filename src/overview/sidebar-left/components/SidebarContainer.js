@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import { bindActionCreators } from 'redux'
-import onClickOutside from 'react-onclickoutside'
 
 import { selectors, actions } from '..'
 import { actions as filterActs } from 'src/search-filters'
@@ -128,7 +127,4 @@ const mapDispatchToProps = (dispatch) => ({
     clearAllFilters: () => dispatch(filterActs.resetFilters()),
 })
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps,
-)(onClickOutside(SidebarContainer))
+export default connect(mapStateToProps, mapDispatchToProps)(SidebarContainer)

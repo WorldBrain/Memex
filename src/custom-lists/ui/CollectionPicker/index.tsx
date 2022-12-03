@@ -1,5 +1,4 @@
 import React from 'react'
-import onClickOutside from 'react-onclickoutside'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -534,4 +533,4 @@ const SpaceContextMenuBtn = styled.div`
     align-items: center;
 `
 
-export default onClickOutside(SpacePicker)
+export default SpacePicker

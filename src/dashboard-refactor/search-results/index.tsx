@@ -181,11 +181,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     noteData.listPickerShowStatus !== 'hide' && (
                         <CollectionPicker
                             initialSelectedListIds={() => listsToDisplay}
-                            onClickOutside={
-                                noteData.listPickerShowStatus === 'lists-bar'
-                                    ? interactionProps.onListPickerBarBtnClick
-                                    : interactionProps.onListPickerFooterBtnClick
-                            }
                             selectEntry={(listId) =>
                                 interactionProps.updateLists({
                                     added: listId,
@@ -766,18 +761,6 @@ const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
     background: ${(props) => props.theme.colors.backgroundColor};
     margin: 2px 0px;
-`
-
-const IconBox = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 3px;
-    padding: 4px;
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.grey};
-    }
 `
 
 const ReferencesContainer = styled.div`

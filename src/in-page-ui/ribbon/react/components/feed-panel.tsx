@@ -1,6 +1,5 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import onClickOutside from 'react-onclickoutside'
 
 interface Props {
     closePanel?: () => void
@@ -30,7 +29,7 @@ class FeedPanel extends React.PureComponent<Props> {
     }
 }
 
-export default onClickOutside(FeedPanel)
+export default FeedPanel
 
 const Div = styled.div`
     height: fill-available;

@@ -1,5 +1,4 @@
 import React from 'react'
-import onClickOutside from 'react-onclickoutside'
 import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
 
@@ -15,7 +14,6 @@ import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResult
 import EntryRow from 'src/common-ui/GenericPicker/components/EntryRow' // ActOnAllTabsButton, // IconStyleWrapper,
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
-import { EntrySelectedList } from 'src/common-ui/GenericPicker/components/EntrySelectedList'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
@@ -252,4 +250,4 @@ const DomainResultItem = styled.div`
     }
 `
 
-export default onClickOutside(DomainPicker)
+export default DomainPicker

@@ -1,5 +1,4 @@
 import React from 'react'
-import onClickOutside from 'react-onclickoutside'
 import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -372,4 +371,4 @@ const EmptyTagsView = styled.div`
     padding: 20px 15px;
 `
 
-export default onClickOutside(TagPicker)
+export default TagPicker

@@ -1,5 +1,4 @@
 import * as React from 'react'
-import onClickOutside from 'react-onclickoutside'
 const styles = require('./ribbon.css')
 
 interface Props {
@@ -16,4 +15,4 @@ class TutorialPanel extends React.PureComponent<Props> {
     }
 }
 
-export default onClickOutside(TutorialPanel)
+export default TutorialPanel

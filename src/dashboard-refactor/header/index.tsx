@@ -108,7 +108,7 @@ function renderSyncStatusMenu(
             targetElementRef={syncStatusButtonRef.current}
             offsetX={15}
             offsetY={5}
-            closeComponent={syncStatusMenuProps.onToggleDisplayState}
+            closeComponent={() => syncStatusMenuProps.onToggleDisplayState()}
             placement={'bottom-end'}
         >
             <SyncStatusMenu
@@ -148,7 +148,9 @@ export default class Header extends PureComponent<Props> {
                 </SearchSection>
                 <RightHeader>
                     <PrimaryAction
-                        onClick={syncStatusMenuProps.onToggleDisplayState}
+                        onClick={() =>
+                            syncStatusMenuProps.onToggleDisplayState()
+                        }
                         label={'Sync Status'}
                         size={'medium'}
                         icon={getSyncStatusIcon(syncStatusIconState)}

@@ -1,5 +1,4 @@
 import * as React from 'react'
-import onClickOutside from 'react-onclickoutside'
 
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { RibbonSearchProps } from './types'
@@ -40,4 +39,4 @@ class SearchBox extends React.Component<Props> {
     }
 }
 
-export default onClickOutside(SearchBox)
+export default SearchBox
