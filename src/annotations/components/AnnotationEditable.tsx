@@ -24,7 +24,6 @@ import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-n
 import { getShareButtonData } from '../sharing-utils'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
-import { ClickAway } from 'src/util/click-away-wrapper'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -107,6 +106,7 @@ export default class AnnotationEditable extends React.Component<Props> {
     private annotEditRef = React.createRef<AnnotationEdit>()
     private spacePickerBarRef = React.createRef<HTMLElement>()
     private shareButtonRef = React.createRef<HTMLElement>()
+    private tutorialButtonRef = React.createRef<HTMLElement>()
 
     static MOD_KEY = getKeyName({ key: 'mod' })
     static defaultProps: Pick<
@@ -426,6 +426,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         return (
             <MarkdownButtonContainer
                 onClick={() => this.setState({ showQuickTutorial: true })}
+                ref={this.tutorialButtonRef}
             >
                 Formatting Help
                 <MarkdownButton
@@ -617,7 +618,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                     }
                                     padding={
                                         this.props.mode === 'edit'
-                                            ? '5px 15px 10px 15px'
+                                            ? '10px 15px 10px 15px'
                                             : '0px 15px 10px 15px'
                                     }
                                 />
@@ -637,44 +638,17 @@ export default class AnnotationEditable extends React.Component<Props> {
                     {/* {this.props.renderListsPickerForAnnotation(this.props.url)} */}
                 </AnnotationBox>
                 {this.state.showQuickTutorial && (
-                    <ClickAway
-                        onClickAway={() =>
-                            this.setState({ showQuickTutorial: false })
-                        }
+                    <PopoutBox
+                        targetElementRef={this.tutorialButtonRef.current}
+                        placement={'bottom'}
                     >
-                        <HoverBox
-                            top={
-                                this.props.contextLocation === 'dashboard'
-                                    ? 'unset'
-                                    : '215px'
+                        <QuickTutorial
+                            markdownHelpOnTop={true}
+                            getKeyboardShortcutsState={
+                                getKeyboardShortcutsState
                             }
-                            bottom={
-                                this.props.contextLocation === 'dashboard'
-                                    ? '60px'
-                                    : 'unset'
-                            }
-                            right={
-                                this.props.contextLocation === 'dashboard'
-                                    ? '20px'
-                                    : '50px'
-                            }
-                            width="430px"
-                            position={
-                                this.props.contextLocation === 'dashboard'
-                                    ? 'fixed'
-                                    : 'initial'
-                            }
-                            height="430px"
-                            overflow="scroll"
-                        >
-                            <QuickTutorial
-                                markdownHelpOnTop={true}
-                                getKeyboardShortcutsState={
-                                    getKeyboardShortcutsState
-                                }
-                            />
-                        </HoverBox>
-                    </ClickAway>
+                        />
+                    </PopoutBox>
                 )}
             </ThemeProvider>
         )

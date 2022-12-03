@@ -4,9 +4,9 @@ import styled from 'styled-components'
 
 import { HelpMenu, Props as HelpMenuProps } from './help-menu'
 import { menuItems } from '../menu-items'
-import { ClickAway } from 'src/util/click-away-wrapper'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
 export interface Props extends HelpMenuProps {}
 
@@ -19,6 +19,8 @@ export class HelpBtn extends React.PureComponent<Props, State> {
         menuOptions: menuItems,
         extVersion: browser.runtime.getManifest().version,
     }
+
+    private helpButtonRef = React.createRef<HTMLElement>()
 
     state = { isOpen: false }
 
@@ -34,13 +36,16 @@ export class HelpBtn extends React.PureComponent<Props, State> {
         }
 
         return (
-            <ClickAway
-                onClickAway={() =>
+            <PopoutBox
+                targetElementRef={this.helpButtonRef.current}
+                placement={'top-end'}
+                offsetX={10}
+                closeComponent={() =>
                     this.setState((state) => ({ isOpen: !state.isOpen }))
                 }
             >
                 <HelpMenu {...this.props} />
-            </ClickAway>
+            </PopoutBox>
         )
     }
 
@@ -52,6 +57,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                     filePath={icons.helpIcon}
                     heightAndWidth={'34px'}
                     onClick={this.handleClick}
+                    containerRef={this.helpButtonRef}
                 />
             </HelpIconPosition>
         )

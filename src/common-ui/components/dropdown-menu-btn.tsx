@@ -1,7 +1,6 @@
 import React from 'react'
 import styled, { ThemeProvider, css } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { ClickAway } from 'src/util/click-away-wrapper'
 
 export interface MenuItemProps {
     name: string
@@ -113,25 +112,23 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
     render() {
         return (
             <ThemeProvider theme={this.theme}>
-                <ClickAway onClickAway={this.props.onClickOutside}>
-                    <Menu
-                        onMouseEnter={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation
-                        }}
-                        onMouseLeave={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation
-                        }}
-                        width={this.props.width}
-                        leftPosition={this.theme.leftMenuOffset}
-                    >
-                        {this.props.menuTitle && (
-                            <MenuTitle>{this.props.menuTitle}</MenuTitle>
-                        )}
-                        {this.props.children ?? this.renderMenuItems()}
-                    </Menu>
-                </ClickAway>
+                <Menu
+                    onMouseEnter={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation
+                    }}
+                    onMouseLeave={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation
+                    }}
+                    width={this.props.width}
+                    leftPosition={this.theme.leftMenuOffset}
+                >
+                    {this.props.menuTitle && (
+                        <MenuTitle>{this.props.menuTitle}</MenuTitle>
+                    )}
+                    {this.props.children ?? this.renderMenuItems()}
+                </Menu>
             </ThemeProvider>
         )
     }

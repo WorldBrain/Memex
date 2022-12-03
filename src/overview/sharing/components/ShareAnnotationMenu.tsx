@@ -11,7 +11,6 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { ClickAway } from 'src/util/click-away-wrapper'
 
 const COPY_TIMEOUT = 2000
 

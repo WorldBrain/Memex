@@ -9,10 +9,9 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import MemexEditor from '@worldbrain/memex-common/lib/editor'
 import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
-import { ClickAway } from 'src/util/click-away-wrapper'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
 export interface Props {
     listName: string
@@ -34,8 +33,8 @@ interface State {
 
 export default class ListDetails extends PureComponent<Props, State> {
     static MOD_KEY = getKeyName({ key: 'mod' })
-
     private formattingHelpBtn = React.createRef<HTMLElement>()
+
     state: State = {
         description: this.props.description ?? '',
         isEditingDescription: false,
@@ -80,17 +79,20 @@ export default class ListDetails extends PureComponent<Props, State> {
 
     private renderMarkdownHelpButton() {
         return (
-            <MarkdownButtonContainer
-                ref={this.formattingHelpBtn}
+            <PrimaryAction
+                innerRef={this.formattingHelpBtn}
                 onClick={() =>
                     this.setState({
                         showQuickTutorial: !this.state.showQuickTutorial,
                     })
                 }
-            >
-                Formatting
-                <Icon filePath={icons.helpIcon} heightAndWidth={'20px'} />
-            </MarkdownButtonContainer>
+                type={'tertiary'}
+                icon={'helpIcon'}
+                iconPosition={'right'}
+                size={'small'}
+                active={this.state.showQuickTutorial}
+                label={'Formatting Help'}
+            />
         )
     }
 
@@ -110,6 +112,18 @@ export default class ListDetails extends PureComponent<Props, State> {
                     <SaveActionBar>
                         {this.renderMarkdownHelpButton()}
                         <BtnContainerStyled>
+                            <TooltipBox tooltipText="esc" placement="bottom">
+                                <Icon
+                                    heightAndWidth="22px"
+                                    icon={icons.removeX}
+                                    color={'normalText'}
+                                    onClick={() =>
+                                        this.setState({
+                                            isEditingDescription: false,
+                                        })
+                                    }
+                                />
+                            </TooltipBox>
                             <TooltipBox
                                 tooltipText={`${ListDetails.MOD_KEY} + Enter`}
                                 placement="bottom"
@@ -120,18 +134,6 @@ export default class ListDetails extends PureComponent<Props, State> {
                                     color={'purple'}
                                     onClick={() =>
                                         this.finishEdit({ shouldSave: true })
-                                    }
-                                />
-                            </TooltipBox>
-                            <TooltipBox tooltipText="esc" placement="bottom">
-                                <Icon
-                                    heightAndWidth="22px"
-                                    icon={icons.removeX}
-                                    color={'normalText'}
-                                    onClick={() =>
-                                        this.setState({
-                                            isEditingDescription: false,
-                                        })
                                     }
                                 />
                             </TooltipBox>
@@ -287,29 +289,21 @@ export default class ListDetails extends PureComponent<Props, State> {
                         )}
                     </DescriptionContainer>
                     {this.state.showQuickTutorial && (
-                        <ClickAway
-                            ignoreClickOnElement={
-                                this.formattingHelpBtn.current
-                            }
-                            onClickAway={() =>
+                        <PopoutBox
+                            targetElementRef={this.formattingHelpBtn.current}
+                            placement={'bottom-start'}
+                            closeComponent={() =>
                                 this.setState({ showQuickTutorial: false })
                             }
+                            offsetX={5}
                         >
-                            <HoverBox
-                                top={'260px'}
-                                right={'420px'}
-                                width="430px"
-                                height="430px"
-                                overflow="scroll"
-                            >
-                                <QuickTutorial
-                                    markdownHelpOnTop={true}
-                                    getKeyboardShortcutsState={
-                                        getKeyboardShortcutsState
-                                    }
-                                />
-                            </HoverBox>
-                        </ClickAway>
+                            <QuickTutorial
+                                markdownHelpOnTop={true}
+                                getKeyboardShortcutsState={
+                                    getKeyboardShortcutsState
+                                }
+                            />
+                        </PopoutBox>
                     )}
                 </TopBarContainer>
             </>
