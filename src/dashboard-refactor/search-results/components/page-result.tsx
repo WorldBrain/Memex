@@ -377,7 +377,6 @@ export default class PageResultView extends PureComponent<Props> {
                     {this.hasLists && (
                         <ListsSegment
                             lists={this.displayLists}
-                            showEditBtn={this.props.hoverState === 'lists'}
                             onListClick={undefined}
                             onEditBtnClick={this.props.onListPickerBarBtnClick}
                             renderSpacePicker={

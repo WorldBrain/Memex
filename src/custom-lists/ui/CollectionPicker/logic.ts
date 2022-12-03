@@ -24,7 +24,6 @@ export interface SpacePickerDependencies {
     ) => Promise<void>
     unselectEntry: (listId: number) => Promise<void>
     actOnAllTabs?: (listId: number) => Promise<void>
-    onEscapeKeyDown?: () => void | Promise<void>
     /** Called when user keys Enter+Cmd/Ctrl in main text input */
     onSubmit?: () => void | Promise<void>
     initialSelectedListIds?: () => number[] | Promise<number[]>
@@ -236,11 +235,6 @@ export default class SpacePickerLogic extends UILogic<
                 )
                 return
             }
-        }
-
-        if (event.key === 'Escape' && this.dependencies.onEscapeKeyDown) {
-            await this.dependencies.onEscapeKeyDown()
-            return
         }
     }
 

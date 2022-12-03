@@ -330,7 +330,6 @@ export class DashboardContainer extends StatefulUIElement<
                 areDomainsFiltered={searchFilters.domainsIncluded.length > 0}
                 datePickerProps={{
                     onClickOutside: toggleDatesFilter,
-                    onEscapeKeyDown: toggleDatesFilter,
                     startDate: searchFilters.dateFrom,
                     startDateText: searchFilters.dateFromInput,
                     endDate: searchFilters.dateTo,
@@ -348,7 +347,6 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 domainPickerProps={{
                     onClickOutside: toggleDomainsFilter,
-                    onEscapeKeyDown: toggleDomainsFilter,
                     initialSelectedEntries: () => searchFilters.domainsIncluded,
                     queryEntries: (query) =>
                         searchBG.suggest({
@@ -373,7 +371,6 @@ export class DashboardContainer extends StatefulUIElement<
                 tagPickerProps={
                     searchResults.shouldShowTagsUIs && {
                         onClickOutside: toggleTagsFilter,
-                        onEscapeKeyDown: toggleTagsFilter,
                         initialSelectedEntries: () =>
                             searchFilters.tagsIncluded,
                         queryEntries: (query) =>
@@ -400,7 +397,6 @@ export class DashboardContainer extends StatefulUIElement<
                 spacePickerProps={{
                     spacesBG: this.props.listsBG,
                     onClickOutside: toggleSpacesFilter,
-                    onEscapeKeyDown: toggleSpacesFilter,
                     contentSharingBG: this.props.contentShareBG,
                     createNewEntry: () => undefined,
                     initialSelectedListIds: () => searchFilters.spacesIncluded,

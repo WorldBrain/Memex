@@ -221,11 +221,13 @@ export class AnnotationCreate extends React.Component<Props, State>
                 targetElementRef={this.spacePickerButtonRef.current}
                 placement={'bottom-start'}
                 offsetX={10}
-                closeComponent={() => this.toggleSpacePicker()}
+                closeComponent={
+                    this.state.isListPickerShown &&
+                    (() => this.toggleSpacePicker())
+                }
             >
                 <CollectionPicker
                     initialSelectedListIds={() => lists}
-                    onEscapeKeyDown={() => this.toggleSpacePicker()}
                     unselectEntry={this.props.removePageFromList}
                     createNewEntry={this.props.createNewList}
                     selectEntry={this.props.addPageToList}
@@ -335,7 +337,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 newLineOrientation={true}
                                 lists={this.displayLists}
                                 onMouseEnter={this.props.onListsHover}
-                                showEditBtn={this.props.hoverState === 'lists'}
                                 onListClick={undefined}
                                 onEditBtnClick={() =>
                                     this.setState({ isListPickerShown: true })
