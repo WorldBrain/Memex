@@ -50,7 +50,8 @@ export default class PageResultView extends PureComponent<Props> {
     }
 
     spacePickerButtonRef = React.createRef<HTMLElement>()
-    copyPasterButtonRef = React.createRef<HTMLElement>()
+    spacePickerBarRef = React.createRef<HTMLElement>()
+    copyPasteronPageButtonRef = React.createRef<HTMLElement>()
 
     private get domain(): string {
         let fullUrl: URL
@@ -110,7 +111,7 @@ export default class PageResultView extends PureComponent<Props> {
         if (this.props.listPickerShowStatus === 'lists-bar') {
             return (
                 <PopoutBox
-                    targetElementRef={this.spacePickerButtonRef.current}
+                    targetElementRef={this.spacePickerBarRef.current}
                     placement={'bottom-start'}
                     offsetX={10}
                     bigClosingScreen
@@ -174,7 +175,7 @@ export default class PageResultView extends PureComponent<Props> {
         if (this.props.isCopyPasterShown) {
             return (
                 <PopoutBox
-                    targetElementRef={this.copyPasterButtonRef.current}
+                    targetElementRef={this.copyPasteronPageButtonRef.current}
                     placement={'bottom'}
                     offsetX={10}
                     bigClosingScreen
@@ -225,9 +226,7 @@ export default class PageResultView extends PureComponent<Props> {
             return [
                 {
                     key: 'expand-notes-btn',
-                    image: this.hasNotes
-                        ? icons.commentFull
-                        : icons.commentEmpty,
+                    image: this.hasNotes ? 'commentFull' : 'commentEmpty',
                     ButtonText:
                         this.props.noteIds[this.props.notesType].length > 0 &&
                         this.props.noteIds[
@@ -242,16 +241,16 @@ export default class PageResultView extends PureComponent<Props> {
             return [
                 {
                     key: 'delete-page-btn',
-                    image: icons.trash,
+                    image: 'trash',
                     onClick: this.props.onTrashBtnClick,
                     tooltipText: 'Delete Page & all related content',
                     componentToOpen: null,
                 },
                 {
                     key: 'copy-paste-page-btn',
-                    image: icons.copy,
+                    image: 'copy',
                     onClick: this.props.onCopyPasterBtnClick,
-                    ref: this.copyPasterButtonRef,
+                    buttonRef: this.copyPasteronPageButtonRef,
                     tooltipText: 'Copy Page',
                 },
                 // {
@@ -262,18 +261,16 @@ export default class PageResultView extends PureComponent<Props> {
                 // },
                 {
                     key: 'add-spaces-btn',
-                    image: icons.plus,
+                    image: 'plus',
                     imageColor: 'purple',
                     ButtonText: 'Spaces',
                     iconSize: '14px',
                     onClick: this.props.onListPickerFooterBtnClick,
-                    ref: this.spacePickerButtonRef,
+                    buttonRef: this.spacePickerButtonRef,
                 },
                 {
                     key: 'expand-notes-btn',
-                    image: this.hasNotes
-                        ? icons.commentFull
-                        : icons.commentEmpty,
+                    image: this.hasNotes ? 'commentFull' : 'commentEmpty',
                     ButtonText:
                         this.props.noteIds[this.props.notesType].length > 0 &&
                         this.props.noteIds[
@@ -297,21 +294,21 @@ export default class PageResultView extends PureComponent<Props> {
             {
                 key: 'delete-page-btn',
                 isDisabled: true,
-                image: icons.trash,
+                image: 'trash',
             },
             {
                 key: 'copy-paste-page-btn',
                 isDisabled: true,
-                image: icons.copy,
-                ref: this.copyPasterButtonRef,
+                image: 'copy',
+                buttonRef: this.copyPasteronPageButtonRef,
             },
             {
                 key: 'add-spaces-btn',
-                image: icons.plus,
+                image: 'plus',
                 imageColor: 'purple',
                 iconSize: '14px',
                 ButtonText: 'Spaces',
-                ref: this.spacePickerButtonRef,
+                buttonRef: this.spacePickerButtonRef,
                 // onClick: this.props.onListPickerFooterBtnClick,
             },
             // {
@@ -328,7 +325,7 @@ export default class PageResultView extends PureComponent<Props> {
             // },
             {
                 key: 'expand-notes-btn',
-                image: this.hasNotes ? icons.commentFull : icons.commentEmpty,
+                image: this.hasNotes ? 'commentFull' : 'commentEmpty',
                 ButtonText:
                     this.props.noteIds[this.props.notesType].length > 0 &&
                     this.props.noteIds[this.props.notesType].length.toString(),
@@ -385,6 +382,7 @@ export default class PageResultView extends PureComponent<Props> {
                             }
                             filteredbyListID={this.props.filteredbyListID}
                             padding={'0px 20px 10px 20px'}
+                            spacePickerButtonRef={this.spacePickerBarRef}
                         />
                     )}
                     <ItemBoxBottom

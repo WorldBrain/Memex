@@ -169,7 +169,7 @@ export default class ListDetails extends PureComponent<Props, State> {
         }
 
         const tooltipText = this.props.isOwnedList ? (
-            <span>Edit Space Description</span>
+            <span>Edit Space</span>
         ) : (
             <span>
                 It isn't yet possible to edit descriptions <br /> of Spaces that
@@ -185,10 +185,9 @@ export default class ListDetails extends PureComponent<Props, State> {
                         this.props.isOwnedList &&
                         this.setState({ isEditingDescription: true })
                     }
-                    heightAndWidth="18px"
-                    color={'normalText'}
+                    padding={'5px'}
+                    heightAndWidth="22px"
                     icon={'edit'}
-                    defaultBackground
                 />
             </TooltipBox>
         )
@@ -210,19 +209,20 @@ export default class ListDetails extends PureComponent<Props, State> {
                                         'Saved on Mobile'}
                                     {this.props.listId === 20201014 && 'Inbox'}
                                 </SectionTitle>
-                                <TitleEditContainer>
+                                {/* <TitleEditContainer>
                                     {this.renderEditButton()}
-                                </TitleEditContainer>
+                                </TitleEditContainer> */}
                             </DetailsContainer>
                             {this.props.listName && (
                                 <BtnsContainer>
                                     {this.props.remoteLink ? (
-                                        <>
+                                        <SpaceButtonRow>
                                             <Margin right="10px">
+                                                {this.renderEditButton()}
                                                 <Icon
-                                                    height="19px"
+                                                    height="22px"
+                                                    padding={'5px'}
                                                     filePath={icons.goTo}
-                                                    color="iconColor"
                                                     onClick={() =>
                                                         window.open(
                                                             this.props
@@ -236,25 +236,12 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                     this.props
                                                         .onAddContributorsClick
                                                 }
-                                                label={
-                                                    <ShareCollectionBtn>
-                                                        <Icon
-                                                            height="20px"
-                                                            filePath={
-                                                                icons.link
-                                                            }
-                                                            color="white"
-                                                            hoverOff
-                                                        />
-                                                        <ShareCollectionBtnLabel>
-                                                            Share Space
-                                                        </ShareCollectionBtnLabel>
-                                                    </ShareCollectionBtn>
-                                                }
-                                                backgroundColor={'darkhover'}
-                                                fontColor={'normalText'}
+                                                size={'large'}
+                                                type={'primary'}
+                                                label={'Share Space'}
+                                                icon={'invite'}
                                             />
-                                        </>
+                                        </SpaceButtonRow>
                                     ) : (
                                         <TooltipBox
                                             tooltipText="Invite people to this Space"
@@ -265,23 +252,10 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                     this.props
                                                         .onAddContributorsClick
                                                 }
-                                                label={
-                                                    <ShareCollectionBtn>
-                                                        <Icon
-                                                            height="20px"
-                                                            filePath={
-                                                                icons.link
-                                                            }
-                                                            color="white"
-                                                            hoverOff
-                                                        />
-                                                        <ShareCollectionBtnLabel>
-                                                            Share Space
-                                                        </ShareCollectionBtnLabel>
-                                                    </ShareCollectionBtn>
-                                                }
-                                                backgroundColor={'darkhover'}
-                                                fontColor={'normalText'}
+                                                size={'large'}
+                                                type={'primary'}
+                                                label={'Share Space'}
+                                                icon={'invite'}
                                             />
                                         </TooltipBox>
                                     )}
@@ -342,6 +316,16 @@ export default class ListDetails extends PureComponent<Props, State> {
         )
     }
 }
+
+const SpaceButtonRow = styled.div`
+    display: flex;
+    grid-gap: 15px;
+    align-items: center;
+
+    & > div {
+        grid-gap: 15px;
+    }
+`
 
 const TitleContainer = styled.div`
     display: flex;

@@ -55,7 +55,7 @@ export default function SearchCopyPaster(props: Props) {
     const copypasterButtonRef = React.useRef<HTMLElement>(null)
 
     return (
-        <TooltipBox tooltipText={'Copy Search Results'}>
+        <TooltipBox tooltipText={'Copy Search Results'} placement="bottom">
             <Icon
                 filePath={icons.copy}
                 heightAndWidth="22px"

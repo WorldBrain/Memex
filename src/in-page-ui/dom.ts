@@ -1,4 +1,5 @@
 import { injectCSS } from 'src/util/content-injection'
+import Browser, { runtime } from 'webextension-polyfill'
 
 export function createInPageUIRoot({
     containerId,
@@ -58,12 +59,12 @@ export function createShadowRootIfSupported(
          */
         shadow = container.attachShadow({ mode: 'open' })
 
+        const fontFile = runtime.getURL('/fonts/Satoshi/satoshi.css')
         var innerHTML = ''
         innerHTML += '<style>'
         innerHTML +=
             ':host {all: initial, font-family: "Satoshi"} :host * {font-family: "Satoshi", sans-serif; line-height: initial}'
-        innerHTML +=
-            '</style> <link rel="stylesheet" href="/fonts/Satoshi/satoshi.css" />'
+        innerHTML += `</style> <link rel="stylesheet" href="${fontFile}" />`
         shadow.innerHTML = innerHTML
 
         shadow.appendChild(rootElement)

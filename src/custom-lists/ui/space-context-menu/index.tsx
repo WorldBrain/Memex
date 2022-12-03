@@ -3,7 +3,7 @@ import styled, { css, keyframes } from 'styled-components'
 import Logic, { Dependencies, State, Event } from './logic'
 import { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
-import { Icon } from 'src/dashboard-refactor/styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import * as icons from 'src/common-ui/components/design-library/icons'
@@ -69,8 +69,9 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         onClick={wrapClick((e) =>
                             this.processEvent('shareSpace', null),
                         )}
-                        fontSize="14px"
-                        width="100%"
+                        size={'medium'}
+                        type={'secondary'}
+                        fullWidth
                     />
                 </ShareSectionContainer>
             )
@@ -80,26 +81,27 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             <ShareSectionContainer onClick={wrapClick}>
                 {this.state.inviteLinks.map(
                     ({ link, showCopyMsg, roleID }, linkIndex) => (
-                        <Margin key={link}>
-                            <LinkAndRoleBox viewportBreakpoint="normal">
-                                <PermissionArea>
-                                    <TooltipBox
-                                        placement={'right'}
-                                        tooltipText={
-                                            sharedListRoleIDToString(roleID) ===
-                                            'Contributor' ? (
-                                                <span>
-                                                    Add highlights, pages &
-                                                    replies
-                                                </span>
-                                            ) : (
-                                                <span>
-                                                    View & reply to highlights &
-                                                    pages
-                                                </span>
-                                            )
-                                        }
-                                    >
+                        <TooltipBox
+                            placement={'bottom'}
+                            strategy={'fixed'}
+                            tooltipText={
+                                sharedListRoleIDToString(roleID) ===
+                                'Contributor' ? (
+                                    <span>
+                                        Add highlights,
+                                        <br /> pages & replies
+                                    </span>
+                                ) : (
+                                    <span>
+                                        View & reply <br />
+                                        to highlights & pages
+                                    </span>
+                                )
+                            }
+                        >
+                            <Margin top={'5px'} key={link}>
+                                <LinkAndRoleBox viewportBreakpoint="normal">
+                                    <PermissionArea>
                                         <PermissionText
                                             title={null}
                                             viewportBreakpoint="normal"
@@ -107,46 +109,46 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                             {sharedListRoleIDToString(roleID) +
                                                 ' Access'}
                                         </PermissionText>
-                                    </TooltipBox>
-                                </PermissionArea>
-                                <CopyLinkBox>
-                                    <LinkBox
-                                        left="small"
-                                        onClick={wrapClick((e) =>
-                                            this.processEvent(
-                                                'copyInviteLink',
-                                                { linkIndex },
-                                            ),
-                                        )}
-                                    >
-                                        <Link>
-                                            {showCopyMsg
-                                                ? 'Copied to clipboard'
-                                                : link.split('https://')[1]}
-                                        </Link>
-                                        <IconContainer id={'iconContainer'}>
-                                            <Icon
-                                                heightAndWidth="16px"
-                                                path={icons.copy}
-                                                onClick={wrapClick(() =>
-                                                    this.processEvent(
-                                                        'copyInviteLink',
-                                                        { linkIndex },
-                                                    ),
-                                                )}
-                                            />
-                                            <Icon
-                                                heightAndWidth="16px"
-                                                path={icons.goTo}
-                                                onClick={wrapClick(() =>
-                                                    window.open(link),
-                                                )}
-                                            />
-                                        </IconContainer>
-                                    </LinkBox>
-                                </CopyLinkBox>
-                            </LinkAndRoleBox>
-                        </Margin>
+                                    </PermissionArea>
+                                    <CopyLinkBox>
+                                        <LinkBox
+                                            left="small"
+                                            onClick={wrapClick((e) =>
+                                                this.processEvent(
+                                                    'copyInviteLink',
+                                                    { linkIndex },
+                                                ),
+                                            )}
+                                        >
+                                            <Link>
+                                                {showCopyMsg
+                                                    ? 'Copied to clipboard'
+                                                    : link.split('https://')[1]}
+                                            </Link>
+                                            <IconContainer id={'iconContainer'}>
+                                                <Icon
+                                                    heightAndWidth="20px"
+                                                    filePath={'copy'}
+                                                    onClick={wrapClick(() =>
+                                                        this.processEvent(
+                                                            'copyInviteLink',
+                                                            { linkIndex },
+                                                        ),
+                                                    )}
+                                                />
+                                                <Icon
+                                                    heightAndWidth="20px"
+                                                    filePath={'goTo'}
+                                                    onClick={wrapClick(() =>
+                                                        window.open(link),
+                                                    )}
+                                                />
+                                            </IconContainer>
+                                        </LinkBox>
+                                    </CopyLinkBox>
+                                </LinkAndRoleBox>
+                            </Margin>
+                        </TooltipBox>
                     ),
                 )}
             </ShareSectionContainer>
@@ -174,17 +176,22 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                 <DeleteBox>
                     <TitleBox>Delete this Space?</TitleBox>
                     <DetailsText>
-                        This does not delete the pages in it
+                        This does NOT delete the pages in it
                     </DetailsText>
                     <PrimaryAction
                         onClick={wrapClick(this.props.onDeleteSpaceConfirm)}
-                        label={<ButtonLabel>Delete</ButtonLabel>}
+                        label={'Delete'}
+                        icon={'trash'}
+                        type={'secondary'}
+                        size={'medium'}
                     />
-                    <SecondaryAction
+                    <PrimaryAction
                         onClick={wrapClick(() =>
                             this.processEvent('cancelDeleteSpace', null),
                         )}
-                        label={<ButtonLabel>Cancel</ButtonLabel>}
+                        label={'Cancel'}
+                        type={'tertiary'}
+                        size={'medium'}
                     />
                 </DeleteBox>
             )
@@ -224,16 +231,13 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         nameValue={this.state.nameValue}
                     />
                 </EditArea>
-                <MenuButton onClick={deleteHandler}>
-                    <Margin right="6px">
-                        <Icon
-                            hoverOff
-                            heightAndWidth="18px"
-                            path={icons.trash}
-                        />
-                    </Margin>
-                    Delete
-                </MenuButton>
+                <PrimaryAction
+                    onClick={deleteHandler}
+                    icon={'trash'}
+                    size={'medium'}
+                    type={'tertiary'}
+                    label={'Delete Space'}
+                />
             </ContextMenuContainer>
         )
     }
@@ -248,7 +252,7 @@ const ContextMenuContainer = styled.div`
     grid-gap: 5px;
     flex-direction: column;
     width: fill-available;
-    padding: 15px;
+    padding: 15px 17px 10px 17px;
     min-height: fit-content;
     height: fit-content;
     justify-content: center;
@@ -279,6 +283,7 @@ const PermissionArea = styled.div`
 const EditArea = styled.div`
     color: ${(props) => props.theme.colors.normalText};
     width: fill-available;
+    margin-bottom: 3px;
 `
 
 const IconContainer = styled.div`

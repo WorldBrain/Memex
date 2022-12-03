@@ -22,7 +22,7 @@ import {
 import { generateAnnotationUrl } from 'src/annotations/utils'
 import { AnalyticsEvent } from 'src/analytics/types'
 import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
-import { getYoutubeTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
+import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 
 const styles = require('src/highlighting/ui/styles.css')
 
@@ -168,22 +168,24 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const selection = params.getSelection()
         const { pageUrl, title } = await params.getUrlAndTitle()
 
-        // Enable support using annotation keyboard shortcuts to make notes on youtube videos without opening the sidebar first
+        // Enable support for any kind of HTML 5 video using annotation keyboard shortcuts to make notes without opening the sidebar and notes field first
 
-        let youtubeTimestampForComment
-        if (pageUrl.includes('youtube.com/watch')) {
-            const [videoURLWithTime, humanTimestamp] = getYoutubeTimestamp()
-            youtubeTimestampForComment = `[${humanTimestamp}](${videoURLWithTime})`
+        let videoTimeStampForComment
+        const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
+
+        if (videoURLWithTime != null) {
+            videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`
         }
 
         if (
             (!selection || selection.isCollapsed) &&
-            !youtubeTimestampForComment
+            videoTimeStampForComment == null
         ) {
             return null
         }
 
         const anchor = await extractAnchorFromSelection(selection)
+
         const body = anchor && anchor.quote
         const hasSelectedText = anchor.quote.length
 
@@ -191,18 +193,18 @@ export class HighlightRenderer implements HighlightRendererInterface {
             url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
             body: hasSelectedText
                 ? anchor.quote
-                : youtubeTimestampForComment && undefined,
+                : videoTimeStampForComment && undefined,
             pageUrl,
             tags: [],
             lists: [],
             comment: hasSelectedText
                 ? ''
-                : youtubeTimestampForComment
-                ? youtubeTimestampForComment
+                : videoTimeStampForComment
+                ? videoTimeStampForComment
                 : undefined,
             selector: hasSelectedText
                 ? anchor
-                : youtubeTimestampForComment && undefined,
+                : videoTimeStampForComment && undefined,
             pageTitle: title,
         }
 

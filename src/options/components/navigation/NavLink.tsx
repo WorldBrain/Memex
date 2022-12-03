@@ -100,8 +100,7 @@ const RouteItem = styled.li<{ name: string; isActive: boolean }>`
             background-color: ${(props) => props.theme.colors.activeBackground};
 
             &:hover {
-                background-color: ${(props) =>
-                    props.theme.colors.activeBackground};
+                outline: 1px solid ${(props) => props.theme.colors.lightHover};
                 cursor: default;
             }
         `}
@@ -112,7 +111,8 @@ const RouteItem = styled.li<{ name: string; isActive: boolean }>`
     }
 
     &:hover {
-        background-color: ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        cursor: pointer;
     }
 
     ${(props) =>

@@ -349,8 +349,6 @@ export class SidebarContainerLogic extends UILogic<
                 ? event.existingWidthState
                 : SIDEBAR_WIDTH_STORAGE_KEY
 
-        console.log('width', width)
-
         this.emitMutation({
             showState: { $set: 'visible' },
             sidebarWidth: { $set: width },
