@@ -177,16 +177,15 @@ export class HighlightRenderer implements HighlightRendererInterface {
             videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`
         }
 
-        console.log(videoTimeStampForComment)
-
         if (
             (!selection || selection.isCollapsed) &&
-            !videoTimeStampForComment
+            videoTimeStampForComment == null
         ) {
             return null
         }
 
         const anchor = await extractAnchorFromSelection(selection)
+
         const body = anchor && anchor.quote
         const hasSelectedText = anchor.quote.length
 
