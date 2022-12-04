@@ -144,7 +144,7 @@ export const search: (args?: any) => Thunk = (
             : pageSearchRPC
 
         // Tell background script to search
-        const searchResult = null
+        const searchResult = undefined
         dispatch(resultsActs.updateSearchResult({ overwrite, searchResult }))
 
         if (searchResult.docs.length) {
