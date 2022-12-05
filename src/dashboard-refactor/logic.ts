@@ -1,5 +1,6 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
+import throttle from 'lodash/throttle'
 import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
 
 import * as utils from './search-results/util'
@@ -532,9 +533,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.runSearch(nextState)
     }
 
-    private runSearch = debounce((previousState: State, paginate?: boolean) => {
-        const searchID = ++this.currentSearchID
-        this.search({ previousState, event: { paginate, searchID } })
+    private runSearch = throttle((previousState: State, paginate?: boolean) => {
+        this.search({ previousState, event: { paginate } })
     }, 100)
 
     // leaving this here for now in order to finalise the feature for handling the race condition rendering
@@ -543,6 +543,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     /* START - Misc event handlers */
     search: EventHandler<'search'> = async ({ previousState, event }) => {
+        const searchID = ++this.currentSearchID
         const searchFilters: UIMutation<State['searchFilters']> = {
             skip: event.paginate
                 ? { $apply: (skip) => skip + PAGE_SIZE }
@@ -607,8 +608,8 @@ export class DashboardLogic extends UILogic<State, Events> {
 
                 // console.log('searchIDafter', event.searchID)
                 // console.log('currentSearchIDafter', this.currentSearchID)
-                if (event.searchID !== this.currentSearchID) {
-                    console.log('NOT:', event.searchID)
+                if (searchID !== this.currentSearchID) {
+                    console.log('NOT:', searchID)
                     return
                 }
 
