@@ -234,6 +234,14 @@ export default class PageResultView extends PureComponent<Props> {
                             this.props.notesType
                         ].length.toString(),
                     imageColor: 'purple',
+                    onClick: this.props.onNotesBtnClick,
+                    tooltipText: (
+                        <span>
+                            <strong>Add/View Notes</strong>
+                            <br />
+                            shift+click to open inline
+                        </span>
+                    ),
                 },
             ]
         }
@@ -245,7 +253,6 @@ export default class PageResultView extends PureComponent<Props> {
                     image: 'trash',
                     onClick: this.props.onTrashBtnClick,
                     tooltipText: 'Delete Page & all related content',
-                    componentToOpen: null,
                 },
                 {
                     key: 'copy-paste-page-btn',
@@ -281,7 +288,6 @@ export default class PageResultView extends PureComponent<Props> {
                         ].length.toString(),
                     imageColor: 'purple',
                     onClick: this.props.onNotesBtnClick,
-                    componentToOpen: null,
                     tooltipText: (
                         <span>
                             <strong>Add/View Notes</strong>
