@@ -258,8 +258,9 @@ export class AnnotationsSidebar extends React.Component<
                 listId,
             )
         } else {
+            // TODO: make sure this gets passed the right list ID (do we need to save it?)
             // Make sure followed list annotations will be loaded after selected
-            this.props.expandFollowedListNotes(listId)
+            // this.props.expandFollowedListNotes()
             if (this.props.onSelectSpace) {
                 console.debug('Triggering select space', listId)
                 this.props.onSelectSpace(listId)
@@ -608,6 +609,18 @@ export class AnnotationsSidebar extends React.Component<
                         </FollowedListTitleContainer>
                         <ButtonContainer>
                             <ActionButtons>
+                                <TooltipBox
+                                    tooltipText="Open space in isolated view"
+                                    placement="left"
+                                >
+                                    <Icon
+                                        icon="edit"
+                                        height="16px"
+                                        onClick={() =>
+                                            this.triggerSelectSpace(listId)
+                                        }
+                                    />
+                                </TooltipBox>
                                 <TooltipBox
                                     tooltipText="Go to Space"
                                     placement="left"
