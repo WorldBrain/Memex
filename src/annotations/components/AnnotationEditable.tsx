@@ -31,6 +31,7 @@ import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -71,19 +72,12 @@ export interface AnnotationProps {
         name: string
         profileImgSrc?: string
     }
-    listPickerRenderLocation?: ListPickerShowState
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
-    renderListsPickerForAnnotation?: (
-        id: string,
-        referenceElement: React.RefObject<HTMLElement>,
-    ) => JSX.Element
+    renderListsPickerForAnnotation?: (id: string) => JSX.Element
     renderCopyPasterForAnnotation?: (id: string) => JSX.Element
-    renderShareMenuForAnnotation?: (
-        id: string,
-        referenceElement: React.RefObject<HTMLElement>,
-    ) => JSX.Element
+    renderShareMenuForAnnotation?: (id: string) => JSX.Element
 }
 
 export interface AnnotationEditableEventProps {
@@ -98,15 +92,21 @@ export interface AnnotationEditableEventProps {
 interface State {
     editorHeight: string
     showQuickTutorial: boolean
+    showSpacePicker: ListPickerShowState
+    showShareMenu: boolean
+    showCopyPaster: boolean
+    hoverEditArea: boolean
+    hoverCard: boolean
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
 
-export default class AnnotationEditable extends React.Component<Props> {
+export default class AnnotationEditable extends React.Component<Props, State> {
     private annotEditRef = React.createRef<AnnotationEdit>()
     private spacePickerBarRef = React.createRef<HTMLElement>()
     private shareButtonRef = React.createRef<HTMLElement>()
     private tutorialButtonRef = React.createRef<HTMLElement>()
+    private copyPasterButtonRef = React.createRef<HTMLElement>()
 
     static MOD_KEY = getKeyName({ key: 'mod' })
     static defaultProps: Pick<
@@ -122,6 +122,11 @@ export default class AnnotationEditable extends React.Component<Props> {
     state: State = {
         editorHeight: '50px',
         showQuickTutorial: false,
+        showSpacePicker: 'hide',
+        showShareMenu: false,
+        showCopyPaster: false,
+        hoverEditArea: false,
+        hoverCard: false,
     }
 
     focusEditForm() {
@@ -130,6 +135,18 @@ export default class AnnotationEditable extends React.Component<Props> {
 
     componentDidMount() {
         this.textAreaHeight()
+    }
+
+    private updateSpacePickerState(showState: ListPickerShowState) {
+        if (this.state.showSpacePicker === 'hide') {
+            this.setState({
+                showSpacePicker: showState,
+            })
+        } else {
+            this.setState({
+                showSpacePicker: 'hide',
+            })
+        }
     }
 
     private get displayLists(): Array<{
@@ -195,47 +212,46 @@ export default class AnnotationEditable extends React.Component<Props> {
         } = this.props
 
         const actionsBox =
-            this.props.hoverState === 'main-content' &&
-            this.props.mode != 'edit' ? (
-                <HighlightActionsBox>
-                    {onGoToAnnotation && (
-                        <TooltipBox
-                            tooltipText="Open in Page"
-                            placement="bottom"
-                        >
-                            <HighlightAction right="2px">
-                                <Icon
-                                    onClick={onGoToAnnotation}
-                                    filePath={icons.goTo}
-                                    heightAndWidth={'20px'}
-                                    padding={'5px'}
-                                />
-                            </HighlightAction>
-                        </TooltipBox>
-                    )}
-                    {footerDeps?.onEditIconClick && (
-                        <TooltipBox
-                            tooltipText={
-                                <span>
-                                    <strong>Add/Edit Note</strong>
-                                    <br />
-                                    or double-click card
-                                </span>
-                            }
-                            placement="bottom"
-                        >
-                            <HighlightAction>
-                                <Icon
-                                    onClick={footerDeps.onEditIconClick}
-                                    icon={'edit'}
-                                    heightAndWidth={'20px'}
-                                    padding={'5px'}
-                                />
-                            </HighlightAction>
-                        </TooltipBox>
-                    )}
-                </HighlightActionsBox>
-            ) : null
+            this.props.mode != 'edit'
+                ? this.state.hoverEditArea && (
+                      <HighlightActionsBox>
+                          {onGoToAnnotation && (
+                              <TooltipBox
+                                  tooltipText="Open in Page"
+                                  placement="bottom"
+                              >
+                                  <HighlightAction right="2px">
+                                      <Icon
+                                          onClick={onGoToAnnotation}
+                                          filePath={icons.goTo}
+                                          heightAndWidth={'20px'}
+                                          padding={'5px'}
+                                      />
+                                  </HighlightAction>
+                              </TooltipBox>
+                          )}
+                          <TooltipBox
+                              tooltipText={
+                                  <span>
+                                      <strong>Add/Edit Note</strong>
+                                      <br />
+                                      or double-click card
+                                  </span>
+                              }
+                              placement="bottom"
+                          >
+                              <HighlightAction>
+                                  <Icon
+                                      onClick={footerDeps.onEditIconClick}
+                                      icon={'edit'}
+                                      heightAndWidth={'20px'}
+                                      padding={'5px'}
+                                  />
+                              </HighlightAction>
+                          </TooltipBox>
+                      </HighlightActionsBox>
+                  )
+                : null
 
         return (
             <HighlightStyled
@@ -333,6 +349,19 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
+    private isAnyModalOpen() {
+        if (
+            this.state.showCopyPaster ||
+            this.state.showQuickTutorial ||
+            this.state.showShareMenu ||
+            this.state.showSpacePicker !== 'hide'
+        ) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     private calcFooterActions(): ItemBoxBottomAction[] {
         const {
             annotationFooterDependencies: footerDeps,
@@ -360,18 +389,13 @@ export default class AnnotationEditable extends React.Component<Props> {
             return [repliesToggle]
         }
 
-        if (hoverState === null) {
+        if (this.state.hoverCard === false) {
             if (appendRepliesToggle) {
                 return [repliesToggle]
             }
         }
 
-        if (
-            hoverState != null ||
-            (hoverState != null &&
-                (this.props.renderCopyPasterForAnnotation ||
-                    this.props.listPickerRenderLocation === 'footer'))
-        ) {
+        if (this.state.hoverCard === true || this.isAnyModalOpen() === true) {
             return [
                 {
                     key: 'delete-note-btn',
@@ -382,15 +406,19 @@ export default class AnnotationEditable extends React.Component<Props> {
                 {
                     key: 'copy-paste-note-btn',
                     image: 'copy',
-                    onClick: footerDeps.onCopyPasterBtnClick,
+                    onClick: () => this.setState({ showCopyPaster: true }),
                     tooltipText: 'Copy Note',
+                    active: this.state.showCopyPaster,
+                    buttonRef: this.copyPasterButtonRef,
                 },
                 {
                     key: 'add-spaces-btn',
                     image: 'plus',
                     imageColor: 'purple',
-                    onClick: footerDeps.onListIconClick,
+                    tooltipText: 'Add to Spaces',
+                    onClick: () => this.updateSpacePickerState('footer'),
                     buttonRef: this.props.spacePickerButtonRef,
+                    active: this.state.showSpacePicker === 'footer',
                 },
                 // {
                 //     key: 'share-note-btn',
@@ -403,21 +431,14 @@ export default class AnnotationEditable extends React.Component<Props> {
         }
 
         return [
-            // {
-            //     key: 'delete-note-btn',
-            //     isDisabled: true,
-            //     image: icons.trash,
-            // },
-            // {
-            //     key: 'copy-paste-note-btn',
-            //     isDisabled: true,
-            //     image: icons.copy,
-            // },
-            // {
-            //     key: 'share-note-btn',
-            //     isDisabled: true,
-            //     image: shareIconData.icon,
-            // },
+            {
+                key: 'add-spaces-btn',
+                image: 'plus',
+                imageColor: 'purple',
+                // onClick: () => this.updateSpacePickerState('footer'),
+                // buttonRef: this.props.spacePickerButtonRef,
+                // active: this.state.showSpacePicker === 'footer',
+            },
             appendRepliesToggle && repliesToggle,
         ]
     }
@@ -459,24 +480,25 @@ export default class AnnotationEditable extends React.Component<Props> {
             return (
                 <DefaultFooterStyled>
                     <PrimaryAction
-                        onClick={footerDeps.onShareClick}
+                        onClick={() =>
+                            this.setState({
+                                showShareMenu: true,
+                            })
+                        }
                         label={shareIconData.label}
                         icon={shareIconData.icon}
                         size={'small'}
                         type={'tertiary'}
                         innerRef={this.shareButtonRef}
-                        active={this.props.activeShareMenuNoteId && true}
+                        active={this.state.showShareMenu}
                     />
                     <ItemBoxBottom
-                        firstDivProps={{
-                            onMouseEnter: this.props.onFooterHover,
-                        }}
                         creationInfo={this.creationInfo}
                         actions={this.calcFooterActions()}
                     />
-                    {this.props.listPickerRenderLocation === 'footer' &&
+                    {this.state.showSpacePicker === 'footer' &&
                         this.renderSpacePicker(this.props.spacePickerButtonRef)}
-                    {this.props.activeShareMenuNoteId &&
+                    {this.state.showShareMenu &&
                         this.renderShareMenu(this.shareButtonRef)}
                 </DefaultFooterStyled>
             )
@@ -546,36 +568,81 @@ export default class AnnotationEditable extends React.Component<Props> {
         )
     }
 
-    renderSpacePicker(referenceElement) {
+    private renderSpacePicker(referenceElement: React.RefObject<HTMLElement>) {
         if (
             !(
-                this.props.listPickerRenderLocation === 'lists-bar' ||
-                this.props.listPickerRenderLocation === 'footer'
+                this.state.showSpacePicker === 'lists-bar' ||
+                this.state.showSpacePicker === 'footer'
             )
         ) {
             return
         }
 
-        return this.props.renderListsPickerForAnnotation(
-            this.props.url,
-            referenceElement,
+        return (
+            <PopoutBox
+                targetElementRef={referenceElement.current}
+                placement={
+                    this.state.showSpacePicker === 'lists-bar'
+                        ? 'bottom-start'
+                        : 'bottom-end'
+                }
+                closeComponent={() => {
+                    this.setState({
+                        showSpacePicker: 'hide',
+                    })
+                }}
+                offsetX={10}
+                bigClosingScreen
+            >
+                {this.props.renderListsPickerForAnnotation(this.props.url)}
+            </PopoutBox>
         )
     }
 
-    renderShareMenu(referenceElement) {
-        if (!this.props.activeShareMenuNoteId) {
+    renderShareMenu(referenceElement: React.RefObject<HTMLElement>) {
+        if (!this.state.showShareMenu) {
             return
         }
 
-        return this.props.renderShareMenuForAnnotation(
-            this.props.url,
-            referenceElement,
+        return (
+            <PopoutBox
+                targetElementRef={referenceElement.current}
+                placement={'bottom-start'}
+                closeComponent={() => {
+                    this.setState({
+                        showShareMenu: false,
+                    })
+                }}
+                offsetX={10}
+            >
+                {this.props.renderShareMenuForAnnotation(this.props.url)}
+            </PopoutBox>
+        )
+    }
+
+    renderCopyPaster(referenceElement: React.RefObject<HTMLElement>) {
+        if (!this.state.showCopyPaster) {
+            return
+        }
+
+        return (
+            <PopoutBox
+                targetElementRef={referenceElement.current}
+                placement={'bottom-end'}
+                closeComponent={() => {
+                    this.setState({
+                        showCopyPaster: false,
+                    })
+                }}
+                offsetX={10}
+            >
+                {this.props.renderCopyPasterForAnnotation(this.props.url)}
+            </PopoutBox>
         )
     }
 
     render() {
         const { annotationFooterDependencies } = this.props
-
         return (
             <ThemeProvider theme={this.theme}>
                 <AnnotationBox
@@ -586,8 +653,17 @@ export default class AnnotationEditable extends React.Component<Props> {
                     <ItemBox
                         firstDivProps={{
                             id: this.props.url,
-                            onMouseLeave: this.props.onUnhover,
                         }}
+                        onMouseEnter={() =>
+                            this.setState({
+                                hoverCard: true,
+                            })
+                        }
+                        onMouseLeave={() =>
+                            this.setState({
+                                hoverCard: false,
+                            })
+                        }
                     >
                         <AnnotationStyled>
                             <ContentContainer
@@ -595,6 +671,16 @@ export default class AnnotationEditable extends React.Component<Props> {
                                     annotationFooterDependencies?.onEditIconClick
                                 }
                                 isEditMode={this.props.mode === 'edit'}
+                                onMouseEnter={() =>
+                                    this.setState({
+                                        hoverEditArea: true,
+                                    })
+                                }
+                                onMouseLeave={() =>
+                                    this.setState({
+                                        hoverEditArea: false,
+                                    })
+                                }
                             >
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
@@ -604,14 +690,8 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 <ListsSegment
                                     tabIndex={0}
                                     lists={this.displayLists}
-                                    onMouseEnter={this.props.onListsHover}
-                                    showEditBtn={
-                                        this.props.hoverState === 'lists'
-                                    }
-                                    onListClick={undefined}
-                                    onEditBtnClick={
-                                        this.props.annotationEditDependencies
-                                            ?.onListsBarPickerBtnClick
+                                    onEditBtnClick={() =>
+                                        this.updateSpacePickerState('lists-bar')
                                     }
                                     spacePickerButtonRef={
                                         this.spacePickerBarRef
@@ -624,18 +704,11 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 />
                             )}
                             {this.renderFooter()}
-                            {/* {this.props.renderCopyPasterForAnnotation && (
-                                <CopyPasterWrapper>
-                                    {this.props.renderCopyPasterForAnnotation(
-                                        this.props.url,
-                                    )}
-                                </CopyPasterWrapper>
-                            )} */}
+                            {this.renderCopyPaster(this.copyPasterButtonRef)}
                         </AnnotationStyled>
                     </ItemBox>
-                    {this.props.listPickerRenderLocation === 'lists-bar' &&
+                    {this.state.showSpacePicker === 'lists-bar' &&
                         this.renderSpacePicker(this.spacePickerBarRef)}
-                    {/* {this.props.renderListsPickerForAnnotation(this.props.url)} */}
                 </AnnotationBox>
                 {this.state.showQuickTutorial && (
                     <PopoutBox

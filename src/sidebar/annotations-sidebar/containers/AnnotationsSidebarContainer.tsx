@@ -126,7 +126,6 @@ export class AnnotationsSidebarContainer<
     }
 
     listenToEsc = (event) => {
-        console.log(this.state.showAllNotesShareMenu)
         if (event.key === 'Escape') {
             if (
                 this.state.showAllNotesCopyPaster ||
@@ -291,12 +290,12 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('setTagPickerAnnotationId', {
                     id: annotation.url,
                 }),
-            onListIconClick: () =>
-                this.processEvent('setListPickerAnnotationId', {
-                    id: annotation.url,
-                    position: 'footer',
-                    followedListId,
-                }),
+            // onListIconClick: () =>
+            //     this.processEvent('setListPickerAnnotationId', {
+            //         id: annotation.url,
+            //         position: 'footer',
+            //         followedListId,
+            //     }),
         }
     }
 
@@ -462,122 +461,91 @@ export class AnnotationsSidebarContainer<
     private renderCopyPasterManagerForAnnotation = (
         followedListId?: string,
     ) => (currentAnnotationId: string) => {
-        const state =
-            followedListId != null
-                ? this.state.followedLists.byId[followedListId]
-                      .activeCopyPasterAnnotationId
-                : this.state.activeCopyPasterAnnotationId
+        // const state =
+        //     followedListId != null
+        //         ? this.state.followedLists.byId[followedListId]
+        //               .activeCopyPasterAnnotationId
+        //         : this.state.activeCopyPasterAnnotationId
 
-        if (state !== currentAnnotationId) {
-            return null
-        }
+        // if (state !== currentAnnotationId) {
+        //     return null
+        // }
 
         return (
             <PageNotesCopyPaster
                 copyPaster={this.props.copyPaster}
                 annotationUrls={[currentAnnotationId]}
                 normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
-                onClickOutside={() =>
-                    this.processEvent('resetCopyPasterAnnotationId', null)
-                }
             />
         )
     }
 
     private renderListPickerForAnnotation = (followedListId?: string) => (
         currentAnnotationId: string,
-        referenceElement: React.RefObject<HTMLElement>,
     ) => {
         const currentAnnotation = this.props.annotationsCache.getAnnotationById(
             currentAnnotationId,
         )
 
-        const state =
-            followedListId != null
-                ? this.state.followedLists.byId[followedListId]
-                      .activeListPickerState
-                : this.state.activeListPickerState
+        // const state =
+        //     followedListId != null
+        //         ? this.state.followedLists.byId[followedListId]
+        //               .activeListPickerState
+        //         : this.state.activeListPickerState
 
-        if (
-            state == null ||
-            state.annotationId !== currentAnnotationId ||
-            currentAnnotation == null
-        ) {
-            return
-        }
+        // if (
+        //     state == null ||
+        //     state.annotationId !== currentAnnotationId ||
+        //     currentAnnotation == null
+        // ) {
+        //     return
+        // }
 
         return (
-            <PopoutBox
-                targetElementRef={referenceElement.current}
-                placement={'bottom-start'}
-                closeComponent={() => {
-                    this.processEvent('resetListPickerAnnotationId', {
-                        id: currentAnnotation.url,
-                    })
-                }}
-                offsetX={10}
-                bigClosingScreen
-            >
-                <CollectionPicker
-                    {...this.getSpacePickerProps(currentAnnotation, true)}
-                />
-            </PopoutBox>
+            <CollectionPicker
+                {...this.getSpacePickerProps(currentAnnotation, true)}
+            />
         )
     }
 
     private renderShareMenuForAnnotation = (followedListId?: string) => (
         currentAnnotationId: string,
-        referenceElement: React.RefObject<HTMLElement>,
     ) => {
         const currentAnnotation = this.props.annotationsCache.getAnnotationById(
             currentAnnotationId,
         )
 
-        const state =
-            followedListId != null
-                ? this.state.followedLists.byId[followedListId]
-                      .activeShareMenuAnnotationId
-                : this.state.activeShareMenuNoteId
+        // const state =
+        //     followedListId != null
+        //         ? this.state.followedLists.byId[followedListId]
+        //               .activeShareMenuAnnotationId
+        //         : this.state.activeShareMenuNoteId
 
-        if (state !== currentAnnotationId || currentAnnotation == null) {
-            return null
-        }
+        // if (state !== currentAnnotationId || currentAnnotation == null) {
+        //     return null
+        // }
 
         return (
-            <PopoutBox
-                targetElementRef={referenceElement.current}
-                placement={'bottom-start'}
-                closeComponent={() =>
+            <SingleNoteShareMenu
+                listData={this.props.annotationsCache.listData}
+                isShared={currentAnnotation.isShared}
+                shareImmediately={this.state.immediatelyShareNotes}
+                contentSharingBG={this.props.contentSharing}
+                annotationsBG={this.props.annotations}
+                copyLink={(link) => this.processEvent('copyNoteLink', { link })}
+                annotationUrl={currentAnnotationId}
+                postShareHook={(state, opts) =>
+                    this.processEvent('updateAnnotationShareInfo', {
+                        annotationUrl: currentAnnotationId,
+                        privacyLevel: state.privacyLevel,
+                        keepListsIfUnsharing: opts?.keepListsIfUnsharing,
+                    })
+                }
+                closeShareMenu={() =>
                     this.processEvent('resetShareMenuNoteId', null)
                 }
-                offsetX={15}
-                width={'400px'}
-            >
-                <SingleNoteShareMenu
-                    listData={this.props.annotationsCache.listData}
-                    isShared={currentAnnotation.isShared}
-                    shareImmediately={this.state.immediatelyShareNotes}
-                    contentSharingBG={this.props.contentSharing}
-                    annotationsBG={this.props.annotations}
-                    copyLink={(link) =>
-                        this.processEvent('copyNoteLink', { link })
-                    }
-                    annotationUrl={currentAnnotationId}
-                    postShareHook={(state, opts) =>
-                        this.processEvent('updateAnnotationShareInfo', {
-                            annotationUrl: currentAnnotationId,
-                            privacyLevel: state.privacyLevel,
-                            keepListsIfUnsharing: opts?.keepListsIfUnsharing,
-                        })
-                    }
-                    closeShareMenu={() =>
-                        this.processEvent('resetShareMenuNoteId', null)
-                    }
-                    spacePickerProps={this.getSpacePickerProps(
-                        currentAnnotation,
-                    )}
-                />
-            </PopoutBox>
+                spacePickerProps={this.getSpacePickerProps(currentAnnotation)}
+            />
         )
     }
 
@@ -994,8 +962,6 @@ export class AnnotationsSidebarContainer<
                                 })}
                             isAnnotationCreateShown={this.state.showCommentBox}
                             setPopoutsActive={(isActive) => {
-                                console.log('popoutevent')
-                                console.log(isActive)
                                 this.processEvent('setPopoutsActive', isActive)
                             }}
                             annotationCreateProps={this.getCreateProps()}

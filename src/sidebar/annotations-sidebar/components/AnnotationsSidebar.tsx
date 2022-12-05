@@ -71,10 +71,7 @@ export interface AnnotationsSidebarProps
     activeShareMenuNoteId: string
     renderShareMenuForAnnotation: (
         followedListId?: string,
-    ) => (
-        id: string,
-        referenceElement: React.RefObject<HTMLElement>,
-    ) => JSX.Element
+    ) => (id: string) => JSX.Element
     renderListsPickerForAnnotation: (
         followedListId?: string,
     ) => (

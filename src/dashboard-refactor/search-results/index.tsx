@@ -162,85 +162,68 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         : undefined
                 }
                 mode={noteData.isEditing ? 'edit' : 'default'}
-                renderCopyPasterForAnnotation={() =>
-                    noteData.isCopyPasterShown && (
-                        <HoverBox
-                            padding={'0px'}
-                            right="0"
-                            withRelativeContainer
-                        >
-                            <PageNotesCopyPaster
-                                annotationUrls={[noteId]}
-                                normalizedPageUrls={[pageId]}
-                                onClickOutside={
-                                    interactionProps.onCopyPasterBtnClick
-                                }
-                            />
-                        </HoverBox>
-                    )
-                }
+                renderCopyPasterForAnnotation={() => (
+                    <PageNotesCopyPaster
+                        annotationUrls={[noteId]}
+                        normalizedPageUrls={[pageId]}
+                    />
+                )}
                 spacePickerButtonRef={this.spaceBtnBarDashboardRef}
-                listPickerRenderLocation={noteData.listPickerShowStatus}
-                renderListsPickerForAnnotation={() =>
-                    noteData.listPickerShowStatus !== 'hide' && (
-                        <CollectionPicker
-                            initialSelectedListIds={() => listsToDisplay}
-                            selectEntry={(listId) =>
+                renderListsPickerForAnnotation={() => (
+                    <CollectionPicker
+                        initialSelectedListIds={() => listsToDisplay}
+                        selectEntry={(listId) =>
+                            interactionProps.updateLists({
+                                added: listId,
+                                deleted: null,
+                                selected: [],
+                                options: {
+                                    showExternalConfirmations: true,
+                                },
+                            })
+                        }
+                        unselectEntry={(listId) =>
+                            interactionProps.updateLists({
+                                added: null,
+                                deleted: listId,
+                                selected: [],
+                                options: {
+                                    showExternalConfirmations: true,
+                                },
+                            })
+                        }
+                        createNewEntry={interactionProps.createNewList}
+                    />
+                )}
+                renderShareMenuForAnnotation={() => (
+                    <SingleNoteShareMenu
+                        listData={this.props.listData}
+                        isShared={noteData.isShared}
+                        shareImmediately={
+                            noteData.shareMenuShowStatus === 'show-n-share'
+                        }
+                        annotationUrl={noteId}
+                        copyLink={this.props.onNoteLinkCopy}
+                        postShareHook={interactionProps.updateShareInfo}
+                        spacePickerProps={{
+                            initialSelectedListIds: () => listsToDisplay,
+                            selectEntry: (listId, options) =>
                                 interactionProps.updateLists({
                                     added: listId,
                                     deleted: null,
                                     selected: [],
-                                    options: {
-                                        showExternalConfirmations: true,
-                                    },
-                                })
-                            }
-                            unselectEntry={(listId) =>
+                                    options,
+                                }),
+                            unselectEntry: (listId) =>
                                 interactionProps.updateLists({
                                     added: null,
                                     deleted: listId,
                                     selected: [],
-                                    options: {
-                                        showExternalConfirmations: true,
-                                    },
-                                })
-                            }
-                            createNewEntry={interactionProps.createNewList}
-                        />
-                    )
-                }
-                renderShareMenuForAnnotation={() =>
-                    noteData.shareMenuShowStatus !== 'hide' && (
-                        <SingleNoteShareMenu
-                            listData={this.props.listData}
-                            isShared={noteData.isShared}
-                            shareImmediately={
-                                noteData.shareMenuShowStatus === 'show-n-share'
-                            }
-                            annotationUrl={noteId}
-                            copyLink={this.props.onNoteLinkCopy}
-                            closeShareMenu={interactionProps.onShareBtnClick}
-                            postShareHook={interactionProps.updateShareInfo}
-                            spacePickerProps={{
-                                initialSelectedListIds: () => listsToDisplay,
-                                selectEntry: (listId, options) =>
-                                    interactionProps.updateLists({
-                                        added: listId,
-                                        deleted: null,
-                                        selected: [],
-                                        options,
-                                    }),
-                                unselectEntry: (listId) =>
-                                    interactionProps.updateLists({
-                                        added: null,
-                                        deleted: listId,
-                                        selected: [],
-                                    }),
-                                createNewEntry: interactionProps.createNewList,
-                            }}
-                        />
-                    )
-                }
+                                }),
+                            createNewEntry: interactionProps.createNewList,
+                        }}
+                    />
+                )}
                 annotationEditDependencies={{
                     comment: noteData.editNoteForm.inputValue,
                     onListsBarPickerBtnClick:
@@ -257,8 +240,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     onDeleteCancel: () => undefined,
                     onDeleteConfirm: () => undefined,
                     onTagIconClick: interactionProps.onTagPickerBtnClick,
-                    onListIconClick:
-                        interactionProps.onListPickerFooterBtnClick,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
                     onEditIconClick: interactionProps.onEditBtnClick,
