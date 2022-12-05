@@ -354,7 +354,10 @@ export default class AnnotationEditable extends React.Component<Props> {
                       imageColor: 'purple',
                       image: hasReplies ? 'commentFull' : 'commentEmpty',
                   }
-                : { node: <LoadingIndicator size={16} /> }
+                : {
+                      key: 'replies-btn',
+                      node: <LoadingIndicator size={16} />,
+                  }
 
         if (!footerDeps) {
             return [repliesToggle]
@@ -459,7 +462,7 @@ export default class AnnotationEditable extends React.Component<Props> {
             return (
                 <DefaultFooterStyled>
                     <PrimaryAction
-                        onClick={footerDeps.onShareClick}
+                        onClick={footerDeps?.onShareClick}
                         label={shareIconData.label}
                         icon={shareIconData.icon}
                         size={'small'}

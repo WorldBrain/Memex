@@ -80,11 +80,11 @@ export class AnnotationsSidebarContainer<
                 focusCreateForm: () =>
                     (this.sidebarRef?.current[
                         'instanceRef'
-                    ] as AnnotationsSidebarComponent).focusCreateForm(),
+                    ] as AnnotationsSidebarComponent)?.focusCreateForm(),
                 focusEditNoteForm: (annotationId) => {
                     ;(this.sidebarRef?.current[
                         'instanceRef'
-                    ] as AnnotationsSidebarComponent).focusEditNoteForm(
+                    ] as AnnotationsSidebarComponent)?.focusEditNoteForm(
                         annotationId,
                     )
                 },
@@ -1000,7 +1000,7 @@ export class AnnotationsSidebarContainer<
                             // sidebarActions={null}
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}
-                            ref={this.sidebarRef as any}
+                            ref={this.sidebarRef}
                             openCollectionPage={(remoteListId) =>
                                 window.open(
                                     getListShareUrl({ remoteListId }),
