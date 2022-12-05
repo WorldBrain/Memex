@@ -104,7 +104,7 @@ export type SearchResultToState = (
     extraPageResultState?: Pick<PageResult, 'areNotesShown'>,
 ) => Pick<RootState, 'results' | 'noteData' | 'pageData'>
 
-export type SearchType = 'pages' | 'notes'
+export type SearchType = 'pages' | 'notes' | 'videos' | 'twitter' | 'pdf'
 export type NotesType = 'search' | 'user' | 'followed'
 
 export interface NoteFormState {

@@ -54,7 +54,7 @@ export type Events = UIEvent<
         SearchFilterEvents &
         ListsSidebarEvents &
         SyncModalEvents & {
-            search: { paginate?: boolean }
+            search: { paginate?: boolean; searchID: number }
         }
 >
 

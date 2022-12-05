@@ -89,6 +89,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     syncSettings: SyncSettingsStore<
         'contentSharing' | 'dashboard' | 'extension'
     >
+    currentSearchID = 0
 
     constructor(private options: DashboardDependencies) {
         super()
@@ -528,35 +529,15 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
-        await this.runSearch(nextState)
+        this.runSearch(nextState)
     }
 
-    private runSearch = throttle((previousState: State, paginate?: boolean) => {
-        this.search({ previousState, event: { paginate } })
+    private runSearch = debounce((previousState: State, paginate?: boolean) => {
+        const searchID = ++this.currentSearchID
+        this.search({ previousState, event: { paginate, searchID } })
     }, 100)
 
     // leaving this here for now in order to finalise the feature for handling the race condition rendering
-
-    private incrementFunctionExecutionID(lastExecIDs: number[]) {
-        let newArray: number[]
-        let newFunctionID: number
-
-        if (lastExecIDs.length > 0) {
-            newFunctionID = lastExecIDs.slice(-1)[0] + 1
-            newArray = lastExecIDs
-            newArray.push(newFunctionID)
-        } else {
-            newArray = [0]
-        }
-
-        this.emitMutation({
-            searchResults: {
-                searchFunctionExecutionIDs: { $set: newArray },
-            },
-        })
-
-        return newArray
-    }
 
     /* END - Misc helper methods */
 
@@ -574,7 +555,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: {
                     [event.paginate
                         ? 'searchPaginationState'
-                        : 'searchState']: { $set: taskState },
+                        : 'searchState']: {
+                        $set: taskState,
+                    },
                 },
             }),
 
@@ -621,6 +604,14 @@ export class DashboardLogic extends UILogic<State, Events> {
                             : 'no-results'
                     }
                 }
+
+                // console.log('searchIDafter', event.searchID)
+                // console.log('currentSearchIDafter', this.currentSearchID)
+                if (event.searchID !== this.currentSearchID) {
+                    console.log('NOT:', event.searchID)
+                    return
+                }
+
                 this.emitMutation({
                     searchFilters,
                     searchResults: {

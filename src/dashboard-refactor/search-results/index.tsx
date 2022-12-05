@@ -56,7 +56,11 @@ const timestampToString = (timestamp: number) =>
 export type Props = RootState &
     Pick<
         SearchTypeSwitchProps,
-        'onNotesSearchSwitch' | 'onPagesSearchSwitch'
+        | 'onNotesSearchSwitch'
+        | 'onPagesSearchSwitch'
+        | 'onVideosSearchSwitch'
+        | 'onTwitterSearchSwitch'
+        | 'onPDFSearchSwitch'
     > & {
         searchFilters?: any
         searchResults?: any
@@ -587,6 +591,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             return this.renderNoResults()
         }
 
+        // console.log(this.props.searchState)
         if (this.props.searchState === 'running') {
             return this.renderLoader()
         }
