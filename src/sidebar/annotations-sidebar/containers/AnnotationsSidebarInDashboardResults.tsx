@@ -9,6 +9,7 @@ type Props = SidebarContainerOptions & {
     setLoginModalShown: (isShown: boolean) => void
     setDisplayNameModalShown: (isShown: boolean) => void
     setSidebarWidthforDashboard?: (sidebarWidth) => void
+    onNotesSidebarClose?: () => void
 }
 
 export class AnnotationsSidebarInDashboardResults extends React.Component<

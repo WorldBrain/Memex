@@ -10,6 +10,9 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 export interface Props {
     onNotesSearchSwitch: React.MouseEventHandler<HTMLButtonElement>
     onPagesSearchSwitch: React.MouseEventHandler<HTMLButtonElement>
+    onVideosSearchSwitch: React.MouseEventHandler<HTMLButtonElement>
+    onTwitterSearchSwitch: React.MouseEventHandler<HTMLButtonElement>
+    onPDFSearchSwitch: React.MouseEventHandler<HTMLButtonElement>
     searchType: SearchType
 }
 
@@ -31,6 +34,30 @@ export default class SearchTypeSwitch extends PureComponent<Props> {
                     label={'Highlights'}
                     onClick={this.props.onNotesSearchSwitch}
                     active={this.props.searchType === 'notes'}
+                    size={'small'}
+                />
+                <PrimaryAction
+                    icon={'play'}
+                    type={'tertiary'}
+                    label={'Videos'}
+                    onClick={this.props.onVideosSearchSwitch}
+                    active={this.props.searchType === 'videos'}
+                    size={'small'}
+                />
+                <PrimaryAction
+                    icon={'twitter'}
+                    type={'tertiary'}
+                    label={'Tweets'}
+                    onClick={this.props.onTwitterSearchSwitch}
+                    active={this.props.searchType === 'twitter'}
+                    size={'small'}
+                />
+                <PrimaryAction
+                    icon={'filePDF'}
+                    type={'tertiary'}
+                    label={'PDFs'}
+                    onClick={this.props.onPDFSearchSwitch}
+                    active={this.props.searchType === 'pdf'}
                     size={'small'}
                 />
             </SearchTypeSwitchContainer>

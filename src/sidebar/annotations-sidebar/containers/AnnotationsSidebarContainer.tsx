@@ -61,6 +61,7 @@ export interface Props extends SidebarContainerOptions {
     skipTopBarRender?: boolean
     isLockable?: boolean
     setSidebarWidthforDashboard?: (sidebarWidth) => void
+    onNotesSidebarClose?: () => void
 }
 
 export class AnnotationsSidebarContainer<
@@ -183,6 +184,7 @@ export class AnnotationsSidebarContainer<
         if (this.props.sidebarContext === 'dashboard') {
             setTimeout(() => {
                 this.props.setSidebarWidthforDashboard('0px')
+                this.props.onNotesSidebarClose()
             }, 50)
         }
     }
@@ -440,11 +442,6 @@ export class AnnotationsSidebarContainer<
                         ...DEF_CONTEXT,
                     })
                 }
-            },
-            onEscapeKeyDown: () => {
-                this.processEvent('resetListPickerAnnotationId', {
-                    id: annotation.url,
-                })
             },
             selectEntry: async (listId, options) =>
                 this.processEvent(getUpdateListsEvent(listId), {
@@ -1143,8 +1140,6 @@ const GlobalStyle = createGlobalStyle<{
     #outerContainer {
         width: ${(props) => props.sidebarWidth};
     }
-
-
 `
 
 const ShareMenuWrapper = styled.div`

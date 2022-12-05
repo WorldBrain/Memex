@@ -531,11 +531,33 @@ export class DashboardLogic extends UILogic<State, Events> {
         await this.runSearch(nextState)
     }
 
-    private runSearch = debounce(
-        (previousState: State, paginate?: boolean) =>
-            this.search({ previousState, event: { paginate } }),
-        300,
-    )
+    private runSearch = throttle((previousState: State, paginate?: boolean) => {
+        this.search({ previousState, event: { paginate } })
+    }, 100)
+
+    // leaving this here for now in order to finalise the feature for handling the race condition rendering
+
+    private incrementFunctionExecutionID(lastExecIDs: number[]) {
+        let newArray: number[]
+        let newFunctionID: number
+
+        if (lastExecIDs.length > 0) {
+            newFunctionID = lastExecIDs.slice(-1)[0] + 1
+            newArray = lastExecIDs
+            newArray.push(newFunctionID)
+        } else {
+            newArray = [0]
+        }
+
+        this.emitMutation({
+            searchResults: {
+                searchFunctionExecutionIDs: { $set: newArray },
+            },
+        })
+
+        return newArray
+    }
+
     /* END - Misc helper methods */
 
     /* START - Misc event handlers */
@@ -569,7 +591,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                 } =
                     previousState.searchResults.searchType === 'pages'
                         ? await this.searchPages(searchState)
-                        : await this.searchNotes(searchState)
+                        : previousState.searchResults.searchType === 'notes'
+                        ? await this.searchNotes(searchState)
+                        : previousState.searchResults.searchType === 'videos'
+                        ? await this.searchVideos(searchState)
+                        : previousState.searchResults.searchType === 'twitter'
+                        ? await this.searchTwitter(searchState)
+                        : await this.searchPDFs(searchState)
 
                 let noResultsType: NoResultsType = null
                 if (
@@ -633,6 +661,73 @@ export class DashboardLogic extends UILogic<State, Events> {
         const result = await this.options.searchBG.searchPages(
             stateToSearchParams(state),
         )
+
+        return {
+            ...utils.pageSearchResultToState(result),
+            resultsExhausted: result.resultsExhausted,
+            searchTermsInvalid: result.isBadTerm,
+        }
+    }
+    private searchVideos = async (state: State) => {
+        let result = await this.options.searchBG.searchPages(
+            stateToSearchParams(state),
+        )
+
+        const videoResults = result.docs.filter(
+            (x) =>
+                x.url.startsWith('youtube.com/watch') ||
+                x.url.startsWith('vimeo.com/'),
+        )
+
+        result = {
+            docs: videoResults,
+            resultsExhausted: result.resultsExhausted,
+            isBadTerm: result.isBadTerm,
+        }
+
+        return {
+            ...utils.pageSearchResultToState(result),
+            resultsExhausted: result.resultsExhausted,
+            searchTermsInvalid: result.isBadTerm,
+        }
+    }
+
+    private searchTwitter = async (state: State) => {
+        let result = await this.options.searchBG.searchPages(
+            stateToSearchParams(state),
+        )
+
+        const videoResults = result.docs.filter(
+            (x) =>
+                x.url.startsWith('twitter.com/') ||
+                x.url.startsWith('mobile.twitter.com/'),
+        )
+
+        result = {
+            docs: videoResults,
+            resultsExhausted: result.resultsExhausted,
+            isBadTerm: result.isBadTerm,
+        }
+
+        return {
+            ...utils.pageSearchResultToState(result),
+            resultsExhausted: result.resultsExhausted,
+            searchTermsInvalid: result.isBadTerm,
+        }
+    }
+
+    private searchPDFs = async (state: State) => {
+        let result = await this.options.searchBG.searchPages(
+            stateToSearchParams(state),
+        )
+
+        const videoResults = result.docs.filter((x) => x.url.endsWith('.pdf'))
+
+        result = {
+            docs: videoResults,
+            resultsExhausted: result.resultsExhausted,
+            isBadTerm: result.isBadTerm,
+        }
 
         return {
             ...utils.pageSearchResultToState(result),
@@ -1170,6 +1265,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                             byId: {
                                 [event.pageId]: {
                                     areNotesShown: { $set: event.areShown },
+                                    notesShowLocation: {
+                                        $set: event.notesShowLocation,
+                                    },
                                 },
                             },
                         },

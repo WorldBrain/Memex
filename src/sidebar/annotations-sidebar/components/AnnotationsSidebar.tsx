@@ -266,10 +266,8 @@ export class AnnotationsSidebar extends React.Component<
             this.state.showSortDropDown ||
             this.state.showPageSpacePicker
         ) {
-            console.log('settrue')
             return this.props.setPopoutsActive(true)
         } else {
-            console.log('setfalse')
             return this.props.setPopoutsActive(false)
         }
     }

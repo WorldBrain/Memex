@@ -345,7 +345,6 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     setPopoutsActive: EventHandler<'setPopoutsActive'> = async ({ event }) => {
-        console.log(event)
         this.emitMutation({
             popoutsActive: { $set: event },
         })

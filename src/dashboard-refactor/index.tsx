@@ -715,6 +715,17 @@ export class DashboardContainer extends StatefulUIElement<
                 onPagesSearchSwitch={() =>
                     this.processEvent('setSearchType', { searchType: 'pages' })
                 }
+                onVideosSearchSwitch={() => {
+                    this.processEvent('setSearchType', { searchType: 'videos' })
+                }}
+                onTwitterSearchSwitch={() => {
+                    this.processEvent('setSearchType', {
+                        searchType: 'twitter',
+                    })
+                }}
+                onPDFSearchSwitch={() => {
+                    this.processEvent('setSearchType', { searchType: 'pdf' })
+                }}
                 onPageLinkCopy={(link) =>
                     this.processEvent('copyShareLink', {
                         link,
@@ -742,6 +753,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 pageId,
                                 areShown: !searchResults.results[day].pages
                                     .byId[pageId].areNotesShown,
+                                notesShowLocation: 'inline',
                             })
                             return
                         }
@@ -749,6 +761,15 @@ export class DashboardContainer extends StatefulUIElement<
                         this.notesSidebarRef.current.toggleSidebarShowForPageId(
                             pageData.fullUrl,
                         )
+
+                        this.processEvent('setPageNotesShown', {
+                            day,
+                            pageId,
+                            areShown: !searchResults.results[day].pages.byId[
+                                pageId
+                            ].areNotesShown,
+                            notesShowLocation: 'sidebar',
+                        })
                     },
                     onTagPickerBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageTagPickerShown', {
