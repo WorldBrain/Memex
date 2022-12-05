@@ -325,6 +325,8 @@ const Sidebar = styled.div<{
     justify-content: start;
     z-index: 3000;
     width: 100%;
+    height: 100%;
+    flex-shrink: 0;
 
     ${(props) =>
         props.locked &&
@@ -368,11 +370,12 @@ const Sidebar = styled.div<{
 `
 
 const Container = styled.div`
-    position: absolute;
+    position: sticky;
     z-index: 2147483645;
     width: 100%;
     display: flex;
     justify-content: center;
+    height: fill-available;
 `
 
 const PeekTrigger = styled.div`
@@ -398,6 +401,7 @@ const BottomGroup = styled.div<{ sidebarWidth: string }>`
     overflow-x: visible;
     height: fill-available;
     width: ${(props) => props.sidebarWidth};
+    padding-bottom: 100px;
 
     &::-webkit-scrollbar {
       display: none;

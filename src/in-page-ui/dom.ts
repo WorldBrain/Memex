@@ -1,5 +1,5 @@
 import { injectCSS } from 'src/util/content-injection'
-import Browser, { runtime } from 'webextension-polyfill'
+import { runtime } from 'webextension-polyfill'
 
 export function createInPageUIRoot({
     containerId,

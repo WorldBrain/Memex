@@ -26,7 +26,7 @@ export default class SearchTypeSwitch extends PureComponent<Props> {
                     label={'Web'}
                     onClick={this.props.onPagesSearchSwitch}
                     active={this.props.searchType === 'pages'}
-                    size={'small'}
+                    size={'medium'}
                 />
                 <PrimaryAction
                     icon={'highlight'}
@@ -34,7 +34,7 @@ export default class SearchTypeSwitch extends PureComponent<Props> {
                     label={'Highlights'}
                     onClick={this.props.onNotesSearchSwitch}
                     active={this.props.searchType === 'notes'}
-                    size={'small'}
+                    size={'medium'}
                 />
                 <PrimaryAction
                     icon={'play'}
@@ -42,7 +42,7 @@ export default class SearchTypeSwitch extends PureComponent<Props> {
                     label={'Videos'}
                     onClick={this.props.onVideosSearchSwitch}
                     active={this.props.searchType === 'videos'}
-                    size={'small'}
+                    size={'medium'}
                 />
                 <PrimaryAction
                     icon={'twitter'}
@@ -50,7 +50,7 @@ export default class SearchTypeSwitch extends PureComponent<Props> {
                     label={'Tweets'}
                     onClick={this.props.onTwitterSearchSwitch}
                     active={this.props.searchType === 'twitter'}
-                    size={'small'}
+                    size={'medium'}
                 />
                 <PrimaryAction
                     icon={'filePDF'}
@@ -58,7 +58,7 @@ export default class SearchTypeSwitch extends PureComponent<Props> {
                     label={'PDFs'}
                     onClick={this.props.onPDFSearchSwitch}
                     active={this.props.searchType === 'pdf'}
-                    size={'small'}
+                    size={'medium'}
                 />
             </SearchTypeSwitchContainer>
         )
