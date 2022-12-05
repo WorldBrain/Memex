@@ -225,6 +225,7 @@ export class SidebarContainerLogic extends UILogic<
             showLoginModal: false,
             showDisplayNameSetupModal: false,
             showAnnotationsShareModal: false,
+            popoutsActive: false,
             showAllNotesShareMenu: false,
             activeShareMenuNoteId: undefined,
             immediatelyShareNotes: false,
@@ -343,21 +344,36 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
+    setPopoutsActive: EventHandler<'setPopoutsActive'> = async ({ event }) => {
+        console.log(event)
+        this.emitMutation({
+            popoutsActive: { $set: event },
+        })
+    }
+
     show: EventHandler<'show'> = async ({ event }) => {
         const width =
             event.existingWidthState != null
                 ? event.existingWidthState
                 : SIDEBAR_WIDTH_STORAGE_KEY
 
-        console.log('width', width)
-
         this.emitMutation({
             showState: { $set: 'visible' },
             sidebarWidth: { $set: width },
         })
     }
+    hide: EventHandler<'hide'> = ({ event, previousState }) => {
+        if (
+            previousState.showAllNotesCopyPaster ||
+            previousState.showAllNotesShareMenu ||
+            previousState.activeListPickerState ||
+            previousState.showAnnotationsShareModal ||
+            previousState.activeShareMenuNoteId ||
+            previousState.popoutsActive
+        ) {
+            return
+        }
 
-    hide: EventHandler<'hide'> = () => {
         this.emitMutation({
             showState: { $set: 'hidden' },
             activeAnnotationUrl: { $set: null },

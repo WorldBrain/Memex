@@ -1,5 +1,4 @@
 import React from 'react'
-import onClickOutside from 'react-onclickoutside'
 import styled, { ThemeProvider } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -434,6 +433,7 @@ class SpacePicker extends StatefulUIElement<
                 <OuterSearchBox
                     onKeyPress={this.handleKeyPress}
                     onClick={this.handleOuterSearchBoxClick}
+                    width={this.props.width}
                 >
                     {this.renderMainContent()}
                 </OuterSearchBox>
@@ -498,7 +498,7 @@ const LoadingBox = styled.div`
 
 const OuterSearchBox = styled.div`
     border-radius: 12px;
-    width: 300px;
+    width: ${(props) => (props.width ? props.width : '300px')};
 `
 const PickerContainer = styled.div`
     border-radius: 12px;
@@ -533,4 +533,4 @@ const SpaceContextMenuBtn = styled.div`
     align-items: center;
 `
 
-export default onClickOutside(SpacePicker)
+export default SpacePicker

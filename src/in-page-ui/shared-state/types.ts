@@ -8,6 +8,7 @@ export type InPageUISidebarAction =
     | 'edit_annotation_spaces'
     | 'show_annotation'
     | 'set_sharing_access'
+    | 'show_shared_spaces'
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'
 export type InPageUIComponentShowState = {
@@ -45,7 +46,9 @@ export interface SharedInPageUIEvents {
 }
 
 export interface ShouldSetUpOptions {
+    keepRibbonHidden?: boolean
     showSidebarOnLoad?: boolean
+    showPageActivityIndicator?: boolean
 }
 
 export interface SharedInPageUIInterface {

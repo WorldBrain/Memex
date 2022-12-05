@@ -36,6 +36,9 @@ class DeleteConfirmModal extends PureComponent<Props> {
                     onClick={deleteDocs}
                     innerRef={this._action}
                     tabIndex={0}
+                    type={'secondary'}
+                    size={'large'}
+                    bold
                 />
             </ConfirmModal>
         )

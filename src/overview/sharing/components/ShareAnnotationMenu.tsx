@@ -11,7 +11,6 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { ClickAway } from 'src/util/click-away-wrapper'
 
 const COPY_TIMEOUT = 2000
 
@@ -249,56 +248,15 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     }
 
     render() {
-        if (this.props.onClickOutside) {
-            return (
-                <ClickAway onClickAway={this.props.onClickOutside}>
-                    {this.renderMain()}
-                </ClickAway>
-            )
-        }
-
         return this.renderMain()
     }
 }
 
 export default ShareAnnotationMenu
 
-const NoResultsSection = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 30px 0px;
-    flex-direction: column;
-`
-
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
-    height: 50px;
-    width: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
-`
-
-const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 10px;
-`
-
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
-    font-size: 14px;
-    font-weight: 400;
-    text-align: center;
-`
-
 const Menu = styled.div`
     padding: 5px 0px;
-    width: 330px;
+    width: 400px;
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};

@@ -22,6 +22,8 @@ describe('Backup feature', () => {
             visits: { backup: true, watch: true },
             bookmarks: { backup: true, watch: true },
             favIcons: { backup: true, watch: true },
+            followedList: { backup: false, watch: false },
+            followedListEntry: { backup: false, watch: false },
             annotations: { backup: true, watch: true },
             annotBookmarks: { backup: true, watch: true },
             annotListEntries: { backup: true, watch: true },

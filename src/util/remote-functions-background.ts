@@ -14,6 +14,7 @@ import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { PDFRemoteInterface } from 'src/pdf/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { AnalyticsInterface } from 'src/analytics/background/types'
+import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 
 export interface RemoteFunctionImplementations<
     Role extends 'provider' | 'caller'
@@ -31,6 +32,7 @@ export interface RemoteFunctionImplementations<
     readablePageArchives: RemoteReaderInterface
     contentSharing: ContentSharingInterface
     personalCloud: PersonalCloudRemoteInterface
+    pageActivityIndicator: RemotePageActivityIndicatorInterface
     pdf: PDFRemoteInterface
 }
 
@@ -45,6 +47,7 @@ export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     // features: runInBackground(),
     featuresBeta: runInBackground(),
     tags: runInBackground(),
+    pageActivityIndicator: runInBackground(),
     collections: runInBackground(),
     copyPaster: runInBackground(),
     readablePageArchives: runInBackground(),

@@ -98,6 +98,8 @@ import type { LocalExtensionSettings } from './types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import DeprecatedStorageModules from './deprecated-storage-modules'
+import { PageActivityIndicatorBackground } from 'src/page-activity-indicator/background'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -106,6 +108,7 @@ export interface BackgroundModules {
     social: SocialBackground
     pdfBg: PDFBackground
     // connectivityChecker: ConnectivityCheckerBackground
+    pageActivityIndicator: PageActivityIndicatorBackground
     activityIndicator: ActivityIndicatorBackground
     directLinking: DirectLinkingBackground
     pages: PageIndexingBackground
@@ -334,6 +337,9 @@ export function createBackgroundModules(options: {
                 (await options.getServerStorage()).modules.users,
         })
 
+    const getCurrentUserId = async (): Promise<AutoPk | null> =>
+        (await auth.authService.getCurrentUser())?.id ?? null
+
     const activityStreams = new ActivityStreamsBackground({
         storageManager,
         callFirebaseFunction,
@@ -342,10 +348,7 @@ export function createBackgroundModules(options: {
     if (!options.userMessageService) {
         const userMessagesService = new FirebaseUserMessageService({
             firebase: getFirebase,
-            auth: {
-                getCurrentUserId: async () =>
-                    (await auth.authService.getCurrentUser())?.id,
-            },
+            auth: { getCurrentUserId },
         })
         options.userMessageService = userMessagesService
         userMessagesService.startListening({
@@ -412,6 +415,14 @@ export function createBackgroundModules(options: {
         prefix: 'personalCloud.',
     })
 
+    const pageActivityIndicator = new PageActivityIndicatorBackground({
+        fetch,
+        storageManager,
+        getCurrentUserId,
+        getServerStorage,
+        jobScheduler: jobScheduler.scheduler,
+    })
+
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
         storageManager,
         syncSettingsStore,
@@ -465,8 +476,7 @@ export function createBackgroundModules(options: {
         },
         settingStore: personalCloudSettingStore,
         localExtSettingStore,
-        getUserId: async () =>
-            (await auth.authService.getCurrentUser())?.id ?? null,
+        getUserId: getCurrentUserId,
         async *userIdChanges() {
             for await (const nextUser of authChanges(auth.authService)) {
                 yield nextUser
@@ -586,6 +596,7 @@ export function createBackgroundModules(options: {
             tabManagement,
             personalCloud,
             notifications,
+            pageActivityIndicator,
         },
     })
 
@@ -602,6 +613,7 @@ export function createBackgroundModules(options: {
         search,
         eventLog: new EventLogBackground({ storageManager }),
         activityIndicator,
+        pageActivityIndicator,
         customLists,
         tags,
         bookmarks,
@@ -755,6 +767,7 @@ export async function setupBackgroundModules(
     // await backgroundModules.pdfBg.setupRequestInterceptors()
     await backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
+    await backgroundModules.pageActivityIndicator.setup()
 
     // Ensure log-in state gotten from FB + trigger share queue processing, but don't wait for it
     await backgroundModules.auth.authService.refreshUserInfo()
@@ -767,6 +780,7 @@ export function getBackgroundStorageModules(
     __deprecatedModules: DeprecatedStorageModules,
 ): { [moduleName: string]: StorageModule } {
     return {
+        pageActivityIndicator: backgroundModules.pageActivityIndicator.storage,
         pageFetchBacklog: __deprecatedModules.pageFetchBacklogStorage,
         annotations: backgroundModules.directLinking.annotationStorage,
         readwiseAction: __deprecatedModules.readwiseActionQueueStorage,

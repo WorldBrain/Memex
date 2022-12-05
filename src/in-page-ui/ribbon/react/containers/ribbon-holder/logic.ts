@@ -1,8 +1,9 @@
 import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
-import { RibbonContainerDependencies } from '../ribbon/types'
-import {
+import type { RibbonContainerDependencies } from '../ribbon/types'
+import type {
     SharedInPageUIInterface,
     InPageUIComponentShowState,
+    ShouldSetUpOptions,
 } from 'src/in-page-ui/shared-state/types'
 
 export interface RibbonHolderState {
@@ -11,11 +12,13 @@ export interface RibbonHolderState {
 }
 
 export type RibbonHolderEvents = UIEvent<{
+    openSidebarToSharedSpaces: null
     show: null
     hide: null
 }>
 
 export interface RibbonHolderDependencies {
+    setUpOptions: ShouldSetUpOptions
     inPageUI: SharedInPageUIInterface
     containerDependencies: RibbonContainerDependencies
 }
@@ -67,6 +70,14 @@ export class RibbonHolderLogic extends UILogic<
 
     hide: EventHandler<'hide'> = () => {
         return { state: { $set: 'hidden' } }
+    }
+
+    openSidebarToSharedSpaces: EventHandler<
+        'openSidebarToSharedSpaces'
+    > = async ({}) => {
+        await this.dependencies.inPageUI.showSidebar({
+            action: 'show_shared_spaces',
+        })
     }
 
     _handleUIStateChange = (event: {

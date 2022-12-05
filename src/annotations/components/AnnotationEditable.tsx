@@ -24,12 +24,13 @@ import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-n
 import { getShareButtonData } from '../sharing-utils'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
-import { ClickAway } from 'src/util/click-away-wrapper'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -51,7 +52,10 @@ export interface AnnotationProps {
     url?: string
     className?: string
     isActive?: boolean
+    activeShareMenuNoteId?: string
     isShared: boolean
+    shareButtonRef?: React.RefObject<HTMLElement>
+    spacePickerButtonRef?: React.RefObject<HTMLElement>
     hasReplies?: boolean
     appendRepliesToggle?: boolean
     isBulkShareProtected: boolean
@@ -71,9 +75,15 @@ export interface AnnotationProps {
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
-    renderListsPickerForAnnotation?: (id: string) => JSX.Element
+    renderListsPickerForAnnotation?: (
+        id: string,
+        referenceElement: React.RefObject<HTMLElement>,
+    ) => JSX.Element
     renderCopyPasterForAnnotation?: (id: string) => JSX.Element
-    renderShareMenuForAnnotation?: (id: string) => JSX.Element
+    renderShareMenuForAnnotation?: (
+        id: string,
+        referenceElement: React.RefObject<HTMLElement>,
+    ) => JSX.Element
 }
 
 export interface AnnotationEditableEventProps {
@@ -94,6 +104,9 @@ export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
 
 export default class AnnotationEditable extends React.Component<Props> {
     private annotEditRef = React.createRef<AnnotationEdit>()
+    private spacePickerBarRef = React.createRef<HTMLElement>()
+    private shareButtonRef = React.createRef<HTMLElement>()
+    private tutorialButtonRef = React.createRef<HTMLElement>()
 
     static MOD_KEY = getKeyName({ key: 'mod' })
     static defaultProps: Pick<
@@ -209,7 +222,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                     or double-click card
                                 </span>
                             }
-                            placement="left"
+                            placement="bottom"
                         >
                             <HighlightAction>
                                 <Icon
@@ -339,21 +352,13 @@ export default class AnnotationEditable extends React.Component<Props> {
                       onClick: onReplyBtnClick,
                       tooltipText: 'Show replies',
                       imageColor: 'purple',
-                      image: hasReplies
-                          ? icons.commentFull
-                          : icons.commentEmpty,
+                      image: hasReplies ? 'commentFull' : 'commentEmpty',
                   }
                 : { node: <LoadingIndicator size={16} /> }
 
         if (!footerDeps) {
             return [repliesToggle]
         }
-
-        const shareIconData = getShareButtonData(
-            isShared,
-            isBulkShareProtected,
-            this.hasSharedLists,
-        )
 
         if (hoverState === null) {
             if (appendRepliesToggle) {
@@ -370,32 +375,22 @@ export default class AnnotationEditable extends React.Component<Props> {
             return [
                 {
                     key: 'delete-note-btn',
-                    image: icons.trash,
+                    image: 'trash',
                     onClick: footerDeps.onDeleteIconClick,
                     tooltipText: 'Delete Note',
                 },
                 {
                     key: 'copy-paste-note-btn',
-                    image: icons.copy,
+                    image: 'copy',
                     onClick: footerDeps.onCopyPasterBtnClick,
                     tooltipText: 'Copy Note',
-                    componentToOpen: this.props.renderCopyPasterForAnnotation
-                        ? this.props.renderCopyPasterForAnnotation(
-                              this.props.url,
-                          )
-                        : null,
                 },
                 {
                     key: 'add-spaces-btn',
-                    image: icons.plus,
+                    image: 'plus',
                     imageColor: 'purple',
                     onClick: footerDeps.onListIconClick,
-                    componentToOpen:
-                        this.props.listPickerRenderLocation === 'footer'
-                            ? this.props.renderListsPickerForAnnotation(
-                                  this.props.url,
-                              )
-                            : null,
+                    buttonRef: this.props.spacePickerButtonRef,
                 },
                 // {
                 //     key: 'share-note-btn',
@@ -431,6 +426,7 @@ export default class AnnotationEditable extends React.Component<Props> {
         return (
             <MarkdownButtonContainer
                 onClick={() => this.setState({ showQuickTutorial: true })}
+                ref={this.tutorialButtonRef}
             >
                 Formatting Help
                 <MarkdownButton
@@ -462,15 +458,15 @@ export default class AnnotationEditable extends React.Component<Props> {
         if (mode === 'default' || footerDeps == null) {
             return (
                 <DefaultFooterStyled>
-                    <ShareBtn onClick={footerDeps.onShareClick}>
-                        <Icon
-                            icon={shareIconData.icon}
-                            hoverOff
-                            color={'iconColor'}
-                            heightAndWidth="20px"
-                        />
-                        {shareIconData.label}
-                    </ShareBtn>
+                    <PrimaryAction
+                        onClick={footerDeps.onShareClick}
+                        label={shareIconData.label}
+                        icon={shareIconData.icon}
+                        size={'small'}
+                        type={'tertiary'}
+                        innerRef={this.shareButtonRef}
+                        active={this.props.activeShareMenuNoteId && true}
+                    />
                     <ItemBoxBottom
                         firstDivProps={{
                             onMouseEnter: this.props.onFooterHover,
@@ -478,6 +474,10 @@ export default class AnnotationEditable extends React.Component<Props> {
                         creationInfo={this.creationInfo}
                         actions={this.calcFooterActions()}
                     />
+                    {this.props.listPickerRenderLocation === 'footer' &&
+                        this.renderSpacePicker(this.props.spacePickerButtonRef)}
+                    {this.props.activeShareMenuNoteId &&
+                        this.renderShareMenu(this.shareButtonRef)}
                 </DefaultFooterStyled>
             )
         }
@@ -515,15 +515,16 @@ export default class AnnotationEditable extends React.Component<Props> {
 
         return (
             <DefaultFooterStyled>
-                <ShareBtn onClick={footerDeps.onShareClick} tabIndex={0}>
-                    <Icon
-                        icon={shareIconData.icon}
-                        hoverOff
-                        color={'iconColor'}
-                        heightAndWidth="18px"
-                    />
-                    {shareIconData.label}
-                </ShareBtn>
+                <PrimaryAction
+                    onClick={footerDeps.onShareClick}
+                    label={shareIconData.label}
+                    icon={shareIconData.icon}
+                    size={'small'}
+                    type={'tertiary'}
+                    innerRef={this.shareButtonRef}
+                    active={this.props.activeShareMenuNoteId && true}
+                />
+
                 <DeletionBox>
                     {mode === 'delete' && (
                         <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
@@ -542,6 +543,33 @@ export default class AnnotationEditable extends React.Component<Props> {
                     </SaveActionBar>
                 </DeletionBox>
             </DefaultFooterStyled>
+        )
+    }
+
+    renderSpacePicker(referenceElement) {
+        if (
+            !(
+                this.props.listPickerRenderLocation === 'lists-bar' ||
+                this.props.listPickerRenderLocation === 'footer'
+            )
+        ) {
+            return
+        }
+
+        return this.props.renderListsPickerForAnnotation(
+            this.props.url,
+            referenceElement,
+        )
+    }
+
+    renderShareMenu(referenceElement) {
+        if (!this.props.activeShareMenuNoteId) {
+            return
+        }
+
+        return this.props.renderShareMenuForAnnotation(
+            this.props.url,
+            referenceElement,
         )
     }
 
@@ -571,9 +599,6 @@ export default class AnnotationEditable extends React.Component<Props> {
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
                             </ContentContainer>
-                            {/* lists */}
-                            {/* Collections button for annotations. To be added later. */}
-
                             {(this.props.lists.length > 0 ||
                                 this.props.mode === 'edit') && (
                                 <ListsSegment
@@ -588,17 +613,12 @@ export default class AnnotationEditable extends React.Component<Props> {
                                         this.props.annotationEditDependencies
                                             ?.onListsBarPickerBtnClick
                                     }
-                                    renderSpacePicker={() =>
-                                        this.props.listPickerRenderLocation ===
-                                        'lists-bar'
-                                            ? this.props.renderListsPickerForAnnotation(
-                                                  this.props.url,
-                                              )
-                                            : null
+                                    spacePickerButtonRef={
+                                        this.spacePickerBarRef
                                     }
                                     padding={
                                         this.props.mode === 'edit'
-                                            ? '5px 15px 10px 15px'
+                                            ? '10px 15px 10px 15px'
                                             : '0px 15px 10px 15px'
                                     }
                                 />
@@ -611,55 +631,25 @@ export default class AnnotationEditable extends React.Component<Props> {
                                     )}
                                 </CopyPasterWrapper>
                             )} */}
-                            {this.props.renderShareMenuForAnnotation && (
-                                <ShareMenuWrapper>
-                                    {this.props.renderShareMenuForAnnotation(
-                                        this.props.url,
-                                    )}
-                                </ShareMenuWrapper>
-                            )}
                         </AnnotationStyled>
                     </ItemBox>
+                    {this.props.listPickerRenderLocation === 'lists-bar' &&
+                        this.renderSpacePicker(this.spacePickerBarRef)}
+                    {/* {this.props.renderListsPickerForAnnotation(this.props.url)} */}
                 </AnnotationBox>
                 {this.state.showQuickTutorial && (
-                    <ClickAway
-                        onClickAway={() =>
-                            this.setState({ showQuickTutorial: false })
-                        }
+                    <PopoutBox
+                        targetElementRef={this.tutorialButtonRef.current}
+                        placement={'bottom'}
+                        closeComponent={() => this.toggleShowTutorial()}
                     >
-                        <HoverBox
-                            top={
-                                this.props.contextLocation === 'dashboard'
-                                    ? 'unset'
-                                    : '215px'
+                        <QuickTutorial
+                            markdownHelpOnTop={true}
+                            getKeyboardShortcutsState={
+                                getKeyboardShortcutsState
                             }
-                            bottom={
-                                this.props.contextLocation === 'dashboard'
-                                    ? '60px'
-                                    : 'unset'
-                            }
-                            right={
-                                this.props.contextLocation === 'dashboard'
-                                    ? '20px'
-                                    : '50px'
-                            }
-                            width="430px"
-                            position={
-                                this.props.contextLocation === 'dashboard'
-                                    ? 'fixed'
-                                    : 'initial'
-                            }
-                            height="430px"
-                            overflow="scroll"
-                        >
-                            <QuickTutorial
-                                markdownHelpOnTop={true}
-                                getKeyboardShortcutsState={
-                                    getKeyboardShortcutsState
-                                }
-                            />
-                        </HoverBox>
-                    </ClickAway>
+                        />
+                    </PopoutBox>
                 )}
             </ThemeProvider>
         )

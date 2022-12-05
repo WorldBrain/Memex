@@ -55,9 +55,9 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             <IconContainer>
                                 <Margin right="5px">
                                     <Icon
-                                        heightAndWidth="24px"
+                                        heightAndWidth="22px"
                                         filePath={icons.removeX}
-                                        padding={'6px'}
+                                        padding={'5px'}
                                         onClick={() => this.handleClearSearch()}
                                     />
                                 </Margin>
@@ -69,6 +69,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                                         heightAndWidth="22px"
                                         filePath={icons.searchIcon}
                                         padding={'5px'}
+                                        hoverOff
                                     />
                                 </Margin>
                             </IconContainer>
@@ -208,5 +209,4 @@ const ActionButtons = styled.div`
     align-items: center;
     justify-content: flex-start;
     grid-gap: 15px;
-    flex: 1;
 `

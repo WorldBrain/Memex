@@ -46,6 +46,7 @@ interface Dependencies {
     storageManager: Storex
     bgModules: Pick<
         BackgroundModules,
+        | 'pageActivityIndicator'
         | 'tabManagement'
         | 'notifications'
         | 'copyPaster'

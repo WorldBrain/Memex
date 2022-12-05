@@ -174,6 +174,17 @@ const LOCAL_LISTS_V24 = {
     },
 }
 
+const LOCAL_SHARED_LIST_METADATA_V24 = {
+    first: {
+        localId: LOCAL_LISTS_V24.first.id,
+        remoteId: 'test-1',
+    },
+    second: {
+        localId: LOCAL_LISTS_V24.second.id,
+        remoteId: 'test-2',
+    },
+}
+
 export const LOCAL_TEST_DATA_V24 = {
     pages: LOCAL_PAGES_V24,
     bookmarks: {
@@ -344,16 +355,7 @@ export const LOCAL_TEST_DATA_V24 = {
             description: 'test description second list',
         },
     },
-    sharedListMetadata: {
-        first: {
-            localId: LOCAL_LISTS_V24.first.id,
-            remoteId: 'test-1',
-        },
-        second: {
-            localId: LOCAL_LISTS_V24.second.id,
-            remoteId: 'test-2',
-        },
-    },
+    sharedListMetadata: LOCAL_SHARED_LIST_METADATA_V24,
     pageListEntries: {
         first: {
             createdAt: new Date(1625190554480),
@@ -390,6 +392,13 @@ export const LOCAL_TEST_DATA_V24 = {
             listId: LOCAL_LISTS_V24.first.id,
             url: LOCAL_ANNOTATIONS_V24.second.url,
             createdAt: new Date(1625190554991),
+        },
+    },
+    followedList: {
+        first: {
+            creator: TEST_USER.id,
+            name: LOCAL_LISTS_V24.first.name,
+            sharedList: LOCAL_SHARED_LIST_METADATA_V24.first.remoteId,
         },
     },
     templates: {
@@ -1022,7 +1031,7 @@ export const REMOTE_TEST_DATA_V24 = {
         first: {
             id: 1,
             personalList: REMOTE_LISTS_V24.first.id,
-            remoteId: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+            remoteId: LOCAL_SHARED_LIST_METADATA_V24.first.remoteId,
             user: TEST_USER.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             createdWhen: 565,
@@ -1031,7 +1040,7 @@ export const REMOTE_TEST_DATA_V24 = {
         second: {
             id: 2,
             personalList: REMOTE_LISTS_V24.second.id,
-            remoteId: LOCAL_TEST_DATA_V24.sharedListMetadata.second.remoteId,
+            remoteId: LOCAL_SHARED_LIST_METADATA_V24.second.remoteId,
             user: TEST_USER.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             createdWhen: 565,
@@ -1090,6 +1099,14 @@ export const REMOTE_TEST_DATA_V24 = {
             user: TEST_USER.id,
             personalList: REMOTE_LISTS_V24.first.id,
             personalAnnotation: REMOTE_ANNOTATIONS_V24.second.id,
+        },
+    },
+    personalFollowedList: {
+        first: {
+            id: 1,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            sharedList: LOCAL_SHARED_LIST_METADATA_V24.first.remoteId,
         },
     },
     personalTextTemplate: {

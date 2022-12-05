@@ -170,6 +170,10 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         component: InPageUIComponent,
         options: ShouldSetUpOptions = {},
     ) {
+        // NOTE: The loadComponent call is not async, though if you remove the await then the `componentShouldSetUp` event
+        //  gets sent off too early and the components won't properly receive it. Adding setTimeout(0) to the following call
+        //  doesn't seem to fix it as simply putting await does.
+        // TODO: fix this - could indicate a deeper timing issue
         await this.options.loadComponent(component)
         this._maybeEmitShouldSetUp(component, options)
     }

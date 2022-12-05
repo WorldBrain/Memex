@@ -11,7 +11,7 @@ import {
 import type { TweetData } from '@worldbrain/memex-common/lib/twitter-integration/api/types'
 import { tweetDataToTitle } from '@worldbrain/memex-common/lib/twitter-integration/utils'
 import { createUploadStorageUtils } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/storage-utils'
-import { FCM_SYNC_TRIGGER_MSG } from '@worldbrain/memex-common/lib/personal-cloud/backend/constants'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
 const TEST_TWEET_A: TweetData = {
     name: 'Test User',
@@ -54,17 +54,9 @@ async function setupTest(opts: {
 describe('Translation-layer Twitter integration tests', () => {
     it('given a stored twitter action, should device tweet ID from stored locator data, download tweet data from Twitter API, derive title, then update associated content metadata - and send off an FCM message to tell clients to sync', async () => {
         const fcmTokens = ['test-device-1', 'test-device-2']
-        let sentToDevices: { tokens: string[]; message: any }
-        jest.mock('firebase-admin', () => ({
-            messaging: () => ({
-                sendToDevice: async (tokens: string[], message: any) => {
-                    sentToDevices = { tokens, message }
-                },
-            }),
-        }))
 
         let capturedException: Error | null = null
-        const { processor, storage, userId } = await setupTest({
+        const { processor, storage, userId, context } = await setupTest({
             testTweetData: TEST_TWEET_A,
             captureException: async (e) => {
                 capturedException = e
@@ -131,7 +123,7 @@ describe('Translation-layer Twitter integration tests', () => {
             .collection('personalTwitterAction')
             .createObject(twitterAction)
 
-        expect(sentToDevices).toEqual({ tokens: [], message: {} })
+        expect(context.pushMessagingService.sentMessages).toEqual([])
         expect(capturedException).toBeNull()
         expect(
             await storage.manager
@@ -151,10 +143,15 @@ describe('Translation-layer Twitter integration tests', () => {
 
         await processor.processTwitterAction(twitterAction)
 
-        expect(sentToDevices).toEqual({
-            tokens: fcmTokens,
-            message: { data: { type: FCM_SYNC_TRIGGER_MSG } },
-        })
+        expect(context.pushMessagingService.sentMessages).toEqual([
+            {
+                type: 'to-user',
+                userId: TEST_USER.email,
+                payload: {
+                    type: 'downloadClientUpdates',
+                },
+            },
+        ])
         expect(capturedException).toBeNull()
         expect(
             await storage.manager

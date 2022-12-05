@@ -34,16 +34,13 @@ import { PageNotesCopyPaster } from 'src/copy-paster'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import analytics from 'src/analytics'
-import TagPicker from 'src/tags/ui/TagPicker'
 import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import { ClickAway } from 'src/util/click-away-wrapper'
 import { Rnd } from 'react-rnd'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
-import { setLocalStorage } from 'src/util/storage'
 import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
 import {
     PRIVATIZE_ANNOT_MSG,
@@ -54,6 +51,7 @@ import {
     SELECT_SPACE_NEGATIVE_LABEL,
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -69,6 +67,8 @@ export class AnnotationsSidebarContainer<
     P extends Props = Props
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
     private sidebarRef = React.createRef<AnnotationsSidebarComponent>()
+    private shareButtonRef = React.createRef<HTMLElement>()
+    private spacePickerButtonRef = React.createRef<HTMLElement>()
 
     constructor(props: P) {
         super(
@@ -124,8 +124,27 @@ export class AnnotationsSidebarContainer<
         }
     }
 
+    listenToEsc = (event) => {
+        console.log(this.state.showAllNotesShareMenu)
+        if (event.key === 'Escape') {
+            if (
+                this.state.showAllNotesCopyPaster ||
+                this.state.showAllNotesShareMenu ||
+                this.state.activeListPickerState ||
+                this.state.showAnnotationsShareModal ||
+                this.state.activeShareMenuNoteId ||
+                this.state.popoutsActive
+            ) {
+                return
+            } else {
+                this.hideSidebar()
+            }
+        }
+    }
     toggleSidebarShowForPageId(pageId: string) {
         const isAlreadyOpenForOtherPage = pageId !== this.state.pageUrl
+
+        document.addEventListener('keydown', this.listenToEsc, true)
 
         if (this.state.showState === 'hidden' || isAlreadyOpenForOtherPage) {
             this.setPageUrl(pageId)
@@ -137,7 +156,6 @@ export class AnnotationsSidebarContainer<
     }
 
     showSidebar() {
-        console.log('currentstate', this.state.sidebarWidth)
         this.processEvent('show', {
             existingWidthState: this.state.sidebarWidth
                 ? this.state.sidebarWidth
@@ -159,9 +177,7 @@ export class AnnotationsSidebarContainer<
     }
 
     hideSidebar() {
-        // if (this.state.isWidthLocked) {
-        //     setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '-40px') // the -40px is because in logic.ts in AdjustSidebarWidth I add a margin of 40px
-        // }
+        document.removeEventListener('keydown', this.listenToEsc, true)
         this.processEvent('hide', null)
 
         if (this.props.sidebarContext === 'dashboard') {
@@ -175,13 +191,11 @@ export class AnnotationsSidebarContainer<
         this.processEvent(this.state.isLocked ? 'unlock' : 'lock', null)
 
     toggleSidebarWidthLock = () => {
-        console.log('testlock')
         this.processEvent(
             this.state.isWidthLocked ? 'unlockWidth' : 'lockWidth',
             null,
         )
 
-        console.log(this.state.sidebarWidth)
         if (!this.state.isWidthLocked) {
             this.processEvent('adjustSidebarWidth', {
                 newWidth: this.state.sidebarWidth
@@ -490,6 +504,7 @@ export class AnnotationsSidebarContainer<
 
     private renderListPickerForAnnotation = (followedListId?: string) => (
         currentAnnotationId: string,
+        referenceElement: React.RefObject<HTMLElement>,
     ) => {
         const currentAnnotation = this.props.annotationsCache.getAnnotationById(
             currentAnnotationId,
@@ -506,24 +521,31 @@ export class AnnotationsSidebarContainer<
             state.annotationId !== currentAnnotationId ||
             currentAnnotation == null
         ) {
-            return null
+            return
         }
 
         return (
-            <ClickAway
-                onClickAway={() =>
-                    this.processEvent('resetListPickerAnnotationId', {})
-                }
+            <PopoutBox
+                targetElementRef={referenceElement.current}
+                placement={'bottom-start'}
+                closeComponent={() => {
+                    this.processEvent('resetListPickerAnnotationId', {
+                        id: currentAnnotation.url,
+                    })
+                }}
+                offsetX={10}
+                bigClosingScreen
             >
                 <CollectionPicker
                     {...this.getSpacePickerProps(currentAnnotation, true)}
                 />
-            </ClickAway>
+            </PopoutBox>
         )
     }
 
     private renderShareMenuForAnnotation = (followedListId?: string) => (
         currentAnnotationId: string,
+        referenceElement: React.RefObject<HTMLElement>,
     ) => {
         const currentAnnotation = this.props.annotationsCache.getAnnotationById(
             currentAnnotationId,
@@ -540,41 +562,40 @@ export class AnnotationsSidebarContainer<
         }
 
         return (
-            <ShareMenuWrapper>
-                <HoverBox left="-40px" padding={'0px'} width="360px">
-                    <ClickAway
-                        onClickAway={() =>
-                            this.processEvent('resetShareMenuNoteId', null)
-                        }
-                    >
-                        <SingleNoteShareMenu
-                            listData={this.props.annotationsCache.listData}
-                            isShared={currentAnnotation.isShared}
-                            shareImmediately={this.state.immediatelyShareNotes}
-                            contentSharingBG={this.props.contentSharing}
-                            annotationsBG={this.props.annotations}
-                            copyLink={(link) =>
-                                this.processEvent('copyNoteLink', { link })
-                            }
-                            annotationUrl={currentAnnotationId}
-                            postShareHook={(state, opts) =>
-                                this.processEvent('updateAnnotationShareInfo', {
-                                    annotationUrl: currentAnnotationId,
-                                    privacyLevel: state.privacyLevel,
-                                    keepListsIfUnsharing:
-                                        opts?.keepListsIfUnsharing,
-                                })
-                            }
-                            closeShareMenu={() =>
-                                this.processEvent('resetShareMenuNoteId', null)
-                            }
-                            spacePickerProps={this.getSpacePickerProps(
-                                currentAnnotation,
-                            )}
-                        />
-                    </ClickAway>
-                </HoverBox>
-            </ShareMenuWrapper>
+            <PopoutBox
+                targetElementRef={referenceElement.current}
+                placement={'bottom-start'}
+                closeComponent={() =>
+                    this.processEvent('resetShareMenuNoteId', null)
+                }
+                offsetX={15}
+                width={'400px'}
+            >
+                <SingleNoteShareMenu
+                    listData={this.props.annotationsCache.listData}
+                    isShared={currentAnnotation.isShared}
+                    shareImmediately={this.state.immediatelyShareNotes}
+                    contentSharingBG={this.props.contentSharing}
+                    annotationsBG={this.props.annotations}
+                    copyLink={(link) =>
+                        this.processEvent('copyNoteLink', { link })
+                    }
+                    annotationUrl={currentAnnotationId}
+                    postShareHook={(state, opts) =>
+                        this.processEvent('updateAnnotationShareInfo', {
+                            annotationUrl: currentAnnotationId,
+                            privacyLevel: state.privacyLevel,
+                            keepListsIfUnsharing: opts?.keepListsIfUnsharing,
+                        })
+                    }
+                    closeShareMenu={() =>
+                        this.processEvent('resetShareMenuNoteId', null)
+                    }
+                    spacePickerProps={this.getSpacePickerProps(
+                        currentAnnotation,
+                    )}
+                />
+            </PopoutBox>
         )
     }
 
@@ -640,27 +661,6 @@ export class AnnotationsSidebarContainer<
             </>
         )
     }
-
-    // private getTooltipText(name: string): string {
-    //     const elData = this.shortcutsData.get(name)
-    //     const short: Shortcut = this.keyboardShortcuts[name]
-
-    //     if (!elData) {
-    //         return ''
-    //     }
-
-    //     let source = elData.tooltip
-
-    //     if (['createBookmark', 'toggleSidebar'].includes(name)) {
-    //         source = this.props.bookmark.isBookmarked
-    //             ? elData.toggleOff
-    //             : elData.toggleOn
-    //     }
-
-    //     return short.shortcut && short.enabled
-    //         ? `${source} (${short.shortcut})`
-    //         : source
-    // }
 
     protected renderTopBanner() {
         return null
@@ -953,7 +953,7 @@ export class AnnotationsSidebarContainer<
                         className="sidebar-draggable"
                         resizeGrid={[1, 0]}
                         dragAxis={'none'}
-                        minWidth={'470px'}
+                        minWidth={SIDEBAR_WIDTH_STORAGE_KEY}
                         maxWidth={'1000px'}
                         disableDragging={true}
                         enableResizing={{
@@ -1054,6 +1054,11 @@ export class AnnotationsSidebarContainer<
                                     annotationUrl,
                                 })}
                             isAnnotationCreateShown={this.state.showCommentBox}
+                            setPopoutsActive={(isActive) => {
+                                console.log('popoutevent')
+                                console.log(isActive)
+                                this.processEvent('setPopoutsActive', isActive)
+                            }}
                             annotationCreateProps={this.getCreateProps()}
                             bindAnnotationFooterEventProps={(
                                 annotation,
@@ -1082,7 +1087,12 @@ export class AnnotationsSidebarContainer<
                             renderShareMenuForAnnotation={
                                 this.renderShareMenuForAnnotation
                             }
+                            activeShareMenuNoteId={
+                                this.state.activeShareMenuNoteId
+                            }
+                            shareButtonRef={this.shareButtonRef}
                             renderTagsPickerForAnnotation={undefined}
+                            spacePickerButtonRef={this.spacePickerButtonRef}
                             renderListsPickerForAnnotation={
                                 this.renderListPickerForAnnotation
                             }

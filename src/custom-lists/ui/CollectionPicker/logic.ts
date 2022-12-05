@@ -35,6 +35,7 @@ export interface SpacePickerDependencies {
     onClickOutside?: React.MouseEventHandler
     spacesBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface
+    width?: string
 }
 
 // TODO: This needs cleanup - so inconsistent

@@ -187,7 +187,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         const collaborationIcon = this.props.isCollaborative && (
             <>
                 <TooltipBox tooltipText={'Shared Space'} placement="bottom">
-                    <Icon heightAndWidth="14px" icon={'people'} hoverOff />
+                    <Icon heightAndWidth="14px" icon={'peopleFine'} hoverOff />
                 </TooltipBox>
             </>
         )
@@ -285,25 +285,13 @@ const Name = styled.div`
     color: ${(props) => props.theme.colors.normalText};
 `
 
-const MenuContainer = styled.div`
-    display: 'flex';
-    flex-direction: 'column';
-    width: min-content;
-    position: absolute;
-    background-color: ${colors.white};
-    box-shadow: ${styles.boxShadow.overlayElement};
-    border-radius: ${styles.boxShadow.overlayElement};
-    left: 105px;
-    top: 30px;
-    z-index: 1;
-`
-
 const IconBox = styled.div<Props>`
     display: ${(props) =>
         props.newItemsCount ||
         props.dropReceivingState?.isDraggedOver ||
         props.dropReceivingState?.wasPageDropped ||
-        props.isActivityFeed
+        props.isActivityFeed ||
+        props.isMenuDisplayed
             ? 'flex'
             : 'None'};
     height: 100%;
@@ -334,100 +322,80 @@ const TitleBox = styled.div<Props>`
 `
 
 const SidebarItem = styled.div<Props>`
- height: 40px;
-margin: 5px 10px;
-border-radius: 5px;
- display: flex;
- flex-direction: row;
- justify-content: space-between;
- align-items: center;
- background-color: ${(props) =>
-     props.dropReceivingState?.isDraggedOver
-         ? props.theme.colors.backgroundColorDarker
-         : 'transparent'};
+    height: 40px;
+    margin: 5px 10px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: ${(props) =>
+        props.dropReceivingState?.isDraggedOver
+            ? props.theme.colors.backgroundColorDarker
+            : 'transparent'};
 
- &:hover {
-    background-color: ${(props) => props.theme.colors.lightHover};
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+
+        ${({ selectedState }: Props) =>
+            selectedState?.isSelected &&
+            css`
+                background: ${(props) => props.theme.colors.activeBackground};
+            `}
+    }
+
+    ${({ isMenuDisplayed, dropReceivingState }) =>
+        css`
+            background-color: ${isMenuDisplayed ||
+            (dropReceivingState?.canReceiveDroppedItems &&
+                dropReceivingState?.isDraggedOver)
+                ? `${(props) => props.theme.colors.lightHover}`
+                : `transparent`};
+        `};
+
+
+
+    &:hover ${IconBox} {
+
+        display: 
+        ${(props) =>
+            !props.dropReceivingState?.isDraggedOver || props.isMenuDisplayed
+                ? 'flex'
+                : 'None'};
+
+    }
+
+    ${IconBox} {
+        display: 
+        ${(props) =>
+            props.dropReceivingState?.isDraggedOver || props.isMenuDisplayed
+                ? 'flex'
+                : 'None'};
+
+}
+
+
+
+
+    &:hover ${TitleBox} {
+        width: 70%;
+    }
 
     ${({ selectedState }: Props) =>
         selectedState?.isSelected &&
         css`
+            color: ${(props) => props.theme.colors.darkText};
             background: ${(props) => props.theme.colors.activeBackground};
         `}
- }
 
 
+    cursor: ${({ dropReceivingState }: Props) =>
+        !dropReceivingState?.isDraggedOver
+            ? `pointer`
+            : dropReceivingState?.canReceiveDroppedItems
+            ? `pointer`
+            : `not-allowed`};
 
-
-
-
- ${({ isMenuDisplayed, dropReceivingState }) =>
-     css`
-         background-color: ${isMenuDisplayed ||
-         (dropReceivingState?.canReceiveDroppedItems &&
-             dropReceivingState?.isDraggedOver)
-             ? `${(props) => props.theme.colors.lightHover}`
-             : `transparent`};
-     `};
-
-
-
- &:hover ${IconBox} {
-
- display: ${(props) =>
-     !props.dropReceivingState?.isDraggedOver ? 'flex' : 'None'};
-
- }
-
-
-
- &:hover ${TitleBox} {
-
- width: 70%;
-
- }
-
-
-
- ${({ selectedState }: Props) =>
-     selectedState?.isSelected &&
-     css`
-         color: ${(props) => props.theme.colors.darkText};
-         background: ${(props) => props.theme.colors.activeBackground};
-     `}
-
-
- cursor: ${({ dropReceivingState }: Props) =>
-     !dropReceivingState?.isDraggedOver
-         ? `pointer`
-         : dropReceivingState?.canReceiveDroppedItems
-         ? `pointer`
-         : `not-allowed`};
-
-`
-
-const MenuButton = styled.div`
-    height: 34px;
-    width: 100%;
-    font-family: ${fonts.primary.name};
-    font-weight: ${fonts.primary.weight.normal};
-    font-size: 14px;
-    line-height: 18px;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    cursor: pointer;
-    padding: 0px 10px 0 0;
-    & ${SidebarItem} {
-        background-color: red;
-    }
-    &:hover {
-        background-color: ${(props) => props.theme.colors.lightHover};
-    }
-    & > div {
-        width: auto;
-    }
 `
 
 const ListTitle = styled.span<Props>`

@@ -1232,7 +1232,18 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageHover: EventHandler<'setPageHover'> = ({ event }) => {
+    setPageHover: EventHandler<'setPageHover'> = ({ event, previousState }) => {
+        if (
+            previousState.searchResults.results[event.day].pages.byId[
+                event.pageId
+            ].isCopyPasterShown ||
+            previousState.searchResults.results[event.day].pages.byId[
+                event.pageId
+            ].listPickerShowStatus !== 'hide'
+        ) {
+            return
+        }
+
         this.emitMutation({
             searchResults: {
                 results: {
@@ -3178,7 +3189,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         'setSyncStatusMenuDisplayState'
     > = async ({ event }) => {
         this.emitMutation({
-            syncMenu: { isDisplayed: { $set: event.isShown } },
+            syncMenu: { isDisplayed: { $set: !event.isShown } },
         })
     }
 

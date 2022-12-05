@@ -1,5 +1,4 @@
 import React from 'react'
-import onClickOutside from 'react-onclickoutside'
 
 import Tooltip from './tooltip'
 import {
@@ -190,4 +189,4 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
     }
 }
 
-export default onClickOutside(TooltipContainer)
+export default TooltipContainer

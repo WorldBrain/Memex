@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import onClickOutside from 'react-onclickoutside'
 import moment from 'moment'
 import chrono from 'chrono-node'
 import classnames from 'classnames'
@@ -463,4 +462,4 @@ const BorderRight = styled.div`
     border-right: 1px solid color9;
 `
 
-export default onClickOutside(DateRangeSelection)
+export default DateRangeSelection

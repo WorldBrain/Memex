@@ -7,7 +7,6 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
-import { ClickAway } from 'src/util/click-away-wrapper'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import ConfirmDialog from '../../common-ui/components/ConfirmDialog'
@@ -254,7 +253,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
     render() {
         return (
-            <ClickAway onClickAway={this.props.closeShareMenu}>
+            <>
                 {this.state.confirmationMode == null ? (
                     <>
                         <ShareAnnotationMenu
@@ -309,12 +308,13 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                             unselectEntry={this.handleSpacePickerSelection(
                                 'unselect',
                             )}
+                            width={'fill-available'}
                         />
                     </>
                 ) : (
                     this.renderConfirmationMode()
                 )}
-            </ClickAway>
+            </>
         )
     }
 }

@@ -1,5 +1,6 @@
 import browser from 'webextension-polyfill'
 
+export const logoNoText = browser.runtime.getURL('/img/memexLogo.svg')
 export const logoSmall = browser.runtime.getURL(
     '/img/worldbrain-logo-narrow-bw-48.png',
 )

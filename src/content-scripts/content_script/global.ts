@@ -43,10 +43,11 @@ import { getUnderlyingResourceUrl, isFullUrlPDF } from 'src/util/uri-utils'
 import { copyPaster, subscription } from 'src/util/remote-functions-background'
 import { ContentLocatorFormat } from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import { setupPdfViewerListeners } from './pdf-detection'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { checkPageBlacklisted } from 'src/blacklist/utils'
+import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 // import { maybeRenderTutorial } from 'src/in-page-ui/guided-tutorial/content-script'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
@@ -58,7 +59,7 @@ export async function main(
         loadRemotely?: boolean
         getContentFingerprints?: GetContentFingerprints
     } = {},
-) {
+): Promise<SharedInPageUIState> {
     params.loadRemotely = params.loadRemotely ?? true
     const isPdfViewerRunning = params.getContentFingerprints != null
     if (isPdfViewerRunning) {
@@ -93,6 +94,9 @@ export async function main(
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const tagsBG = runInBackground<RemoteTagsInterface>()
     const collectionsBG = runInBackground<RemoteCollectionsInterface>()
+    const pageActivityIndicatorBG = runInBackground<
+        RemotePageActivityIndicatorInterface
+    >()
     const remoteFunctionRegistry = new RemoteFunctionRegistry()
     const annotationsManager = new AnnotationsManager()
     const toolbarNotifications = new ToolbarNotifications()
@@ -130,8 +134,8 @@ export async function main(
             delete components[component]
         },
     })
-    const pageUrl = await pageInfo.getPageUrl()
-    const loadAnnotationsPromise = annotationsCache.load(pageUrl)
+    const fullPageUrl = await pageInfo.getPageUrl()
+    const loadAnnotationsPromise = annotationsCache.load(fullPageUrl)
 
     const annotationFunctionsParams = {
         inPageUI,
@@ -350,15 +354,22 @@ export async function main(
         }
     }
 
-    const isPageBlacklisted = await checkPageBlacklisted(pageUrl)
-    const isSidebarEnabled = await sidebarUtils.getSidebarState()
+    const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
+    const isSidebarEnabled =
+        (await sidebarUtils.getSidebarState()) &&
+        (pageInfo.isPdf ? isPdfViewerRunning : true)
+    const pageActivityStatus = await pageActivityIndicatorBG.getPageActivityStatus(
+        fullPageUrl,
+    )
 
     if (
-        isSidebarEnabled &&
-        !isPageBlacklisted &&
-        (pageInfo.isPdf ? isPdfViewerRunning : true)
+        (isSidebarEnabled && !isPageBlacklisted) ||
+        pageActivityStatus === 'has-annotations'
     ) {
-        await inPageUI.loadComponent('ribbon')
+        await inPageUI.loadComponent('ribbon', {
+            keepRibbonHidden: !isSidebarEnabled,
+            showPageActivityIndicator: pageActivityStatus === 'has-annotations',
+        })
     }
 
     return inPageUI

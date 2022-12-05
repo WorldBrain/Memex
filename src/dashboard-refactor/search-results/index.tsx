@@ -108,6 +108,8 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         </Loader>
     )
 
+    spaceBtnBarDashboardRef = React.createRef<HTMLElement>()
+
     private renderNoteResult = (
         day: number,
         pageId: string,
@@ -173,16 +175,12 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         </HoverBox>
                     )
                 }
+                spacePickerButtonRef={this.spaceBtnBarDashboardRef}
                 listPickerRenderLocation={noteData.listPickerShowStatus}
                 renderListsPickerForAnnotation={() =>
                     noteData.listPickerShowStatus !== 'hide' && (
                         <CollectionPicker
                             initialSelectedListIds={() => listsToDisplay}
-                            onClickOutside={
-                                noteData.listPickerShowStatus === 'lists-bar'
-                                    ? interactionProps.onListPickerBarBtnClick
-                                    : interactionProps.onListPickerFooterBtnClick
-                            }
                             selectEntry={(listId) =>
                                 interactionProps.updateLists({
                                     added: listId,
@@ -209,46 +207,34 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 }
                 renderShareMenuForAnnotation={() =>
                     noteData.shareMenuShowStatus !== 'hide' && (
-                        <HoverBox
-                            padding={'0px'}
-                            width="350px"
-                            right="0"
-                            withRelativeContainer
-                        >
-                            <SingleNoteShareMenu
-                                listData={this.props.listData}
-                                isShared={noteData.isShared}
-                                shareImmediately={
-                                    noteData.shareMenuShowStatus ===
-                                    'show-n-share'
-                                }
-                                annotationUrl={noteId}
-                                copyLink={this.props.onNoteLinkCopy}
-                                closeShareMenu={
-                                    interactionProps.onShareBtnClick
-                                }
-                                postShareHook={interactionProps.updateShareInfo}
-                                spacePickerProps={{
-                                    initialSelectedListIds: () =>
-                                        listsToDisplay,
-                                    selectEntry: (listId, options) =>
-                                        interactionProps.updateLists({
-                                            added: listId,
-                                            deleted: null,
-                                            selected: [],
-                                            options,
-                                        }),
-                                    unselectEntry: (listId) =>
-                                        interactionProps.updateLists({
-                                            added: null,
-                                            deleted: listId,
-                                            selected: [],
-                                        }),
-                                    createNewEntry:
-                                        interactionProps.createNewList,
-                                }}
-                            />
-                        </HoverBox>
+                        <SingleNoteShareMenu
+                            listData={this.props.listData}
+                            isShared={noteData.isShared}
+                            shareImmediately={
+                                noteData.shareMenuShowStatus === 'show-n-share'
+                            }
+                            annotationUrl={noteId}
+                            copyLink={this.props.onNoteLinkCopy}
+                            closeShareMenu={interactionProps.onShareBtnClick}
+                            postShareHook={interactionProps.updateShareInfo}
+                            spacePickerProps={{
+                                initialSelectedListIds: () => listsToDisplay,
+                                selectEntry: (listId, options) =>
+                                    interactionProps.updateLists({
+                                        added: listId,
+                                        deleted: null,
+                                        selected: [],
+                                        options,
+                                    }),
+                                unselectEntry: (listId) =>
+                                    interactionProps.updateLists({
+                                        added: null,
+                                        deleted: listId,
+                                        selected: [],
+                                    }),
+                                createNewEntry: interactionProps.createNewList,
+                            }}
+                        />
                     )
                 }
                 annotationEditDependencies={{
@@ -775,18 +761,6 @@ const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
     background: ${(props) => props.theme.colors.backgroundColor};
     margin: 2px 0px;
-`
-
-const IconBox = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 3px;
-    padding: 4px;
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.grey};
-    }
 `
 
 const ReferencesContainer = styled.div`

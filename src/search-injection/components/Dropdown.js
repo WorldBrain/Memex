@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import onClickOutside from 'react-onclickoutside'
 
 import { remoteFunction } from 'src/util/webextensionRPC'
 import styled from 'styled-components'
@@ -79,4 +78,4 @@ const DropDownItem = styled.div`
     }
 `
 
-export default onClickOutside(Dropdown)
+export default Dropdown

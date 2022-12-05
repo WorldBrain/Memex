@@ -30,7 +30,7 @@ export class HelpMenu extends React.PureComponent<Props> {
                         filePath={icon}
                         heightAndWidth="22px"
                         hoverOff
-                        color={top ? 'purple' : null}
+                        color={top ? 'backgroundColor' : null}
                     />
                 )}
                 {text}
@@ -44,29 +44,28 @@ export class HelpMenu extends React.PureComponent<Props> {
 
     render() {
         return (
-            <HoverBox
-                position={'fixed'}
-                right={'20px'}
-                bottom={'60px'}
-                padding={'10px'}
-                width={'260px'}
-            >
+            <Container>
                 {this.props.menuOptions.map((opt, i) =>
                     opt === '-'
                         ? this.renderSeparator(opt, i)
                         : this.renderMenuOption(opt, i),
                 )}
                 {this.renderFooter()}
-            </HoverBox>
+            </Container>
         )
     }
 }
+
+const Container = styled.div`
+    padding: 15px;
+    width: 250px;
+`
 
 const MenuItem = styled.div<{ top }>`
     border-radius: 5px;
     border: none;
     list-style: none;
-    background-color: ${(props) => props.top && props.theme.colors.lightHover};
+    background-color: ${(props) => props.top && props.theme.colors.purple};
 
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.lineGrey};
@@ -76,7 +75,7 @@ const MenuItem = styled.div<{ top }>`
 const Link = styled.a<{ top }>`
     color: ${(props) =>
         props.top
-            ? props.theme.colors.darkerText
+            ? props.theme.colors.backgroundColor
             : props.theme.colors.normalText};
     font-weight: ${(props) => (props.top ? '600' : '400')};
     height: 40px;

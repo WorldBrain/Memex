@@ -1,5 +1,4 @@
 import React, { PureComponent } from 'react'
-import onClickOutside from 'react-onclickoutside'
 import styled, { css } from 'styled-components'
 import moment from 'moment'
 
@@ -61,8 +60,8 @@ export interface SyncStatusMenuProps extends RootState {
     pendingRemoteChangeCount: number
     onLoginClick: React.MouseEventHandler
     onClickOutside: React.MouseEventHandler
-    syncStatusIconState?: SyncStatusIconState
-    onToggleDisplayState: React.MouseEventHandler
+    syncStatusIconState?: any
+    onToggleDisplayState?: () => void
 }
 
 class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
@@ -176,7 +175,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             <RowContainer>
                 <Row>
                     <LoadingBox>
-                        <LoadingIndicator />
+                        <LoadingIndicator size={30} />
                     </LoadingBox>
                 </Row>
             </RowContainer>
@@ -195,12 +194,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
         }
 
         return (
-            <StyledHoverBox
-                padding={'5px 0px 10px 0px'}
-                width="min-content"
-                right="50px"
-                top="40px"
-            >
+            <Container>
                 {this.renderStatus()}
                 <Separator />
                 <RowContainer>
@@ -242,12 +236,12 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         Email
                     </HelpTextBlockLink>
                 </BottomRow>
-            </StyledHoverBox>
+            </Container>
         )
     }
 }
 
-export default onClickOutside(SyncStatusMenu)
+export default SyncStatusMenu
 
 const LoadingBox = styled.div`
     height: 100px;
@@ -262,12 +256,8 @@ const ExternalLink = styled.a`
     text-decoration: none;
 `
 
-const StyledHoverBox = styled(HoverBox)`
-    height: min-content;
-    width: min-content;
-    min-width: 270px;
-    flex-direction: column;
-    overflow: hidden;
+const Container = styled.div`
+    width: 250px;
 `
 
 const Separator = styled.div`
@@ -292,7 +282,7 @@ const TopBox = styled(Margin)`
 
 const Row = styled(Margin)`
     height: min-content;
-    display: grid;
+    display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -312,7 +302,7 @@ const Row = styled(Margin)`
 `
 
 const BottomRow = styled.div`
-    padding: 15px 10px 5px 20px;
+    padding: 15px 10px 15px 20px;
     display: flex;
     justify-content: flex-start;
     cursor: pointer;
@@ -394,6 +384,7 @@ const HelpTextBlockLink = styled.a<{
     display: flex;
     align-items: center;
     padding-left: 5px;
+    color: ${(props) => props.theme.colors.purple};
 `
 
 const TextBlockSmall = styled.div`

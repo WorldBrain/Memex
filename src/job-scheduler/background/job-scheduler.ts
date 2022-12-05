@@ -27,7 +27,7 @@ export class JobScheduler {
     }
 
     private static calcTimeFromNow = (minutes: number, now = Date.now()) =>
-        typeof minutes === 'undefined' ? minutes : now + minutes * 60 * 1000
+        minutes == null ? minutes : now + minutes * 60 * 1000
 
     private setTimeoutKey = (key: string, value: number) =>
         this.props.storageAPI.local.set({
@@ -68,7 +68,9 @@ export class JobScheduler {
     ) {
         const timeToRun = await this.getTimeoutKey(name)
 
-        if (timeToRun < now) {
+        if (timeToRun === JobScheduler.NOT_SET) {
+            await job()
+        } else if (timeToRun < now) {
             await job()
             await this.setTimeoutKey(
                 name,
@@ -110,6 +112,16 @@ export class JobScheduler {
                 `Tried to fire an alarm but the type of job could not be determined for name: ${name}`,
             ])
         }
+    }
+
+    async scheduleJob(job: JobDefinition<PrimedJob>) {
+        this.jobs.set(job.name, job)
+
+        this.props.alarmsAPI.create(job.name, {
+            when: job.when,
+            delayInMinutes: job.delayInMinutes,
+            periodInMinutes: job.periodInMinutes,
+        })
     }
 
     // Schedule all periodic ping attempts at a random minute past the hour, every hour

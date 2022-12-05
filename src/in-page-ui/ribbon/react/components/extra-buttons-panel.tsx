@@ -1,6 +1,5 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import onClickOutside from 'react-onclickoutside'
 
 interface Props {
     closePanel: () => void
@@ -30,7 +29,7 @@ class ExtraButtonsPanel extends React.PureComponent<Props> {
     }
 }
 
-export default onClickOutside(ExtraButtonsPanel)
+export default ExtraButtonsPanel
 
 const Div = styled.div`
     padding: 10px 0px;

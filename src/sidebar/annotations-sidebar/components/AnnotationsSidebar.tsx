@@ -1,7 +1,6 @@
 import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import styled, { css } from 'styled-components'
-import onClickOutside from 'react-onclickoutside'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ConversationReplies } from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
 import type {
@@ -40,7 +39,7 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import type { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getLocalStorage } from 'src/util/storage'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
@@ -67,12 +66,21 @@ export interface AnnotationsSidebarProps
         followedListId?: string,
     ) => (id: string) => JSX.Element
     renderTagsPickerForAnnotation: (id: string) => JSX.Element
+    shareButtonRef: React.RefObject<HTMLElement>
+    spacePickerButtonRef: React.RefObject<HTMLElement>
+    activeShareMenuNoteId: string
     renderShareMenuForAnnotation: (
         followedListId?: string,
-    ) => (id: string) => JSX.Element
+    ) => (
+        id: string,
+        referenceElement: React.RefObject<HTMLElement>,
+    ) => JSX.Element
     renderListsPickerForAnnotation: (
         followedListId?: string,
-    ) => (id: string) => JSX.Element
+    ) => (
+        id: string,
+        referenceElement?: React.RefObject<HTMLElement>,
+    ) => JSX.Element
 
     expandFeed: () => void
     expandMyNotes: () => void
@@ -127,6 +135,8 @@ export interface AnnotationsSidebarProps
     selectedSpaceLocalId: number
 
     //postShareHook: (shareInfo) => void
+    //postShareHook: (shareInfo) => void+
+    setPopoutsActive: (popoutsOpen: boolean) => void
 }
 
 interface AnnotationsSidebarState {
@@ -151,6 +161,7 @@ export class AnnotationsSidebar extends React.Component<
     } = {}
     private sortDropDownButtonRef = React.createRef<HTMLDivElement>()
     private copyButtonRef = React.createRef<HTMLDivElement>()
+    private pageShareButtonRef = React.createRef<HTMLDivElement>()
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
 
     state: AnnotationsSidebarState = {
@@ -281,6 +292,22 @@ export class AnnotationsSidebar extends React.Component<
         return annotationCreateLists
     }
 
+    setPopoutsActive() {
+        if (
+            this.state.showAllNotesCopyPaster ||
+            this.state.isMarkdownHelpShown ||
+            this.state.showAllNotesShareMenu ||
+            this.state.showSortDropDown ||
+            this.state.showPageSpacePicker
+        ) {
+            console.log('settrue')
+            return this.props.setPopoutsActive(true)
+        } else {
+            console.log('setfalse')
+            return this.props.setPopoutsActive(false)
+        }
+    }
+
     private renderCopyPasterManager(annotationUrls) {
         if (!this.state.showAllNotesCopyPaster) {
             return
@@ -291,11 +318,11 @@ export class AnnotationsSidebar extends React.Component<
                 targetElementRef={this.copyButtonRef.current}
                 placement={'bottom-end'}
                 offsetX={5}
-                closeComponent={() =>
+                closeComponent={() => {
                     this.setState({
                         showAllNotesCopyPaster: false,
                     })
-                }
+                }}
                 strategy={'fixed'}
                 width={'fit-content'}
             >
@@ -505,6 +532,9 @@ export class AnnotationsSidebar extends React.Component<
                                 isActive={
                                     this.props.activeAnnotationUrl === data.id
                                 }
+                                activeShareMenuNoteId={
+                                    this.props.activeShareMenuNoteId
+                                }
                                 onReplyBtnClick={eventHandlers.onReplyBtnClick}
                                 onHighlightClick={this.props.setActiveAnnotationUrl(
                                     data.id,
@@ -521,6 +551,10 @@ export class AnnotationsSidebar extends React.Component<
                                     this.props.getListDetailsById
                                 }
                                 {...ownAnnotationProps}
+                                shareButtonRef={this.props.shareButtonRef}
+                                spacePickerButtonRef={
+                                    this.props.spacePickerButtonRef
+                                }
                             />
                             <ConversationReplies
                                 newReplyEventHandlers={eventHandlers}
@@ -798,7 +832,11 @@ export class AnnotationsSidebar extends React.Component<
                     <AnnotationBox
                         key={annot.url}
                         isActive={this.props.activeAnnotationUrl === annot.url}
-                        zIndex={annotations.length - i}
+                        zIndex={
+                            this.props.activeShareMenuNoteId === annot.url
+                                ? 10000
+                                : this.props.annotations.length - i
+                        }
                     >
                         <AnnotationEditable
                             {...annot}
@@ -828,6 +866,7 @@ export class AnnotationsSidebar extends React.Component<
                                 annot.body?.length > 0
                             }
                             passDownRef={ref}
+                            shareButtonRef={this.props.shareButtonRef}
                             renderShareMenuForAnnotation={this.props.renderShareMenuForAnnotation()}
                             renderCopyPasterForAnnotation={this.props.renderCopyPasterForAnnotation()}
                             renderListsPickerForAnnotation={this.props.renderListsPickerForAnnotation()}
@@ -897,24 +936,20 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <TopBarContainer>
-                <FollowedListTitleContainerMyNotes>
-                    <MyNotesClickableArea
-                        onClick={
-                            this.props.isExpanded
-                                ? null
-                                : () => {
-                                      this.props.expandMyNotes()
-                                  }
-                        }
-                    >
-                        <FollowedListSectionTitle
-                            active={this.props.isExpanded}
-                        >
-                            My Annotations
-                        </FollowedListSectionTitle>
-                    </MyNotesClickableArea>
-                </FollowedListTitleContainerMyNotes>
-                <FollowedListTitleContainer
+                <PrimaryAction
+                    onClick={
+                        this.props.isExpanded
+                            ? null
+                            : () => {
+                                  this.props.expandMyNotes()
+                              }
+                    }
+                    label={'My Annotations'}
+                    active={this.props.isExpanded}
+                    type={'tertiary'}
+                    size={'medium'}
+                />
+                <PrimaryAction
                     onClick={
                         this.props.isExpandedSharedSpaces
                             ? null
@@ -924,38 +959,64 @@ export class AnnotationsSidebar extends React.Component<
                                   )
                               }
                     }
-                    left="5px"
-                >
-                    <FollowedListSectionTitle
-                        active={this.props.isExpandedSharedSpaces}
-                    >
-                        Spaces
-                        {this.props.followedListLoadState === 'running' && (
+                    label={'Spaces'}
+                    active={this.props.isExpandedSharedSpaces}
+                    type={'tertiary'}
+                    size={'medium'}
+                    iconPosition={'right'}
+                    icon={
+                        this.props.followedListLoadState === 'running' ||
+                        this.props.followedListLoadState === 'pristine' ? (
                             <LoadingBox>
                                 <LoadingIndicator size={12} />{' '}
                             </LoadingBox>
-                        )}
-                        {followedLists.allIds.length > 0 && (
+                        ) : followedLists.allIds.length > 0 ? (
                             <LoadingBox>
                                 <PageActivityIndicator
                                     active={true}
                                     left="5px"
                                 />
                             </LoadingBox>
-                        )}
-                    </FollowedListSectionTitle>
-                </FollowedListTitleContainer>
-                <FollowedListTitleContainerMyNotes left="5px">
-                    <MyNotesClickableArea
-                        onClick={() => this.props.expandFeed()}
-                    >
-                        <FollowedListSectionTitle
-                            active={this.props.isFeedShown}
-                        >
-                            Feed
-                        </FollowedListSectionTitle>
-                    </MyNotesClickableArea>
-                </FollowedListTitleContainerMyNotes>
+                        ) : (
+                            <LoadingBox>
+                                <PageActivityIndicator
+                                    active={false}
+                                    left="5px"
+                                />
+                            </LoadingBox>
+                        )
+                    }
+                />
+                <PrimaryAction
+                    onClick={() => this.props.expandFeed()}
+                    label={'Feed'}
+                    active={this.props.isFeedShown}
+                    type={'tertiary'}
+                    size={'medium'}
+                    iconPosition={'right'}
+                    icon={
+                        this.props.followedListLoadState === 'running' ||
+                        this.props.followedListLoadState === 'pristine' ? (
+                            <LoadingBox>
+                                <LoadingIndicator size={12} />{' '}
+                            </LoadingBox>
+                        ) : followedLists.allIds.length > 0 ? (
+                            <LoadingBox>
+                                <PageActivityIndicator
+                                    active={true}
+                                    left="5px"
+                                />
+                            </LoadingBox>
+                        ) : (
+                            <LoadingBox>
+                                <PageActivityIndicator
+                                    active={false}
+                                    left="5px"
+                                />
+                            </LoadingBox>
+                        )
+                    }
+                />
             </TopBarContainer>
         )
     }
@@ -1025,15 +1086,18 @@ export class AnnotationsSidebar extends React.Component<
             <>
                 <PrimaryAction
                     label={'Share Page'}
-                    backgroundColor={'purple'}
-                    onClick={() =>
-                        this.setState({
+                    onClick={async () => {
+                        await this.setState({
                             showPageSpacePicker: !this.state
                                 .showPageSpacePicker,
                         })
-                    }
+                        this.setPopoutsActive()
+                    }}
+                    icon={'invite'}
+                    type={'primary'}
+                    size={'medium'}
+                    innerRef={this.pageShareButtonRef}
                 />
-                {/* <SpacePicker initialSelectedListIds={this.props.pag}  />} */}
             </>
         )
     }
@@ -1047,11 +1111,12 @@ export class AnnotationsSidebar extends React.Component<
                 <TopBarActionBtns>
                     <Icon
                         filePath={icons.sort}
-                        onClick={() =>
-                            this.setState({
+                        onClick={async () => {
+                            await this.setState({
                                 showSortDropDown: true,
                             })
-                        }
+                            this.setPopoutsActive()
+                        }}
                         height="18px"
                         width="20px"
                         containerRef={this.sortDropDownButtonRef}
@@ -1059,11 +1124,12 @@ export class AnnotationsSidebar extends React.Component<
                     />
                     <Icon
                         filePath={icons.copy}
-                        onClick={() =>
-                            this.setState({
+                        onClick={async () => {
+                            await this.setState({
                                 showAllNotesCopyPaster: true,
                             })
-                        }
+                            this.setPopoutsActive()
+                        }}
                         height="18px"
                         width="20px"
                         containerRef={this.copyButtonRef}
@@ -1071,11 +1137,12 @@ export class AnnotationsSidebar extends React.Component<
                     />
                     <Icon
                         filePath={icons.multiEdit}
-                        onClick={() =>
-                            this.setState({
+                        onClick={async () => {
+                            await this.setState({
                                 showAllNotesShareMenu: true,
                             })
-                        }
+                            this.setPopoutsActive()
+                        }}
                         active={this.state.showAllNotesShareMenu}
                         height="18px"
                         width="20px"
@@ -1083,6 +1150,26 @@ export class AnnotationsSidebar extends React.Component<
                     />
                 </TopBarActionBtns>
             </>
+        )
+    }
+
+    renderPageShareModal() {
+        if (!this.state.showPageSpacePicker) {
+            return
+        }
+        return (
+            <PopoutBox
+                targetElementRef={this.pageShareButtonRef.current}
+                placement={'bottom-end'}
+                closeComponent={() =>
+                    this.setState({
+                        showPageSpacePicker: !this.state.showPageSpacePicker,
+                    })
+                }
+                offsetX={10}
+            >
+                TOOD: Space picker goes here!
+            </PopoutBox>
         )
     }
 
@@ -1100,24 +1187,15 @@ export class AnnotationsSidebar extends React.Component<
                             </>
                         )}
                     </>
-                    {this.state.showPageSpacePicker && (
-                        <HoverBox
-                            padding="10px"
-                            right="0px"
-                            top="55px"
-                            width="250px"
-                        >
-                            TOOD: Space picker goes here!
-                        </HoverBox>
-                    )}
                 </TopBar>
+                {this.renderPageShareModal()}
                 {this.renderResultsBody()}
             </ResultBodyContainer>
         )
     }
 }
 
-export default onClickOutside(AnnotationsSidebar)
+export default AnnotationsSidebar
 
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
@@ -1179,7 +1257,7 @@ const TopBar = styled.div`
 
 const TopBarContainer = styled.div`
     display: flex;
-    grid-gap: 2px;
+    grid-gap: 4px;
     align-items: center;
 `
 const EmptyMessageContainer = styled.div`
@@ -1192,7 +1270,7 @@ const EmptyMessageContainer = styled.div`
     width: fill-available;
 `
 const AnnotationBox = styled.div<{ isActive: boolean; zIndex: number }>`
-    width: fill-available;
+    width: 99%;
     z-index: ${(props) => props.zIndex};
 `
 
@@ -1280,7 +1358,7 @@ const AnnotationContainer = styled(Margin)`
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: flex-start;
+    align-items: center;
     /* padding-bottom: 500px;
     overflow-y: scroll;
     overflow-x: visible; */

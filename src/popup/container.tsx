@@ -39,7 +39,7 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { isFullUrlPDF } from 'src/util/uri-utils'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import checkBrowser from 'src/util/check-browser'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
@@ -243,6 +243,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                                 url: `chrome://extensions/?id=${browser.runtime.id}`,
                             })
                         }
+                        size={'medium'}
+                        type={'primary'}
                     />
                 </BlurredNotice>
             )
@@ -257,6 +259,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         onClick={() =>
                             this.processEvent('togglePDFReader', null)
                         }
+                        size={'medium'}
+                        type={'primary'}
                     />
                 </BlurredNotice>
             )
@@ -323,6 +327,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
         return (
             <PopupContainerContainer>
+                {this.maybeRenderBlurredNotice()}
                 <FeedActivitySection
                     onClick={() => window.open(this.whichFeed(), '_blank')}
                 >
@@ -342,10 +347,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         }
                     />
                 </FeedActivitySection>
-                {this.maybeRenderBlurredNotice()}
                 <BookmarkButton closePopup={this.closePopup} />
                 <CollectionsButton pageListsIds={this.state.pageListIds} />
-                {this.state.shouldShowTagsUIs && <TagsButton />}
                 <SpacerLine />
                 {this.isCurrentPagePDF === true && (
                     <PDFReaderButton
@@ -465,11 +468,9 @@ const FeedActivitySectionInnerContainer = styled.div`
 
 const NoticeTitle = styled.div`
     font-size: 16px;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.normalText};
     font-weight: bold;
-    padding-bottom: 10px;
     text-align: center;
-    padding: 0 10px;
     margin-bottom: 20px;
 `
 
@@ -483,8 +484,8 @@ const LoadingBox = styled.div`
 
 const NoticeSubTitle = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.darkgrey};
-    font-weight: normal;
+    color: ${(props) => props.theme.colors.greyScale8};
+    font-weight: 300;
     padding-bottom: 15px;
     text-align: center;
     padding: 0 10px;
@@ -496,13 +497,9 @@ const BlurredNotice = styled.div<{
     location: string
 }>`
     position: absolute;
-    height: ${(props) =>
-        props.browser === 'firefox' && props.location === 'local'
-            ? '90%'
-            : ' 66%'};
-    border-bottom: 1px solid #e0e0e0;
+    height: 100%;
     width: 100%;
-    z-index: 20;
+    z-index: 30;
     overflow-y: ${(props) =>
         props.browser === 'firefox' && props.location === 'local'
             ? 'hidden'
@@ -510,23 +507,14 @@ const BlurredNotice = styled.div<{
     background: ${(props) => (props.browser === 'firefox' ? 'white' : 'none')};
     backdrop-filter: blur(10px);
     display: flex;
-    justify-content: flex-start;
-    padding-top: 50px;
+    justify-content: center;
     align-items: center;
     flex-direction: column;
-`
 
-const DashboardButtonBox = styled.div`
-    height: 45px;
-    width: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+    scrollbar-width: none;
 
-    &: hover {
-        background-color: #e0e0e0;
-        border-radius: 3px;
+    &::-webkit-scrollbar {
+        display: none;
     }
 `
 
@@ -548,23 +536,6 @@ const FeedActivitySection = styled.div`
     // &:hover {
     //     background-color: ${(props) => props.theme.colors.backgroundColor};
     // }
-`
-
-const BottomBarBox = styled.div`
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    height: 45px;
-
-    & > div {
-        width: 45px;
-    }
-`
-
-const LinkButtonBox = styled.img`
-    height: 24px;
-    width: 24px;
 `
 
 const SpacePickerContainer = styled.div`

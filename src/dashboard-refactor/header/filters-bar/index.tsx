@@ -168,10 +168,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 offsetX={10}
                 closeComponent={this.props.toggleDatesFilter}
             >
-                <DatePicker
-                    {...this.props.datePickerProps}
-                    outsideClickIgnoreClass="date-picker-button"
-                />
+                <DatePicker {...this.props.datePickerProps} />
             </PopoutBox>
         )
     }
@@ -192,7 +189,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                     {...this.props.spacePickerProps}
                     searchInputPlaceholder="Add Space filters"
                     removeTooltipText="Remove Space filter"
-                    outsideClickIgnoreClass="space-picker-button"
                     filterMode
                 />
             </PopoutBox>
@@ -215,7 +211,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                     {...this.props.domainPickerProps}
                     searchInputPlaceholder="Add domain filters"
                     removeToolTipText="Remove filter"
-                    outsideClickIgnoreClass="domain-picker-button"
                 />
             </PopoutBox>
         )

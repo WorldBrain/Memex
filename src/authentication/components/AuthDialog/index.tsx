@@ -184,12 +184,11 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                             )
                                         }
                                         label={'Sign Up'}
-                                        fontSize={'16px'}
-                                        fontColor={'black'}
-                                        backgroundColor={'purple'}
+                                        size={'large'}
+                                        type={'primary'}
+                                        fullWidth
+                                        iconPosition="right"
                                         icon={'longArrowRight'}
-                                        iconSize={'22px'}
-                                        iconPosition={'right'}
                                     />
                                 </ConfirmContainer>
                                 {this.state.error && (
@@ -290,11 +289,10 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                             )
                                         }
                                         label={'Login'}
-                                        fontSize={'16px'}
-                                        fontColor={'black'}
-                                        backgroundColor={'purple'}
+                                        size={'large'}
+                                        type={'primary'}
+                                        fullWidth
                                         icon={'longArrowRight'}
-                                        iconSize={'22px'}
                                         iconPosition={'right'}
                                     />
                                 </ConfirmContainer>
