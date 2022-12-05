@@ -48,6 +48,8 @@ import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { checkPageBlacklisted } from 'src/blacklist/utils'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { runtime } from 'webextension-polyfill'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -454,9 +456,9 @@ class PageInfo {
 
 export function injectYoutubeContextMenu(annotationsFunctions: any) {
     const config = { attributes: true, childList: true, subtree: true }
+    const icon = runtime.getURL('/img/memex-icon.svg')
     const observer = new MutationObserver((mutation) => {
         const targetObject = mutation[0]
-        //console.log(targetObject)
         if (
             (targetObject.target as HTMLElement).className ===
             'ytp-popup ytp-contextmenu'
@@ -466,8 +468,7 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
             newEntry.setAttribute('class', 'ytp-menuitem')
             newEntry.onclick = () =>
                 annotationsFunctions.createAnnotation()(false, false)
-            newEntry.innerHTML =
-                '<div class="ytp-menuitem-icon"></div><div class="ytp-menuitem-label">Add Note to timestamp with Memex</div>'
+            newEntry.innerHTML = `<div class="ytp-menuitem-icon"><img src=${icon} style="height: 23px; padding-left: 2px; display: flex; width: auto"/></div><div class="ytp-menuitem-label" style="white-space: nowrap">Add Note to timestamp with Memex</div>`
             panel.prepend(newEntry)
             // panel.style.height = "320px"
             observer.disconnect()
