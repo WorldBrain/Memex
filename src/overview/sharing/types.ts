@@ -17,7 +17,6 @@ export interface ShareMenuCommonProps {
     contentSharingBG: ContentSharingInterface
     annotationsBG: AnnotationInterface<'caller'>
     customListsBG?: RemoteCollectionsInterface
-    closeShareMenu: React.MouseEventHandler
     copyLink: (link: string) => Promise<void>
     postBulkShareHook?: (states: AnnotationSharingStates) => void
 }

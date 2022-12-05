@@ -131,7 +131,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             },
         )
 
-        this.props.closeShareMenu({} as any)
         await p
     }
 
@@ -164,7 +163,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             },
         )
 
-        this.props.closeShareMenu({} as any)
         await p
     }
 

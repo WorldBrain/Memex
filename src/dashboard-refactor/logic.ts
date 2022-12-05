@@ -188,6 +188,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 noteUpdateState: 'pristine',
                 newNoteCreateState: 'pristine',
                 searchPaginationState: 'pristine',
+                activeDay: undefined,
+                activePageID: undefined,
             },
             searchFilters: {
                 searchQuery: '',
@@ -1226,9 +1228,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        if (event.isShown) {
-            await this.showShareOnboardingIfNeeded()
-        }
+        // if (event.isShown) {
+        //     await this.showShareOnboardingIfNeeded()
+        // }
 
         this.emitMutation({
             searchResults: {
@@ -1304,9 +1306,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                             byId: {
                                 [event.pageId]: {
                                     areNotesShown: { $set: event.areShown },
-                                    notesShowLocation: {
-                                        $set: event.notesShowLocation,
-                                    },
                                 },
                             },
                         },

@@ -617,47 +617,47 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         return days
     }
 
-    private renderListShareBtn() {
-        if (this.props.selectedListId == null) {
-            return
-        }
+    // private renderListShareBtn() {
+    //     if (this.props.selectedListId == null) {
+    //         return
+    //     }
 
-        return (
-            <>
-                <TooltipBox
-                    tooltipText="Bulk-change privacy of annotations in this Space"
-                    placement="bottom"
-                >
-                    <Icon
-                        filePath={icons.multiEdit}
-                        height="16px"
-                        onClick={this.props.toggleListShareMenu}
-                    />
-                </TooltipBox>
-                {this.props.isListShareMenuShown && (
-                    <HoverBox
-                        width="340px"
-                        top="20px"
-                        right="-90px"
-                        withRelativeContainer
-                        position="absolute"
-                    >
-                        <ListShareMenu
-                            openListShareModal={this.props.openListShareModal}
-                            copyLink={this.props.onListLinkCopy}
-                            listId={this.props.selectedListId}
-                            shareImmediately={false}
-                            postBulkShareHook={(shareState) =>
-                                this.props.updateAllResultNotesShareInfo(
-                                    shareState,
-                                )
-                            }
-                        />
-                    </HoverBox>
-                )}
-            </>
-        )
-    }
+    //     return (
+    //         <>
+    //             <TooltipBox
+    //                 tooltipText="Bulk-change privacy of annotations in this Space"
+    //                 placement="bottom"
+    //             >
+    //                 <Icon
+    //                     filePath={icons.multiEdit}
+    //                     height="16px"
+    //                     onClick={this.props.toggleListShareMenu}
+    //                 />
+    //             </TooltipBox>
+    //             {this.props.isListShareMenuShown && (
+    //                 <HoverBox
+    //                     width="340px"
+    //                     top="20px"
+    //                     right="-90px"
+    //                     withRelativeContainer
+    //                     position="absolute"
+    //                 >
+    //                     <ListShareMenu
+    //                         openListShareModal={this.props.openListShareModal}
+    //                         copyLink={this.props.onListLinkCopy}
+    //                         listId={this.props.selectedListId}
+    //                         shareImmediately={false}
+    //                         postBulkShareHook={(shareState) =>
+    //                             this.props.updateAllResultNotesShareInfo(
+    //                                 shareState,
+    //                             )
+    //                         }
+    //                     />
+    //                 </HoverBox>
+    //             )}
+    //         </>
+    //     )
+    // }
 
     private firstTimeUser() {
         if (
@@ -850,8 +850,8 @@ const SectionCircle = styled.div`
 `
 
 const ImportInfo = styled.span`
-color: ${(props) => props.theme.colors.purple};
-margin - bottom: 40px;
-font - weight: 500;
-cursor: pointer;
+    color: ${(props) => props.theme.colors.purple};
+    margin-bottom: 40px;
+    font-weight: 500;
+    cursor: pointer;
 `

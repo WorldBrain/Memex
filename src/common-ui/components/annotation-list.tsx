@@ -152,242 +152,242 @@ class AnnotationList extends Component<Props, State> {
         }))
     }
 
-    private updateAnnotationShareState = (annotationUrl: string) => (
-        info: AnnotationSharingInfo,
-    ) =>
-        this.setState((state) => ({
-            annotationsSharingInfo: {
-                ...state.annotationsSharingInfo,
-                [annotationUrl]: info,
-            },
-        }))
+    // private updateAnnotationShareState = (annotationUrl: string) => (
+    //     info: AnnotationSharingInfo,
+    // ) =>
+    //     this.setState((state) => ({
+    //         annotationsSharingInfo: {
+    //             ...state.annotationsSharingInfo,
+    //             [annotationUrl]: info,
+    //         },
+    //     }))
 
-    private toggleIsExpanded = () => {
-        this.setState(
-            (prevState: State): State => ({
-                ...prevState,
-                isExpanded: !prevState.isExpanded,
-            }),
-        )
-    }
+    // private toggleIsExpanded = () => {
+    //     this.setState(
+    //         (prevState: State): State => ({
+    //             ...prevState,
+    //             isExpanded: !prevState.isExpanded,
+    //         }),
+    //     )
+    // }
 
-    private handleEditAnnotation = (url: string) => () => {
-        const { annotations, editForms } = this.state
+    // private handleEditAnnotation = (url: string) => () => {
+    //     const { annotations, editForms } = this.state
 
-        const index = annotations.findIndex((annot) => annot.url === url)
-        const form = editForms[url]
-        const annotation: Annotation = annotations[index]
+    //     const index = annotations.findIndex((annot) => annot.url === url)
+    //     const form = editForms[url]
+    //     const annotation: Annotation = annotations[index]
 
-        if (
-            !annotation ||
-            (!annotation.body &&
-                !form.commentText?.length &&
-                !form.tags?.length)
-        ) {
-            return
-        }
+    //     if (
+    //         !annotation ||
+    //         (!annotation.body &&
+    //             !form.commentText?.length &&
+    //             !form.tags?.length)
+    //     ) {
+    //         return
+    //     }
 
-        const newAnnotations: Annotation[] = [
-            ...annotations.slice(0, index),
-            {
-                ...annotation,
-                comment: form.commentText,
-                tags: form.tags,
-                lastEdited: new Date(),
-            },
-            ...annotations.slice(index + 1),
-        ]
+    //     const newAnnotations: Annotation[] = [
+    //         ...annotations.slice(0, index),
+    //         {
+    //             ...annotation,
+    //             comment: form.commentText,
+    //             tags: form.tags,
+    //             lastEdited: new Date(),
+    //         },
+    //         ...annotations.slice(index + 1),
+    //     ]
 
-        this.props.handleEditAnnotation(url, form.commentText, form.tags)
+    //     this.props.handleEditAnnotation(url, form.commentText, form.tags)
 
-        this.setState((state) => ({
-            annotations: newAnnotations,
-            annotationModes: { ...state.annotationModes, [url]: 'default' },
-            editForms: {
-                ...state.editForms,
-                [url]: {
-                    ...INIT_FORM_STATE,
-                    commentText: state.editForms[url].commentText,
-                    tags: state.editForms[url].tags,
-                },
-            },
-        }))
-    }
+    //     this.setState((state) => ({
+    //         annotations: newAnnotations,
+    //         annotationModes: { ...state.annotationModes, [url]: 'default' },
+    //         editForms: {
+    //             ...state.editForms,
+    //             [url]: {
+    //                 ...INIT_FORM_STATE,
+    //                 commentText: state.editForms[url].commentText,
+    //                 tags: state.editForms[url].tags,
+    //             },
+    //         },
+    //     }))
+    // }
 
-    private handleDeleteAnnotation = (url: string) => () => {
-        this.props.handleDeleteAnnotation(url)
+    // private handleDeleteAnnotation = (url: string) => () => {
+    //     this.props.handleDeleteAnnotation(url)
 
-        // Delete the annotation in the state too
-        const { annotations } = this.state
-        const index = this.state.annotations.findIndex(
-            (annot) => annot.url === url,
-        )
-        const newAnnotations = [
-            ...annotations.slice(0, index),
-            ...annotations.slice(index + 1),
-        ]
-        this.setState({
-            annotations: newAnnotations,
-        })
-    }
+    //     // Delete the annotation in the state too
+    //     const { annotations } = this.state
+    //     const index = this.state.annotations.findIndex(
+    //         (annot) => annot.url === url,
+    //     )
+    //     const newAnnotations = [
+    //         ...annotations.slice(0, index),
+    //         ...annotations.slice(index + 1),
+    //     ]
+    //     this.setState({
+    //         annotations: newAnnotations,
+    //     })
+    // }
 
-    private handleGoToAnnotation = (annotation: Annotation) => () => {
-        this.props.goToAnnotation(annotation)
-    }
+    // private handleGoToAnnotation = (annotation: Annotation) => () => {
+    //     this.props.goToAnnotation(annotation)
+    // }
 
-    private handleTagPickerClick = (url: string) => () => {
-        this.props.setActiveTagPickerNoteId(url)
-    }
-    private handleListPickerClick = (url: string) => () => {
-        this.props.setActiveListPickerNoteId(url)
-    }
+    // private handleTagPickerClick = (url: string) => () => {
+    //     this.props.setActiveTagPickerNoteId(url)
+    // }
+    // private handleListPickerClick = (url: string) => () => {
+    //     this.props.setActiveListPickerNoteId(url)
+    // }
 
-    private handleEditCancel = (url: string, commentText: string) => () =>
-        this.setState((state) => ({
-            annotationModes: { [url]: 'default' },
-            editForms: {
-                ...state.editForms,
-                [url]: {
-                    ...state.editForms[url],
-                    commentText,
-                },
-            },
-        }))
+    // private handleEditCancel = (url: string, commentText: string) => () =>
+    //     this.setState((state) => ({
+    //         annotationModes: { [url]: 'default' },
+    //         editForms: {
+    //             ...state.editForms,
+    //             [url]: {
+    //                 ...state.editForms[url],
+    //                 commentText,
+    //             },
+    //         },
+    //     }))
 
-    private handleShareClick = (url: string) => () => {
-        if (this.props.setActiveShareMenuNoteId != null) {
-            this.props.setActiveShareMenuNoteId(url)
-        }
-    }
+    // private handleShareClick = (url: string) => () => {
+    //     if (this.props.setActiveShareMenuNoteId != null) {
+    //         this.props.setActiveShareMenuNoteId(url)
+    //     }
+    // }
 
-    private renderTagPicker(annot: Annotation) {
-        if (this.props.activeTagPickerNoteId !== annot.url) {
-            return null
-        }
+    // private renderTagPicker(annot: Annotation) {
+    //     if (this.props.activeTagPickerNoteId !== annot.url) {
+    //         return null
+    //     }
 
-        return (
-            <div className={styles.hoverBoxWrapper}>
-                <HoverBox>
-                    {/* <TagPicker
-                        onUpdateEntrySelection={(args) =>
-                            this.tagsBG.updateTagForPage({
-                                ...args,
-                                url: annot.url,
-                            })
-                        }
-                        initialSelectedEntries={() => annot.tags}
-                        onClickOutside={() =>
-                            this.props.setActiveTagPickerNoteId(undefined)
-                        }
-                    /> */}
-                </HoverBox>
-            </div>
-        )
-    }
-    private renderListPicker(annot: Annotation) {
-        if (this.props.activeListPickerNoteId !== annot.url) {
-            return null
-        }
+    //     return (
+    //         <div className={styles.hoverBoxWrapper}>
+    //             <HoverBox>
+    //                 {/* <TagPicker
+    //                     onUpdateEntrySelection={(args) =>
+    //                         this.tagsBG.updateTagForPage({
+    //                             ...args,
+    //                             url: annot.url,
+    //                         })
+    //                     }
+    //                     initialSelectedEntries={() => annot.tags}
+    //                     onClickOutside={() =>
+    //                         this.props.setActiveTagPickerNoteId(undefined)
+    //                     }
+    //                 /> */}
+    //             </HoverBox>
+    //         </div>
+    //     )
+    // }
+    // private renderListPicker(annot: Annotation) {
+    //     if (this.props.activeListPickerNoteId !== annot.url) {
+    //         return null
+    //     }
 
-        return (
-            <div className={styles.hoverBoxWrapper}>
-                <HoverBox>
-                    {/* <CollectionPicker
-                        onUpdateEntrySelection={async (args) => {
-                            //  TODO implement picker
-                            const name = args.added ?? args.deleted
-                            const list = await this.collectionsBG.fetchListByName(
-                                { name },
-                            )
-                            const id = list.id
-                            if (args.added != null) {
-                                this.contentShareBG.shareAnnotationToSomeLists({
-                                    annotationUrl: annot.url,
-                                    localListIds: [id],
-                                })
-                            } else if (args.deleted != null) {
-                                this.contentShareBG.unshareAnnotationFromSomeLists(
-                                    {
-                                        annotationUrl: annot.url,
-                                        localListIds: [id],
-                                    },
-                                )
-                            }
-                        }}
-                        initialSelectedEntries={() => annot.lists}
-                        onClickOutside={() =>
-                            this.props.setActiveListPickerNoteId(undefined)
-                        }
-                    /> */}
-                </HoverBox>
-            </div>
-        )
-    }
+    //     return (
+    //         <div className={styles.hoverBoxWrapper}>
+    //             <HoverBox>
+    //                 {/* <CollectionPicker
+    //                     onUpdateEntrySelection={async (args) => {
+    //                         //  TODO implement picker
+    //                         const name = args.added ?? args.deleted
+    //                         const list = await this.collectionsBG.fetchListByName(
+    //                             { name },
+    //                         )
+    //                         const id = list.id
+    //                         if (args.added != null) {
+    //                             this.contentShareBG.shareAnnotationToSomeLists({
+    //                                 annotationUrl: annot.url,
+    //                                 localListIds: [id],
+    //                             })
+    //                         } else if (args.deleted != null) {
+    //                             this.contentShareBG.unshareAnnotationFromSomeLists(
+    //                                 {
+    //                                     annotationUrl: annot.url,
+    //                                     localListIds: [id],
+    //                                 },
+    //                             )
+    //                         }
+    //                     }}
+    //                     initialSelectedEntries={() => annot.lists}
+    //                     onClickOutside={() =>
+    //                         this.props.setActiveListPickerNoteId(undefined)
+    //                     }
+    //                 /> */}
+    //             </HoverBox>
+    //         </div>
+    //     )
+    // }
 
-    private renderCopyPasterManager(annot: Annotation) {
-        if (this.props.activeCopyPasterAnnotationId !== annot.url) {
-            return null
-        }
+    // private renderCopyPasterManager(annot: Annotation) {
+    //     if (this.props.activeCopyPasterAnnotationId !== annot.url) {
+    //         return null
+    //     }
 
-        return (
-            <div className={styles.hoverBoxWrapper}>
-                <HoverBox>
-                    <PageNotesCopyPaster
-                        copyPaster={this.props.copyPaster}
-                        annotationUrls={[annot.url]}
-                        normalizedPageUrls={[annot.pageUrl]}
-                        onClickOutside={() =>
-                            this.props.setActiveCopyPasterAnnotationId?.(
-                                undefined,
-                            )
-                        }
-                    />
-                </HoverBox>
-            </div>
-        )
-    }
+    //     return (
+    //         <div className={styles.hoverBoxWrapper}>
+    //             <HoverBox>
+    //                 <PageNotesCopyPaster
+    //                     copyPaster={this.props.copyPaster}
+    //                     annotationUrls={[annot.url]}
+    //                     normalizedPageUrls={[annot.pageUrl]}
+    //                     onClickOutside={() =>
+    //                         this.props.setActiveCopyPasterAnnotationId?.(
+    //                             undefined,
+    //                         )
+    //                     }
+    //                 />
+    //             </HoverBox>
+    //         </div>
+    //     )
+    // }
 
-    private renderShareMenu(annot: Annotation) {
-        if (this.props.activeShareMenuNoteId !== annot.url) {
-            return null
-        }
+    // private renderShareMenu(annot: Annotation) {
+    //     if (this.props.activeShareMenuNoteId !== annot.url) {
+    //         return null
+    //     }
 
-        return (
-            <div className={styles.hoverBoxWrapper}>
-                <HoverBox>
-                    {/* <SingleNoteShareMenu
-                        contentSharingBG={this.props.contentSharing}
-                        copyLink={async (link) => {
-                            analytics.trackEvent({
-                                category: 'ContentSharing',
-                                action: 'copyNoteLink',
-                            })
+    //     return (
+    //         <div className={styles.hoverBoxWrapper}>
+    //             <HoverBox>
+    //                 {/* <SingleNoteShareMenu
+    //                     contentSharingBG={this.props.contentSharing}
+    //                     copyLink={async (link) => {
+    //                         analytics.trackEvent({
+    //                             category: 'ContentSharing',
+    //                             action: 'copyNoteLink',
+    //                         })
 
-                            await copyToClipboard(link)
-                        }}
-                        annotationUrl={annot.url}
-                        postShareHook={(state) => {
-                            const privacyState = getAnnotationPrivacyState(
-                                state.privacyLevel,
-                            )
-                            return this.updateAnnotationShareState(annot.url)({
-                                status: privacyState.public
-                                    ? 'shared'
-                                    : 'unshared',
-                                taskState: 'success',
-                                privacyLevel: privacyState.protected
-                                    ? AnnotationPrivacyLevels.PROTECTED
-                                    : undefined,
-                            })
-                        }}
-                        closeShareMenu={() =>
-                            this.props.setActiveShareMenuNoteId?.(undefined)
-                        }
-                    /> */}
-                </HoverBox>
-            </div>
-        )
-    }
+    //                         await copyToClipboard(link)
+    //                     }}
+    //                     annotationUrl={annot.url}
+    //                     postShareHook={(state) => {
+    //                         const privacyState = getAnnotationPrivacyState(
+    //                             state.privacyLevel,
+    //                         )
+    //                         return this.updateAnnotationShareState(annot.url)({
+    //                             status: privacyState.public
+    //                                 ? 'shared'
+    //                                 : 'unshared',
+    //                             taskState: 'success',
+    //                             privacyLevel: privacyState.protected
+    //                                 ? AnnotationPrivacyLevels.PROTECTED
+    //                                 : undefined,
+    //                         })
+    //                     }}
+    //                     closeShareMenu={() =>
+    //                         this.props.setActiveShareMenuNoteId?.(undefined)
+    //                     }
+    //                 /> */}
+    //             </HoverBox>
+    //         </div>
+    //     )
+    // }
 
     private handleEditFormUpdate = (
         url: string,
@@ -477,34 +477,33 @@ class AnnotationList extends Component<Props, State> {
 
     render() {
         const { isExpanded } = this.state
-        return (
-            <div
-                className={cx({
-                    [styles.parentExpanded]: isExpanded,
-                })}
-            >
-                {/* Annotation count text and toggle arrow */}
-                <div
-                    className={cx(styles.resultCount, {
-                        [styles.expandedCount]: this.state.isExpanded,
-                    })}
-                    onClick={this.toggleIsExpanded}
-                >
-                    <b>{this.props.annotations.length}</b>{' '}
-                    <span className={styles.resultsText}>results</span>
-                    <span
-                        className={cx(styles.icon, {
-                            [styles.inverted]: this.state.isExpanded,
-                        })}
-                    />
-                </div>
+        return undefined
+        // <div
+        //     className={cx({
+        //         [styles.parentExpanded]: isExpanded,
+        //     })}
+        // >
+        //     {/* Annotation count text and toggle arrow */}
+        //     <div
+        //         className={cx(styles.resultCount, {
+        //             [styles.expandedCount]: this.state.isExpanded,
+        //         })}
+        //         onClick={this.toggleIsExpanded}
+        //     >
+        //         <b>{this.props.annotations.length}</b>{' '}
+        //         <span className={styles.resultsText}>results</span>
+        //         <span
+        //             className={cx(styles.icon, {
+        //                 [styles.inverted]: this.state.isExpanded,
+        //             })}
+        //         />
+        //     </div>
 
-                {/* Container for displaying AnnotationBox */}
-                <div className={styles.annotationList}>
-                    {isExpanded ? this.renderAnnotations() : null}
-                </div>
-            </div>
-        )
+        //     {/* Container for displaying AnnotationBox */}
+        //     <div className={styles.annotationList}>
+        //         {isExpanded ? this.renderAnnotations() : null}
+        //     </div>
+        // </div>
     }
 }
 

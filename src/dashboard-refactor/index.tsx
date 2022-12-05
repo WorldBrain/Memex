@@ -644,7 +644,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
-                activePage={this.state.activePage}
+                activePage={this.state.activePageID && true}
                 listData={listsSidebar.listData}
                 getListDetailsById={this.getListDetailsById}
                 toggleSortMenuShown={() =>

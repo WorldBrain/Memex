@@ -541,9 +541,6 @@ export class AnnotationsSidebarContainer<
                         keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                     })
                 }
-                closeShareMenu={() =>
-                    this.processEvent('resetShareMenuNoteId', null)
-                }
                 spacePickerProps={this.getSpacePickerProps(currentAnnotation)}
             />
         )

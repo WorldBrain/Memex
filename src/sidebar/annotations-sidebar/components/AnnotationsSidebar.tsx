@@ -441,8 +441,6 @@ export class AnnotationsSidebar extends React.Component<
                         ownAnnotationProps.mode = this.props.followedLists.byId[
                             listId
                         ].annotationModes[data.localId]
-                        ownAnnotationProps.listPickerRenderLocation =
-                            list.activeListPickerState?.position
                         ownAnnotationProps.annotationEditDependencies = this.props.bindAnnotationEditProps(
                             { url: data.localId, isShared: true },
                             listId,
@@ -725,9 +723,6 @@ export class AnnotationsSidebar extends React.Component<
                             onHighlightClick={this.props.setActiveAnnotationUrl(
                                 annot.url,
                             )}
-                            listPickerRenderLocation={
-                                this.props.activeListPickerState?.position
-                            }
                             onGoToAnnotation={footerDeps.onGoToAnnotation}
                             annotationEditDependencies={this.props.bindAnnotationEditProps(
                                 annot,
