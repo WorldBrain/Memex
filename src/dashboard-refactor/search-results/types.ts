@@ -177,6 +177,7 @@ export interface PageResult {
     id: string
     notesType: NotesType
     areNotesShown: boolean
+    activePage: boolean
     isShareMenuShown: boolean
     isTagPickerShown: boolean
     isCopyPasterShown: boolean
@@ -229,6 +230,8 @@ export interface RootState {
     // Misc local storage flags
     showMobileAppAd: boolean
     showOnboardingMsg: boolean
+    activePageID: string
+    activeDay: number
 }
 
 export interface PageEventArgs {
@@ -286,6 +289,11 @@ export type Events = UIEvent<{
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageShareMenuShown: PageEventArgs & { isShown: boolean }
     setPageNotesShown: PageEventArgs & { areShown: boolean }
+    setActivePage: {
+        activePage: boolean
+        activeDay?: number
+        activePageID?: string
+    }
     setPageNotesSort: PageEventArgs & { sortingFn: AnnotationsSorter }
     setPageNotesType: PageEventArgs & { noteType: NotesType }
     setPageHover: PageEventArgs & { hover: ResultHoverState }

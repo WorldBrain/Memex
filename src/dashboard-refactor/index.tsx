@@ -509,7 +509,6 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: false,
                         }),
                     onToggleDisplayState: () => {
-                        console.log('toggletriggered')
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: syncMenu.isDisplayed,
                         })
@@ -645,6 +644,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                activePage={this.state.activePage}
                 listData={listsSidebar.listData}
                 getListDetailsById={this.getListDetailsById}
                 toggleSortMenuShown={() =>
@@ -753,7 +753,6 @@ export class DashboardContainer extends StatefulUIElement<
                                 pageId,
                                 areShown: !searchResults.results[day].pages
                                     .byId[pageId].areNotesShown,
-                                notesShowLocation: 'inline',
                             })
                             return
                         }
@@ -762,14 +761,36 @@ export class DashboardContainer extends StatefulUIElement<
                             pageData.fullUrl,
                         )
 
-                        this.processEvent('setPageNotesShown', {
-                            day,
-                            pageId,
-                            areShown: !searchResults.results[day].pages.byId[
-                                pageId
-                            ].areNotesShown,
-                            notesShowLocation: 'sidebar',
-                        })
+                        if (
+                            searchResults.results[day].pages.byId[pageId]
+                                .activePage
+                        ) {
+                            this.processEvent('setActivePage', {
+                                activeDay: undefined,
+                                activePageID: undefined,
+                                activePage: false,
+                            })
+                            this.processEvent('setPageNotesShown', {
+                                day,
+                                pageId,
+                                areShown:
+                                    searchResults.results[day].pages.byId[
+                                        pageId
+                                    ].areNotesShown && false,
+                            })
+                        } else if (this.state.activePageID) {
+                            this.processEvent('setActivePage', {
+                                activeDay: this.state.activeDay,
+                                activePageID: this.state.activePageID,
+                                activePage: false,
+                            })
+                        } else {
+                            this.processEvent('setActivePage', {
+                                activeDay: day,
+                                activePageID: pageId,
+                                activePage: true,
+                            })
+                        }
                     },
                     onTagPickerBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageTagPickerShown', {
@@ -1475,6 +1496,13 @@ export class DashboardContainer extends StatefulUIElement<
                             50,
                         )
                     }}
+                    onNotesSidebarClose={() =>
+                        this.processEvent('setActivePage', {
+                            activeDay: undefined,
+                            activePageID: undefined,
+                            activePage: false,
+                        })
+                    }
                 />
                 <HelpBtn />
                 <DragElement
@@ -1551,7 +1579,7 @@ const ListSidebarContent = styled(Rnd)<{
     ${(props) =>
         props.locked &&
         css`
-            height: 100%;
+            height: 100vh;
             background-color: ${(props) =>
                 props.theme.colors.backgroundColorDarker};
             border-right: solid 1px ${(props) => props.theme.colors.lineGrey};

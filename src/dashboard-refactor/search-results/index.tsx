@@ -63,6 +63,7 @@ export type Props = RootState &
         | 'onPDFSearchSwitch'
     > & {
         searchFilters?: any
+        activePage?: boolean
         searchResults?: any
         searchQuery?: string
         listData: ListSidebarState['listData']
@@ -377,12 +378,12 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 key={day.toString() + pageId}
             >
                 <PageResult
+                    activePage={this.props.activePage}
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={this.props.selectedListId}
                     getListDetailsById={this.props.getListDetailsById}
                     shareMenuProps={{
                         normalizedPageUrl: page.normalizedUrl,
-                        closeShareMenu: interactionProps.onShareBtnClick,
                         copyLink: this.props.onPageLinkCopy,
                         postBulkShareHook: (shareInfo) =>
                             interactionProps.updatePageNotesShareInfo(
@@ -644,7 +645,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         <ListShareMenu
                             openListShareModal={this.props.openListShareModal}
                             copyLink={this.props.onListLinkCopy}
-                            closeShareMenu={this.props.toggleListShareMenu}
                             listId={this.props.selectedListId}
                             shareImmediately={false}
                             postBulkShareHook={(shareState) =>

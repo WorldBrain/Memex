@@ -46,6 +46,8 @@ export interface RootState {
     windowWidth?: number
     mainContentWidth?: string
     notesSidebarWidth?: string
+    activePageID?: string
+    activeDay?: number
 }
 
 export type Events = UIEvent<
@@ -54,7 +56,7 @@ export type Events = UIEvent<
         SearchFilterEvents &
         ListsSidebarEvents &
         SyncModalEvents & {
-            search: { paginate?: boolean; searchID: number }
+            search: { paginate?: boolean; searchID?: number }
         }
 >
 

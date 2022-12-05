@@ -1247,6 +1247,53 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    setActivePage: EventHandler<'setActivePage'> = ({
+        event,
+        previousState,
+    }) => {
+        if (event.activePageID == null && event.activeDay == null) {
+            this.emitMutation({
+                activeDay: { $set: undefined },
+                activePageID: { $set: undefined },
+                searchResults: {
+                    results: {
+                        [previousState.activeDay]: {
+                            pages: {
+                                byId: {
+                                    [previousState.activePageID]: {
+                                        activePage: {
+                                            $set: false,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        }
+
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.activeDay]: {
+                        pages: {
+                            byId: {
+                                [event.activePageID]: {
+                                    activePage: {
+                                        $set: event.activePage,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            activeDay: { $set: event.activeDay },
+            activePageID: { $set: event.activePageID },
+        })
+    }
+
     setPageNotesShown: EventHandler<'setPageNotesShown'> = ({ event }) => {
         this.emitMutation({
             searchResults: {
