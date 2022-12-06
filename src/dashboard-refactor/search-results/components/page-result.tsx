@@ -350,6 +350,7 @@ export default class PageResultView extends PureComponent<Props> {
         return (
             <ItemBox
                 onMouseEnter={this.props.onMainContentHover}
+                onMouseOver={this.props.onMainContentHover}
                 onMouseLeave={this.props.onUnhover}
                 active={this.props.activePage}
                 firstDivProps={{

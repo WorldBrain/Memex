@@ -52,6 +52,7 @@ import {
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { SIDEBAR_DEFAULT_OPTION } from 'src/sidebar-overlay/constants'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -159,16 +160,21 @@ export class AnnotationsSidebarContainer<
         this.processEvent('show', {
             existingWidthState: this.state.sidebarWidth
                 ? this.state.sidebarWidth
-                : undefined,
+                : SIDEBAR_WIDTH_STORAGE_KEY,
         })
 
         if (this.props.sidebarContext === 'dashboard') {
             setTimeout(() => {
-                this.props.setSidebarWidthforDashboard(this.state.sidebarWidth)
+                this.props.setSidebarWidthforDashboard(
+                    this.state.sidebarWidth || SIDEBAR_WIDTH_STORAGE_KEY,
+                )
             }, 0)
         }
 
-        if (this.state.isWidthLocked) {
+        if (
+            this.state.isWidthLocked ||
+            this.props.sidebarContext === 'dashboard'
+        ) {
             this.processEvent('adjustSidebarWidth', {
                 newWidth: this.state.sidebarWidth,
                 isWidthLocked: true,
@@ -885,12 +891,12 @@ export class AnnotationsSidebarContainer<
                             topLeft: false,
                         }}
                         onResizeStop={(e, direction, ref, delta, position) => {
-                            if (this.props.sidebarContext !== 'dashboard') {
-                                this.processEvent('adjustSidebarWidth', {
-                                    newWidth: ref.style.width,
-                                    isWidthLocked: this.state.isWidthLocked,
-                                })
-                            }
+                            // if (this.props.sidebarContext !== 'dashboard') {
+                            this.processEvent('adjustSidebarWidth', {
+                                newWidth: ref.style.width,
+                                isWidthLocked: this.state.isWidthLocked,
+                            })
+                            // }
 
                             if (this.props.sidebarContext === 'dashboard') {
                                 this.props.setSidebarWidthforDashboard(

@@ -142,7 +142,7 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     setupWindowWidthListner() {
-        this.processEvent('calculateMainContentWidth', {})
+        // this.processEvent('calculateMainContentWidth', {})
 
         window.addEventListener('resize', () => {
             this.processEvent('calculateMainContentWidth', {
@@ -471,11 +471,11 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setSidebarLocked', {
                             isLocked: !listsSidebar.isSidebarLocked,
                         })
-                        this.processEvent('calculateMainContentWidth', {
-                            spaceSidebarWidth: !listsSidebar.isSidebarLocked
-                                ? '250px'
-                                : '0px',
-                        })
+                        // this.processEvent('calculateMainContentWidth', {
+                        //     spaceSidebarWidth: !listsSidebar.isSidebarLocked
+                        //         ? '250px'
+                        //         : '0px',
+                        // })
                     },
                 }}
                 sidebarToggleHoverState={{
@@ -1321,12 +1321,12 @@ export class DashboardContainer extends StatefulUIElement<
             toggleSidebarLockedState: () => {
                 this.processEvent('setSidebarLocked', {
                     isLocked: !listsSidebar.isSidebarLocked,
-                }),
-                    this.processEvent('calculateMainContentWidth', {
-                        spaceSidebarWidth: !listsSidebar.isSidebarLocked
-                            ? '250px'
-                            : '0px',
-                    })
+                })
+                // this.processEvent('calculateMainContentWidth', {
+                //     spaceSidebarWidth: !listsSidebar.isSidebarLocked
+                //         ? '250px'
+                //         : '0px',
+                // })
             },
         }
 
@@ -1405,7 +1405,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 isPeeking: false,
                             })
                         }}
-                        default={{ width: 300 }}
+                        default={{ width: sizeConstants.listsSidebar.widthPx }}
                         resizeHandleClasses={{
                             right: 'sidebarResizeHandleSidebar',
                         }}
@@ -1485,16 +1485,9 @@ export class DashboardContainer extends StatefulUIElement<
                         })
                     }
                     setSidebarWidthforDashboard={(sidebarWidth) => {
-                        this.processMutation({
-                            notesSidebarWidth: { $set: sidebarWidth },
+                        this.processEvent('calculateMainContentWidth', {
+                            notesSidebarWidth: sidebarWidth,
                         })
-                        setTimeout(
-                            () =>
-                                this.processEvent('calculateMainContentWidth', {
-                                    notesSidebarWidth: sidebarWidth,
-                                }),
-                            50,
-                        )
                     }}
                     onNotesSidebarClose={() =>
                         this.processEvent('setActivePage', {

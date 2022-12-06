@@ -378,7 +378,7 @@ export class SidebarContainerLogic extends UILogic<
             activeAnnotationUrl: { $set: null },
         })
 
-        document.body.style.width = 'unset'
+        document.body.style.width = '100%'
     }
 
     lock: EventHandler<'lock'> = () =>
@@ -392,7 +392,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     unlockWidth: EventHandler<'unlockWidth'> = () => {
-        document.body.style.width = 'unset'
+        document.body.style.width = '100%'
         this.emitMutation({ isWidthLocked: { $set: false } })
     }
 

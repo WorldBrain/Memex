@@ -2,7 +2,7 @@ import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
 import throttle from 'lodash/throttle'
 import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
-
+import { sizeConstants } from 'src/dashboard-refactor/constants'
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
@@ -309,7 +309,11 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 isSidebarLocked: { $set: listsSidebarLocked ?? true },
             },
-            spaceSidebarWidth: { $set: listsSidebarLocked ? '250px' : '0px' },
+            spaceSidebarWidth: {
+                $set: listsSidebarLocked
+                    ? sizeConstants.listsSidebar.widthPx + 'px'
+                    : '0px',
+            },
             syncMenu: {
                 lastSuccessfulSyncDate: {
                     $set:
@@ -2602,16 +2606,24 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* END - search filter event handlers */
 
     /* START - lists sidebar event handlers */
-    setNotesSidebarWidth: EventHandler<'setNotesSidebarWidth'> = async (
-        notesSidebarWidth,
-    ) => {
-        const sidebarWidth = notesSidebarWidth.event.notesSidebarWidth
-        this.emitMutation({
-            notesSidebarWidth: { $set: sidebarWidth },
-        })
-    }
+    // setNotesSidebarWidth: EventHandler<'setNotesSidebarWidth'> = async (
+    //     event,
+    //     previousState,
+    // ) => {
+    //     const sidebarWidth = event.notesSidebarWidth
+    //     this.emitMutation({
+    //         notesSidebarWidth: { $set: sidebarWidth },
+    //     })
+    //     this.calculateMainContentWidth({
+    //         previousState,
+    //         event: { notesSidebarWidth: event.notesSidebarWidth },
+    //     })
+    // }
 
-    setSidebarLocked: EventHandler<'setSidebarLocked'> = async ({ event }) => {
+    setSidebarLocked: EventHandler<'setSidebarLocked'> = async ({
+        event,
+        previousState,
+    }) => {
         this.emitMutation({
             listsSidebar: {
                 isSidebarLocked: { $set: event.isLocked },
@@ -2623,10 +2635,40 @@ export class DashboardLogic extends UILogic<State, Events> {
             'listSidebarLocked',
             event.isLocked,
         )
+        if (
+            previousState.spaceSidebarWidth ===
+                sizeConstants.listsSidebar.widthPx + 'px' &&
+            !previousState.listsSidebar.isSidebarLocked
+        ) {
+            this.calculateMainContentWidth({
+                previousState,
+                event: {
+                    spaceSidebarWidth:
+                        sizeConstants.listsSidebar.widthPx + 'px',
+                },
+            })
+        }
+
+        if (!previousState.listsSidebar.isSidebarLocked) {
+            this.calculateMainContentWidth({
+                previousState,
+                event: {
+                    spaceSidebarWidth:
+                        sizeConstants.listsSidebar.widthPx + 'px',
+                },
+            })
+        }
+        if (previousState.listsSidebar.isSidebarLocked) {
+            this.calculateMainContentWidth({
+                previousState,
+                event: { spaceSidebarWidth: '0px' },
+            })
+        }
     }
 
     setSidebarPeeking: EventHandler<'setSidebarPeeking'> = async ({
         event,
+        previousState,
     }) => {
         this.emitMutation({
             listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
@@ -2654,33 +2696,44 @@ export class DashboardLogic extends UILogic<State, Events> {
     > = async ({ previousState, event }) => {
         // Calculate SpaceBarWidth
 
+        // let contentWidth = this.contentWidth
+        let windowWidth = window.innerWidth
         let spaceSidebarWidth
-        spaceSidebarWidth = event.spaceSidebarWidth
-            ? event.spaceSidebarWidth
-            : previousState.spaceSidebarWidth
+        let notesSidebarWidth
+
+        if (event.windowWidth) {
+            windowWidth = event.windowWidth
+        }
+
+        if (event.spaceSidebarWidth) {
+            spaceSidebarWidth = event.spaceSidebarWidth
+        } else {
+            spaceSidebarWidth = previousState.spaceSidebarWidth
+        }
+
+        if (event.notesSidebarWidth) {
+            notesSidebarWidth = event.notesSidebarWidth
+        } else {
+            notesSidebarWidth = previousState.notesSidebarWidth
+        }
+
+        // calculate all values as integers
         spaceSidebarWidth = spaceSidebarWidth.replace('px', '')
         spaceSidebarWidth = parseInt(spaceSidebarWidth)
 
-        // Calculate NotesSidebar Width
-        let notesSidebarWidth
-
-        notesSidebarWidth = event.notesSidebarWidth
-            ? event.notesSidebarWidth
-            : previousState.notesSidebarWidth
         notesSidebarWidth = notesSidebarWidth.replace('px', '')
         notesSidebarWidth = parseInt(notesSidebarWidth)
 
-        let windowWidth = event.windowWidth
-            ? event.windowWidth
-            : previousState.windowWidth
+        // Calculate final width in as integer
+        let contentWidthInt =
+            windowWidth - spaceSidebarWidth - notesSidebarWidth
+
+        // spit out final width as px
+        let contentWidthPX = (contentWidthInt + 'px').toString()
 
         // Calculate total width of main content:
-
-        let mainContentWidth =
-            windowWidth - spaceSidebarWidth - notesSidebarWidth + 'px'
-
         this.emitMutation({
-            mainContentWidth: { $set: mainContentWidth },
+            mainContentWidth: { $set: contentWidthPX },
             spaceSidebarWidth: { $set: spaceSidebarWidth + 'px' },
             notesSidebarWidth: { $set: notesSidebarWidth + 'px' },
             windowWidth: { $set: windowWidth },
