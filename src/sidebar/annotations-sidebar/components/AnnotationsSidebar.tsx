@@ -116,7 +116,9 @@ export interface AnnotationsSidebarProps
     // for the isolated view, or get out of an isolated or leaf
     // view for a currently selected space. In the last case
     // listId argument will be null
-    onSpaceSelect: (remoteListId: string | null) => void
+    onRemoteSpaceSelect: (remoteListId: string) => void
+    onLocalSpaceSelect: (localListId: number) => void
+    onResetSpaceSelect: () => void
 
     copyPaster: any
     onClickOutsideCopyPaster: () => void
@@ -248,13 +250,6 @@ export class AnnotationsSidebar extends React.Component<
         if (this.props.onClickOutside) {
             return this.props.onClickOutside(e)
         }
-    }
-
-    private handleSpaceSelect = (
-        remoteListId: string | null,
-    ): React.MouseEventHandler => (e) => {
-        e.stopPropagation()
-        this.props.onSpaceSelect(remoteListId)
     }
 
     private getListsForAnnotationCreate = (
@@ -603,9 +598,12 @@ export class AnnotationsSidebar extends React.Component<
                                     <Icon
                                         icon="edit"
                                         height="16px"
-                                        onClick={this.handleSpaceSelect(
-                                            remoteListId,
-                                        )}
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            this.props.onRemoteSpaceSelect(
+                                                remoteListId,
+                                            )
+                                        }}
                                     />
                                 </TooltipBox>
                                 <TooltipBox
@@ -852,6 +850,7 @@ export class AnnotationsSidebar extends React.Component<
                             isActive={
                                 this.props.activeAnnotationUrl === annot.url
                             }
+                            onListClick={this.props.onLocalSpaceSelect}
                             onHighlightClick={this.props.setActiveAnnotationUrl(
                                 annot.url,
                             )}
@@ -1048,7 +1047,7 @@ export class AnnotationsSidebar extends React.Component<
         )
 
         return (
-            <TopBarContainer onClick={this.handleSpaceSelect(null)}>
+            <TopBarContainer onClick={() => this.props.onResetSpaceSelect()}>
                 <TooltipBox tooltipText="Back to all spaces">
                     <Icon
                         filePath={icons.arrowLeft}

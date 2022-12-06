@@ -72,6 +72,7 @@ export interface AnnotationProps {
         profileImgSrc?: string
     }
     listPickerRenderLocation?: ListPickerShowState
+    onListClick?: (localListId: number) => void
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
@@ -611,7 +612,7 @@ export default class AnnotationEditable extends React.Component<Props> {
                                     showEditBtn={
                                         this.props.hoverState === 'lists'
                                     }
-                                    onListClick={undefined}
+                                    onListClick={this.props.onListClick}
                                     onEditBtnClick={
                                         this.props.annotationEditDependencies
                                             ?.onListsBarPickerBtnClick

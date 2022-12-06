@@ -9,7 +9,7 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     showEditBtn: boolean
     onEditBtnClick: React.MouseEventHandler
     lists: Array<{ id: number; name: string; isShared: boolean }>
-    onListClick?: (tag: number) => void
+    onListClick?: (localListId: number) => void
     renderSpacePicker?: () => JSX.Element
     filteredbyListID?: number
     tabIndex?: number
@@ -111,7 +111,10 @@ export default function ListsSegment({
                                     key={space.id}
                                     onClick={
                                         onListClick
-                                            ? () => onListClick(space.id)
+                                            ? (e) => {
+                                                  e.stopPropagation()
+                                                  onListClick(space.id)
+                                              }
                                             : undefined
                                     }
                                 >
@@ -201,7 +204,7 @@ const ListsContainer = styled.div<{ newLineOrientation }>`
     grid-gap: 5px;
 `
 
-const ListSpaceContainer = styled.div`
+const ListSpaceContainer = styled.div<{ onClick: React.MouseEventHandler }>`
     background-color: ${(props) => props.theme.colors.lightHover};
     color: ${(props) => props.theme.colors.greyScale9};
     padding: 2px 8px;
@@ -212,7 +215,7 @@ const ListSpaceContainer = styled.div`
     height: 20px;
     margin: 2px 4px 2px 0;
     display: flex;
-    cursor: pointer;
+    cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
     align-items: center;
     white-space: nowrap;
     font-family: 'Satoshi', sans-serif;

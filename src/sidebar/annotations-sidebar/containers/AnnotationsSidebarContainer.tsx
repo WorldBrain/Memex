@@ -212,10 +212,6 @@ export class AnnotationsSidebarContainer<
         this.processEvent('setPageUrl', { pageUrl })
     }
 
-    private handleSpaceSelect = async (remoteListId: string | null) => {
-        await this.processEvent('setSelectedSpace', { remoteListId })
-    }
-
     private handleClickOutside = (e) => {
         if (this.state.isLocked) {
             return
@@ -975,9 +971,19 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
-                            // TODO: determine selected space after anchor
-                            onSpaceSelect={this.handleSpaceSelect}
-                            // sidebarActions={null}
+                            onRemoteSpaceSelect={(remoteListId) =>
+                                this.processEvent('setSelectedSpace', {
+                                    remoteListId,
+                                })
+                            }
+                            onLocalSpaceSelect={(localListId) =>
+                                this.processEvent('setSelectedSpace', {
+                                    localListId,
+                                })
+                            }
+                            onResetSpaceSelect={() =>
+                                this.processEvent('setSelectedSpace', null)
+                            }
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}
                             ref={this.sidebarRef}
