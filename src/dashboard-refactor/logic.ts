@@ -2669,12 +2669,15 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
         })
-        this.calculateMainContentWidth({
-            previousState,
-            event: {
-                isSidebarPeeking: true,
-            },
-        })
+
+        if (event.isPeeking) {
+            this.calculateMainContentWidth({
+                previousState,
+                event: {
+                    isSidebarPeeking: event.isPeeking,
+                },
+            })
+        }
     }
 
     setSidebarToggleHovered: EventHandler<'setSidebarToggleHovered'> = async ({

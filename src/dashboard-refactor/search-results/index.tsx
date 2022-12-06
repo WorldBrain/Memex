@@ -691,36 +691,69 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 <PageTopBarBox isDisplayed={this.props.isDisplayed}>
                     <TopBar
                         leftSide={
-                            this.firstTimeUser() === false && (
+                            <ContentTypeSwitchContainer>
+                                <ReferencesContainer>
+                                    {this.props.listData[
+                                        this.props.selectedListId
+                                    ]?.remoteId != null && (
+                                        <>
+                                            <Icon
+                                                hoverOff
+                                                heightAndWidth="12px"
+                                                color={'iconColor'}
+                                                icon={icons.alertRound}
+                                            />
+                                            <InfoText>
+                                                Only your own contributions to
+                                                this space are visible locally.
+                                            </InfoText>
+                                        </>
+                                    )}
+                                </ReferencesContainer>
                                 <SearchTypeSwitch {...this.props} />
-                            )
+                            </ContentTypeSwitchContainer>
                         }
-                        rightSide={
-                            <ReferencesContainer>
-                                {this.props.listData[this.props.selectedListId]
-                                    ?.remoteId != null && (
-                                    <>
-                                        <Icon
-                                            hoverOff
-                                            heightAndWidth="12px"
-                                            color={'iconColor'}
-                                            icon={icons.alertRound}
-                                        />
-                                        <InfoText>
-                                            Only your own contributions to this
-                                            space are visible locally.
-                                        </InfoText>
-                                    </>
-                                )}
-                            </ReferencesContainer>
-                        }
+                        rightSide={undefined}
                     />
                 </PageTopBarBox>
                 {this.renderResultsByDay()}
+                {this.props.areResultsExhausted &&
+                    this.props.searchState === 'success' &&
+                    this.props.searchResults.allIds.length > 0 && (
+                        <ResultsExhaustedMessage>
+                            <Icon
+                                filePath="checkRound"
+                                heightAndWidth="22px"
+                                hoverOff
+                                color={'greyScale4'}
+                            />
+                            End of results
+                        </ResultsExhaustedMessage>
+                    )}
             </ResultsContainer>
         )
     }
 }
+
+const ResultsExhaustedMessage = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    color: ${(props) => props.theme.colors.greyScale4};
+    padding: 10px;
+    white-space: nowrap;
+    width: fill-available;
+    justify-content: center;
+    font-size: 16px;
+    align-items: center;
+`
+
+const ContentTypeSwitchContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    grid-gap: 10px;
+    margin-bottom: 5px;
+`
 
 const ResultsMessage = styled.div`
     padding-top: 30px;

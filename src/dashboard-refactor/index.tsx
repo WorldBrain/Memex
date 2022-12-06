@@ -1402,7 +1402,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 })
                             }
                         }}
-                        default={{ width: sizeConstants.listsSidebar.widthPx }}
+                        // default={{ width: sizeConstants.listsSidebar.widthPx }}
                         resizeHandleClasses={{
                             right: 'sidebarResizeHandleSidebar',
                         }}
@@ -1424,10 +1424,11 @@ export class DashboardContainer extends StatefulUIElement<
                             topLeft: false,
                         }}
                         onResizeStop={(e, direction, ref, delta, position) => {
-                            !this.state.listsSidebar.isSidebarPeeking &&
-                                this.processEvent('calculateMainContentWidth', {
-                                    spaceSidebarWidth: ref.style.width,
-                                })
+                            this.processEvent('calculateMainContentWidth', {
+                                spaceSidebarWidth: ref.style.width,
+                                isSidebarPeeking: !this.state.listsSidebar
+                                    .isSidebarPeeking,
+                            })
                         }}
                     >
                         {this.renderListsSidebar()}
@@ -1485,6 +1486,8 @@ export class DashboardContainer extends StatefulUIElement<
                     setSidebarWidthforDashboard={(sidebarWidth) => {
                         this.processEvent('calculateMainContentWidth', {
                             notesSidebarWidth: sidebarWidth,
+                            isSidebarPeeking: !this.state.listsSidebar
+                                .isSidebarLocked,
                         })
                     }}
                     onNotesSidebarClose={() =>
