@@ -1029,7 +1029,8 @@ export class SidebarContainerLogic extends UILogic<
             remove: number[]
         },
     ) {
-        const followedAnnotId = this.options.annotationsCache.getAnnotationById(
+        const { annotationsCache } = this.options
+        const followedAnnotId = annotationsCache.getAnnotationById(
             localAnnotationId,
         )?.remoteId
 
@@ -1039,7 +1040,7 @@ export class SidebarContainerLogic extends UILogic<
 
         // Resolve local list IDs to remote (or calc lists to remove/add to, if not explicitly given)
         const localListIdToRemoteData = (localListId: number) =>
-            this.options.annotationsCache.listData[localListId]
+            annotationsCache.listData[localListId]
 
         const addTo = listUpdates.add
             .map(localListIdToRemoteData)
@@ -1110,17 +1111,25 @@ export class SidebarContainerLogic extends UILogic<
                                           },
                                       }
                                     : {
-                                          $set: this.createdFollowedListState({
-                                              name,
-                                              id: remoteId,
-                                              sharedAnnotationReferences: [
-                                                  {
-                                                      type:
-                                                          'shared-annotation-reference',
-                                                      id: followedAnnotId,
-                                                  },
-                                              ],
-                                          }),
+                                          $set: this.createdFollowedListState(
+                                              {
+                                                  name,
+                                                  id: remoteId,
+                                                  sharedAnnotationReferences: [
+                                                      {
+                                                          type:
+                                                              'shared-annotation-reference',
+                                                          id: followedAnnotId,
+                                                      },
+                                                  ],
+                                              },
+                                              {
+                                                  isContributable:
+                                                      annotationsCache.getLocalListIdByRemoteId(
+                                                          remoteId,
+                                                      ) != null,
+                                              },
+                                          ),
                                       },
                         }),
                         {},
@@ -1302,7 +1311,7 @@ export class SidebarContainerLogic extends UILogic<
     loadFollowedLists: EventHandler<'loadFollowedLists'> = async ({
         previousState,
     }) => {
-        const { customLists, pageUrl, annotationsCache } = this.options
+        const { annotationsCache, customLists, pageUrl } = this.options
 
         await executeUITask(this, 'followedListLoadState', async () => {
             const followedLists = await customLists.fetchFollowedListsWithAnnotations(
@@ -1336,7 +1345,12 @@ export class SidebarContainerLogic extends UILogic<
                         $set: fromPairs(
                             followedLists.map((list) => [
                                 list.id,
-                                this.createdFollowedListState(list),
+                                this.createdFollowedListState(list, {
+                                    isContributable:
+                                        annotationsCache.getLocalListIdByRemoteId(
+                                            list.id,
+                                        ) != null,
+                                }),
                             ]),
                         ),
                     },
@@ -1347,6 +1361,9 @@ export class SidebarContainerLogic extends UILogic<
 
     private createdFollowedListState = (
         list: SharedAnnotationList,
+        args: {
+            isContributable: boolean
+        },
     ): FollowedListState => {
         const initAnnotStates = (initValue: any) =>
             list.sharedAnnotationReferences.reduce((acc, ref) => {
@@ -1365,7 +1382,7 @@ export class SidebarContainerLogic extends UILogic<
         return {
             ...list,
             isExpanded: false,
-            isContributable: false,
+            isContributable: args.isContributable,
             annotationsLoadState: 'pristine',
             conversationsLoadState: 'pristine',
             activeCopyPasterAnnotationId: undefined,
@@ -1718,9 +1735,14 @@ export class SidebarContainerLogic extends UILogic<
             let localListId: number
             if ('remoteListId' in event) {
                 remoteListId = event.remoteListId
-                localListId = this.options.annotationsCache.getListIdByRemoteId(
+                localListId = this.options.annotationsCache.getLocalListIdByRemoteId(
                     event.remoteListId,
                 )
+                if (localListId == null) {
+                    throw new Error(
+                        'Could not find associated local space data - cannot enter selected space mode on non-writable space',
+                    )
+                }
             } else {
                 localListId = event.localListId
             }
