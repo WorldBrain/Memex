@@ -303,7 +303,7 @@ interface SidebarEvents {
     toggleIsolatedListView: { listId: string }
 
     // Selected space management
-    setSelectedSpace: { remoteListId: string | null }
+    setSelectedSpace: { remoteListId: string } | { localListId: number } | null
 
     updateAnnotationShareInfo: {
         annotationUrl: string

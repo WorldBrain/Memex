@@ -1710,23 +1710,29 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const localId =
-            event.remoteListId === null
-                ? null
-                : this.options.annotationsCache.getListIdByRemoteId(
-                      event.remoteListId,
-                  )
+        let mutation: UIMutation<SidebarContainerState>
+        if (event == null) {
+            mutation = { selectedSpace: { $set: null } }
+        } else {
+            let remoteListId: string
+            let localListId: number
+            if ('remoteListId' in event) {
+                remoteListId = event.remoteListId
+                localListId = this.options.annotationsCache.getListIdByRemoteId(
+                    event.remoteListId,
+                )
+            } else {
+                localListId = event.localListId
+            }
 
-        const mutation: UIMutation<SidebarContainerState> = {
-            selectedSpace: {
-                $set:
-                    localId == null
-                        ? null
-                        : {
-                              localId,
-                              remoteId: event.remoteListId,
-                          },
-            },
+            mutation = {
+                selectedSpace: {
+                    $set: {
+                        localId: localListId,
+                        remoteId: remoteListId ?? null,
+                    },
+                },
+            }
         }
 
         const nextState = this.withMutation(previousState, mutation)

@@ -2543,15 +2543,49 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.selectedSpace).toEqual(null)
             expect(emittedEvents).toEqual([])
 
-            await sidebar.processEvent('setSelectedSpace', { remoteListId })
+            await sidebar.processEvent('setSelectedSpace', {
+                remoteListId,
+            })
 
             expect(sidebar.state.selectedSpace.localId).toEqual(0)
             expect(sidebar.state.selectedSpace.remoteId).toEqual(remoteListId)
             expect(emittedEvents).toEqual([expectedEvent])
 
-            await sidebar.processEvent('setSelectedSpace', {
-                remoteListId: null,
+            await sidebar.processEvent('setSelectedSpace', null)
+
+            expect(sidebar.state.selectedSpace).toEqual(null)
+            expect(emittedEvents).toEqual([
+                expectedEvent,
+                { event: 'setSelectedSpace', args: null },
+            ])
+        })
+
+        it('should be able to set isolated view mode for a specific local space', async ({
+            device,
+        }) => {
+            await setupFollowedListsTestData(device)
+            const { sidebar, emittedEvents } = await setupLogicHelper({
+                device,
+                withAuth: true,
             })
+            const localListId = 0
+            const expectedEvent = {
+                event: 'setSelectedSpace',
+                args: { localId: 0, remoteId: null },
+            }
+
+            expect(sidebar.state.selectedSpace).toEqual(null)
+            expect(emittedEvents).toEqual([])
+
+            await sidebar.processEvent('setSelectedSpace', {
+                localListId,
+            })
+
+            expect(sidebar.state.selectedSpace.localId).toEqual(0)
+            expect(sidebar.state.selectedSpace.remoteId).toEqual(null)
+            expect(emittedEvents).toEqual([expectedEvent])
+
+            await sidebar.processEvent('setSelectedSpace', null)
 
             expect(sidebar.state.selectedSpace).toEqual(null)
             expect(emittedEvents).toEqual([
