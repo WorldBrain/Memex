@@ -189,9 +189,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const body = anchor && anchor.quote
         const hasSelectedText = anchor.quote.length
 
-        let actualLists = []
+        const annotationLists = []
         if (params.inPageUI.selectedSpace) {
-            actualLists = [params.inPageUI.selectedSpace.localId]
+            annotationLists.push(params.inPageUI.selectedSpace.localId)
         }
 
         const annotation: Annotation = {
@@ -201,7 +201,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 : videoTimeStampForComment && undefined,
             pageUrl,
             tags: [],
-            lists: [],
+            lists: annotationLists,
             comment: hasSelectedText
                 ? ''
                 : videoTimeStampForComment
@@ -212,8 +212,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 : videoTimeStampForComment && undefined,
             pageTitle: title,
         }
-
-        console.debug('AnnotationsCache:', params.annotationsCache)
+        console.debug('creating hihlight', annotation)
 
         try {
             await Promise.all([

@@ -34,9 +34,7 @@ import {
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
-import browser from 'webextension-polyfill'
 import { getInitialAnnotationConversationStates } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import {
     AnnotationPrivacyState,
@@ -736,7 +734,7 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const { commentBox, pageUrl } = previousState
+        const { commentBox, pageUrl, selectedSpace } = previousState
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
@@ -756,13 +754,18 @@ export class SidebarContainerLogic extends UILogic<
                 return
             }
 
+            const annotationLists = [...commentBox.lists]
+            if (selectedSpace) {
+                annotationLists.push(selectedSpace.localId)
+            }
+
             const nextAnnotation = await this.options.annotationsCache.create(
                 {
                     url: annotationUrl,
                     pageUrl,
                     comment,
-                    tags: [...commentBox.tags],
-                    lists: [...commentBox.lists],
+                    tags: [],
+                    lists: annotationLists,
                 },
                 {
                     shouldShare: event.shouldShare,

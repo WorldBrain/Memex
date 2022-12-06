@@ -511,7 +511,7 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.commentBox.commentText).toEqual('')
         })
 
-        it('should be able to save a new comment with tags', async ({
+        it('should be able to save a new comment in selected space mode', async ({
             device,
         }) => {
             const { sidebar } = await setupLogicHelper({ device })
@@ -522,18 +522,18 @@ describe('SidebarContainerLogic', () => {
             })
             expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
 
-            expect(sidebar.state.commentBox.tags).toEqual([])
-            await sidebar.processEvent('updateNewPageCommentTags', {
-                tags: [DATA.TAG_1, DATA.TAG_2],
+            expect(sidebar.state.commentBox.lists).toEqual([])
+            await sidebar.processEvent('updateNewPageCommentLists', {
+                lists: [DATA.LISTS_1[0].id],
             })
-            expect(sidebar.state.commentBox.tags).toEqual([
-                DATA.TAG_1,
-                DATA.TAG_2,
-            ])
-            await sidebar.processEvent('updateNewPageCommentTags', {
-                tags: [DATA.TAG_2],
+            expect(sidebar.state.commentBox.lists).toEqual([DATA.LISTS_1[0].id])
+
+            // TODO: Update this to trigger the `setSelectedSpace` event instead of directly mutating the state
+            sidebar.processMutation({
+                selectedSpace: { $set: { localId: DATA.LISTS_1[1].id } },
             })
-            expect(sidebar.state.commentBox.tags).toEqual([DATA.TAG_2])
+
+            expect(sidebar.state.commentBox.lists).toEqual([DATA.LISTS_1[0].id])
 
             await sidebar.processEvent('saveNewPageComment', {
                 shouldShare: false,
@@ -541,10 +541,10 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.annotations).toEqual([
                 expect.objectContaining({
                     comment: DATA.COMMENT_1,
-                    tags: [DATA.TAG_2],
+                    lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
                 }),
             ])
-            expect(sidebar.state.commentBox.tags).toEqual([])
+            expect(sidebar.state.commentBox.lists).toEqual([])
             expect(sidebar.state.commentBox.isBookmarked).toBe(false)
             expect(sidebar.state.commentBox.commentText).toEqual('')
         })
