@@ -231,13 +231,30 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         nameValue={this.state.nameValue}
                     />
                 </EditArea>
-                <PrimaryAction
-                    onClick={deleteHandler}
-                    icon={'trash'}
-                    size={'medium'}
-                    type={'tertiary'}
-                    label={'Delete Space'}
-                />
+                <ButtonBox>
+                    <PrimaryAction
+                        onClick={deleteHandler}
+                        icon={'trash'}
+                        size={'medium'}
+                        type={'tertiary'}
+                        label={'Delete Space'}
+                    />
+                    <>
+                        {this.state.showSaveButton && (
+                            <Icon
+                                filePath="check"
+                                color="purple"
+                                heightAndWidth="24px"
+                                onClick={() => {
+                                    this.props.editableProps.onConfirmClick(
+                                        this.state.nameValue,
+                                    )
+                                    this.props.onClose()
+                                }}
+                            />
+                        )}
+                    </>
+                </ButtonBox>
             </ContextMenuContainer>
         )
     }
@@ -246,6 +263,13 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         return <MenuContainer>{this.renderMainContent()}</MenuContainer>
     }
 }
+
+const ButtonBox = styled.div`
+    width: fill-available;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`
 
 const ContextMenuContainer = styled.div`
     display: flex;
