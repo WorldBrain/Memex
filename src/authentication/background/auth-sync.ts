@@ -1,55 +1,25 @@
-function validMessage(messageObj: any) {
-    return (
-        typeof messageObj === 'object' &&
-        typeof messageObj.message === 'string' &&
-        (!messageObj.payload || typeof messageObj.payload === 'string')
-    )
-}
+import {
+    unpackMessage,
+    validMessage,
+    packMessage,
+    ExtMessage,
+    validGeneratedLoginToken,
+    SyncProps,
+} from '@worldbrain/memex-common/lib/authentication/auth-sync'
 
-enum ExtMessage {
-    LOGGED_IN = 'LOGGED_IN',
-    TOKEN_REQUEST = 'TOKEN_REQUEST',
-    TOKEN = 'TOKEN',
-}
-
-function unpackMessage(messageObj: any) {
-    return {
-        message: atob(messageObj.message) as ExtMessage,
-        payload: messageObj.payload ? atob(messageObj.payload) : null,
-    }
-}
-
-function packMessage(message: ExtMessage, payload?: string) {
-    return {
-        message: btoa(message),
-        payload: payload ? btoa(payload) : null,
-    }
-}
-
-function validGeneratedLoginToken(loginToken: any) {
-    return loginToken && typeof loginToken === 'string'
-}
-
-interface SyncProps {
-    awaitAuth: () => Promise<void>
-    isLoggedIn: () => Promise<boolean>
-    generateLoginToken: () => Promise<string>
-    loginWithToken: (token: string) => Promise<void>
-}
-
-function validSender(sender: any) {
+function validSender(sender: any, expectedOrigin: string) {
     if (!(typeof sender === 'object' && typeof sender.origin === 'string')) {
         return false
     }
-
-    return sender.origin === 'http://localhost:3000'
+    return sender.origin === expectedOrigin
 }
 
 function getMessage(
     message: any,
     sender: any,
+    expectedOrigin: string,
 ): null | ReturnType<typeof unpackMessage> {
-    if (!validSender(sender) || !validMessage(message)) {
+    if (!validSender(sender, expectedOrigin) || !validMessage(message)) {
         return null
     }
 
@@ -61,21 +31,25 @@ function addListener(
         sendResponse: (obj: ReturnType<typeof packMessage>) => void,
         messageObj: ReturnType<typeof unpackMessage>,
     ) => void,
+    expectedOrigin: string,
 ) {
     //@ts-ignore next-line
     chrome.runtime.onMessageExternal.addListener(
         (message, sender, sendResponse) => {
-            const messageObj = getMessage(message, sender)
+            const messageObj = getMessage(message, sender, expectedOrigin)
             if (!messageObj) {
                 return
             }
-            console.log(JSON.stringify(messageObj, null, 2))
+            // console.log(JSON.stringify(messageObj, null, 2))
             listener(sendResponse, messageObj)
         },
     )
 }
 
-function sendTokenToAppPath(generateLoginToken: () => Promise<string>) {
+function sendTokenToAppPath(
+    generateLoginToken: () => Promise<string>,
+    expectedOrigin: string,
+) {
     addListener((sendResponse, messageObj) => {
         if (messageObj.message !== ExtMessage.TOKEN_REQUEST) {
             return
@@ -86,14 +60,15 @@ function sendTokenToAppPath(generateLoginToken: () => Promise<string>) {
             }
             sendResponse(packMessage(ExtMessage.TOKEN, loginToken))
         })
-    })
+    }, expectedOrigin)
 }
 
 function loginWithAppTokenPath(
     loginWithToken: (token: string) => Promise<void>,
+    expectedOrigin: string,
 ) {
     addListener((sendResponse, messageObj) => {
-        console.log(JSON.stringify(messageObj, null, 2))
+        // console.log(JSON.stringify(messageObj, null, 2))
         if (messageObj.message === ExtMessage.TOKEN) {
             if (messageObj.payload) {
                 loginWithToken(messageObj.payload)
@@ -101,7 +76,7 @@ function loginWithAppTokenPath(
         } else {
             sendResponse(packMessage(ExtMessage.TOKEN_REQUEST))
         }
-    })
+    }, expectedOrigin)
 }
 
 export async function listenToWebAppMessage({
@@ -110,11 +85,12 @@ export async function listenToWebAppMessage({
     generateLoginToken,
     loginWithToken,
 }: SyncProps) {
+    const expectedOrigin = 'http://localhost:3000'
+
     await awaitAuth()
-    console.log(await isLoggedIn())
     if (await isLoggedIn()) {
-        sendTokenToAppPath(generateLoginToken)
+        sendTokenToAppPath(generateLoginToken, expectedOrigin)
     } else {
-        loginWithAppTokenPath(loginWithToken)
+        loginWithAppTokenPath(loginWithToken, expectedOrigin)
     }
 }

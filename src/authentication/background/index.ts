@@ -146,6 +146,9 @@ export class AuthBackground {
             },
         }
 
+        const awaitAuth = this.authService.waitForAuthReady.bind(
+            this.authService,
+        )
         const getCurrentUser = this.authService.getCurrentUser.bind(
             this.authService,
         )
@@ -155,9 +158,8 @@ export class AuthBackground {
         const loginWithToken = this.authService.loginWithToken.bind(
             this.authService,
         )
-
         listenToWebAppMessage({
-            awaitAuth: () => Promise.resolve(), //TODO: need to find out how to await auth here, maybe not necessary?
+            awaitAuth,
             isLoggedIn: () => getCurrentUser().then((val) => !!val),
             generateLoginToken: () =>
                 generateLoginToken().then((obj) => obj.token),
