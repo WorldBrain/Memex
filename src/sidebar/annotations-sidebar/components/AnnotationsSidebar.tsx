@@ -696,6 +696,12 @@ export class AnnotationsSidebar extends React.Component<
         }
     }
 
+    private throwNoSelectedSpaceError() {
+        throw new Error(
+            'Isolated view specific render method called when state not set',
+        )
+    }
+
     private renderFeed() {
         return (
             <AnnotationsSectionStyled>
@@ -706,9 +712,7 @@ export class AnnotationsSidebar extends React.Component<
 
     private renderAnnotationsEditableForSelectedSpace() {
         if (this.props.selectedSpace == null) {
-            throw new Error(
-                'Isolated view specific render method called when state not set',
-            )
+            this.throwNoSelectedSpaceError()
         }
         const selectedSpaceAnnotations = this.props.annotations.filter(
             ({ lists }) => lists.includes(this.props.selectedSpace.localId),
@@ -1035,6 +1039,14 @@ export class AnnotationsSidebar extends React.Component<
 
      */
     private renderLeafTopBar() {
+        if (!this.props.selectedSpace) {
+            this.throwNoSelectedSpaceError()
+        }
+
+        const listDetails = this.props.getListDetailsById(
+            this.props.selectedSpace.localId,
+        )
+
         return (
             <TopBarContainer onClick={this.handleSpaceSelect(null)}>
                 <TooltipBox tooltipText="Back to all spaces">
@@ -1043,8 +1055,9 @@ export class AnnotationsSidebar extends React.Component<
                         heightAndWidth="26px"
                         onClick={(evt) => console.log('Clicked VIEW ALL', evt)}
                     />
-                    View All
                 </TooltipBox>
+                View All --- Selected space: {listDetails.name} --- Descritpion:{' '}
+                {listDetails.description}
             </TopBarContainer>
         )
     }

@@ -112,6 +112,7 @@ export class AnnotationsSidebarContainer<
             name,
             id: listId,
             remoteId: null,
+            description: null,
         })
         return listId
     }
@@ -121,6 +122,7 @@ export class AnnotationsSidebarContainer<
         return {
             name: annotationsCache.listData[listId]?.name ?? 'Missing list',
             isShared: annotationsCache.listData[listId]?.remoteId != null,
+            description: annotationsCache.listData[listId]?.description,
         }
     }
 

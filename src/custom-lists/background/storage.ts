@@ -251,6 +251,12 @@ export default class CustomListStorage extends StorageModule {
         return this.operation('findListDescriptionByList', { listId })
     }
 
+    async fetchListDescriptionsByLists(
+        listIds: number[],
+    ): Promise<ListDescription[]> {
+        return this.operation('findListDescriptionsByLists', { listIds })
+    }
+
     async fetchAllLists({
         limit,
         skip,
@@ -268,9 +274,8 @@ export default class CustomListStorage extends StorageModule {
         })
 
         if (includeDescriptions) {
-            const descriptions: ListDescription[] = await this.operation(
-                'findListDescriptionsByLists',
-                { listIds: lists.map((list) => list.id) },
+            const descriptions = await this.fetchListDescriptionsByLists(
+                lists.map((list) => list.id),
             )
             const descriptionsById = descriptions.reduce(
                 (acc, curr) => ({ ...acc, [curr.listId]: curr.description }),

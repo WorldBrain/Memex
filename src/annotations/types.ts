@@ -100,4 +100,4 @@ export type SelectionIndices = [number, number]
 
 export type ListDetailsGetter = (
     id: number,
-) => { name: string; isShared: boolean }
+) => { name: string; isShared: boolean; description?: string }

@@ -64,6 +64,9 @@ export interface RemoteCollectionsInterface {
         oldName: string
         newName: string
     }): Promise<void>
+    fetchListDescriptions(args: {
+        listIds: number[]
+    }): Promise<{ [listId: number]: string | null }>
     updateListDescription(args: {
         listId: number
         description: string

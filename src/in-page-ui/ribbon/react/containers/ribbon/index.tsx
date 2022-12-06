@@ -231,6 +231,7 @@ export default class RibbonContainer extends StatefulUIElement<
                             name,
                             id: listId,
                             remoteId: null,
+                            description: null,
                         })
                         await this.processEvent('updateLists', {
                             value: {

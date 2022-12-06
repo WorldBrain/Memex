@@ -166,10 +166,12 @@ export const createAnnotationsCache = (
             },
             loadListData: async () => {
                 const lists = await bgModules.customLists.fetchAllLists({})
+                const localListIds = lists.map((l) => l.id)
                 const remoteListIds = await bgModules.contentSharing.getRemoteListIds(
-                    {
-                        localListIds: lists.map((l) => l.id),
-                    },
+                    { localListIds },
+                )
+                const descriptions = await bgModules.customLists.fetchListDescriptions(
+                    { listIds: localListIds },
                 )
 
                 return lists.reduce(
@@ -178,6 +180,7 @@ export const createAnnotationsCache = (
                         [l.id]: {
                             name: l.name,
                             remoteId: remoteListIds[l.id] ?? null,
+                            description: descriptions[l.id] ?? null,
                         },
                     }),
                     {},
@@ -201,6 +204,12 @@ interface AnnotationCacheChanges {
 interface ModifiedList {
     added: number | null
     deleted: number | null
+}
+
+interface ListDetails {
+    name: string
+    remoteId: string | null
+    description: string | null
 }
 
 export type AnnotationCacheChangeEvents = TypedEventEmitter<
@@ -244,9 +253,7 @@ export interface AnnotationsCacheDependencies {
             sharedLists: number[]
             privateLists: number[]
         }>
-        loadListData: () => Promise<{
-            [listId: number]: { name: string; remoteId: string | null }
-        }>
+        loadListData: () => Promise<{ [listId: number]: ListDetails }>
     }
 }
 
@@ -285,15 +292,11 @@ export interface AnnotationsCacheInterface {
     ) => Promise<void>
     /** NOTE: This is a state-only operation. No backend side-effects should occur. */
     updatePublicAnnotationLists: (args: ModifiedList) => Promise<void>
-    addNewListData: (list: {
-        name: string
-        id: number
-        remoteId: string | null
-    }) => void
+    addNewListData: (list: ListDetails & { id: number }) => void
     setAnnotations: (annotations: CachedAnnotation[]) => void
 
     annotations: CachedAnnotation[]
-    listData: { [listId: number]: { name: string; remoteId: string | null } }
+    listData: { [listId: number]: ListDetails }
     readonly highlights: CachedAnnotation[]
     annotationChanges: AnnotationCacheChangeEvents
     readonly parentPageSharedListIds: Set<number>
@@ -675,7 +678,11 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
     }
 
     addNewListData: AnnotationsCacheInterface['addNewListData'] = (list) => {
-        this.listData[list.id] = { name: list.name, remoteId: list.remoteId }
+        this.listData[list.id] = {
+            name: list.name,
+            remoteId: list.remoteId,
+            description: list.description,
+        }
     }
 
     private isModifiedListShared = ({

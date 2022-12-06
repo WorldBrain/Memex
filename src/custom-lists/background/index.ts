@@ -91,6 +91,7 @@ export default class CustomListBackground {
             addOpenTabsToList: this.addOpenTabsToList,
             removeOpenTabsFromList: this.removeOpenTabsFromList,
             updateListForPage: this.updateListForPage,
+            fetchListDescriptions: this.fetchListDescriptions,
             updateListDescription: this.updateListDescription,
             getInboxUnreadCount: this.getInboxUnreadCount,
         }
@@ -668,6 +669,18 @@ export default class CustomListBackground {
                     pageUrl: normalizeUrl(tab.url),
                 }),
             ),
+        )
+    }
+
+    fetchListDescriptions: RemoteCollectionsInterface['fetchListDescriptions'] = async ({
+        listIds,
+    }) => {
+        const descriptions = await this.storage.fetchListDescriptionsByLists(
+            listIds,
+        )
+        return descriptions.reduce(
+            (acc, curr) => ({ ...acc, [curr.listId]: curr.description }),
+            {},
         )
     }
 
