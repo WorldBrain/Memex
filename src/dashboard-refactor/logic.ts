@@ -151,6 +151,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             currentUser: null,
             notesSidebarWidth: '0px',
             windowWidth: appWidth,
+            spaceSidebarWidth: sizeConstants.listsSidebar.widthPx + 'px',
 
             modals: {
                 showLogin: false,
@@ -308,11 +309,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
             listsSidebar: {
                 isSidebarLocked: { $set: listsSidebarLocked ?? true },
-            },
-            spaceSidebarWidth: {
-                $set: listsSidebarLocked
-                    ? sizeConstants.listsSidebar.widthPx + 'px'
-                    : '0px',
             },
             syncMenu: {
                 lastSuccessfulSyncDate: {
@@ -2661,7 +2657,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (previousState.listsSidebar.isSidebarLocked) {
             this.calculateMainContentWidth({
                 previousState,
-                event: { spaceSidebarWidth: '0px' },
+                event: { isSidebarPeeking: true },
             })
         }
     }
@@ -2672,6 +2668,12 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         this.emitMutation({
             listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
+        })
+        this.calculateMainContentWidth({
+            previousState,
+            event: {
+                isSidebarPeeking: true,
+            },
         })
     }
 
@@ -2725,9 +2727,15 @@ export class DashboardLogic extends UILogic<State, Events> {
         notesSidebarWidth = parseInt(notesSidebarWidth)
 
         // Calculate final width in as integer
-        let contentWidthInt =
-            windowWidth - spaceSidebarWidth - notesSidebarWidth
 
+        let contentWidthInt
+
+        if (event.isSidebarPeeking) {
+            contentWidthInt = windowWidth - notesSidebarWidth
+        } else {
+            contentWidthInt =
+                windowWidth - spaceSidebarWidth - notesSidebarWidth
+        }
         // spit out final width as px
         let contentWidthPX = (contentWidthInt + 'px').toString()
 

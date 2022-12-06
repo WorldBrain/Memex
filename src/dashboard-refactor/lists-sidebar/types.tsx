@@ -71,6 +71,7 @@ export type Events = UIEvent<{
         spaceSidebarWidth?: string
         notesSidebarWidth?: string
         windowWidth?: number
+        isSidebarPeeking?: boolean
     }
 
     setAddListInputShown: { isShown: boolean }

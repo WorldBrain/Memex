@@ -539,6 +539,7 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <ListsSidebarContainer
                 {...listsSidebar}
+                sidebarWidth={this.state.spaceSidebarWidth}
                 lockedState={lockedState}
                 openFeedUrl={() =>
                     this.processEvent('clickFeedActivityIndicator', null)
@@ -1352,8 +1353,7 @@ export class DashboardContainer extends StatefulUIElement<
             position: listsSidebar.isSidebarPeeking ? 'fixed' : 'sticky',
         }
 
-        const isPeeking = listsSidebar.isSidebarPeeking
-
+        const isPeeking = this.state.listsSidebar.isSidebarPeeking
         return (
             <Container id={'dashboardContainer'}>
                 <SidebarHeaderContainer>
@@ -1395,15 +1395,12 @@ export class DashboardContainer extends StatefulUIElement<
                                 `$sizeConstants.header.heightPxpx`,
                         }}
                         locked={listsSidebar.isSidebarLocked}
-                        onMouseEnter={() => {
-                            this.processEvent('setSidebarPeeking', {
-                                isPeeking,
-                            })
-                        }}
-                        onMouseLeave={(isPeeking) => {
-                            this.processEvent('setSidebarPeeking', {
-                                isPeeking: false,
-                            })
+                        onMouseLeave={() => {
+                            if (this.state.listsSidebar.isSidebarPeeking) {
+                                this.processEvent('setSidebarPeeking', {
+                                    isPeeking: false,
+                                })
+                            }
                         }}
                         default={{ width: sizeConstants.listsSidebar.widthPx }}
                         resizeHandleClasses={{
@@ -1411,7 +1408,9 @@ export class DashboardContainer extends StatefulUIElement<
                         }}
                         resizeGrid={[1, 0]}
                         dragAxis={'none'}
-                        minWidth={'250px'}
+                        minWidth={
+                            sizeConstants.listsSidebar.widthPx - 50 + 'px'
+                        }
                         maxWidth={'500px'}
                         disableDragging={'true'}
                         enableResizing={{
@@ -1425,15 +1424,14 @@ export class DashboardContainer extends StatefulUIElement<
                             topLeft: false,
                         }}
                         onResizeStop={(e, direction, ref, delta, position) => {
-                            this.processEvent('calculateMainContentWidth', {
-                                spaceSidebarWidth: ref.style.width,
-                            })
+                            !this.state.listsSidebar.isSidebarPeeking &&
+                                this.processEvent('calculateMainContentWidth', {
+                                    spaceSidebarWidth: ref.style.width,
+                                })
                         }}
                     >
                         {this.renderListsSidebar()}
                     </ListSidebarContent>
-                    {/* <ContentArea> */}
-                    {/* {this.renderHeaderBar()} */}
                     <MainContent responsiveWidth={this.state.mainContentWidth}>
                         {this.state.listsSidebar.showFeed ? (
                             <FeedContainer>
@@ -1581,7 +1579,7 @@ const ListSidebarContent = styled(Rnd)<{
     ${(props) =>
         props.peeking &&
         css`
-            position: fixed;
+            position: absolute
             height: max-content;
             background-color: ${(props) =>
                 props.theme.colors.backgroundColorDarker};
@@ -1591,6 +1589,7 @@ const ListSidebarContent = styled(Rnd)<{
             margin-left: 10px;
             height: 90vh;
             top: 20px;
+            left: 0px;
             border-radius: 8px;
             animation: slide-in ease-in-out;
             animation-duration: 0.15s;

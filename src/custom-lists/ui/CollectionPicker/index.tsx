@@ -78,12 +78,6 @@ class SpacePicker extends StatefulUIElement<
             .filter((entry) => entry != null)
     }
 
-    handleClickOutside = (e) => {
-        if (this.props.onClickOutside) {
-            this.props.onClickOutside(e)
-        }
-    }
-
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
         this.processEvent('setSearchInputRef', { ref })
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
@@ -123,9 +117,6 @@ class SpacePicker extends StatefulUIElement<
     }
 
     handleKeyPress = (event: KeyboardEvent) => {
-        if (event.key === 'Escape') {
-            this.handleClickOutside(event.key)
-        }
         this.processEvent('keyPress', { event })
     }
 
