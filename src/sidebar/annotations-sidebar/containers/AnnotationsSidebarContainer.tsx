@@ -210,17 +210,8 @@ export class AnnotationsSidebarContainer<
         this.processEvent('setPageUrl', { pageUrl })
     }
 
-    /**
-     * Handles AnnotationSidebar onSelectSpace event
-     *
-     * This handler will actually select the space change by asking our
-     * UILogic to emit the change. Sub-classes like AnnotationSidebarInPage
-     * may override this to notify other elements like the InPageUI.
-     *
-     * @param listId space ID being selected or null
-     */
-    protected handleSelectSpace(listId: string | null) {
-        this.processEvent('selectSpace', { listId })
+    private handleSpaceSelect = async (remoteListId: string | null) => {
+        await this.processEvent('setSelectedSpace', { remoteListId })
     }
 
     private handleClickOutside = (e) => {
@@ -890,9 +881,12 @@ export class AnnotationsSidebarContainer<
     }
 
     private renderSelectedSpacePill() {
+        if (!this.state.selectedSpace?.remoteId) {
+            return null
+        }
         console.debug('Rendering selected space pill')
         const followedList = this.state.followedLists.byId[
-            this.state.selectedSpace
+            this.state.selectedSpace.remoteId
         ]
         return (
             <div
@@ -916,11 +910,7 @@ export class AnnotationsSidebarContainer<
 
     render() {
         if (this.state.showState === 'hidden') {
-            if (this.state.selectedSpace) {
-                return this.renderSelectedSpacePill()
-            } else {
-                return null
-            }
+            return this.renderSelectedSpacePill()
         }
 
         const style = {
@@ -984,19 +974,7 @@ export class AnnotationsSidebarContainer<
                         <AnnotationsSidebar
                             {...this.state}
                             // TODO: determine selected space after anchor
-                            selectedSpace={
-                                document.URL.split('#').length > 1
-                                    ? this.state.selectedSpace
-                                    : this.state.selectedSpace
-                            }
-                            selectedSpaceLocalId={
-                                document.URL.split('#').length > 1
-                                    ? this.state.selectedSpaceLocalId
-                                    : this.state.selectedSpaceLocalId
-                            }
-                            onSelectSpace={(listId) =>
-                                this.handleSelectSpace(listId)
-                            }
+                            onSpaceSelect={this.handleSpaceSelect}
                             // sidebarActions={null}
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}

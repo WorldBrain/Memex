@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events'
-import TypedEventEmitter from 'typed-emitter'
+import type TypedEventEmitter from 'typed-emitter'
 
-import { MaybePromise } from 'src/util/types'
-import {
+import type { MaybePromise } from 'src/util/types'
+import type {
     SharedInPageUIInterface,
     SharedInPageUIEvents,
     InPageUIComponentShowState,
@@ -15,7 +15,8 @@ import {
     getRemoteEventEmitter,
     TypedRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
-import { ContentSharingEvents } from 'src/content-sharing/background/types'
+import type { ContentSharingEvents } from 'src/content-sharing/background/types'
+import type { SelectedSpaceState } from 'src/sidebar/annotations-sidebar/types'
 
 export interface SharedInPageUIDependencies {
     getNormalizedPageUrl: () => MaybePromise<string>
@@ -58,7 +59,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
      * UIlogic event, which will then update this value here.
      *
      */
-    selectedSpace: string | null = null
+    selectedSpace: SelectedSpaceState | null = null
 
     _pendingEvents: {
         sidebarAction?: {

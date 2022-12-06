@@ -197,6 +197,8 @@ export class SidebarContainerLogic extends UILogic<
             activeTagPickerAnnotationId: undefined,
             activeListPickerState: undefined,
 
+            selectedSpace: null,
+
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
 
@@ -1701,17 +1703,33 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    selectSpace: EventHandler<'selectSpace'> = ({ event }) => {
+    setSelectedSpace: EventHandler<'setSelectedSpace'> = ({
+        event,
+        previousState,
+    }) => {
         const localId =
-            event.listId === null
+            event.remoteListId === null
                 ? null
                 : this.options.annotationsCache.getListIdByRemoteId(
-                      event.listId,
+                      event.remoteListId,
                   )
-        this.emitMutation({
-            selectedSpace: { $set: event.listId },
-            selectedSpaceLocalId: { $set: localId },
-        })
+
+        const mutation: UIMutation<SidebarContainerState> = {
+            selectedSpace: {
+                $set:
+                    localId == null
+                        ? null
+                        : {
+                              localId,
+                              remoteId: event.remoteListId,
+                          },
+            },
+        }
+
+        const nextState = this.withMutation(previousState, mutation)
+        this.options.events.emit('setSelectedSpace', nextState.selectedSpace)
+
+        this.emitMutation(mutation)
     }
 
     setAnnotationShareModalShown: EventHandler<

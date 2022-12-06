@@ -21,7 +21,7 @@ import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
 import type { Annotation, ListDetailsGetter } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
-import type { AnnotationMode, SidebarTheme } from '../types'
+import type { AnnotationMode, SelectedSpaceState, SidebarTheme } from '../types'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import {
     AnnotationEditGeneralProps,
@@ -116,7 +116,7 @@ export interface AnnotationsSidebarProps
     // for the isolated view, or get out of an isolated or leaf
     // view for a currently selected space. In the last case
     // listId argument will be null
-    onSelectSpace?: (listId: string | null) => void
+    onSpaceSelect: (remoteListId: string | null) => void
 
     copyPaster: any
     onClickOutsideCopyPaster: () => void
@@ -131,8 +131,7 @@ export interface AnnotationsSidebarProps
 
     // Space, list or collection currently selected to be shown as part
     // of the isolated view or leaf page.
-    selectedSpace: string
-    selectedSpaceLocalId: number
+    selectedSpace: SelectedSpaceState | null
 
     //postShareHook: (shareInfo) => void
     //postShareHook: (shareInfo) => void+
@@ -251,23 +250,11 @@ export class AnnotationsSidebar extends React.Component<
         }
     }
 
-    private triggerSelectSpace(listId: string | null) {
-        if (listId === this.props.selectedSpace) {
-            console.debug(
-                'Not triggering select space because it is the same',
-                listId,
-            )
-        } else {
-            // TODO: make sure this gets passed the right list ID (do we need to save it?)
-            // Make sure followed list annotations will be loaded after selected
-            // this.props.expandFollowedListNotes()
-            if (this.props.onSelectSpace) {
-                console.debug('Triggering select space', listId)
-                this.props.onSelectSpace(listId)
-            } else {
-                console.warn('No handler to select space', listId)
-            }
-        }
+    private handleSpaceSelect = (
+        remoteListId: string | null,
+    ): React.MouseEventHandler => (e) => {
+        e.stopPropagation()
+        this.props.onSpaceSelect(remoteListId)
     }
 
     private getListsForAnnotationCreate = (
@@ -579,18 +566,18 @@ export class AnnotationsSidebar extends React.Component<
     private renderSharedNotesByList() {
         const { followedLists } = this.props
 
-        const sharedNotesByList = followedLists.allIds.map((listId) => {
-            const listData = followedLists.byId[listId]
+        const sharedNotesByList = followedLists.allIds.map((remoteListId) => {
+            const listData = followedLists.byId[remoteListId]
             return (
                 <FollowedListNotesContainer
                     bottom={listData.isExpanded ? '20px' : '0px'}
-                    key={listId}
+                    key={remoteListId}
                     top="0px"
                 >
                     {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
                         onClick={() =>
-                            this.props.expandFollowedListNotes(listId)
+                            this.props.expandFollowedListNotes(remoteListId)
                         }
                         title={listData.name}
                     >
@@ -616,9 +603,9 @@ export class AnnotationsSidebar extends React.Component<
                                     <Icon
                                         icon="edit"
                                         height="16px"
-                                        onClick={() =>
-                                            this.triggerSelectSpace(listId)
-                                        }
+                                        onClick={this.handleSpaceSelect(
+                                            remoteListId,
+                                        )}
                                     />
                                 </TooltipBox>
                                 <TooltipBox
@@ -630,7 +617,7 @@ export class AnnotationsSidebar extends React.Component<
                                         height="16px"
                                         onClick={() =>
                                             this.props.openCollectionPage(
-                                                listId,
+                                                remoteListId,
                                             )
                                         }
                                     />
@@ -641,7 +628,7 @@ export class AnnotationsSidebar extends React.Component<
                             </FollowedListNoteCount>
                         </ButtonContainer>
                     </FollowedListRow>
-                    {this.renderFollowedListNotes(listId)}
+                    {this.renderFollowedListNotes(remoteListId)}
                 </FollowedListNotesContainer>
             )
         })
@@ -717,13 +704,14 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderAnnotationsEditableSelectedSpace(listId: string) {
+    private renderAnnotationsEditableForSelectedSpace() {
+        if (this.props.selectedSpace == null) {
+            throw new Error(
+                'Isolated view specific render method called when state not set',
+            )
+        }
         const selectedSpaceAnnotations = this.props.annotations.filter(
-            (currentAnnotation) => {
-                return currentAnnotation.lists.includes(
-                    this.props.selectedSpaceLocalId,
-                )
-            },
+            ({ lists }) => lists.includes(this.props.selectedSpace.localId),
         )
         return this.renderAnnotationsEditable(selectedSpaceAnnotations)
     }
@@ -741,14 +729,11 @@ export class AnnotationsSidebar extends React.Component<
         //         {this.renderIsolatedView(this.props.isolatedView)}
         //     </AnnotationsSectionStyled>
         // ) : (
-        console.debug('Results body', this.props.selectedSpace)
         return (
             <React.Fragment>
                 {this.props.selectedSpace ? (
                     <AnnotationsSectionStyled>
-                        {this.renderAnnotationsEditableSelectedSpace(
-                            this.props.selectedSpace,
-                        )}
+                        {this.renderAnnotationsEditableForSelectedSpace()}
                     </AnnotationsSectionStyled>
                 ) : this.props.isExpanded ? (
                     <AnnotationsSectionStyled>
@@ -1051,7 +1036,7 @@ export class AnnotationsSidebar extends React.Component<
      */
     private renderLeafTopBar() {
         return (
-            <TopBarContainer onClick={() => this.triggerSelectSpace(null)}>
+            <TopBarContainer onClick={this.handleSpaceSelect(null)}>
                 <TooltipBox tooltipText="Back to all spaces">
                     <Icon
                         filePath={icons.arrowLeft}

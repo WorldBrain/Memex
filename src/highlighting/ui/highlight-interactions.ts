@@ -191,11 +191,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
         let actualLists = []
         if (params.inPageUI.selectedSpace) {
-            const remoteSelectedListId = params.inPageUI.selectedSpace
-            const localSelectedListId = params.annotationsCache.getListIdByRemoteId(
-                remoteSelectedListId,
-            )
-            actualLists = [localSelectedListId]
+            actualLists = [params.inPageUI.selectedSpace.localId]
         }
 
         const annotation: Annotation = {

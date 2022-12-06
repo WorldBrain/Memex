@@ -1,6 +1,7 @@
-import TypedEventEmitter from 'typed-emitter'
-import { Anchor } from 'src/highlighting/types'
-import { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
+import type TypedEventEmitter from 'typed-emitter'
+import type { Anchor } from 'src/highlighting/types'
+import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
+import type { SelectedSpaceState } from 'src/sidebar/annotations-sidebar/types'
 
 export type InPageUISidebarAction =
     | 'comment'
@@ -54,7 +55,7 @@ export interface ShouldSetUpOptions {
 export interface SharedInPageUIInterface {
     events: TypedEventEmitter<SharedInPageUIEvents>
     componentsShown: InPageUIComponentShowState
-    selectedSpace: string | null
+    selectedSpace: SelectedSpaceState | null
 
     // Ribbon
     showRibbon(options?: { action?: InPageUIRibbonAction }): Promise<void>

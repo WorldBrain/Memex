@@ -11,7 +11,7 @@ import type {
 } from 'src/custom-lists/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
-import type { SidebarTheme } from '../types'
+import type { SelectedSpaceState, SidebarTheme } from '../types'
 import type {
     AnnotationSharingStates,
     ContentSharingInterface,
@@ -148,8 +148,7 @@ export interface SidebarContainerState
     // for the side bar, also known as the isolated view. When a space
     // is selected, all operations default to use that selected space
     // except if explicity told otherwise.
-    selectedSpace?: string | null
-    selectedSpaceLocalId?: number | null
+    selectedSpace: SelectedSpaceState | null
 
     annotationSharingAccess: AnnotationSharingAccess
 
@@ -304,7 +303,7 @@ interface SidebarEvents {
     toggleIsolatedListView: { listId: string }
 
     // Selected space management
-    selectSpace: { listId: string | null }
+    setSelectedSpace: { remoteListId: string | null }
 
     updateAnnotationShareInfo: {
         annotationUrl: string

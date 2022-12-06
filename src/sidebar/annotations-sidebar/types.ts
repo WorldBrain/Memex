@@ -33,7 +33,7 @@ export interface HighlighterEvents {
 }
 
 export interface AnnotationsSidebarInPageEvents extends HighlighterEvents {
-    selectSpace: (listId: string) => void
+    setSelectedSpace: (args: SelectedSpaceState) => void
 }
 
 export interface AnnotationStorageInterface {}
@@ -47,4 +47,9 @@ export interface SidebarTheme {
     rightOffsetPx: number
     topOffsetPx: number
     paddingRight: number
+}
+
+export interface SelectedSpaceState {
+    remoteId?: string
+    localId: number
 }

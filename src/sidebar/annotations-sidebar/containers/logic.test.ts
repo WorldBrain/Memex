@@ -2526,6 +2526,40 @@ describe('SidebarContainerLogic', () => {
                 })
         }
 
+        it('should be able to set isolated view mode for a specific joined space', async ({
+            device,
+        }) => {
+            await setupFollowedListsTestData(device)
+            const { sidebar, emittedEvents } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+            const remoteListId = DATA.FOLLOWED_LISTS[0].id
+            const expectedEvent = {
+                event: 'setSelectedSpace',
+                args: { localId: 0, remoteId: remoteListId },
+            }
+
+            expect(sidebar.state.selectedSpace).toEqual(null)
+            expect(emittedEvents).toEqual([])
+
+            await sidebar.processEvent('setSelectedSpace', { remoteListId })
+
+            expect(sidebar.state.selectedSpace.localId).toEqual(0)
+            expect(sidebar.state.selectedSpace.remoteId).toEqual(remoteListId)
+            expect(emittedEvents).toEqual([expectedEvent])
+
+            await sidebar.processEvent('setSelectedSpace', {
+                remoteListId: null,
+            })
+
+            expect(sidebar.state.selectedSpace).toEqual(null)
+            expect(emittedEvents).toEqual([
+                expectedEvent,
+                { event: 'setSelectedSpace', args: null },
+            ])
+        })
+
         it('should be able to set notes type + trigger followed list load', async ({
             device,
         }) => {
