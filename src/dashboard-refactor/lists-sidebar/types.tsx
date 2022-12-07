@@ -17,6 +17,7 @@ export interface SidebarPeekState {
 export interface ListData {
     id: number
     name: string
+    newName?: string
     remoteId?: string
     description?: string
     isOwnedList?: boolean

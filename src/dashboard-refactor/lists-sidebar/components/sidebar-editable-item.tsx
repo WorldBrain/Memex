@@ -15,6 +15,7 @@ export interface Props {
     errorMessage: string | null
     onCancelClick: (shouldSave: boolean) => void
     onConfirmClick: (value: string) => void
+    cancelListEdit: () => void
 }
 
 export default class ListsSidebarEditableItem extends React.PureComponent<
@@ -58,9 +59,9 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
                 <Container>
                     <EditableListTitle
                         autoFocus
-                        onChange={this.handleChange}
+                        // onChange={this.handleChange}
                         value={this.state.value}
-                        onKeyDown={this.handleInputKeyDown}
+                        // onKeyDown={this.handleInputKeyDown}
                     />
                     <ActionButtonBox right="5px">
                         <Icon

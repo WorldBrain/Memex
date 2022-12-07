@@ -225,6 +225,11 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                 <EditArea>
                     <EditableMenuItem
                         {...this.props.editableProps}
+                        confirmWithEnter={() => {
+                            this.setState({
+                                showSaveButton: false,
+                            })
+                        }}
                         onNameChange={(name) =>
                             this.processEvent('updateSpaceName', { name })
                         }
@@ -246,10 +251,9 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                 color="purple"
                                 heightAndWidth="24px"
                                 onClick={() => {
-                                    this.props.editableProps.onConfirmClick(
-                                        this.state.nameValue,
-                                    )
-                                    this.props.onClose()
+                                    this.setState({
+                                        showSaveButton: false,
+                                    })
                                 }}
                             />
                         )}

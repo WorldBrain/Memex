@@ -250,6 +250,7 @@ export class DashboardContainer extends StatefulUIElement<
                 changeListName: (value) =>
                     this.processEvent('changeListName', { value }),
                 onCancelClick: () => this.processEvent('cancelListEdit', null),
+                cancelListEdit: () => this.processEvent('cancelListEdit', null),
                 onConfirmClick: (value) =>
                     this.processEvent('confirmListEdit', { value }),
                 initValue: listsSidebar.listData[listId].name,

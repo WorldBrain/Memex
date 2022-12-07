@@ -9,22 +9,37 @@ export interface Props {
     changeListName?: (value: string) => void
     onNameChange: (value: string) => void
     onRenameStart?: React.MouseEventHandler<Element>
+    confirmWithEnter?: () => void
 }
 
-export default class EditableMenuItem extends React.PureComponent<Props> {
+export interface State {
+    spaceTitle: string
+}
+
+export default class EditableMenuItem extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
         this.props.onRenameStart?.(null)
+    }
+
+    state = {
+        spaceTitle: this.props.nameValue,
     }
 
     private handleChange: React.KeyboardEventHandler = (event) => {
         const value = (event.target as HTMLInputElement).value
         this.props.onNameChange(value)
         this.props.changeListName?.(value)
+        console.log('value', value)
+
+        this.setState({
+            spaceTitle: value,
+        })
     }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         // Allow escape keydown to bubble up to close the sidebar only if no input state
+
         if (e.key === 'Escape') {
             if (this.props.nameValue.length) {
                 e.stopPropagation()
@@ -33,10 +48,14 @@ export default class EditableMenuItem extends React.PureComponent<Props> {
             return
         }
 
+        console.log('spacetime:', this.state.spaceTitle)
+
         if (e.key === 'Enter') {
-            if (this.props.nameValue.length) {
+            if (this.state.spaceTitle.length) {
+                this.props.confirmWithEnter()
+                console.log('confirm')
                 e.stopPropagation()
-                this.props.onConfirmClick(this.props.nameValue)
+                this.props.onConfirmClick(this.state.spaceTitle)
             }
         }
 
@@ -59,7 +78,7 @@ export default class EditableMenuItem extends React.PureComponent<Props> {
                             e.stopPropagation()
                         }}
                         onChange={this.handleChange}
-                        value={this.props.nameValue}
+                        value={this.state.spaceTitle}
                         onKeyDown={this.handleInputKeyDown}
                     />
                 </Container>

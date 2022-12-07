@@ -3093,7 +3093,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 editListErrorMessage: { $set: null },
                 listData: {
-                    [listId]: { name: { $set: newName } },
+                    [listId]: {
+                        newName: { $set: newName },
+                    },
                 },
             },
         })
@@ -3113,7 +3115,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             id: listId,
         })
 
-        const newName = previousState.listsSidebar.listData[listId].name
+        console.log('oldname: ', { name: oldName })
+
+        const newName = previousState.listsSidebar.listData[listId].newName
+        console.log('newNameSet', newName)
 
         if (newName === oldName) {
             return
@@ -3156,14 +3161,16 @@ export class DashboardLogic extends UILogic<State, Events> {
                     newName,
                 })
 
-                await this.changeListName({
-                    event,
-                    previousState,
-                })
+                console.log('listnametrigger')
 
                 this.emitMutation({
                     listsSidebar: {
-                        editingListId: { $set: undefined },
+                        listData: {
+                            [listId]: {
+                                name: { $set: newName },
+                                newName: { $set: newName },
+                            },
+                        },
                         editListErrorMessage: {
                             $set: null,
                         },
