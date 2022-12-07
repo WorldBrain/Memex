@@ -573,7 +573,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             return this.renderNoResults()
         }
 
-        // console.log(this.props.searchState)
         if (this.props.searchState === 'running') {
             return this.renderLoader()
         }

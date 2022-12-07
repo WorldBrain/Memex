@@ -3115,11 +3115,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             id: listId,
         })
 
-        console.log('oldname: ', { name: oldName })
-
         const newName = previousState.listsSidebar.listData[listId].newName
-        console.log('newNameSet', newName)
-
         if (newName === oldName) {
             return
         }
@@ -3160,8 +3156,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     oldName,
                     newName,
                 })
-
-                console.log('listnametrigger')
 
                 this.emitMutation({
                     listsSidebar: {

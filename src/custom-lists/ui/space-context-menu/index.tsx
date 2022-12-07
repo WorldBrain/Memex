@@ -254,6 +254,9 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                     this.setState({
                                         showSaveButton: false,
                                     })
+                                    this.props.editableProps.onConfirmClick(
+                                        this.state.nameValue,
+                                    )
                                 }}
                             />
                         )}

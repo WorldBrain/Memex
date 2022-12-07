@@ -24,6 +24,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 class SpacePicker extends StatefulUIElement<
     SpacePickerDependencies,
@@ -334,9 +335,6 @@ class SpacePicker extends StatefulUIElement<
                             listId: list.localId,
                             name,
                         })
-                        await this.processEvent('toggleEntryContextMenu', {
-                            listId: list.localId,
-                        })
                     },
                     onCancelClick: this.handleSpaceContextMenuClose(
                         list.localId,
@@ -349,13 +347,17 @@ class SpacePicker extends StatefulUIElement<
                         remoteListId,
                     })
                 }
-                onClose={this.handleSpaceContextMenuClose(list.localId)}
+                // onClose={this.handleSpaceContextMenuClose(list.localId)}
                 remoteListId={list.remoteId}
             />
         )
     }
 
     renderMainContent() {
+        const list = this.state.displayEntries.find(
+            (l) => l.localId === this.state.contextMenuListId,
+        )
+
         if (this.state.loadingSuggestions === 'running') {
             return (
                 <LoadingBox>
@@ -367,7 +369,25 @@ class SpacePicker extends StatefulUIElement<
         return (
             <>
                 {this.state.contextMenuListId ? (
-                    this.renderSpaceContextMenu()
+                    <>
+                        <PrimaryActionBox>
+                            <PrimaryAction
+                                type="tertiary"
+                                size="small"
+                                label="Go back"
+                                icon="arrowLeft"
+                                onClick={async () =>
+                                    await this.processEvent(
+                                        'toggleEntryContextMenu',
+                                        {
+                                            listId: list.localId,
+                                        },
+                                    )
+                                }
+                            />
+                        </PrimaryActionBox>
+                        {this.renderSpaceContextMenu()}
+                    </>
                 ) : (
                     <PickerContainer>
                         <PickerSearchInput
@@ -432,6 +452,10 @@ class SpacePicker extends StatefulUIElement<
         )
     }
 }
+
+const PrimaryActionBox = styled.div`
+    padding: 10px 0px 0px 10px;
+`
 
 const EntryListHeader = styled.div`
     padding: 5px 5px;

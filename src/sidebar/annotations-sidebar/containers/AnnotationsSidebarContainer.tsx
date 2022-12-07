@@ -180,7 +180,6 @@ export class AnnotationsSidebarContainer<
 
     listenToEsc = (event) => {
         if (event.key === 'Escape') {
-            console.log(event.key)
             this.hideSidebar()
         }
     }

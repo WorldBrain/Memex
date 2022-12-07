@@ -30,7 +30,6 @@ export default class EditableMenuItem extends React.Component<Props, State> {
         const value = (event.target as HTMLInputElement).value
         this.props.onNameChange(value)
         this.props.changeListName?.(value)
-        console.log('value', value)
 
         this.setState({
             spaceTitle: value,
@@ -48,12 +47,10 @@ export default class EditableMenuItem extends React.Component<Props, State> {
             return
         }
 
-        console.log('spacetime:', this.state.spaceTitle)
-
         if (e.key === 'Enter') {
             if (this.state.spaceTitle.length) {
                 this.props.confirmWithEnter()
-                console.log('confirm')
+                e.preventDefault()
                 e.stopPropagation()
                 this.props.onConfirmClick(this.state.spaceTitle)
             }
