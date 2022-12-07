@@ -535,9 +535,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.runSearch(nextState)
     }
 
-    private runSearch = throttle((previousState: State, paginate?: boolean) => {
-        this.search({ previousState, event: { paginate } })
-    }, 100)
+    private runSearch = throttle(
+        async (previousState: State, paginate?: boolean) => {
+            await this.search({ previousState, event: { paginate } })
+        },
+        100,
+    )
 
     // leaving this here for now in order to finalise the feature for handling the race condition rendering
 
@@ -568,85 +571,99 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const searchState = this.withMutation(previousState, {
                     searchFilters,
                 })
-                let {
-                    noteData,
-                    pageData,
-                    results,
-                    resultsExhausted,
-                    searchTermsInvalid,
-                } =
-                    previousState.searchResults.searchType === 'pages'
-                        ? await this.searchPages(searchState)
-                        : previousState.searchResults.searchType === 'notes'
-                        ? await this.searchNotes(searchState)
-                        : previousState.searchResults.searchType === 'videos'
-                        ? await this.searchVideos(searchState)
-                        : previousState.searchResults.searchType === 'twitter'
-                        ? await this.searchTwitter(searchState)
-                        : await this.searchPDFs(searchState)
 
-                let noResultsType: NoResultsType = null
-                if (
-                    resultsExhausted &&
-                    searchState.searchFilters.skip === 0 &&
-                    !pageData.allIds.length
-                ) {
-                    if (
-                        previousState.listsSidebar.selectedListId ===
-                        SPECIAL_LIST_IDS.MOBILE
-                    ) {
-                        noResultsType = previousState.searchResults
-                            .showMobileAppAd
-                            ? 'mobile-list-ad'
-                            : 'mobile-list'
-                    } else if (previousState.searchResults.showOnboardingMsg) {
-                        noResultsType = 'onboarding-msg'
-                    } else {
-                        noResultsType = searchTermsInvalid
-                            ? 'stop-words'
-                            : 'no-results'
-                    }
-                }
-
-                // console.log('searchIDafter', event.searchID)
-                // console.log('currentSearchIDafter', this.currentSearchID)
                 if (searchID !== this.currentSearchID) {
-                    console.log('NOT:', searchID)
                     return
-                }
+                } else {
+                    let {
+                        noteData,
+                        pageData,
+                        results,
+                        resultsExhausted,
+                        searchTermsInvalid,
+                    } =
+                        previousState.searchResults.searchType === 'pages'
+                            ? await this.searchPages(searchState)
+                            : previousState.searchResults.searchType === 'notes'
+                            ? await this.searchNotes(searchState)
+                            : previousState.searchResults.searchType ===
+                              'videos'
+                            ? await this.searchVideos(searchState)
+                            : previousState.searchResults.searchType ===
+                              'twitter'
+                            ? await this.searchTwitter(searchState)
+                            : await this.searchPDFs(searchState)
 
-                this.emitMutation({
-                    searchFilters,
-                    searchResults: {
-                        areResultsExhausted: {
-                            $set: resultsExhausted,
+                    let noResultsType: NoResultsType = null
+                    if (
+                        resultsExhausted &&
+                        searchState.searchFilters.skip === 0 &&
+                        !pageData.allIds.length
+                    ) {
+                        if (
+                            previousState.listsSidebar.selectedListId ===
+                            SPECIAL_LIST_IDS.MOBILE
+                        ) {
+                            noResultsType = previousState.searchResults
+                                .showMobileAppAd
+                                ? 'mobile-list-ad'
+                                : 'mobile-list'
+                        } else if (
+                            previousState.searchResults.showOnboardingMsg
+                        ) {
+                            noResultsType = 'onboarding-msg'
+                        } else {
+                            noResultsType = searchTermsInvalid
+                                ? 'stop-words'
+                                : 'no-results'
+                        }
+                    }
+
+                    if (searchID !== this.currentSearchID) {
+                        return
+                    }
+
+                    this.emitMutation({
+                        searchFilters,
+                        searchResults: {
+                            areResultsExhausted: {
+                                $set: resultsExhausted,
+                            },
+                            searchState: { $set: 'success' },
+                            searchPaginationState: { $set: 'success' },
+                            noResultsType: { $set: noResultsType },
+                            ...(event.paginate
+                                ? {
+                                      results: {
+                                          $apply: (prev) =>
+                                              utils.mergeSearchResults(
+                                                  prev,
+                                                  results,
+                                              ),
+                                      },
+                                      pageData: {
+                                          $apply: (prev) =>
+                                              mergeNormalizedStates(
+                                                  prev,
+                                                  pageData,
+                                              ),
+                                      },
+                                      noteData: {
+                                          $apply: (prev) =>
+                                              mergeNormalizedStates(
+                                                  prev,
+                                                  noteData,
+                                              ),
+                                      },
+                                  }
+                                : {
+                                      results: { $set: results },
+                                      pageData: { $set: pageData },
+                                      noteData: { $set: noteData },
+                                  }),
                         },
-                        noResultsType: { $set: noResultsType },
-                        ...(event.paginate
-                            ? {
-                                  results: {
-                                      $apply: (prev) =>
-                                          utils.mergeSearchResults(
-                                              prev,
-                                              results,
-                                          ),
-                                  },
-                                  pageData: {
-                                      $apply: (prev) =>
-                                          mergeNormalizedStates(prev, pageData),
-                                  },
-                                  noteData: {
-                                      $apply: (prev) =>
-                                          mergeNormalizedStates(prev, noteData),
-                                  },
-                              }
-                            : {
-                                  results: { $set: results },
-                                  pageData: { $set: pageData },
-                                  noteData: { $set: noteData },
-                              }),
-                    },
-                })
+                    })
+                }
             },
         )
     }

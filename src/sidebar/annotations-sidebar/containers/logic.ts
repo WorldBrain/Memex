@@ -362,17 +362,6 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
     hide: EventHandler<'hide'> = ({ event, previousState }) => {
-        if (
-            previousState.showAllNotesCopyPaster ||
-            previousState.showAllNotesShareMenu ||
-            previousState.activeListPickerState ||
-            previousState.showAnnotationsShareModal ||
-            previousState.activeShareMenuNoteId ||
-            previousState.popoutsActive
-        ) {
-            return
-        }
-
         this.emitMutation({
             showState: { $set: 'hidden' },
             activeAnnotationUrl: { $set: null },

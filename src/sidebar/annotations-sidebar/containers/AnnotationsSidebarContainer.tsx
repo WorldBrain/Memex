@@ -146,6 +146,8 @@ export class AnnotationsSidebarContainer<
         })
 
         if (this.props.sidebarContext === 'dashboard') {
+            document.addEventListener('keydown', this.listenToEsc)
+
             setTimeout(() => {
                 this.props.setSidebarWidthforDashboard(
                     this.state.sidebarWidth || SIDEBAR_WIDTH_STORAGE_KEY,
@@ -169,12 +171,19 @@ export class AnnotationsSidebarContainer<
 
         if (this.props.sidebarContext === 'dashboard') {
             setTimeout(() => {
+                document.removeEventListener('keydown', this.listenToEsc)
                 this.props.setSidebarWidthforDashboard('0px')
                 this.props.onNotesSidebarClose()
             }, 50)
         }
     }
 
+    listenToEsc = (event) => {
+        if (event.key === 'Escape') {
+            console.log(event.key)
+            this.hideSidebar()
+        }
+    }
     toggleSidebarLock = () =>
         this.processEvent(this.state.isLocked ? 'unlock' : 'lock', null)
 
