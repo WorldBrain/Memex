@@ -85,7 +85,6 @@ export interface AnnotationsSidebarProps
     expandFollowedListNotes: (listId: string) => void
     toggleIsolatedListView: (listId: string) => void
 
-    onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
         annotation: Pick<Annotation, 'url' | 'body'>,
         followedListId?: string,
@@ -108,7 +107,6 @@ export interface AnnotationsSidebarProps
     onCopyBtnClick: () => void
     onMenuItemClick: (sortingFn) => void
     copyPaster: any
-    onClickOutsideCopyPaster: () => void
     normalizedPageUrls: string[]
     normalizedPageUrl?: string
     annotationUrls: () => void
@@ -158,7 +156,6 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     async componentDidMount() {
-        document.addEventListener('keydown', this.onKeydown, false)
         //setLocalStorage(SHOW_ISOLATED_VIEW_KEY, true)
         const isolatedViewNotifVisible = await getLocalStorage(
             SHOW_ISOLATED_VIEW_KEY,
@@ -169,19 +166,11 @@ export class AnnotationsSidebar extends React.Component<
         })
     }
 
-    componentWillUnmount() {
-        document.removeEventListener('keydown', this.onKeydown, false)
-    }
+    componentWillUnmount() {}
 
     focusCreateForm = () => (this.annotationCreateRef?.current as any).focus()
     focusEditNoteForm = (annotationId: string) =>
         (this.annotationEditRefs[annotationId]?.current).focusEditForm()
-
-    private onKeydown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-            this.props.onClickOutside(e as any)
-        }
-    }
 
     private searchEnterHandler = {
         test: (e) => e.key === 'Enter',
@@ -227,11 +216,6 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    handleClickOutside: React.MouseEventHandler = (e) => {
-        if (this.props.onClickOutside) {
-            return this.props.onClickOutside(e)
-        }
-    }
     private getListsForAnnotationCreate = (
         followedLists,
         isolatedView: string,
@@ -291,9 +275,6 @@ export class AnnotationsSidebar extends React.Component<
                     copyPaster={this.props.copyPaster}
                     annotationUrls={annotationUrls}
                     normalizedPageUrls={this.props.normalizedPageUrls}
-                    onClickOutside={() =>
-                        this.setState({ showAllNotesCopyPaster: false })
-                    }
                 />
             </PopoutBox>
         )
@@ -909,9 +890,6 @@ export class AnnotationsSidebar extends React.Component<
                 <SortingDropdownMenuBtn
                     onMenuItemClick={(sortingFn) =>
                         this.props.onMenuItemClick(sortingFn)
-                    }
-                    onClickOutSide={() =>
-                        this.setState({ showSortDropDown: false })
                     }
                 />
             </PopoutBox>

@@ -897,12 +897,6 @@ export class AnnotationsSidebarContainer<
                                 normalizeUrl(this.state.pageUrl),
                             ]}
                             normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
-                            onClickOutsideCopyPaster={() =>
-                                this.processEvent(
-                                    'resetCopyPasterAnnotationId',
-                                    null,
-                                )
-                            }
                             copyPaster={this.props.copyPaster}
                             contentSharing={this.props.contentSharing}
                             annotationsShareAll={this.props.annotations}
