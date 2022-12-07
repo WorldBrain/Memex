@@ -1088,10 +1088,8 @@ export class AnnotationsSidebarContainer<
                             expandFeed={() =>
                                 this.processEvent('expandFeed', null)
                             }
-                            expandSharedSpaces={(listIds) =>
-                                this.processEvent('expandSharedSpaces', {
-                                    listIds,
-                                })
+                            expandSharedSpaces={() =>
+                                this.processEvent('expandSharedSpaces', null)
                             }
                             expandFollowedListNotes={(listId) =>
                                 this.processEvent('expandFollowedListNotes', {

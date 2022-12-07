@@ -190,9 +190,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 sharingAccess: event.annotationSharingAccess,
             })
         } else if (event.action === 'show_shared_spaces') {
-            // TODO: Shouldn't need to trigger two events here. Confusing interface
-            await this.processEvent('expandMyNotes', null)
-            await this.processEvent('expandSharedSpaces', { listIds: [] })
+            await this.processEvent('expandSharedSpaces', null)
         }
 
         this.forceUpdate()

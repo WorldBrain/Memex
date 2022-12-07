@@ -84,7 +84,7 @@ export interface AnnotationsSidebarProps
 
     expandFeed: () => void
     expandMyNotes: () => void
-    expandSharedSpaces: (listIds: string[]) => void
+    expandSharedSpaces: () => void
     expandFollowedListNotes: (listId: string) => void
     toggleIsolatedListView: (listId: string) => void
 
@@ -942,28 +942,14 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <TopBarContainer>
                 <PrimaryAction
-                    onClick={
-                        this.props.areMyAnnotationsExpanded
-                            ? null
-                            : () => {
-                                  this.props.expandMyNotes()
-                              }
-                    }
+                    onClick={this.props.expandMyNotes}
                     label={'My Annotations'}
                     active={this.props.areMyAnnotationsExpanded}
                     type={'tertiary'}
                     size={'medium'}
                 />
                 <PrimaryAction
-                    onClick={
-                        this.props.isExpandedSharedSpaces
-                            ? null
-                            : () => {
-                                  this.props.expandSharedSpaces(
-                                      followedLists.allIds,
-                                  )
-                              }
-                    }
+                    onClick={this.props.expandSharedSpaces}
                     label={'Spaces'}
                     active={this.props.isExpandedSharedSpaces}
                     type={'tertiary'}

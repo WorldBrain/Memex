@@ -222,7 +222,7 @@ interface SidebarEvents {
 
     expandFeed: null
     expandMyNotes: null
-    expandSharedSpaces: { listIds: string[] }
+    expandSharedSpaces: null
 
     // Adding a new page comment
     addNewPageComment: { comment?: string; tags?: string[] }

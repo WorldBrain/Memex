@@ -1394,52 +1394,25 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    expandFeed: EventHandler<'expandFeed'> = async ({
-        event,
-        previousState,
-    }) => {
-        const {
-            areMyAnnotationsExpanded: wasExpanded,
-            annotations,
-        } = previousState
-
-        const mutation: UIMutation<SidebarContainerState> = {
-            areMyAnnotationsExpanded: { $set: false },
+    expandFeed: EventHandler<'expandFeed'> = async ({}) => {
+        this.emitMutation({
             isFeedShown: { $set: true },
             isExpandedSharedSpaces: { $set: false },
-        }
-
-        this.emitMutation(mutation)
+            areMyAnnotationsExpanded: { $set: false },
+        })
     }
 
     expandMyNotes: EventHandler<'expandMyNotes'> = async ({
-        event,
         previousState,
     }) => {
-        const {
-            areMyAnnotationsExpanded: wasExpanded,
-            annotations,
-        } = previousState
-
-        const annotIds = annotations.map((annot) => annot.url as string)
-
-        const mutation: UIMutation<SidebarContainerState> = {
-            areMyAnnotationsExpanded: { $set: !wasExpanded },
+        this.emitMutation({
             isFeedShown: { $set: false },
             isExpandedSharedSpaces: { $set: false },
-        }
-        this.emitMutation(mutation)
-
-        // If collapsing, signal to de-render highlights
-        if (wasExpanded) {
-            this.options.events?.emit('removeAnnotationHighlights', {
-                urls: annotIds,
-            })
-            return
-        }
+            areMyAnnotationsExpanded: { $set: true },
+        })
 
         this.options.events?.emit('renderHighlights', {
-            highlights: annotations
+            highlights: previousState.annotations
                 .filter((annotation) => annotation?.selector != null)
                 .map((annotation) => ({
                     url: annotation.url,
@@ -1449,11 +1422,9 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     expandSharedSpaces: EventHandler<'expandSharedSpaces'> = async ({
-        event,
         previousState,
     }) => {
-        const wasExpanded = previousState.isExpandedSharedSpaces
-        const expandedSharedAnnotationReferences = event.listIds
+        const expandedSharedAnnotationReferences = previousState.followedLists.allIds
             .filter((id) => previousState.followedLists.byId[id].isExpanded)
             .map(
                 (id) =>
@@ -1464,20 +1435,12 @@ export class SidebarContainerLogic extends UILogic<
             .flat()
             .map((ref) => ref.id as string)
 
-        const mutation: UIMutation<SidebarContainerState> = {
-            isExpandedSharedSpaces: { $set: !wasExpanded },
-            areMyAnnotationsExpanded: { $set: false },
+        this.emitMutation({
             isFeedShown: { $set: false },
-        }
-        this.emitMutation(mutation)
+            isExpandedSharedSpaces: { $set: true },
+            areMyAnnotationsExpanded: { $set: false },
+        })
 
-        // If collapsing, signal to de-render highlights
-        if (wasExpanded) {
-            this.options.events?.emit('removeAnnotationHighlights', {
-                urls: sharedAnnotIds,
-            })
-            return
-        }
         this.options.events?.emit('renderHighlights', {
             highlights: sharedAnnotIds
                 .filter(
