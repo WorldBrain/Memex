@@ -138,9 +138,12 @@ export interface SidebarContainerState
     showState: 'visible' | 'hidden'
     isLocked: boolean
     isWidthLocked: boolean
-    isExpanded: boolean
+
+    // TODO: unify these flag states into a single one (they're all mutually exclusive)
+    areMyAnnotationsExpanded: boolean
     isExpandedSharedSpaces: boolean
     isFeedShown: boolean
+
     sidebarWidth?: string
     isolatedView?: string | null // if null show default view
 
@@ -149,6 +152,7 @@ export interface SidebarContainerState
     // is selected, all operations default to use that selected space
     // except if explicity told otherwise.
     selectedSpace: SelectedSpaceState | null
+    selectedSpaceLoadState: TaskState
 
     annotationSharingAccess: AnnotationSharingAccess
 

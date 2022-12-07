@@ -726,18 +726,21 @@ export class AnnotationsSidebar extends React.Component<
         if (this.props.isSearchLoading) {
             return this.renderLoader()
         }
-        // return this.props.isolatedView ? (
-        //     <AnnotationsSectionStyled>
-        //         {this.renderIsolatedView(this.props.isolatedView)}
-        //     </AnnotationsSectionStyled>
-        // ) : (
-        return (
-            <React.Fragment>
-                {this.props.selectedSpace ? (
+
+        if (this.props.selectedSpace && !this.props.areMyAnnotationsExpanded) {
+            return (
+                <>
+                    {this.renderSelectedSpaceTopBar()}
                     <AnnotationsSectionStyled>
                         {this.renderAnnotationsEditableForSelectedSpace()}
                     </AnnotationsSectionStyled>
-                ) : this.props.isExpanded ? (
+                </>
+            )
+        }
+
+        return (
+            <React.Fragment>
+                {this.props.areMyAnnotationsExpanded ? (
                     <AnnotationsSectionStyled>
                         {this.renderAnnotationsEditable(this.props.annotations)}
                     </AnnotationsSectionStyled>
@@ -896,9 +899,10 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedListNotesContainer
-                bottom={this.props.isExpanded ? '20px' : '0px'}
+                bottom={this.props.areMyAnnotationsExpanded ? '20px' : '0px'}
             >
-                {(this.props.isExpanded || this.props.selectedSpace) && (
+                {(this.props.areMyAnnotationsExpanded ||
+                    this.props.selectedSpace) && (
                     <>
                         <TopAreaContainer>
                             {this.renderNewAnnotation()}
@@ -939,14 +943,14 @@ export class AnnotationsSidebar extends React.Component<
             <TopBarContainer>
                 <PrimaryAction
                     onClick={
-                        this.props.isExpanded
+                        this.props.areMyAnnotationsExpanded
                             ? null
                             : () => {
                                   this.props.expandMyNotes()
                               }
                     }
                     label={'My Annotations'}
-                    active={this.props.isExpanded}
+                    active={this.props.areMyAnnotationsExpanded}
                     type={'tertiary'}
                     size={'medium'}
                 />
@@ -1022,22 +1026,7 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    /*
-
-        A Leaf Screen refers to a final screen havigation you reach after
-        going through a series of screens levels. Of course you may have links
-        to other documents from a Leaf Screen, but from a navigation standing
-        point, the leaf is the last screen in the hierarchy. From there you
-        can only navigate back up in the hierarchy.
-
-        The LeafTopBar was initially created to basically contain the back
-        button to the uppoer navigation level.
-
-        We don't have a declared navigation structure at this point so take
-        this only as a logical UX matter.
-
-     */
-    private renderLeafTopBar() {
+    private renderSelectedSpaceTopBar() {
         if (!this.props.selectedSpace) {
             this.throwNoSelectedSpaceError()
         }
@@ -1187,16 +1176,8 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
                 <TopBar>
-                    <>
-                        {this.props.selectedSpace ? (
-                            this.renderLeafTopBar()
-                        ) : (
-                            <>
-                                {this.renderTopBarSwitcher()}
-                                {/* {this.renderSharePageButton()} */}
-                            </>
-                        )}
-                    </>
+                    {this.renderTopBarSwitcher()}
+                    {/* {this.renderSharePageButton()} */}
                 </TopBar>
                 {this.renderPageShareModal()}
                 {this.renderResultsBody()}

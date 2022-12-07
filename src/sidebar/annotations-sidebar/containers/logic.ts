@@ -167,7 +167,7 @@ export class SidebarContainerLogic extends UILogic<
         return {
             ...annotationConversationInitialState(),
 
-            isExpanded: true,
+            areMyAnnotationsExpanded: true,
             isExpandedSharedSpaces: false,
             isFeedShown: false,
             loadState: 'pristine',
@@ -195,6 +195,7 @@ export class SidebarContainerLogic extends UILogic<
             activeTagPickerAnnotationId: undefined,
             activeListPickerState: undefined,
 
+            selectedSpaceLoadState: 'pristine',
             selectedSpace: null,
 
             commentBox: { ...INIT_FORM_STATE },
@@ -1397,10 +1398,13 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const { isExpanded: wasExpanded, annotations } = previousState
+        const {
+            areMyAnnotationsExpanded: wasExpanded,
+            annotations,
+        } = previousState
 
         const mutation: UIMutation<SidebarContainerState> = {
-            isExpanded: { $set: false },
+            areMyAnnotationsExpanded: { $set: false },
             isFeedShown: { $set: true },
             isExpandedSharedSpaces: { $set: false },
         }
@@ -1412,12 +1416,15 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const { isExpanded: wasExpanded, annotations } = previousState
+        const {
+            areMyAnnotationsExpanded: wasExpanded,
+            annotations,
+        } = previousState
 
         const annotIds = annotations.map((annot) => annot.url as string)
 
         const mutation: UIMutation<SidebarContainerState> = {
-            isExpanded: { $set: !wasExpanded },
+            areMyAnnotationsExpanded: { $set: !wasExpanded },
             isFeedShown: { $set: false },
             isExpandedSharedSpaces: { $set: false },
         }
@@ -1459,7 +1466,7 @@ export class SidebarContainerLogic extends UILogic<
 
         const mutation: UIMutation<SidebarContainerState> = {
             isExpandedSharedSpaces: { $set: !wasExpanded },
-            isExpanded: { $set: false },
+            areMyAnnotationsExpanded: { $set: false },
             isFeedShown: { $set: false },
         }
         this.emitMutation(mutation)
