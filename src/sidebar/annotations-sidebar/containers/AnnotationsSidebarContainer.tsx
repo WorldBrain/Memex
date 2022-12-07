@@ -126,26 +126,8 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    listenToEsc = (event) => {
-        if (event.key === 'Escape') {
-            if (
-                this.state.showAllNotesCopyPaster ||
-                this.state.showAllNotesShareMenu ||
-                this.state.activeListPickerState ||
-                this.state.showAnnotationsShareModal ||
-                this.state.activeShareMenuNoteId ||
-                this.state.popoutsActive
-            ) {
-                return
-            } else {
-                this.hideSidebar()
-            }
-        }
-    }
     toggleSidebarShowForPageId(pageId: string) {
         const isAlreadyOpenForOtherPage = pageId !== this.state.pageUrl
-
-        document.addEventListener('keydown', this.listenToEsc, true)
 
         if (this.state.showState === 'hidden' || isAlreadyOpenForOtherPage) {
             this.setPageUrl(pageId)
@@ -183,7 +165,6 @@ export class AnnotationsSidebarContainer<
     }
 
     hideSidebar() {
-        document.removeEventListener('keydown', this.listenToEsc, true)
         this.processEvent('hide', null)
 
         if (this.props.sidebarContext === 'dashboard') {
@@ -215,28 +196,6 @@ export class AnnotationsSidebarContainer<
 
     setPageUrl = (pageUrl: string) => {
         this.processEvent('setPageUrl', { pageUrl })
-    }
-
-    private handleClickOutside = (e) => {
-        if (this.state.isLocked) {
-            return
-        }
-
-        if (this.props.onClickOutside) {
-            return this.props.onClickOutside(e)
-        }
-
-        // Do not close the sidebar if clicked on a highlight in the page
-        if (e.target?.dataset?.annotation) {
-            return
-        }
-
-        if (
-            this.state.showState === 'visible' &&
-            this.props.sidebarContext !== 'dashboard'
-        ) {
-            this.hideSidebar()
-        }
     }
 
     protected bindAnnotationFooterEventProps(
@@ -858,7 +817,7 @@ export class AnnotationsSidebarContainer<
             <ThemeProvider theme={this.props.theme}>
                 <GlobalStyle sidebarWidth={this.state.sidebarWidth} />
                 <ContainerStyled
-                    className={classNames('ignore-react-onclickoutside')}
+                    id={'annotationSidebarContainer'}
                     sidebarContext={this.props.sidebarContext}
                     isShown={this.state.showState}
                 >
@@ -987,7 +946,6 @@ export class AnnotationsSidebarContainer<
                                 this.state.annotationsLoadState === 'running' ||
                                 this.state.loadState === 'running'
                             }
-                            onClickOutside={this.handleClickOutside}
                             theme={this.props.theme}
                             renderCopyPasterForAnnotation={
                                 this.renderCopyPasterManagerForAnnotation
