@@ -418,10 +418,6 @@ const StyledPageResult = styled.div`
     flex-direction: column;
     position: relative;
     border-radius: 12px;
-
-    &:hover {
-        outline: 2px solid ${(props) => props.theme.colors.lineGrey};
-    }
 `
 
 const RemoveFromListBtn = styled.div`

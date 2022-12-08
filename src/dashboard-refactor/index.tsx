@@ -763,36 +763,50 @@ export class DashboardContainer extends StatefulUIElement<
                             pageData.fullUrl,
                         )
 
-                        if (
-                            searchResults.results[day].pages.byId[pageId]
-                                .activePage
-                        ) {
-                            this.processEvent('setActivePage', {
-                                activeDay: undefined,
-                                activePageID: undefined,
-                                activePage: false,
-                            })
-                            this.processEvent('setPageNotesShown', {
-                                day,
-                                pageId,
-                                areShown:
-                                    searchResults.results[day].pages.byId[
-                                        pageId
-                                    ].areNotesShown && false,
-                            })
-                        } else if (this.state.activePageID) {
-                            this.processEvent('setActivePage', {
-                                activeDay: this.state.activeDay,
-                                activePageID: this.state.activePageID,
-                                activePage: false,
-                            })
-                        } else {
-                            this.processEvent('setActivePage', {
-                                activeDay: day,
-                                activePageID: pageId,
-                                activePage: true,
-                            })
-                        }
+                        // this.processEvent('setPageNotesShown', {
+                        //     day,
+                        //     pageId,
+                        //     areShown: !searchResults.results[day].pages.byId[
+                        //         pageId
+                        //     ].areNotesShown,
+                        // })
+
+                        this.processEvent('setActivePage', {
+                            activeDay: day,
+                            activePageID: pageId,
+                            activePage: true,
+                        })
+
+                        // if (
+                        //     searchResults.results[day].pages.byId[pageId]
+                        //         .activePage
+                        // ) {
+                        //     this.processEvent('setActivePage', {
+                        //         activeDay: undefined,
+                        //         activePageID: undefined,
+                        //         activePage: false,
+                        //     })
+                        //     this.processEvent('setPageNotesShown', {
+                        //         day,
+                        //         pageId,
+                        //         areShown:
+                        //             searchResults.results[day].pages.byId[
+                        //                 pageId
+                        //             ].areNotesShown && false,
+                        //     })
+                        // } else if (this.state.activePageID) {
+                        //     this.processEvent('setActivePage', {
+                        //         activeDay: this.state.activeDay,
+                        //         activePageID: this.state.activePageID,
+                        //         activePage: false,
+                        //     })
+                        // } else {
+                        //     this.processEvent('setActivePage', {
+                        //         activeDay: day,
+                        //         activePageID: pageId,
+                        //         activePage: true,
+                        //     })
+                        // }
                     },
                     onTagPickerBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageTagPickerShown', {

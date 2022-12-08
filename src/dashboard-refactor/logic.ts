@@ -1311,6 +1311,23 @@ export class DashboardLogic extends UILogic<State, Events> {
             activeDay: { $set: event.activeDay },
             activePageID: { $set: event.activePageID },
         })
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [previousState.activeDay]: {
+                        pages: {
+                            byId: {
+                                [previousState.activePageID]: {
+                                    activePage: {
+                                        $set: false,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
     }
 
     setPageNotesShown: EventHandler<'setPageNotesShown'> = ({ event }) => {
