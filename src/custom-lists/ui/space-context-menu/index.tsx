@@ -19,13 +19,9 @@ import EditableMenuItem, {
 import { getListShareUrl } from 'src/content-sharing/utils'
 
 export interface Props extends Dependencies {
-    xPosition?: number
-    yPosition?: number
-    fixedPositioning?: boolean
     editableProps: Omit<EditableMenuItemProps, 'nameValue' | 'onNameChange'>
     onDeleteSpaceConfirm?: React.MouseEventHandler
     onDeleteSpaceIntent?: React.MouseEventHandler
-    onClose: (saveChanges?: boolean) => void
 }
 
 // NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links

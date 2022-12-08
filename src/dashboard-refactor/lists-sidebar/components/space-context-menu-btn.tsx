@@ -14,18 +14,9 @@ export interface Props {
     isMenuDisplayed: boolean
     toggleMenu: React.MouseEventHandler
     editableProps?: EditableItemProps
-    // cancelSpaceNameEdit?: () => void
 }
 
-export interface State {
-    xPosition: number
-    yPosition: number
-}
-
-export default class SpaceContextMenuButton extends PureComponent<
-    Props,
-    State
-> {
+export default class SpaceContextMenuButton extends PureComponent<Props> {
     private spaceContextMenuButton = React.createRef<HTMLInputElement>()
     private contextMenuRef: React.RefObject<SpaceContextMenu>
 

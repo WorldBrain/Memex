@@ -320,8 +320,6 @@ class SpacePicker extends StatefulUIElement<
                 spaceName={list.name}
                 ref={this.contextMenuRef}
                 localListId={this.state.contextMenuListId}
-                xPosition={this.state.contextMenuPositionX}
-                yPosition={this.state.contextMenuPositionY}
                 contentSharingBG={this.props.contentSharingBG}
                 spacesBG={this.props.spacesBG}
                 onDeleteSpaceConfirm={() =>
@@ -347,7 +345,6 @@ class SpacePicker extends StatefulUIElement<
                         remoteListId,
                     })
                 }
-                // onClose={this.handleSpaceContextMenuClose(list.localId)}
                 remoteListId={list.remoteId}
             />
         )
