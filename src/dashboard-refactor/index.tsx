@@ -1428,7 +1428,7 @@ export class DashboardContainer extends StatefulUIElement<
                             this.processEvent('calculateMainContentWidth', {
                                 spaceSidebarWidth: ref.style.width,
                                 isSidebarPeeking: !this.state.listsSidebar
-                                    .isSidebarPeeking,
+                                    .isSidebarLocked,
                             })
                         }}
                     >

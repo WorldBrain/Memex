@@ -816,21 +816,15 @@ export class AnnotationsSidebar extends React.Component<
                         this.props.followedListLoadState === 'running' ||
                         this.props.followedListLoadState === 'pristine' ? (
                             <LoadingBox>
-                                <LoadingIndicator size={12} />{' '}
+                                <LoadingIndicator size={10} />{' '}
                             </LoadingBox>
                         ) : followedLists.allIds.length > 0 ? (
                             <LoadingBox>
-                                <PageActivityIndicator
-                                    active={true}
-                                    left="5px"
-                                />
+                                <PageActivityIndicator active={true} />
                             </LoadingBox>
                         ) : (
                             <LoadingBox>
-                                <PageActivityIndicator
-                                    active={false}
-                                    left="5px"
-                                />
+                                <PageActivityIndicator active={false} />
                             </LoadingBox>
                         )
                     }
@@ -850,17 +844,11 @@ export class AnnotationsSidebar extends React.Component<
                             </LoadingBox>
                         ) : followedLists.allIds.length > 0 ? (
                             <LoadingBox>
-                                <PageActivityIndicator
-                                    active={true}
-                                    left="5px"
-                                />
+                                <PageActivityIndicator active={true} />
                             </LoadingBox>
                         ) : (
                             <LoadingBox>
-                                <PageActivityIndicator
-                                    active={false}
-                                    left="5px"
-                                />
+                                <PageActivityIndicator active={false} />
                             </LoadingBox>
                         )
                     }
@@ -1047,9 +1035,24 @@ const Link = styled.span`
 `
 
 const LoadingBox = styled.div`
-    width: 30px;
     display: flex;
     justify-content: center;
+    position: absolute;
+    height: 12px;
+    width: 12px;
+    align-items: center;
+    right: 0px;
+    margin-top: -20px;
+`
+
+const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
+    font-weight: bold;
+    border-radius: 30px;
+    background-color: ${(props) => props.theme.colors.purple};
+    width: 12px;
+    height: 12px;
+    font-size: 12px;
+    display: flex;
 `
 
 const TopBar = styled.div`
@@ -1318,17 +1321,6 @@ const FollowedListTitle = styled.span<{ context: string }>`
     overflow-x: hidden;
     color: ${(props) => props.theme.colors.normalText};
 `
-
-const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
-    font-weight: bold;
-    border-radius: 30px;
-    background-color: ${(props) => props.theme.colors.purple};
-    width: 14px;
-    height: 14px;
-    font-size: 12px;
-    display: flex;
-`
-
 const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
     font-weight: bold;
     font-size: 14px;

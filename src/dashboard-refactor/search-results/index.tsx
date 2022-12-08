@@ -788,7 +788,7 @@ const ReferencesContainer = styled.div`
     color: ${(props) => props.theme.colors.darkText};
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: flex-end;
     grid-gap: 5px;
 `
