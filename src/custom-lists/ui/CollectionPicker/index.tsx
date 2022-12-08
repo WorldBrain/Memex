@@ -134,6 +134,7 @@ class SpacePicker extends StatefulUIElement<
                               )
                         : undefined
                 }
+                allTabsButtonPressed={this.state.allTabsButtonPressed}
                 onFocus={this.handleResultListFocus}
                 key={`ListKeyName-${entry.localId}`}
                 id={`ListKeyName-${entry.localId}`}
@@ -161,7 +162,7 @@ class SpacePicker extends StatefulUIElement<
             <IconStyleWrapper show>
                 <TooltipBox
                     tooltipText="Add all tabs in window to Space"
-                    placement="left"
+                    placement="bottom"
                 >
                     <Icon
                         filePath={icons.multiEdit}

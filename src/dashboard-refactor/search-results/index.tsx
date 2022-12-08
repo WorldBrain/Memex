@@ -772,7 +772,7 @@ const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     width: 100%;
 
     padding: 0px 15px;
-    height: 50px;
+    height: fit-content;
     max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
     z-index: 2147483639;
     position: sticky;
@@ -788,8 +788,8 @@ const ReferencesContainer = styled.div`
     color: ${(props) => props.theme.colors.darkText};
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: flex-start;
     grid-gap: 5px;
 `
 

@@ -76,6 +76,7 @@ export interface SpacePickerState {
     loadingShareStates: TaskState
     loadingQueryResults: TaskState
     renameListErrorMessage: string | null
+    allTabsButtonPressed?: number
 }
 
 const sortDisplayEntries = (selectedEntryIds: Set<number>) => (
@@ -643,6 +644,7 @@ export default class SpacePickerLogic extends UILogic<
                       )
                     : [...previousState.selectedListIds, entry.localId],
             },
+            allTabsButtonPressed: { $set: entry.localId },
         } as UIMutation<SpacePickerState>)
     }
 
