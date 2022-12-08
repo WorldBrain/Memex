@@ -713,6 +713,7 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.theme.canClickAnnotations &&
                                 annot.body?.length > 0
                             }
+                            contextLocation={this.props.sidebarContext}
                             passDownRef={ref}
                             shareButtonRef={this.props.shareButtonRef}
                             renderShareMenuForAnnotation={this.props.renderShareMenuForAnnotation()}

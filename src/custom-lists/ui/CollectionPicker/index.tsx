@@ -234,57 +234,6 @@ class SpacePicker extends StatefulUIElement<
     private handleSpaceContextMenuOpen = (listId: number) => async (
         entry: SpaceDisplayEntry,
     ) => {
-        const rect = this.contextMenuBtnRef?.current?.getBoundingClientRect()
-
-        // Popup
-        if (window.outerWidth < 500) {
-            await this.processEvent('updateContextMenuPosition', {
-                x: undefined,
-                y: undefined,
-            })
-        } else {
-            // right side of screen
-            if (window.outerWidth - rect.right < 400) {
-                await this.processEvent('updateContextMenuPosition', {
-                    x: outerWidth - rect.left,
-                })
-                //lower side
-
-                if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
-                    await this.processEvent('updateContextMenuPosition', {
-                        y: outerHeight - rect.bottom - 50,
-                    })
-                }
-                // upper side
-                else {
-                    await this.processEvent('updateContextMenuPosition', {
-                        y: outerHeight - rect.bottom + 100,
-                    })
-                }
-            }
-
-            // left side of screen
-
-            if (window.outerWidth - rect.right > window.outerWidth / 2) {
-                await this.processEvent('updateContextMenuPosition', {
-                    x: outerWidth - rect.right - 320,
-                })
-
-                // lower side
-
-                if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
-                    await this.processEvent('updateContextMenuPosition', {
-                        y: outerHeight - rect.bottom + 40,
-                    })
-                }
-                // upper side
-                else {
-                    await this.processEvent('updateContextMenuPosition', {
-                        y: outerHeight - rect.top + 110,
-                    })
-                }
-            }
-        }
         await this.processEvent('toggleEntryContextMenu', { listId })
     }
 

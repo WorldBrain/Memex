@@ -341,7 +341,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 <TextTruncated text={comment}>
                     {({ text }) => (
                         <NoteTextBox hasHighlight={this.theme.hasHighlight}>
-                            <NoteText>{text}</NoteText>
+                            <NoteText
+                                contextLocation={this.props.contextLocation}
+                            >
+                                {text}
+                            </NoteText>
                         </NoteTextBox>
                     )}
                 </TextTruncated>

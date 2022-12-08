@@ -82,10 +82,6 @@ class EntryRow extends React.Component<Props> {
 
         let cleanID = parseInt(id.split('ListKeyName-')[1])
 
-        console.log(this.props.allTabsButtonPressed === cleanID)
-        console.log(cleanID)
-        console.log(this.props.allTabsButtonPressed)
-
         return (
             <Row
                 onClick={this.handleEntryPress}
