@@ -1096,11 +1096,6 @@ export class AnnotationsSidebarContainer<
                                     listId,
                                 })
                             }
-                            toggleIsolatedListView={(listId) =>
-                                this.processEvent('toggleIsolatedListView', {
-                                    listId,
-                                })
-                            }
                             bindSharedAnnotationEventHandlers={(
                                 annotationReference,
                                 sharedListReference,

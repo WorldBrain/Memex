@@ -145,7 +145,6 @@ export interface SidebarContainerState
     isFeedShown: boolean
 
     sidebarWidth?: string
-    isolatedView?: string | null // if null show default view
 
     // Indicates what is the currently selected space in the leaf screen
     // for the side bar, also known as the isolated view. When a space
@@ -304,7 +303,6 @@ interface SidebarEvents {
     loadFollowedLists: null
     loadFollowedListNotes: { listId: string }
     expandFollowedListNotes: { listId: string }
-    toggleIsolatedListView: { listId: string }
 
     // Selected space management
     setSelectedSpace: { remoteListId: string } | { localListId: number } | null

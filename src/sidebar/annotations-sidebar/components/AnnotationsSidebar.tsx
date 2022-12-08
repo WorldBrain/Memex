@@ -86,7 +86,6 @@ export interface AnnotationsSidebarProps
     expandMyNotes: () => void
     expandSharedSpaces: () => void
     expandFollowedListNotes: (listId: string) => void
-    toggleIsolatedListView: (listId: string) => void
 
     onClickOutside: React.MouseEventHandler
     bindAnnotationFooterEventProps: (
