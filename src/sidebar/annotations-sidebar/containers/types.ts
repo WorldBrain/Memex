@@ -150,7 +150,6 @@ export interface SidebarContainerState
     // is selected, all operations default to use that selected space
     // except if explicity told otherwise.
     selectedSpace: SelectedSpaceState | null
-    selectedSpaceLoadState: TaskState
 
     annotationSharingAccess: AnnotationSharingAccess
 

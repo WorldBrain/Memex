@@ -127,10 +127,6 @@ export interface AnnotationsSidebarProps
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
 
-    // Space, list or collection currently selected to be shown as part
-    // of the isolated view or leaf page.
-    selectedSpace: SelectedSpaceState | null
-
     //postShareHook: (shareInfo) => void
     //postShareHook: (shareInfo) => void+
     setPopoutsActive: (popoutsOpen: boolean) => void
@@ -703,11 +699,24 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderAnnotationsEditableForSelectedSpace() {
-        if (this.props.selectedSpace == null) {
+        const { selectedSpace, followedLists } = this.props
+        if (selectedSpace == null) {
             this.throwNoSelectedSpaceError()
         }
+
+        if (selectedSpace.remoteId != null) {
+            if (
+                followedLists.byId[selectedSpace.remoteId]
+                    ?.annotationsLoadState === 'running'
+            ) {
+                return this.renderLoader()
+            }
+
+            return this.renderFollowedListNotes(selectedSpace.remoteId, true)
+        }
+
         const selectedSpaceAnnotations = this.props.annotations.filter(
-            ({ lists }) => lists.includes(this.props.selectedSpace.localId),
+            ({ lists }) => lists.includes(selectedSpace.localId),
         )
         return this.renderAnnotationsEditable(selectedSpaceAnnotations)
     }
@@ -1021,11 +1030,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <TopBarContainer onClick={() => this.props.onResetSpaceSelect()}>
                 <TooltipBox tooltipText="Back to all spaces">
-                    <Icon
-                        filePath={icons.arrowLeft}
-                        heightAndWidth="26px"
-                        onClick={(evt) => console.log('Clicked VIEW ALL', evt)}
-                    />
+                    <Icon filePath={icons.arrowLeft} heightAndWidth="26px" />
                 </TooltipBox>
                 View All --- Selected space: {listDetails.name} --- Descritpion:{' '}
                 {listDetails.description}

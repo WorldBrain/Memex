@@ -2537,8 +2537,17 @@ describe('SidebarContainerLogic', () => {
             const remoteListId = DATA.FOLLOWED_LISTS[0].id
             const expectedEvents = []
 
+            const remoteAnnotationIds = sidebar.state.followedLists.byId[
+                remoteListId
+            ].sharedAnnotationReferences.map((ref) => ref.id.toString())
+
             expect(sidebar.state.selectedSpace).toEqual(null)
             expect(emittedEvents).toEqual(expectedEvents)
+            expect(
+                sidebar.state.followedLists.byId[remoteListId]
+                    .annotationsLoadState,
+            ).toEqual('pristine')
+            expect(sidebar.state.followedAnnotations).toEqual({})
 
             await sidebar.processEvent('setSelectedSpace', {
                 remoteListId,
@@ -2546,21 +2555,36 @@ describe('SidebarContainerLogic', () => {
 
             expectedEvents.push(
                 {
-                    event: 'renderHighlights',
-                    args: {
-                        highlights: sidebar.state.annotations.filter(
-                            ({ lists }) => lists.includes(0),
-                        ),
-                    },
-                },
-                {
                     event: 'setSelectedSpace',
                     args: { localId: 0, remoteId: remoteListId },
+                },
+                {
+                    event: 'renderHighlights',
+                    args: { highlights: expect.any(Array) },
                 },
             )
             expect(sidebar.state.selectedSpace.localId).toEqual(0)
             expect(sidebar.state.selectedSpace.remoteId).toEqual(remoteListId)
             expect(emittedEvents).toEqual(expectedEvents)
+            expect(
+                sidebar.state.followedLists.byId[remoteListId]
+                    .annotationsLoadState,
+            ).toEqual('success')
+            expect(sidebar.state.followedAnnotations).toEqual(
+                expect.objectContaining({
+                    [DATA.SHARED_ANNOTATIONS[0].reference
+                        .id]: expect.objectContaining({
+                        id: DATA.SHARED_ANNOTATIONS[0].reference.id,
+                        body: DATA.SHARED_ANNOTATIONS[0].body,
+                        selector: DATA.SHARED_ANNOTATIONS[0].selector,
+                    }),
+                    [DATA.SHARED_ANNOTATIONS[1].reference
+                        .id]: expect.objectContaining({
+                        id: DATA.SHARED_ANNOTATIONS[1].reference.id,
+                        comment: DATA.SHARED_ANNOTATIONS[1].comment,
+                    }),
+                }),
+            )
 
             await sidebar.processEvent('setSelectedSpace', null)
             expectedEvents.push(
@@ -2576,6 +2600,10 @@ describe('SidebarContainerLogic', () => {
 
             expect(sidebar.state.selectedSpace).toEqual(null)
             expect(emittedEvents).toEqual(expectedEvents)
+            expect(
+                sidebar.state.followedLists.byId[remoteListId]
+                    .annotationsLoadState,
+            ).toEqual('success')
         })
 
         it('should be able to set isolated view mode for a specific local space', async ({

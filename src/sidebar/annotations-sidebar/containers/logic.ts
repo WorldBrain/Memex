@@ -195,7 +195,6 @@ export class SidebarContainerLogic extends UILogic<
             activeTagPickerAnnotationId: undefined,
             activeListPickerState: undefined,
 
-            selectedSpaceLoadState: 'pristine',
             selectedSpace: null,
 
             commentBox: { ...INIT_FORM_STATE },
@@ -1323,20 +1322,6 @@ export class SidebarContainerLogic extends UILogic<
                 },
             )
 
-            // TODO: Make this work (if needed)
-            // const areListsContributable = fromPairs(
-            //     await Promise.all(
-            //         followedLists.map(async (list) => {
-            //             const canWrite = await contentSharing.canWriteToSharedListRemoteId(
-            //                 {
-            //                     remoteId: list.id,
-            //                 },
-            //             )
-            //             return [list.id, canWrite]
-            //         }),
-            //     ),
-            // )
-
             this.emitMutation({
                 followedLists: {
                     allIds: {
@@ -1624,7 +1609,7 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    setSelectedSpace: EventHandler<'setSelectedSpace'> = ({
+    setSelectedSpace: EventHandler<'setSelectedSpace'> = async ({
         event,
         previousState,
     }) => {
@@ -1650,6 +1635,11 @@ export class SidebarContainerLogic extends UILogic<
                 }
             } else {
                 localListId = event.localListId
+                this.options.events.emit('renderHighlights', {
+                    highlights: previousState.annotations.filter(({ lists }) =>
+                        lists.includes(localListId),
+                    ),
+                })
             }
 
             mutation = {
@@ -1660,17 +1650,24 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 },
             }
-            this.options.events.emit('renderHighlights', {
-                highlights: previousState.annotations.filter(({ lists }) =>
-                    lists.includes(localListId),
-                ),
-            })
         }
 
         const nextState = this.withMutation(previousState, mutation)
         this.options.events.emit('setSelectedSpace', nextState.selectedSpace)
 
         this.emitMutation(mutation)
+
+        // If we're setting a remote list AND we haven't already loaded the remote notes for that list, load them
+        if (
+            nextState.selectedSpace?.remoteId != null &&
+            nextState.followedLists.byId[nextState.selectedSpace.remoteId]
+                ?.annotationsLoadState === 'pristine'
+        ) {
+            await this.processUIEvent('loadFollowedListNotes', {
+                previousState: nextState,
+                event: { listId: nextState.selectedSpace.remoteId },
+            })
+        }
     }
 
     setAnnotationShareModalShown: EventHandler<
