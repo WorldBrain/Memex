@@ -180,6 +180,8 @@ export class SidebarContainerLogic extends UILogic<
             followedAnnotations: {},
             users: {},
 
+            currentUserId: null,
+
             isWidthLocked: false,
             isLocked: false,
             pageUrl: this.options.pageUrl,
@@ -233,7 +235,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        const { pageUrl, annotationsCache } = this.options
+        const { pageUrl, annotationsCache, auth: authBG } = this.options
         annotationsCache.annotationChanges.addListener(
             'newStateIntent',
             this.annotationSubscription,
@@ -243,10 +245,14 @@ export class SidebarContainerLogic extends UILogic<
         this.annotationSubscription(annotationsCache.annotations)
 
         await loadInitial<SidebarContainerState>(this, async () => {
+            const currentUser = await authBG.getCurrentUser()
             const areTagsMigrated = await this.syncSettings.extension.get(
                 'areTagsMigratedToSpaces',
             )
-            this.emitMutation({ shouldShowTagsUIs: { $set: !areTagsMigrated } })
+            this.emitMutation({
+                shouldShowTagsUIs: { $set: !areTagsMigrated },
+                currentUserId: { $set: currentUser?.id ?? null },
+            })
 
             // If `pageUrl` prop passed down, load search results on init, else just wait
             if (pageUrl != null) {
@@ -323,12 +329,16 @@ export class SidebarContainerLogic extends UILogic<
             setDisplayNameModalShown?.(false)
             this.emitMutation({
                 annotationSharingAccess: { $set: 'sharing-allowed' },
+                currentUserId: { $set: user.id },
             })
             return true
         }
 
         setLoginModalShown?.(true)
-        this.emitMutation({ showLoginModal: { $set: true } })
+        this.emitMutation({
+            showLoginModal: { $set: true },
+            currentUserId: { $set: null },
+        })
         return false
     }
 
@@ -1519,13 +1529,12 @@ export class SidebarContainerLogic extends UILogic<
                 },
             }),
             async () => {
-                const [currentUser, sharedAnnotations] = await Promise.all([
-                    authBG.getCurrentUser(),
-                    annotations.getSharedAnnotations({
+                const sharedAnnotations = await annotations.getSharedAnnotations(
+                    {
                         sharedAnnotationReferences,
                         withCreatorData: true,
-                    }),
-                ])
+                    },
+                )
 
                 this.options.events?.emit('renderHighlights', {
                     highlights: sharedAnnotations
@@ -1551,7 +1560,7 @@ export class SidebarContainerLogic extends UILogic<
                                     creatorId: annot.creatorReference.id,
                                     localId:
                                         annot.creatorReference.id ===
-                                        currentUser.id
+                                        previousState.currentUserId
                                             ? annotationsCache.getAnnotationByRemoteId(
                                                   annot.reference.id,
                                               )?.url ?? null

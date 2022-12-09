@@ -1019,21 +1019,71 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderSelectedSpaceTopBar() {
-        if (!this.props.selectedSpace) {
+        const { selectedSpace } = this.props
+        if (!selectedSpace) {
             this.throwNoSelectedSpaceError()
         }
 
-        const listDetails = this.props.getListDetailsById(
-            this.props.selectedSpace.localId,
-        )
+        let totalAnnotsCountJSX: JSX.Element
+        let othersAnnotsCountJSX: JSX.Element = null
+
+        // TODO: clean this state derivation mess up
+        if (selectedSpace.remoteId != null) {
+            const {
+                sharedAnnotationReferences,
+                annotationsLoadState,
+            } = this.props.followedLists.byId[selectedSpace.remoteId]
+            const totalAnnotsCount = sharedAnnotationReferences.length
+            let othersAnnotsCount = 0
+            for (const { id } of sharedAnnotationReferences) {
+                if (
+                    this.props.followedAnnotations[id]?.creatorId !==
+                    this.props.currentUserId
+                ) {
+                    othersAnnotsCount++
+                }
+            }
+            totalAnnotsCountJSX =
+                annotationsLoadState === 'running' ? (
+                    <LoadingIndicatorStyled />
+                ) : (
+                    <span style={{ color: 'white' }}>
+                        Total annots count: {totalAnnotsCount}
+                    </span>
+                )
+            othersAnnotsCountJSX =
+                annotationsLoadState === 'running' ? (
+                    <LoadingIndicatorStyled />
+                ) : (
+                    <span style={{ color: 'white' }}>
+                        Others annots count: {othersAnnotsCount}
+                    </span>
+                )
+        } else {
+            const totalAnnotsCount = this.props.annotations.filter((annot) =>
+                annot.lists.includes(selectedSpace.localId),
+            ).length
+            totalAnnotsCountJSX = (
+                <span style={{ color: 'white' }}>
+                    Total annots count: {totalAnnotsCount}
+                </span>
+            )
+        }
+
+        const listDetails = this.props.getListDetailsById(selectedSpace.localId)
 
         return (
             <TopBarContainer onClick={() => this.props.onResetSpaceSelect()}>
                 <TooltipBox tooltipText="Back to all spaces">
                     <Icon filePath={icons.arrowLeft} heightAndWidth="26px" />
                 </TooltipBox>
-                View All --- Selected space: {listDetails.name} --- Descritpion:{' '}
+                <span style={{ color: 'white' }}>
+                    View All --- Selected space: {listDetails.name} ---
+                    Descritpion:{' '}
+                </span>
                 {listDetails.description}
+                {totalAnnotsCountJSX}
+                {othersAnnotsCountJSX}
             </TopBarContainer>
         )
     }

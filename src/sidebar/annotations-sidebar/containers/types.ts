@@ -141,6 +141,8 @@ export interface SidebarContainerState
     isLocked: boolean
     isWidthLocked: boolean
 
+    currentUserId: string | null
+
     activeTab: SidebarTab
 
     sidebarWidth?: string
