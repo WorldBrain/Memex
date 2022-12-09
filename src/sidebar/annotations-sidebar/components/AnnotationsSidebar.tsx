@@ -41,6 +41,7 @@ import { getLocalStorage } from 'src/util/storage'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
@@ -551,9 +552,26 @@ export class AnnotationsSidebar extends React.Component<
 
     private renderSharedNotesByList() {
         const { followedLists } = this.props
-
         const sharedNotesByList = followedLists.allIds.map((remoteListId) => {
             const listData = followedLists.byId[remoteListId]
+
+            const sharedAnnotationReferences =
+                listData.sharedAnnotationReferences
+
+            let othersAnnotsCount = 0
+            for (const { id } of sharedAnnotationReferences) {
+                console.log(this.props.followedAnnotations[id]?.creatorId)
+                console.log(this.props.currentUserId)
+
+                if (
+                    this.props.followedAnnotations[id]?.creatorId !==
+                    this.props.currentUserId
+                ) {
+                    console.log('true')
+                    othersAnnotsCount++
+                }
+            }
+
             return (
                 <FollowedListNotesContainer
                     bottom={listData.isExpanded ? '20px' : '0px'}
@@ -563,26 +581,29 @@ export class AnnotationsSidebar extends React.Component<
                     {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
                         onClick={() =>
-                            this.props.expandFollowedListNotes(remoteListId)
+                            this.props.onRemoteSpaceSelect(remoteListId)
                         }
                         title={listData.name}
                     >
                         <FollowedListTitleContainer>
-                            {/* <Icon
+                            <Icon
                                 icon={icons.arrowRight}
-                                heightAndWidth="22px"
+                                heightAndWidth="20px"
                                 rotation={listData.isExpanded && 90}
-                                onClick={() =>
-                                    this.props.expandFollowedListNotes(listId)
-                                }
-                            /> */}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    this.props.expandFollowedListNotes(
+                                        remoteListId,
+                                    )
+                                }}
+                            />
                             <FollowedListTitle>
                                 {listData.name}
                             </FollowedListTitle>
                         </FollowedListTitleContainer>
                         <ButtonContainer>
                             <ActionButtons>
-                                <TooltipBox
+                                {/* <TooltipBox
                                     tooltipText="Open space in isolated view"
                                     placement="left"
                                 >
@@ -596,24 +617,44 @@ export class AnnotationsSidebar extends React.Component<
                                             )
                                         }}
                                     />
-                                </TooltipBox>
+                                </TooltipBox> */}
                                 <TooltipBox
                                     tooltipText="Go to Space"
                                     placement="left"
                                 >
                                     <Icon
                                         icon="goTo"
-                                        height="16px"
-                                        onClick={() =>
+                                        height="20px"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
                                             this.props.openCollectionPage(
                                                 remoteListId,
                                             )
-                                        }
+                                        }}
                                     />
                                 </TooltipBox>
                             </ActionButtons>
                             <FollowedListNoteCount active left="5px">
-                                {listData.sharedAnnotationReferences.length}
+                                <TooltipBox
+                                    tooltipText={'Annotations by Others'}
+                                    placement={'bottom'}
+                                >
+                                    <OthersAnnotationCounter>
+                                        {othersAnnotsCount}
+                                    </OthersAnnotationCounter>
+                                </TooltipBox>
+                                <TooltipBox
+                                    tooltipText={'Total Annotations'}
+                                    placement={'bottom'}
+                                >
+                                    <TotalAnnotationsCounter>
+                                        /
+                                        {
+                                            listData.sharedAnnotationReferences
+                                                .length
+                                        }
+                                    </TotalAnnotationsCounter>
+                                </TooltipBox>
                             </FollowedListNoteCount>
                         </ButtonContainer>
                     </FollowedListRow>
@@ -1074,19 +1115,110 @@ export class AnnotationsSidebar extends React.Component<
         const listDetails = this.props.getListDetailsById(selectedSpace.localId)
 
         return (
-            <TopBarContainer onClick={() => this.props.onResetSpaceSelect()}>
-                <TooltipBox tooltipText="Back to all spaces">
-                    <Icon filePath={icons.arrowLeft} heightAndWidth="26px" />
-                </TooltipBox>
-                <span style={{ color: 'white' }}>
-                    View All --- Selected space: {listDetails.name} ---
-                    Descritpion:{' '}
-                </span>
-                {listDetails.description}
-                {totalAnnotsCountJSX}
-                {othersAnnotsCountJSX}
-            </TopBarContainer>
+            <IsolatedViewHeaderContainer>
+                <IsolatedViewHeaderTopBar>
+                    <PrimaryAction
+                        icon="arrowLeft"
+                        type="tertiary"
+                        size="small"
+                        label="All Spaces"
+                        onClick={() => this.props.onResetSpaceSelect()}
+                        fontColor={'greyScale8'}
+                        iconColor={'greyScale8'}
+                    />
+                    {this.renderPermissionStatusButton()}
+                </IsolatedViewHeaderTopBar>
+                <SpaceTitle>{listDetails.name}</SpaceTitle>
+                <SpaceDescription>{listDetails.description}</SpaceDescription>
+
+                {/* {totalAnnotsCountJSX}
+                {othersAnnotsCountJSX} */}
+            </IsolatedViewHeaderContainer>
         )
+    }
+
+    private renderPermissionStatusButton() {
+        if (
+            this.props.selectedSpace.remoteId &&
+            this.props.selectedSpace.localId
+        ) {
+            return (
+                <TooltipBox
+                    tooltipText={
+                        <span>
+                            You can add pages & <br /> annotations to this Space
+                        </span>
+                    }
+                    placement={'bottom-end'}
+                >
+                    <PermissionInfoButton
+                        label="Contributor"
+                        type="secondary"
+                        size="small"
+                        icon="plus"
+                    >
+                        <Icon
+                            filePath="peopleFine"
+                            color="greyScale8"
+                            heightAndWidth="20px"
+                            hoverOff
+                        />
+                        Contributor
+                    </PermissionInfoButton>
+                </TooltipBox>
+            )
+        }
+
+        if (
+            this.props.selectedSpace.remoteId &&
+            !this.props.selectedSpace.localId
+        ) {
+            return (
+                <PermissionInfoButton
+                    label="Follower"
+                    type="secondary"
+                    size="small"
+                    icon="plus"
+                >
+                    <Icon
+                        filePath="plusIcon"
+                        color="greyScale8"
+                        heightAndWidth="20px"
+                        hoverOff
+                    />
+                    Follower
+                </PermissionInfoButton>
+            )
+        }
+
+        if (
+            !this.props.selectedSpace.remoteId &&
+            !this.props.selectedSpace.localId
+        ) {
+            return undefined
+        }
+
+        if (
+            this.props.selectedSpace.remoteId &&
+            this.props.selectedSpace.localId
+        ) {
+            return (
+                <PermissionInfoButton
+                    label="Owner"
+                    type="secondary"
+                    size="small"
+                    icon="plus"
+                >
+                    <Icon
+                        filePath="personFine"
+                        color="greyScale8"
+                        heightAndWidth="20px"
+                        hoverOff
+                    />
+                    Creator
+                </PermissionInfoButton>
+            )
+        }
     }
 
     private renderSortingMenuDropDown() {
@@ -1230,6 +1362,45 @@ export default AnnotationsSidebar
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
 
+const OthersAnnotationCounter = styled.div`
+    display: flex;
+    align-items: flex-end;
+    line-height: 19px;
+`
+const TotalAnnotationsCounter = styled.div`
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.greyScale8};
+    display: flex;
+    align-items: flex-end;
+`
+
+const PermissionInfoButton = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 5px;
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.greyScale8};
+    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-radius: 5px;
+    padding: 2px 8px;
+`
+
+const SpaceTitle = styled.div`
+    font-size: 22px;
+    font-weight: 500;
+    width: fill-available;
+    color: ${(props) => props.theme.colors.normalText};
+    letter-spacing: 1px;
+`
+
+const SpaceDescription = styled(Markdown)`
+    font-size: 14px;
+    font-weight: 300;
+    width: fill-available;
+    color: ${(props) => props.theme.colors.greyScale8};
+    letter-spacing: 1px;
+`
+
 const TopAreaContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -1283,6 +1454,26 @@ const TopBar = styled.div`
     z-index: 11300;
     padding: 10px 0px 10px 0px;
     border-bottom: 1px solid ${(props) => props.theme.colors.darkhover};
+`
+
+const IsolatedViewHeaderContainer = styled.div`
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    grid-gap: 10px;
+    flex-direction: column;
+    margin-bottom: 30px;
+    padding: 0 0 0 10px;
+    z-index: 20;
+`
+
+const IsolatedViewHeaderTopBar = styled.div`
+    display: flex;
+    align-items: center;
+    height: 30px;
+    margin: 10px 0px 0px -10px;
+    justify-content: space-between;
+    width: fill-available;
 `
 
 const TopBarContainer = styled.div`
@@ -1451,6 +1642,7 @@ const FollowedListRow = styled(Margin)<{ context: string }>`
     height: 40px;
     padding: 5px 15px 5px 10px;
     margin: 0 2px;
+    z-index: 20;
 
     &:first-child {
         margin-top: 5px;
@@ -1554,9 +1746,11 @@ const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
 
 const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
     font-weight: bold;
-    font-size: 14px;
+    font-size: 16px;
     display: flex;
     color: ${(props) => props.theme.colors.normalText};
+    grid-gap: 3px;
+    align-items: flex-end;
 `
 
 const CloseIconStyled = styled.div<{ background: string }>`
