@@ -146,25 +146,7 @@ export class AuthBackground {
             },
         }
 
-        const awaitAuth = this.authService.waitForAuthReady.bind(
-            this.authService,
-        )
-        const getCurrentUser = this.authService.getCurrentUser.bind(
-            this.authService,
-        )
-        const generateLoginToken = this.authService.generateLoginToken.bind(
-            this.authService,
-        )
-        const loginWithToken = this.authService.loginWithToken.bind(
-            this.authService,
-        )
-        listenToWebAppMessage({
-            awaitAuth,
-            isLoggedIn: () => getCurrentUser().then((val) => !!val),
-            generateLoginToken: () =>
-                generateLoginToken().then((obj) => obj.token),
-            loginWithToken,
-        })
+        listenToWebAppMessage(this.authService)
     }
 
     refreshUserInfo = async () => {
