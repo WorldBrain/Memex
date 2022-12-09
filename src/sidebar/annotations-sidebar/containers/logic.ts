@@ -1411,38 +1411,40 @@ export class SidebarContainerLogic extends UILogic<
             areMyAnnotationsExpanded: { $set: true },
         })
 
-        this.options.events?.emit('renderHighlights', {
-            highlights: previousState.annotations
-                .filter((annotation) => annotation?.selector != null)
-                .map((annotation) => ({
-                    url: annotation.url,
-                    selector: annotation.selector,
-                })),
-        })
+        // Don't re-render highlights on the page if in selected-space mode
+        if (previousState.selectedSpace == null) {
+            this.options.events?.emit('renderHighlights', {
+                highlights: previousState.annotations
+                    .filter((annotation) => annotation?.selector != null)
+                    .map((annotation) => ({
+                        url: annotation.url,
+                        selector: annotation.selector,
+                    })),
+            })
+        }
     }
 
     expandSharedSpaces: EventHandler<'expandSharedSpaces'> = async ({
         previousState,
     }) => {
-        const expandedSharedAnnotationReferences = previousState.followedLists.allIds
-            .filter((id) => previousState.followedLists.byId[id].isExpanded)
-            .map(
-                (id) =>
-                    previousState.followedLists.byId[id]
-                        .sharedAnnotationReferences,
-            )
-        const sharedAnnotIds = expandedSharedAnnotationReferences
-            .flat()
-            .map((ref) => ref.id as string)
-
         this.emitMutation({
             isFeedShown: { $set: false },
             isExpandedSharedSpaces: { $set: true },
             areMyAnnotationsExpanded: { $set: false },
         })
 
-        this.options.events?.emit('renderHighlights', {
-            highlights: sharedAnnotIds
+        // Don't re-render highlights on the page if in selected-space mode
+        if (previousState.selectedSpace == null) {
+            // TODO: Can we simplify this crazy chain?
+            const highlights = previousState.followedLists.allIds
+                .filter((id) => previousState.followedLists.byId[id].isExpanded)
+                .map(
+                    (id) =>
+                        previousState.followedLists.byId[id]
+                            .sharedAnnotationReferences,
+                )
+                .flat()
+                .map((ref) => ref.id.toString())
                 .filter(
                     (id) =>
                         previousState.followedAnnotations[id]?.selector != null,
@@ -1450,8 +1452,10 @@ export class SidebarContainerLogic extends UILogic<
                 .map((id) => ({
                     url: id,
                     selector: previousState.followedAnnotations[id].selector,
-                })),
-        })
+                }))
+
+            this.options.events?.emit('renderHighlights', { highlights })
+        }
     }
 
     expandFollowedListNotes: EventHandler<'expandFollowedListNotes'> = async ({
@@ -1644,6 +1648,10 @@ export class SidebarContainerLogic extends UILogic<
         let mutation: UIMutation<SidebarContainerState>
         if (event == null) {
             mutation = { selectedSpace: { $set: null } }
+
+            this.options.events.emit('renderHighlights', {
+                highlights: previousState.annotations,
+            })
         } else {
             let remoteListId: string
             let localListId: number
@@ -1669,6 +1677,11 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 },
             }
+            this.options.events.emit('renderHighlights', {
+                highlights: previousState.annotations.filter(({ lists }) =>
+                    lists.includes(localListId),
+                ),
+            })
         }
 
         const nextState = this.withMutation(previousState, mutation)

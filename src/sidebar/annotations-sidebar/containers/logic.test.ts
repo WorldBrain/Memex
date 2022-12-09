@@ -2535,29 +2535,47 @@ describe('SidebarContainerLogic', () => {
                 withAuth: true,
             })
             const remoteListId = DATA.FOLLOWED_LISTS[0].id
-            const expectedEvent = {
-                event: 'setSelectedSpace',
-                args: { localId: 0, remoteId: remoteListId },
-            }
+            const expectedEvents = []
 
             expect(sidebar.state.selectedSpace).toEqual(null)
-            expect(emittedEvents).toEqual([])
+            expect(emittedEvents).toEqual(expectedEvents)
 
             await sidebar.processEvent('setSelectedSpace', {
                 remoteListId,
             })
 
+            expectedEvents.push(
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: sidebar.state.annotations.filter(
+                            ({ lists }) => lists.includes(0),
+                        ),
+                    },
+                },
+                {
+                    event: 'setSelectedSpace',
+                    args: { localId: 0, remoteId: remoteListId },
+                },
+            )
             expect(sidebar.state.selectedSpace.localId).toEqual(0)
             expect(sidebar.state.selectedSpace.remoteId).toEqual(remoteListId)
-            expect(emittedEvents).toEqual([expectedEvent])
+            expect(emittedEvents).toEqual(expectedEvents)
 
             await sidebar.processEvent('setSelectedSpace', null)
+            expectedEvents.push(
+                {
+                    event: 'renderHighlights',
+                    args: { highlights: sidebar.state.annotations },
+                },
+                {
+                    event: 'setSelectedSpace',
+                    args: null,
+                },
+            )
 
             expect(sidebar.state.selectedSpace).toEqual(null)
-            expect(emittedEvents).toEqual([
-                expectedEvent,
-                { event: 'setSelectedSpace', args: null },
-            ])
+            expect(emittedEvents).toEqual(expectedEvents)
         })
 
         it('should be able to set isolated view mode for a specific local space', async ({
@@ -2569,29 +2587,47 @@ describe('SidebarContainerLogic', () => {
                 withAuth: true,
             })
             const localListId = 0
-            const expectedEvent = {
-                event: 'setSelectedSpace',
-                args: { localId: 0, remoteId: null },
-            }
+            const expectedEvents = []
 
             expect(sidebar.state.selectedSpace).toEqual(null)
-            expect(emittedEvents).toEqual([])
+            expect(emittedEvents).toEqual(expectedEvents)
 
             await sidebar.processEvent('setSelectedSpace', {
                 localListId,
             })
 
+            expectedEvents.push(
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: sidebar.state.annotations.filter(
+                            ({ lists }) => lists.includes(localListId),
+                        ),
+                    },
+                },
+                {
+                    event: 'setSelectedSpace',
+                    args: { localId: 0, remoteId: null },
+                },
+            )
             expect(sidebar.state.selectedSpace.localId).toEqual(0)
             expect(sidebar.state.selectedSpace.remoteId).toEqual(null)
-            expect(emittedEvents).toEqual([expectedEvent])
+            expect(emittedEvents).toEqual(expectedEvents)
 
             await sidebar.processEvent('setSelectedSpace', null)
 
+            expectedEvents.push(
+                {
+                    event: 'renderHighlights',
+                    args: { highlights: sidebar.state.annotations },
+                },
+                {
+                    event: 'setSelectedSpace',
+                    args: null,
+                },
+            )
             expect(sidebar.state.selectedSpace).toEqual(null)
-            expect(emittedEvents).toEqual([
-                expectedEvent,
-                { event: 'setSelectedSpace', args: null },
-            ])
+            expect(emittedEvents).toEqual(expectedEvents)
         })
 
         it('should be able to set notes type + trigger followed list load', async ({
@@ -2615,7 +2651,7 @@ describe('SidebarContainerLogic', () => {
                         {
                             ...list,
                             isExpanded: false,
-                            isContributable: false,
+                            isContributable: true,
                             annotationsLoadState: 'pristine',
                             conversationsLoadState: 'pristine',
                             activeCopyPasterAnnotationId: undefined,
