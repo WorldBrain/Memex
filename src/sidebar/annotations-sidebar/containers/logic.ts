@@ -44,6 +44,7 @@ import { resolvablePromise } from 'src/util/promises'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { SharedAnnotationList } from 'src/custom-lists/background/types'
 import { toInteger } from 'lodash'
+import type { Highlight } from 'src/highlighting/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -167,9 +168,8 @@ export class SidebarContainerLogic extends UILogic<
         return {
             ...annotationConversationInitialState(),
 
-            areMyAnnotationsExpanded: true,
-            isExpandedSharedSpaces: false,
-            isFeedShown: false,
+            activeTab: 'annotations',
+
             loadState: 'pristine',
             noteCreateState: 'pristine',
             annotationsLoadState: 'pristine',
@@ -1394,49 +1394,30 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    expandFeed: EventHandler<'expandFeed'> = async ({}) => {
-        this.emitMutation({
-            isFeedShown: { $set: true },
-            isExpandedSharedSpaces: { $set: false },
-            areMyAnnotationsExpanded: { $set: false },
-        })
-    }
-
-    expandMyNotes: EventHandler<'expandMyNotes'> = async ({
+    setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
+        event,
         previousState,
     }) => {
         this.emitMutation({
-            isFeedShown: { $set: false },
-            isExpandedSharedSpaces: { $set: false },
-            areMyAnnotationsExpanded: { $set: true },
+            activeTab: { $set: event.tab },
         })
 
-        // Don't re-render highlights on the page if in selected-space mode
-        if (previousState.selectedSpace == null) {
-            this.options.events?.emit('renderHighlights', {
-                highlights: previousState.annotations
-                    .filter((annotation) => annotation?.selector != null)
-                    .map((annotation) => ({
-                        url: annotation.url,
-                        selector: annotation.selector,
-                    })),
-            })
+        // Don't attempt to re-render highlights on the page if in selected-space mode
+        if (previousState.selectedSpace != null || event.tab === 'feed') {
+            return
         }
-    }
 
-    expandSharedSpaces: EventHandler<'expandSharedSpaces'> = async ({
-        previousState,
-    }) => {
-        this.emitMutation({
-            isFeedShown: { $set: false },
-            isExpandedSharedSpaces: { $set: true },
-            areMyAnnotationsExpanded: { $set: false },
-        })
-
-        // Don't re-render highlights on the page if in selected-space mode
-        if (previousState.selectedSpace == null) {
+        let highlights: Highlight[]
+        if (event.tab === 'annotations') {
+            highlights = previousState.annotations
+                .filter((annotation) => annotation?.selector != null)
+                .map((annotation) => ({
+                    url: annotation.url,
+                    selector: annotation.selector,
+                }))
+        } else if (event.tab === 'spaces') {
             // TODO: Can we simplify this crazy chain?
-            const highlights = previousState.followedLists.allIds
+            highlights = previousState.followedLists.allIds
                 .filter((id) => previousState.followedLists.byId[id].isExpanded)
                 .map(
                     (id) =>
@@ -1453,7 +1434,9 @@ export class SidebarContainerLogic extends UILogic<
                     url: id,
                     selector: previousState.followedAnnotations[id].selector,
                 }))
+        }
 
+        if (highlights != null) {
             this.options.events?.emit('renderHighlights', { highlights })
         }
     }

@@ -98,6 +98,8 @@ export interface FollowedListAnnotation {
     creatorId: string
 }
 
+export type SidebarTab = 'annotations' | 'spaces' | 'feed'
+
 export type ListPickerShowState =
     | { annotationId: string; position: 'footer' | 'lists-bar' }
     | undefined
@@ -139,10 +141,7 @@ export interface SidebarContainerState
     isLocked: boolean
     isWidthLocked: boolean
 
-    // TODO: unify these flag states into a single one (they're all mutually exclusive)
-    areMyAnnotationsExpanded: boolean
-    isExpandedSharedSpaces: boolean
-    isFeedShown: boolean
+    activeTab: SidebarTab
 
     sidebarWidth?: string
 
@@ -218,10 +217,7 @@ interface SidebarEvents {
     setPopoutsActive: boolean
 
     sortAnnotations: { sortingFn: AnnotationsSorter }
-
-    expandFeed: null
-    expandMyNotes: null
-    expandSharedSpaces: null
+    setActiveSidebarTab: { tab: SidebarTab }
 
     // Adding a new page comment
     addNewPageComment: { comment?: string; tags?: string[] }

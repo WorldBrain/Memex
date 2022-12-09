@@ -379,10 +379,6 @@ export class AnnotationsCache implements AnnotationsCacheInterface {
         const matchingLocalId = knownLocalIds.find(
             (localId) => this.listData[localId].remoteId === remoteId,
         )
-        console.debug('Found localListId for remoteListId', {
-            localListId: matchingLocalId,
-            remoteListId: remoteId,
-        })
         return matchingLocalId ?? null
     }
 

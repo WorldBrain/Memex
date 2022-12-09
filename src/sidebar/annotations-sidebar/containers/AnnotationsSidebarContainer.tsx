@@ -1082,15 +1082,10 @@ export class AnnotationsSidebarContainer<
                             renderListsPickerForAnnotation={
                                 this.renderListPickerForAnnotation
                             }
-                            expandMyNotes={() =>
-                                this.processEvent('expandMyNotes', null)
-                            }
-                            expandFeed={() =>
-                                this.processEvent('expandFeed', null)
-                            }
-                            expandSharedSpaces={() =>
-                                this.processEvent('expandSharedSpaces', null)
-                            }
+                            setActiveTab={(tab) => (event) =>
+                                this.processEvent('setActiveSidebarTab', {
+                                    tab,
+                                })}
                             expandFollowedListNotes={(listId) =>
                                 this.processEvent('expandFollowedListNotes', {
                                     listId,

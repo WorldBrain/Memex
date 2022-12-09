@@ -28,7 +28,7 @@ import {
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
 import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
-import type { SidebarContainerState } from '../containers/types'
+import type { SidebarContainerState, SidebarTab } from '../containers/types'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { SortingDropdownMenuBtn } from '../components/SortingDropdownMenu'
@@ -82,9 +82,7 @@ export interface AnnotationsSidebarProps
         referenceElement?: React.RefObject<HTMLElement>,
     ) => JSX.Element
 
-    expandFeed: () => void
-    expandMyNotes: () => void
-    expandSharedSpaces: () => void
+    setActiveTab: (tab: SidebarTab) => React.MouseEventHandler
     expandFollowedListNotes: (listId: string) => void
 
     onClickOutside: React.MouseEventHandler
@@ -101,7 +99,6 @@ export interface AnnotationsSidebarProps
     annotationCreateProps: AnnotationCreateProps
 
     sharingAccess: AnnotationSharingAccess
-    isFeedShown: boolean
     isSearchLoading: boolean
     isAnnotationCreateShown: boolean
     annotations: Annotation[]
@@ -148,7 +145,6 @@ interface AnnotationsSidebarState {
     showAllNotesShareMenu: boolean
     showPageSpacePicker: boolean
     showSortDropDown: boolean
-    isFeedShown: boolean
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -172,7 +168,6 @@ export class AnnotationsSidebar extends React.Component<
         showAllNotesShareMenu: false,
         showPageSpacePicker: false,
         showSortDropDown: false,
-        isFeedShown: false,
     }
 
     async componentDidMount() {
@@ -631,7 +626,7 @@ export class AnnotationsSidebar extends React.Component<
         })
         return (
             <SectionTitleContainer>
-                {this.props.isExpandedSharedSpaces &&
+                {this.props.activeTab === 'spaces' &&
                     (this.props.followedListLoadState === 'running' ? (
                         this.renderLoader()
                     ) : this.props.followedListLoadState === 'error' ? (
@@ -718,7 +713,7 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderResultsBody() {
-        if (this.props.isFeedShown) {
+        if (this.props.activeTab === 'feed') {
             return this.renderFeed()
         }
 
@@ -726,7 +721,10 @@ export class AnnotationsSidebar extends React.Component<
             return this.renderLoader()
         }
 
-        if (this.props.selectedSpace && !this.props.areMyAnnotationsExpanded) {
+        if (
+            this.props.selectedSpace &&
+            this.props.activeTab !== 'annotations'
+        ) {
             return (
                 <>
                     {this.renderSelectedSpaceTopBar()}
@@ -739,7 +737,7 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <React.Fragment>
-                {this.props.areMyAnnotationsExpanded ? (
+                {this.props.activeTab === 'annotations' ? (
                     <AnnotationsSectionStyled>
                         {this.renderAnnotationsEditable(this.props.annotations)}
                     </AnnotationsSectionStyled>
@@ -898,9 +896,9 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedListNotesContainer
-                bottom={this.props.areMyAnnotationsExpanded ? '20px' : '0px'}
+                bottom={this.props.activeTab === 'annotations' ? '20px' : '0px'}
             >
-                {(this.props.areMyAnnotationsExpanded ||
+                {(this.props.activeTab === 'annotations' ||
                     this.props.selectedSpace) && (
                     <>
                         <TopAreaContainer>
@@ -941,16 +939,16 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <TopBarContainer>
                 <PrimaryAction
-                    onClick={this.props.expandMyNotes}
+                    onClick={this.props.setActiveTab('annotations')}
                     label={'My Annotations'}
-                    active={this.props.areMyAnnotationsExpanded}
+                    active={this.props.activeTab === 'annotations'}
                     type={'tertiary'}
                     size={'medium'}
                 />
                 <PrimaryAction
-                    onClick={this.props.expandSharedSpaces}
+                    onClick={this.props.setActiveTab('spaces')}
                     label={'Spaces'}
-                    active={this.props.isExpandedSharedSpaces}
+                    active={this.props.activeTab === 'spaces'}
                     type={'tertiary'}
                     size={'medium'}
                     iconPosition={'right'}
@@ -978,9 +976,9 @@ export class AnnotationsSidebar extends React.Component<
                     }
                 />
                 <PrimaryAction
-                    onClick={() => this.props.expandFeed()}
+                    onClick={this.props.setActiveTab('feed')}
                     label={'Feed'}
-                    active={this.props.isFeedShown}
+                    active={this.props.activeTab === 'feed'}
                     type={'tertiary'}
                     size={'medium'}
                     iconPosition={'right'}

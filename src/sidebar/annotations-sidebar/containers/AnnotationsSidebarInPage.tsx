@@ -190,7 +190,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 sharingAccess: event.annotationSharingAccess,
             })
         } else if (event.action === 'show_shared_spaces') {
-            await this.processEvent('expandSharedSpaces', null)
+            await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
         }
 
         this.forceUpdate()

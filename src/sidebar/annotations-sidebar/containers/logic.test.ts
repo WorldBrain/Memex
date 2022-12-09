@@ -2630,6 +2630,67 @@ describe('SidebarContainerLogic', () => {
             expect(emittedEvents).toEqual(expectedEvents)
         })
 
+        it('should be able to switch sidebar tabs', async ({ device }) => {
+            await setupFollowedListsTestData(device)
+            const { sidebar, emittedEvents } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+
+            const expectedEvents = []
+
+            expect(sidebar.state.activeTab).toEqual('annotations')
+            expect(emittedEvents).toEqual(expectedEvents)
+
+            await sidebar.processEvent('setActiveSidebarTab', { tab: 'feed' })
+            expect(sidebar.state.activeTab).toEqual('feed')
+            expect(emittedEvents).toEqual(expectedEvents)
+
+            await sidebar.processEvent('setActiveSidebarTab', {
+                tab: 'annotations',
+            })
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: { highlights: expect.any(Array) },
+            })
+            expect(sidebar.state.activeTab).toEqual('annotations')
+            expect(emittedEvents).toEqual(expectedEvents)
+
+            await sidebar.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: { highlights: expect.any(Array) },
+            })
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(emittedEvents).toEqual(expectedEvents)
+
+            // Now go into selected space mode, which should stop the `renderHighlights` events from emitting
+            sidebar.processMutation({ selectedSpace: { $set: { localId: 0 } } })
+
+            await sidebar.processEvent('setActiveSidebarTab', {
+                tab: 'annotations',
+            })
+            expect(sidebar.state.activeTab).toEqual('annotations')
+            expect(emittedEvents).toEqual(expectedEvents)
+
+            await sidebar.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(emittedEvents).toEqual(expectedEvents)
+
+            // Now get back out of selected space mode
+            sidebar.processMutation({ selectedSpace: { $set: null } })
+
+            await sidebar.processEvent('setActiveSidebarTab', {
+                tab: 'annotations',
+            })
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: { highlights: expect.any(Array) },
+            })
+            expect(sidebar.state.activeTab).toEqual('annotations')
+            expect(emittedEvents).toEqual(expectedEvents)
+        })
+
         it('should be able to set notes type + trigger followed list load', async ({
             device,
         }) => {
