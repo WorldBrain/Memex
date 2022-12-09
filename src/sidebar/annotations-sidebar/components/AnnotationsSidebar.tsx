@@ -373,7 +373,7 @@ export class AnnotationsSidebar extends React.Component<
     ) {
         const list = this.props.followedLists.byId[listId]
         if (
-            (!list.isExpanded || list.annotationsLoadState === 'pristine') &&
+            (!list?.isExpanded || list.annotationsLoadState === 'pristine') &&
             !forceRendering
         ) {
             console.debug(
@@ -384,7 +384,7 @@ export class AnnotationsSidebar extends React.Component<
             return null
         }
 
-        if (list.annotationsLoadState === 'running') {
+        if (!list || list.annotationsLoadState === 'running') {
             return this.renderLoader()
         }
 
@@ -512,6 +512,7 @@ export class AnnotationsSidebar extends React.Component<
                                 onHighlightClick={this.props.setActiveAnnotationUrl(
                                     data.id,
                                 )}
+                                onListClick={this.props.onLocalSpaceSelect}
                                 isClickable={
                                     this.props.theme.canClickAnnotations &&
                                     data.body?.length > 0

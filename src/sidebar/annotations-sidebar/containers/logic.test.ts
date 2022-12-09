@@ -2537,10 +2537,7 @@ describe('SidebarContainerLogic', () => {
             const remoteListId = DATA.FOLLOWED_LISTS[0].id
             const expectedEvents = []
 
-            const remoteAnnotationIds = sidebar.state.followedLists.byId[
-                remoteListId
-            ].sharedAnnotationReferences.map((ref) => ref.id.toString())
-
+            expect(sidebar.state.activeTab).toEqual('annotations')
             expect(sidebar.state.selectedSpace).toEqual(null)
             expect(emittedEvents).toEqual(expectedEvents)
             expect(
@@ -2563,6 +2560,7 @@ describe('SidebarContainerLogic', () => {
                     args: { highlights: expect.any(Array) },
                 },
             )
+            expect(sidebar.state.activeTab).toEqual('spaces')
             expect(sidebar.state.selectedSpace.localId).toEqual(0)
             expect(sidebar.state.selectedSpace.remoteId).toEqual(remoteListId)
             expect(emittedEvents).toEqual(expectedEvents)
@@ -2598,6 +2596,7 @@ describe('SidebarContainerLogic', () => {
                 },
             )
 
+            expect(sidebar.state.activeTab).toEqual('spaces')
             expect(sidebar.state.selectedSpace).toEqual(null)
             expect(emittedEvents).toEqual(expectedEvents)
             expect(
@@ -2606,10 +2605,13 @@ describe('SidebarContainerLogic', () => {
             ).toEqual('success')
         })
 
-        it('should be able to set isolated view mode for a specific local space', async ({
+        it('should be able to set isolated view mode for a specific local-only space', async ({
             device,
         }) => {
-            await setupFollowedListsTestData(device)
+            await device.storageManager.collection('customLists').createObject({
+                id: 0,
+                name: 'test',
+            })
             const { sidebar, emittedEvents } = await setupLogicHelper({
                 device,
                 withAuth: true,
@@ -2617,6 +2619,7 @@ describe('SidebarContainerLogic', () => {
             const localListId = 0
             const expectedEvents = []
 
+            expect(sidebar.state.activeTab).toEqual('annotations')
             expect(sidebar.state.selectedSpace).toEqual(null)
             expect(emittedEvents).toEqual(expectedEvents)
 
@@ -2638,6 +2641,7 @@ describe('SidebarContainerLogic', () => {
                     args: { localId: 0, remoteId: null },
                 },
             )
+            expect(sidebar.state.activeTab).toEqual('spaces')
             expect(sidebar.state.selectedSpace.localId).toEqual(0)
             expect(sidebar.state.selectedSpace.remoteId).toEqual(null)
             expect(emittedEvents).toEqual(expectedEvents)
@@ -2654,6 +2658,7 @@ describe('SidebarContainerLogic', () => {
                     args: null,
                 },
             )
+            expect(sidebar.state.activeTab).toEqual('spaces')
             expect(sidebar.state.selectedSpace).toEqual(null)
             expect(emittedEvents).toEqual(expectedEvents)
         })

@@ -1622,6 +1622,13 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        // TODO : this is a hack to stop users clicking on space pills before the followed lists have been loaded
+        //  Because shit breaks down if they're not loaded and everything's too much of a mess to untangle right now.
+        //  Should become much less of a problem once we load followed lists from local DB
+        if (previousState.followedListLoadState !== 'success') {
+            return
+        }
+
         let mutation: UIMutation<SidebarContainerState>
         if (event == null) {
             mutation = { selectedSpace: { $set: null } }
@@ -1643,15 +1650,26 @@ export class SidebarContainerLogic extends UILogic<
                     )
                 }
             } else {
+                const listData = this.options.annotationsCache.listData[
+                    event.localListId
+                ]
+                if (listData?.remoteId != null) {
+                    remoteListId = listData.remoteId
+                }
+
                 localListId = event.localListId
-                this.options.events.emit('renderHighlights', {
-                    highlights: previousState.annotations.filter(({ lists }) =>
-                        lists.includes(localListId),
-                    ),
-                })
+
+                if (remoteListId == null) {
+                    this.options.events.emit('renderHighlights', {
+                        highlights: previousState.annotations.filter(
+                            ({ lists }) => lists.includes(localListId),
+                        ),
+                    })
+                }
             }
 
             mutation = {
+                activeTab: { $set: 'spaces' },
                 selectedSpace: {
                     $set: {
                         localId: localListId,
