@@ -179,7 +179,7 @@ export class SidebarContainerLogic extends UILogic<
             followedLists: initNormalizedState(),
             followedAnnotations: {},
             users: {},
-
+            pillVisibility: 'unhover',
             currentUserId: null,
 
             isWidthLocked: false,
@@ -427,6 +427,14 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         await this.options.copyToClipboard(link)
+    }
+
+    setPillVisibility: EventHandler<'setPillVisibility'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            pillVisibility: { $set: event.value },
+        })
     }
 
     paginateSearch: EventHandler<'paginateSearch'> = async ({

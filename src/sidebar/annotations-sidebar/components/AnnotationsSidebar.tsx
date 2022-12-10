@@ -692,23 +692,15 @@ export class AnnotationsSidebar extends React.Component<
                                 <EmptyMessageContainer>
                                     <SectionCircle>
                                         <Icon
-                                            filePath={icons.peopleFine}
+                                            filePath={icons.collectionsEmpty}
                                             heightAndWidth="20px"
                                             color="purple"
                                             hoverOff
                                         />
                                     </SectionCircle>
                                     <InfoText>
-                                        Create your first
-                                        <Link
-                                            onClick={() =>
-                                                window.open(
-                                                    'https://links.memex.garden/tutorials/collaborative-spaces',
-                                                )
-                                            }
-                                        >
-                                            collaborative Space
-                                        </Link>
+                                        This page has not been added to a <br />{' '}
+                                        shared or followed Space yet
                                     </InfoText>
                                 </EmptyMessageContainer>
                             )}
@@ -1130,7 +1122,6 @@ export class AnnotationsSidebar extends React.Component<
                 </IsolatedViewHeaderTopBar>
                 <SpaceTitle>{listDetails.name}</SpaceTitle>
                 <SpaceDescription>{listDetails.description}</SpaceDescription>
-
                 {/* {totalAnnotsCountJSX}
                 {othersAnnotsCountJSX} */}
             </IsolatedViewHeaderContainer>
@@ -1484,7 +1475,7 @@ const TopBarContainer = styled.div`
 const EmptyMessageContainer = styled.div`
     display: flex;
     flex-direction: column;
-    padding: 20px 5px;
+    padding: 40px 5px;
     grid-gap: 10px;
     justify-content: center;
     align-items: center;
@@ -1499,8 +1490,8 @@ const SectionCircle = styled.div`
     background: ${(props) => props.theme.colors.darkhover};
     border: 1px solid ${(props) => props.theme.colors.greyScale6};
     border-radius: 8px;
-    height: 48px;
-    width: 48px;
+    height: 40px;
+    width: 40px;
     display: flex;
     justify-content: center;
     align-items: center;

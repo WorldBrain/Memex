@@ -144,6 +144,7 @@ export interface SidebarContainerState
     currentUserId: string | null
 
     activeTab: SidebarTab
+    pillVisibility: string
 
     sidebarWidth?: string
 
@@ -292,6 +293,7 @@ interface SidebarEvents {
 
     // Search
     paginateSearch: null
+    setPillVisibility: { value: string }
     setAnnotationsExpanded: { value: boolean }
     fetchSuggestedTags: null
     fetchSuggestedDomains: null
