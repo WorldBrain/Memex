@@ -4,10 +4,10 @@ import {
     packMessage,
     ExtMessage,
     validGeneratedLoginToken,
+    logUnpackedMessage,
+    logPackedMessage,
 } from '@worldbrain/memex-common/lib/authentication/auth-sync'
 import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
-
-const enableMessageLogging = false
 
 function validSender(sender: any, expectedOrigin: string) {
     if (!(typeof sender === 'object' && typeof sender.origin === 'string')) {
@@ -28,6 +28,8 @@ function getMessage(
     return unpackMessage(message)
 }
 
+const enableMessageLogging = false
+
 function addListener(
     listener: (
         sendResponse: (obj: ReturnType<typeof packMessage>) => void,
@@ -42,16 +44,9 @@ function addListener(
             if (!messageObj) {
                 return
             }
-            if (enableMessageLogging) {
-                console.log('Recieved: ' + JSON.stringify(messageObj, null, 2))
-            }
+            logUnpackedMessage(messageObj, 'Recieved', enableMessageLogging)
             const sendResponse = (msg) => {
-                if (enableMessageLogging) {
-                    console.log(
-                        'Sending: ' +
-                            JSON.stringify(unpackMessage(msg), null, 2),
-                    )
-                }
+                logPackedMessage(msg, 'Sending', enableMessageLogging)
                 runtimeSendResponse(msg)
             }
             return listener(sendResponse, messageObj)
@@ -116,9 +111,6 @@ export async function listenToWebAppMessage(authService: AuthService) {
             .getCurrentUser()
             .then((val) => {
                 const isLoggedIn = !!val
-                if (enableMessageLogging) {
-                    console.log('Currently logged in: ' + isLoggedIn)
-                }
                 if (isLoggedIn) {
                     return sendTokenToAppHandler(
                         authService,
