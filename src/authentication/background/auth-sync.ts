@@ -7,6 +7,8 @@ import {
 } from '@worldbrain/memex-common/lib/authentication/auth-sync'
 import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 
+const enableMessageLogging = false
+
 function validSender(sender: any, expectedOrigin: string) {
     if (!(typeof sender === 'object' && typeof sender.origin === 'string')) {
         return false
@@ -40,14 +42,19 @@ function addListener(
             if (!messageObj) {
                 return
             }
-            // console.log('Recieved: ' + JSON.stringify(messageObj, null, 2))
-            // const sendResponse = (msg) => {
-            //     console.log(
-            //         'Sending: ' + JSON.stringify(unpackMessage(msg), null, 2),
-            //     )
-            //     runtimeSendResponse(msg)
-            // }
-            listener(runtimeSendResponse, messageObj)
+            if (enableMessageLogging) {
+                console.log('Recieved: ' + JSON.stringify(messageObj, null, 2))
+            }
+            const sendResponse = (msg) => {
+                if (enableMessageLogging) {
+                    console.log(
+                        'Sending: ' +
+                            JSON.stringify(unpackMessage(msg), null, 2),
+                    )
+                }
+                runtimeSendResponse(msg)
+            }
+            return listener(sendResponse, messageObj)
         },
     )
 }
@@ -57,7 +64,9 @@ async function sendTokenToAppHandler(
     sendResponse: (obj: ReturnType<typeof packMessage>) => void,
     messageObj: ReturnType<typeof unpackMessage>,
 ) {
+    console.log('Trying to send token to app.')
     if (messageObj.message !== ExtMessage.TOKEN_REQUEST) {
+        sendResponse(packMessage(ExtMessage.LOGGED_IN))
         return
     }
     await authService.generateLoginToken().then((tokenObj) => {
@@ -74,6 +83,7 @@ async function loginWithAppTokenHandler(
     sendResponse: (obj: ReturnType<typeof packMessage>) => void,
     messageObj: ReturnType<typeof unpackMessage>,
 ) {
+    console.log('Trying to get token from app.')
     if (messageObj.message === ExtMessage.TOKEN) {
         if (messageObj.payload) {
             await authService.loginWithToken(messageObj.payload)
@@ -94,10 +104,10 @@ export async function listenToWebAppMessage(authService: AuthService) {
     let reactingToMessage = false
     addListener((sendResponse, messageObj) => {
         //JS is mostly event-loop concurrent: https://stackoverflow.com/a/5347062
-        //so we have a simple lock here to prevent multiple tabs of the app contacting the extension
+        //so we have a simple lock here to prevent multiple tabs of the app contacting the extension, this works so-so
         //this will not prevent multiple instances of the service worker to react
         if (reactingToMessage) {
-            return
+            return false
         }
         reactingToMessage = true
 
@@ -106,6 +116,9 @@ export async function listenToWebAppMessage(authService: AuthService) {
             .getCurrentUser()
             .then((val) => {
                 const isLoggedIn = !!val
+                if (enableMessageLogging) {
+                    console.log('Currently logged in: ' + isLoggedIn)
+                }
                 if (isLoggedIn) {
                     return sendTokenToAppHandler(
                         authService,
