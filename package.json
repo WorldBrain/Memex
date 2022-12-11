@@ -254,7 +254,6 @@
         "jest-sourcemaps": "^1.0.1",
         "jest-webextension-mock": "^3.7.9",
         "js-combinatorics": "^0.5.4",
-        "material-design-icons": "^3.0.1",
         "mini-css-extract-plugin": "^0.4.0",
         "mocha": "^5.2.0",
         "node-blob": "^0.0.2",
