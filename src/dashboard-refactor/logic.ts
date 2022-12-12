@@ -1,7 +1,8 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
+import throttle from 'lodash/throttle'
 import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
-
+import { sizeConstants } from 'src/dashboard-refactor/constants'
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
@@ -89,6 +90,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     syncSettings: SyncSettingsStore<
         'contentSharing' | 'dashboard' | 'extension'
     >
+    currentSearchID = 0
 
     constructor(private options: DashboardDependencies) {
         super()
@@ -149,6 +151,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             currentUser: null,
             notesSidebarWidth: '0px',
             windowWidth: appWidth,
+            spaceSidebarWidth: sizeConstants.listsSidebar.widthPx + 'px',
 
             modals: {
                 showLogin: false,
@@ -186,6 +189,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 noteUpdateState: 'pristine',
                 newNoteCreateState: 'pristine',
                 searchPaginationState: 'pristine',
+                activeDay: undefined,
+                activePageID: undefined,
             },
             searchFilters: {
                 searchQuery: '',
@@ -305,7 +310,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 isSidebarLocked: { $set: listsSidebarLocked ?? true },
             },
-            spaceSidebarWidth: { $set: listsSidebarLocked ? '250px' : '0px' },
             syncMenu: {
                 lastSuccessfulSyncDate: {
                     $set:
@@ -528,18 +532,23 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
-        await this.runSearch(nextState)
+        this.runSearch(nextState)
     }
 
-    private runSearch = debounce(
-        (previousState: State, paginate?: boolean) =>
-            this.search({ previousState, event: { paginate } }),
-        300,
+    private runSearch = throttle(
+        async (previousState: State, paginate?: boolean) => {
+            await this.search({ previousState, event: { paginate } })
+        },
+        100,
     )
+
+    // leaving this here for now in order to finalise the feature for handling the race condition rendering
+
     /* END - Misc helper methods */
 
     /* START - Misc event handlers */
     search: EventHandler<'search'> = async ({ previousState, event }) => {
+        const searchID = ++this.currentSearchID
         const searchFilters: UIMutation<State['searchFilters']> = {
             skip: event.paginate
                 ? { $apply: (skip) => skip + PAGE_SIZE }
@@ -552,7 +561,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchResults: {
                     [event.paginate
                         ? 'searchPaginationState'
-                        : 'searchState']: { $set: taskState },
+                        : 'searchState']: {
+                        $set: taskState,
+                    },
                 },
             }),
 
@@ -560,71 +571,99 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const searchState = this.withMutation(previousState, {
                     searchFilters,
                 })
-                let {
-                    noteData,
-                    pageData,
-                    results,
-                    resultsExhausted,
-                    searchTermsInvalid,
-                } =
-                    previousState.searchResults.searchType === 'pages'
-                        ? await this.searchPages(searchState)
-                        : await this.searchNotes(searchState)
 
-                let noResultsType: NoResultsType = null
-                if (
-                    resultsExhausted &&
-                    searchState.searchFilters.skip === 0 &&
-                    !pageData.allIds.length
-                ) {
+                if (searchID !== this.currentSearchID) {
+                    return
+                } else {
+                    let {
+                        noteData,
+                        pageData,
+                        results,
+                        resultsExhausted,
+                        searchTermsInvalid,
+                    } =
+                        previousState.searchResults.searchType === 'pages'
+                            ? await this.searchPages(searchState)
+                            : previousState.searchResults.searchType === 'notes'
+                            ? await this.searchNotes(searchState)
+                            : previousState.searchResults.searchType ===
+                              'videos'
+                            ? await this.searchVideos(searchState)
+                            : previousState.searchResults.searchType ===
+                              'twitter'
+                            ? await this.searchTwitter(searchState)
+                            : await this.searchPDFs(searchState)
+
+                    let noResultsType: NoResultsType = null
                     if (
-                        previousState.listsSidebar.selectedListId ===
-                        SPECIAL_LIST_IDS.MOBILE
+                        resultsExhausted &&
+                        searchState.searchFilters.skip === 0 &&
+                        !pageData.allIds.length
                     ) {
-                        noResultsType = previousState.searchResults
-                            .showMobileAppAd
-                            ? 'mobile-list-ad'
-                            : 'mobile-list'
-                    } else if (previousState.searchResults.showOnboardingMsg) {
-                        noResultsType = 'onboarding-msg'
-                    } else {
-                        noResultsType = searchTermsInvalid
-                            ? 'stop-words'
-                            : 'no-results'
+                        if (
+                            previousState.listsSidebar.selectedListId ===
+                            SPECIAL_LIST_IDS.MOBILE
+                        ) {
+                            noResultsType = previousState.searchResults
+                                .showMobileAppAd
+                                ? 'mobile-list-ad'
+                                : 'mobile-list'
+                        } else if (
+                            previousState.searchResults.showOnboardingMsg
+                        ) {
+                            noResultsType = 'onboarding-msg'
+                        } else {
+                            noResultsType = searchTermsInvalid
+                                ? 'stop-words'
+                                : 'no-results'
+                        }
                     }
-                }
-                this.emitMutation({
-                    searchFilters,
-                    searchResults: {
-                        areResultsExhausted: {
-                            $set: resultsExhausted,
+
+                    if (searchID !== this.currentSearchID) {
+                        return
+                    }
+
+                    this.emitMutation({
+                        searchFilters,
+                        searchResults: {
+                            areResultsExhausted: {
+                                $set: resultsExhausted,
+                            },
+                            searchState: { $set: 'success' },
+                            searchPaginationState: { $set: 'success' },
+                            noResultsType: { $set: noResultsType },
+                            ...(event.paginate
+                                ? {
+                                      results: {
+                                          $apply: (prev) =>
+                                              utils.mergeSearchResults(
+                                                  prev,
+                                                  results,
+                                              ),
+                                      },
+                                      pageData: {
+                                          $apply: (prev) =>
+                                              mergeNormalizedStates(
+                                                  prev,
+                                                  pageData,
+                                              ),
+                                      },
+                                      noteData: {
+                                          $apply: (prev) =>
+                                              mergeNormalizedStates(
+                                                  prev,
+                                                  noteData,
+                                              ),
+                                      },
+                                  }
+                                : {
+                                      results: { $set: results },
+                                      pageData: { $set: pageData },
+                                      noteData: { $set: noteData },
+                                  }),
                         },
-                        noResultsType: { $set: noResultsType },
-                        ...(event.paginate
-                            ? {
-                                  results: {
-                                      $apply: (prev) =>
-                                          utils.mergeSearchResults(
-                                              prev,
-                                              results,
-                                          ),
-                                  },
-                                  pageData: {
-                                      $apply: (prev) =>
-                                          mergeNormalizedStates(prev, pageData),
-                                  },
-                                  noteData: {
-                                      $apply: (prev) =>
-                                          mergeNormalizedStates(prev, noteData),
-                                  },
-                              }
-                            : {
-                                  results: { $set: results },
-                                  pageData: { $set: pageData },
-                                  noteData: { $set: noteData },
-                              }),
-                    },
-                })
+                    })
+                }
             },
         )
     }
@@ -633,6 +672,73 @@ export class DashboardLogic extends UILogic<State, Events> {
         const result = await this.options.searchBG.searchPages(
             stateToSearchParams(state),
         )
+
+        return {
+            ...utils.pageSearchResultToState(result),
+            resultsExhausted: result.resultsExhausted,
+            searchTermsInvalid: result.isBadTerm,
+        }
+    }
+    private searchVideos = async (state: State) => {
+        let result = await this.options.searchBG.searchPages(
+            stateToSearchParams(state),
+        )
+
+        const videoResults = result.docs.filter(
+            (x) =>
+                x.url.startsWith('youtube.com/watch') ||
+                x.url.startsWith('vimeo.com/'),
+        )
+
+        result = {
+            docs: videoResults,
+            resultsExhausted: result.resultsExhausted,
+            isBadTerm: result.isBadTerm,
+        }
+
+        return {
+            ...utils.pageSearchResultToState(result),
+            resultsExhausted: result.resultsExhausted,
+            searchTermsInvalid: result.isBadTerm,
+        }
+    }
+
+    private searchTwitter = async (state: State) => {
+        let result = await this.options.searchBG.searchPages(
+            stateToSearchParams(state),
+        )
+
+        const videoResults = result.docs.filter(
+            (x) =>
+                x.url.startsWith('twitter.com/') ||
+                x.url.startsWith('mobile.twitter.com/'),
+        )
+
+        result = {
+            docs: videoResults,
+            resultsExhausted: result.resultsExhausted,
+            isBadTerm: result.isBadTerm,
+        }
+
+        return {
+            ...utils.pageSearchResultToState(result),
+            resultsExhausted: result.resultsExhausted,
+            searchTermsInvalid: result.isBadTerm,
+        }
+    }
+
+    private searchPDFs = async (state: State) => {
+        let result = await this.options.searchBG.searchPages(
+            stateToSearchParams(state),
+        )
+
+        const videoResults = result.docs.filter((x) => x.url.endsWith('.pdf'))
+
+        result = {
+            docs: videoResults,
+            resultsExhausted: result.resultsExhausted,
+            isBadTerm: result.isBadTerm,
+        }
 
         return {
             ...utils.pageSearchResultToState(result),
@@ -1139,9 +1245,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        if (event.isShown) {
-            await this.showShareOnboardingIfNeeded()
-        }
+        // if (event.isShown) {
+        //     await this.showShareOnboardingIfNeeded()
+        // }
 
         this.emitMutation({
             searchResults: {
@@ -1151,6 +1257,70 @@ export class DashboardLogic extends UILogic<State, Events> {
                             byId: {
                                 [event.pageId]: {
                                     isShareMenuShown: { $set: event.isShown },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setActivePage: EventHandler<'setActivePage'> = ({
+        event,
+        previousState,
+    }) => {
+        if (event.activePageID == null && event.activeDay == null) {
+            this.emitMutation({
+                activeDay: { $set: undefined },
+                activePageID: { $set: undefined },
+                searchResults: {
+                    results: {
+                        [previousState.activeDay]: {
+                            pages: {
+                                byId: {
+                                    [previousState.activePageID]: {
+                                        activePage: {
+                                            $set: false,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        }
+
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.activeDay]: {
+                        pages: {
+                            byId: {
+                                [event.activePageID]: {
+                                    activePage: {
+                                        $set: event.activePage,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            activeDay: { $set: event.activeDay },
+            activePageID: { $set: event.activePageID },
+        })
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [previousState.activeDay]: {
+                        pages: {
+                            byId: {
+                                [previousState.activePageID]: {
+                                    activePage: {
+                                        $set: false,
+                                    },
                                 },
                             },
                         },
@@ -2466,16 +2636,24 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* END - search filter event handlers */
 
     /* START - lists sidebar event handlers */
-    setNotesSidebarWidth: EventHandler<'setNotesSidebarWidth'> = async (
-        notesSidebarWidth,
-    ) => {
-        const sidebarWidth = notesSidebarWidth.event.notesSidebarWidth
-        this.emitMutation({
-            notesSidebarWidth: { $set: sidebarWidth },
-        })
-    }
+    // setNotesSidebarWidth: EventHandler<'setNotesSidebarWidth'> = async (
+    //     event,
+    //     previousState,
+    // ) => {
+    //     const sidebarWidth = event.notesSidebarWidth
+    //     this.emitMutation({
+    //         notesSidebarWidth: { $set: sidebarWidth },
+    //     })
+    //     this.calculateMainContentWidth({
+    //         previousState,
+    //         event: { notesSidebarWidth: event.notesSidebarWidth },
+    //     })
+    // }
 
-    setSidebarLocked: EventHandler<'setSidebarLocked'> = async ({ event }) => {
+    setSidebarLocked: EventHandler<'setSidebarLocked'> = async ({
+        event,
+        previousState,
+    }) => {
         this.emitMutation({
             listsSidebar: {
                 isSidebarLocked: { $set: event.isLocked },
@@ -2487,14 +2665,53 @@ export class DashboardLogic extends UILogic<State, Events> {
             'listSidebarLocked',
             event.isLocked,
         )
+        if (
+            previousState.spaceSidebarWidth ===
+                sizeConstants.listsSidebar.widthPx + 'px' &&
+            !previousState.listsSidebar.isSidebarLocked
+        ) {
+            this.calculateMainContentWidth({
+                previousState,
+                event: {
+                    spaceSidebarWidth:
+                        sizeConstants.listsSidebar.widthPx + 'px',
+                },
+            })
+        }
+
+        if (!previousState.listsSidebar.isSidebarLocked) {
+            this.calculateMainContentWidth({
+                previousState,
+                event: {
+                    spaceSidebarWidth:
+                        sizeConstants.listsSidebar.widthPx + 'px',
+                },
+            })
+        }
+        if (previousState.listsSidebar.isSidebarLocked) {
+            this.calculateMainContentWidth({
+                previousState,
+                event: { isSidebarPeeking: true },
+            })
+        }
     }
 
     setSidebarPeeking: EventHandler<'setSidebarPeeking'> = async ({
         event,
+        previousState,
     }) => {
         this.emitMutation({
             listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
         })
+
+        if (event.isPeeking) {
+            this.calculateMainContentWidth({
+                previousState,
+                event: {
+                    isSidebarPeeking: event.isPeeking,
+                },
+            })
+        }
     }
 
     setSidebarToggleHovered: EventHandler<'setSidebarToggleHovered'> = async ({
@@ -2518,33 +2735,50 @@ export class DashboardLogic extends UILogic<State, Events> {
     > = async ({ previousState, event }) => {
         // Calculate SpaceBarWidth
 
+        // let contentWidth = this.contentWidth
+        let windowWidth = window.innerWidth
         let spaceSidebarWidth
-        spaceSidebarWidth = event.spaceSidebarWidth
-            ? event.spaceSidebarWidth
-            : previousState.spaceSidebarWidth
+        let notesSidebarWidth
+
+        if (event.windowWidth) {
+            windowWidth = event.windowWidth
+        }
+
+        if (event.spaceSidebarWidth) {
+            spaceSidebarWidth = event.spaceSidebarWidth
+        } else {
+            spaceSidebarWidth = previousState.spaceSidebarWidth
+        }
+
+        if (event.notesSidebarWidth) {
+            notesSidebarWidth = event.notesSidebarWidth
+        } else {
+            notesSidebarWidth = previousState.notesSidebarWidth
+        }
+
+        // calculate all values as integers
         spaceSidebarWidth = spaceSidebarWidth.replace('px', '')
         spaceSidebarWidth = parseInt(spaceSidebarWidth)
 
-        // Calculate NotesSidebar Width
-        let notesSidebarWidth
-
-        notesSidebarWidth = event.notesSidebarWidth
-            ? event.notesSidebarWidth
-            : previousState.notesSidebarWidth
         notesSidebarWidth = notesSidebarWidth.replace('px', '')
         notesSidebarWidth = parseInt(notesSidebarWidth)
 
-        let windowWidth = event.windowWidth
-            ? event.windowWidth
-            : previousState.windowWidth
+        // Calculate final width in as integer
+
+        let contentWidthInt
+
+        if (event.isSidebarPeeking) {
+            contentWidthInt = windowWidth - notesSidebarWidth
+        } else {
+            contentWidthInt =
+                windowWidth - spaceSidebarWidth - notesSidebarWidth
+        }
+        // spit out final width as px
+        let contentWidthPX = (contentWidthInt + 'px').toString()
 
         // Calculate total width of main content:
-
-        let mainContentWidth =
-            windowWidth - spaceSidebarWidth - notesSidebarWidth + 'px'
-
         this.emitMutation({
-            mainContentWidth: { $set: mainContentWidth },
+            mainContentWidth: { $set: contentWidthPX },
             spaceSidebarWidth: { $set: spaceSidebarWidth + 'px' },
             notesSidebarWidth: { $set: notesSidebarWidth + 'px' },
             windowWidth: { $set: windowWidth },
@@ -2876,7 +3110,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 editListErrorMessage: { $set: null },
                 listData: {
-                    [listId]: { name: { $set: newName } },
+                    [listId]: {
+                        newName: { $set: newName },
+                    },
                 },
             },
         })
@@ -2896,8 +3132,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             id: listId,
         })
 
-        const newName = previousState.listsSidebar.listData[listId].name
-
+        const newName = previousState.listsSidebar.listData[listId].newName
         if (newName === oldName) {
             return
         }
@@ -2939,14 +3174,14 @@ export class DashboardLogic extends UILogic<State, Events> {
                     newName,
                 })
 
-                await this.changeListName({
-                    event,
-                    previousState,
-                })
-
                 this.emitMutation({
                     listsSidebar: {
-                        editingListId: { $set: undefined },
+                        listData: {
+                            [listId]: {
+                                name: { $set: newName },
+                                newName: { $set: newName },
+                            },
+                        },
                         editListErrorMessage: {
                             $set: null,
                         },

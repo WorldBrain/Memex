@@ -18,6 +18,7 @@ export interface Props extends SpaceDisplayEntry {
     resultItem: React.ReactNode
     contextMenuBtnRef?: React.RefObject<HTMLDivElement>
     selected?: boolean
+    allTabsButtonPressed?: number
 }
 
 class EntryRow extends React.Component<Props> {
@@ -45,10 +46,10 @@ class EntryRow extends React.Component<Props> {
     }
 
     private handleActOnAllPress: React.MouseEventHandler = (e) => {
-        this.props.onPressActOnAll &&
-            this.props.onPressActOnAll(this._getEntry())
         e.preventDefault()
         e.stopPropagation()
+        this.props.onPressActOnAll &&
+            this.props.onPressActOnAll(this._getEntry())
         return false
     }
 
@@ -78,6 +79,8 @@ class EntryRow extends React.Component<Props> {
             onPressActOnAll,
             contextMenuBtnRef,
         } = this.props
+
+        let cleanID = parseInt(id.split('ListKeyName-')[1])
 
         return (
             <Row
@@ -117,18 +120,35 @@ class EntryRow extends React.Component<Props> {
                     )}
                     {focused && onPressActOnAll && (
                         <ButtonContainer>
-                            <TooltipBox
-                                tooltipText={
-                                    this.props.actOnAllTooltipText ?? ''
-                                }
-                                placement="left"
-                            >
-                                <Icon
-                                    filePath={icons.multiEdit}
-                                    heightAndWidth="16px"
-                                    onClick={this.handleActOnAllPress}
-                                />
-                            </TooltipBox>
+                            {this.props.allTabsButtonPressed === cleanID ? (
+                                <TooltipBox
+                                    tooltipText={
+                                        <>
+                                            All open tabs in this window
+                                            <br /> have been added to this Space
+                                        </>
+                                    }
+                                    placement="top"
+                                >
+                                    <Icon
+                                        filePath={icons.checkRound}
+                                        heightAndWidth="20px"
+                                    />
+                                </TooltipBox>
+                            ) : (
+                                <TooltipBox
+                                    tooltipText={
+                                        this.props.actOnAllTooltipText ?? ''
+                                    }
+                                    placement="top"
+                                >
+                                    <Icon
+                                        filePath={icons.multiEdit}
+                                        heightAndWidth="20px"
+                                        onClick={this.handleActOnAllPress}
+                                    />
+                                </TooltipBox>
+                            )}
                         </ButtonContainer>
                     )}
                     {selected ? (

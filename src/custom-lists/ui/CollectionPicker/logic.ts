@@ -24,7 +24,6 @@ export interface SpacePickerDependencies {
     ) => Promise<void>
     unselectEntry: (listId: number) => Promise<void>
     actOnAllTabs?: (listId: number) => Promise<void>
-    onEscapeKeyDown?: () => void | Promise<void>
     /** Called when user keys Enter+Cmd/Ctrl in main text input */
     onSubmit?: () => void | Promise<void>
     initialSelectedListIds?: () => number[] | Promise<number[]>
@@ -77,6 +76,7 @@ export interface SpacePickerState {
     loadingShareStates: TaskState
     loadingQueryResults: TaskState
     renameListErrorMessage: string | null
+    allTabsButtonPressed?: number
 }
 
 const sortDisplayEntries = (selectedEntryIds: Set<number>) => (
@@ -236,11 +236,6 @@ export default class SpacePickerLogic extends UILogic<
                 )
                 return
             }
-        }
-
-        if (event.key === 'Escape' && this.dependencies.onEscapeKeyDown) {
-            await this.dependencies.onEscapeKeyDown()
-            return
         }
     }
 
@@ -649,6 +644,7 @@ export default class SpacePickerLogic extends UILogic<
                       )
                     : [...previousState.selectedListIds, entry.localId],
             },
+            allTabsButtonPressed: { $set: entry.localId },
         } as UIMutation<SpacePickerState>)
     }
 

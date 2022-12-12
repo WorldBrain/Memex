@@ -29,6 +29,7 @@ interface State {
     isListPickerShown: boolean
     toggleShowTutorial: boolean
     youtubeShortcut: string | null
+    onEditClick?: boolean
 }
 
 export interface AnnotationCreateEventProps {
@@ -93,6 +94,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         isListPickerShown: false,
         toggleShowTutorial: false,
         youtubeShortcut: null,
+        onEditClick: false,
     }
 
     async componentDidMount() {
@@ -221,11 +223,13 @@ export class AnnotationCreate extends React.Component<Props, State>
                 targetElementRef={this.spacePickerButtonRef.current}
                 placement={'bottom-start'}
                 offsetX={10}
-                closeComponent={() => this.toggleSpacePicker()}
+                closeComponent={
+                    this.state.isListPickerShown &&
+                    (() => this.toggleSpacePicker())
+                }
             >
                 <CollectionPicker
                     initialSelectedListIds={() => lists}
-                    onEscapeKeyDown={() => this.toggleSpacePicker()}
                     unselectEntry={this.props.removePageFromList}
                     createNewEntry={this.props.createNewList}
                     selectEntry={this.props.addPageToList}
@@ -314,28 +318,44 @@ export class AnnotationCreate extends React.Component<Props, State>
             <>
                 <TextBoxContainerStyled>
                     <Margin vertical="10px">
-                        <MemexEditor
-                            onKeyDown={this.handleInputKeyDown}
-                            onContentUpdate={(content) =>
-                                this.props.onCommentChange(content)
-                            }
-                            markdownContent={this.props.comment}
-                            setEditorInstanceRef={(editor) =>
-                                (this.editor = editor)
-                            }
-                            autoFocus={this.props.autoFocus}
-                            placeholder={`Add private note.\n Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
-                            isRibbonCommentBox={this.props.isRibbonCommentBox}
-                            youtubeShortcut={this.state.youtubeShortcut}
-                        />
+                        {this.state.onEditClick ? (
+                            <MemexEditor
+                                onKeyDown={this.handleInputKeyDown}
+                                onContentUpdate={(content) =>
+                                    this.props.onCommentChange(content)
+                                }
+                                markdownContent={this.props.comment}
+                                setEditorInstanceRef={(editor) =>
+                                    (this.editor = editor)
+                                }
+                                autoFocus={
+                                    this.props.autoFocus ||
+                                    this.state.onEditClick
+                                }
+                                placeholder={`Add private note.\n Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
+                                isRibbonCommentBox={
+                                    this.props.isRibbonCommentBox
+                                }
+                                youtubeShortcut={this.state.youtubeShortcut}
+                            />
+                        ) : (
+                            <EditorDummy
+                                onClick={() =>
+                                    this.setState({
+                                        onEditClick: true,
+                                    })
+                                }
+                            >
+                                Add private note (share with 'shift + enter')
+                            </EditorDummy>
+                        )}
                     </Margin>
-                    {this.props.comment !== '' && (
+                    {this.props.comment === '' ? null : (
                         <FooterContainer>
                             <ListsSegment
                                 newLineOrientation={true}
                                 lists={this.displayLists}
                                 onMouseEnter={this.props.onListsHover}
-                                showEditBtn={this.props.hoverState === 'lists'}
                                 onListClick={undefined}
                                 onEditBtnClick={() =>
                                     this.setState({ isListPickerShown: true })
@@ -356,6 +376,21 @@ export class AnnotationCreate extends React.Component<Props, State>
 }
 
 export default AnnotationCreate
+
+const EditorDummy = styled.div`
+    outline: none;
+    padding: 10px 10px;
+    width: fill-available;
+    border-radius: 3px;
+    min-height: 20px;
+    white-space: pre-wrap;
+    overflow: hidden;
+    background-color: ${(props) => props.theme.colors.darkhover};
+    font-family: 'Satoshi', sans-serif;
+    cursor: text;
+    float: left;
+    color: ${(props) => props.theme.colors.greyScale8};
+`
 
 const SaveCancelArea = styled.div`
     display: flex;

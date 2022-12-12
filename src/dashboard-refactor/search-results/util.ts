@@ -102,6 +102,7 @@ export const getInitialPageResultState = (
 ): PageResult => ({
     id,
     notesType: 'user',
+    activePage: undefined,
     areNotesShown: false,
     isTagPickerShown: false,
     isShareMenuShown: false,

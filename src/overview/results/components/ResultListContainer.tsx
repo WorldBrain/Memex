@@ -235,9 +235,6 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                     <TagPicker
                         onUpdateEntrySelection={this.handleTagUpdate(index)}
                         initialSelectedEntries={async () => selectedTags}
-                        onEscapeKeyDown={
-                            this.props.handleTagBtnClick(index) as any
-                        }
                     />
                 </div>
             </HoverBox>

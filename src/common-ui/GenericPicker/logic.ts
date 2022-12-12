@@ -25,7 +25,6 @@ export interface GenericPickerDependencies {
     onUpdateEntrySelection: PickerUpdateHandler
     queryEntries: (query: string) => Promise<string[]>
     actOnAllTabs?: (query: string) => Promise<void>
-    onEscapeKeyDown?: () => void | Promise<void>
     loadDefaultSuggestions: () => string[] | Promise<string[]>
     initialSelectedEntries?: () => string[] | Promise<string[]>
     children?: any
@@ -172,10 +171,6 @@ export default abstract class GenericPickerLogic<
                     previousState.displayEntries,
                 )
             }
-        }
-
-        if (key === 'Escape' && this.dependencies.onEscapeKeyDown) {
-            return this.dependencies.onEscapeKeyDown()
         }
     }
 

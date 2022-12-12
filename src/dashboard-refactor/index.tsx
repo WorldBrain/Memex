@@ -142,7 +142,7 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     setupWindowWidthListner() {
-        this.processEvent('calculateMainContentWidth', {})
+        // this.processEvent('calculateMainContentWidth', {})
 
         window.addEventListener('resize', () => {
             this.processEvent('calculateMainContentWidth', {
@@ -250,6 +250,7 @@ export class DashboardContainer extends StatefulUIElement<
                 changeListName: (value) =>
                     this.processEvent('changeListName', { value }),
                 onCancelClick: () => this.processEvent('cancelListEdit', null),
+                cancelListEdit: () => this.processEvent('cancelListEdit', null),
                 onConfirmClick: (value) =>
                     this.processEvent('confirmListEdit', { value }),
                 initValue: listsSidebar.listData[listId].name,
@@ -330,7 +331,6 @@ export class DashboardContainer extends StatefulUIElement<
                 areDomainsFiltered={searchFilters.domainsIncluded.length > 0}
                 datePickerProps={{
                     onClickOutside: toggleDatesFilter,
-                    onEscapeKeyDown: toggleDatesFilter,
                     startDate: searchFilters.dateFrom,
                     startDateText: searchFilters.dateFromInput,
                     endDate: searchFilters.dateTo,
@@ -348,7 +348,6 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 domainPickerProps={{
                     onClickOutside: toggleDomainsFilter,
-                    onEscapeKeyDown: toggleDomainsFilter,
                     initialSelectedEntries: () => searchFilters.domainsIncluded,
                     queryEntries: (query) =>
                         searchBG.suggest({
@@ -373,7 +372,6 @@ export class DashboardContainer extends StatefulUIElement<
                 tagPickerProps={
                     searchResults.shouldShowTagsUIs && {
                         onClickOutside: toggleTagsFilter,
-                        onEscapeKeyDown: toggleTagsFilter,
                         initialSelectedEntries: () =>
                             searchFilters.tagsIncluded,
                         queryEntries: (query) =>
@@ -400,7 +398,6 @@ export class DashboardContainer extends StatefulUIElement<
                 spacePickerProps={{
                     spacesBG: this.props.listsBG,
                     onClickOutside: toggleSpacesFilter,
-                    onEscapeKeyDown: toggleSpacesFilter,
                     contentSharingBG: this.props.contentShareBG,
                     createNewEntry: () => undefined,
                     initialSelectedListIds: () => searchFilters.spacesIncluded,
@@ -475,11 +472,11 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setSidebarLocked', {
                             isLocked: !listsSidebar.isSidebarLocked,
                         })
-                        this.processEvent('calculateMainContentWidth', {
-                            spaceSidebarWidth: !listsSidebar.isSidebarLocked
-                                ? '250px'
-                                : '0px',
-                        })
+                        // this.processEvent('calculateMainContentWidth', {
+                        //     spaceSidebarWidth: !listsSidebar.isSidebarLocked
+                        //         ? '250px'
+                        //         : '0px',
+                        // })
                     },
                 }}
                 sidebarToggleHoverState={{
@@ -513,7 +510,6 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: false,
                         }),
                     onToggleDisplayState: () => {
-                        console.log('toggletriggered')
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: syncMenu.isDisplayed,
                         })
@@ -544,6 +540,7 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <ListsSidebarContainer
                 {...listsSidebar}
+                sidebarWidth={this.state.spaceSidebarWidth}
                 lockedState={lockedState}
                 openFeedUrl={() =>
                     this.processEvent('clickFeedActivityIndicator', null)
@@ -649,6 +646,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                activePage={this.state.activePageID && true}
                 listData={listsSidebar.listData}
                 getListDetailsById={this.getListDetailsById}
                 toggleSortMenuShown={() =>
@@ -719,6 +717,17 @@ export class DashboardContainer extends StatefulUIElement<
                 onPagesSearchSwitch={() =>
                     this.processEvent('setSearchType', { searchType: 'pages' })
                 }
+                onVideosSearchSwitch={() => {
+                    this.processEvent('setSearchType', { searchType: 'videos' })
+                }}
+                onTwitterSearchSwitch={() => {
+                    this.processEvent('setSearchType', {
+                        searchType: 'twitter',
+                    })
+                }}
+                onPDFSearchSwitch={() => {
+                    this.processEvent('setSearchType', { searchType: 'pdf' })
+                }}
                 onPageLinkCopy={(link) =>
                     this.processEvent('copyShareLink', {
                         link,
@@ -753,6 +762,51 @@ export class DashboardContainer extends StatefulUIElement<
                         this.notesSidebarRef.current.toggleSidebarShowForPageId(
                             pageData.fullUrl,
                         )
+
+                        // this.processEvent('setPageNotesShown', {
+                        //     day,
+                        //     pageId,
+                        //     areShown: !searchResults.results[day].pages.byId[
+                        //         pageId
+                        //     ].areNotesShown,
+                        // })
+
+                        this.processEvent('setActivePage', {
+                            activeDay: day,
+                            activePageID: pageId,
+                            activePage: true,
+                        })
+
+                        // if (
+                        //     searchResults.results[day].pages.byId[pageId]
+                        //         .activePage
+                        // ) {
+                        //     this.processEvent('setActivePage', {
+                        //         activeDay: undefined,
+                        //         activePageID: undefined,
+                        //         activePage: false,
+                        //     })
+                        //     this.processEvent('setPageNotesShown', {
+                        //         day,
+                        //         pageId,
+                        //         areShown:
+                        //             searchResults.results[day].pages.byId[
+                        //                 pageId
+                        //             ].areNotesShown && false,
+                        //     })
+                        // } else if (this.state.activePageID) {
+                        //     this.processEvent('setActivePage', {
+                        //         activeDay: this.state.activeDay,
+                        //         activePageID: this.state.activePageID,
+                        //         activePage: false,
+                        //     })
+                        // } else {
+                        //     this.processEvent('setActivePage', {
+                        //         activeDay: day,
+                        //         activePageID: pageId,
+                        //         activePage: true,
+                        //     })
+                        // }
                     },
                     onTagPickerBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageTagPickerShown', {
@@ -1283,12 +1337,12 @@ export class DashboardContainer extends StatefulUIElement<
             toggleSidebarLockedState: () => {
                 this.processEvent('setSidebarLocked', {
                     isLocked: !listsSidebar.isSidebarLocked,
-                }),
-                    this.processEvent('calculateMainContentWidth', {
-                        spaceSidebarWidth: !listsSidebar.isSidebarLocked
-                            ? '250px'
-                            : '0px',
-                    })
+                })
+                // this.processEvent('calculateMainContentWidth', {
+                //     spaceSidebarWidth: !listsSidebar.isSidebarLocked
+                //         ? '250px'
+                //         : '0px',
+                // })
             },
         }
 
@@ -1314,8 +1368,7 @@ export class DashboardContainer extends StatefulUIElement<
             position: listsSidebar.isSidebarPeeking ? 'fixed' : 'sticky',
         }
 
-        const isPeeking = listsSidebar.isSidebarPeeking
-
+        const isPeeking = this.state.listsSidebar.isSidebarPeeking
         return (
             <Container id={'dashboardContainer'}>
                 <SidebarHeaderContainer>
@@ -1357,23 +1410,22 @@ export class DashboardContainer extends StatefulUIElement<
                                 `$sizeConstants.header.heightPxpx`,
                         }}
                         locked={listsSidebar.isSidebarLocked}
-                        onMouseEnter={() => {
-                            this.processEvent('setSidebarPeeking', {
-                                isPeeking,
-                            })
+                        onMouseLeave={() => {
+                            if (this.state.listsSidebar.isSidebarPeeking) {
+                                this.processEvent('setSidebarPeeking', {
+                                    isPeeking: false,
+                                })
+                            }
                         }}
-                        onMouseLeave={(isPeeking) => {
-                            this.processEvent('setSidebarPeeking', {
-                                isPeeking: false,
-                            })
-                        }}
-                        default={{ width: 300 }}
+                        // default={{ width: sizeConstants.listsSidebar.widthPx }}
                         resizeHandleClasses={{
                             right: 'sidebarResizeHandleSidebar',
                         }}
                         resizeGrid={[1, 0]}
                         dragAxis={'none'}
-                        minWidth={'250px'}
+                        minWidth={
+                            sizeConstants.listsSidebar.widthPx - 50 + 'px'
+                        }
                         maxWidth={'500px'}
                         disableDragging={'true'}
                         enableResizing={{
@@ -1389,13 +1441,13 @@ export class DashboardContainer extends StatefulUIElement<
                         onResizeStop={(e, direction, ref, delta, position) => {
                             this.processEvent('calculateMainContentWidth', {
                                 spaceSidebarWidth: ref.style.width,
+                                isSidebarPeeking: !this.state.listsSidebar
+                                    .isSidebarLocked,
                             })
                         }}
                     >
                         {this.renderListsSidebar()}
                     </ListSidebarContent>
-                    {/* <ContentArea> */}
-                    {/* {this.renderHeaderBar()} */}
                     <MainContent responsiveWidth={this.state.mainContentWidth}>
                         {this.state.listsSidebar.showFeed ? (
                             <FeedContainer>
@@ -1447,17 +1499,19 @@ export class DashboardContainer extends StatefulUIElement<
                         })
                     }
                     setSidebarWidthforDashboard={(sidebarWidth) => {
-                        this.processMutation({
-                            notesSidebarWidth: { $set: sidebarWidth },
+                        this.processEvent('calculateMainContentWidth', {
+                            notesSidebarWidth: sidebarWidth,
+                            isSidebarPeeking: !this.state.listsSidebar
+                                .isSidebarLocked,
                         })
-                        setTimeout(
-                            () =>
-                                this.processEvent('calculateMainContentWidth', {
-                                    notesSidebarWidth: sidebarWidth,
-                                }),
-                            50,
-                        )
                     }}
+                    onNotesSidebarClose={() =>
+                        this.processEvent('setActivePage', {
+                            activeDay: undefined,
+                            activePageID: undefined,
+                            activePage: false,
+                        })
+                    }
                 />
                 <HelpBtn />
                 <DragElement
@@ -1534,7 +1588,7 @@ const ListSidebarContent = styled(Rnd)<{
     ${(props) =>
         props.locked &&
         css`
-            height: 100%;
+            height: 100vh;
             background-color: ${(props) =>
                 props.theme.colors.backgroundColorDarker};
             border-right: solid 1px ${(props) => props.theme.colors.lineGrey};
@@ -1543,7 +1597,7 @@ const ListSidebarContent = styled(Rnd)<{
     ${(props) =>
         props.peeking &&
         css`
-            position: fixed;
+            position: absolute
             height: max-content;
             background-color: ${(props) =>
                 props.theme.colors.backgroundColorDarker};
@@ -1553,6 +1607,7 @@ const ListSidebarContent = styled(Rnd)<{
             margin-left: 10px;
             height: 90vh;
             top: 20px;
+            left: 0px;
             border-radius: 8px;
             animation: slide-in ease-in-out;
             animation-duration: 0.15s;

@@ -107,12 +107,12 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                     spaceName={listData.name}
                     localListId={listData.id}
                     remoteListId={listData.remoteId}
-                    onClose={this.props.editableProps!.onCancelClick}
                     toggleMenu={this.props.onMoreActionClick}
                     editableProps={this.props.editableProps!}
                     isMenuDisplayed={this.props.isMenuDisplayed}
                     onDeleteSpaceIntent={this.props.onDeleteClick}
                     onSpaceShare={onSpaceShare}
+                    // cancelSpaceNameEdit={this.props.cancelSpaceNameEdit()}
                 />
             )
         }

@@ -24,6 +24,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 class SpacePicker extends StatefulUIElement<
     SpacePickerDependencies,
@@ -78,12 +79,6 @@ class SpacePicker extends StatefulUIElement<
             .filter((entry) => entry != null)
     }
 
-    handleClickOutside = (e) => {
-        if (this.props.onClickOutside) {
-            this.props.onClickOutside(e)
-        }
-    }
-
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
         this.processEvent('setSearchInputRef', { ref })
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
@@ -123,9 +118,6 @@ class SpacePicker extends StatefulUIElement<
     }
 
     handleKeyPress = (event: KeyboardEvent) => {
-        if (event.key === 'Escape') {
-            this.handleClickOutside(event.key)
-        }
         this.processEvent('keyPress', { event })
     }
 
@@ -142,6 +134,7 @@ class SpacePicker extends StatefulUIElement<
                               )
                         : undefined
                 }
+                allTabsButtonPressed={this.state.allTabsButtonPressed}
                 onFocus={this.handleResultListFocus}
                 key={`ListKeyName-${entry.localId}`}
                 id={`ListKeyName-${entry.localId}`}
@@ -169,7 +162,7 @@ class SpacePicker extends StatefulUIElement<
             <IconStyleWrapper show>
                 <TooltipBox
                     tooltipText="Add all tabs in window to Space"
-                    placement="left"
+                    placement="bottom"
                 >
                     <Icon
                         filePath={icons.multiEdit}
@@ -241,57 +234,6 @@ class SpacePicker extends StatefulUIElement<
     private handleSpaceContextMenuOpen = (listId: number) => async (
         entry: SpaceDisplayEntry,
     ) => {
-        const rect = this.contextMenuBtnRef?.current?.getBoundingClientRect()
-
-        // Popup
-        if (window.outerWidth < 500) {
-            await this.processEvent('updateContextMenuPosition', {
-                x: undefined,
-                y: undefined,
-            })
-        } else {
-            // right side of screen
-            if (window.outerWidth - rect.right < 400) {
-                await this.processEvent('updateContextMenuPosition', {
-                    x: outerWidth - rect.left,
-                })
-                //lower side
-
-                if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
-                    await this.processEvent('updateContextMenuPosition', {
-                        y: outerHeight - rect.bottom - 50,
-                    })
-                }
-                // upper side
-                else {
-                    await this.processEvent('updateContextMenuPosition', {
-                        y: outerHeight - rect.bottom + 100,
-                    })
-                }
-            }
-
-            // left side of screen
-
-            if (window.outerWidth - rect.right > window.outerWidth / 2) {
-                await this.processEvent('updateContextMenuPosition', {
-                    x: outerWidth - rect.right - 320,
-                })
-
-                // lower side
-
-                if (window.outerHeight - rect.bottom > window.outerHeight / 2) {
-                    await this.processEvent('updateContextMenuPosition', {
-                        y: outerHeight - rect.bottom + 40,
-                    })
-                }
-                // upper side
-                else {
-                    await this.processEvent('updateContextMenuPosition', {
-                        y: outerHeight - rect.top + 110,
-                    })
-                }
-            }
-        }
         await this.processEvent('toggleEntryContextMenu', { listId })
     }
 
@@ -328,8 +270,6 @@ class SpacePicker extends StatefulUIElement<
                 spaceName={list.name}
                 ref={this.contextMenuRef}
                 localListId={this.state.contextMenuListId}
-                xPosition={this.state.contextMenuPositionX}
-                yPosition={this.state.contextMenuPositionY}
                 contentSharingBG={this.props.contentSharingBG}
                 spacesBG={this.props.spacesBG}
                 onDeleteSpaceConfirm={() =>
@@ -343,9 +283,6 @@ class SpacePicker extends StatefulUIElement<
                             listId: list.localId,
                             name,
                         })
-                        await this.processEvent('toggleEntryContextMenu', {
-                            listId: list.localId,
-                        })
                     },
                     onCancelClick: this.handleSpaceContextMenuClose(
                         list.localId,
@@ -358,13 +295,16 @@ class SpacePicker extends StatefulUIElement<
                         remoteListId,
                     })
                 }
-                onClose={this.handleSpaceContextMenuClose(list.localId)}
                 remoteListId={list.remoteId}
             />
         )
     }
 
     renderMainContent() {
+        const list = this.state.displayEntries.find(
+            (l) => l.localId === this.state.contextMenuListId,
+        )
+
         if (this.state.loadingSuggestions === 'running') {
             return (
                 <LoadingBox>
@@ -376,7 +316,25 @@ class SpacePicker extends StatefulUIElement<
         return (
             <>
                 {this.state.contextMenuListId ? (
-                    this.renderSpaceContextMenu()
+                    <>
+                        <PrimaryActionBox>
+                            <PrimaryAction
+                                type="tertiary"
+                                size="small"
+                                label="Go back"
+                                icon="arrowLeft"
+                                onClick={async () =>
+                                    await this.processEvent(
+                                        'toggleEntryContextMenu',
+                                        {
+                                            listId: list.localId,
+                                        },
+                                    )
+                                }
+                            />
+                        </PrimaryActionBox>
+                        {this.renderSpaceContextMenu()}
+                    </>
                 ) : (
                     <PickerContainer>
                         <PickerSearchInput
@@ -441,6 +399,10 @@ class SpacePicker extends StatefulUIElement<
         )
     }
 }
+
+const PrimaryActionBox = styled.div`
+    padding: 10px 0px 0px 10px;
+`
 
 const EntryListHeader = styled.div`
     padding: 5px 5px;

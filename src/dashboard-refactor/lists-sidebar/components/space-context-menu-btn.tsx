@@ -8,24 +8,25 @@ import SpaceContextMenu, {
 } from 'src/custom-lists/ui/space-context-menu'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-export interface Props
-    extends Omit<
-        SpaceContextMenuProps,
-        'xPosition' | 'yPosition' | 'copyToClipboard'
-    > {
+import { Props as EditableItemProps } from './sidebar-editable-item'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { ListData } from '../types'
+
+export interface Props {
     isMenuDisplayed: boolean
     toggleMenu: React.MouseEventHandler
+    editableProps?: EditableItemProps
+    contentSharingBG?: ContentSharingInterface
+    spacesBG?: RemoteCollectionsInterface
+    spaceName?: string
+    localListId?: number
+    remoteListId?: string
+    onDeleteSpaceIntent?: React.MouseEventHandler
+    onSpaceShare?: (remoteListId: string) => void
 }
 
-export interface State {
-    xPosition: number
-    yPosition: number
-}
-
-export default class SpaceContextMenuButton extends PureComponent<
-    Props,
-    State
-> {
+export default class SpaceContextMenuButton extends PureComponent<Props> {
     private spaceContextMenuButton = React.createRef<HTMLInputElement>()
     private contextMenuRef: React.RefObject<SpaceContextMenu>
 
@@ -47,7 +48,10 @@ export default class SpaceContextMenuButton extends PureComponent<
                 placement={'right-start'}
                 offsetX={30}
                 offsetY={-10}
-                closeComponent={(e) => this.toggleMenu(e)}
+                closeComponent={(e) => {
+                    this.toggleMenu(e)
+                    this.props.editableProps.cancelListEdit()
+                }}
                 strategy={'fixed'}
                 width={'300px'}
                 bigClosingScreen
