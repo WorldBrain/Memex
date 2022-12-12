@@ -9,19 +9,19 @@ import {
 } from '@worldbrain/memex-common/lib/authentication/auth-sync'
 import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 
-function validSender(sender: any, expectedOrigin: string) {
+function validSender(sender: any, expectedOrigins: string[]) {
     if (!(typeof sender === 'object' && typeof sender.origin === 'string')) {
         return false
     }
-    return sender.origin === expectedOrigin
+    return expectedOrigins.includes(sender.origin)
 }
 
 function getMessage(
     message: any,
     sender: any,
-    expectedOrigin: string,
+    expectedOrigins: string[],
 ): null | ReturnType<typeof unpackMessage> {
-    if (!validSender(sender, expectedOrigin) || !validMessage(message)) {
+    if (!validSender(sender, expectedOrigins) || !validMessage(message)) {
         return null
     }
 
@@ -35,12 +35,12 @@ function addListener(
         sendResponse: (obj: ReturnType<typeof packMessage>) => void,
         messageObj: ReturnType<typeof unpackMessage>,
     ) => void,
-    expectedOrigin: string,
+    expectedOrigins: string[],
 ) {
     //@ts-ignore next-line
     chrome.runtime.onMessageExternal.addListener(
         (message, sender, runtimeSendResponse) => {
-            const messageObj = getMessage(message, sender, expectedOrigin)
+            const messageObj = getMessage(message, sender, expectedOrigins)
             if (!messageObj) {
                 return
             }
@@ -89,10 +89,10 @@ async function loginWithAppTokenHandler(
 }
 
 export async function listenToWebAppMessage(authService: AuthService) {
-    const expectedOrigin =
-        process.env.NODE_ENV === 'development'
-            ? 'http://localhost:3000'
-            : 'https://memex.social'
+    const expectedOrigins =
+        process.env.NODE_ENV === 'production'
+            ? ['https://memex.social']
+            : ['http://localhost:3000', 'https://staging.memex.social']
 
     await authService.waitForAuthReady()
 
@@ -129,5 +129,5 @@ export async function listenToWebAppMessage(authService: AuthService) {
 
         //indicates that we want to send an async response
         return true
-    }, expectedOrigin)
+    }, expectedOrigins)
 }
