@@ -69,8 +69,8 @@ export class AnnotationsSidebarContainer<
     P extends Props = Props
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
     private sidebarRef = React.createRef<AnnotationsSidebarComponent>()
-    private shareButtonRef = React.createRef<HTMLElement>()
-    private spacePickerButtonRef = React.createRef<HTMLElement>()
+    private shareButtonRef = React.createRef<HTMLDivElement>()
+    private spacePickerButtonRef = React.createRef<HTMLDivElement>()
 
     constructor(props: P) {
         super(

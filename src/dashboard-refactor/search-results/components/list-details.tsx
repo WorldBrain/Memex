@@ -33,7 +33,7 @@ interface State {
 
 export default class ListDetails extends PureComponent<Props, State> {
     static MOD_KEY = getKeyName({ key: 'mod' })
-    private formattingHelpBtn = React.createRef<HTMLElement>()
+    private formattingHelpBtn = React.createRef<HTMLDivElement>()
 
     state: State = {
         description: this.props.description ?? '',

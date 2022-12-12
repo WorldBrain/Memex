@@ -121,7 +121,7 @@ function renderSyncStatusMenu(
 export default class Header extends PureComponent<Props> {
     static SYNC_MENU_TOGGLE_BTN_CLASS = 'sync-menu-toggle-btn'
 
-    syncStatusButtonRef = React.createRef<HTMLElement>()
+    syncStatusButtonRef = React.createRef<HTMLDivElement>()
 
     render() {
         const {

@@ -55,8 +55,8 @@ export interface AnnotationProps {
     isActive?: boolean
     activeShareMenuNoteId?: string
     isShared: boolean
-    shareButtonRef?: React.RefObject<HTMLElement>
-    spacePickerButtonRef?: React.RefObject<HTMLElement>
+    shareButtonRef?: React.RefObject<HTMLDivElement>
+    spacePickerButtonRef?: React.RefObject<HTMLDivElement>
     hasReplies?: boolean
     appendRepliesToggle?: boolean
     isBulkShareProtected: boolean
@@ -103,10 +103,10 @@ export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
 
 export default class AnnotationEditable extends React.Component<Props, State> {
     private annotEditRef = React.createRef<AnnotationEdit>()
-    private spacePickerBarRef = React.createRef<HTMLElement>()
-    private shareButtonRef = React.createRef<HTMLElement>()
+    private spacePickerBarRef = React.createRef<HTMLDivElement>()
+    private shareButtonRef = React.createRef<HTMLDivElement>()
     private tutorialButtonRef = React.createRef<HTMLElement>()
-    private copyPasterButtonRef = React.createRef<HTMLElement>()
+    private copyPasterButtonRef = React.createRef<HTMLDivElement>()
 
     static MOD_KEY = getKeyName({ key: 'mod' })
     static defaultProps: Pick<

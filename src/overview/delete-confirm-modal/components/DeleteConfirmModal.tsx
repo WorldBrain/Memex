@@ -9,7 +9,7 @@ export interface Props extends ConfirmModalProps {
 }
 
 class DeleteConfirmModal extends PureComponent<Props> {
-    private _action: React.RefObject<HTMLButtonElement>
+    private _action: React.RefObject<HTMLDivElement>
 
     constructor(props) {
         super(props)

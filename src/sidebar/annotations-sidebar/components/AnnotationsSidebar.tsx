@@ -66,8 +66,8 @@ export interface AnnotationsSidebarProps
         followedListId?: string,
     ) => (id: string) => JSX.Element
     renderTagsPickerForAnnotation: (id: string) => JSX.Element
-    shareButtonRef: React.RefObject<HTMLElement>
-    spacePickerButtonRef: React.RefObject<HTMLElement>
+    shareButtonRef: React.RefObject<HTMLDivElement>
+    spacePickerButtonRef: React.RefObject<HTMLDivElement>
     activeShareMenuNoteId: string
     renderShareMenuForAnnotation: (
         followedListId?: string,
@@ -76,7 +76,7 @@ export interface AnnotationsSidebarProps
         followedListId?: string,
     ) => (
         id: string,
-        referenceElement?: React.RefObject<HTMLElement>,
+        referenceElement?: React.RefObject<HTMLDivElement>,
     ) => JSX.Element
 
     expandFeed: () => void
