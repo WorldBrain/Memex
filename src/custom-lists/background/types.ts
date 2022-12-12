@@ -51,7 +51,10 @@ export interface CollectionsCacheInterface {
 }
 
 export interface RemoteCollectionsInterface {
-    createCustomList(args: { name: string }): Promise<number>
+    createCustomList(args: {
+        name: string
+        type?: 'page-link'
+    }): Promise<number>
     insertPageToList(args: {
         id: number
         url: string

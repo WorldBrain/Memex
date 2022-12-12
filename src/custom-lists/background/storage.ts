@@ -402,12 +402,14 @@ export default class CustomListStorage extends StorageModule {
 
     async insertCustomList({
         id,
+        type,
         name,
         isDeletable = true,
         isNestable = true,
         createdAt = new Date(),
     }: {
         id: number
+        type?: string
         name: string
         isDeletable?: boolean
         isNestable?: boolean
@@ -416,6 +418,7 @@ export default class CustomListStorage extends StorageModule {
         const { object } = await this.operation('createList', {
             id,
             name,
+            type,
             isNestable,
             isDeletable,
             searchableName: name,
