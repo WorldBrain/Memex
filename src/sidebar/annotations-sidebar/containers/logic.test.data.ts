@@ -152,6 +152,10 @@ export const FOLLOWED_LISTS: SharedAnnotationList[] = [
     {
         id: 'test a',
         name: 'test a',
+        creatorReference: {
+            id: '123',
+            type: 'user-reference',
+        },
         sharedAnnotationReferences: [
             SHARED_ANNOTATIONS[0].reference,
             SHARED_ANNOTATIONS[3].reference,
@@ -160,6 +164,10 @@ export const FOLLOWED_LISTS: SharedAnnotationList[] = [
     {
         id: 'test b',
         name: 'test b',
+        creatorReference: {
+            id: '123',
+            type: 'user-reference',
+        },
         sharedAnnotationReferences: [
             SHARED_ANNOTATIONS[0].reference,
             SHARED_ANNOTATIONS[1].reference,
@@ -168,6 +176,10 @@ export const FOLLOWED_LISTS: SharedAnnotationList[] = [
     {
         id: 'test c',
         name: 'test c',
+        creatorReference: {
+            id: TEST_USER.id,
+            type: 'user-reference',
+        },
         sharedAnnotationReferences: [
             SHARED_ANNOTATIONS[0].reference,
             SHARED_ANNOTATIONS[2].reference,
@@ -177,6 +189,10 @@ export const FOLLOWED_LISTS: SharedAnnotationList[] = [
     {
         id: 'test d',
         name: 'test d',
+        creatorReference: {
+            id: TEST_USER.id,
+            type: 'user-reference',
+        },
         sharedAnnotationReferences: [],
     },
 ]

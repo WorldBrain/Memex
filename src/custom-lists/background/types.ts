@@ -1,5 +1,6 @@
-import { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { SpaceDisplayEntry } from '../ui/CollectionPicker/logic'
+import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { SpaceDisplayEntry } from '../ui/CollectionPicker/logic'
 
 export interface PageList {
     id: number
@@ -29,6 +30,7 @@ export interface ListDescription {
 export interface SharedAnnotationList {
     id: string
     name: string
+    creatorReference: UserReference
     sharedAnnotationReferences: SharedAnnotationReference[]
 }
 

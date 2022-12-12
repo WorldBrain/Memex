@@ -253,6 +253,7 @@ export default class CustomListBackground {
         return sharedLists.map((list) => ({
             id: list.reference.id as string,
             name: list.title,
+            creatorReference: list.creator,
             sharedAnnotationReferences: annotListEntriesByList
                 .get(list.reference.id)
                 .map((entry) => entry.sharedAnnotation),

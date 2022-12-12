@@ -1129,86 +1129,81 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderPermissionStatusButton() {
-        if (
-            this.props.selectedSpace.remoteId &&
-            this.props.selectedSpace.localId
-        ) {
-            return (
-                <TooltipBox
-                    tooltipText={
-                        <span>
-                            You can add pages & <br /> annotations to this Space
-                        </span>
-                    }
-                    placement={'bottom-end'}
-                >
+        const { selectedSpace, followedLists, currentUserId } = this.props
+        if (!selectedSpace) {
+            this.throwNoSelectedSpaceError()
+        }
+
+        if (selectedSpace.remoteId != null) {
+            const sharedListData = followedLists.byId[selectedSpace.remoteId]
+
+            if (selectedSpace.localId == null) {
+                return (
                     <PermissionInfoButton
-                        label="Contributor"
+                        label="Follower"
                         type="secondary"
                         size="small"
                         icon="plus"
                     >
                         <Icon
-                            filePath="peopleFine"
+                            filePath="plusIcon"
                             color="greyScale8"
                             heightAndWidth="20px"
                             hoverOff
                         />
-                        Contributor
+                        Follower
                     </PermissionInfoButton>
-                </TooltipBox>
-            )
-        }
+                )
+            }
 
-        if (
-            this.props.selectedSpace.remoteId &&
-            !this.props.selectedSpace.localId
-        ) {
-            return (
-                <PermissionInfoButton
-                    label="Follower"
-                    type="secondary"
-                    size="small"
-                    icon="plus"
-                >
-                    <Icon
-                        filePath="plusIcon"
-                        color="greyScale8"
-                        heightAndWidth="20px"
-                        hoverOff
-                    />
-                    Follower
-                </PermissionInfoButton>
-            )
-        }
-
-        if (
-            !this.props.selectedSpace.remoteId &&
-            !this.props.selectedSpace.localId
-        ) {
-            return undefined
-        }
-
-        if (
-            this.props.selectedSpace.remoteId &&
-            this.props.selectedSpace.localId
-        ) {
-            return (
-                <PermissionInfoButton
-                    label="Owner"
-                    type="secondary"
-                    size="small"
-                    icon="plus"
-                >
-                    <Icon
-                        filePath="personFine"
-                        color="greyScale8"
-                        heightAndWidth="20px"
-                        hoverOff
-                    />
-                    Creator
-                </PermissionInfoButton>
-            )
+            if (sharedListData.creatorReference.id === currentUserId) {
+                return (
+                    <PermissionInfoButton
+                        label="Owner"
+                        type="secondary"
+                        size="small"
+                        icon="plus"
+                    >
+                        <Icon
+                            filePath="personFine"
+                            color="greyScale8"
+                            heightAndWidth="20px"
+                            hoverOff
+                        />
+                        Creator
+                    </PermissionInfoButton>
+                )
+            } else {
+                return (
+                    <TooltipBox
+                        tooltipText={
+                            <span>
+                                You can add pages & <br /> annotations to this
+                                Space
+                            </span>
+                        }
+                        placement={'bottom-end'}
+                    >
+                        <PermissionInfoButton
+                            label="Contributor"
+                            type="secondary"
+                            size="small"
+                            icon="plus"
+                        >
+                            <Icon
+                                filePath="peopleFine"
+                                color="greyScale8"
+                                heightAndWidth="20px"
+                                hoverOff
+                            />
+                            Contributor
+                        </PermissionInfoButton>
+                    </TooltipBox>
+                )
+            }
+        } else {
+            // Local-only spaces don't show a button
+            return null
         }
     }
 

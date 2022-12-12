@@ -1133,6 +1133,11 @@ export class SidebarContainerLogic extends UILogic<
                                               {
                                                   name,
                                                   id: remoteId,
+                                                  // TODO: Properly set list's creator ID once we move to locally sourced followedList data
+                                                  creatorReference: {
+                                                      type: 'user-reference',
+                                                      id: 123,
+                                                  },
                                                   sharedAnnotationReferences: [
                                                       {
                                                           type:
