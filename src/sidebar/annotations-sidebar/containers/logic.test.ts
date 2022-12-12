@@ -530,7 +530,9 @@ describe('SidebarContainerLogic', () => {
 
             // TODO: Update this to trigger the `setSelectedSpace` event instead of directly mutating the state
             sidebar.processMutation({
-                selectedSpace: { $set: { localId: DATA.LISTS_1[1].id } },
+                selectedSpace: {
+                    $set: { localId: DATA.LISTS_1[1].id, remoteId: null },
+                },
             })
 
             expect(sidebar.state.commentBox.lists).toEqual([DATA.LISTS_1[0].id])
@@ -2400,6 +2402,7 @@ describe('SidebarContainerLogic', () => {
                 DATA.FOLLOWED_LISTS[0],
                 DATA.FOLLOWED_LISTS[1],
                 DATA.FOLLOWED_LISTS[2],
+                DATA.FOLLOWED_LISTS[4],
             ]
             device.backgroundModules.contentSharing.canWriteToSharedListRemoteId = async () =>
                 false
@@ -2605,6 +2608,79 @@ describe('SidebarContainerLogic', () => {
             ).toEqual('success')
         })
 
+        it('should be able to set isolated view mode for a specific followed-only space', async ({
+            device,
+        }) => {
+            await setupFollowedListsTestData(device)
+            const { sidebar, emittedEvents } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+            const remoteListId = DATA.FOLLOWED_LISTS[4].id
+            const expectedEvents = []
+
+            expect(sidebar.state.activeTab).toEqual('annotations')
+            expect(sidebar.state.selectedSpace).toEqual(null)
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(
+                sidebar.state.followedLists.byId[remoteListId]
+                    .annotationsLoadState,
+            ).toEqual('pristine')
+            expect(sidebar.state.followedAnnotations).toEqual({})
+
+            await sidebar.processEvent('setSelectedSpace', { remoteListId })
+
+            expectedEvents.push(
+                {
+                    event: 'setSelectedSpace',
+                    args: { localId: null, remoteId: remoteListId },
+                },
+                {
+                    event: 'renderHighlights',
+                    args: { highlights: expect.any(Array) },
+                },
+            )
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(sidebar.state.selectedSpace.localId).toEqual(null)
+            expect(sidebar.state.selectedSpace.remoteId).toEqual(remoteListId)
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(
+                sidebar.state.followedLists.byId[remoteListId]
+                    .annotationsLoadState,
+            ).toEqual('success')
+            expect(sidebar.state.followedAnnotations).toEqual(
+                expect.objectContaining({
+                    [DATA.SHARED_ANNOTATIONS[0].reference
+                        .id]: expect.objectContaining({
+                        id: DATA.SHARED_ANNOTATIONS[0].reference.id,
+                        body: DATA.SHARED_ANNOTATIONS[0].body,
+                        selector: DATA.SHARED_ANNOTATIONS[0].selector,
+                    }),
+                    [DATA.SHARED_ANNOTATIONS[1].reference
+                        .id]: expect.objectContaining({
+                        id: DATA.SHARED_ANNOTATIONS[1].reference.id,
+                        comment: DATA.SHARED_ANNOTATIONS[1].comment,
+                    }),
+                }),
+            )
+
+            await sidebar.processEvent('setSelectedSpace', null)
+
+            expectedEvents.push(
+                {
+                    event: 'renderHighlights',
+                    args: { highlights: sidebar.state.annotations },
+                },
+                {
+                    event: 'setSelectedSpace',
+                    args: null,
+                },
+            )
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(sidebar.state.selectedSpace).toEqual(null)
+            expect(emittedEvents).toEqual(expectedEvents)
+        })
+
         it('should be able to set isolated view mode for a specific local-only space', async ({
             device,
         }) => {
@@ -2698,7 +2774,9 @@ describe('SidebarContainerLogic', () => {
             expect(emittedEvents).toEqual(expectedEvents)
 
             // Now go into selected space mode, which should stop the `renderHighlights` events from emitting
-            sidebar.processMutation({ selectedSpace: { $set: { localId: 0 } } })
+            sidebar.processMutation({
+                selectedSpace: { $set: { localId: 0, remoteId: null } },
+            })
 
             await sidebar.processEvent('setActiveSidebarTab', {
                 tab: 'annotations',
@@ -2734,7 +2812,9 @@ describe('SidebarContainerLogic', () => {
             })
 
             // This awkwardness is due to the sloppy test data setup
-            const loadedFollowedLists = DATA.FOLLOWED_LISTS.slice(0, -1)
+            const loadedFollowedLists = DATA.FOLLOWED_LISTS.filter(
+                (list) => list.sharedAnnotationReferences.length > 0,
+            )
 
             expect(sidebar.state.followedListLoadState).toEqual('success')
             expect(sidebar.state.followedLists).toEqual({
@@ -2745,7 +2825,7 @@ describe('SidebarContainerLogic', () => {
                         {
                             ...list,
                             isExpanded: false,
-                            isContributable: true,
+                            isContributable: list.id !== 'test e', // TODO: improve test setup
                             annotationsLoadState: 'pristine',
                             conversationsLoadState: 'pristine',
                             activeCopyPasterAnnotationId: undefined,

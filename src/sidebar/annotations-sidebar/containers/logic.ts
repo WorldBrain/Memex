@@ -773,7 +773,7 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             const annotationLists = [...commentBox.lists]
-            if (selectedSpace) {
+            if (selectedSpace?.localId != null) {
                 annotationLists.push(selectedSpace.localId)
             }
 
@@ -1642,54 +1642,52 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        let mutation: UIMutation<SidebarContainerState>
         if (event == null) {
-            mutation = { selectedSpace: { $set: null } }
+            this.emitMutation({ selectedSpace: { $set: null } })
 
             this.options.events.emit('renderHighlights', {
                 highlights: previousState.annotations,
             })
+            this.options.events.emit('setSelectedSpace', null)
+            return
+        }
+
+        let remoteListId: string
+        let localListId: number
+        let mutation: UIMutation<SidebarContainerState>
+
+        if ('remoteListId' in event) {
+            remoteListId = event.remoteListId
+            localListId = this.options.annotationsCache.getLocalListIdByRemoteId(
+                event.remoteListId,
+            )
         } else {
-            let remoteListId: string
-            let localListId: number
-            if ('remoteListId' in event) {
-                remoteListId = event.remoteListId
-                localListId = this.options.annotationsCache.getLocalListIdByRemoteId(
-                    event.remoteListId,
-                )
-                if (localListId == null) {
-                    throw new Error(
-                        'Could not find associated local space data - cannot enter selected space mode on non-writable space',
-                    )
-                }
-            } else {
-                const listData = this.options.annotationsCache.listData[
-                    event.localListId
-                ]
-                if (listData?.remoteId != null) {
-                    remoteListId = listData.remoteId
-                }
-
-                localListId = event.localListId
-
-                if (remoteListId == null) {
-                    this.options.events.emit('renderHighlights', {
-                        highlights: previousState.annotations.filter(
-                            ({ lists }) => lists.includes(localListId),
-                        ),
-                    })
-                }
+            const listData = this.options.annotationsCache.listData[
+                event.localListId
+            ]
+            if (listData?.remoteId != null) {
+                remoteListId = listData.remoteId
             }
 
-            mutation = {
-                activeTab: { $set: 'spaces' },
-                selectedSpace: {
-                    $set: {
-                        localId: localListId,
-                        remoteId: remoteListId ?? null,
-                    },
+            localListId = event.localListId
+
+            if (remoteListId == null) {
+                this.options.events.emit('renderHighlights', {
+                    highlights: previousState.annotations.filter(({ lists }) =>
+                        lists.includes(localListId),
+                    ),
+                })
+            }
+        }
+
+        mutation = {
+            activeTab: { $set: 'spaces' },
+            selectedSpace: {
+                $set: {
+                    localId: localListId,
+                    remoteId: remoteListId ?? null,
                 },
-            }
+            },
         }
 
         const nextState = this.withMutation(previousState, mutation)

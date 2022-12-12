@@ -49,7 +49,19 @@ export interface SidebarTheme {
     paddingRight: number
 }
 
-export interface SelectedSpaceState {
-    remoteId?: string
-    localId: number
-}
+export type SelectedSpaceState =
+    // Followed-only space
+    | {
+          localId: null
+          remoteId: string
+      }
+    // Local-only space
+    | {
+          localId: number
+          remoteId: null
+      }
+    // Joined/own shared space
+    | {
+          remoteId: string
+          localId: number
+      }

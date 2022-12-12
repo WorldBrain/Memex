@@ -195,6 +195,15 @@ export const FOLLOWED_LISTS: SharedAnnotationList[] = [
         },
         sharedAnnotationReferences: [],
     },
+    {
+        id: 'test e',
+        name: 'test e',
+        creatorReference: {
+            id: TEST_USER.id,
+            type: 'user-reference',
+        },
+        sharedAnnotationReferences: [SHARED_ANNOTATIONS[4].reference],
+    },
 ]
 
 export const ANNOTATION_THREADS: PreparedThread[] = [

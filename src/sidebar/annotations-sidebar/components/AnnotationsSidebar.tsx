@@ -560,14 +560,10 @@ export class AnnotationsSidebar extends React.Component<
 
             let othersAnnotsCount = 0
             for (const { id } of sharedAnnotationReferences) {
-                console.log(this.props.followedAnnotations[id]?.creatorId)
-                console.log(this.props.currentUserId)
-
                 if (
                     this.props.followedAnnotations[id]?.creatorId !==
                     this.props.currentUserId
                 ) {
-                    console.log('true')
                     othersAnnotsCount++
                 }
             }
@@ -1058,53 +1054,20 @@ export class AnnotationsSidebar extends React.Component<
             this.throwNoSelectedSpaceError()
         }
 
-        let totalAnnotsCountJSX: JSX.Element
-        let othersAnnotsCountJSX: JSX.Element = null
-
-        // TODO: clean this state derivation mess up
-        if (selectedSpace.remoteId != null) {
-            const {
-                sharedAnnotationReferences,
-                annotationsLoadState,
-            } = this.props.followedLists.byId[selectedSpace.remoteId]
-            const totalAnnotsCount = sharedAnnotationReferences.length
-            let othersAnnotsCount = 0
-            for (const { id } of sharedAnnotationReferences) {
-                if (
-                    this.props.followedAnnotations[id]?.creatorId !==
-                    this.props.currentUserId
-                ) {
-                    othersAnnotsCount++
-                }
-            }
-            totalAnnotsCountJSX =
-                annotationsLoadState === 'running' ? (
-                    <LoadingIndicatorStyled />
-                ) : (
-                    <span style={{ color: 'white' }}>
-                        Total annots count: {totalAnnotsCount}
-                    </span>
-                )
-            othersAnnotsCountJSX =
-                annotationsLoadState === 'running' ? (
-                    <LoadingIndicatorStyled />
-                ) : (
-                    <span style={{ color: 'white' }}>
-                        Others annots count: {othersAnnotsCount}
-                    </span>
-                )
+        let spaceName: string
+        let spaceDescription: string = ''
+        if (selectedSpace.localId == null) {
+            const followedListData = this.props.followedLists.byId[
+                selectedSpace.remoteId
+            ]
+            spaceName = followedListData?.name ?? 'Missing list'
         } else {
-            const totalAnnotsCount = this.props.annotations.filter((annot) =>
-                annot.lists.includes(selectedSpace.localId),
-            ).length
-            totalAnnotsCountJSX = (
-                <span style={{ color: 'white' }}>
-                    Total annots count: {totalAnnotsCount}
-                </span>
+            const listDetails = this.props.getListDetailsById(
+                selectedSpace.localId,
             )
+            spaceName = listDetails.name
+            spaceDescription = listDetails.description
         }
-
-        const listDetails = this.props.getListDetailsById(selectedSpace.localId)
 
         return (
             <IsolatedViewHeaderContainer>
@@ -1120,8 +1083,8 @@ export class AnnotationsSidebar extends React.Component<
                     />
                     {this.renderPermissionStatusButton()}
                 </IsolatedViewHeaderTopBar>
-                <SpaceTitle>{listDetails.name}</SpaceTitle>
-                <SpaceDescription>{listDetails.description}</SpaceDescription>
+                <SpaceTitle>{spaceName}</SpaceTitle>
+                <SpaceDescription>{spaceDescription}</SpaceDescription>
                 {/* {totalAnnotsCountJSX}
                 {othersAnnotsCountJSX} */}
             </IsolatedViewHeaderContainer>
