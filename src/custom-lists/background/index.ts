@@ -450,12 +450,7 @@ export default class CustomListBackground {
         id: _id,
         type,
         createdAt,
-    }: {
-        name: string
-        id?: number
-        type?: 'page-link'
-        createdAt?: Date
-    }): Promise<number> => {
+    }) => {
         const id = _id ?? this.generateListId()
         const inserted = await this.storage.insertCustomList({
             id,

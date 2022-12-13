@@ -357,7 +357,7 @@ const SidebarItem = styled.div<Props>`
 
     &:hover ${IconBox} {
 
-        display: 
+        display:
         ${(props) =>
             !props.dropReceivingState?.isDraggedOver || props.isMenuDisplayed
                 ? 'flex'
@@ -366,7 +366,7 @@ const SidebarItem = styled.div<Props>`
     }
 
     ${IconBox} {
-        display: 
+        display:
         ${(props) =>
             props.dropReceivingState?.isDraggedOver || props.isMenuDisplayed
                 ? 'flex'
