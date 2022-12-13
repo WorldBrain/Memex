@@ -9,21 +9,11 @@ import SpaceContextMenu, {
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { Props as EditableItemProps } from './sidebar-editable-item'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
-import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import { ListData } from '../types'
 
-export interface Props {
+export interface Props extends Omit<SpaceContextMenuProps, 'copyToClipboard'> {
     isMenuDisplayed: boolean
+    editableProps: EditableItemProps
     toggleMenu: React.MouseEventHandler
-    editableProps?: EditableItemProps
-    contentSharingBG?: ContentSharingInterface
-    spacesBG?: RemoteCollectionsInterface
-    spaceName?: string
-    localListId?: number
-    remoteListId?: string
-    onDeleteSpaceIntent?: React.MouseEventHandler
-    onSpaceShare?: (remoteListId: string) => void
 }
 
 export default class SpaceContextMenuButton extends PureComponent<Props> {
