@@ -113,7 +113,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         </Loader>
     )
 
-    spaceBtnBarDashboardRef = React.createRef<HTMLElement>()
+    spaceBtnBarDashboardRef = React.createRef<HTMLDivElement>()
 
     private renderNoteResult = (
         day: number,

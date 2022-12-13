@@ -49,9 +49,9 @@ export default class PageResultView extends PureComponent<Props> {
             : this.props.fullUrl
     }
 
-    spacePickerButtonRef = React.createRef<HTMLElement>()
-    spacePickerBarRef = React.createRef<HTMLElement>()
-    copyPasteronPageButtonRef = React.createRef<HTMLElement>()
+    spacePickerButtonRef = React.createRef<HTMLDivElement>()
+    spacePickerBarRef = React.createRef<HTMLDivElement>()
+    copyPasteronPageButtonRef = React.createRef<HTMLDivElement>()
 
     private get domain(): string {
         let fullUrl: URL
