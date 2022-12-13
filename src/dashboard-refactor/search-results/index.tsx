@@ -448,20 +448,22 @@ export default class SearchResultsContainer extends React.Component<
     }
 
     private renderOnboardingTutorials() {
+        let title
+        let videoURL
+        let readURL
+        let onDismiss
+
         if (
             this.state.tutorialState != null &&
             this.state.tutorialState[this.props.searchType]
         ) {
-            let title
-            let videoURL
-            let readURL
-
             if (this.props.searchType === 'pages') {
                 title =
                     'Learn the basics about saving and searching what you read online'
                 videoURL =
                     'https://share.descript.com/embed/QTnFzKBo7XM?autoplay=1'
                 readURL = 'https://tutorials.memex.garden/webhighlights'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
             }
             if (this.props.searchType === 'notes') {
                 title =
@@ -469,6 +471,7 @@ export default class SearchResultsContainer extends React.Component<
                 videoURL =
                     'https://share.descript.com/embed/0HGxOo3duKu?autoplay=1'
                 readURL = 'https://tutorials.memex.garden/webhighlights'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
             }
             if (this.props.searchType === 'videos') {
                 title =
@@ -476,6 +479,7 @@ export default class SearchResultsContainer extends React.Component<
                 videoURL =
                     'https://share.descript.com/embed/4yYXrC63L95?autoplay=1'
                 readURL = 'https://tutorials.memex.garden/webhighlights'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
             }
             if (this.props.searchType === 'twitter') {
                 title =
@@ -483,6 +487,7 @@ export default class SearchResultsContainer extends React.Component<
                 videoURL =
                     'https://share.descript.com/embed/TVgEKP80LqR?autoplay=1'
                 readURL = 'https://tutorials.memex.garden/webhighlights'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
             }
             if (this.props.searchType === 'pdf') {
                 title =
@@ -490,8 +495,27 @@ export default class SearchResultsContainer extends React.Component<
                 videoURL =
                     'https://share.descript.com/embed/Vl7nXyy3sLb?autoplay=1'
                 readURL = 'https://tutorials.memex.garden/webhighlights'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
             }
+        }
 
+        if (
+            this.props.showMobileAppAd &&
+            this.props.selectedListId === 20201015
+        ) {
+            title = (
+                <MobileAdContainer>
+                    Save pages & create highlights and annotations on your
+                    mobile devices.
+                    <MobileAppAd />
+                </MobileAdContainer>
+            )
+            videoURL = 'https://share.descript.com/embed/Vl7nXyy3sLb?autoplay=1'
+            readURL = 'https://tutorials.memex.garden/webhighlights'
+            onDismiss = this.props.onDismissMobileAd
+        }
+
+        if (title != null) {
             return (
                 <TutorialContainer
                     showTutorialVideo={this.state.showTutorialVideo}
@@ -514,9 +538,7 @@ export default class SearchResultsContainer extends React.Component<
                                 size="medium"
                                 type="tertiary"
                                 label="Dismiss"
-                                onClick={() =>
-                                    this.dismissTutorials(this.props.searchType)
-                                }
+                                onClick={() => onDismiss()}
                             />
                         </TutorialButtons>
                     </TutorialContent>
@@ -566,17 +588,17 @@ export default class SearchResultsContainer extends React.Component<
                 this.props.searchFilters.dateFrom > 0)
         ) {
             return (
-                <ResultsMessage>
-                    <SectionCircle>
+                <NoResultsMessage>
+                    <IconBox heightAndWidth="34px" background="dark">
                         <Icon
                             filePath={icons.searchIcon}
-                            heightAndWidth="24px"
+                            heightAndWidth="18px"
                             color="purple"
                             hoverOff
                         />
-                    </SectionCircle>
-                    <NoResults title="Nothing found for this query" />
-                </ResultsMessage>
+                    </IconBox>
+                    `Nothing found for "{this.props.searchQuery}"`
+                </NoResultsMessage>
             )
         }
 
@@ -588,138 +610,36 @@ export default class SearchResultsContainer extends React.Component<
             !this.props.searchFilters.isTagFilterActive &&
             !this.props.searchFilters.isDomainFilterActive
         ) {
-            if (this.props.noResultsType === 'mobile-list-ad') {
+            if (this.props.selectedListId === 20201015) {
                 return (
-                    <ResultsMessage>
-                        <SectionCircle>
+                    <NoResultsMessage>
+                        <IconBox heightAndWidth="34px" background="dark">
                             <Icon
                                 filePath={icons.phone}
-                                heightAndWidth="24px"
+                                heightAndWidth="18px"
                                 color="purple"
                                 hoverOff
                             />
-                        </SectionCircle>
-                        <NoResults title="Save & annotate from your mobile devices">
-                            <DismissibleResultsMessage
-                                onDismiss={this.props.onDismissMobileAd}
-                            >
-                                <MobileAppAd />
-                            </DismissibleResultsMessage>
-                        </NoResults>
-                    </ResultsMessage>
+                        </IconBox>
+                        Nothing saved yet from your mobile devices
+                    </NoResultsMessage>
                 )
             }
 
-            // if (this.props.searchType === 'notes') {
             return (
                 <>
-                    {/* <ResultsMessage>
-                            <IconBox heightAndWidth="40px" background="dark">
-                                <Icon
-                                    filePath={icons.highlighterEmpty}
-                                    heightAndWidth="20px"
-                                    color="purple"
-                                    hoverOff
-                                />
-                            </IconBox>
-                            <NoResults
-                                title={
-                                    <span>
-                                        Make your first highlight or annotation
-                                    </span>
-                                }
+                    <NoResultsMessage>
+                        <IconBox heightAndWidth="34px" background="dark">
+                            <Icon
+                                filePath={icons.heartEmpty}
+                                heightAndWidth="18px"
+                                color="purple"
+                                hoverOff
                             />
-                        </ResultsMessage> */}
+                        </IconBox>
+                        Nothing saved yet
+                    </NoResultsMessage>
                 </>
-            )
-            // }
-            // else {
-            //     return (
-            //         <ResultsMessage>
-            //             <SectionCircle>
-            //                 <Icon
-            //                     filePath={icons.heartEmpty}
-            //                     heightAndWidth="24px"
-            //                     color="purple"
-            //                     hoverOff
-            //                 />
-            //             </SectionCircle>
-            //             <NoResults
-            //                 title={
-            //                     <span>
-            //                         Save your first website or{' '}
-            //                         <ImportInfo
-            //                             onClick={() =>
-            //                                 (window.location.hash = '#/import')
-            //                             }
-            //                         >
-            //                             import your bookmarks.
-            //                         </ImportInfo>
-            //                     </span>
-            //                 }
-            //             ></NoResults>
-            //         </ResultsMessage>
-            //     )
-            // }
-        }
-
-        if (
-            this.props.noResultsType === 'mobile-list' &&
-            this.props.searchQuery.length === 0
-        ) {
-            return (
-                <ResultsMessage>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.phone}
-                            heightAndWidth="24px"
-                            color="purple"
-                            hoverOff
-                        />
-                    </SectionCircle>
-                    <NoResults title="Save & annotate from your mobile devices"></NoResults>
-                </ResultsMessage>
-            )
-        }
-
-        if (this.props.noResultsType === 'mobile-list-ad') {
-            return (
-                <ResultsMessage>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.phone}
-                            heightAndWidth="24px"
-                            color="purple"
-                            hoverOff
-                        />
-                    </SectionCircle>
-                    <NoResults title="Save & annotate from your mobile devices">
-                        <DismissibleResultsMessage
-                            onDismiss={this.props.onDismissMobileAd}
-                        >
-                            <MobileAppAd />
-                        </DismissibleResultsMessage>
-                    </NoResults>
-                </ResultsMessage>
-            )
-        }
-
-        if (this.props.noResultsType === 'stop-words') {
-            return (
-                <ResultsMessage>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.searchIcon}
-                            heightAndWidth="24px"
-                            color="purple"
-                            hoverOff
-                        />
-                    </SectionCircle>
-                    <NoResults title="No Results">
-                        Search terms are too common <br />
-                        or have been filtered out to increase performance.
-                    </NoResults>
-                </ResultsMessage>
             )
         }
     }
@@ -891,6 +811,11 @@ export default class SearchResultsContainer extends React.Component<
     }
 }
 
+const MobileAdContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+`
+
 const TutorialVideo = styled.iframe<{ showTutorialVideo: boolean }>`
     height: 170px;
     width: auto;
@@ -1028,6 +953,17 @@ const ResultsExhaustedMessage = styled.div`
     width: fill-available;
     justify-content: center;
     font-size: 16px;
+    align-items: center;
+`
+const NoResultsMessage = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    color: ${(props) => props.theme.colors.greyScale4};
+    padding: 30px;
+    white-space: nowrap;
+    width: fill-available;
+    justify-content: center;
+    font-size: 18px;
     align-items: center;
 `
 

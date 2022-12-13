@@ -456,5 +456,5 @@ const DescriptionContainer = styled.div`
 `
 
 const DescriptionText = styled(Markdown)`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale8};
 `
