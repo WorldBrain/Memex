@@ -32,6 +32,7 @@ import type { BackgroundModules } from './setup'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { isExtensionTab, isBrowserPageTab } from 'src/tab-management/utils'
 import { captureException } from 'src/util/raven'
+import { browser } from 'webextension-polyfill-ts'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -140,6 +141,20 @@ class BackgroundScript {
         })
     }
 
+    private setOnboardingTutorialState = async () => {
+        const tutorials = {
+            ['@onboarding-dashboard-tutorials']: {
+                pages: true,
+                notes: true,
+                videos: true,
+                pdf: true,
+                twitter: true,
+            },
+        }
+
+        await browser.storage.local.set(tutorials)
+    }
+
     /**
      * Set up logic that will get run on ext install, update, browser update.
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onInstalled
@@ -151,6 +166,7 @@ class BackgroundScript {
                     await this.handleInstallLogic()
                     await this.handleUnifiedLogic()
                     await setLocalStorage(READ_STORAGE_FLAG, true)
+                    await this.setOnboardingTutorialState()
                     break
                 case 'update':
                     await this.runQuickAndDirtyMigrations()

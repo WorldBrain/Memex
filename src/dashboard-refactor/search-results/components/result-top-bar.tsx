@@ -12,7 +12,6 @@ export default class ResultTopBar extends PureComponent<Props> {
         return (
             <TopBarContainer>
                 <TopBarSection>{this.props.leftSide}</TopBarSection>
-                <TopBarSection>{this.props.rightSide}</TopBarSection>
             </TopBarContainer>
         )
     }
@@ -21,7 +20,7 @@ export default class ResultTopBar extends PureComponent<Props> {
 const TopBarContainer = styled.div`
     display: flex;
     justify-content: space-between;
-    width: 100%;
+    width: fill-available;
     align-items: center;
     z-index: 1000;
 `
@@ -29,4 +28,5 @@ const TopBarContainer = styled.div`
 const TopBarSection = styled.div`
     display: flex;
     flex-direction: row;
+    width: fill-available;
 `

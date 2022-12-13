@@ -1,6 +1,7 @@
-import React, { PureComponent } from 'react'
-import styled from 'styled-components'
+import React, { PureComponent, useState } from 'react'
+import styled, { css } from 'styled-components'
 import Waypoint from 'react-waypoint'
+import browser from 'webextension-polyfill'
 
 import type {
     RootState,
@@ -19,7 +20,7 @@ import type { RootState as ListSidebarState } from '../lists-sidebar/types'
 import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
     Props as SearchTypeSwitchProps,
-} from './components/search-type-switch'
+} from '@worldbrain/memex-common/lib/common-ui/components/search-type-switch'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
 import NoResults from './components/no-results'
@@ -49,6 +50,9 @@ import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { searchType } from 'src/overview/results/selectors'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -106,14 +110,30 @@ export type Props = RootState &
         updateAllResultNotesShareInfo: (state: AnnotationSharingStates) => void
     }
 
-export default class SearchResultsContainer extends PureComponent<Props> {
+export interface State {
+    tutorialState: []
+    showTutorialVideo: boolean
+}
+
+export default class SearchResultsContainer extends React.Component<
+    Props,
+    State
+> {
     private renderLoader = (props: { key?: string } = {}) => (
         <Loader {...props}>
             <LoadingIndicator />
         </Loader>
     )
+    componentDidMount() {
+        this.getTutorialState()
+    }
 
     spaceBtnBarDashboardRef = React.createRef<HTMLDivElement>()
+
+    state = {
+        showTutorialVideo: false,
+        tutorialState: undefined,
+    }
 
     private renderNoteResult = (
         day: number,
@@ -404,6 +424,138 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         )
     }
 
+    private getTutorialState = async () => {
+        const tutorialStateLoaded = await browser.storage.local.get(
+            '@onboarding-dashboard-tutorials',
+        )
+        this.setState({
+            tutorialState:
+                tutorialStateLoaded['@onboarding-dashboard-tutorials'],
+        })
+    }
+
+    private dismissTutorials = async (type) => {
+        let tutorialState = this.state.tutorialState
+        tutorialState[type] = false
+
+        this.setState({
+            tutorialState: tutorialState,
+        })
+
+        await browser.storage.local.set({
+            '@onboarding-dashboard-tutorials': tutorialState,
+        })
+    }
+
+    private renderOnboardingTutorials() {
+        if (
+            this.state.tutorialState != null &&
+            this.state.tutorialState[this.props.searchType]
+        ) {
+            let title
+            let videoURL
+            let readURL
+
+            if (this.props.searchType === 'pages') {
+                title =
+                    'Learn the basics about saving and searching what you read online'
+                videoURL =
+                    'https://share.descript.com/embed/QTnFzKBo7XM?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/webhighlights'
+            }
+            if (this.props.searchType === 'notes') {
+                title =
+                    'Learn the basics about adding highlights and notes to web content, PDFs and videos'
+                videoURL =
+                    'https://share.descript.com/embed/0HGxOo3duKu?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/webhighlights'
+            }
+            if (this.props.searchType === 'videos') {
+                title =
+                    'Learn the basics about adding highlights to videos on Youtube, Vimeo and HTML5 videos'
+                videoURL =
+                    'https://share.descript.com/embed/4yYXrC63L95?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/webhighlights'
+            }
+            if (this.props.searchType === 'twitter') {
+                title =
+                    'Learn the basics about saving and annotating tweets on the web and on mobile'
+                videoURL =
+                    'https://share.descript.com/embed/TVgEKP80LqR?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/webhighlights'
+            }
+            if (this.props.searchType === 'pdf') {
+                title =
+                    'Learn the basics about annotating PDFs on the web and your hard drive'
+                videoURL =
+                    'https://share.descript.com/embed/Vl7nXyy3sLb?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/webhighlights'
+            }
+
+            return (
+                <TutorialContainer
+                    showTutorialVideo={this.state.showTutorialVideo}
+                >
+                    <TutorialContent
+                        showTutorialVideo={this.state.showTutorialVideo}
+                    >
+                        <TutorialTitle>{title}</TutorialTitle>
+                        <TutorialButtons>
+                            <PrimaryAction
+                                size="medium"
+                                type="primary"
+                                iconPosition="right"
+                                icon="longArrowRight"
+                                label="Read More"
+                                onClick={() => window.open(readURL, '_blank')}
+                            />
+
+                            <PrimaryAction
+                                size="medium"
+                                type="tertiary"
+                                label="Dismiss"
+                                onClick={() =>
+                                    this.dismissTutorials(this.props.searchType)
+                                }
+                            />
+                        </TutorialButtons>
+                    </TutorialContent>
+                    <TutorialVideoContainer
+                        showTutorialVideo={this.state.showTutorialVideo}
+                    >
+                        {this.state.showTutorialVideo ? (
+                            <TutorialVideo
+                                src={videoURL}
+                                showTutorialVideo={this.state.showTutorialVideo}
+                            />
+                        ) : (
+                            <TutorialVideoBox
+                                onClick={() =>
+                                    this.setState({
+                                        showTutorialVideo: true,
+                                    })
+                                }
+                            >
+                                <TutorialPlayButton>
+                                    <Icon
+                                        hoverOff
+                                        color={'normalText'}
+                                        filePath={'play'}
+                                        heightAndWidth={'20px'}
+                                    />
+                                    Watch
+                                </TutorialPlayButton>
+                                <TutorialBlurPicture />
+                            </TutorialVideoBox>
+                        )}
+                    </TutorialVideoContainer>
+                </TutorialContainer>
+            )
+        } else {
+            return undefined
+        }
+    }
+
     private renderNoResults() {
         if (
             this.props.searchResults.allIds.length === 0 &&
@@ -428,6 +580,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             )
         }
 
+        // if the first time using Memex
         if (
             this.props.searchResults.allIds.length === 0 &&
             this.props.searchQuery.length === 0 &&
@@ -457,54 +610,57 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 )
             }
 
-            if (this.props.searchType === 'notes') {
-                return (
-                    <ResultsMessage>
-                        <SectionCircle>
-                            <Icon
-                                filePath={icons.highlighterEmpty}
-                                heightAndWidth="24px"
-                                color="purple"
-                                hoverOff
+            // if (this.props.searchType === 'notes') {
+            return (
+                <>
+                    {/* <ResultsMessage>
+                            <IconBox heightAndWidth="40px" background="dark">
+                                <Icon
+                                    filePath={icons.highlighterEmpty}
+                                    heightAndWidth="20px"
+                                    color="purple"
+                                    hoverOff
+                                />
+                            </IconBox>
+                            <NoResults
+                                title={
+                                    <span>
+                                        Make your first highlight or annotation
+                                    </span>
+                                }
                             />
-                        </SectionCircle>
-                        <NoResults
-                            title={
-                                <span>
-                                    Make your first highlight or annotation
-                                </span>
-                            }
-                        />
-                    </ResultsMessage>
-                )
-            } else {
-                return (
-                    <ResultsMessage>
-                        <SectionCircle>
-                            <Icon
-                                filePath={icons.heartEmpty}
-                                heightAndWidth="24px"
-                                color="purple"
-                                hoverOff
-                            />
-                        </SectionCircle>
-                        <NoResults
-                            title={
-                                <span>
-                                    Save your first website or{' '}
-                                    <ImportInfo
-                                        onClick={() =>
-                                            (window.location.hash = '#/import')
-                                        }
-                                    >
-                                        import your bookmarks.
-                                    </ImportInfo>
-                                </span>
-                            }
-                        ></NoResults>
-                    </ResultsMessage>
-                )
-            }
+                        </ResultsMessage> */}
+                </>
+            )
+            // }
+            // else {
+            //     return (
+            //         <ResultsMessage>
+            //             <SectionCircle>
+            //                 <Icon
+            //                     filePath={icons.heartEmpty}
+            //                     heightAndWidth="24px"
+            //                     color="purple"
+            //                     hoverOff
+            //                 />
+            //             </SectionCircle>
+            //             <NoResults
+            //                 title={
+            //                     <span>
+            //                         Save your first website or{' '}
+            //                         <ImportInfo
+            //                             onClick={() =>
+            //                                 (window.location.hash = '#/import')
+            //                             }
+            //                         >
+            //                             import your bookmarks.
+            //                         </ImportInfo>
+            //                     </span>
+            //                 }
+            //             ></NoResults>
+            //         </ResultsMessage>
+            //     )
+            // }
         }
 
         if (
@@ -715,6 +871,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         rightSide={undefined}
                     />
                 </PageTopBarBox>
+                {this.renderOnboardingTutorials()}
                 {this.renderResultsByDay()}
                 {this.props.areResultsExhausted &&
                     this.props.searchState === 'success' &&
@@ -734,6 +891,134 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     }
 }
 
+const TutorialVideo = styled.iframe<{ showTutorialVideo: boolean }>`
+    height: 170px;
+    width: auto;
+    border: none;
+    border-radius: 5px;
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            height: 500px;
+            width: fill-available;
+        `}
+`
+
+const TutorialContainer = styled.div<{ showTutorialVideo: boolean }>`
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    grid-gap: 40px;
+    padding: 26px 34px;
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    border-radius: 8px;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    width: fill-available;
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            flex-direction: column-reverse;
+            grid-gap: 20px;
+        `}
+`
+
+const TutorialContent = styled.div<{ showTutorialVideo: boolean }>`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
+    height: fill-available;
+    justify-content: space-between;
+    height: 170px;
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            height: 120px;
+        `}
+`
+
+const TutorialTitle = styled.div`
+    font-size: 18px;
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.normalText};
+    line-height: 30px;
+`
+
+const TutorialButtons = styled.div`
+    display: flex;
+    grid-gap: 5px;
+`
+
+const TutorialVideoContainer = styled.div<{ showTutorialVideo: boolean }>`
+    position: relative;
+    height: 170px;
+    width: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            height: 500px;
+            width: fill-available;
+        `}
+`
+
+const TutorialVideoBox = styled.div<{ showTutorialVideo: boolean }>`
+    position: relative;
+    height: 170px;
+    width: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 0.8;
+    }
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            width: fill-available;
+            height: unset;
+        `}
+`
+
+const TutorialBlurPicture = styled.div`
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-image: url('/img/tutorialBlur.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    border-radius: 5px;
+    height: 170px;
+    width: 300px;
+    background-size: cover;
+`
+
+const TutorialPlayButton = styled.div`
+    height: 40px;
+    width: fit-content;
+    padding: 0 15px;
+    background-color: ${(props) => props.theme.colors.lightHover};
+    color: ${(props) => props.theme.colors.normalText};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50px;
+    z-index: 1;
+    font-size: 14px;
+    grid-gap: 5px;
+`
+
 const ResultsExhaustedMessage = styled.div`
     display: flex;
     grid-gap: 10px;
@@ -751,7 +1036,9 @@ const ContentTypeSwitchContainer = styled.div`
     flex-direction: column;
     align-items: flex-start;
     grid-gap: 10px;
-    margin-bottom: 5px;
+    width: fill-available;
+    padding-bottom: 10px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.darkhover};
 `
 
 const ResultsMessage = styled.div`
