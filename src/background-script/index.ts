@@ -155,6 +155,14 @@ class BackgroundScript {
         await browser.storage.local.set(tutorials)
     }
 
+    private setDefaultHighlightColor = async () => {
+        const highlightColor = {
+            ['@highlight-colors']: '#c6f0d4',
+        }
+
+        await browser.storage.local.set(highlightColor)
+    }
+
     /**
      * Set up logic that will get run on ext install, update, browser update.
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onInstalled
@@ -172,6 +180,7 @@ class BackgroundScript {
                     await this.runQuickAndDirtyMigrations()
                     await setLocalStorage(READ_STORAGE_FLAG, false)
                     await this.handleUnifiedLogic()
+                    await this.setDefaultHighlightColor()
                     break
                 default:
             }

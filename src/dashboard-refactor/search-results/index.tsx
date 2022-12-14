@@ -2,6 +2,7 @@ import React, { PureComponent, useState } from 'react'
 import styled, { css } from 'styled-components'
 import Waypoint from 'react-waypoint'
 import browser from 'webextension-polyfill'
+// import { SketchPicker } from 'react-color'
 
 import type {
     RootState,
@@ -23,7 +24,6 @@ import SearchTypeSwitch, {
 } from '@worldbrain/memex-common/lib/common-ui/components/search-type-switch'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
-import NoResults from './components/no-results'
 import { bindFunctionalProps, formatDayGroupTime } from './util'
 import { SortingDropdownMenuBtn } from 'src/sidebar/annotations-sidebar/components/SortingDropdownMenu'
 import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
@@ -38,21 +38,19 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import DismissibleResultsMessage from './components/dismissible-results-message'
 import MobileAppAd from 'src/sync/components/device-list/mobile-app-ad'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import ListDetails, {
     Props as ListDetailsProps,
 } from './components/list-details'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import ListShareMenu from 'src/overview/sharing/ListShareMenu'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { searchType } from 'src/overview/results/selectors'
+import { HexColorPicker } from 'react-colorful'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -792,6 +790,7 @@ export default class SearchResultsContainer extends React.Component<
                     />
                 </PageTopBarBox>
                 {this.renderOnboardingTutorials()}
+                <HexColorPicker color={'red'} />
                 {this.renderResultsByDay()}
                 {this.props.areResultsExhausted &&
                     this.props.searchState === 'success' &&

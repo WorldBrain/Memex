@@ -23,6 +23,7 @@ import { generateAnnotationUrl } from 'src/annotations/utils'
 import { AnalyticsEvent } from 'src/analytics/types'
 import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
+import browser from 'webextension-polyfill'
 
 const styles = require('src/highlighting/ui/styles.css')
 
@@ -100,7 +101,6 @@ export type HighlightRendererInterface = HighlightRenderInterface &
     HighlightInteractionsInterface
 
 export interface HighlightRendererDependencies {}
-
 export class HighlightRenderer implements HighlightRendererInterface {
     private observer
 
@@ -243,6 +243,10 @@ export class HighlightRenderer implements HighlightRendererInterface {
             return
         }
 
+        const highlightsColor = await browser.storage.local.get(
+            '@highlight-colors',
+        )
+
         const baseClass =
             styles[temporary ? 'memex-highlight-tmp' : 'memex-highlight']
 
@@ -266,7 +270,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     },
                 )
 
-                highlightedElements = highlightRange(range, baseClass)
+                highlightedElements = highlightRange(
+                    range,
+                    baseClass,
+                    highlightsColor['@highlight-colors'],
+                )
                 // markRange({ range, cssClass: baseClass })
 
                 this.attachEventListenersToNewHighlights(highlight, onClick)
