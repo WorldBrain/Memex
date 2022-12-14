@@ -38,16 +38,10 @@ export interface ListsSidebarProps {
     searchBarProps: ListsSidebarSearchBarProps
     listsGroups: ListsSidebarGroupProps[]
     initDropReceivingState: (listId: number) => DropReceivingState
-}
-
-export interface State {
     sidebarWidth: string
 }
 
-export default class ListsSidebar extends PureComponent<
-    ListsSidebarProps,
-    State
-> {
+export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     private renderLists = (
         lists: ListsSidebarItemProps[],
         canReceiveDroppedItems: boolean,
@@ -69,10 +63,6 @@ export default class ListsSidebar extends PureComponent<
         window.location.hash = '#/' + route
     }
 
-    state = {
-        sidebarWidth: '100%',
-    }
-
     render() {
         const {
             lockedState: { isSidebarLocked },
@@ -82,304 +72,176 @@ export default class ListsSidebar extends PureComponent<
             listsGroups,
         } = this.props
 
-        const style = {
-            display: !isSidebarPeeking && !isSidebarLocked ? 'none' : 'flex',
-            top: '20',
-            height: isSidebarPeeking ? '90vh' : 'fill-available',
-            width: '96%',
-            background: 'transparent',
-        }
-
         return (
-            <Container
-            // onMouseLeave={this.props.peekState.setSidebarPeekState(false)}
-            >
+            <Container>
                 <GlobalStyle />
-                <Sidebar
-                    ref={this.SidebarContainer}
-                    style={style}
-                    size={{
-                        width: '90%',
-                        height: isSidebarPeeking ? '90vh' : '100vh',
-                    }}
-                    peeking={isSidebarPeeking}
-                    position={{
-                        x:
-                            isSidebarLocked &&
-                            `$sizeConstants.header.heightPxpx`,
-                    }}
-                    locked={isSidebarLocked}
-                    // onMouseEnter={
-                    //     isSidebarPeeking &&
-                    //     this.props.peekState.setSidebarPeekState(true)
-                    // }
-                    width={'100%'}
-                    // resizeHandleClasses={{
-                    //     right: 'sidebarResizeHandleSidebar',
-                    // }}
-                    resizeGrid={[1, 0]}
-                    dragAxis={'none'}
-                    minWidth={'250px'}
-                    maxWidth={'500px'}
-                    disableDragging={'true'}
-                    // enableResizing={this.props.peekState && {
-                    //     top: false,
-                    //     right: true,
-                    //     bottom: false,
-                    //     left: false,
-                    //     topRight: false,
-                    //     bottomRight: false,
-                    //     bottomLeft: false,
-                    //     topLeft: false,
-                    // }}
-                    // onResize={(e, direction, ref, delta, position) => {
-                    //     this.setState({ sidebarWidth: ref.style.width })
-                    // }}
-                >
-                    <BottomGroup sidebarWidth={this.state.sidebarWidth}>
-                        <Margin vertical="10px">
-                            <ListsSidebarGroup
-                                isExpanded
-                                loadingState="success"
-                            >
-                                {this.renderLists(
-                                    [
-                                        {
-                                            name: 'Activity Feed',
-                                            listId: SPECIAL_LIST_IDS.INBOX + 2,
-                                            hasActivity: this.props
-                                                .hasFeedActivity,
-                                            selectedState: {
-                                                isSelected:
-                                                    this.props
-                                                        .selectedListId ===
-                                                    SPECIAL_LIST_IDS.INBOX + 2,
-                                                onSelection: this.props
-                                                    .switchToFeed,
-                                            },
+                <BottomGroup sidebarWidth={this.props.sidebarWidth}>
+                    <Margin vertical="10px">
+                        <ListsSidebarGroup isExpanded loadingState="success">
+                            {this.renderLists(
+                                [
+                                    {
+                                        name: 'Activity Feed',
+                                        listId: SPECIAL_LIST_IDS.INBOX + 2,
+                                        hasActivity: this.props.hasFeedActivity,
+                                        selectedState: {
+                                            isSelected:
+                                                this.props.selectedListId ===
+                                                SPECIAL_LIST_IDS.INBOX + 2,
+                                            onSelection: this.props
+                                                .switchToFeed,
                                         },
-                                    ],
-                                    false,
-                                )}
-                            </ListsSidebarGroup>
-                        </Margin>
-                        <Separator />
-                        <Margin vertical="10px">
-                            <ListsSidebarGroup
-                                isExpanded
-                                loadingState="success"
-                            >
-                                {this.renderLists(
-                                    [
-                                        {
-                                            name: 'All Saved',
-                                            listId: -1,
-                                            selectedState: {
-                                                isSelected:
-                                                    this.props
-                                                        .selectedListId ===
-                                                    null,
-                                                onSelection: this.props
-                                                    .onAllSavedSelection,
-                                            },
+                                    },
+                                ],
+                                false,
+                            )}
+                        </ListsSidebarGroup>
+                    </Margin>
+                    <Separator />
+                    <Margin vertical="10px">
+                        <ListsSidebarGroup isExpanded loadingState="success">
+                            {this.renderLists(
+                                [
+                                    {
+                                        name: 'All Saved',
+                                        listId: -1,
+                                        selectedState: {
+                                            isSelected:
+                                                this.props.selectedListId ===
+                                                null,
+                                            onSelection: this.props
+                                                .onAllSavedSelection,
                                         },
-                                        {
-                                            name: 'Inbox',
-                                            listId: SPECIAL_LIST_IDS.INBOX,
-                                            newItemsCount: this.props
-                                                .inboxUnreadCount,
-                                            selectedState: {
-                                                isSelected:
-                                                    this.props
-                                                        .selectedListId ===
-                                                    SPECIAL_LIST_IDS.INBOX,
-                                                onSelection: this.props
-                                                    .onListSelection,
-                                            },
+                                    },
+                                    {
+                                        name: 'Inbox',
+                                        listId: SPECIAL_LIST_IDS.INBOX,
+                                        newItemsCount: this.props
+                                            .inboxUnreadCount,
+                                        selectedState: {
+                                            isSelected:
+                                                this.props.selectedListId ===
+                                                SPECIAL_LIST_IDS.INBOX,
+                                            onSelection: this.props
+                                                .onListSelection,
                                         },
-                                        {
-                                            name: 'From Mobile',
-                                            listId: SPECIAL_LIST_IDS.MOBILE,
-                                            selectedState: {
-                                                isSelected:
-                                                    this.props
-                                                        .selectedListId ===
-                                                    SPECIAL_LIST_IDS.MOBILE,
-                                                onSelection: this.props
-                                                    .onListSelection,
-                                            },
+                                    },
+                                    {
+                                        name: 'From Mobile',
+                                        listId: SPECIAL_LIST_IDS.MOBILE,
+                                        selectedState: {
+                                            isSelected:
+                                                this.props.selectedListId ===
+                                                SPECIAL_LIST_IDS.MOBILE,
+                                            onSelection: this.props
+                                                .onListSelection,
                                         },
-                                    ],
-                                    false,
-                                )}
-                            </ListsSidebarGroup>
-                        </Margin>
-                        <Separator />
-                        <Margin top="5px">
-                            <ListsSidebarSearchBar {...searchBarProps} />
-                        </Margin>
-                        {listsGroups.map((group, i) => (
-                            <>
-                                <Margin key={i} vertical="10px">
-                                    <ListsSidebarGroup {...group}>
-                                        {group.isAddInputShown && (
-                                            <ListsSidebarEditableItem
-                                                onConfirmClick={
-                                                    group.confirmAddNewList
-                                                }
-                                                onCancelClick={
-                                                    group.cancelAddNewList
-                                                }
-                                                errorMessage={
-                                                    addListErrorMessage
-                                                }
-                                            />
-                                        )}
-                                        {group.title === 'My Spaces' &&
-                                        group.listsArray.length === 0 ? (
-                                            !(
-                                                !group.isAddInputShown &&
-                                                searchBarProps.searchQuery
-                                                    .length > 0 && (
-                                                    <NoCollectionsMessage
-                                                        onClick={
-                                                            group.onAddBtnClick
-                                                        }
-                                                    >
-                                                        <SectionCircle>
-                                                            <Icon
-                                                                filePath={
-                                                                    icons.plus
-                                                                }
-                                                                heightAndWidth="14px"
-                                                                color="purple"
-                                                                hoverOff
-                                                            />
-                                                        </SectionCircle>
-                                                        <InfoText>
-                                                            Create your
-                                                            <Link>
-                                                                first Space
-                                                            </Link>
-                                                        </InfoText>
-                                                    </NoCollectionsMessage>
-                                                )
+                                    },
+                                ],
+                                false,
+                            )}
+                        </ListsSidebarGroup>
+                    </Margin>
+                    <Separator />
+                    <Margin top="5px">
+                        <ListsSidebarSearchBar {...searchBarProps} />
+                    </Margin>
+                    {listsGroups.map((group, i) => (
+                        <>
+                            <Margin key={i} vertical="10px">
+                                <ListsSidebarGroup {...group}>
+                                    {group.isAddInputShown && (
+                                        <ListsSidebarEditableItem
+                                            onConfirmClick={
+                                                group.confirmAddNewList
+                                            }
+                                            onCancelClick={
+                                                group.cancelAddNewList
+                                            }
+                                            errorMessage={addListErrorMessage}
+                                        />
+                                    )}
+                                    {group.title === 'My Spaces' &&
+                                    group.listsArray.length === 0 ? (
+                                        !(
+                                            !group.isAddInputShown &&
+                                            searchBarProps.searchQuery.length >
+                                                0 && (
+                                                <NoCollectionsMessage
+                                                    onClick={
+                                                        group.onAddBtnClick
+                                                    }
+                                                >
+                                                    <SectionCircle>
+                                                        <Icon
+                                                            filePath={
+                                                                icons.plus
+                                                            }
+                                                            heightAndWidth="14px"
+                                                            color="purple"
+                                                            hoverOff
+                                                        />
+                                                    </SectionCircle>
+                                                    <InfoText>
+                                                        Create your
+                                                        <Link>first Space</Link>
+                                                    </InfoText>
+                                                </NoCollectionsMessage>
                                             )
-                                        ) : (
-                                            <>
-                                                {group.title ===
-                                                    'Followed Spaces' &&
-                                                group.listsArray.length ===
-                                                    0 ? (
-                                                    <NoCollectionsMessage
-                                                        onClick={() =>
-                                                            window.open(
-                                                                'https://links.memex.garden/follow-first-space',
-                                                            )
-                                                        }
-                                                    >
-                                                        <SectionCircle>
-                                                            <Icon
-                                                                filePath={
-                                                                    icons.heartEmpty
-                                                                }
-                                                                heightAndWidth="14px"
-                                                                color="purple"
-                                                                hoverOff
-                                                            />
-                                                        </SectionCircle>
-                                                        <InfoText>
-                                                            Follow your
-                                                            <Link>
-                                                                first Space
-                                                            </Link>
-                                                        </InfoText>
-                                                    </NoCollectionsMessage>
-                                                ) : (
-                                                    this.renderLists(
-                                                        group.listsArray,
-                                                        true,
-                                                    )
-                                                )}
-                                            </>
-                                        )}
-                                    </ListsSidebarGroup>
-                                </Margin>
-                                <Separator />
-                            </>
-                        ))}
-                    </BottomGroup>
-                </Sidebar>
-                {/* </Rnd> */}
+                                        )
+                                    ) : (
+                                        <>
+                                            {group.title ===
+                                                'Followed Spaces' &&
+                                            group.listsArray.length === 0 ? (
+                                                <NoCollectionsMessage
+                                                    onClick={() =>
+                                                        window.open(
+                                                            'https://links.memex.garden/follow-first-space',
+                                                        )
+                                                    }
+                                                >
+                                                    <SectionCircle>
+                                                        <Icon
+                                                            filePath={
+                                                                icons.heartEmpty
+                                                            }
+                                                            heightAndWidth="14px"
+                                                            color="purple"
+                                                            hoverOff
+                                                        />
+                                                    </SectionCircle>
+                                                    <InfoText>
+                                                        Follow your
+                                                        <Link>first Space</Link>
+                                                    </InfoText>
+                                                </NoCollectionsMessage>
+                                            ) : (
+                                                this.renderLists(
+                                                    group.listsArray,
+                                                    true,
+                                                )
+                                            )}
+                                        </>
+                                    )}
+                                </ListsSidebarGroup>
+                            </Margin>
+                            <Separator />
+                        </>
+                    ))}
+                </BottomGroup>
             </Container>
         )
     }
 }
 
-const Sidebar = styled.div<{
-    locked: boolean
-    peeking: boolean
-}>`
-    display: flex;
-    flex-direction: column;
-    justify-content: start;
-    z-index: 3000;
-    width: 100%;
-
-    ${(props) =>
-        props.locked &&
-        css`
-            height: 100%;
-            background-color: ${colors.white};
-            /* border-right: solid 1px ${(props) =>
-                props.theme.colors.lineGrey}; */
-        `}
-    ${(props) =>
-        props.peeking &&
-        css`
-            height: max-content;
-            background-color: ${colors.white};
-            //box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
-            /* margin-top: 50px; */
-            margin-bottom: 9px;
-            height: 90vh;
-            top: 20px;
-            border-top-right-radius: 3px;
-            border-bottom-right-radius: 3px;
-            position: sticky;
-        `}
-    ${(props) =>
-        !props.peeking &&
-        !props.locked &&
-        css`
-            display: none;
-        `}
-
-        @keyframes slide-in {
-            0% { 
-                left: -200px;
-                opacity: 0%;
-            }
-            100% { 
-                left: 0px;
-                opacity: 100%;
-            }
-        }
-`
-
 const Container = styled.div`
-    position: absolute;
+    position: sticky;
     z-index: 2147483645;
     width: 100%;
     display: flex;
     justify-content: center;
-`
-
-const PeekTrigger = styled.div`
-    height: 100vh;
-    width: 10px;
-    position: fixed;
-    background: red;
+    height: fill-available;
 `
 
 const Separator = styled.div`
@@ -390,14 +252,12 @@ const Separator = styled.div`
     }
 `
 
-const TopGroup = styled.div`
-    /* border-top: 1px solid ${(props) => props.theme.colors.lineGrey}; */
-`
 const BottomGroup = styled.div<{ sidebarWidth: string }>`
     overflow-y: scroll;
     overflow-x: visible;
     height: fill-available;
     width: ${(props) => props.sidebarWidth};
+    padding-bottom: 100px;
 
     &::-webkit-scrollbar {
       display: none;

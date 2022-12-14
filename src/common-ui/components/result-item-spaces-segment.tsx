@@ -6,7 +6,6 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { padding } from 'polished'
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
-    showEditBtn: boolean
     onEditBtnClick: React.MouseEventHandler
     lists: Array<{ id: number; name: string; isShared: boolean }>
     onListClick?: (localListId: number) => void
@@ -76,7 +75,6 @@ const SpacePickerWrapper = styled.div`
 export default function ListsSegment({
     lists,
     onListClick,
-    showEditBtn,
     onEditBtnClick,
     renderSpacePicker,
     filteredbyListID,
@@ -128,16 +126,6 @@ export default function ListsSegment({
                                         />
                                     )}
                                     {space.name}
-                                    {/* TODO: uncomment when collection context menu is done */}
-                                    {/* {showEditBtn && (
-                            <ListPillSettingButton
-                                onClick={() => {
-                                    // open the space context modal
-                                }}
-                            >
-                                {' ... '}
-                            </ListPillSettingButton>
-                        )} */}
                                 </ListSpaceContainer>
                             )
                         })}

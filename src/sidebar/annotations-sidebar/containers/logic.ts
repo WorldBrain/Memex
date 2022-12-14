@@ -355,7 +355,6 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     setPopoutsActive: EventHandler<'setPopoutsActive'> = async ({ event }) => {
-        console.log(event)
         this.emitMutation({
             popoutsActive: { $set: event },
         })
@@ -373,23 +372,12 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
     hide: EventHandler<'hide'> = ({ event, previousState }) => {
-        if (
-            previousState.showAllNotesCopyPaster ||
-            previousState.showAllNotesShareMenu ||
-            previousState.activeListPickerState ||
-            previousState.showAnnotationsShareModal ||
-            previousState.activeShareMenuNoteId ||
-            previousState.popoutsActive
-        ) {
-            return
-        }
-
         this.emitMutation({
             showState: { $set: 'hidden' },
             activeAnnotationUrl: { $set: null },
         })
 
-        document.body.style.width = 'unset'
+        document.body.style.width = '100%'
     }
 
     lock: EventHandler<'lock'> = () =>
@@ -403,7 +391,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     unlockWidth: EventHandler<'unlockWidth'> = () => {
-        document.body.style.width = 'unset'
+        document.body.style.width = '100%'
         this.emitMutation({ isWidthLocked: { $set: false } })
     }
 

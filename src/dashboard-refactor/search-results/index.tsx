@@ -56,9 +56,14 @@ const timestampToString = (timestamp: number) =>
 export type Props = RootState &
     Pick<
         SearchTypeSwitchProps,
-        'onNotesSearchSwitch' | 'onPagesSearchSwitch'
+        | 'onNotesSearchSwitch'
+        | 'onPagesSearchSwitch'
+        | 'onVideosSearchSwitch'
+        | 'onTwitterSearchSwitch'
+        | 'onPDFSearchSwitch'
     > & {
         searchFilters?: any
+        activePage?: boolean
         searchResults?: any
         searchQuery?: string
         listData: ListSidebarState['listData']
@@ -108,7 +113,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         </Loader>
     )
 
-    spaceBtnBarDashboardRef = React.createRef<HTMLElement>()
+    spaceBtnBarDashboardRef = React.createRef<HTMLDivElement>()
 
     private renderNoteResult = (
         day: number,
@@ -158,85 +163,68 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         : undefined
                 }
                 mode={noteData.isEditing ? 'edit' : 'default'}
-                renderCopyPasterForAnnotation={() =>
-                    noteData.isCopyPasterShown && (
-                        <HoverBox
-                            padding={'0px'}
-                            right="0"
-                            withRelativeContainer
-                        >
-                            <PageNotesCopyPaster
-                                annotationUrls={[noteId]}
-                                normalizedPageUrls={[pageId]}
-                                onClickOutside={
-                                    interactionProps.onCopyPasterBtnClick
-                                }
-                            />
-                        </HoverBox>
-                    )
-                }
+                renderCopyPasterForAnnotation={() => (
+                    <PageNotesCopyPaster
+                        annotationUrls={[noteId]}
+                        normalizedPageUrls={[pageId]}
+                    />
+                )}
                 spacePickerButtonRef={this.spaceBtnBarDashboardRef}
-                listPickerRenderLocation={noteData.listPickerShowStatus}
-                renderListsPickerForAnnotation={() =>
-                    noteData.listPickerShowStatus !== 'hide' && (
-                        <CollectionPicker
-                            initialSelectedListIds={() => listsToDisplay}
-                            selectEntry={(listId) =>
+                renderListsPickerForAnnotation={() => (
+                    <CollectionPicker
+                        initialSelectedListIds={() => listsToDisplay}
+                        selectEntry={(listId) =>
+                            interactionProps.updateLists({
+                                added: listId,
+                                deleted: null,
+                                selected: [],
+                                options: {
+                                    showExternalConfirmations: true,
+                                },
+                            })
+                        }
+                        unselectEntry={(listId) =>
+                            interactionProps.updateLists({
+                                added: null,
+                                deleted: listId,
+                                selected: [],
+                                options: {
+                                    showExternalConfirmations: true,
+                                },
+                            })
+                        }
+                        createNewEntry={interactionProps.createNewList}
+                    />
+                )}
+                renderShareMenuForAnnotation={() => (
+                    <SingleNoteShareMenu
+                        listData={this.props.listData}
+                        isShared={noteData.isShared}
+                        shareImmediately={
+                            noteData.shareMenuShowStatus === 'show-n-share'
+                        }
+                        annotationUrl={noteId}
+                        copyLink={this.props.onNoteLinkCopy}
+                        postShareHook={interactionProps.updateShareInfo}
+                        spacePickerProps={{
+                            initialSelectedListIds: () => listsToDisplay,
+                            selectEntry: (listId, options) =>
                                 interactionProps.updateLists({
                                     added: listId,
                                     deleted: null,
                                     selected: [],
-                                    options: {
-                                        showExternalConfirmations: true,
-                                    },
-                                })
-                            }
-                            unselectEntry={(listId) =>
+                                    options,
+                                }),
+                            unselectEntry: (listId) =>
                                 interactionProps.updateLists({
                                     added: null,
                                     deleted: listId,
                                     selected: [],
-                                    options: {
-                                        showExternalConfirmations: true,
-                                    },
-                                })
-                            }
-                            createNewEntry={interactionProps.createNewList}
-                        />
-                    )
-                }
-                renderShareMenuForAnnotation={() =>
-                    noteData.shareMenuShowStatus !== 'hide' && (
-                        <SingleNoteShareMenu
-                            listData={this.props.listData}
-                            isShared={noteData.isShared}
-                            shareImmediately={
-                                noteData.shareMenuShowStatus === 'show-n-share'
-                            }
-                            annotationUrl={noteId}
-                            copyLink={this.props.onNoteLinkCopy}
-                            closeShareMenu={interactionProps.onShareBtnClick}
-                            postShareHook={interactionProps.updateShareInfo}
-                            spacePickerProps={{
-                                initialSelectedListIds: () => listsToDisplay,
-                                selectEntry: (listId, options) =>
-                                    interactionProps.updateLists({
-                                        added: listId,
-                                        deleted: null,
-                                        selected: [],
-                                        options,
-                                    }),
-                                unselectEntry: (listId) =>
-                                    interactionProps.updateLists({
-                                        added: null,
-                                        deleted: listId,
-                                        selected: [],
-                                    }),
-                                createNewEntry: interactionProps.createNewList,
-                            }}
-                        />
-                    )
-                }
+                                }),
+                            createNewEntry: interactionProps.createNewList,
+                        }}
+                    />
+                )}
                 annotationEditDependencies={{
                     comment: noteData.editNoteForm.inputValue,
                     onListsBarPickerBtnClick:
@@ -253,8 +241,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     onDeleteCancel: () => undefined,
                     onDeleteConfirm: () => undefined,
                     onTagIconClick: interactionProps.onTagPickerBtnClick,
-                    onListIconClick:
-                        interactionProps.onListPickerFooterBtnClick,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
                     onEditIconClick: interactionProps.onEditBtnClick,
@@ -392,12 +378,12 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 key={day.toString() + pageId}
             >
                 <PageResult
+                    activePage={this.props.activePage}
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={this.props.selectedListId}
                     getListDetailsById={this.props.getListDetailsById}
                     shareMenuProps={{
                         normalizedPageUrl: page.normalizedUrl,
-                        closeShareMenu: interactionProps.onShareBtnClick,
                         copyLink: this.props.onPageLinkCopy,
                         postBulkShareHook: (shareInfo) =>
                             interactionProps.updatePageNotesShareInfo(
@@ -630,48 +616,47 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         return days
     }
 
-    private renderListShareBtn() {
-        if (this.props.selectedListId == null) {
-            return
-        }
+    // private renderListShareBtn() {
+    //     if (this.props.selectedListId == null) {
+    //         return
+    //     }
 
-        return (
-            <>
-                <TooltipBox
-                    tooltipText="Bulk-change privacy of annotations in this Space"
-                    placement="bottom"
-                >
-                    <Icon
-                        filePath={icons.multiEdit}
-                        height="16px"
-                        onClick={this.props.toggleListShareMenu}
-                    />
-                </TooltipBox>
-                {this.props.isListShareMenuShown && (
-                    <HoverBox
-                        width="340px"
-                        top="20px"
-                        right="-90px"
-                        withRelativeContainer
-                        position="absolute"
-                    >
-                        <ListShareMenu
-                            openListShareModal={this.props.openListShareModal}
-                            copyLink={this.props.onListLinkCopy}
-                            closeShareMenu={this.props.toggleListShareMenu}
-                            listId={this.props.selectedListId}
-                            shareImmediately={false}
-                            postBulkShareHook={(shareState) =>
-                                this.props.updateAllResultNotesShareInfo(
-                                    shareState,
-                                )
-                            }
-                        />
-                    </HoverBox>
-                )}
-            </>
-        )
-    }
+    //     return (
+    //         <>
+    //             <TooltipBox
+    //                 tooltipText="Bulk-change privacy of annotations in this Space"
+    //                 placement="bottom"
+    //             >
+    //                 <Icon
+    //                     filePath={icons.multiEdit}
+    //                     height="16px"
+    //                     onClick={this.props.toggleListShareMenu}
+    //                 />
+    //             </TooltipBox>
+    //             {this.props.isListShareMenuShown && (
+    //                 <HoverBox
+    //                     width="340px"
+    //                     top="20px"
+    //                     right="-90px"
+    //                     withRelativeContainer
+    //                     position="absolute"
+    //                 >
+    //                     <ListShareMenu
+    //                         openListShareModal={this.props.openListShareModal}
+    //                         copyLink={this.props.onListLinkCopy}
+    //                         listId={this.props.selectedListId}
+    //                         shareImmediately={false}
+    //                         postBulkShareHook={(shareState) =>
+    //                             this.props.updateAllResultNotesShareInfo(
+    //                                 shareState,
+    //                             )
+    //                         }
+    //                     />
+    //                 </HoverBox>
+    //             )}
+    //         </>
+    //     )
+    // }
 
     private firstTimeUser() {
         if (
@@ -705,36 +690,69 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 <PageTopBarBox isDisplayed={this.props.isDisplayed}>
                     <TopBar
                         leftSide={
-                            this.firstTimeUser() === false && (
+                            <ContentTypeSwitchContainer>
+                                <ReferencesContainer>
+                                    {this.props.listData[
+                                        this.props.selectedListId
+                                    ]?.remoteId != null && (
+                                        <>
+                                            <Icon
+                                                hoverOff
+                                                heightAndWidth="12px"
+                                                color={'iconColor'}
+                                                icon={icons.alertRound}
+                                            />
+                                            <InfoText>
+                                                Only your own contributions to
+                                                this space are visible locally.
+                                            </InfoText>
+                                        </>
+                                    )}
+                                </ReferencesContainer>
                                 <SearchTypeSwitch {...this.props} />
-                            )
+                            </ContentTypeSwitchContainer>
                         }
-                        rightSide={
-                            <ReferencesContainer>
-                                {this.props.listData[this.props.selectedListId]
-                                    ?.remoteId != null && (
-                                    <>
-                                        <Icon
-                                            hoverOff
-                                            heightAndWidth="12px"
-                                            color={'iconColor'}
-                                            icon={icons.alertRound}
-                                        />
-                                        <InfoText>
-                                            Only your own contributions to this
-                                            space are visible locally.
-                                        </InfoText>
-                                    </>
-                                )}
-                            </ReferencesContainer>
-                        }
+                        rightSide={undefined}
                     />
                 </PageTopBarBox>
                 {this.renderResultsByDay()}
+                {this.props.areResultsExhausted &&
+                    this.props.searchState === 'success' &&
+                    this.props.searchResults.allIds.length > 0 && (
+                        <ResultsExhaustedMessage>
+                            <Icon
+                                filePath="checkRound"
+                                heightAndWidth="22px"
+                                hoverOff
+                                color={'greyScale4'}
+                            />
+                            End of results
+                        </ResultsExhaustedMessage>
+                    )}
             </ResultsContainer>
         )
     }
 }
+
+const ResultsExhaustedMessage = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    color: ${(props) => props.theme.colors.greyScale4};
+    padding: 10px;
+    white-space: nowrap;
+    width: fill-available;
+    justify-content: center;
+    font-size: 16px;
+    align-items: center;
+`
+
+const ContentTypeSwitchContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    grid-gap: 10px;
+    margin-bottom: 5px;
+`
 
 const ResultsMessage = styled.div`
     padding-top: 30px;
@@ -754,7 +772,7 @@ const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
     width: 100%;
 
     padding: 0px 15px;
-    height: 50px;
+    height: fit-content;
     max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
     z-index: 2147483639;
     position: sticky;
@@ -770,8 +788,8 @@ const ReferencesContainer = styled.div`
     color: ${(props) => props.theme.colors.darkText};
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: flex-start;
     grid-gap: 5px;
 `
 
@@ -864,8 +882,8 @@ const SectionCircle = styled.div`
 `
 
 const ImportInfo = styled.span`
-color: ${(props) => props.theme.colors.purple};
-margin - bottom: 40px;
-font - weight: 500;
-cursor: pointer;
+    color: ${(props) => props.theme.colors.purple};
+    margin-bottom: 40px;
+    font-weight: 500;
+    cursor: pointer;
 `

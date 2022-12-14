@@ -115,10 +115,15 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                     {renderCopyPasterButton()}
                     {renderExpandButton()}
                 </ActionButtons>
+                <Placeholder />
             </Margin>
         )
     }
 }
+
+const Placeholder = styled.div`
+    width: 220px;
+`
 
 const textStyles = `
     font-family: ${fonts.primary.name};

@@ -52,7 +52,7 @@ function renderCopyPasterBox(props, copypasterButtonRef) {
 }
 
 export default function SearchCopyPaster(props: Props) {
-    const copypasterButtonRef = React.useRef<HTMLElement>(null)
+    const copypasterButtonRef = React.useRef<HTMLDivElement>(null)
 
     return (
         <TooltipBox tooltipText={'Copy Search Results'} placement="bottom">

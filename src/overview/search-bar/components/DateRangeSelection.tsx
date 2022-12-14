@@ -18,7 +18,6 @@ export interface DateRangeSelectionProps {
     endDateText: string
     disabled?: boolean
     onClickOutside?: React.MouseEventHandler
-    onEscapeKeyDown?: () => void | Promise<void>
     onStartDateChange: (...args) => void
     onStartDateTextChange: (...args) => void
     onEndDateChange: (...args) => void
@@ -82,11 +81,6 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
      * Overrides react-date-picker's input keydown handler to search on Enter key press.
      */
     handleKeydown = ({ isStartDate }) => (event) => {
-        if (event.key === 'Escape' && this.props.onEscapeKeyDown) {
-            this.props.onEscapeKeyDown()
-            return
-        }
-
         if (
             this.props.env === 'inpage' &&
             !(event.ctrlKey || event.metaKey) &&

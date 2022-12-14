@@ -20,7 +20,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
         extVersion: browser.runtime.getManifest().version,
     }
 
-    private helpButtonRef = React.createRef<HTMLElement>()
+    private helpButtonRef = React.createRef<HTMLDivElement>()
 
     state = { isOpen: false }
 

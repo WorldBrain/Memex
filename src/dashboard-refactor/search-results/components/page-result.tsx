@@ -49,9 +49,9 @@ export default class PageResultView extends PureComponent<Props> {
             : this.props.fullUrl
     }
 
-    spacePickerButtonRef = React.createRef<HTMLElement>()
-    spacePickerBarRef = React.createRef<HTMLElement>()
-    copyPasteronPageButtonRef = React.createRef<HTMLElement>()
+    spacePickerButtonRef = React.createRef<HTMLDivElement>()
+    spacePickerBarRef = React.createRef<HTMLDivElement>()
+    copyPasteronPageButtonRef = React.createRef<HTMLDivElement>()
 
     private get domain(): string {
         let fullUrl: URL
@@ -234,6 +234,14 @@ export default class PageResultView extends PureComponent<Props> {
                             this.props.notesType
                         ].length.toString(),
                     imageColor: 'purple',
+                    onClick: this.props.onNotesBtnClick,
+                    tooltipText: (
+                        <span>
+                            <strong>Add/View Notes</strong>
+                            <br />
+                            shift+click to open inline
+                        </span>
+                    ),
                 },
             ]
         }
@@ -245,7 +253,6 @@ export default class PageResultView extends PureComponent<Props> {
                     image: 'trash',
                     onClick: this.props.onTrashBtnClick,
                     tooltipText: 'Delete Page & all related content',
-                    componentToOpen: null,
                 },
                 {
                     key: 'copy-paste-page-btn',
@@ -281,7 +288,6 @@ export default class PageResultView extends PureComponent<Props> {
                         ].length.toString(),
                     imageColor: 'purple',
                     onClick: this.props.onNotesBtnClick,
-                    componentToOpen: null,
                     tooltipText: (
                         <span>
                             <strong>Add/View Notes</strong>
@@ -344,7 +350,9 @@ export default class PageResultView extends PureComponent<Props> {
         return (
             <ItemBox
                 onMouseEnter={this.props.onMainContentHover}
+                onMouseOver={this.props.onMainContentHover}
                 onMouseLeave={this.props.onUnhover}
+                active={this.props.activePage}
                 firstDivProps={{
                     // onMouseLeave: this.props.onUnhover,
                     onDragStart: this.props.onPageDrag,
@@ -377,7 +385,6 @@ export default class PageResultView extends PureComponent<Props> {
                     {this.hasLists && (
                         <ListsSegment
                             lists={this.displayLists}
-                            showEditBtn={this.props.hoverState === 'lists'}
                             onListClick={undefined}
                             onEditBtnClick={this.props.onListPickerBarBtnClick}
                             renderSpacePicker={
@@ -411,10 +418,6 @@ const StyledPageResult = styled.div`
     flex-direction: column;
     position: relative;
     border-radius: 12px;
-
-    &:hover {
-        outline: 2px solid ${(props) => props.theme.colors.lineGrey};
-    }
 `
 
 const RemoveFromListBtn = styled.div`

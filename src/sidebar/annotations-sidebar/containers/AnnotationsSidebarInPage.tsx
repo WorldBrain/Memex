@@ -43,6 +43,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         },
     }
 
+    popoutOpen = false
+    // rootNode?: ShadowRoot | Document
+
     constructor(props: Props) {
         super({
             ...props,
@@ -55,12 +58,34 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
     componentDidMount() {
         super.componentDidMount()
+        document.addEventListener('keydown', this.listenToEsc)
+        document.addEventListener('mousedown', this.listenToOutsideClick)
         this.setupEventForwarding()
     }
 
     componentWillUnmount() {
         super.componentWillUnmount()
+
+        document.removeEventListener('keydown', this.listenToEsc)
+        document.removeEventListener('mousedown', this.listenToOutsideClick)
         this.cleanupEventForwarding()
+    }
+
+    listenToEsc = (event) => {
+        if (event.key === 'Escape') {
+            this.hideSidebar()
+        }
+    }
+
+    listenToOutsideClick = async (event) => {
+        const sidebarContainer = document.getElementById(
+            'memex-sidebar-container',
+        )
+        if (sidebarContainer && this.state.showState === 'visible') {
+            if (!event.composedPath().includes(sidebarContainer)) {
+                this.hideSidebar()
+            }
+        }
     }
 
     async componentDidUpdate(prevProps: Props) {
@@ -203,7 +228,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             if (changes.sidebar) {
                 this.showSidebar()
             } else {
-                this.hideSidebar()
+                // this.hideSidebar()
             }
         }
     }

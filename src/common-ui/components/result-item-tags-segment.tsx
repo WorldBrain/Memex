@@ -7,7 +7,6 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     tags: string[]
-    showEditBtn: boolean
     onTagClick?: (tag: string) => void
     onEditBtnClick: React.MouseEventHandler
 }
@@ -15,7 +14,6 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
 export default function TagsSegment({
     tags,
     onTagClick,
-    showEditBtn,
     onEditBtnClick,
     ...props
 }: Props) {

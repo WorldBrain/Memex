@@ -447,18 +447,16 @@ export default class CustomListBackground {
         return this.storage.countInboxUnread()
     }
 
-    createCustomList = async ({
+    createCustomList: RemoteCollectionsInterface['createCustomList'] = async ({
         name,
         id: _id,
+        type,
         createdAt,
-    }: {
-        name: string
-        id?: number
-        createdAt?: Date
-    }): Promise<number> => {
+    }) => {
         const id = _id ?? this.generateListId()
         const inserted = await this.storage.insertCustomList({
             id,
+            type,
             name,
             createdAt,
         })

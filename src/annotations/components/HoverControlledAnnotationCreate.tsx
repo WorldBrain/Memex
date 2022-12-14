@@ -26,10 +26,7 @@ export default class HoverControlledAnnotationEditable extends React.Component<
         return (
             <AnnotationCreate
                 {...this.props}
-                onFooterHover={this.setHoverState('footer')}
                 onNoteHover={this.setHoverState('note')}
-                onTagsHover={this.setHoverState('tags')}
-                onListsHover={this.setHoverState('lists')}
                 onUnhover={this.setHoverState(null)}
                 hoverState={this.state.hoverState}
             />

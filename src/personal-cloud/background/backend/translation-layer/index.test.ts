@@ -302,6 +302,7 @@ async function setup(options?: { withStorageHooks?: boolean }) {
         (await getSqlStorageMananager?.()) ?? serverStorage.manager
     serverIdCapturer.setup(serverStorageManager)
     storageHooksChangeWatcher.setUp({
+        getFunctionsConfig: () => ({}), // TODO: implement
         fetch: fakeFetch.fetch,
         captureException: async (err) => undefined, // TODO: implement
         serverStorageManager,

@@ -33,6 +33,7 @@ export interface State {
     showSuccessMsg: boolean
     mode: 'confirm-space-delete' | 'followed-space' | null
     nameValue: string
+    showSaveButton: boolean
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -56,6 +57,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         nameValue: this.dependencies.spaceName,
         showSuccessMsg: false,
         mode: null,
+        showSaveButton: false,
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
@@ -165,7 +167,10 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         previousState,
         event,
     }) => {
-        this.emitMutation({ nameValue: { $set: event.name } })
+        this.emitMutation({
+            nameValue: { $set: event.name },
+            showSaveButton: { $set: true },
+        })
     }
 
     copyInviteLink: EventHandler<'copyInviteLink'> = async ({

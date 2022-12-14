@@ -19,13 +19,9 @@ import EditableMenuItem, {
 import { getListShareUrl } from 'src/content-sharing/utils'
 
 export interface Props extends Dependencies {
-    xPosition?: number
-    yPosition?: number
-    fixedPositioning?: boolean
     editableProps: Omit<EditableMenuItemProps, 'nameValue' | 'onNameChange'>
     onDeleteSpaceConfirm?: React.MouseEventHandler
     onDeleteSpaceIntent?: React.MouseEventHandler
-    onClose: (saveChanges?: boolean) => void
 }
 
 // NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
@@ -225,19 +221,43 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                 <EditArea>
                     <EditableMenuItem
                         {...this.props.editableProps}
+                        confirmWithEnter={() => {
+                            this.setState({
+                                showSaveButton: false,
+                            })
+                        }}
                         onNameChange={(name) =>
                             this.processEvent('updateSpaceName', { name })
                         }
                         nameValue={this.state.nameValue}
                     />
                 </EditArea>
-                <PrimaryAction
-                    onClick={deleteHandler}
-                    icon={'trash'}
-                    size={'medium'}
-                    type={'tertiary'}
-                    label={'Delete Space'}
-                />
+                <ButtonBox>
+                    <PrimaryAction
+                        onClick={deleteHandler}
+                        icon={'trash'}
+                        size={'medium'}
+                        type={'tertiary'}
+                        label={'Delete Space'}
+                    />
+                    <>
+                        {this.state.showSaveButton && (
+                            <Icon
+                                filePath="check"
+                                color="purple"
+                                heightAndWidth="24px"
+                                onClick={() => {
+                                    this.setState({
+                                        showSaveButton: false,
+                                    })
+                                    this.props.editableProps.onConfirmClick(
+                                        this.state.nameValue,
+                                    )
+                                }}
+                            />
+                        )}
+                    </>
+                </ButtonBox>
             </ContextMenuContainer>
         )
     }
@@ -246,6 +266,13 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         return <MenuContainer>{this.renderMainContent()}</MenuContainer>
     }
 }
+
+const ButtonBox = styled.div`
+    width: fill-available;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`
 
 const ContextMenuContainer = styled.div`
     display: flex;
