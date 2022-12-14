@@ -251,7 +251,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                 placement={'bottom-start'}
                 offsetX={10}
                 closeComponent={() => this.toggleShowTutorial()}
-                width={'420px'}
+                width={'440px'}
                 bigClosingScreen
             >
                 <QuickTutorial

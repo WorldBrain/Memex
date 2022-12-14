@@ -28,6 +28,7 @@ import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-fi
 import { addUrlToBlacklist } from 'src/blacklist/utils'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
@@ -125,7 +126,7 @@ export default class Ribbon extends Component<Props, State> {
         }
     }
 
-    private getTooltipText(name: string): string {
+    private getTooltipText(name: string): JSX.Element | string {
         const elData = this.shortcutsData.get(name)
         const short: Shortcut = this.keyboardShortcuts[name]
 
@@ -141,9 +142,14 @@ export default class Ribbon extends Component<Props, State> {
                 : elData.toggleOn
         }
 
-        return short.shortcut && short.enabled
-            ? `${source} (${short.shortcut})`
-            : source
+        return short.shortcut && short.enabled ? (
+            <TooltipContent>
+                {source}
+                {<KeyboardShortcuts keys={short.shortcut.split('+')} />}
+            </TooltipContent>
+        ) : (
+            source
+        )
     }
 
     private hideListPicker = () => {
@@ -187,7 +193,7 @@ export default class Ribbon extends Component<Props, State> {
                 placement={'left-start'}
                 offsetX={10}
                 closeComponent={this.props.toggleShowTutorial}
-                width={'420px'}
+                width={'440px'}
                 bigClosingScreen
             >
                 <QuickTutorial
@@ -700,6 +706,12 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 }
+
+const TooltipContent = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+`
 
 const BlockListArea = styled.div`
     padding: 0px 10px 15px 5px;

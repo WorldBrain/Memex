@@ -10,6 +10,7 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 const styles = require('./BookmarkButton.css')
 const buttonStyles = require('../../components/Button.css')
@@ -77,17 +78,9 @@ class BookmarkButton extends PureComponent<Props> {
                 <ButtonInnerContent>
                     {text}
                     <ShortCutContainer>
-                        <ShortCutBlock>
-                            <ShortCutText>
-                                {this.state.highlightInfo?.split('+')[0]}
-                            </ShortCutText>
-                        </ShortCutBlock>
-                        +
-                        <ShortCutBlock>
-                            <ShortCutText>
-                                {this.state.highlightInfo?.split('+')[1]}
-                            </ShortCutText>
-                        </ShortCutBlock>
+                        <KeyboardShortcuts
+                            keys={this.state.highlightInfo?.split('+')}
+                        />
                     </ShortCutContainer>
                 </ButtonInnerContent>
             </ButtonItem>
