@@ -381,6 +381,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
      */
     highlightAndScroll = (annotation: Annotation) => {
         this.resetHighlightsStyles()
+        this.removeSelectedHighlights(this.currentActiveHighlight)
         this.selectHighlight(annotation)
         this.scrollToHighlight(annotation)
     }
@@ -542,17 +543,18 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
     /**
      * Return highlights to normal state
-     * If `onlyRemoveDarkHighlights` is true, only dark highlights will be removed.
      */
     resetHighlightsStyles = () => {
         const highlights = document.querySelectorAll(`[data-annotation]`)
-
         console.log(highlights)
         highlights.forEach((highlight: HTMLElement) => {
+            console.log(highlight.getAttribute('data-annotation'))
+            console.log(this.currentActiveHighlight)
             if (
                 highlight.getAttribute('data-annotation') ===
                 this.currentActiveHighlight
             ) {
+                console.log('hat functioniert')
                 return
             } else {
                 highlight.classList.remove('selectedHighlight')
