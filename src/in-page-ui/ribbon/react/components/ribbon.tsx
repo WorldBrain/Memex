@@ -32,7 +32,7 @@ import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { HexAlphaColorPicker, HexColorPicker } from 'react-colorful'
 
-export interface Props extends RibbonSubcomponentProps, RibbonHighlightsProps {
+export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
     setRef?: (el: HTMLElement) => void
     isExpanded: boolean
