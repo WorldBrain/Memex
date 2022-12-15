@@ -50,7 +50,6 @@ import type { ListDetailsGetter } from 'src/annotations/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { HexColorPicker } from 'react-colorful'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -790,7 +789,6 @@ export default class SearchResultsContainer extends React.Component<
                     />
                 </PageTopBarBox>
                 {this.renderOnboardingTutorials()}
-                <HexColorPicker color={'red'} />
                 {this.renderResultsByDay()}
                 {this.props.areResultsExhausted &&
                     this.props.searchState === 'success' &&
