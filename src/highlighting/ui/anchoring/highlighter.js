@@ -107,7 +107,7 @@ function getPdfCanvas(highlightEl) {
  *   The SVG graphic element that corresponds to the highlight or `null` if
  *   no PDF page was found below the highlight.
  */
-function drawHighlightsAbovePdfCanvas(highlightEl) {
+function drawHighlightsAbovePdfCanvas(highlightEl, highlightsColor) {
     const canvasEl = getPdfCanvas(highlightEl)
     if (!canvasEl || !canvasEl.parentElement) {
         return null
@@ -168,7 +168,7 @@ function drawHighlightsAbovePdfCanvas(highlightEl) {
 
     if (isCssBlendSupported) {
         rect.setAttribute('class', 'hypothesis-svg-highlight')
-        rect.setAttribute('style', `fill: #d4e8ff;`)
+        rect.style['fill'] = highlightsColor
     } else {
         rect.setAttribute('class', 'hypothesis-svg-highlight is-opaque')
     }
@@ -308,13 +308,9 @@ export function highlightRange(
 
         /** @type {HighlightElement} */
         const highlightEl = document.createElement('hypothesis-highlight')
-        highlightEl.setAttribute(
-            'style',
-            `background-color: ${highlightsColor}`,
-        )
-        // make color of text visibly different if its a link
-        highlightEl.className = cssClass
 
+        highlightEl.style['background-color'] = highlightsColor
+        highlightEl.className = cssClass
         nodes[0].parentNode.replaceChild(highlightEl, nodes[0])
         nodes.forEach((node) => highlightEl.appendChild(node))
 
@@ -323,7 +319,10 @@ export function highlightRange(
             // above the page's canvas rather than CSS `background-color` on the
             // highlight element. This enables more control over blending of the
             // highlight with the content below.
-            const svgHighlight = drawHighlightsAbovePdfCanvas(highlightEl)
+            const svgHighlight = drawHighlightsAbovePdfCanvas(
+                highlightEl,
+                highlightsColor,
+            )
             if (svgHighlight) {
                 highlightEl.className += ' is-transparent'
 

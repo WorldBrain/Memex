@@ -24,6 +24,9 @@ import { AnalyticsEvent } from 'src/analytics/types'
 import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import browser from 'webextension-polyfill'
+import * as PDFs from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
+import { C } from 'js-combinatorics'
+import { throttle } from 'lodash'
 
 const styles = require('src/highlighting/ui/styles.css')
 
@@ -108,9 +111,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
     constructor(private deps: HighlightRendererDependencies) {
         document.addEventListener('click', this.handleOutsideHighlightClick)
-        browser.storage.onChanged.addListener((change) => {
-            this.defaultHighlightColor = change['@highlight-colors'].newValue
-        })
     }
 
     private handleOutsideHighlightClick = async (e: MouseEvent) => {
@@ -244,18 +244,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
         onClick: AnnotationClickHandler,
         temporary = false,
     ) => {
+        let highlightColor = this.defaultHighlightColor
         if (!highlight?.selector?.descriptor?.content) {
             return
         }
 
-        const highlightsColor = await browser.storage.local.get(
-            '@highlight-colors',
-        )
-
-        addEventListener('storage', (event) => {})
-        onstorage = (event) => {}
-
-        this.defaultHighlightColor = highlightsColor['@highlight-colors']
+        console.log('renderhighlightattempt')
 
         const baseClass =
             styles[temporary ? 'memex-highlight-tmp' : 'memex-highlight']
@@ -273,9 +267,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
                 const range = await retryUntil(
                     () => descriptorToRange({ descriptor }),
-                    (_range) => _range !== null,
+                    (range) => range !== null,
                     {
-                        intervalMiliseconds: 200,
+                        intervalMiliseconds: 1000,
                         timeoutMiliseconds: 5000,
                     },
                 )
@@ -283,7 +277,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 highlightedElements = highlightRange(
                     range,
                     baseClass,
-                    highlightsColor['@highlight-colors'],
+                    highlightColor,
                 )
                 // markRange({ range, cssClass: baseClass })
 
@@ -322,6 +316,15 @@ export class HighlightRenderer implements HighlightRendererInterface {
         highlights: Highlight[],
         onClick,
     ): Promise<Highlight[]> => {
+        const highlightsColor = await browser.storage.local.get(
+            '@highlight-colors',
+        )
+        this.defaultHighlightColor = highlightsColor['@highlight-colors']
+
+        browser.storage.onChanged.addListener((change) => {
+            this.defaultHighlightColor = change['@highlight-colors'].newValue
+        })
+
         await Promise.all(
             highlights.map(async (highlight) => {
                 await this.renderHighlight(highlight, onClick)
@@ -338,7 +341,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
             if (pdfViewer) {
                 this.observer = new MutationObserver(
-                    debounce(() => this.reanchorer(highlights, onClick), 100),
+                    throttle(() => this.reanchorer(highlights, onClick), 1000),
                 )
                 this.observer.observe(pdfViewer.viewer, {
                     attributes: true,
@@ -351,12 +354,30 @@ export class HighlightRenderer implements HighlightRendererInterface {
     }
 
     reanchorer = (highlights: Highlight[], onClick) => {
-        const reanchors = highlights.filter(
+        let reanchors = highlights.filter(
             (h) => !document.body.contains(h.domElements?.pop() ?? null),
         )
+
         if (reanchors.length > 0) {
             this.renderHighlights(reanchors, onClick)
         }
+
+        // for (let item of reanchors) {
+        //     let currentPageIndex = globalThis.PDFViewerApplication?.page
+        //     PDFs.findPage(item.selector.descriptor.content[1].start).then(
+        //         ({ index, offset, textContent }) => {
+        //             console.log('test',)
+        //             if (index !== currentPageIndex) {
+        //                 return
+        //             } else {
+        //                 if (reanchors.length > 0) {
+        //                     console.log('attempt at reanchoring')
+        //                     this.renderHighlights(reanchors, onClick)
+        //                 }
+        //             }
+        //         },
+        //     )
+        // }
     }
 
     /**
@@ -396,12 +417,13 @@ export class HighlightRenderer implements HighlightRendererInterface {
      */
 
     attachEventListenersToNewHighlights = (
-        highlight: Highlight,
+        highlight: Annotation | Highlight,
         openSidebar: AnnotationClickHandler,
     ) => {
         const newHighlights = document.querySelectorAll(
             `.${styles['memex-highlight']}:not([data-annotation])`,
         )
+
         newHighlights.forEach((highlightEl: HTMLElement) => {
             highlightEl.dataset.annotation = highlight.url
 
@@ -513,10 +535,15 @@ export class HighlightRenderer implements HighlightRendererInterface {
     /**
      * Makes the highlight a dark highlight.
      */
-    selectHighlight = ({ url }: Highlight) => {
-        this.currentActiveHighlight = url
+    selectHighlight = (annotation: Annotation | Highlight) => {
+        this.currentActiveHighlight = annotation.url
         const highlights = document.querySelectorAll(
-            `[data-annotation="${url}"]`,
+            `[data-annotation="${annotation.url}"]`,
+        )
+        PDFs.anchor(
+            document.body,
+            annotation?.selector.descriptor.content,
+            true,
         )
         highlights.forEach((highlight: HTMLElement) => {
             highlight.classList.add('selectedHighlight')
@@ -540,22 +567,19 @@ export class HighlightRenderer implements HighlightRendererInterface {
         })
         this.currentActiveHighlight = ''
     }
-
     /**
      * Return highlights to normal state
      */
     resetHighlightsStyles = () => {
         const highlights = document.querySelectorAll(`[data-annotation]`)
-        console.log(highlights)
         highlights.forEach((highlight: HTMLElement) => {
-            console.log(highlight.getAttribute('data-annotation'))
-            console.log(this.currentActiveHighlight)
             if (
                 highlight.getAttribute('data-annotation') ===
                 this.currentActiveHighlight
             ) {
-                console.log('hat functioniert')
-                return
+                highlight.classList.remove('selectedHighlight')
+                highlight.style['background-color'] = this.defaultHighlightColor
+                highlight.style['border-bottom'] = 'unset'
             } else {
                 highlight.classList.remove('selectedHighlight')
                 highlight.style['background-color'] = this.defaultHighlightColor

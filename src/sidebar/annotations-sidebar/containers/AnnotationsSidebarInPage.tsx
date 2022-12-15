@@ -108,9 +108,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         sidebarEvents.on('removeTemporaryHighlights', () =>
             highlighter.removeTempHighlights(),
         )
-        sidebarEvents.on('highlightAndScroll', ({ url }) =>
-            highlighter.highlightAndScroll({ url } as any),
-        )
+        sidebarEvents.on('highlightAndScroll', (annotation) => {
+            highlighter.highlightAndScroll(annotation.annotation)
+        })
         sidebarEvents.on('removeAnnotationHighlight', ({ url }) =>
             highlighter.removeAnnotationHighlight(url),
         )

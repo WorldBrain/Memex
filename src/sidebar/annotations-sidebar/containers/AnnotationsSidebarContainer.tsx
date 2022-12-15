@@ -920,9 +920,9 @@ export class AnnotationsSidebarContainer<
                             annotationModes={
                                 this.state.annotationModes.pageAnnotations
                             }
-                            setActiveAnnotationUrl={(annotationUrl) => () =>
+                            setActiveAnnotationUrl={(annotation) => () =>
                                 this.processEvent('setActiveAnnotationUrl', {
-                                    annotationUrl,
+                                    annotation,
                                 })}
                             isAnnotationCreateShown={this.state.showCommentBox}
                             setPopoutsActive={(isActive) => {

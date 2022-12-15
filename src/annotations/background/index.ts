@@ -133,6 +133,7 @@ export default class DirectLinkingBackground {
                     await runInTab<InPageUIContentScriptRemoteInterface>(
                         tabId,
                     ).showSidebar({
+                        annotation: annotation,
                         annotationUrl: annotation.url,
                         action: 'show_annotation',
                     })
@@ -186,6 +187,7 @@ export default class DirectLinkingBackground {
             ).showSidebar(
                 activeUrl && {
                     anchor,
+                    annotation,
                     annotationUrl: activeUrl,
                     action: 'show_annotation',
                 },

@@ -1,6 +1,7 @@
 import TypedEventEmitter from 'typed-emitter'
 import { Anchor } from 'src/highlighting/types'
 import { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
+import { Annotation } from 'src/highlighting/ui/types/api'
 
 export type InPageUISidebarAction =
     | 'comment'
@@ -25,6 +26,7 @@ export interface IncomingAnnotationData {
 export interface SidebarActionOptions {
     action: InPageUISidebarAction
     anchor?: Anchor
+    annotation?: Annotation
     annotationUrl?: string
     annotationData?: IncomingAnnotationData
     annotationSharingAccess?: AnnotationSharingAccess

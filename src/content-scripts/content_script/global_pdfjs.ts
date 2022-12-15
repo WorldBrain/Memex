@@ -45,29 +45,9 @@ const getContentFingerprints: GetContentFingerprints = async () => {
 
 Global.main({ loadRemotely: false, getContentFingerprints }).then(
     (inPageUI) => {
-        makeRemotelyCallableType<InPDFPageUIContentScriptRemoteInterface>({
-            extractPDFContents: async () => {
-                const searchParams = new URLSearchParams(location.search)
-                const filePath = searchParams.get('file')
-
-                if (!filePath?.length) {
-                    return null
-                }
-
-                const pdf: PDFDocumentProxy = await (globalThis as any)[
-                    'pdfjsLib'
-                ].getDocument(filePath).promise
-                return extractDataFromPDFDocument(pdf, document.title)
-            },
-        })
-
         inPageUI.events.on('stateChanged', (event) => {
             const sidebarState = event?.changes?.sidebar
             let windowWidth = window.innerWidth
-            let SidebarInitialWidth = SIDEBAR_WIDTH_STORAGE_KEY
-            let SidebarInitialAsInteger = parseFloat(
-                SidebarInitialWidth.replace('px', ''),
-            )
 
             if (sidebarState === true) {
                 let sidebar = document.getElementById('memex-sidebar-container')
@@ -90,6 +70,21 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
                 document.body.classList.remove('memexSidebarOpen')
                 document.body.style.width = '100%'
             }
+        })
+        makeRemotelyCallableType<InPDFPageUIContentScriptRemoteInterface>({
+            extractPDFContents: async () => {
+                const searchParams = new URLSearchParams(location.search)
+                const filePath = searchParams.get('file')
+
+                if (!filePath?.length) {
+                    return null
+                }
+
+                const pdf: PDFDocumentProxy = await (globalThis as any)[
+                    'pdfjsLib'
+                ].getDocument(filePath).promise
+                return extractDataFromPDFDocument(pdf, document.title)
+            },
         })
     },
 )
