@@ -45,7 +45,7 @@ export interface Props extends RibbonSubcomponentProps {
     toggleShowTutorial: () => void
     handleRibbonToggle: () => void
     handleRemoveRibbon: () => void
-    highlighter: Pick<HighlightInteractionsInterface, 'removeHighlights'>
+    highlighter: Pick<HighlightInteractionsInterface, 'resetHighlightsStyles'>
     hideOnMouseLeave?: boolean
     toggleFeed: () => void
     showFeed: boolean
