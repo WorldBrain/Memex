@@ -75,13 +75,6 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
                     'annotationSidebarContainer',
                 )
                 let sidebarContainerWidth = sidebarContainer.offsetWidth
-                // sidebar.addEventListener(
-                //     'mouseup',
-                //     () =>
-                //         (document.body.style.width =
-                //             window.innerWidth - sidebarContainerWidth + 'px'),
-                // )
-
                 document.body.style.width =
                     windowWidth - sidebarContainerWidth + 'px'
 
@@ -102,19 +95,11 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
 )
 
 function listenToWindowWidthChanges(sidebarContainer) {
-    console.log('test')
     let sidebarContainerWidth = sidebarContainer.offsetWidth
-
-    console.log(sidebarContainerWidth)
-
     document.body.style.width = window.innerWidth - sidebarContainerWidth + 'px'
 }
 
 function listenToSidebarWidthChanges(sidebarContainer) {
-    console.log('test2')
     let sidebarContainerWidth = sidebarContainer.offsetWidth
-
-    console.log(sidebarContainerWidth)
-
     document.body.style.width = window.innerWidth - sidebarContainerWidth + 'px'
 }
