@@ -287,6 +287,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 )
                 // markRange({ range, cssClass: baseClass })
 
+                for (let highlights of highlightedElements) {
+                    if (highlights.parentNode.nodeName === 'A') {
+                        highlights.style['color'] = '#0b0080'
+                    }
+                }
+
                 this.attachEventListenersToNewHighlights(highlight, onClick)
                 highlight.domElements = highlightedElements
 
@@ -374,7 +380,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
      * @param {*} annotation Annotation object which has the selector to be highlighted
      */
     highlightAndScroll = (annotation: Annotation) => {
-        this.removeHighlights({ onlyRemoveDarkHighlights: true })
+        this.resetHighlightsStyles()
         this.selectHighlight(annotation)
         this.scrollToHighlight(annotation)
     }
@@ -421,7 +427,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     openInEdit: e.getModifierState('Shift'),
                 })
                 // make sure to remove all other selections before selecting the new one
-                this.removeHighlights({ onlyRemoveDarkHighlights: true })
+                this.resetHighlightsStyles()
                 this.selectHighlight(highlight)
             }
 
@@ -450,7 +456,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 ) {
                     return
                 }
-                this.removeHoveredHighlights()
+                this.removeHoveredHighlights(highlight)
             }
             highlightEl.addEventListener(
                 'mouseleave',
@@ -458,24 +464,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 false,
             )
         })
-    }
-    /**
-     * Removes the medium class from all the highlights making them light.
-     */
-    removeHoveredHighlights = () => {
-        // Remove previous "medium" highlights
-        const prevHighlights = document.getElementsByTagName(
-            'hypothesis-highlight',
-        )
-        for (let highlight of prevHighlights) {
-            if (!highlight.classList.contains('selectedHighlight')) {
-                highlight.classList.remove('hoveredHighlight')
-                highlight.setAttribute(
-                    'style',
-                    `background-color: ${this.defaultHighlightColor}`,
-                )
-            }
-        }
     }
 
     removeTempHighlights = () => {
@@ -490,22 +478,37 @@ export class HighlightRenderer implements HighlightRendererInterface {
     hoverOverHighlight = ({ url }: Highlight) => {
         // Make the current annotation as a "medium" highlight.
         const baseClass = styles['memex-highlight']
-        const mediumClass = styles['medium']
         const highlights = document.querySelectorAll(
             `.${baseClass}[data-annotation="${url}"]`,
         )
 
-        highlights.forEach((highlight) => {
+        highlights.forEach((highlight: HTMLElement) => {
             highlight.classList.add('hoveredHighlight')
 
             if (!highlight.classList.contains('selectedHighlight')) {
-                highlight.setAttribute(
-                    'style',
-                    `background-color: ${this.defaultHighlightColor}80`,
-                )
+                highlight.style['background-color'] =
+                    this.defaultHighlightColor + '80'
             }
         })
     }
+
+    /**
+     * Removes the medium class from all the highlights making them light.
+     */
+
+    removeHoveredHighlights = ({ url }: Highlight) => {
+        const baseClass = styles['memex-highlight']
+        const highlights = document.querySelectorAll(
+            `.${baseClass}[data-annotation="${url}"]`,
+        )
+        highlights.forEach((highlight: HTMLElement) => {
+            if (!highlight.classList.contains('selectedHighlight')) {
+                highlight.classList.remove('hoveredHighlight')
+                highlight.style['background-color'] = this.defaultHighlightColor
+            }
+        })
+    }
+
     /**
      * Makes the highlight a dark highlight.
      */
@@ -514,12 +517,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const highlights = document.querySelectorAll(
             `[data-annotation="${url}"]`,
         )
-        highlights.forEach((highlight) => {
+        highlights.forEach((highlight: HTMLElement) => {
             highlight.classList.add('selectedHighlight')
-            highlight.setAttribute(
-                'style',
-                `background-color: ${this.defaultHighlightColor}80; border-bottom: 2px solid ${this.defaultHighlightColor}`,
-            )
+            highlight.style['background-color'] =
+                this.defaultHighlightColor + '80'
+            highlight.style['border-bottom'] =
+                '2px solid' + this.defaultHighlightColor
         })
     }
 
@@ -527,41 +530,39 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const highlights = document.querySelectorAll(
             `[data-annotation="${url}"]`,
         )
-        for (let highlight of highlights) {
+        highlights.forEach((highlight: HTMLElement) => {
             if (highlight.classList.contains('selectedHighlight')) {
                 highlight.classList.remove('selectedHighlight')
-                highlight.setAttribute(
-                    'style',
-                    `background-color: ${this.defaultHighlightColor}`,
-                )
+                highlight.style['background-color'] = this.defaultHighlightColor
+                highlight.style['border-bottom'] = 'unset'
             }
-        }
+        })
         this.currentActiveHighlight = ''
     }
 
     /**
-     * Removes all highlight elements in the current page.
+     * Return highlights to normal state
      * If `onlyRemoveDarkHighlights` is true, only dark highlights will be removed.
      */
-    removeHighlights = (args?: { onlyRemoveDarkHighlights?: boolean }) => {
-        // this.removeTempHighlights()
+    resetHighlightsStyles = () => {
+        const highlights = document.querySelectorAll(`[data-annotation]`)
 
-        // const baseClass = '.' + styles['memex-highlight']
-        // const darkClass = args?.onlyRemoveDarkHighlights
-        //     ? '.' + styles['dark']
-        //     : ''
-        // const highlightClass = `${baseClass}${darkClass}`
-        const highlights = document.getElementsByTagName('hypothesis-highlight')
-
-        for (let highlight of highlights) {
-            highlight.setAttribute(
-                'style',
-                `background-color: ${this.defaultHighlightColor}`,
-            )
-        }
+        console.log(highlights)
+        highlights.forEach((highlight: HTMLElement) => {
+            if (
+                highlight.getAttribute('data-annotation') ===
+                this.currentActiveHighlight
+            ) {
+                return
+            } else {
+                highlight.classList.remove('selectedHighlight')
+                highlight.style['background-color'] = this.defaultHighlightColor
+                highlight.style['border-bottom'] = 'unset'
+            }
+        })
     }
 
-    undoAllHighlights = this.removeHighlights
+    undoAllHighlights = this.resetHighlightsStyles
 
     /**
      * Finds each annotation's position in page, sorts it by the position and
