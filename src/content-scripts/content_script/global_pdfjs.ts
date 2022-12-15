@@ -63,38 +63,58 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
 
         inPageUI.events.on('stateChanged', (event) => {
             const sidebarState = event?.changes?.sidebar
+            let windowWidth = window.innerWidth
+            let SidebarInitialWidth = SIDEBAR_WIDTH_STORAGE_KEY
+            let SidebarInitialAsInteger = parseFloat(
+                SidebarInitialWidth.replace('px', ''),
+            )
 
             if (sidebarState === true) {
+                let sidebar = document.getElementById('memex-sidebar-container')
+                let sidebarContainer = sidebar.shadowRoot.getElementById(
+                    'annotationSidebarContainer',
+                )
+                let sidebarContainerWidth = sidebarContainer.offsetWidth
+                // sidebar.addEventListener(
+                //     'mouseup',
+                //     () =>
+                //         (document.body.style.width =
+                //             window.innerWidth - sidebarContainerWidth + 'px'),
+                // )
+
+                document.body.style.width =
+                    windowWidth - sidebarContainerWidth + 'px'
+
+                window.addEventListener('resize', () =>
+                    listenToWindowWidthChanges(sidebarContainer),
+                )
+                sidebar.addEventListener('mouseup', () =>
+                    listenToSidebarWidthChanges(sidebarContainer),
+                )
+
                 document.body.classList.add('memexSidebarOpen')
-                setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '450px')
-
-                let SidebarInitialWidth = getLocalStorage(
-                    SIDEBAR_WIDTH_STORAGE_KEY,
-                ).then((width) => {
-                    let SidebarInitialAsInteger = parseFloat(
-                        width.toString().replace('px', ''),
-                    )
-                    let WindowInitialWidth =
-                        (
-                            window.innerWidth - SidebarInitialAsInteger
-                        ).toString() + 'px'
-                    document.body.style.width = WindowInitialWidth
-                })
-
-                browser.storage.onChanged.addListener((changes) => {
-                    let SidebarWidth = changes[
-                        SIDEBAR_WIDTH_STORAGE_KEY
-                    ].newValue.replace('px', '')
-                    SidebarWidth = parseFloat(SidebarWidth)
-                    let windowWidth = window.innerWidth
-                    let width = (windowWidth - SidebarWidth).toString()
-                    width = width + 'px'
-                    document.body.style.width = width
-                })
             } else if (sidebarState === false) {
                 document.body.classList.remove('memexSidebarOpen')
-                document.body.style.width = window.innerWidth.toString() + 'px'
+                document.body.style.width = '100%'
             }
         })
     },
 )
+
+function listenToWindowWidthChanges(sidebarContainer) {
+    console.log('test')
+    let sidebarContainerWidth = sidebarContainer.offsetWidth
+
+    console.log(sidebarContainerWidth)
+
+    document.body.style.width = window.innerWidth - sidebarContainerWidth + 'px'
+}
+
+function listenToSidebarWidthChanges(sidebarContainer) {
+    console.log('test2')
+    let sidebarContainerWidth = sidebarContainer.offsetWidth
+
+    console.log(sidebarContainerWidth)
+
+    document.body.style.width = window.innerWidth - sidebarContainerWidth + 'px'
+}
