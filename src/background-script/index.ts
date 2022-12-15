@@ -175,6 +175,7 @@ class BackgroundScript {
                     await this.handleUnifiedLogic()
                     await setLocalStorage(READ_STORAGE_FLAG, true)
                     await this.setOnboardingTutorialState()
+                    await this.setDefaultHighlightColor()
                     break
                 case 'update':
                     await this.runQuickAndDirtyMigrations()

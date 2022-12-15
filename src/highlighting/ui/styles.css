@@ -1,26 +1,5 @@
 .memex-highlight {
-    background: #c6f0d4;
+    /* default state */
     cursor: pointer;
     color: #0e0f15;
-
-    &.medium {
-        background: #6ae394;
-    }
-
-    &.dark {
-        background: #6ae394;
-    }
-
-    &.tmp {
-        background: #6ae394;
-    }
-}
-
-.memex-highlight-tmp {
-    background: #6ae394;
-    cursor: pointer;
-}
-
-.dark-mode {
-    color: #000;
 }

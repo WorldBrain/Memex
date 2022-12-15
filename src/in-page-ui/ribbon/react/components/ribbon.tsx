@@ -14,7 +14,7 @@ import type {
     BaseKeyboardShortcuts,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
 import { HighlightInteractionsInterface } from 'src/highlighting/types'
-import { RibbonSubcomponentProps } from './types'
+import { RibbonSubcomponentProps, RibbonHighlightsProps } from './types'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import AnnotationCreate from 'src/annotations/components/AnnotationCreate'
 import BlurredSidebarOverlay from 'src/in-page-ui/sidebar/react/components/blurred-overlay'
@@ -32,7 +32,7 @@ import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { HexAlphaColorPicker, HexColorPicker } from 'react-colorful'
 
-export interface Props extends RibbonSubcomponentProps {
+export interface Props extends RibbonSubcomponentProps, RibbonHighlightsProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
     setRef?: (el: HTMLElement) => void
     isExpanded: boolean
@@ -121,18 +121,15 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     updatePickerColor(value) {
-        console.log('value', value)
         this.setState({
             pickerColor: value,
         })
 
-        console.log('pickerColor', this.state.pickerColor)
         let highlights: HTMLCollection = document.getElementsByTagName(
             'hypothesis-highlight',
         )
 
         for (let item of highlights) {
-            console.log(item)
             item.setAttribute('style', `background-color:${value};`)
         }
     }
@@ -287,7 +284,6 @@ export default class Ribbon extends Component<Props, State> {
                     <HexAlphaColorPicker
                         color={this.state.pickerColor}
                         onChange={(value) => {
-                            console.log('rest', value)
                             this.setState({
                                 pickerColor: value,
                             })
@@ -469,7 +465,7 @@ export default class Ribbon extends Component<Props, State> {
                                 heightAndWidth="22px"
                                 hoverOff
                             />
-                            {this.props.isRibbonEnabled ? (
+                            {this.props.highlights.areHighlightsEnabled ? (
                                 <InfoText>Hide Highlights</InfoText>
                             ) : (
                                 <InfoText>Show Highlights</InfoText>
@@ -525,7 +521,7 @@ export default class Ribbon extends Component<Props, State> {
                         >
                             <Icon
                                 filePath={icons.settings}
-                                heightAndWidth="16px"
+                                heightAndWidth="22px"
                                 hoverOff
                             />
                             <InfoText>Settings</InfoText>
@@ -537,7 +533,7 @@ export default class Ribbon extends Component<Props, State> {
                         >
                             <Icon
                                 filePath={icons.sadFace}
-                                heightAndWidth="16px"
+                                heightAndWidth="22px"
                                 hoverOff
                             />
                             <InfoText>Feature Requests & Bugs</InfoText>
@@ -591,10 +587,6 @@ export default class Ribbon extends Component<Props, State> {
         if (!this.state.shortcutsReady) {
             return false
         }
-
-        console.log(
-            this.colorPickerField ?? this.colorPickerField.current.value,
-        )
         return (
             <>
                 <OuterRibbon
@@ -1041,7 +1033,7 @@ const ExtraButtonRow = styled.div`
     position: relative;
 
     &:hover {
-        background: ${(props) => props.theme.colors.backgroundColorDarker};
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
     }
 `
 

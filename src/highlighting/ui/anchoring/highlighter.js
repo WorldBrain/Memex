@@ -308,11 +308,12 @@ export function highlightRange(
 
         /** @type {HighlightElement} */
         const highlightEl = document.createElement('hypothesis-highlight')
-        highlightEl.className = cssClass
         highlightEl.setAttribute(
             'style',
             `background-color: ${highlightsColor}`,
         )
+        // make color of text visibly different if its a link
+        highlightEl.className = cssClass
 
         nodes[0].parentNode.replaceChild(highlightEl, nodes[0])
         nodes.forEach((node) => highlightEl.appendChild(node))
