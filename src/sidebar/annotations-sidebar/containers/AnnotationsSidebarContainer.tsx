@@ -819,6 +819,7 @@ export class AnnotationsSidebarContainer<
             position: 'relative',
             right: '0px',
             left: 'unset',
+            zIndex: 3,
         } as const
 
         return (

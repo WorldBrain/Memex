@@ -49,7 +49,7 @@ export interface AnnotationsSidebarProps
     // sidebarActions: () => void
 
     setActiveAnnotationUrl?: (
-        annotation: Annotation,
+        annotation?: Annotation,
         annotationUrl?: string,
     ) => React.MouseEventHandler
     getListDetailsById: ListDetailsGetter

@@ -1000,6 +1000,7 @@ const ContentContainer = styled.div<{ isEditMode: boolean }>`
     display: flex;
     box-sizing: border-box;
     flex-direction: column;
+    z-index: 1001;
 
     ${(props) =>
         props.isEditMode &&
