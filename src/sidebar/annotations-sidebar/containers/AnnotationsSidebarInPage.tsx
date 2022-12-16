@@ -129,9 +129,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         sidebarEvents.on('renderHighlights', async ({ highlights }) => {
             await highlighter.renderHighlights(
                 highlights,
-                ({ annotationUrl }) => {
+                ({ unifiedAnnotationId }) => {
                     inPageUI.showSidebar({
-                        annotationUrl,
+                        annotationUrl: unifiedAnnotationId,
                         action: 'show_annotation',
                     })
                 },

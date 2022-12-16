@@ -8,6 +8,7 @@ import { generateAnnotationUrl } from 'src/annotations/utils'
 import { resolvablePromise } from 'src/util/resolvable'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { Analytics } from 'src/analytics'
+import { createAnnotation } from 'src/annotations/annotation-save-logic'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -378,7 +379,7 @@ export class RibbonContainerLogic extends UILogic<
 
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
-        const annotationUrl = generateAnnotationUrl({
+        const localAnnotationId = generateAnnotationUrl({
             pageUrl,
             now: () => Date.now(),
         })
@@ -391,27 +392,38 @@ export class RibbonContainerLogic extends UILogic<
                 },
             },
         })
+        const now = Date.now()
 
-        await this.dependencies.annotationsCache.create(
-            {
-                pageUrl,
+        const { remoteAnnotationId, savePromise } = await createAnnotation({
+            annotationsBG: this.dependencies.annotations,
+            contentSharingBG: this.dependencies.contentSharing,
+            annotationData: {
                 comment,
-                url: annotationUrl,
-                tags: commentBox.tags,
-                lists: commentBox.lists,
+                fullPageUrl: pageUrl,
+                localId: localAnnotationId,
+                createdWhen: new Date(now),
             },
-            {
-                shouldShare,
-                shouldCopyShareLink: shouldShare,
-                isBulkShareProtected: isProtected,
-            },
-        )
-
+        })
+        this.dependencies.annotationsCache.addAnnotation({
+            localId: localAnnotationId,
+            remoteId: remoteAnnotationId ?? undefined,
+            comment,
+            normalizedPageUrl: pageUrl,
+            unifiedListIds: [],
+            lastEdited: now,
+            createdWhen: now,
+            isShared: shouldShare,
+            isBulkShareProtected: isProtected,
+            creator: { type: 'user-reference', id: 123 }, // TODO: properly set current user
+        })
         this.dependencies.setRibbonShouldAutoHide(true)
 
-        await new Promise((resolve) =>
-            setTimeout(resolve, this.commentSavedTimeout),
-        )
+        await Promise.all([
+            new Promise((resolve) =>
+                setTimeout(resolve, this.commentSavedTimeout),
+            ),
+            savePromise,
+        ])
         this.emitMutation({ commentBox: { isCommentSaved: { $set: false } } })
     }
 
@@ -541,10 +553,11 @@ export class RibbonContainerLogic extends UILogic<
             lists: { pageListIds: { $set: [...pageListsSet] } },
         })
 
-        await this.dependencies.annotationsCache.updatePublicAnnotationLists({
-            added: event.value.added,
-            deleted: event.value.deleted,
-        })
+        // TODO: cache implement
+        // await this.dependencies.annotationsCache.updatePublicAnnotationLists({
+        //     added: event.value.added,
+        //     deleted: event.value.deleted,
+        // })
         return this.dependencies.customLists.updateListForPage({
             added: event.value.added,
             deleted: event.value.deleted,

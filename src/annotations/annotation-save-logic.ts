@@ -37,7 +37,7 @@ export interface SaveAnnotationParams<
 }
 
 export interface SaveAnnotationReturnValue {
-    remoteAnnotationLink: string | null
+    remoteAnnotationId: string | null
     savePromise: Promise<string>
 }
 
@@ -51,7 +51,7 @@ export async function createAnnotation({
 }: SaveAnnotationParams<AnnotationCreateData>): Promise<
     SaveAnnotationReturnValue
 > {
-    let remoteAnnotationId: string
+    let remoteAnnotationId: string = null
     if (shareOpts?.shouldShare) {
         remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
 
@@ -61,9 +61,7 @@ export async function createAnnotation({
     }
 
     return {
-        remoteAnnotationLink: shareOpts?.shouldShare
-            ? getNoteShareUrl({ remoteAnnotationId })
-            : null,
+        remoteAnnotationId,
         savePromise: (async () => {
             const annotationUrl = await annotationsBG.createAnnotation(
                 {
@@ -112,7 +110,7 @@ export async function updateAnnotation({
 }: SaveAnnotationParams<AnnotationUpdateData>): Promise<
     SaveAnnotationReturnValue
 > {
-    let remoteAnnotationId: string
+    let remoteAnnotationId: string = null
     if (shareOpts?.shouldShare) {
         const remoteAnnotMetadata = await contentSharingBG.getRemoteAnnotationMetadata(
             { annotationUrls: [annotationData.localId] },
@@ -128,9 +126,7 @@ export async function updateAnnotation({
     }
 
     return {
-        remoteAnnotationLink: shareOpts?.shouldShare
-            ? getNoteShareUrl({ remoteAnnotationId })
-            : null,
+        remoteAnnotationId,
         savePromise: (async () => {
             await annotationsBG.editAnnotation(
                 annotationData.localId,
