@@ -162,7 +162,7 @@ export default class SearchResultsContainer extends React.Component<
             }
         })
 
-        document.addEventListener('resize', () => {
+        window.addEventListener('resize', () => {
             if (topBarElement.clientWidth < topBarElement.scrollWidth) {
                 this.setState({
                     showHorizontalScrollSwitch: 'right',
