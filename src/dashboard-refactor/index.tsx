@@ -147,6 +147,7 @@ export class DashboardContainer extends StatefulUIElement<
         window.addEventListener('resize', () => {
             this.processEvent('calculateMainContentWidth', {
                 windowWidth: window.innerWidth,
+                isSidebarLocked: this.state.listsSidebar.isSidebarLocked,
             })
         })
     }
@@ -1691,6 +1692,8 @@ const Container = styled.div`
     background-color: ${(props) => props.theme.colors.backgroundColor};
     min-height: 100vh;
     height: 100%;
+    /* min-width: fit-content; */
+    width: fill-available;
 
     & * {
         font-family: 'Satoshi', sans-serif;,
@@ -1804,7 +1807,7 @@ const SyncStatusHeaderText = styled.span<{
     overflow: hidden;
     ${(props) => (props.textCentered ? 'text-align: center;' : '')}
 
-    @media screen and (max-width: 900px) {
+    @media screen and (max-width: 600px) {
         display: none;
     }
 `

@@ -110,6 +110,7 @@ export type Props = RootState &
 export interface State {
     tutorialState: []
     showTutorialVideo: boolean
+    showHorizontalScrollSwitch: string
 }
 
 export default class SearchResultsContainer extends React.Component<
@@ -123,6 +124,55 @@ export default class SearchResultsContainer extends React.Component<
     )
     componentDidMount() {
         this.getTutorialState()
+        this.listenToContentSwitcherSizeChanges()
+    }
+
+    listenToContentSwitcherSizeChanges() {
+        let topBarElement = document.getElementById('SearchTypeSwitchContainer')
+
+        if (topBarElement.clientWidth < topBarElement.scrollWidth) {
+            this.setState({
+                showHorizontalScrollSwitch: 'right',
+            })
+        } else {
+            this.setState({
+                showHorizontalScrollSwitch: 'none',
+            })
+        }
+
+        topBarElement.addEventListener('scroll', () => {
+            if (topBarElement.scrollLeft > 0) {
+                this.setState({
+                    showHorizontalScrollSwitch: 'left',
+                })
+
+                if (
+                    Math.ceil(
+                        topBarElement.scrollLeft + topBarElement.clientWidth,
+                    ) !== topBarElement.scrollWidth
+                ) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'both',
+                    })
+                }
+            } else {
+                this.setState({
+                    showHorizontalScrollSwitch: 'right',
+                })
+            }
+        })
+
+        document.addEventListener('resize', () => {
+            if (topBarElement.clientWidth < topBarElement.scrollWidth) {
+                this.setState({
+                    showHorizontalScrollSwitch: 'right',
+                })
+            } else {
+                this.setState({
+                    showHorizontalScrollSwitch: 'left',
+                })
+            }
+        })
     }
 
     spaceBtnBarDashboardRef = React.createRef<HTMLDivElement>()
@@ -130,6 +180,7 @@ export default class SearchResultsContainer extends React.Component<
     state = {
         showTutorialVideo: false,
         tutorialState: undefined,
+        showHorizontalScrollSwitch: 'none',
     }
 
     private renderNoteResult = (
@@ -763,7 +814,7 @@ export default class SearchResultsContainer extends React.Component<
                 <PageTopBarBox isDisplayed={this.props.isDisplayed}>
                     <TopBar
                         leftSide={
-                            <ContentTypeSwitchContainer>
+                            <ContentTypeSwitchContainer id="ContentTypeSwitchContainer">
                                 <ReferencesContainer>
                                     {this.props.listData[
                                         this.props.selectedListId
@@ -782,7 +833,53 @@ export default class SearchResultsContainer extends React.Component<
                                         </>
                                     )}
                                 </ReferencesContainer>
-                                <SearchTypeSwitch {...this.props} />
+                                <SearchTypeSwitchContainer>
+                                    {this.state.showHorizontalScrollSwitch ===
+                                        'left' ||
+                                    this.state.showHorizontalScrollSwitch ===
+                                        'both' ? (
+                                        <IconContainerLeft>
+                                            <Icon
+                                                filePath="arrowLeft"
+                                                heightAndWidth="22px"
+                                                onClick={() =>
+                                                    document
+                                                        .getElementById(
+                                                            'SearchTypeSwitchContainer',
+                                                        )
+                                                        .scrollBy({
+                                                            left: -200,
+                                                            top: 0,
+                                                            behavior: 'smooth',
+                                                        })
+                                                }
+                                            />
+                                        </IconContainerLeft>
+                                    ) : undefined}
+                                    <SearchTypeSwitch {...this.props} />
+                                    {this.state.showHorizontalScrollSwitch ===
+                                        'right' ||
+                                    this.state.showHorizontalScrollSwitch ===
+                                        'both' ? (
+                                        <IconContainerRight>
+                                            <Icon
+                                                filePath="arrowRight"
+                                                heightAndWidth="22px"
+                                                onClick={() =>
+                                                    document
+                                                        .getElementById(
+                                                            'SearchTypeSwitchContainer',
+                                                        )
+                                                        .scrollBy({
+                                                            left: 200,
+                                                            top: 0,
+                                                            behavior: 'smooth',
+                                                        })
+                                                }
+                                            />
+                                        </IconContainerRight>
+                                    ) : undefined}
+                                </SearchTypeSwitchContainer>
                             </ContentTypeSwitchContainer>
                         }
                         rightSide={undefined}
@@ -807,6 +904,35 @@ export default class SearchResultsContainer extends React.Component<
         )
     }
 }
+
+const IconContainerRight = styled.div`
+    position: absolute;
+    right: 5px;
+    top: 4px;
+    border-radius: 5px;
+
+    background: ${(props) => props.theme.colors.backgroundColor}70;
+    z-index: 20;
+    backdrop-filter: blur(4px);
+`
+const IconContainerLeft = styled.div`
+    position: absolute;
+    left: 5px;
+    top: 4px;
+    border-radius: 5px;
+
+    background: ${(props) => props.theme.colors.backgroundColor}70;
+    z-index: 20;
+    backdrop-filter: blur(4px);
+`
+
+const SearchTypeSwitchContainer = styled.div`
+    display: flex;
+    grid-gap: 3px;
+    position: relative;
+    width: fill-available;
+    padding-right: 30px;
+`
 
 const MobileAdContainer = styled.div`
     display: flex;
@@ -971,7 +1097,13 @@ const ContentTypeSwitchContainer = styled.div`
     grid-gap: 10px;
     width: fill-available;
     padding-bottom: 10px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.darkhover};
+    /* overflow-x: scroll;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none; */
 `
 
 const ResultsMessage = styled.div`
@@ -989,16 +1121,14 @@ const InfoText = styled.div`
 `
 
 const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
-    width: 100%;
-
-    padding: 0px 15px;
+    /* padding: 0px 15px; */
     height: fit-content;
     max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
     z-index: 2147483639;
     position: sticky;
     top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
     background: ${(props) => props.theme.colors.backgroundColor};
-    margin: 2px 0px;
+    width: fill-available;
 `
 
 const ReferencesContainer = styled.div`

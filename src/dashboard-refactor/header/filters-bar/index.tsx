@@ -277,7 +277,7 @@ const DateText = styled.div`
 
 const Container = styled.div<{ hidden: boolean }>`
     height: fit-content;
-    width: 100%;
+    width: fill-available;
     border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
     justify-content: center;
     position: sticky;

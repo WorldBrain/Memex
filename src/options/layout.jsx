@@ -18,9 +18,10 @@ class Layout extends Component {
                 <Navigation
                     currentLocation={this.props.location}
                     routes={routes}
-                />
+                >
+                    <AccountMenu />
+                </Navigation>
                 <div className={styles.route}>{this.props.children}</div>
-                <AccountMenu />
                 <HelpBtn />
             </RootContainer>
         )
@@ -31,6 +32,7 @@ const RootContainer = styled.div`
     background-color: ${(props) => props.theme.colors.backgroundColor};
     display: flex;
     flex-direction: row;
+    min-width: fit-content;
 
     & * {
         box-sizing: border-box;

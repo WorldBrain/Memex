@@ -49,6 +49,10 @@ const RightHeader = styled.div`
     position: absolute;
     right: 30px;
     grid-gap: 10px;
+
+    @media screen and (max-width: 768px) {
+        right: 15px;
+    }
 `
 
 // const PlaceholderContainer = styled.div`
@@ -147,18 +151,20 @@ export default class Header extends PureComponent<Props> {
                     />
                 </SearchSection>
                 <RightHeader>
-                    <PrimaryAction
-                        onClick={() =>
-                            syncStatusMenuProps.onToggleDisplayState()
-                        }
-                        label={'Sync Status'}
-                        size={'medium'}
-                        icon={getSyncStatusIcon(syncStatusIconState)}
-                        type={'tertiary'}
-                        iconColor={getSyncIconColor(syncStatusIconState)}
-                        spinningIcon={syncStatusIconState === 'yellow'}
-                        innerRef={this.syncStatusButtonRef}
-                    />
+                    <ActionWrapper>
+                        <PrimaryAction
+                            onClick={() =>
+                                syncStatusMenuProps.onToggleDisplayState()
+                            }
+                            label={'Sync Status'}
+                            size={'medium'}
+                            icon={getSyncStatusIcon(syncStatusIconState)}
+                            type={'tertiary'}
+                            iconColor={getSyncIconColor(syncStatusIconState)}
+                            spinningIcon={syncStatusIconState === 'yellow'}
+                            innerRef={this.syncStatusButtonRef}
+                        />
+                    </ActionWrapper>
                     <Icon
                         onClick={() => window.open(SETTINGS_URL, '_self')}
                         heightAndWidth="22px"
@@ -175,3 +181,17 @@ export default class Header extends PureComponent<Props> {
         )
     }
 }
+
+const ActionWrapper = styled.div`
+    & span {
+        @media screen and (max-width: 768px) {
+            display: none;
+        }
+    }
+
+    & > div {
+        @media screen and (max-width: 768px) {
+            width: 34px;
+        }
+    }
+`

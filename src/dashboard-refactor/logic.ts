@@ -985,7 +985,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     dragPage: EventHandler<'dragPage'> = async ({ event, previousState }) => {
         const crt = this.options.document.getElementById(DRAG_EL_ID)
         crt.style.display = 'block'
-        event.dataTransfer.setDragImage(crt, 10, 10)
+        event.dataTransfer.setDragImage(crt, 0, 0)
 
         const page = previousState.searchResults.pageData.byId[event.pageId]
         event.dataTransfer.setData(
@@ -2746,6 +2746,11 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         if (event.spaceSidebarWidth) {
             spaceSidebarWidth = event.spaceSidebarWidth
+        } else if (
+            event.isSidebarLocked != null &&
+            event.isSidebarLocked === false
+        ) {
+            spaceSidebarWidth = 0
         } else {
             spaceSidebarWidth = previousState.spaceSidebarWidth
         }
