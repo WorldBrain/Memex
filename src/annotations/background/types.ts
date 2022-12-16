@@ -67,7 +67,11 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     getAnnotationTags: RemotePositionalFunction<Role, any[], any>
     addAnnotationTag: RemotePositionalFunction<Role, any[], any>
     delAnnotationTag: RemotePositionalFunction<Role, any[], any>
-    toggleSidebarOverlay: RemoteFunction<Role, { activeUrl: string }, any>
+    toggleSidebarOverlay: RemoteFunction<
+        Role,
+        { unifiedAnnotationId: string },
+        any
+    >
     toggleAnnotBookmark: RemotePositionalFunction<Role, any[], any>
     getAnnotBookmark: RemotePositionalFunction<Role, any[], any>
     getListIdsForAnnotation: RemotePositionalFunction<

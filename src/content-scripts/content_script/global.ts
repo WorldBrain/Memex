@@ -32,7 +32,7 @@ import * as sidebarUtils from 'src/sidebar-overlay/utils'
 import * as constants from '../constants'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import type { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
-import { createAnnotationsCache } from 'src/annotations/annotations-cache'
+import type { PageAnnotationsCache } from 'src/annotations/cache'
 import type { AnalyticsEvent } from 'src/analytics/types'
 import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
@@ -48,7 +48,6 @@ import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { checkPageBlacklisted } from 'src/blacklist/utils'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { runtime } from 'webextension-polyfill'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
@@ -102,17 +101,8 @@ export async function main(
     const annotationsManager = new AnnotationsManager()
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
-    const highlightRenderer = new HighlightRenderer({
-        notificationsBG: runInBackground(),
-    })
-    const annotationEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
-
-    const annotationsCache = createAnnotationsCache({
-        tags: tagsBG,
-        customLists: collectionsBG,
-        annotations: annotationsBG,
-        contentSharing: runInBackground(),
-    })
+    const highlightRenderer = new HighlightRenderer({ annotationsBG })
+    const sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
@@ -136,7 +126,8 @@ export async function main(
         },
     })
     const fullPageUrl = await pageInfo.getPageUrl()
-    const loadAnnotationsPromise = annotationsCache.load(fullPageUrl)
+    const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
+    const annotationsCache = new PageAnnotationsCache({ normalizedPageUrl })
 
     const annotationFunctionsParams = {
         inPageUI,
@@ -219,7 +210,7 @@ export async function main(
         },
         async registerSidebarScript(execute): Promise<void> {
             await execute({
-                events: annotationEvents,
+                events: sidebarEvents,
                 initialState: inPageUI.componentsShown.sidebar
                     ? 'visible'
                     : 'hidden',
@@ -270,7 +261,6 @@ export async function main(
 
     // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
     // so it is included in this global content script where it adds less than 500kb.
-    await loadAnnotationsPromise
     await contentScriptRegistry.registerHighlightingScript(highlightMain)
 
     // 5. Registers remote functions that can be used to interact with components
@@ -290,11 +280,17 @@ export async function main(
         removeTooltip: async () => inPageUI.removeTooltip(),
         insertOrRemoveTooltip: async () => inPageUI.toggleTooltip(),
         goToHighlight: async (annotation, pageAnnotations) => {
+            const unifiedAnnotation = annotationsCache.getAnnotationByLocalId(
+                annotation.url,
+            )
+            const unifiedPageAnnotations = pageAnnotations.map((annot) =>
+                annotationsCache.getAnnotationByLocalId(annot.url),
+            )
             await highlightRenderer.renderHighlights(
-                pageAnnotations,
+                unifiedPageAnnotations,
                 annotationsBG.toggleSidebarOverlay,
             )
-            highlightRenderer.highlightAndScroll(annotation)
+            highlightRenderer.highlightAndScroll(unifiedAnnotation)
         },
         createHighlight: annotationsFunctions.createHighlight({
             category: 'Highlights',

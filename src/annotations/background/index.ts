@@ -13,7 +13,6 @@ import {
 } from 'src/util/webextensionRPC'
 import AnnotationStorage from './storage'
 import { AnnotSearchParams } from 'src/search/background/types'
-import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
@@ -156,21 +155,17 @@ export default class DirectLinkingBackground {
         {
             anchor,
             override,
-            activeUrl,
             openSidebar,
             openToTags,
             openToComment,
             openToBookmark,
             openToCollections,
-        }: OpenSidebarArgs &
-            Partial<KeyboardActions> & {
-                anchor?: any
-                override?: boolean
-                openSidebar?: boolean
-            } = {
-            anchor: null,
-            override: false,
-            activeUrl: undefined,
+            unifiedAnnotationId,
+        }: Partial<KeyboardActions> & {
+            anchor?: any
+            override?: boolean
+            openSidebar?: boolean
+            unifiedAnnotationId: string
         },
     ) {
         const [currentTab] = await this.options.browserAPIs.tabs.query({
@@ -183,13 +178,11 @@ export default class DirectLinkingBackground {
         if (openSidebar) {
             await runInTab<InPageUIContentScriptRemoteInterface>(
                 tabId,
-            ).showSidebar(
-                activeUrl && {
-                    anchor,
-                    annotationUrl: activeUrl,
-                    action: 'show_annotation',
-                },
-            )
+            ).showSidebar({
+                anchor,
+                action: 'show_annotation',
+                annotationUrl: unifiedAnnotationId,
+            })
         } else {
             const actions: { [Action in InPageUIRibbonAction]: boolean } = {
                 tag: openToTags,

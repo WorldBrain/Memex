@@ -1,4 +1,4 @@
 export type AnnotationClickHandler = (params: {
-    annotationUrl: string
+    unifiedAnnotationId: string
     openInEdit?: boolean
 }) => void

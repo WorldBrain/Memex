@@ -56,6 +56,8 @@ export interface PageAnnotationsCacheInterface {
     removeList: (list: Pick<UnifiedList, 'unifiedId'>) => void
     sortLists: (sortingFn?: any) => void
     sortAnnotations: (sortingFn?: AnnotationsSorter) => void
+
+    getAnnotationsArray: () => UnifiedAnnotation[]
     getAnnotationByLocalId: (localId: string) => UnifiedAnnotation | null
     getAnnotationByRemoteId: (remoteId: string) => UnifiedAnnotation | null
     getListByLocalId: (localId: number) => UnifiedList | null
@@ -88,6 +90,9 @@ export type UnifiedAnnotation = Pick<
     isBulkShareProtected: boolean
     unifiedListIds: UnifiedList['unifiedId'][]
 }
+
+export type UnifiedHighlight = UnifiedAnnotation &
+    Required<Pick<UnifiedAnnotation, 'body' | 'selector'>>
 
 export interface UnifiedList {
     // Core list data

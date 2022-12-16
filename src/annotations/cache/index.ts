@@ -59,6 +59,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         return this.deps.events
     }
 
+    getAnnotationsArray: PageAnnotationsCacheInterface['getAnnotationsArray'] = () =>
+        normalizedStateToArray(this.annotations)
+
     getAnnotationByLocalId: PageAnnotationsCacheInterface['getAnnotationByLocalId'] = (
         localId,
     ) => {

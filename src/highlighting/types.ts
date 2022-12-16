@@ -1,7 +1,10 @@
 export type { Anchor } from '@worldbrain/memex-common/lib/annotations/types'
-import { Annotation } from 'src/annotations/types'
-import { SaveAndRenderHighlightDeps } from 'src/highlighting/ui/highlight-interactions'
-import { AnnotationClickHandler } from './ui/types'
+import type { UnifiedAnnotation } from 'src/annotations/cache/types'
+import type { Annotation } from 'src/annotations/types'
+import type { AnnotationClickHandler } from './ui/types'
+import type { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import type { AnalyticsEvent } from 'src/analytics/types'
 
 export type Highlight = Pick<Annotation, 'url' | 'selector'> & {
     temporary?: boolean
@@ -12,26 +15,26 @@ export type HighlightElement = HTMLElement
 
 export interface HighlightInteractionsInterface {
     renderHighlights: (
-        highlights: Highlight[],
-        openSidebar: AnnotationClickHandler,
-    ) => Promise<Highlight[]>
+        highlights: UnifiedAnnotation[],
+        onClick: AnnotationClickHandler,
+        temp?: boolean,
+    ) => Promise<void>
     renderHighlight: (
-        highlight: Highlight,
-        openSidebar: AnnotationClickHandler,
-        temporary?: boolean,
-    ) => Promise<Highlight>
-    scrollToHighlight: ({ url }: Highlight) => void
-    highlightAndScroll: (annotation: Annotation) => void
+        highlight: UnifiedAnnotation,
+        onClick: AnnotationClickHandler,
+        temp?: boolean,
+    ) => Promise<void>
+    scrollToHighlight: (highlight: UnifiedAnnotation) => void
+    highlightAndScroll: (annotation: UnifiedAnnotation) => void
     attachEventListenersToNewHighlights: (
-        highlight: Highlight,
+        highlight: UnifiedAnnotation,
         openSidebar: AnnotationClickHandler,
     ) => void
     removeMediumHighlights: () => void
     removeTempHighlights: () => void
-    makeHighlightMedium: ({ url }: Highlight) => void
-    makeHighlightDark: ({ url }: Highlight) => void
+    makeHighlightMedium: (highlight: UnifiedAnnotation) => void
+    makeHighlightDark: (highlight: UnifiedAnnotation) => void
     removeHighlights: (args?: { onlyRemoveDarkHighlights?: boolean }) => void
-    sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
     _removeHighlight: (highlight: Element) => void
     removeAnnotationHighlight: (url: string) => void
     removeAnnotationHighlights: (urls: string[]) => void
@@ -41,4 +44,14 @@ export interface HighlightInteractionsInterface {
     saveAndRenderHighlightAndEditInSidebar: (
         params: SaveAndRenderHighlightDeps,
     ) => Promise<void>
+}
+
+export interface SaveAndRenderHighlightDeps {
+    getUrlAndTitle: () => Promise<{ pageUrl: string; title: string }>
+    getSelection: () => Selection
+    annotationsCache: PageAnnotationsCacheInterface
+    analyticsEvent?: AnalyticsEvent
+    inPageUI: SharedInPageUIInterface
+    showSpacePicker?: boolean
+    shouldShare?: boolean
 }

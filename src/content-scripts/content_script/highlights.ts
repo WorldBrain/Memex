@@ -1,5 +1,5 @@
-import { HighlightDependencies, HighlightsScriptMain } from './types'
-import { AnnotationClickHandler } from 'src/highlighting/ui/types'
+import type { HighlightDependencies, HighlightsScriptMain } from './types'
+import type { AnnotationClickHandler } from 'src/highlighting/ui/types'
 // import { bodyLoader } from 'src/util/loader'
 
 export const main: HighlightsScriptMain = async (options) => {
@@ -31,17 +31,17 @@ export const main: HighlightsScriptMain = async (options) => {
 
 const showHighlights = (options: HighlightDependencies) => {
     const onClickHighlight: AnnotationClickHandler = ({
-        annotationUrl,
+        unifiedAnnotationId,
         openInEdit,
     }) => {
         options.inPageUI.showSidebar({
             action: openInEdit ? 'edit_annotation' : 'show_annotation',
-            annotationUrl,
+            annotationUrl: unifiedAnnotationId,
         })
     }
 
     options.highlightRenderer.renderHighlights(
-        options.annotationsCache.annotations,
+        options.annotationsCache.getAnnotationsArray(),
         onClickHighlight,
         false,
     )

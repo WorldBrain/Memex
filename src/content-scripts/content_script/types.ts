@@ -1,13 +1,13 @@
-import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import { RibbonContainerDependencies } from 'src/in-page-ui/ribbon/react/containers/ribbon/types'
-import { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
-import { Props as SidebarContainerDependencies } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInPage'
-import AnnotationsManager from 'src/annotations/annotations-manager'
-import { AnnotationInterface } from 'src/annotations/background/types'
-import { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
-import { HighlightRendererInterface } from 'src/highlighting/ui/highlight-interactions'
-import { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import type { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import type { RibbonContainerDependencies } from 'src/in-page-ui/ribbon/react/containers/ribbon/types'
+import type { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
+import type { Props as SidebarContainerDependencies } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInPage'
+import type AnnotationsManager from 'src/annotations/annotations-manager'
+import type { AnnotationInterface } from 'src/annotations/background/types'
+import type { HighlightRendererInterface } from 'src/highlighting/ui/highlight-interactions'
+import type { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
 export interface ContentScriptRegistry {
     registerRibbonScript(main: RibbonScriptMain): Promise<void>
@@ -38,7 +38,7 @@ export interface HighlightDependencies {
     highlightRenderer: HighlightRendererInterface
     annotationsManager: AnnotationsManager
     annotations: AnnotationInterface<'caller'>
-    annotationsCache: AnnotationsCacheInterface
+    annotationsCache: PageAnnotationsCacheInterface
 }
 
 export interface SearchInjectionDependencies {

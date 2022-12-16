@@ -1,28 +1,24 @@
 import analytics from 'src/analytics'
 import debounce from 'lodash/debounce'
 
-import { getOffsetTop } from 'src/sidebar-overlay/utils'
-import {
+import type {
     Anchor,
-    Highlight,
-    HighlightInteractionsInterface,
     HighlightElement,
+    SaveAndRenderHighlightDeps,
+    HighlightInteractionsInterface,
 } from 'src/highlighting/types'
-import { AnnotationClickHandler } from 'src/highlighting/ui/types'
+import type { AnnotationClickHandler } from 'src/highlighting/ui/types'
 import { retryUntil } from 'src/util/retry-until'
 import { descriptorToRange } from './anchoring/index'
 import * as Raven from 'src/util/raven'
-import { Annotation } from 'src/annotations/types'
-import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import type { Annotation } from 'src/annotations/types'
 import * as anchoring from 'src/highlighting/ui/anchoring'
-import {
-    AnnotationCacheChangeEvents,
-    AnnotationsCacheInterface,
-} from 'src/annotations/annotations-cache'
 import { generateAnnotationUrl } from 'src/annotations/utils'
-import { AnalyticsEvent } from 'src/analytics/types'
 import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
+import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
+import type { UnifiedAnnotation } from 'src/annotations/cache/types'
+import type { AnnotationInterface } from 'src/annotations/background/types'
 
 const styles = require('src/highlighting/ui/styles.css')
 
@@ -37,74 +33,22 @@ export const extractAnchorFromSelection = async (
     }
 }
 
-export interface HighlightRenderInterface {
-    renderHighlights: (
-        highlights: Highlight[],
-        onClick: AnnotationClickHandler,
-        temp?: boolean,
-    ) => void
-    renderHighlight: (
-        highlight: Highlight,
-        onClick: AnnotationClickHandler,
-    ) => void
+export type HighlightRendererInterface = HighlightInteractionsInterface & {
     undoHighlight: (uniqueUrl: string) => void
     undoAllHighlights: () => void
 }
 
-// TODO: (sidebar-refactor) move to somewhere more highlight content script related
-export const renderAnnotationCacheChanges = ({
-    cacheChanges,
-    onClickHighlight,
-    renderer,
-}: {
-    cacheChanges: AnnotationCacheChangeEvents
-    onClickHighlight: AnnotationClickHandler
-    renderer: HighlightRenderInterface
-}) => {
-    const onRollback = (annotations) => {
-        renderer.undoAllHighlights()
-        renderer.renderHighlights(
-            annotations as Highlight[],
-            onClickHighlight,
-            false,
-        )
-    }
-    const onCreated = (annotation) => {
-        renderer.renderHighlight(annotation as Highlight, onClickHighlight)
-    }
-    const onDeleted = (annotation) => {
-        renderer.undoHighlight(annotation.url)
-    }
-
-    cacheChanges.on('rollback', onRollback)
-    cacheChanges.on('created', onCreated)
-    cacheChanges.on('deleted', onDeleted)
-
-    return () => {
-        cacheChanges.removeListener('rollback', onRollback)
-        cacheChanges.removeListener('created', onCreated)
-        cacheChanges.removeListener('deleted', onDeleted)
-    }
-}
-
-export interface SaveAndRenderHighlightDeps {
-    getUrlAndTitle: () => Promise<{ pageUrl: string; title: string }>
-    getSelection: () => Selection
-    annotationsCache: AnnotationsCacheInterface
-    analyticsEvent?: AnalyticsEvent
-    inPageUI: SharedInPageUIInterface
-    shouldShare?: boolean
-}
-
-export type HighlightRendererInterface = HighlightRenderInterface &
-    HighlightInteractionsInterface
-
-export interface HighlightRendererDependencies {}
-
 export class HighlightRenderer implements HighlightRendererInterface {
-    private observer
+    private observer: MutationObserver
+    private highlightedElsByUnifiedAnnotId: {
+        [unifiedId: string]: HTMLElement[]
+    } = {}
 
-    constructor(private deps: HighlightRendererDependencies) {
+    constructor(
+        private deps: {
+            annotationsBG: AnnotationInterface<'caller'>
+        },
+    ) {
         document.addEventListener('click', this.handleOutsideHighlightClick)
     }
 
@@ -126,10 +70,8 @@ export class HighlightRenderer implements HighlightRendererInterface {
         this.removeHighlights({ onlyRemoveDarkHighlights: true })
     }
 
-    saveAndRenderHighlightAndEditInSidebar = async (
-        params: SaveAndRenderHighlightDeps & {
-            showSpacePicker?: boolean
-        },
+    saveAndRenderHighlightAndEditInSidebar: HighlightInteractionsInterface['saveAndRenderHighlightAndEditInSidebar'] = async (
+        params,
     ) => {
         analytics.trackEvent(
             params.analyticsEvent ?? {
@@ -151,7 +93,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
         }
     }
 
-    saveAndRenderHighlight = async (params: SaveAndRenderHighlightDeps) => {
+    saveAndRenderHighlight: HighlightInteractionsInterface['saveAndRenderHighlight'] = async (
+        params,
+    ) => {
         analytics.trackEvent(
             params.analyticsEvent ?? {
                 category: 'Highlights',
@@ -194,7 +138,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
             annotationLists.push(params.inPageUI.selectedSpace.localId)
         }
 
-        const annotation: Annotation = {
+        const now = new Date()
+        const annotation: Annotation &
+            Required<Pick<Annotation, 'createdWhen' | 'lastEdited'>> = {
             url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
             body: hasSelectedText
                 ? anchor.quote
@@ -211,20 +157,28 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 ? anchor
                 : videoTimeStampForComment && undefined,
             pageTitle: title,
+            createdWhen: now,
+            lastEdited: now,
         }
-        console.debug('creating hihlight', annotation)
 
         try {
+            const cacheAnnotation = reshapeAnnotationForCache(annotation, {
+                creator: { type: 'user-reference', id: 123 },
+            })
+            const { unifiedId } = params.annotationsCache.addAnnotation(
+                cacheAnnotation,
+            )
+
             await Promise.all([
-                params.annotationsCache.create(annotation, {
-                    shouldShare: params.shouldShare,
-                    shouldCopyShareLink: params.shouldShare,
+                this.deps.annotationsBG.createAnnotation({
+                    ...annotation,
+                    title: annotation.pageTitle,
                 }),
                 this.renderHighlight(
-                    annotation,
-                    ({ openInEdit, annotationUrl }) => {
+                    { ...cacheAnnotation, unifiedId },
+                    ({ openInEdit, unifiedAnnotationId }) => {
                         params.inPageUI.showSidebar({
-                            annotationUrl,
+                            annotationUrl: unifiedAnnotationId,
                             action: openInEdit
                                 ? 'edit_annotation'
                                 : 'show_annotation',
@@ -240,9 +194,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
         return annotation
     }
 
-    renderHighlight = async (
-        highlight: Highlight,
-        onClick: AnnotationClickHandler,
+    renderHighlight: HighlightInteractionsInterface['renderHighlight'] = async (
+        highlight,
+        onClick,
         temporary = false,
     ) => {
         if (!highlight?.selector?.descriptor?.content) {
@@ -276,10 +230,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 // markRange({ range, cssClass: baseClass })
 
                 this.attachEventListenersToNewHighlights(highlight, onClick)
-                highlight.domElements = highlightedElements
+                this.highlightedElsByUnifiedAnnotId[
+                    highlight.unifiedId
+                ] = highlightedElements
             })
 
-            return highlight
+            // return highlight
         } catch (e) {
             Raven.captureException(e)
             // console.error(
@@ -287,27 +243,31 @@ export class HighlightRenderer implements HighlightRendererInterface {
             //     e,
             // )
             console.error(e)
-            return highlight
+            // return highlight
         }
     }
 
     /**
      * Given an array of highlight objects, highlights all of them.
      */
-    renderHighlights = async (
-        highlights: Highlight[],
+    renderHighlights: HighlightInteractionsInterface['renderHighlights'] = async (
+        highlights,
         onClick,
-    ): Promise<Highlight[]> => {
+        temp,
+    ) => {
         await Promise.all(
             highlights.map(async (highlight) => {
-                await this.renderHighlight(highlight, onClick)
+                await this.renderHighlight(highlight, onClick, temp)
             }),
         )
         this.watchForReanchors(highlights, onClick)
-        return highlights
+        // return highlights
     }
 
-    watchForReanchors = (highlights: Highlight[], onClick) => {
+    private watchForReanchors = (
+        highlights: UnifiedAnnotation[],
+        onClick: AnnotationClickHandler,
+    ) => {
         if (!this.observer) {
             // @ts-ignore
             const pdfViewer = globalThis.PDFViewerApplication?.pdfViewer
@@ -326,9 +286,16 @@ export class HighlightRenderer implements HighlightRendererInterface {
         }
     }
 
-    reanchorer = (highlights: Highlight[], onClick) => {
+    private reanchorer = (
+        highlights: UnifiedAnnotation[],
+        onClick: AnnotationClickHandler,
+    ) => {
         const reanchors = highlights.filter(
-            (h) => !document.body.contains(h.domElements?.pop() ?? null),
+            (h) =>
+                !document.body.contains(
+                    this.highlightedElsByUnifiedAnnotId[h.unifiedId]?.pop() ??
+                        null,
+                ),
         )
         if (reanchors.length > 0) {
             this.renderHighlights(reanchors, onClick)
@@ -338,10 +305,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
     /**
      * Scrolls to the highlight of the given annotation on the current page.
      */
-    scrollToHighlight = ({ url }: Highlight) => {
+    scrollToHighlight: HighlightInteractionsInterface['scrollToHighlight'] = ({
+        unifiedId,
+    }) => {
         const baseClass = styles['memex-highlight']
         const $highlight = document.querySelector(
-            `.${baseClass}[data-annotation="${url}"]`,
+            `.${baseClass}[data-annotation="${unifiedId}"]`,
         ) as HTMLElement
 
         if ($highlight) {
@@ -353,9 +322,10 @@ export class HighlightRenderer implements HighlightRendererInterface {
     /**
      * Given an annotation object, highlights that text and removes other highlights
      * from the page.
-     * @param {*} annotation Annotation object which has the selector to be highlighted
      */
-    highlightAndScroll = (annotation: Annotation) => {
+    highlightAndScroll: HighlightInteractionsInterface['highlightAndScroll'] = (
+        annotation,
+    ) => {
         this.removeHighlights({ onlyRemoveDarkHighlights: true })
         this.makeHighlightDark(annotation)
         this.scrollToHighlight(annotation)
@@ -364,20 +334,16 @@ export class HighlightRenderer implements HighlightRendererInterface {
     /**
      * Attaches event listeners to the highlights for hovering/focusing on the
      * annotation in sidebar.
-     * @param {Highlight} highlight The annotation to which the listeners are going to be attached
-     * @param {function} focusOnAnnotation Function when called will set the sidebar container to active state
-     * @param {function} hoverAnnotationContainer Function when called will set the sidebar container to hover state
-     * @param openSidebar
      */
-    attachEventListenersToNewHighlights = (
-        highlight: Highlight,
-        openSidebar: AnnotationClickHandler,
+    attachEventListenersToNewHighlights: HighlightInteractionsInterface['attachEventListenersToNewHighlights'] = (
+        highlight,
+        openSidebar,
     ) => {
         const newHighlights = document.querySelectorAll(
             `.${styles['memex-highlight']}:not([data-annotation])`,
         )
         newHighlights.forEach((highlightEl: HTMLElement) => {
-            highlightEl.dataset.annotation = highlight.url
+            highlightEl.dataset.annotation = highlight.unifiedId
 
             const clickListener = async (e: MouseEvent) => {
                 // Let anchors behave as normal
@@ -394,7 +360,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     return
                 }
                 openSidebar({
-                    annotationUrl: highlight.url,
+                    unifiedAnnotationId: highlight.unifiedId,
                     openInEdit: e.getModifierState('Shift'),
                 })
                 this.removeHighlights({ onlyRemoveDarkHighlights: true })
@@ -451,24 +417,27 @@ export class HighlightRenderer implements HighlightRendererInterface {
     }
     /**
      * Makes the given annotation as a medium highlight.
-     * @param {string} url PK of the annotation to make medium
      */
-    makeHighlightMedium = ({ url }: Highlight) => {
+    makeHighlightMedium: HighlightInteractionsInterface['makeHighlightMedium'] = ({
+        unifiedId,
+    }) => {
         // Make the current annotation as a "medium" highlight.
         const baseClass = styles['memex-highlight']
         const mediumClass = styles['medium']
         const highlights = document.querySelectorAll(
-            `.${baseClass}[data-annotation="${url}"]`,
+            `.${baseClass}[data-annotation="${unifiedId}"]`,
         )
         highlights.forEach((highlight) => highlight.classList.add(mediumClass))
     }
     /**
      * Makes the highlight a dark highlight.
      */
-    makeHighlightDark = ({ url }: Highlight) => {
+    makeHighlightDark: HighlightInteractionsInterface['makeHighlightDark'] = ({
+        unifiedId,
+    }) => {
         const baseClass = styles['memex-highlight']
         const highlights = document.querySelectorAll(
-            `.${baseClass}[data-annotation="${url}"]`,
+            `.${baseClass}[data-annotation="${unifiedId}"]`,
         )
 
         highlights.forEach((highlight) => {
@@ -499,32 +468,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
         }
     }
     undoAllHighlights = this.removeHighlights
-
-    /**
-     * Finds each annotation's position in page, sorts it by the position and
-     * returns the sorted annotations.
-     */
-    sortAnnotationsByPosition = (annotations: Annotation[]) => {
-        const offsetTopObjects = annotations.map((annotation, index) => {
-            const firstHighlight = document.querySelector(
-                `.${styles['memex-highlight']}[data-annotation="${annotation.url}"]`,
-            )
-            return {
-                index,
-                offsetTop: firstHighlight
-                    ? getOffsetTop(firstHighlight as HTMLElement)
-                    : Infinity,
-            }
-        })
-
-        const sortedOffsetTopObjects = offsetTopObjects.sort(
-            (a, b) => a.offsetTop - b.offsetTop,
-        )
-
-        return sortedOffsetTopObjects.map(
-            (offsetTopObject) => annotations[offsetTopObject.index],
-        )
-    }
 
     /**
      * Unwraps the `memex-highlight` element from the highlight,
