@@ -1,5 +1,22 @@
+:root {
+    /* #f0f0f0 in decimal RGB */
+    --highlightColor: var(--defaultHighlightColorCSS);
+}
+
 .memex-highlight {
     /* default state */
     cursor: pointer;
     color: #0e0f15;
+    background-color: rgb(var(--highlightColor));
+}
+
+.selectedHighlight {
+    /* prettier-ignore */
+    background-color: rgba(var(--defaultHighlightColorCSS), 0.5);
+    border-bottom: 2px solid rgb(var(--defaultHighlightColorCSS));
+}
+
+.hoveredHighlight {
+    background-color: rgba(var(--defaultHighlightColorCSS), 0.7);
+    fill: rgba(var(--defaultHighlightColorCSS), 0.7);
 }

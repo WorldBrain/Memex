@@ -25,8 +25,8 @@ import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import browser from 'webextension-polyfill'
 import * as PDFs from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
-import { C } from 'js-combinatorics'
 import { throttle } from 'lodash'
+import hexToRgb from 'hex-to-rgb'
 
 const styles = require('src/highlighting/ui/styles.css')
 
@@ -249,10 +249,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
             return
         }
 
-        console.log('renderhighlightattempt')
-
-        const baseClass =
-            styles[temporary ? 'memex-highlight-tmp' : 'memex-highlight']
+        const baseClass = styles['memex-highlight']
 
         try {
             let highlightedElements = [] as HighlightElement[]
@@ -282,6 +279,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 // markRange({ range, cssClass: baseClass })
 
                 for (let highlights of highlightedElements) {
+                    highlights.style.setProperty(
+                        '--defaultHighlightColorCSS',
+                        this.defaultHighlightColor,
+                    )
+
                     if (highlights.parentNode.nodeName === 'A') {
                         highlights.style['color'] = '#0b0080'
                     }
@@ -319,7 +321,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const highlightsColor = await browser.storage.local.get(
             '@highlight-colors',
         )
-        this.defaultHighlightColor = highlightsColor['@highlight-colors']
+        this.defaultHighlightColor = hexToRgb(
+            highlightsColor['@highlight-colors'],
+        ).toString()
 
         browser.storage.onChanged.addListener((change) => {
             this.defaultHighlightColor = change['@highlight-colors'].newValue
@@ -506,11 +510,13 @@ export class HighlightRenderer implements HighlightRendererInterface {
         )
 
         highlights.forEach((highlight: HTMLElement) => {
-            highlight.classList.add('hoveredHighlight')
+            highlight.classList.add(styles['hoveredHighlight'])
 
             if (!highlight.classList.contains('selectedHighlight')) {
-                highlight.style['background-color'] =
-                    this.defaultHighlightColor + '80'
+                highlight.style.setProperty(
+                    '--defaultHighlightColorCSS',
+                    this.defaultHighlightColor,
+                )
             }
         })
     }
@@ -525,9 +531,13 @@ export class HighlightRenderer implements HighlightRendererInterface {
             `.${baseClass}[data-annotation="${url}"]`,
         )
         highlights.forEach((highlight: HTMLElement) => {
-            if (!highlight.classList.contains('selectedHighlight')) {
-                highlight.classList.remove('hoveredHighlight')
-                highlight.style['background-color'] = this.defaultHighlightColor
+            if (!highlight.classList.contains(styles['selectedHighlight'])) {
+                highlight.classList.remove(styles['hoveredHighlight'])
+                // highlight.style['background-color'] = this.defaultHighlightColor
+                highlight.style.setProperty(
+                    '--defaultHighlightColorCSS',
+                    this.defaultHighlightColor,
+                )
             }
         })
     }
@@ -545,12 +555,14 @@ export class HighlightRenderer implements HighlightRendererInterface {
             annotation?.selector.descriptor.content,
             true,
         )
+
         highlights.forEach((highlight: HTMLElement) => {
-            highlight.classList.add('selectedHighlight')
-            highlight.style['background-color'] =
-                this.defaultHighlightColor + '80'
-            highlight.style['border-bottom'] =
-                '2px solid' + this.defaultHighlightColor
+            highlight.classList.add(styles['selectedHighlight'])
+            highlight.classList.remove(styles['hoveredHighlight'])
+            highlight.style.setProperty(
+                '--defaultHighlightColorCSS',
+                this.defaultHighlightColor,
+            )
         })
     }
 
@@ -559,10 +571,14 @@ export class HighlightRenderer implements HighlightRendererInterface {
             `[data-annotation="${url}"]`,
         )
         highlights.forEach((highlight: HTMLElement) => {
-            if (highlight.classList.contains('selectedHighlight')) {
-                highlight.classList.remove('selectedHighlight')
-                highlight.style['background-color'] = this.defaultHighlightColor
-                highlight.style['border-bottom'] = 'unset'
+            if (highlight.classList.contains(styles['selectedHighlight'])) {
+                highlight.classList.remove(styles['selectedHighlight'])
+                highlight.style.setProperty(
+                    '--defaultHighlightColorCSS',
+                    this.defaultHighlightColor,
+                )
+                // highlight.style['background-color'] = this.defaultHighlightColor
+                // highlight.style['border-bottom'] = 'unset'
             }
         })
         this.currentActiveHighlight = ''
@@ -577,13 +593,17 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 highlight.getAttribute('data-annotation') ===
                 this.currentActiveHighlight
             ) {
-                highlight.classList.remove('selectedHighlight')
-                highlight.style['background-color'] = this.defaultHighlightColor
-                highlight.style['border-bottom'] = 'unset'
+                highlight.classList.remove(styles['selectedHighlight'])
+                highlight.style.setProperty(
+                    '--defaultHighlightColorCSS',
+                    this.defaultHighlightColor,
+                )
             } else {
-                highlight.classList.remove('selectedHighlight')
-                highlight.style['background-color'] = this.defaultHighlightColor
-                highlight.style['border-bottom'] = 'unset'
+                highlight.classList.remove(styles['selectedHighlight'])
+                highlight.style.setProperty(
+                    '--defaultHighlightColorCSS',
+                    this.defaultHighlightColor,
+                )
             }
         })
     }

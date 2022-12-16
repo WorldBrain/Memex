@@ -53,7 +53,7 @@
 // @ts-nocheck
 /* eslint-disable */
 import { isNodeInRange } from './range-util'
-import { colorBrandMintGreen } from 'src/common-ui/components/design-library/colors'
+const styles = require('src/highlighting/ui/styles.css')
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
 
@@ -168,6 +168,7 @@ function drawHighlightsAbovePdfCanvas(highlightEl, highlightsColor) {
 
     if (isCssBlendSupported) {
         rect.setAttribute('class', 'hypothesis-svg-highlight')
+        rect.classList.add(styles['memex-highlight'])
         rect.style['fill'] = highlightsColor
     } else {
         rect.setAttribute('class', 'hypothesis-svg-highlight is-opaque')
@@ -260,13 +261,10 @@ function wholeTextNodesInRange(range) {
  * @param {string} cssClass - A CSS class to use for the highlight
  * @return {HighlightElement[]} - Elements wrapping text in `normedRange` to add a highlight effect
  */
-export function highlightRange(
-    range,
-    cssClass = 'hypothesis-highlight',
-    highlightsColor,
-) {
+export function highlightRange(range, baseClass, highlightsColor) {
     const textNodes = wholeTextNodesInRange(range)
 
+    let cssClass = 'hypothesis-highlight'
     // Check if this range refers to a placeholder for not-yet-rendered text in
     // a PDF. These highlights should be invisible.
     const isPlaceholder =
@@ -309,8 +307,9 @@ export function highlightRange(
         /** @type {HighlightElement} */
         const highlightEl = document.createElement('hypothesis-highlight')
 
-        highlightEl.style['background-color'] = highlightsColor
+        // highlightEl.style['background-color'] = highlightsColor
         highlightEl.className = cssClass
+        highlightEl.classList.add(styles['memex-highlight'])
         nodes[0].parentNode.replaceChild(highlightEl, nodes[0])
         nodes.forEach((node) => highlightEl.appendChild(node))
 
@@ -321,7 +320,7 @@ export function highlightRange(
             // highlight with the content below.
             const svgHighlight = drawHighlightsAbovePdfCanvas(
                 highlightEl,
-                highlightsColor,
+                `rgb(${highlightsColor})`,
             )
             if (svgHighlight) {
                 highlightEl.className += ' is-transparent'

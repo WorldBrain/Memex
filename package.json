@@ -93,6 +93,7 @@
         "firebase-admin": "^10.0.0",
         "firebase-functions": "^3.16.0",
         "firebaseui": "^4.2.0",
+        "hex-to-rgb": "^1.0.1",
         "history": "^3.2.1",
         "immutability-helper": "^3.0.1",
         "jsdom": "^20.0.0",

@@ -30,7 +30,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { HexAlphaColorPicker, HexColorPicker } from 'react-colorful'
+import { HexColorPicker } from 'react-colorful'
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
@@ -281,7 +281,7 @@ export default class Ribbon extends Component<Props, State> {
                     componentRef={this.colorPickerField}
                 />
                 <HexPickerContainer>
-                    <HexAlphaColorPicker
+                    <HexColorPicker
                         color={this.state.pickerColor}
                         onChange={(value) => {
                             this.setState({
@@ -289,7 +289,6 @@ export default class Ribbon extends Component<Props, State> {
                             })
                             this.updatePickerColor(value)
                         }}
-                        id={'hextest'}
                     />
                 </HexPickerContainer>
                 {/* <HexAlphaColorPicker color={this.state.pickerColor} /> */}

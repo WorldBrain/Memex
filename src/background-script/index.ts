@@ -181,7 +181,6 @@ class BackgroundScript {
                     await this.runQuickAndDirtyMigrations()
                     await setLocalStorage(READ_STORAGE_FLAG, false)
                     await this.handleUnifiedLogic()
-                    await this.setDefaultHighlightColor()
                     break
                 default:
             }
