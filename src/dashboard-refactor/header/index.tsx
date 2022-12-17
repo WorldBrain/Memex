@@ -50,7 +50,7 @@ const RightHeader = styled.div`
     right: 30px;
     grid-gap: 10px;
 
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 900px) {
         right: 15px;
     }
 `
@@ -184,13 +184,13 @@ export default class Header extends PureComponent<Props> {
 
 const ActionWrapper = styled.div`
     & span {
-        @media screen and (max-width: 768px) {
+        @media screen and (max-width: 900px) {
             display: none;
         }
     }
 
     & > div {
-        @media screen and (max-width: 768px) {
+        @media screen and (max-width: 900px) {
             width: 34px;
         }
     }

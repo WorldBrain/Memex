@@ -63,6 +63,7 @@ export type Props = RootState &
         | 'onTwitterSearchSwitch'
         | 'onPDFSearchSwitch'
     > & {
+        isSpacesSidebarLocked?: boolean
         searchFilters?: any
         activePage?: boolean
         searchResults?: any
@@ -141,43 +142,17 @@ export default class SearchResultsContainer extends React.Component<
         }
 
         topBarElement.addEventListener('scroll', () => {
-            console.log(
-                Math.ceil(topBarElement.scrollLeft + topBarElement.clientWidth),
-            )
-            console.log(topBarElement.scrollWidth)
+            this.contentSwitcherResizeLogic(topBarElement)
+        })
 
-            if (topBarElement.scrollLeft > 0) {
-                this.setState({
-                    showHorizontalScrollSwitch: 'left',
-                })
+        const resizeObservation = new ResizeObserver((output) => {
+            this.contentSwitcherResizeLogic(output[0].target)
+        })
 
-                if (
-                    Math.ceil(
-                        topBarElement.scrollLeft + topBarElement.clientWidth,
-                    ) !== topBarElement.scrollWidth
-                ) {
-                    this.setState({
-                        showHorizontalScrollSwitch: 'both',
-                    })
-                }
+        resizeObservation.observe(topBarElement)
 
-                if (
-                    Math.abs(
-                        Math.ceil(
-                            topBarElement.scrollLeft +
-                                topBarElement.clientWidth,
-                        ) - topBarElement.scrollWidth,
-                    ) < 5
-                ) {
-                    this.setState({
-                        showHorizontalScrollSwitch: 'left',
-                    })
-                }
-            } else {
-                this.setState({
-                    showHorizontalScrollSwitch: 'right',
-                })
-            }
+        topBarElement.addEventListener('resize', () => {
+            this.contentSwitcherResizeLogic(topBarElement)
         })
 
         window.addEventListener('resize', () => {
@@ -208,6 +183,52 @@ export default class SearchResultsContainer extends React.Component<
                 })
             }
         })
+    }
+
+    outputsize(topBarElement) {
+        let width = topBarElement.offsetWidth
+        let height = topBarElement.offsetHeight
+    }
+
+    contentSwitcherResizeLogic(topBarElement) {
+        if (topBarElement.clientWidth < topBarElement.scrollWidth) {
+            this.setState({
+                showHorizontalScrollSwitch: 'right',
+            })
+            if (topBarElement.scrollLeft > 0) {
+                this.setState({
+                    showHorizontalScrollSwitch: 'left',
+                })
+
+                if (
+                    Math.ceil(
+                        topBarElement.scrollLeft + topBarElement.clientWidth,
+                    ) !== topBarElement.scrollWidth
+                ) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'both',
+                    })
+                }
+
+                if (
+                    Math.abs(
+                        Math.ceil(
+                            topBarElement.scrollLeft +
+                                topBarElement.clientWidth,
+                        ) - topBarElement.scrollWidth,
+                    ) < 5
+                ) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'left',
+                    })
+                }
+            }
+        } else {
+            this.setState({
+                showHorizontalScrollSwitch: 'none',
+            })
+            return
+        }
     }
 
     spaceBtnBarDashboardRef = React.createRef<HTMLDivElement>()
@@ -846,28 +867,27 @@ export default class SearchResultsContainer extends React.Component<
                         listId={this.props.selectedListId}
                     />
                 )}
+                <ReferencesContainer>
+                    {this.props.listData[this.props.selectedListId]?.remoteId !=
+                        null && (
+                        <>
+                            <Icon
+                                hoverOff
+                                heightAndWidth="12px"
+                                color={'iconColor'}
+                                icon={icons.alertRound}
+                            />
+                            <InfoText>
+                                Only your own contributions to this space are
+                                visible locally.
+                            </InfoText>
+                        </>
+                    )}
+                </ReferencesContainer>
                 <PageTopBarBox isDisplayed={this.props.isDisplayed}>
                     <TopBar
                         leftSide={
                             <ContentTypeSwitchContainer id="ContentTypeSwitchContainer">
-                                <ReferencesContainer>
-                                    {this.props.listData[
-                                        this.props.selectedListId
-                                    ]?.remoteId != null && (
-                                        <>
-                                            <Icon
-                                                hoverOff
-                                                heightAndWidth="12px"
-                                                color={'iconColor'}
-                                                icon={icons.alertRound}
-                                            />
-                                            <InfoText>
-                                                Only your own contributions to
-                                                this space are visible locally.
-                                            </InfoText>
-                                        </>
-                                    )}
-                                </ReferencesContainer>
                                 <SearchTypeSwitchContainer>
                                     {this.state.showHorizontalScrollSwitch ===
                                         'left' ||
@@ -1131,7 +1151,7 @@ const ContentTypeSwitchContainer = styled.div`
     align-items: flex-start;
     grid-gap: 10px;
     width: fill-available;
-    padding-bottom: 10px;
+    padding: 10px 0px;
     /* overflow-x: scroll;
 
     &::-webkit-scrollbar {
@@ -1155,7 +1175,7 @@ const InfoText = styled.div`
     font-weight: 300;
 `
 
-const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
+const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     /* padding: 0px 15px; */
     height: fit-content;
     max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);

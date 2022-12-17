@@ -124,7 +124,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
 const Placeholder = styled.div`
     width: 220px;
 
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 900px) {
         width: 120px;
     }
 `

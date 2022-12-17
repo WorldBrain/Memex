@@ -61,7 +61,6 @@ const DEF_CONTEXT: { context: AnnotationEventContext } = {
 export interface Props extends SidebarContainerOptions {
     skipTopBarRender?: boolean
     isLockable?: boolean
-    setSidebarWidthforDashboard?: (sidebarWidth) => void
     onNotesSidebarClose?: () => void
 }
 
@@ -147,12 +146,6 @@ export class AnnotationsSidebarContainer<
 
         if (this.props.sidebarContext === 'dashboard') {
             document.addEventListener('keydown', this.listenToEsc)
-
-            setTimeout(() => {
-                this.props.setSidebarWidthforDashboard(
-                    this.state.sidebarWidth || SIDEBAR_WIDTH_STORAGE_KEY,
-                )
-            }, 0)
         }
 
         if (
@@ -172,7 +165,6 @@ export class AnnotationsSidebarContainer<
         if (this.props.sidebarContext === 'dashboard') {
             setTimeout(() => {
                 document.removeEventListener('keydown', this.listenToEsc)
-                this.props.setSidebarWidthforDashboard('0px')
                 this.props.onNotesSidebarClose()
             }, 50)
         }
@@ -865,12 +857,6 @@ export class AnnotationsSidebarContainer<
                                 isWidthLocked: this.state.isWidthLocked,
                             })
                             // }
-
-                            if (this.props.sidebarContext === 'dashboard') {
-                                this.props.setSidebarWidthforDashboard(
-                                    ref.style.width,
-                                )
-                            }
                         }}
                     >
                         <AnnotationsSidebar
@@ -1084,9 +1070,9 @@ const PickerWrapper = styled.div`
 `
 
 const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
-    height: 100%;
+    height: 100vh;
     overflow-x: visible;
-    position: fixed;
+    position: sticky;
     padding: 0px 0px 10px 0px;
 
     right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;

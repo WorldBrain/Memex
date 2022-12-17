@@ -2649,7 +2649,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     //         event: { notesSidebarWidth: event.notesSidebarWidth },
     //     })
     // }
-
     setSidebarLocked: EventHandler<'setSidebarLocked'> = async ({
         event,
         previousState,
@@ -2665,37 +2664,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             'listSidebarLocked',
             event.isLocked,
         )
-        if (
-            previousState.spaceSidebarWidth ===
-                sizeConstants.listsSidebar.widthPx + 'px' &&
-            !previousState.listsSidebar.isSidebarLocked
-        ) {
-            this.calculateMainContentWidth({
-                previousState,
-                event: {
-                    spaceSidebarWidth:
-                        sizeConstants.listsSidebar.widthPx + 'px',
-                },
-            })
-        }
-
-        if (!previousState.listsSidebar.isSidebarLocked) {
-            this.calculateMainContentWidth({
-                previousState,
-                event: {
-                    spaceSidebarWidth:
-                        sizeConstants.listsSidebar.widthPx + 'px',
-                },
-            })
-        }
-        if (previousState.listsSidebar.isSidebarLocked) {
-            this.calculateMainContentWidth({
-                previousState,
-                event: { isSidebarPeeking: true },
-            })
-        }
     }
-
     setSidebarPeeking: EventHandler<'setSidebarPeeking'> = async ({
         event,
         previousState,
@@ -2703,15 +2672,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
         })
-
-        if (event.isPeeking) {
-            this.calculateMainContentWidth({
-                previousState,
-                event: {
-                    isSidebarPeeking: event.isPeeking,
-                },
-            })
-        }
     }
 
     setSidebarToggleHovered: EventHandler<'setSidebarToggleHovered'> = async ({
@@ -2725,68 +2685,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     $set: !listsSidebar.isSidebarLocked && event.isHovered,
                 },
             },
-        })
-    }
-
-    // Set maincontentWidth based on changes to specific states
-
-    calculateMainContentWidth: EventHandler<
-        'calculateMainContentWidth'
-    > = async ({ previousState, event }) => {
-        // Calculate SpaceBarWidth
-
-        // let contentWidth = this.contentWidth
-        let windowWidth = window.innerWidth
-        let spaceSidebarWidth
-        let notesSidebarWidth
-
-        if (event.windowWidth) {
-            windowWidth = event.windowWidth
-        }
-
-        if (event.spaceSidebarWidth) {
-            spaceSidebarWidth = event.spaceSidebarWidth
-        } else if (
-            event.isSidebarLocked != null &&
-            event.isSidebarLocked === false
-        ) {
-            spaceSidebarWidth = 0
-        } else {
-            spaceSidebarWidth = previousState.spaceSidebarWidth
-        }
-
-        if (event.notesSidebarWidth) {
-            notesSidebarWidth = event.notesSidebarWidth
-        } else {
-            notesSidebarWidth = previousState.notesSidebarWidth
-        }
-
-        // calculate all values as integers
-        spaceSidebarWidth = spaceSidebarWidth.replace('px', '')
-        spaceSidebarWidth = parseInt(spaceSidebarWidth)
-
-        notesSidebarWidth = notesSidebarWidth.replace('px', '')
-        notesSidebarWidth = parseInt(notesSidebarWidth)
-
-        // Calculate final width in as integer
-
-        let contentWidthInt
-
-        if (event.isSidebarPeeking) {
-            contentWidthInt = windowWidth - notesSidebarWidth
-        } else {
-            contentWidthInt =
-                windowWidth - spaceSidebarWidth - notesSidebarWidth
-        }
-        // spit out final width as px
-        let contentWidthPX = (contentWidthInt + 'px').toString()
-
-        // Calculate total width of main content:
-        this.emitMutation({
-            mainContentWidth: { $set: contentWidthPX },
-            spaceSidebarWidth: { $set: spaceSidebarWidth + 'px' },
-            notesSidebarWidth: { $set: notesSidebarWidth + 'px' },
-            windowWidth: { $set: windowWidth },
         })
     }
 

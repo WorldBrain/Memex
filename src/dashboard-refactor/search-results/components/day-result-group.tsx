@@ -21,6 +21,7 @@ export default class DayResultGroup extends PureComponent<Props> {
 
 const DayContainer = styled.div<{ zIndex: number }>`
     display: flex;
+    margin-top: 2px;
     flex-direction: column;
     width: fill-available;
     z-index: ${(props) => props.zIndex};
