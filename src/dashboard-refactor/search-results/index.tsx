@@ -185,11 +185,6 @@ export default class SearchResultsContainer extends React.Component<
         })
     }
 
-    outputsize(topBarElement) {
-        let width = topBarElement.offsetWidth
-        let height = topBarElement.offsetHeight
-    }
-
     contentSwitcherResizeLogic(topBarElement) {
         if (topBarElement.clientWidth < topBarElement.scrollWidth) {
             this.setState({

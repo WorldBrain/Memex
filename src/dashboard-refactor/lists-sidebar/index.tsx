@@ -242,6 +242,7 @@ const Container = styled.div`
     display: flex;
     justify-content: center;
     height: fill-available;
+    overflow: scroll;
 `
 
 const Separator = styled.div`
@@ -256,7 +257,7 @@ const BottomGroup = styled.div<{ sidebarWidth: string }>`
     overflow-y: scroll;
     overflow-x: visible;
     height: fill-available;
-    width: ${(props) => props.sidebarWidth};
+    width: fill-available;
     padding-bottom: 100px;
 
     &::-webkit-scrollbar {

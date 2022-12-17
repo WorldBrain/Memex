@@ -1412,9 +1412,7 @@ export class DashboardContainer extends StatefulUIElement<
                         }}
                         resizeGrid={[1, 0]}
                         dragAxis={'none'}
-                        minWidth={
-                            sizeConstants.listsSidebar.widthPx - 50 + 'px'
-                        }
+                        minWidth={sizeConstants.listsSidebar.widthPx + 'px'}
                         maxWidth={'500px'}
                         disableDragging={'true'}
                         enableResizing={{
@@ -1776,7 +1774,7 @@ const SyncStatusHeaderBox = styled.div`
             props.theme.colors.backgroundColorDarker};
     }
 
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 900px) {
         padding: 4px 4px 4px 4px;
         margin-left: 15px;
         width: 20px;
