@@ -176,6 +176,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchPaginationState: 'pristine',
                 activeDay: undefined,
                 activePageID: undefined,
+                clearInboxLoadState: 'pristine',
             },
             searchFilters: {
                 searchQuery: '',
@@ -1058,6 +1059,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         }
 
+        console.log(mutation)
+
         if (event.day === PAGE_SEARCH_DUMMY_DAY) {
             mutation.results = {
                 [PAGE_SEARCH_DUMMY_DAY]: {
@@ -1078,6 +1081,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             )
         }
 
+        console.log(mutation)
+
         await this.options.listsBG.removePageFromList({
             id: listId,
             url: event.pageId,
@@ -1090,6 +1095,47 @@ export class DashboardLogic extends UILogic<State, Events> {
                           inboxUnreadCount: { $apply: (count) => count - 1 },
                       }
                     : {},
+        })
+    }
+
+    clearInbox: EventHandler<'clearInbox'> = async () => {
+        const listContent = await this.options.listsBG.fetchListById({
+            id: SPECIAL_LIST_IDS.INBOX,
+        })
+        const pages = listContent.pages
+        const filterOutPages = (pages: string[]) =>
+            pages.filter((page) => page === '')
+
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [PAGE_SEARCH_DUMMY_DAY]: {
+                        pages: {
+                            allIds: {
+                                $set: [],
+                            },
+                        },
+                    },
+                },
+                clearInboxLoadState: { $set: 'running' },
+            },
+            listsSidebar: {
+                inboxUnreadCount: { $set: 0 },
+            },
+        })
+
+        for (let page of pages) {
+            console.log(page)
+            await this.options.listsBG.removePageFromList({
+                id: SPECIAL_LIST_IDS.INBOX,
+                url: page,
+            })
+        }
+
+        this.emitMutation({
+            searchResults: {
+                clearInboxLoadState: { $set: 'pristine' },
+            },
         })
     }
 

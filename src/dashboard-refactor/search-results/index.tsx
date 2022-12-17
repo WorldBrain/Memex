@@ -106,6 +106,7 @@ export type Props = RootState &
         onListLinkCopy(link: string): Promise<void>
         // updateAllResultNotesShareInfo: (info: NoteShareInfo) => void
         updateAllResultNotesShareInfo: (state: AnnotationSharingStates) => void
+        clearInbox: () => void
     }
 
 export interface State {
@@ -752,6 +753,13 @@ export default class SearchResultsContainer extends React.Component<
             return this.renderLoader()
         }
 
+        if (
+            this.props.clearInboxLoadState === 'running' &&
+            this.props.selectedListId === 20201014
+        ) {
+            return this.renderLoader()
+        }
+
         const days: JSX.Element[] = []
         var groupIndex = 1500
 
@@ -860,6 +868,7 @@ export default class SearchResultsContainer extends React.Component<
                     <ListDetails
                         {...this.props.listDetailsProps}
                         listId={this.props.selectedListId}
+                        clearInbox={this.props.clearInbox}
                     />
                 )}
                 <ReferencesContainer>
@@ -939,6 +948,7 @@ export default class SearchResultsContainer extends React.Component<
                 {this.renderResultsByDay()}
                 {this.props.areResultsExhausted &&
                     this.props.searchState === 'success' &&
+                    this.props.clearInboxLoadState !== 'running' &&
                     this.props.searchResults.allIds.length > 0 && (
                         <ResultsExhaustedMessage>
                             <Icon
