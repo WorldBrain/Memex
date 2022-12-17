@@ -40,7 +40,6 @@ export interface FiltersBarProps {
     datePickerProps: DateRangeSelectionProps
     spacePickerProps: SpacePickerDependencies
     domainPickerProps: DomainPickerDependencies
-    spaceSidebarWidth: string
     spaceSidebarLocked: boolean
 }
 
@@ -221,7 +220,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             <>
                 <Container hidden={!this.props.isDisplayed}>
                     <FilterBtnsContainer
-                        sidebarWidth={this.props.spaceSidebarWidth}
                         spaceSidebarLocked={this.props.spaceSidebarLocked}
                     >
                         {this.renderFilterSelectButton(
@@ -292,7 +290,7 @@ const Container = styled.div<{ hidden: boolean }>`
         `};
 `
 
-const FilterBtnsContainer = styled.div<{ sidebarWidth; spaceSidebarLocked }>`
+const FilterBtnsContainer = styled.div<{ spaceSidebarLocked }>`
     max-width: 800px;
     flex: 1;
     position: relative;

@@ -38,7 +38,6 @@ export interface ListsSidebarProps {
     searchBarProps: ListsSidebarSearchBarProps
     listsGroups: ListsSidebarGroupProps[]
     initDropReceivingState: (listId: number) => DropReceivingState
-    sidebarWidth: string
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -75,7 +74,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         return (
             <Container>
                 <GlobalStyle />
-                <BottomGroup sidebarWidth={this.props.sidebarWidth}>
+                <BottomGroup>
                     <Margin vertical="10px">
                         <ListsSidebarGroup isExpanded loadingState="success">
                             {this.renderLists(
@@ -253,7 +252,7 @@ const Separator = styled.div`
     }
 `
 
-const BottomGroup = styled.div<{ sidebarWidth: string }>`
+const BottomGroup = styled.div`
     overflow-y: scroll;
     overflow-x: visible;
     height: fill-available;
@@ -261,11 +260,10 @@ const BottomGroup = styled.div<{ sidebarWidth: string }>`
     padding-bottom: 100px;
 
     &::-webkit-scrollbar {
-      display: none;
+        display: none;
     }
 
     scrollbar-width: none;
-}
 `
 
 const NoCollectionsMessage = styled.div`
@@ -287,7 +285,7 @@ const NoCollectionsMessage = styled.div`
         cursor: pointer;
     }
 
-    &: hover {
+    &:hover {
         background-color: ${(props) =>
             props.theme.colors.backgroundColorDarker};
     }

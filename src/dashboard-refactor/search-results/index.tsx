@@ -1146,7 +1146,8 @@ const ContentTypeSwitchContainer = styled.div`
     align-items: flex-start;
     grid-gap: 10px;
     width: fill-available;
-    padding: 10px 0px;
+    padding: 10px 0px 9px 0px;
+
     /* overflow-x: scroll;
 
     &::-webkit-scrollbar {

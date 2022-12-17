@@ -122,16 +122,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private setupWindowWidthListner() {
-        window.addEventListener('resize', () => {
-            this.emitMutation({
-                windowWidth: { $set: window.innerWidth },
-            })
-        })
-
-        return window.innerWidth
-    }
-
     getInitialState(): State {
         let mode: State['mode'] = 'search'
         if (isDuringInstall(this.options.location)) {
@@ -143,15 +133,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.options.pdfViewerBG.openPdfViewerForNextPdf()
         }
 
-        const appWidth = this.setupWindowWidthListner()
-
         return {
             mode,
             loadState: 'pristine',
             currentUser: null,
-            notesSidebarWidth: '0px',
-            windowWidth: appWidth,
-            spaceSidebarWidth: sizeConstants.listsSidebar.widthPx + 'px',
 
             modals: {
                 showLogin: false,
@@ -2633,22 +2618,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: { selectedListId: { $set: undefined } },
         })
     }
-    /* END - search filter event handlers */
 
-    /* START - lists sidebar event handlers */
-    // setNotesSidebarWidth: EventHandler<'setNotesSidebarWidth'> = async (
-    //     event,
-    //     previousState,
-    // ) => {
-    //     const sidebarWidth = event.notesSidebarWidth
-    //     this.emitMutation({
-    //         notesSidebarWidth: { $set: sidebarWidth },
-    //     })
-    //     this.calculateMainContentWidth({
-    //         previousState,
-    //         event: { notesSidebarWidth: event.notesSidebarWidth },
-    //     })
-    // }
     setSidebarLocked: EventHandler<'setSidebarLocked'> = async ({
         event,
         previousState,

@@ -64,17 +64,9 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
 
 export type Events = UIEvent<{
     setSidebarLocked: { isLocked: boolean }
-    setNotesSidebarWidth: { notesSidebarWidth: string }
     setSidebarPeeking: { isPeeking: boolean }
     setSidebarToggleHovered: { isHovered: boolean }
     setListQueryValue: { query: string }
-    calculateMainContentWidth: {
-        spaceSidebarWidth?: string
-        notesSidebarWidth?: string
-        windowWidth?: number
-        isSidebarPeeking?: boolean
-        isSidebarLocked?: boolean
-    }
 
     setAddListInputShown: { isShown: boolean }
     cancelListCreate: null

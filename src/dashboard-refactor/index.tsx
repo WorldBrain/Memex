@@ -298,7 +298,6 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <FiltersBar
-                spaceSidebarWidth={this.state.spaceSidebarWidth}
                 spaceSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 searchFilters={searchFilters}
                 isDisplayed={searchFilters.searchFiltersOpen}
@@ -460,11 +459,6 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setSidebarLocked', {
                             isLocked: !listsSidebar.isSidebarLocked,
                         })
-                        // this.processEvent('calculateMainContentWidth', {
-                        //     spaceSidebarWidth: !listsSidebar.isSidebarLocked
-                        //         ? '250px'
-                        //         : '0px',
-                        // })
                     },
                 }}
                 sidebarToggleHoverState={{
@@ -503,7 +497,6 @@ export class DashboardContainer extends StatefulUIElement<
                         })
                     },
                 }}
-                sidebarWidth={this.state.spaceSidebarWidth}
             />
         )
     }
@@ -528,7 +521,6 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <ListsSidebarContainer
                 {...listsSidebar}
-                sidebarWidth={this.state.spaceSidebarWidth}
                 lockedState={lockedState}
                 openFeedUrl={() =>
                     this.processEvent('clickFeedActivityIndicator', null)
@@ -1425,17 +1417,10 @@ export class DashboardContainer extends StatefulUIElement<
                             bottomLeft: false,
                             topLeft: false,
                         }}
-                        onResizeStop={(e, direction, ref, delta, position) => {
-                            this.processEvent('calculateMainContentWidth', {
-                                spaceSidebarWidth: ref.style.width,
-                                isSidebarPeeking: !this.state.listsSidebar
-                                    .isSidebarLocked,
-                            })
-                        }}
                     >
                         {this.renderListsSidebar()}
                     </ListSidebarContent>
-                    <MainContent responsiveWidth={this.state.mainContentWidth}>
+                    <MainContent>
                         {this.state.listsSidebar.showFeed ? (
                             <FeedContainer>
                                 <TitleContainer>

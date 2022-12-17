@@ -850,14 +850,6 @@ export class AnnotationsSidebarContainer<
                             bottomLeft: false,
                             topLeft: false,
                         }}
-                        onResizeStop={(e, direction, ref, delta, position) => {
-                            // if (this.props.sidebarContext !== 'dashboard') {
-                            this.processEvent('adjustSidebarWidth', {
-                                newWidth: ref.style.width,
-                                isWidthLocked: this.state.isWidthLocked,
-                            })
-                            // }
-                        }}
                     >
                         <AnnotationsSidebar
                             {...this.state}
