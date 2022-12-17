@@ -1064,7 +1064,8 @@ const PickerWrapper = styled.div`
 const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     height: 100vh;
     overflow-x: visible;
-    position: sticky;
+    position: ${(props) =>
+        props.sidebarContext === 'dashboard' ? 'sticky' : 'fixed'};
     padding: 0px 0px 10px 0px;
 
     right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
