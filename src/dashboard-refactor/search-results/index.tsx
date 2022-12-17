@@ -141,6 +141,11 @@ export default class SearchResultsContainer extends React.Component<
         }
 
         topBarElement.addEventListener('scroll', () => {
+            console.log(
+                Math.ceil(topBarElement.scrollLeft + topBarElement.clientWidth),
+            )
+            console.log(topBarElement.scrollWidth)
+
             if (topBarElement.scrollLeft > 0) {
                 this.setState({
                     showHorizontalScrollSwitch: 'left',
@@ -155,6 +160,19 @@ export default class SearchResultsContainer extends React.Component<
                         showHorizontalScrollSwitch: 'both',
                     })
                 }
+
+                if (
+                    Math.abs(
+                        Math.ceil(
+                            topBarElement.scrollLeft +
+                                topBarElement.clientWidth,
+                        ) - topBarElement.scrollWidth,
+                    ) < 5
+                ) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'left',
+                    })
+                }
             } else {
                 this.setState({
                     showHorizontalScrollSwitch: 'right',
@@ -167,9 +185,26 @@ export default class SearchResultsContainer extends React.Component<
                 this.setState({
                     showHorizontalScrollSwitch: 'right',
                 })
+                if (topBarElement.scrollLeft > 0) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'both',
+                    })
+                }
+                if (
+                    Math.abs(
+                        Math.ceil(
+                            topBarElement.scrollLeft +
+                                topBarElement.clientWidth,
+                        ) - topBarElement.scrollWidth,
+                    ) < 5
+                ) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'left',
+                    })
+                }
             } else {
                 this.setState({
-                    showHorizontalScrollSwitch: 'left',
+                    showHorizontalScrollSwitch: 'none',
                 })
             }
         })
