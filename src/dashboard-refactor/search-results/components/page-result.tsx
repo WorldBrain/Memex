@@ -114,8 +114,8 @@ export default class PageResultView extends PureComponent<Props> {
                     targetElementRef={this.spacePickerBarRef.current}
                     placement={'bottom-start'}
                     offsetX={10}
-                    bigClosingScreen
                     closeComponent={this.listPickerBtnClickHandler}
+                    strategy={'fixed'}
                 >
                     <CollectionPicker
                         selectEntry={(listId) =>
@@ -145,8 +145,8 @@ export default class PageResultView extends PureComponent<Props> {
                     targetElementRef={this.spacePickerButtonRef.current}
                     placement={'bottom-end'}
                     offsetX={10}
-                    bigClosingScreen
                     closeComponent={this.listPickerBtnClickHandler}
+                    strategy={'fixed'}
                 >
                     <CollectionPicker
                         selectEntry={(listId) =>
@@ -176,9 +176,8 @@ export default class PageResultView extends PureComponent<Props> {
             return (
                 <PopoutBox
                     targetElementRef={this.copyPasteronPageButtonRef.current}
-                    placement={'bottom'}
+                    placement={'bottom-end'}
                     offsetX={10}
-                    bigClosingScreen
                     strategy={'fixed'}
                     closeComponent={this.props.onCopyPasterBtnClick}
                 >

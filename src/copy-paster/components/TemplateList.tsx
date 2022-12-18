@@ -29,6 +29,7 @@ const SectionTitle = styled.div`
     font-size: 14px;
     font-weight: bold;
     flex: 1;
+    white-space: nowrap;
 `
 
 const HeaderplaceHolder = styled.div`

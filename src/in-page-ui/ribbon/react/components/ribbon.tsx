@@ -208,7 +208,6 @@ export default class Ribbon extends Component<Props, State> {
                 placement={'left-start'}
                 offsetX={10}
                 closeComponent={this.hideListPicker}
-                bigClosingScreen
             >
                 <CollectionPicker
                     {...this.props.lists}
@@ -235,7 +234,6 @@ export default class Ribbon extends Component<Props, State> {
                 offsetX={10}
                 closeComponent={this.props.toggleShowTutorial}
                 width={'440px'}
-                bigClosingScreen
             >
                 <QuickTutorial
                     getKeyboardShortcutsState={getKeyboardShortcutsState}
@@ -319,7 +317,6 @@ export default class Ribbon extends Component<Props, State> {
                 offsetY={-15}
                 width={'600px'}
                 closeComponent={() => this.props.toggleFeed()}
-                bigClosingScreen
             >
                 <FeedPanel closePanel={() => this.props.toggleFeed()}>
                     <FeedContainer>
@@ -364,7 +361,7 @@ export default class Ribbon extends Component<Props, State> {
                 targetElementRef={this.settingsButtonRef.current}
                 placement={'left-start'}
                 offsetX={10}
-                width={!this.state.showColorPicker ? '360px' : 'unset'}
+                width={!this.state.showColorPicker ? '360px' : '500px'}
                 closeComponent={() => this.props.toggleShowExtraButtons()}
             >
                 <GlobalStyle />
@@ -553,7 +550,6 @@ export default class Ribbon extends Component<Props, State> {
                 targetElementRef={this.sidebarButtonRef.current}
                 placement={'left-start'}
                 offsetX={10}
-                bigClosingScreen
             >
                 <CommentBoxContainer
                     hasComment={this.props.commentBox.commentText.length > 0}
@@ -855,12 +851,14 @@ const PickerButtonTopBar = styled.div`
 
 const ExtraButtonContainer = styled.div`
     padding: 10px;
+    width: 300px;
 `
 const ColorPickerContainer = styled.div`
     display: flex;
     flex-direction: column;
     grid-gap: 10px;
     padding: 15px;
+    width: 250px;
 `
 
 const HexPickerContainer = styled.div`
@@ -1073,6 +1071,7 @@ const FeedFrame = styled.iframe`
     height: 600px;
     border: none;
     border-radius: 10px;
+    width: 450px;
 `
 
 const FeedContainer = styled.div`

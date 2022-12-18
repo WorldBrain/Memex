@@ -1,9 +1,6 @@
 import React from 'react'
-import cx from 'classnames'
-import * as icons from 'src/common-ui/components/design-library/icons'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 import { MenuOptions, MenuOption } from '../types'
 
@@ -23,7 +20,7 @@ export class HelpMenu extends React.PureComponent<Props> {
         { text, link, small, icon, top }: MenuOption,
         i: number,
     ) => (
-        <MenuItem key={i} top={top}>
+        <MenuItem key={i} order={i} top={top}>
             <Link target="_blank" href={link} top={top}>
                 {icon && (
                     <Icon
@@ -56,12 +53,30 @@ export class HelpMenu extends React.PureComponent<Props> {
     }
 }
 
-const Container = styled.div`
-    padding: 15px;
-    width: 250px;
+const openAnimation = keyframes`
+ 0% { padding-bottom: 10px; opacity: 0 }
+ 100% { padding-bottom: 0px; opacity: 1 }
 `
 
-const MenuItem = styled.div<{ top }>`
+const Container = styled.div`
+    padding: 15px;
+    position: relative;
+    width: 250px;
+    height: 420px;
+`
+
+const MenuItem = styled.div<{ order: number }>`
+    animation-name: ${openAnimation};
+    animation-delay: ${(props) => props.order * 40}ms;
+    animation-duration: 0.2s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: backwards;
+    overflow: hidden;
+    height: 43px;
+    display: flex;
+    align-items: center;
+    padding-bottom: 0px;
+
     border-radius: 5px;
     border: none;
     list-style: none;

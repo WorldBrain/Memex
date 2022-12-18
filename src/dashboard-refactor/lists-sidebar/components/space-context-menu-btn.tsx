@@ -44,7 +44,6 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
                 }}
                 strategy={'fixed'}
                 width={'300px'}
-                bigClosingScreen
             >
                 <SpaceContextMenu
                     ref={this.contextMenuRef}

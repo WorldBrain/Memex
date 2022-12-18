@@ -596,7 +596,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     })
                 }}
                 offsetX={10}
-                bigClosingScreen
             >
                 {this.props.renderListsPickerForAnnotation(this.props.url)}
             </PopoutBox>
