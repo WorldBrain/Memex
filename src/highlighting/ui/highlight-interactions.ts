@@ -550,11 +550,15 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const highlights = document.querySelectorAll(
             `[data-annotation="${annotation.url}"]`,
         )
-        PDFs.anchor(
-            document.body,
-            annotation?.selector.descriptor.content,
-            true,
-        )
+        const pdfViewer = globalThis.PDFViewerApplication?.pdfViewer
+
+        if (pdfViewer) {
+            PDFs.anchor(
+                document.body,
+                annotation?.selector.descriptor.content,
+                true,
+            )
+        }
 
         highlights.forEach((highlight: HTMLElement) => {
             highlight.classList.add(styles['selectedHighlight'])
