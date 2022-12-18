@@ -521,11 +521,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.runSearch(nextState)
     }
 
-    private runSearch = throttle(
+    private runSearch = debounce(
         async (previousState: State, paginate?: boolean) => {
             await this.search({ previousState, event: { paginate } })
         },
-        100,
+        200,
     )
 
     // leaving this here for now in order to finalise the feature for handling the race condition rendering
@@ -1059,8 +1059,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         }
 
-        console.log(mutation)
-
         if (event.day === PAGE_SEARCH_DUMMY_DAY) {
             mutation.results = {
                 [PAGE_SEARCH_DUMMY_DAY]: {
@@ -1080,8 +1078,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 event.pageId,
             )
         }
-
-        console.log(mutation)
 
         await this.options.listsBG.removePageFromList({
             id: listId,
@@ -1125,7 +1121,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
 
         for (let page of pages) {
-            console.log(page)
             await this.options.listsBG.removePageFromList({
                 id: SPECIAL_LIST_IDS.INBOX,
                 url: page,

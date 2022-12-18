@@ -1,5 +1,5 @@
 import React, { PureComponent, useState } from 'react'
-import styled, { css } from 'styled-components'
+import styled, { css, keyframes } from 'styled-components'
 import Waypoint from 'react-waypoint'
 import browser from 'webextension-polyfill'
 // import { SketchPicker } from 'react-color'
@@ -1209,11 +1209,22 @@ const NoteTopBarBox = styled(TopBar)`
     display: flex;
 `
 
+const openAnimation = keyframes`
+ 0% { padding-bottom: 20px; opacity: 0 }
+ 100% { padding-bottom: 0px; opacity: 1 }
+`
+
 const ResultBox = styled(Margin)<{ zIndex: number }>`
     flex-direction: column;
     justify-content: space-between;
     width: 100%;
     z-index: ${(props) => props.zIndex};
+
+    animation-name: ${openAnimation};
+    animation-delay: ${(props) => props.order * 50}ms;
+    animation-duration: 0.2s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: backwards;
 `
 
 const PageNotesBox = styled(Margin)`
