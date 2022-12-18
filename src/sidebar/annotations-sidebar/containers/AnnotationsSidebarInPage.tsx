@@ -81,7 +81,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         const sidebarContainer = document.getElementById(
             'memex-sidebar-container',
         )
+
         if (sidebarContainer && this.state.showState === 'visible') {
+            if (event.target.classList.includes('memex-highlight')) {
+                return
+            }
+
             if (!event.composedPath().includes(sidebarContainer)) {
                 this.hideSidebar()
             }

@@ -802,7 +802,10 @@ export class AnnotationsSidebarContainer<
     }
 
     render() {
-        if (this.state.showState === 'hidden') {
+        if (
+            this.state.showState === 'hidden' &&
+            this.props.sidebarContext === 'dashboard'
+        ) {
             return null
         }
 
@@ -1067,11 +1070,7 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     position: ${(props) =>
         props.sidebarContext === 'dashboard' ? 'sticky' : 'fixed'};
     padding: 0px 0px 10px 0px;
-
-    right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
     top: 0px;
-    padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
-
     z-index: ${(props) =>
         props.sidebarContext === 'dashboard'
             ? '2147483641'
@@ -1080,24 +1079,36 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
     font-family: 'Satoshi', sans-serif;
     box-sizing: content-box;
-    animation: ${(props) =>
+    /* animation: ${(props) =>
         props.sidebarContext === 'in-page' && 'slide-in ease-out'};
-    animation-duration: 0.05s;
-    /* transition : all 2s ease; */
+    animation-duration: 0.05s; */
+    transition: all 2s ease;
     // place it initially at -100%
 
     &:: -webkit-scrollbar {
         display: none;
     }
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.16, 0.87);
+
+    ${(props) =>
+        props.isShown === 'hidden' &&
+        css`
+            right: -600px;
+            opacity: 0;
+        `}
+    
+    ${(props) =>
+        props.isShown === 'visible' &&
+        css`
+            right: 0px;
+            opacity: 1;
+        `}
+    
+
 
     scrollbar-width: none;
 
-    ${(props) =>
-        props.isShown !== 'visible' &&
-        css`
-            transition: all 2s ease;
-            transform: translateX(-600px);
-        `}
+ 
 
     @keyframes slide-in {
         0% {
@@ -1116,7 +1127,7 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
             opacity: 100%;
         }
         100% {
-            right: -450px;
+            right: -1000px;
             opacity: 0%;
         }
     }

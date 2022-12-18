@@ -39,11 +39,12 @@ export const main: SidebarScriptMain = async (dependencies) => {
     )
 
     const setUp = async (options: ShouldSetUpOptions = {}) => {
+        console.log('setup')
         createMount()
         setupInPageSidebarUI(mount, {
             ...dependencies,
             pageUrl: await dependencies.getPageUrl(),
-            initialState: options.showSidebarOnLoad ? 'visible' : 'hidden',
+            // initialState: options.showSidebarOnLoad ? 'visible' : 'hidden',
         })
     }
 
