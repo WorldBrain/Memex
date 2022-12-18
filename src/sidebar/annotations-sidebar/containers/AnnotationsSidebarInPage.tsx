@@ -231,7 +231,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             if (changes.sidebar) {
                 this.showSidebar()
             } else {
-                // this.hideSidebar()
+                this.hideSidebar()
             }
         }
     }
