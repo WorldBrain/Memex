@@ -153,17 +153,10 @@ class ImportContainer extends Component {
             return (
                 <PrimaryAction
                     onClick={this.handleBtnClick(boundActions.pause)}
-                    label={
-                        <ButtonContent>
-                            <Icon
-                                filePath={icons.pause}
-                                heightAndWidth="14px"
-                                color="white"
-                                hoverOff
-                            />
-                            Pause Import
-                        </ButtonContent>
-                    }
+                    label={'Pause Import'}
+                    type={'secondary'}
+                    size={'medium'}
+                    icon={'pause'}
                 />
             )
         }
@@ -172,17 +165,10 @@ class ImportContainer extends Component {
             return (
                 <PrimaryAction
                     onClick={this.handleBtnClick(boundActions.resume)}
-                    label={
-                        <ButtonContent>
-                            <Icon
-                                filePath={icons.playFull}
-                                heightAndWidth="14px"
-                                color="white"
-                                hoverOff
-                            />
-                            Resume Import
-                        </ButtonContent>
-                    }
+                    label={'Resume Import'}
+                    type={'secondary'}
+                    size={'medium'}
+                    icon={'play'}
                 />
             )
         }
@@ -190,35 +176,19 @@ class ImportContainer extends Component {
         if (this.props.isStopped) {
             return (
                 <FinishBntContainer>
-                    <SecondaryAction
+                    <PrimaryAction
                         onClick={this.handleBtnClick(boundActions.finish)}
-                        label={
-                            <ButtonContent>
-                                <Icon
-                                    filePath={icons.redo}
-                                    heightAndWidth="14px"
-                                    color="purple"
-                                    hoverOff
-                                />
-                                Start new import
-                            </ButtonContent>
-                        }
-                    >
-                        Start new import
-                    </SecondaryAction>
+                        label={'Start new import'}
+                        type={'forth'}
+                        size={'medium'}
+                        icon={'redo'}
+                    />
                     <PrimaryAction
                         onClick={() => window.open(`${OPTIONS_URL}#/overview`)}
-                        label={
-                            <ButtonContent>
-                                <Icon
-                                    filePath={icons.searchIcon}
-                                    heightAndWidth="14px"
-                                    color="white"
-                                    hoverOff
-                                />
-                                Go to dashboard
-                            </ButtonContent>
-                        }
+                        label={' Go to dashboard'}
+                        type={'primary'}
+                        size={'medium'}
+                        icon={'searchIcon'}
                     />
                 </FinishBntContainer>
             )
@@ -229,11 +199,10 @@ class ImportContainer extends Component {
             <PrimaryAction
                 onClick={this.handleBtnClick(boundActions.start)}
                 isDisabled={isDisabled}
-                customClass={'startImport'}
-                type="submit"
+                type="primary"
                 icon={'play'}
-                iconSize={'20px'}
                 label={'Start Import'}
+                size={'medium'}
             />
         )
     }

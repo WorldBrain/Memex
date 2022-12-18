@@ -134,6 +134,8 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                             <PrimaryAction
                                 onClick={this.props.onBackupRequested}
                                 label={'Start Wizard'}
+                                size={'medium'}
+                                type={'primary'}
                             />
                         </StatusLine>
                     ) : (

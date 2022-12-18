@@ -41,8 +41,7 @@ const InformationBlock = styled.div`
     margin-bottom: 20px;
     font-size: 14px;
     font-weight: 300;
-    position: sticky;
-    top: 20px;
+    position: relative;
     width: fill-available;
     grid-gap: 10px;
 `

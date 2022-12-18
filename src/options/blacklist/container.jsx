@@ -87,6 +87,7 @@ class BlacklistContainer extends Component {
                 onInputChange={this.onInputChange}
                 onInputClear={resetInputVal}
                 inputRef={this.assignRef} // eslint-disable-line no-return-assign
+                renderError={this.renderError()}
                 {...props}
             />
         )
@@ -143,9 +144,7 @@ class BlacklistContainer extends Component {
                 <div>
                     <SectionTitle>Ignore a new domain/url:</SectionTitle>
                     <InfoText />
-                    {this.renderError()}
                     {this.renderBlacklistInputRow()}
-                    <div className={settingsStyle.whiteSpacer30} />
                     {this.renderAddBlacklistSites()}
                     <BlacklistTable>
                         {this.renderBlacklistRows()}

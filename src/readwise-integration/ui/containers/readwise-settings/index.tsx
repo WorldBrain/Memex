@@ -164,13 +164,19 @@ class ReadwiseSettings extends StatefulUIElement<
                             <PrimaryAction
                                 onClick={() => this.confirmSyncKey()}
                                 label={'Confirm'}
+                                icon={'check'}
+                                size={'medium'}
+                                type={'secondary'}
                             />
                         </div>
                     )}
                     {selectors.showKeyRemoveButton(this.state) && (
-                        <SecondaryAction
+                        <PrimaryAction
                             onClick={() => this.removeSyncKey()}
                             label={'Remove'}
+                            icon={'check'}
+                            size={'medium'}
+                            type={'secondary'}
                         />
                     )}
                 </MainBox>

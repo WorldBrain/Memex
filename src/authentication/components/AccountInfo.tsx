@@ -93,7 +93,8 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                             this.state.currentUser.email,
                                         )
                                     }}
-                                    font-size="14px"
+                                    size={'medium'}
+                                    type={'secondary'}
                                 />
                             </FieldsContainer>
                         </SettingSection>
