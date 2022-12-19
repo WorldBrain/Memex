@@ -23,6 +23,10 @@ import { generateAnnotationUrl } from 'src/annotations/utils'
 import { AnalyticsEvent } from 'src/analytics/types'
 import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
+import browser from 'webextension-polyfill'
+import * as PDFs from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
+import { throttle } from 'lodash'
+import hexToRgb from 'hex-to-rgb'
 
 const styles = require('src/highlighting/ui/styles.css')
 
@@ -100,9 +104,10 @@ export type HighlightRendererInterface = HighlightRenderInterface &
     HighlightInteractionsInterface
 
 export interface HighlightRendererDependencies {}
-
 export class HighlightRenderer implements HighlightRendererInterface {
     private observer
+    defaultHighlightColor
+    currentActiveHighlight
 
     constructor(private deps: HighlightRendererDependencies) {
         document.addEventListener('click', this.handleOutsideHighlightClick)
@@ -123,7 +128,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
             }
         }
 
-        this.removeHighlights({ onlyRemoveDarkHighlights: true })
+        this.removeSelectedHighlights(this.currentActiveHighlight)
     }
 
     saveAndRenderHighlightAndEditInSidebar = async (
@@ -239,12 +244,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
         onClick: AnnotationClickHandler,
         temporary = false,
     ) => {
+        let highlightColor = this.defaultHighlightColor
         if (!highlight?.selector?.descriptor?.content) {
             return
         }
 
-        const baseClass =
-            styles[temporary ? 'memex-highlight-tmp' : 'memex-highlight']
+        const baseClass = styles['memex-highlight']
 
         try {
             let highlightedElements = [] as HighlightElement[]
@@ -259,18 +264,39 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
                 const range = await retryUntil(
                     () => descriptorToRange({ descriptor }),
-                    (_range) => _range !== null,
+                    (range) => range !== null,
                     {
-                        intervalMiliseconds: 200,
+                        intervalMiliseconds: 1000,
                         timeoutMiliseconds: 5000,
                     },
                 )
 
-                highlightedElements = highlightRange(range, baseClass)
+                highlightedElements = highlightRange(
+                    range,
+                    baseClass,
+                    highlightColor,
+                )
                 // markRange({ range, cssClass: baseClass })
+
+                for (let highlights of highlightedElements) {
+                    highlights.style.setProperty(
+                        '--defaultHighlightColorCSS',
+                        this.defaultHighlightColor,
+                    )
+
+                    if (highlights.parentNode.nodeName === 'A') {
+                        highlights.style['color'] = '#0b0080'
+                    }
+                }
 
                 this.attachEventListenersToNewHighlights(highlight, onClick)
                 highlight.domElements = highlightedElements
+
+                for (let highlights of highlight.domElements) {
+                    if (highlights.parentNode.nodeName === 'A') {
+                        highlights.style['color'] = '#0b0080'
+                    }
+                }
             })
 
             return highlight
@@ -292,6 +318,17 @@ export class HighlightRenderer implements HighlightRendererInterface {
         highlights: Highlight[],
         onClick,
     ): Promise<Highlight[]> => {
+        const highlightsColor = await browser.storage.local.get(
+            '@highlight-colors',
+        )
+        this.defaultHighlightColor = hexToRgb(
+            highlightsColor['@highlight-colors'],
+        ).toString()
+
+        browser.storage.onChanged.addListener((change) => {
+            this.defaultHighlightColor = change['@highlight-colors'].newValue
+        })
+
         await Promise.all(
             highlights.map(async (highlight) => {
                 await this.renderHighlight(highlight, onClick)
@@ -308,7 +345,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
             if (pdfViewer) {
                 this.observer = new MutationObserver(
-                    debounce(() => this.reanchorer(highlights, onClick), 100),
+                    throttle(() => this.reanchorer(highlights, onClick), 1000),
                 )
                 this.observer.observe(pdfViewer.viewer, {
                     attributes: true,
@@ -321,12 +358,30 @@ export class HighlightRenderer implements HighlightRendererInterface {
     }
 
     reanchorer = (highlights: Highlight[], onClick) => {
-        const reanchors = highlights.filter(
+        let reanchors = highlights.filter(
             (h) => !document.body.contains(h.domElements?.pop() ?? null),
         )
+
         if (reanchors.length > 0) {
             this.renderHighlights(reanchors, onClick)
         }
+
+        // for (let item of reanchors) {
+        //     let currentPageIndex = globalThis.PDFViewerApplication?.page
+        //     PDFs.findPage(item.selector.descriptor.content[1].start).then(
+        //         ({ index, offset, textContent }) => {
+        //             console.log('test',)
+        //             if (index !== currentPageIndex) {
+        //                 return
+        //             } else {
+        //                 if (reanchors.length > 0) {
+        //                     console.log('attempt at reanchoring')
+        //                     this.renderHighlights(reanchors, onClick)
+        //                 }
+        //             }
+        //         },
+        //     )
+        // }
     }
 
     /**
@@ -350,8 +405,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
      * @param {*} annotation Annotation object which has the selector to be highlighted
      */
     highlightAndScroll = (annotation: Annotation) => {
-        this.removeHighlights({ onlyRemoveDarkHighlights: true })
-        this.makeHighlightDark(annotation)
+        this.resetHighlightsStyles()
+        this.removeSelectedHighlights(this.currentActiveHighlight)
+        this.selectHighlight(annotation)
         this.scrollToHighlight(annotation)
     }
 
@@ -363,15 +419,21 @@ export class HighlightRenderer implements HighlightRendererInterface {
      * @param {function} hoverAnnotationContainer Function when called will set the sidebar container to hover state
      * @param openSidebar
      */
+
     attachEventListenersToNewHighlights = (
-        highlight: Highlight,
+        highlight: Annotation | Highlight,
         openSidebar: AnnotationClickHandler,
     ) => {
         const newHighlights = document.querySelectorAll(
             `.${styles['memex-highlight']}:not([data-annotation])`,
         )
+
         newHighlights.forEach((highlightEl: HTMLElement) => {
             highlightEl.dataset.annotation = highlight.url
+
+            if (highlightEl.parentNode.nodeName === 'A') {
+                highlightEl.style['color'] = '#0b0080'
+            }
 
             const clickListener = async (e: MouseEvent) => {
                 // Let anchors behave as normal
@@ -391,18 +453,22 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     annotationUrl: highlight.url,
                     openInEdit: e.getModifierState('Shift'),
                 })
-                this.removeHighlights({ onlyRemoveDarkHighlights: true })
-                this.makeHighlightDark(highlight)
+                // make sure to remove all other selections before selecting the new one
+                this.resetHighlightsStyles()
+                this.selectHighlight(highlight)
             }
 
             highlightEl.addEventListener('click', clickListener, false)
 
             const mouseenterListener = (e) => {
-                if (!e.target.dataset.annotation) {
+                if (
+                    !e.target.dataset.annotation ||
+                    e.target.dataset.annotation === this.currentActiveHighlight
+                ) {
                     return
+                } else {
+                    this.hoverOverHighlight(highlight)
                 }
-                this.removeMediumHighlights()
-                this.makeHighlightMedium(highlight)
             }
             highlightEl.addEventListener(
                 'mouseenter',
@@ -411,10 +477,13 @@ export class HighlightRenderer implements HighlightRendererInterface {
             )
 
             const mouseleaveListener = (e) => {
-                if (!e.target.dataset.annotation) {
+                if (
+                    !e.target.dataset.annotation ||
+                    e.target.dataset.annotation === this.currentActiveHighlight
+                ) {
                     return
                 }
-                this.removeMediumHighlights()
+                this.removeHoveredHighlights(highlight)
             }
             highlightEl.addEventListener(
                 'mouseleave',
@@ -422,20 +491,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 false,
             )
         })
-    }
-    /**
-     * Removes the medium class from all the highlights making them light.
-     */
-    removeMediumHighlights = () => {
-        // Remove previous "medium" highlights
-        const baseClass = styles['memex-highlight']
-        const mediumClass = styles['medium']
-        const prevHighlights = document.querySelectorAll(
-            `.${baseClass}.${mediumClass}`,
-        )
-        prevHighlights.forEach((highlight) =>
-            highlight.classList.remove(mediumClass),
-        )
     }
 
     removeTempHighlights = () => {
@@ -447,52 +502,117 @@ export class HighlightRenderer implements HighlightRendererInterface {
      * Makes the given annotation as a medium highlight.
      * @param {string} url PK of the annotation to make medium
      */
-    makeHighlightMedium = ({ url }: Highlight) => {
+    hoverOverHighlight = ({ url }: Highlight) => {
         // Make the current annotation as a "medium" highlight.
-        const baseClass = styles['memex-highlight']
-        const mediumClass = styles['medium']
-        const highlights = document.querySelectorAll(
-            `.${baseClass}[data-annotation="${url}"]`,
-        )
-        highlights.forEach((highlight) => highlight.classList.add(mediumClass))
-    }
-    /**
-     * Makes the highlight a dark highlight.
-     */
-    makeHighlightDark = ({ url }: Highlight) => {
         const baseClass = styles['memex-highlight']
         const highlights = document.querySelectorAll(
             `.${baseClass}[data-annotation="${url}"]`,
         )
 
-        highlights.forEach((highlight) => {
-            highlight.classList.add(styles['dark'])
+        highlights.forEach((highlight: HTMLElement) => {
+            highlight.classList.add(styles['hoveredHighlight'])
+
+            if (!highlight.classList.contains('selectedHighlight')) {
+                highlight.style.setProperty(
+                    '--defaultHighlightColorCSS',
+                    this.defaultHighlightColor,
+                )
+            }
         })
     }
 
     /**
-     * Removes all highlight elements in the current page.
-     * If `onlyRemoveDarkHighlights` is true, only dark highlights will be removed.
+     * Removes the medium class from all the highlights making them light.
      */
-    removeHighlights = (args?: { onlyRemoveDarkHighlights?: boolean }) => {
-        this.removeTempHighlights()
 
-        const baseClass = '.' + styles['memex-highlight']
-        const darkClass = args?.onlyRemoveDarkHighlights
-            ? '.' + styles['dark']
-            : ''
-        const highlightClass = `${baseClass}${darkClass}`
-        const highlights = document.querySelectorAll(highlightClass)
-
-        if (args?.onlyRemoveDarkHighlights) {
-            highlights.forEach((highlight) =>
-                highlight.classList.remove(styles['dark']),
-            )
-        } else {
-            highlights.forEach((highlight) => this._removeHighlight(highlight))
-        }
+    removeHoveredHighlights = ({ url }: Highlight) => {
+        const baseClass = styles['memex-highlight']
+        const highlights = document.querySelectorAll(
+            `.${baseClass}[data-annotation="${url}"]`,
+        )
+        highlights.forEach((highlight: HTMLElement) => {
+            if (!highlight.classList.contains(styles['selectedHighlight'])) {
+                highlight.classList.remove(styles['hoveredHighlight'])
+                // highlight.style['background-color'] = this.defaultHighlightColor
+                highlight.style.setProperty(
+                    '--defaultHighlightColorCSS',
+                    this.defaultHighlightColor,
+                )
+            }
+        })
     }
-    undoAllHighlights = this.removeHighlights
+
+    /**
+     * Makes the highlight a dark highlight.
+     */
+    selectHighlight = (annotation: Annotation | Highlight) => {
+        this.currentActiveHighlight = annotation.url
+        const highlights = document.querySelectorAll(
+            `[data-annotation="${annotation.url}"]`,
+        )
+        const pdfViewer = globalThis.PDFViewerApplication?.pdfViewer
+
+        if (pdfViewer) {
+            PDFs.anchor(
+                document.body,
+                annotation?.selector.descriptor.content,
+                true,
+            )
+        }
+
+        highlights.forEach((highlight: HTMLElement) => {
+            highlight.classList.add(styles['selectedHighlight'])
+            highlight.classList.remove(styles['hoveredHighlight'])
+            highlight.style.setProperty(
+                '--defaultHighlightColorCSS',
+                this.defaultHighlightColor,
+            )
+        })
+    }
+
+    removeSelectedHighlights = (url) => {
+        const highlights = document.querySelectorAll(
+            `[data-annotation="${url}"]`,
+        )
+        highlights.forEach((highlight: HTMLElement) => {
+            if (highlight.classList.contains(styles['selectedHighlight'])) {
+                highlight.classList.remove(styles['selectedHighlight'])
+                highlight.style.setProperty(
+                    '--defaultHighlightColorCSS',
+                    this.defaultHighlightColor,
+                )
+                // highlight.style['background-color'] = this.defaultHighlightColor
+                // highlight.style['border-bottom'] = 'unset'
+            }
+        })
+        this.currentActiveHighlight = ''
+    }
+    /**
+     * Return highlights to normal state
+     */
+    resetHighlightsStyles = () => {
+        const highlights = document.querySelectorAll(`[data-annotation]`)
+        highlights.forEach((highlight: HTMLElement) => {
+            if (
+                highlight.getAttribute('data-annotation') ===
+                this.currentActiveHighlight
+            ) {
+                highlight.classList.remove(styles['selectedHighlight'])
+                highlight.style.setProperty(
+                    '--defaultHighlightColorCSS',
+                    this.defaultHighlightColor,
+                )
+            } else {
+                highlight.classList.remove(styles['selectedHighlight'])
+                highlight.style.setProperty(
+                    '--defaultHighlightColorCSS',
+                    this.defaultHighlightColor,
+                )
+            }
+        })
+    }
+
+    undoAllHighlights = this.resetHighlightsStyles
 
     /**
      * Finds each annotation's position in page, sorts it by the position and

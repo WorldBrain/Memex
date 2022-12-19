@@ -10,6 +10,7 @@ import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { CheckboxToggle } from 'src/common-ui/components'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 export interface OwnProps {
     closePopup: () => void
@@ -63,17 +64,9 @@ class SidebarOpenButton extends PureComponent<Props, State> {
                 <ButtonInnerContent>
                     Open Annotation Sidebar
                     <ShortCutContainer>
-                        <ShortCutBlock>
-                            <ShortCutText>
-                                {this.state.highlightInfo?.split('+')[0]}
-                            </ShortCutText>
-                        </ShortCutBlock>
-                        +
-                        <ShortCutBlock>
-                            <ShortCutText>
-                                {this.state.highlightInfo?.split('+')[1]}
-                            </ShortCutText>
-                        </ShortCutBlock>
+                        <KeyboardShortcuts
+                            keys={this.state.highlightInfo?.split('+')}
+                        />
                     </ShortCutContainer>
                 </ButtonInnerContent>
             </ButtonItem>

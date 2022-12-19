@@ -23,6 +23,7 @@ export interface Props {
     saveDescription: (description: string) => void
     onAddContributorsClick?: React.MouseEventHandler
     listId?: number
+    clearInbox?: () => void
 }
 
 interface State {
@@ -215,9 +216,37 @@ export default class ListDetails extends PureComponent<Props, State> {
                                     {this.renderEditButton()}
                                 </TitleEditContainer> */}
                             </DetailsContainer>
-                            {this.props.listName && (
-                                <BtnsContainer>
-                                    {this.props.remoteLink ? (
+                            <BtnsContainer>
+                                {this.props.listId === 20201014 ? (
+                                    <TooltipBox
+                                        tooltipText={
+                                            <TooltipTextContent>
+                                                <strong>Tip:</strong> Remove
+                                                individual pages with the
+                                                <br />{' '}
+                                                <Icon
+                                                    filePath="removeX"
+                                                    hoverOff
+                                                    heightAndWidth="16px"
+                                                />{' '}
+                                                icon when hovering page cards
+                                            </TooltipTextContent>
+                                        }
+                                        placement="bottom-end"
+                                    >
+                                        <PrimaryAction
+                                            label={'Clear Inbox'}
+                                            onClick={() =>
+                                                this.props.clearInbox()
+                                            }
+                                            type={'forth'}
+                                            size={'medium'}
+                                            icon={'removeX'}
+                                        />
+                                    </TooltipBox>
+                                ) : undefined}
+                                {this.props.listName &&
+                                    (this.props.remoteLink ? (
                                         <SpaceButtonRow>
                                             <Margin right="10px">
                                                 {this.renderEditButton()}
@@ -260,9 +289,8 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                 icon={'invite'}
                                             />
                                         </TooltipBox>
-                                    )}
-                                </BtnsContainer>
-                            )}
+                                    ))}
+                            </BtnsContainer>
                         </TitleContainer>
                         {this.props.isOwnedList &&
                             !this.props.description?.length &&
@@ -310,6 +338,16 @@ export default class ListDetails extends PureComponent<Props, State> {
         )
     }
 }
+
+const TooltipTextContent = styled.div`
+    display: block;
+    line-height: 23px;
+
+    > div {
+        display: inline-block;
+        vertical-align: middle;
+    }
+`
 
 const SpaceButtonRow = styled.div`
     display: flex;
@@ -456,5 +494,5 @@ const DescriptionContainer = styled.div`
 `
 
 const DescriptionText = styled(Markdown)`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale8};
 `

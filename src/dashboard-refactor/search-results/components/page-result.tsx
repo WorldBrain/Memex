@@ -5,7 +5,7 @@ import ItemBoxBottom, {
     ItemBoxBottomAction,
 } from '@worldbrain/memex-common/lib/common-ui/components/item-box-bottom'
 
-import { Icon } from 'src/dashboard-refactor/styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type {
     PageData,
@@ -114,8 +114,8 @@ export default class PageResultView extends PureComponent<Props> {
                     targetElementRef={this.spacePickerBarRef.current}
                     placement={'bottom-start'}
                     offsetX={10}
-                    bigClosingScreen
                     closeComponent={this.listPickerBtnClickHandler}
+                    strategy={'fixed'}
                 >
                     <CollectionPicker
                         selectEntry={(listId) =>
@@ -145,8 +145,8 @@ export default class PageResultView extends PureComponent<Props> {
                     targetElementRef={this.spacePickerButtonRef.current}
                     placement={'bottom-end'}
                     offsetX={10}
-                    bigClosingScreen
                     closeComponent={this.listPickerBtnClickHandler}
+                    strategy={'fixed'}
                 >
                     <CollectionPicker
                         selectEntry={(listId) =>
@@ -176,9 +176,8 @@ export default class PageResultView extends PureComponent<Props> {
             return (
                 <PopoutBox
                     targetElementRef={this.copyPasteronPageButtonRef.current}
-                    placement={'bottom'}
+                    placement={'bottom-end'}
                     offsetX={10}
-                    bigClosingScreen
                     strategy={'fixed'}
                     closeComponent={this.props.onCopyPasterBtnClick}
                 >
@@ -198,27 +197,30 @@ export default class PageResultView extends PureComponent<Props> {
         return null
     }
 
-    private renderRemoveFromListBtn() {
+    private renderRemoveFromListBtn(): JSX.Element {
         if (
             !this.props.isSearchFilteredByList ||
             this.props.hoverState == null
         ) {
-            return false
+            return undefined
         }
 
         return (
-            <RemoveFromListBtn onClick={this.props.onRemoveFromListBtnClick}>
-                <TooltipBox
-                    tooltipText={
-                        this.props.filteredbyListID === SPECIAL_LIST_IDS.INBOX
-                            ? 'Remove from Inbox'
-                            : 'Remove from Space'
-                    }
-                    placement="left"
-                >
-                    <Icon heightAndWidth="12px" path={icons.close} />
-                </TooltipBox>
-            </RemoveFromListBtn>
+            <TooltipBox
+                tooltipText={
+                    this.props.filteredbyListID === SPECIAL_LIST_IDS.INBOX
+                        ? 'Remove from Inbox'
+                        : 'Remove from Space'
+                }
+                placement="bottom"
+            >
+                <Icon
+                    heightAndWidth="22px"
+                    filePath={icons.removeX}
+                    darkBackground
+                    onClick={this.props.onRemoveFromListBtnClick}
+                />
+            </TooltipBox>
         )
     }
 
@@ -298,51 +300,6 @@ export default class PageResultView extends PureComponent<Props> {
                 },
             ]
         }
-
-        // return [
-        //     {
-        //         key: 'delete-page-btn',
-        //         isDisabled: true,
-        //         image: 'trash',
-        //     },
-        //     {
-        //         key: 'copy-paste-page-btn',
-        //         isDisabled: true,
-        //         image: 'copy',
-        //         buttonRef: this.copyPasteronPageButtonRef,
-        //         active: this.props.isCopyPasterShown,
-        //     },
-        //     {
-        //         key: 'add-spaces-btn',
-        //         image: 'plus',
-        //         imageColor: 'purple',
-        //         iconSize: '14px',
-        //         ButtonText: 'Spaces',
-        //         buttonRef: this.spacePickerButtonRef,
-        //         // onClick: this.props.onListPickerFooterBtnClick,
-        //         active: this.props.listPickerShowStatus === 'footer',
-        //     },
-        //     // {
-        //     //     key: 'share-page-btn',
-        //     //     isDisabled: true,
-        //     //     image: this.props.isShared ? icons.shared : icons.link,
-        //     // },
-        //     // {
-        //     //     key: 'list-page-btn',
-        //     //     isDisabled: true,
-        //     //     image: this.hasLists
-        //     //         ? icons.collectionsFull
-        //     //         : icons.collectionsEmpty,
-        //     // },
-        //     {
-        //         key: 'expand-notes-btn',
-        //         image: this.hasNotes ? 'commentFull' : 'commentEmpty',
-        //         ButtonText:
-        //             this.props.noteIds[this.props.notesType].length > 0 &&
-        //             this.props.noteIds[this.props.notesType].length.toString(),
-        //         imageColor: 'purple',
-        //     },
-        // ]
     }
 
     render() {
@@ -360,7 +317,6 @@ export default class PageResultView extends PureComponent<Props> {
                 }}
             >
                 <StyledPageResult>
-                    {this.renderRemoveFromListBtn()}
                     <PageContentBox
                         // onMouseOver={this.props.onMainContentHover}
                         // onMouseLeave={
@@ -380,6 +336,12 @@ export default class PageResultView extends PureComponent<Props> {
                             fullTitle={this.props.fullTitle}
                             pdfUrl={this.props.fullPdfUrl}
                             favIcon={this.props.favIconURI}
+                            removeFromList={this.renderRemoveFromListBtn()}
+                            mainContentHover={
+                                this.props.hoverState != null
+                                    ? this.props.hoverState
+                                    : undefined
+                            }
                         />
                     </PageContentBox>
                     {this.hasLists && (
@@ -418,21 +380,6 @@ const StyledPageResult = styled.div`
     flex-direction: column;
     position: relative;
     border-radius: 12px;
-`
-
-const RemoveFromListBtn = styled.div`
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: none;
-    outline: none;
-    border: none;
-    display: flex;
-    height: 20px;
-    width: 20px;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
 `
 
 const PageContentBox = styled.a<{ hasSpaces: boolean }>`

@@ -251,8 +251,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                 placement={'bottom-start'}
                 offsetX={10}
                 closeComponent={() => this.toggleShowTutorial()}
-                width={'420px'}
-                bigClosingScreen
+                width={'440px'}
             >
                 <QuickTutorial
                     markdownHelpOnTop={true}
@@ -317,7 +316,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <>
                 <TextBoxContainerStyled>
-                    <Margin vertical="10px">
+                    <EditorContainer vertical="10px">
                         {this.state.onEditClick ? (
                             <MemexEditor
                                 onKeyDown={this.handleInputKeyDown}
@@ -349,7 +348,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 Add private note (share with 'shift + enter')
                             </EditorDummy>
                         )}
-                    </Margin>
+                    </EditorContainer>
                     {this.props.comment === '' ? null : (
                         <FooterContainer>
                             <ListsSegment
@@ -377,6 +376,20 @@ export class AnnotationCreate extends React.Component<Props, State>
 
 export default AnnotationCreate
 
+const EditorContainer = styled(Margin)`
+    z-index: 1000;
+    border-radius: 5px;
+
+    &:focus-within {
+        background-color: ${(props) => props.theme.colors.darkhover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+    }
+    &:hover {
+        background-color: ${(props) => props.theme.colors.darkhover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+    }
+`
+
 const EditorDummy = styled.div`
     outline: none;
     padding: 10px 10px;
@@ -390,6 +403,8 @@ const EditorDummy = styled.div`
     cursor: text;
     float: left;
     color: ${(props) => props.theme.colors.greyScale8};
+    display: flex;
+    align-items: center;
 `
 
 const SaveCancelArea = styled.div`

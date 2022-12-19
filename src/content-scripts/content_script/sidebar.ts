@@ -39,6 +39,7 @@ export const main: SidebarScriptMain = async (dependencies) => {
     )
 
     const setUp = async (options: ShouldSetUpOptions = {}) => {
+        console.log('setup')
         createMount()
         setupInPageSidebarUI(mount, {
             ...dependencies,

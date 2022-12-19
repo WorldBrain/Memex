@@ -59,9 +59,9 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
                 <Container>
                     <EditableListTitle
                         autoFocus
-                        // onChange={this.handleChange}
+                        onChange={this.handleChange}
                         value={this.state.value}
-                        // onKeyDown={this.handleInputKeyDown}
+                        onKeyDown={this.handleInputKeyDown}
                     />
                     <ActionButtonBox right="5px">
                         <Icon

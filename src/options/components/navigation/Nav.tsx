@@ -30,6 +30,8 @@ const Root = styled.div`
 const NavItem = styled.ul`
     padding-inline-start: 0px;
     color: ${(props) => props.theme.colors.normalText};
+    display: flex;
+    flex-direction: column;
 `
 
 export default Nav

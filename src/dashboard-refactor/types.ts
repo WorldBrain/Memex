@@ -42,10 +42,6 @@ export interface RootState {
     searchFilters: SearchFiltersState
     listsSidebar: ListsSidebarState
     modals: DashboardModalsState
-    spaceSidebarWidth?: string
-    windowWidth?: number
-    mainContentWidth?: string
-    notesSidebarWidth?: string
     activePageID?: string
     activeDay?: number
 }

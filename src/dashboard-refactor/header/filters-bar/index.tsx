@@ -17,6 +17,8 @@ import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 const windowWidth: number = window.innerWidth
 const searchBarWidthPx: number = sizeConstants.searchBar.widthPx
@@ -40,7 +42,6 @@ export interface FiltersBarProps {
     datePickerProps: DateRangeSelectionProps
     spacePickerProps: SpacePickerDependencies
     domainPickerProps: DomainPickerDependencies
-    spaceSidebarWidth: string
     spaceSidebarLocked: boolean
 }
 
@@ -55,7 +56,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         onToggle: React.MouseEventHandler,
         isShown: boolean,
         isFiltered: boolean,
-        filterIcons: string,
+        filterIcons: IconKeys,
         filterProps:
             | TagPickerDependencies
             | SpacePickerDependencies
@@ -64,16 +65,20 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         componentRef: React.RefObject<HTMLDivElement>,
     ) => (
         <Margin vertical="7px" width="auto">
-            <FilterSelectButton
-                selected={isShown}
+            <PrimaryAction
+                active={isShown || isFiltered}
                 onClick={onToggle}
-                className={`${name}-picker-button`}
-                filterActive={isShown || isFiltered}
-                ref={componentRef}
-            >
-                <Icon path={filterIcons} heightAndWidth="16px" hoverOff />
-                {this.renderFilterInfo(filterProps, name, isFiltered, label)}
-            </FilterSelectButton>
+                innerRef={componentRef}
+                icon={filterIcons}
+                type={'forth'}
+                size={'medium'}
+                label={this.renderFilterInfo(
+                    filterProps,
+                    name,
+                    isFiltered,
+                    label,
+                )}
+            />
         </Margin>
     )
 
@@ -221,7 +226,6 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             <>
                 <Container hidden={!this.props.isDisplayed}>
                     <FilterBtnsContainer
-                        sidebarWidth={this.props.spaceSidebarWidth}
                         spaceSidebarLocked={this.props.spaceSidebarLocked}
                     >
                         {this.renderFilterSelectButton(
@@ -277,7 +281,7 @@ const DateText = styled.div`
 
 const Container = styled.div<{ hidden: boolean }>`
     height: fit-content;
-    width: 100%;
+    width: fill-available;
     border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
     justify-content: center;
     position: sticky;
@@ -292,7 +296,7 @@ const Container = styled.div<{ hidden: boolean }>`
         `};
 `
 
-const FilterBtnsContainer = styled.div<{ sidebarWidth; spaceSidebarLocked }>`
+const FilterBtnsContainer = styled.div<{ spaceSidebarLocked }>`
     max-width: 800px;
     flex: 1;
     position: relative;

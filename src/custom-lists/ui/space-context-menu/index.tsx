@@ -284,6 +284,7 @@ const ContextMenuContainer = styled.div`
     height: fit-content;
     justify-content: center;
     align-items: flex-start;
+    width: 250px;
 `
 
 const SectionTitle = styled.div`
@@ -323,6 +324,7 @@ const LoadingContainer = styled.div`
     justify-content: center;
     align-items: center;
     width: fill-available;
+    width: 250px;
 `
 
 const ShareSectionContainer = styled.div`

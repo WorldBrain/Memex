@@ -283,7 +283,7 @@ function findPage(offset) {
  * @param {number} end - Character offset within the page's text
  * @return {Promise<Range>}
  */
-async function anchorByPosition(pageIndex, start, end) {
+async function anchorByPosition(pageIndex, start, end, onDemand) {
     const page = await getPageView(pageIndex)
     if (
         page.renderingState === 3 &&
@@ -294,11 +294,18 @@ async function anchorByPosition(pageIndex, start, end) {
         const root = page.textLayer.textLayerDiv
         const startPos = new TextPosition(root, start)
         const endPos = new TextPosition(root, end)
+
+        if (onDemand) {
+            if (PDFViewerApplication.page !== pageIndex + 1) {
+                PDFViewerApplication.page = pageIndex + 1
+            }
+        }
         return new TextRange(startPos, endPos).toRange()
     }
 
     // The page has not been rendered yet. Create a placeholder element and
     // anchor to that instead.
+
     let placeholder = page.div.querySelector('.annotator-placeholder')
     if (!placeholder) {
         placeholder = document.createElement('span')
@@ -309,6 +316,13 @@ async function anchorByPosition(pageIndex, start, end) {
     const range = document.createRange()
     range.setStartBefore(placeholder)
     range.setEndAfter(placeholder)
+
+    if (onDemand) {
+        if (PDFViewerApplication.page !== pageIndex + 1) {
+            PDFViewerApplication.page = pageIndex + 1
+        }
+    }
+
     return range
 }
 
@@ -421,7 +435,7 @@ function prioritizePages(position) {
  * @param {Selector[]} selectors - Selector objects to anchor
  * @return {Promise<Range>}
  */
-export function anchor(root, selectors) {
+export function anchor(root, selectors, onDemand) {
     const position = /** @type {TextPositionSelector|undefined} */ (selectors.find(
         (s) => s.type === 'TextPositionSelector',
     ))
@@ -448,8 +462,7 @@ export function anchor(root, selectors) {
                     const length = end - start
 
                     checkQuote(textContent.substr(start, length))
-
-                    return anchorByPosition(index, start, end)
+                    return anchorByPosition(index, start, end, onDemand)
                 },
             )
         })
@@ -465,7 +478,13 @@ export function anchor(root, selectors) {
                 const { pageIndex, anchor } = quotePositionCache[quote.exact][
                     position.start
                 ]
-                return anchorByPosition(pageIndex, anchor.start, anchor.end)
+
+                return anchorByPosition(
+                    pageIndex,
+                    anchor.start,
+                    anchor.end,
+                    onDemand,
+                )
             }
 
             return prioritizePages(position?.start ?? 0).then((pageIndices) => {

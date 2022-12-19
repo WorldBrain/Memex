@@ -18,6 +18,7 @@ import {
 } from 'src/sync-settings/util'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 async function writeShortcutState(state: State) {
     await setKeyboardShortcutsState(state)
@@ -124,40 +125,52 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
     }
 
     renderCheckboxes() {
-        return this.props.shortcutsData.map(({ id, name, text, subText }) => {
-            if (
-                this.state[name] &&
-                !(id === 'add-tag-shortcut' && !this.state.shouldShowTagsUIs)
-            ) {
-                return (
-                    <CheckBoxRow>
-                        <Checkbox
-                            key={id}
-                            id={id}
-                            isChecked={this.state[name].enabled}
-                            handleChange={this.handleEnabledToggle}
-                            isDisabled={!this.state.shortcutsEnabled}
-                            name={name}
-                            label={text.toString()}
-                        >
-                            <Title>
-                                {subText && <SubText>({subText})</SubText>}
-                            </Title>
-                            <RightBox>
-                                <KeyboardInput
-                                    type="text"
-                                    value={this.state[name].shortcut}
-                                    onKeyDown={this.recordBinding}
-                                    onChange={(e) => e.preventDefault()}
-                                    disabled={!this.state.shortcutsEnabled}
-                                    name={name}
-                                />{' '}
-                            </RightBox>
-                        </Checkbox>
-                    </CheckBoxRow>
-                )
-            }
-        })
+        return this.props.shortcutsData.map(
+            ({ id, name, text, subText }, i) => {
+                if (
+                    this.state[name] &&
+                    !(
+                        id === 'add-tag-shortcut' &&
+                        !this.state.shouldShowTagsUIs
+                    )
+                ) {
+                    const keysArray: [] = this.state[name].shortcut.split('+')
+                    return (
+                        <CheckBoxRow>
+                            <Checkbox
+                                key={id}
+                                id={id}
+                                isChecked={this.state[name].enabled}
+                                handleChange={this.handleEnabledToggle}
+                                isDisabled={!this.state.shortcutsEnabled}
+                                name={name}
+                                label={text.toString()}
+                                zIndex={this.props.shortcutsData.length - i}
+                            >
+                                <RightBox>
+                                    <Title>
+                                        {subText && (
+                                            <SubText>{subText}</SubText>
+                                        )}
+                                    </Title>
+                                    <KeyBoardShortCutBehind>
+                                        <KeyboardShortcuts keys={keysArray} />
+                                    </KeyBoardShortCutBehind>
+                                    <KeyboardInput
+                                        type="text"
+                                        value={this.state[name].shortcut}
+                                        onKeyDown={this.recordBinding}
+                                        onChange={(e) => e.preventDefault()}
+                                        disabled={!this.state.shortcutsEnabled}
+                                        name={name}
+                                    />{' '}
+                                </RightBox>
+                            </Checkbox>
+                        </CheckBoxRow>
+                    )
+                }
+            },
+        )
     }
 
     render() {
@@ -193,6 +206,23 @@ const RightBox = styled.div`
     grid-gap: 10px;
     flex: 1;
     justify-content: flex-end;
+    position: relative;
+    height: 40px;
+    padding-right: 130px;
+    color: ${(props) => props.theme.colors.normalText};
+`
+
+const KeyBoardShortCutBehind = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    height: 40px;
+    width: 120px;
+    top: 0px;
+    right: 0px;
+    border-radius: 8px;
+    background: ${(props) => props.theme.colors.darkhover};
 `
 
 const Title = styled.span`
@@ -213,7 +243,9 @@ const CheckBoxContainer = styled.div`
     cursor: pointer;
 `
 
-const CheckBoxRow = styled.div`
+const CheckBoxRow = styled.div<{
+    zIndex: number
+}>`
     height: 50px;
     margin-left: -10px;
     padding: 10px;
@@ -221,24 +253,30 @@ const CheckBoxRow = styled.div`
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    z-index: ${(props) => props.zIndex};
 
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        z-index: ${(props) => props.zIndex};
     }
 `
 
 const KeyboardInput = styled.input`
-    background: ${(props) => props.theme.colors.darkhover};
     height: 40px;
     width: 120px;
     padding: 0 15px;
     align-items: center;
     justify-content: center;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: transparent;
     outline: none;
     text-align: center;
     border-radius: 8px;
     border: none;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background: transparent;
+    caret-color: transparent;
 
     &:focus {
         outline: 1px solid ${(props) => props.theme.colors.lightHover};

@@ -1,6 +1,6 @@
 import React, { ChangeEventHandler, PureComponent } from 'react'
 import styled from 'styled-components'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { TaskState } from 'ui-logic-core/lib/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'

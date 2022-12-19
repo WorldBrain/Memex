@@ -81,7 +81,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         const sidebarContainer = document.getElementById(
             'memex-sidebar-container',
         )
+
         if (sidebarContainer && this.state.showState === 'visible') {
+            if (event.target.classList.contains('hypothesis-highlight')) {
+                return
+            }
+
             if (!event.composedPath().includes(sidebarContainer)) {
                 this.hideSidebar()
             }
@@ -108,9 +113,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         sidebarEvents.on('removeTemporaryHighlights', () =>
             highlighter.removeTempHighlights(),
         )
-        sidebarEvents.on('highlightAndScroll', ({ url }) =>
-            highlighter.highlightAndScroll({ url } as any),
-        )
+        sidebarEvents.on('highlightAndScroll', (annotation) => {
+            highlighter.highlightAndScroll(annotation.annotation)
+        })
         sidebarEvents.on('removeAnnotationHighlight', ({ url }) =>
             highlighter.removeAnnotationHighlight(url),
         )
@@ -226,7 +231,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             if (changes.sidebar) {
                 this.showSidebar()
             } else {
-                // this.hideSidebar()
+                this.hideSidebar()
             }
         }
     }

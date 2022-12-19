@@ -1,6 +1,7 @@
 import TypedEventEmitter from 'typed-emitter'
 
 import { Highlight } from 'src/highlighting/types'
+import { Annotation } from 'src/annotations/types'
 import { ResultWithIndex } from 'src/overview/types'
 
 export interface Page {
@@ -24,7 +25,7 @@ export { ResultWithIndex }
 export interface HighlighterEvents {
     renderHighlight: (args: { highlight: Highlight }) => void
     renderHighlights: (args: { highlights: Highlight[] }) => void
-    highlightAndScroll: (args: { url: string }) => void
+    highlightAndScroll: (args: { annotation: Annotation }) => void
     removeTemporaryHighlights: () => void
     removeAnnotationHighlight: (args: { url: string }) => void
     removeAnnotationHighlights: (args: { urls: string[] }) => void

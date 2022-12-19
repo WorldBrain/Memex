@@ -596,7 +596,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     })
                 }}
                 offsetX={10}
-                bigClosingScreen
             >
                 {this.props.renderListsPickerForAnnotation(this.props.url)}
             </PopoutBox>
@@ -1000,6 +999,7 @@ const ContentContainer = styled.div<{ isEditMode: boolean }>`
     display: flex;
     box-sizing: border-box;
     flex-direction: column;
+    z-index: 1001;
 
     ${(props) =>
         props.isEditMode &&

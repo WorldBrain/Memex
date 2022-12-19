@@ -26,11 +26,12 @@ export interface HighlightInteractionsInterface {
         highlight: Highlight,
         openSidebar: AnnotationClickHandler,
     ) => void
-    removeMediumHighlights: () => void
+    removeHoveredHighlights: ({ url }: Highlight) => void
     removeTempHighlights: () => void
-    makeHighlightMedium: ({ url }: Highlight) => void
-    makeHighlightDark: ({ url }: Highlight) => void
-    removeHighlights: (args?: { onlyRemoveDarkHighlights?: boolean }) => void
+    hoverOverHighlight: ({ url }: Highlight) => void
+    selectHighlight: ({ url }: Highlight) => void
+    removeSelectedHighlights: (url) => void
+    resetHighlightsStyles: () => void
     sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
     _removeHighlight: (highlight: Element) => void
     removeAnnotationHighlight: (url: string) => void

@@ -38,7 +38,7 @@ function renderCopyPasterBox(props, copypasterButtonRef) {
     if (props.isCopyPasterShown) {
         return (
             <PopoutBox
-                placement={'bottom'}
+                placement={'bottom-end'}
                 offsetX={10}
                 closeComponent={props.toggleCopyPaster}
                 targetElementRef={copypasterButtonRef.current}
@@ -55,21 +55,25 @@ export default function SearchCopyPaster(props: Props) {
     const copypasterButtonRef = React.useRef<HTMLDivElement>(null)
 
     return (
-        <TooltipBox tooltipText={'Copy Search Results'} placement="bottom">
-            <Icon
-                filePath={icons.copy}
-                heightAndWidth="22px"
-                onClick={props.toggleCopyPaster}
-                active={props.isCopyPasterShown}
-                padding={'6px'}
-                containerRef={copypasterButtonRef}
-            />
+        <Container>
+            <TooltipBox tooltipText={'Copy Search Results'} placement="bottom">
+                <Icon
+                    filePath={icons.copy}
+                    heightAndWidth="22px"
+                    onClick={props.toggleCopyPaster}
+                    active={props.isCopyPasterShown}
+                    padding={'6px'}
+                    containerRef={copypasterButtonRef}
+                />
+            </TooltipBox>
             {renderCopyPasterBox(props, copypasterButtonRef)}
-        </TooltipBox>
+        </Container>
     )
 }
 
 // TODO: inheirits from .nakedSquareButton
+
+const Container = styled.div``
 const ActionBtn = styled.button`
     border-radius: 3px;
     padding: 2px;

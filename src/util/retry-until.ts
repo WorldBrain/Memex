@@ -1,3 +1,5 @@
+import { throttle } from 'lodash'
+
 export class RetryTimeoutError extends Error {
     static isRetryTimeoutError = true
 }
@@ -34,7 +36,7 @@ export function retryUntil<T>(
                 return reject(new RetryTimeoutError())
             }
 
-            setTimeout(tryOrRetryLater, options.intervalMiliseconds)
+            throttle(tryOrRetryLater, options.intervalMiliseconds)
         }
 
         tryOrRetryLater()

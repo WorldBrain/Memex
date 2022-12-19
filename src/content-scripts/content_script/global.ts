@@ -294,7 +294,7 @@ export async function main(
             category: 'Highlights',
             action: 'createFromContextMenu',
         }),
-        removeHighlights: async () => highlightRenderer.removeHighlights(),
+        removeHighlights: async () => highlightRenderer.resetHighlightsStyles(),
         createAnnotation: annotationsFunctions.createAnnotation({
             category: 'Annotations',
             action: 'createFromContextMenu',

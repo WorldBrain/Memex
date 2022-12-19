@@ -24,6 +24,7 @@ export interface Props {
     size?: number
     label?: string
     subLabel?: string
+    zIndex?: number
 }
 
 class Checkbox extends React.PureComponent<Props> {
@@ -42,7 +43,7 @@ class Checkbox extends React.PureComponent<Props> {
 
     render() {
         return (
-            <LabelContainer htmlFor={this.props.id}>
+            <LabelContainer zIndex={this.props.zIndex} htmlFor={this.props.id}>
                 <InputContainer
                     type="checkbox"
                     checked={this.props.isChecked}
@@ -122,11 +123,12 @@ const ChildrenBox = styled.span<{ mode }>`
     }
 `
 
-const LabelContainer = styled.label`
+const LabelContainer = styled.label<{ zIndex?: number }>`
     display: flex;
     align-items: center;
     width: 100%;
     cursor: pointer;
+    z-index: ${(props) => props.zIndex};
 `
 
 const InputContainer = styled.input`

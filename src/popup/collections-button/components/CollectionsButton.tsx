@@ -8,6 +8,7 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import styled from 'styled-components'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 export interface OwnProps {
     pageListsIds: number[]
@@ -75,17 +76,9 @@ class CollectionsButton extends PureComponent<Props> {
                 <ButtonInnerContent>
                     Add Page to Spaces
                     <ShortCutContainer>
-                        <ShortCutBlock>
-                            <ShortCutText>
-                                {this.state.highlightInfo?.split('+')[0]}
-                            </ShortCutText>
-                        </ShortCutBlock>
-                        +
-                        <ShortCutBlock>
-                            <ShortCutText>
-                                {this.state.highlightInfo?.split('+')[1]}
-                            </ShortCutText>
-                        </ShortCutBlock>
+                        <KeyboardShortcuts
+                            keys={this.state.highlightInfo?.split('+')}
+                        />
                     </ShortCutContainer>
                 </ButtonInnerContent>
             </ButtonItem>

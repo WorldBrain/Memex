@@ -15,6 +15,7 @@ const BlacklistInputRow = ({
     onInputChange,
     onInputClear,
     inputRef,
+    renderError,
 }) => (
     <Container>
         <TextField
@@ -25,11 +26,17 @@ const BlacklistInputRow = ({
             ref={inputRef}
             width="fill-available"
         />
-        <PrimaryAction
-            onClick={onAdd}
-            disabled={isSaveBtnDisabled}
-            label="Add to Block List"
-        />
+        {value.length > 0 && !isSaveBtnDisabled && (
+            <PrimaryAction
+                onClick={onAdd}
+                disabled={isSaveBtnDisabled}
+                label="Add to Block List"
+                type={'secondary'}
+                size={'medium'}
+                icon={'plus'}
+            />
+        )}
+        {renderError && renderError}
         <input
             value={value}
             className={styles.input}
@@ -53,6 +60,7 @@ export const propTypes = (BlacklistInputRow.propTypes = {
 
     // Misc
     inputRef: PropTypes.func.isRequired,
+    renderError: PropTypes.element,
 })
 
 export default BlacklistInputRow

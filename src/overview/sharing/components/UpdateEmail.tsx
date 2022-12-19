@@ -1,6 +1,6 @@
 import React, { ChangeEventHandler, PureComponent } from 'react'
 import styled from 'styled-components'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 import { formBackground } from 'src/common-ui/components/design-library/colors'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'

@@ -61,7 +61,6 @@ const DEF_CONTEXT: { context: AnnotationEventContext } = {
 export interface Props extends SidebarContainerOptions {
     skipTopBarRender?: boolean
     isLockable?: boolean
-    setSidebarWidthforDashboard?: (sidebarWidth) => void
     onNotesSidebarClose?: () => void
 }
 
@@ -147,12 +146,6 @@ export class AnnotationsSidebarContainer<
 
         if (this.props.sidebarContext === 'dashboard') {
             document.addEventListener('keydown', this.listenToEsc)
-
-            setTimeout(() => {
-                this.props.setSidebarWidthforDashboard(
-                    this.state.sidebarWidth || SIDEBAR_WIDTH_STORAGE_KEY,
-                )
-            }, 0)
         }
 
         if (
@@ -172,7 +165,6 @@ export class AnnotationsSidebarContainer<
         if (this.props.sidebarContext === 'dashboard') {
             setTimeout(() => {
                 document.removeEventListener('keydown', this.listenToEsc)
-                this.props.setSidebarWidthforDashboard('0px')
                 this.props.onNotesSidebarClose()
             }, 50)
         }
@@ -810,7 +802,10 @@ export class AnnotationsSidebarContainer<
     }
 
     render() {
-        if (this.state.showState === 'hidden') {
+        if (
+            this.state.showState === 'hidden' &&
+            this.props.sidebarContext === 'dashboard'
+        ) {
             return null
         }
 
@@ -819,6 +814,7 @@ export class AnnotationsSidebarContainer<
             position: 'relative',
             right: '0px',
             left: 'unset',
+            zIndex: 3,
         } as const
 
         return (
@@ -856,20 +852,6 @@ export class AnnotationsSidebarContainer<
                             bottomRight: false,
                             bottomLeft: false,
                             topLeft: false,
-                        }}
-                        onResizeStop={(e, direction, ref, delta, position) => {
-                            // if (this.props.sidebarContext !== 'dashboard') {
-                            this.processEvent('adjustSidebarWidth', {
-                                newWidth: ref.style.width,
-                                isWidthLocked: this.state.isWidthLocked,
-                            })
-                            // }
-
-                            if (this.props.sidebarContext === 'dashboard') {
-                                this.props.setSidebarWidthforDashboard(
-                                    ref.style.width,
-                                )
-                            }
                         }}
                     >
                         <AnnotationsSidebar
@@ -920,9 +902,9 @@ export class AnnotationsSidebarContainer<
                             annotationModes={
                                 this.state.annotationModes.pageAnnotations
                             }
-                            setActiveAnnotationUrl={(annotationUrl) => () =>
+                            setActiveAnnotationUrl={(annotation) => () =>
                                 this.processEvent('setActiveAnnotationUrl', {
-                                    annotationUrl,
+                                    annotation,
                                 })}
                             isAnnotationCreateShown={this.state.showCommentBox}
                             setPopoutsActive={(isActive) => {
@@ -1083,15 +1065,12 @@ const PickerWrapper = styled.div`
 `
 
 const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
-    height: 100%;
+    height: 100vh;
     overflow-x: visible;
-    position: fixed;
+    position: ${(props) =>
+        props.sidebarContext === 'dashboard' ? 'sticky' : 'fixed'};
     padding: 0px 0px 10px 0px;
-
-    right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
     top: 0px;
-    padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
-
     z-index: ${(props) =>
         props.sidebarContext === 'dashboard'
             ? '2147483641'
@@ -1100,24 +1079,36 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
     font-family: 'Satoshi', sans-serif;
     box-sizing: content-box;
-    animation: ${(props) =>
+    /* animation: ${(props) =>
         props.sidebarContext === 'in-page' && 'slide-in ease-out'};
-    animation-duration: 0.05s;
-    /* transition : all 2s ease; */
+    animation-duration: 0.05s; */
+    transition: all 2s ease;
     // place it initially at -100%
 
     &:: -webkit-scrollbar {
         display: none;
     }
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.16, 0.87);
+
+    ${(props) =>
+        props.isShown === 'hidden' &&
+        css`
+            right: -600px;
+            opacity: 0;
+        `}
+    
+    ${(props) =>
+        props.isShown === 'visible' &&
+        css`
+            right: 0px;
+            opacity: 1;
+        `}
+    
+
 
     scrollbar-width: none;
 
-    ${(props) =>
-        props.isShown !== 'visible' &&
-        css`
-            transition: all 2s ease;
-            transform: translateX(-600px);
-        `}
+ 
 
     @keyframes slide-in {
         0% {
@@ -1136,7 +1127,7 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
             opacity: 100%;
         }
         100% {
-            right: -450px;
+            right: -1000px;
             opacity: 0%;
         }
     }

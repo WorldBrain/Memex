@@ -59,6 +59,7 @@ import SyncStatusMenu, { SyncStatusMenuProps } from './header/sync-status-menu'
 import { SETTINGS_URL } from 'src/constants'
 import { SyncStatusIcon } from './header/sync-status-menu/sync-status-icon'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 export interface Props extends DashboardDependencies {}
 
@@ -128,8 +129,6 @@ export class DashboardContainer extends StatefulUIElement<
     constructor(props: Props) {
         super(props, new DashboardLogic(props))
 
-        setTimeout(() => this.setupWindowWidthListner(), 500)
-
         this.annotationsCache = createAnnotationsCache(
             {
                 contentSharing: props.contentShareBG,
@@ -139,16 +138,6 @@ export class DashboardContainer extends StatefulUIElement<
             },
             { skipPageIndexing: true },
         )
-    }
-
-    setupWindowWidthListner() {
-        // this.processEvent('calculateMainContentWidth', {})
-
-        window.addEventListener('resize', () => {
-            this.processEvent('calculateMainContentWidth', {
-                windowWidth: window.innerWidth,
-            })
-        })
     }
 
     private getListDetailsById: ListDetailsGetter = (id) => ({
@@ -310,7 +299,6 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <FiltersBar
-                spaceSidebarWidth={this.state.spaceSidebarWidth}
                 spaceSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 searchFilters={searchFilters}
                 isDisplayed={searchFilters.searchFiltersOpen}
@@ -472,11 +460,6 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setSidebarLocked', {
                             isLocked: !listsSidebar.isSidebarLocked,
                         })
-                        // this.processEvent('calculateMainContentWidth', {
-                        //     spaceSidebarWidth: !listsSidebar.isSidebarLocked
-                        //         ? '250px'
-                        //         : '0px',
-                        // })
                     },
                 }}
                 sidebarToggleHoverState={{
@@ -515,7 +498,6 @@ export class DashboardContainer extends StatefulUIElement<
                         })
                     },
                 }}
-                sidebarWidth={this.state.spaceSidebarWidth}
             />
         )
     }
@@ -540,7 +522,6 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <ListsSidebarContainer
                 {...listsSidebar}
-                sidebarWidth={this.state.spaceSidebarWidth}
                 lockedState={lockedState}
                 openFeedUrl={() =>
                     this.processEvent('clickFeedActivityIndicator', null)
@@ -646,6 +627,8 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                clearInbox={() => this.processEvent('clearInbox', null)}
+                isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 activePage={this.state.activePageID && true}
                 listData={listsSidebar.listData}
                 getListDetailsById={this.getListDetailsById}
@@ -1382,19 +1365,19 @@ export class DashboardContainer extends StatefulUIElement<
                         />
                     </SidebarToggleBox>
                 </SidebarHeaderContainer>
+                <PeekTrigger
+                    onMouseEnter={(isPeeking) => {
+                        this.processEvent('setSidebarPeeking', {
+                            isPeeking,
+                        })
+                    }}
+                    onDragEnter={(isPeeking) => {
+                        this.processEvent('setSidebarPeeking', {
+                            isPeeking,
+                        })
+                    }}
+                />
                 <MainFrame>
-                    <PeekTrigger
-                        onMouseEnter={(isPeeking) => {
-                            this.processEvent('setSidebarPeeking', {
-                                isPeeking,
-                            })
-                        }}
-                        onDragEnter={(isPeeking) => {
-                            this.processEvent('setSidebarPeeking', {
-                                isPeeking,
-                            })
-                        }}
-                    />
                     <ListSidebarContent
                         ref={this.SidebarContainer}
                         style={style}
@@ -1423,9 +1406,7 @@ export class DashboardContainer extends StatefulUIElement<
                         }}
                         resizeGrid={[1, 0]}
                         dragAxis={'none'}
-                        minWidth={
-                            sizeConstants.listsSidebar.widthPx - 50 + 'px'
-                        }
+                        minWidth={sizeConstants.listsSidebar.widthPx + 'px'}
                         maxWidth={'500px'}
                         disableDragging={'true'}
                         enableResizing={{
@@ -1438,17 +1419,10 @@ export class DashboardContainer extends StatefulUIElement<
                             bottomLeft: false,
                             topLeft: false,
                         }}
-                        onResizeStop={(e, direction, ref, delta, position) => {
-                            this.processEvent('calculateMainContentWidth', {
-                                spaceSidebarWidth: ref.style.width,
-                                isSidebarPeeking: !this.state.listsSidebar
-                                    .isSidebarLocked,
-                            })
-                        }}
                     >
                         {this.renderListsSidebar()}
                     </ListSidebarContent>
-                    <MainContent responsiveWidth={this.state.mainContentWidth}>
+                    <MainContent>
                         {this.state.listsSidebar.showFeed ? (
                             <FeedContainer>
                                 <TitleContainer>
@@ -1462,57 +1436,54 @@ export class DashboardContainer extends StatefulUIElement<
                             </FeedContainer>
                         ) : (
                             <>
-                                {this.renderHeader()}
-                                {this.renderFiltersBar()}
+                                <>
+                                    {this.renderHeader()}
+                                    {this.renderFiltersBar()}
+                                </>
                                 {mode === 'locate-pdf'
                                     ? this.renderPdfLocator()
                                     : this.renderSearchResults()}
                             </>
                         )}
                     </MainContent>
-                    {/* </ContentArea> */}
+                    <NotesSidebar
+                        tags={this.props.tagsBG}
+                        auth={this.props.authBG}
+                        refSidebar={this.notesSidebarRef}
+                        customLists={this.props.listsBG}
+                        annotations={this.props.annotationsBG}
+                        annotationsCache={this.annotationsCache}
+                        contentSharing={this.props.contentShareBG}
+                        syncSettingsBG={this.props.syncSettingsBG}
+                        contentConversationsBG={
+                            this.props.contentConversationsBG
+                        }
+                        setLoginModalShown={(isShown) =>
+                            this.processEvent('setShowLoginModal', { isShown })
+                        }
+                        setDisplayNameModalShown={(isShown) =>
+                            this.processEvent('setShowDisplayNameSetupModal', {
+                                isShown,
+                            })
+                        }
+                        showAnnotationShareModal={() =>
+                            this.processEvent(
+                                'setShowNoteShareOnboardingModal',
+                                {
+                                    isShown: true,
+                                },
+                            )
+                        }
+                        onNotesSidebarClose={() =>
+                            this.processEvent('setActivePage', {
+                                activeDay: undefined,
+                                activePageID: undefined,
+                                activePage: false,
+                            })
+                        }
+                    />
                 </MainFrame>
-
-                {/* <Margin bottom="5px" /> */}
                 {this.renderModals()}
-                <NotesSidebar
-                    tags={this.props.tagsBG}
-                    auth={this.props.authBG}
-                    refSidebar={this.notesSidebarRef}
-                    customLists={this.props.listsBG}
-                    annotations={this.props.annotationsBG}
-                    annotationsCache={this.annotationsCache}
-                    contentSharing={this.props.contentShareBG}
-                    syncSettingsBG={this.props.syncSettingsBG}
-                    contentConversationsBG={this.props.contentConversationsBG}
-                    setLoginModalShown={(isShown) =>
-                        this.processEvent('setShowLoginModal', { isShown })
-                    }
-                    setDisplayNameModalShown={(isShown) =>
-                        this.processEvent('setShowDisplayNameSetupModal', {
-                            isShown,
-                        })
-                    }
-                    showAnnotationShareModal={() =>
-                        this.processEvent('setShowNoteShareOnboardingModal', {
-                            isShown: true,
-                        })
-                    }
-                    setSidebarWidthforDashboard={(sidebarWidth) => {
-                        this.processEvent('calculateMainContentWidth', {
-                            notesSidebarWidth: sidebarWidth,
-                            isSidebarPeeking: !this.state.listsSidebar
-                                .isSidebarLocked,
-                        })
-                    }}
-                    onNotesSidebarClose={() =>
-                        this.processEvent('setActivePage', {
-                            activeDay: undefined,
-                            activePageID: undefined,
-                            activePage: false,
-                        })
-                    }
-                />
                 <HelpBtn />
                 <DragElement
                     isHoveringOverListItem={listsSidebar.dragOverListId != null}
@@ -1566,6 +1537,8 @@ const MainContent = styled.div<{ responsiveWidth: string }>`
     flex-direction: column;
     min-height: 100vh;
     height: 100%;
+    flex: 1;
+    width: 360px;
 
     ${(props) =>
         props.responsiveWidth &&
@@ -1691,6 +1664,8 @@ const Container = styled.div`
     background-color: ${(props) => props.theme.colors.backgroundColor};
     min-height: 100vh;
     height: 100%;
+    /* min-width: fit-content; */
+    width: fill-available;
 
     & * {
         font-family: 'Satoshi', sans-serif;,
@@ -1786,7 +1761,7 @@ const SyncStatusHeaderBox = styled.div`
             props.theme.colors.backgroundColorDarker};
     }
 
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 900px) {
         padding: 4px 4px 4px 4px;
         margin-left: 15px;
         width: 20px;
@@ -1804,7 +1779,7 @@ const SyncStatusHeaderText = styled.span<{
     overflow: hidden;
     ${(props) => (props.textCentered ? 'text-align: center;' : '')}
 
-    @media screen and (max-width: 900px) {
+    @media screen and (max-width: 600px) {
         display: none;
     }
 `

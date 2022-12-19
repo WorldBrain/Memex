@@ -41,6 +41,7 @@ import { getLocalStorage } from 'src/util/storage'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
@@ -48,7 +49,10 @@ export interface AnnotationsSidebarProps
     annotationModes: { [url: string]: AnnotationMode }
     // sidebarActions: () => void
 
-    setActiveAnnotationUrl?: (url: string) => React.MouseEventHandler
+    setActiveAnnotationUrl?: (
+        annotation?: Annotation,
+        annotationUrl?: string,
+    ) => React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
 
     bindSharedAnnotationEventHandlers: (
@@ -464,7 +468,7 @@ export class AnnotationsSidebar extends React.Component<
                                 }
                                 onReplyBtnClick={eventHandlers.onReplyBtnClick}
                                 onHighlightClick={this.props.setActiveAnnotationUrl(
-                                    data.id,
+                                    { annotationUrl: data.id },
                                 )}
                                 isClickable={
                                     this.props.theme.canClickAnnotations &&
@@ -655,10 +659,10 @@ export class AnnotationsSidebar extends React.Component<
                         {this.renderSharedNotesByList()}
                     </AnnotationsSectionStyled>
                 )}
-                {/* <UpdateNotifBanner
+                <UpdateNotifBanner
                     location={'sidebar'}
                     theme={{ position: 'fixed' }}
-                /> */}
+                />
             </React.Fragment>
         )
     }
@@ -702,7 +706,7 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.activeAnnotationUrl === annot.url
                             }
                             onHighlightClick={this.props.setActiveAnnotationUrl(
-                                annot.url,
+                                annot,
                             )}
                             onGoToAnnotation={footerDeps.onGoToAnnotation}
                             annotationEditDependencies={this.props.bindAnnotationEditProps(
