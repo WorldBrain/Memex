@@ -11,7 +11,6 @@ import BlacklistInputRow from './components/BlacklistInputRow'
 import * as actions from './actions'
 import * as selectors from './selectors'
 import styles from './components/base.css'
-import settingsStyle from 'src/options/settings/components/settings.css'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 
 class BlacklistContainer extends Component {

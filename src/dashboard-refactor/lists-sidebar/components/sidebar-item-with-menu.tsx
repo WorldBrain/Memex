@@ -219,7 +219,7 @@ export default class ListsSidebarItemWithMenu extends React.Component<
         const collaborationIcon = this.props.isCollaborative && (
             <>
                 <TooltipBox tooltipText={'Shared Space'} placement="bottom">
-                    <Icon heightAndWidth="14px" icon={'peopleFine'} hoverOff />
+                    <Icon heightAndWidth="18px" icon={'peopleFine'} hoverOff />
                 </TooltipBox>
             </>
         )
