@@ -95,7 +95,7 @@ export default class DataCleaner extends React.PureComponent<Props> {
         if (dataCleaningState === 'error') {
             return (
                 <>
-                    <Icon icon="alertRound" height="20px" />
+                    <Icon icon="warning" height="20px" />
                     <Header>There was an error</Header>
                     <Text>
                         <a href={supportLink}>Contact support</a> if problem

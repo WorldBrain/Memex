@@ -7,10 +7,11 @@ import { css } from 'styled-components'
 import { OutLink } from 'src/common-ui/containers'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export type Props = {
     name: String
-    icon: String
+    icon: IconKeys
     pathname: String
     isActive: Boolean
     isExternal: Boolean

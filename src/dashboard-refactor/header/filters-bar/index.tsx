@@ -234,7 +234,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             this.props.toggleDatesFilter,
                             this.props.showDatesFilter,
                             this.props.areDatesFiltered,
-                            icons.date,
+                            'date',
                             this.props.datePickerProps,
                             this.dateFilterButtonRef,
                         )}
@@ -245,7 +245,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             this.props.toggleDomainsFilter,
                             this.props.showDomainsFilter,
                             this.props.areDomainsFiltered,
-                            icons.globe,
+                            'globe',
                             this.props.domainPickerProps,
                             this.domainFilterButtonRef,
                         )}
@@ -256,8 +256,8 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             this.props.showSpaceFilter,
                             this.props.areSpacesFiltered,
                             this.props.areSpacesFiltered
-                                ? icons.collectionsFull
-                                : icons.collectionsEmpty,
+                                ? 'collectionsFull'
+                                : 'collectionsEmpty',
                             this.props.spacePickerProps,
                             this.spaceFilterButtonRef,
                         )}

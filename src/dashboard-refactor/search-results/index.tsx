@@ -879,7 +879,7 @@ export default class SearchResultsContainer extends React.Component<
                                 hoverOff
                                 heightAndWidth="12px"
                                 color={'iconColor'}
-                                icon={icons.alertRound}
+                                icon={'warning'}
                             />
                             <InfoText>
                                 Only your own contributions to this space are
