@@ -11,7 +11,6 @@ import {
 import { Annotation } from 'src/annotations/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
-import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { FakeAnalytics } from 'src/analytics/mock'
 import * as DATA from './logic.test.data'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'

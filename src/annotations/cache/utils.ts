@@ -1,11 +1,11 @@
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import { PageList } from 'src/custom-lists/background/types'
+import type { PageList } from 'src/custom-lists/background/types'
 import type { Annotation } from '../types'
 import type { UnifiedAnnotation, UnifiedList } from './types'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation,
-    suppData: { creator: UserReference },
+    suppData: { creator?: UserReference },
 ): Omit<UnifiedAnnotation, 'unifiedId'> &
     Partial<Pick<UnifiedAnnotation, 'unifiedId'>> => {
     const createdWhen = annot.createdWhen?.getTime()
@@ -47,7 +47,7 @@ export const reshapeCacheAnnotation = (
 
 export const reshapeListForCache = (
     list: PageList,
-    suppData: { creator: UserReference },
+    suppData: { creator?: UserReference },
 ): Omit<UnifiedList, 'unifiedId'> => ({
     name: list.name,
     localId: list.id,

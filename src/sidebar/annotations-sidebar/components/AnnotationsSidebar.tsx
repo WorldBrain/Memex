@@ -46,12 +46,14 @@ import type {
     PageAnnotationsCacheInterface,
     UnifiedAnnotation,
 } from 'src/annotations/cache/types'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
     extends Omit<SidebarContainerState, 'annotationModes'> {
     annotationModes: { [url: string]: AnnotationMode }
     annotationsCache: PageAnnotationsCacheInterface
+    currentUser?: UserReference
     // sidebarActions: () => void
 
     setActiveAnnotationUrl?: (url: string) => React.MouseEventHandler
@@ -543,7 +545,7 @@ export class AnnotationsSidebar extends React.Component<
             for (const { id } of sharedAnnotationReferences) {
                 if (
                     this.props.followedAnnotations[id]?.creatorId !==
-                    this.props.currentUserId
+                    this.props.currentUser?.id
                 ) {
                     othersAnnotsCount++
                 }
@@ -1062,7 +1064,7 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderPermissionStatusButton() {
-        const { selectedSpace, followedLists, currentUserId } = this.props
+        const { selectedSpace, followedLists, currentUser } = this.props
         if (!selectedSpace) {
             this.throwNoSelectedSpaceError()
         }
@@ -1089,7 +1091,7 @@ export class AnnotationsSidebar extends React.Component<
                 )
             }
 
-            if (sharedListData.creatorReference.id === currentUserId) {
+            if (sharedListData.creatorReference.id === currentUser?.id) {
                 return (
                     <PermissionInfoButton
                         label="Owner"

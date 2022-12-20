@@ -414,7 +414,7 @@ export class RibbonContainerLogic extends UILogic<
             createdWhen: now,
             isShared: shouldShare,
             isBulkShareProtected: isProtected,
-            creator: { type: 'user-reference', id: 123 }, // TODO: properly set current user
+            creator: this.dependencies.currentUser,
         })
         this.dependencies.setRibbonShouldAutoHide(true)
 

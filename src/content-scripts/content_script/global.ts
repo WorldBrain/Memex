@@ -49,6 +49,8 @@ import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { checkPageBlacklisted } from 'src/blacklist/utils'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import { runtime } from 'webextension-polyfill'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -90,6 +92,7 @@ export async function main(
     } = {}
 
     // 2. Initialise dependencies required by content scripts
+    const authBG = runInBackground<AuthRemoteFunctionsInterface>()
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const tagsBG = runInBackground<RemoteTagsInterface>()
@@ -125,6 +128,10 @@ export async function main(
             delete components[component]
         },
     })
+    const _currentUser = await authBG.getCurrentUser()
+    const currentUser: UserReference = _currentUser
+        ? { type: 'user-reference', id: _currentUser.id }
+        : undefined
     const fullPageUrl = await pageInfo.getPageUrl()
     const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
     const annotationsCache = new PageAnnotationsCache({ normalizedPageUrl })
@@ -146,6 +153,7 @@ export async function main(
             highlightRenderer.saveAndRenderHighlight({
                 ...annotationFunctionsParams,
                 analyticsEvent,
+                currentUser,
                 shouldShare,
             }),
         createAnnotation: (analyticsEvent?: AnalyticsEvent<'Annotations'>) => (
@@ -161,6 +169,7 @@ export async function main(
                 ...annotationFunctionsParams,
                 showSpacePicker,
                 analyticsEvent,
+                currentUser,
                 shouldShare,
             })
         },
@@ -173,6 +182,7 @@ export async function main(
         async registerRibbonScript(execute): Promise<void> {
             await execute({
                 inPageUI,
+                currentUser,
                 annotationsManager,
                 getRemoteFunction: remoteFunction,
                 highlighter: highlightRenderer,
@@ -215,6 +225,7 @@ export async function main(
                     ? 'visible'
                     : 'hidden',
                 inPageUI,
+                currentUser,
                 annotationsCache,
                 highlighter: highlightRenderer,
                 annotations: annotationsBG,

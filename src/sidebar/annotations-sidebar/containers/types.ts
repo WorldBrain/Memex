@@ -35,6 +35,7 @@ import type {
     PageAnnotationsCacheInterface,
     UnifiedAnnotation,
 } from 'src/annotations/cache/types'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -60,6 +61,8 @@ export interface SidebarContainerDependencies {
     auth: AuthRemoteFunctionsInterface
     subscription: SubscriptionsService
     theme?: MemexTheme & Partial<SidebarTheme>
+
+    currentUser?: UserReference
     // search: SearchInterface
     // bookmarks: BookmarksInterface
     analytics: Analytics
@@ -143,8 +146,6 @@ export interface SidebarContainerState
     showState: 'visible' | 'hidden'
     isLocked: boolean
     isWidthLocked: boolean
-
-    currentUserId: string | null
 
     activeTab: SidebarTab
     pillVisibility: string

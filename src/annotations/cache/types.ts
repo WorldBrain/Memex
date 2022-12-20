@@ -89,16 +89,13 @@ export type UnifiedAnnotation = Pick<
     normalizedPageUrl: string
     lastEdited: number
     createdWhen: number
-    creator: UserReference
+    creator?: UserReference
 
     // Misc annotation feature state
     isShared: boolean
     isBulkShareProtected: boolean
     unifiedListIds: UnifiedList['unifiedId'][]
 }
-
-export type UnifiedHighlight = UnifiedAnnotation &
-    Required<Pick<UnifiedAnnotation, 'body' | 'selector'>>
 
 export interface UnifiedList {
     // Core list data
@@ -107,7 +104,7 @@ export interface UnifiedList {
     remoteId?: string
     name: string
     description?: string
-    creator: UserReference
+    creator?: UserReference
 
     // Misc list feature state
     unifiedAnnotationIds: UnifiedAnnotation['unifiedId'][]

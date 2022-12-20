@@ -9,6 +9,7 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import type { MaybePromise } from 'src/util/types'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 interface FlagSetterInterface {
     getState(): Promise<boolean>
@@ -33,4 +34,5 @@ export interface RibbonContainerDependencies {
     tooltip: FlagSetterInterface
     highlights: FlagSetterInterface
     syncSettings: SyncSettingsStore<'extension'>
+    currentUser?: UserReference
 }

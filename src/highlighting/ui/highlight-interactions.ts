@@ -163,7 +163,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
         try {
             const cacheAnnotation = reshapeAnnotationForCache(annotation, {
-                creator: { type: 'user-reference', id: 123 },
+                creator: params.currentUser,
             })
             const { unifiedId } = params.annotationsCache.addAnnotation(
                 cacheAnnotation,

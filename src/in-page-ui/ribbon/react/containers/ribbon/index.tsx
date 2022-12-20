@@ -232,7 +232,7 @@ export default class RibbonContainer extends StatefulUIElement<
                             remoteId: null,
                             description: null,
                             unifiedAnnotationIds: [],
-                            creator: { type: 'user-reference', id: 123 }, // TODO: properly set current user ID
+                            creator: this.props.currentUser,
                         })
                         await this.processEvent('updateLists', {
                             value: {

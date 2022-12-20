@@ -5,6 +5,7 @@ import type { AnnotationClickHandler } from './ui/types'
 import type { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import type { AnalyticsEvent } from 'src/analytics/types'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 export type Highlight = Pick<Annotation, 'url' | 'selector'> & {
     temporary?: boolean
@@ -53,5 +54,6 @@ export interface SaveAndRenderHighlightDeps {
     analyticsEvent?: AnalyticsEvent
     inPageUI: SharedInPageUIInterface
     showSpacePicker?: boolean
+    currentUser?: UserReference
     shouldShare?: boolean
 }

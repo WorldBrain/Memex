@@ -110,10 +110,7 @@ export class AnnotationsSidebarContainer<
             name,
             localId: listId,
             unifiedAnnotationIds: [],
-            creator: {
-                type: 'user-reference',
-                id: this.state.currentUserId,
-            },
+            creator: this.props.currentUser,
         })
         return listId
     }
@@ -942,6 +939,7 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
+                            currentUser={this.props.currentUser}
                             annotationsCache={this.props.annotationsCache}
                             onRemoteSpaceSelect={(remoteListId) =>
                                 this.processEvent('setSelectedSpace', {

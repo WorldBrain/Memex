@@ -184,7 +184,6 @@ export class SidebarContainerLogic extends UILogic<
             followedAnnotations: {},
             users: {},
             pillVisibility: 'unhover',
-            currentUserId: null,
 
             isWidthLocked: false,
             isLocked: false,
@@ -241,7 +240,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        const { fullPageUrl, annotationsCache, auth: authBG } = this.options
+        const { fullPageUrl, annotationsCache, currentUser } = this.options
         annotationsCache.events.addListener(
             'newAnnotationsState',
             this.annotationsSubscription,
@@ -256,18 +255,14 @@ export class SidebarContainerLogic extends UILogic<
         this.listsSubscription(annotationsCache.lists)
 
         await loadInitial<SidebarContainerState>(this, async () => {
-            const currentUser = await authBG.getCurrentUser()
             const areTagsMigrated = await this.syncSettings.extension.get(
                 'areTagsMigratedToSpaces',
             )
-            this.emitMutation({
-                shouldShowTagsUIs: { $set: !areTagsMigrated },
-                currentUserId: { $set: currentUser?.id ?? null },
-            })
+            this.emitMutation({ shouldShowTagsUIs: { $set: !areTagsMigrated } })
 
             // If `pageUrl` prop passed down rehydrate cache
             if (fullPageUrl != null) {
-                await this.hydrateCacheAnnotations(fullPageUrl, currentUser?.id)
+                await this.hydrateCacheAnnotations(fullPageUrl)
             }
         })
         this.annotationsLoadComplete.resolve()
@@ -322,13 +317,11 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    private async hydrateCacheAnnotations(
-        fullPageUrl: string,
-        currentUserId: string,
-    ) {
+    private async hydrateCacheAnnotations(fullPageUrl: string) {
         const {
             annotations: annotationsBG,
             customLists: customListsBG,
+            currentUser,
             annotationsCache,
         } = this.options
         // const listsData = await customListsBG.fetchAllLists({})
@@ -347,12 +340,7 @@ export class SidebarContainerLogic extends UILogic<
         annotationsCache.setAnnotations(
             normalizeUrl(fullPageUrl),
             annotationsData.map((annot) =>
-                reshapeAnnotationForCache(annot, {
-                    creator: {
-                        type: 'user-reference',
-                        id: currentUserId,
-                    },
-                }),
+                reshapeAnnotationForCache(annot, { creator: currentUser }),
             ),
         )
     }
@@ -385,16 +373,12 @@ export class SidebarContainerLogic extends UILogic<
             setDisplayNameModalShown?.(false)
             this.emitMutation({
                 annotationSharingAccess: { $set: 'sharing-allowed' },
-                currentUserId: { $set: user.id },
             })
             return true
         }
 
         setLoginModalShown?.(true)
-        this.emitMutation({
-            showLoginModal: { $set: true },
-            currentUserId: { $set: null },
-        })
+        this.emitMutation({ showLoginModal: { $set: true } })
         return false
     }
 
@@ -503,7 +487,7 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        const { annotationsCache, events } = this.options
+        const { annotationsCache, currentUser, events } = this.options
 
         if (!isFullUrl(event.pageUrl)) {
             throw new Error(
@@ -527,10 +511,7 @@ export class SidebarContainerLogic extends UILogic<
 
         await Promise.all([
             executeUITask(this, 'annotationsLoadState', async () => {
-                await this.hydrateCacheAnnotations(
-                    event.pageUrl,
-                    previousState.currentUserId,
-                )
+                await this.hydrateCacheAnnotations(event.pageUrl)
             }),
             this.processUIEvent('loadFollowedLists', {
                 previousState: this.withMutation(previousState, mutation),
@@ -799,12 +780,7 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const {
-            commentBox,
-            pageUrl,
-            selectedSpace,
-            currentUserId,
-        } = previousState
+        const { commentBox, pageUrl, selectedSpace } = previousState
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
@@ -851,11 +827,8 @@ export class SidebarContainerLogic extends UILogic<
                 isShared: event.shouldShare,
                 isBulkShareProtected: event.isProtected,
                 unifiedListIds: [], // TODO: resolve list IDS
+                creator: this.options.currentUser,
                 comment,
-                creator: {
-                    type: 'user-reference',
-                    id: currentUserId,
-                },
             })
 
             await savePromise
@@ -1134,7 +1107,7 @@ export class SidebarContainerLogic extends UILogic<
             remove: number[]
         },
     ) {
-        const { annotationsCache } = this.options
+        const { annotationsCache, currentUser } = this.options
         const followedAnnotId = annotationsCache.getAnnotationByLocalId(
             localAnnotationId,
         )?.remoteId
@@ -1220,11 +1193,7 @@ export class SidebarContainerLogic extends UILogic<
                                               {
                                                   name,
                                                   id: remoteId,
-                                                  // TODO: Properly set list's creator ID once we move to locally sourced followedList data
-                                                  creatorReference: {
-                                                      type: 'user-reference',
-                                                      id: 123,
-                                                  },
+                                                  creatorReference: currentUser,
                                                   sharedAnnotationReferences: [
                                                       {
                                                           type:
@@ -1597,7 +1566,7 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         const {
             annotations,
-            auth: authBG,
+            currentUser,
             annotationsCache,
             contentConversationsBG,
         } = this.options
@@ -1658,7 +1627,7 @@ export class SidebarContainerLogic extends UILogic<
                                     creatorId: annot.creatorReference.id,
                                     localId:
                                         annot.creatorReference.id ===
-                                        previousState.currentUserId
+                                        currentUser?.id
                                             ? annotationsCache.getAnnotationByRemoteId(
                                                   annot.reference.id.toString(),
                                               )?.localId ?? null
