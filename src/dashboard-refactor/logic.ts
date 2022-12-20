@@ -673,39 +673,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             searchTermsInvalid: result.isBadTerm,
         }
     }
-    private searchVideos = async (state: State) => {
-        let result = await this.options.searchBG.searchPages(
-            stateToSearchParams(state),
-        )
-
-        return {
-            ...utils.pageSearchResultToState(result),
-            resultsExhausted: result.resultsExhausted,
-            searchTermsInvalid: result.isBadTerm,
-        }
-    }
-
-    private searchTwitter = async (state: State) => {
-        let result = await this.options.searchBG.searchPages(
-            stateToSearchParams(state),
-        )
-
-        return {
-            ...utils.pageSearchResultToState(result),
-            resultsExhausted: result.resultsExhausted,
-            searchTermsInvalid: result.isBadTerm,
-        }
-    }
 
     private searchPDFs = async (state: State) => {
         let result = await this.options.searchBG.searchPages(
             stateToSearchParams(state),
         )
 
-        const videoResults = result.docs.filter((x) => x.url.endsWith('.pdf'))
+        const pdfResults = result.docs.filter((x) => x.url.endsWith('.pdf'))
 
         result = {
-            docs: videoResults,
+            docs: pdfResults,
             resultsExhausted: result.resultsExhausted,
             isBadTerm: result.isBadTerm,
         }

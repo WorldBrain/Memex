@@ -55,6 +55,8 @@ export const stateToSearchParams = ({
     if (listsSidebar.selectedListId != null) {
         lists.push(listsSidebar.selectedListId)
     }
+
+    // Probably Temporary: Add a domain filter for video and twitter type searches
     const searchType = searchResults.searchType
     const domainsFilterIncludeSearchType = getDomainsFilterIncludeSearchType(
         searchType,
@@ -70,11 +72,17 @@ export const stateToSearchParams = ({
         }
     }
 
+    // Probably Temporary: Add an additional query word for PDFs
+    let searchQuery = searchFilters.searchQuery
+    if (searchType === 'pdf') {
+        searchQuery = searchQuery.concat(' pdf')
+    }
+
     return {
         lists,
         endDate: searchFilters.dateTo,
         startDate: searchFilters.dateFrom,
-        query: searchFilters.searchQuery,
+        query: searchQuery,
         domains: domainsFilterIncluded,
         domainsExclude: searchFilters.domainsExcluded,
         tagsInc: searchFilters.tagsIncluded,
