@@ -2,7 +2,7 @@ import { Annotation } from 'src/annotations/types'
 import { getAnchorSelector } from 'src/highlighting/utils'
 
 type SortableAnnotation = Pick<Annotation, 'selector'> & {
-    createdWhen: Date | number
+    createdWhen?: Date | number
 }
 
 export type AnnotationsSorter = (

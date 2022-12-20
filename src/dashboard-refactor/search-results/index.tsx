@@ -198,7 +198,9 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 )}
                 renderShareMenuForAnnotation={() => (
                     <SingleNoteShareMenu
-                        listData={this.props.listData}
+                        getRemoteListIdForLocalId={(localListId) =>
+                            this.props.listData[localListId]?.remoteId ?? null
+                        }
                         isShared={noteData.isShared}
                         shareImmediately={
                             noteData.shareMenuShowStatus === 'show-n-share'
