@@ -34,16 +34,40 @@ export const areSearchFiltersEmpty = ({
     !searchFilters.tagsIncluded.length &&
     !searchFilters.searchQuery.length
 
+function getDomainsFilterIncludeSearchType(searchType) {
+    if (searchType === 'videos') {
+        return ['youtube.com', 'vimeo.com']
+    }
+
+    if (searchType === 'twitter') {
+        return ['mobile.twitter.com', 'twitter.com']
+    }
+}
 export const stateToSearchParams = ({
     searchFilters,
     listsSidebar,
+    searchResults,
 }: Pick<
     RootState,
-    'listsSidebar' | 'searchFilters'
+    'listsSidebar' | 'searchFilters' | 'searchResults'
 >): BackgroundSearchParams => {
     const lists = [...searchFilters.spacesIncluded]
     if (listsSidebar.selectedListId != null) {
         lists.push(listsSidebar.selectedListId)
+    }
+    const searchType = searchResults.searchType
+    const domainsFilterIncludeSearchType = getDomainsFilterIncludeSearchType(
+        searchType,
+    )
+    let domainsFilterIncluded
+    if (domainsFilterIncludeSearchType != null) {
+        if (searchFilters.domainsIncluded != null) {
+            domainsFilterIncluded = searchFilters.domainsIncluded.concat(
+                domainsFilterIncludeSearchType,
+            )
+        } else {
+            domainsFilterIncluded = domainsFilterIncludeSearchType
+        }
     }
 
     return {
@@ -51,7 +75,7 @@ export const stateToSearchParams = ({
         endDate: searchFilters.dateTo,
         startDate: searchFilters.dateFrom,
         query: searchFilters.searchQuery,
-        domains: searchFilters.domainsIncluded,
+        domains: domainsFilterIncluded,
         domainsExclude: searchFilters.domainsExcluded,
         tagsInc: searchFilters.tagsIncluded,
         tagsExc: searchFilters.tagsExcluded,

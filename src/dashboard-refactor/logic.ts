@@ -580,16 +580,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                         resultsExhausted,
                         searchTermsInvalid,
                     } =
-                        previousState.searchResults.searchType === 'pages'
+                        previousState.searchResults.searchType === 'pages' ||
+                        previousState.searchResults.searchType === 'videos' ||
+                        previousState.searchResults.searchType === 'twitter'
                             ? await this.searchPages(searchState)
                             : previousState.searchResults.searchType === 'notes'
                             ? await this.searchNotes(searchState)
-                            : previousState.searchResults.searchType ===
-                              'videos'
-                            ? await this.searchVideos(searchState)
-                            : previousState.searchResults.searchType ===
-                              'twitter'
-                            ? await this.searchTwitter(searchState)
                             : await this.searchPDFs(searchState)
 
                     let noResultsType: NoResultsType = null
@@ -682,18 +678,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             stateToSearchParams(state),
         )
 
-        const videoResults = result.docs.filter(
-            (x) =>
-                x.url.startsWith('youtube.com/watch') ||
-                x.url.startsWith('vimeo.com/'),
-        )
-
-        result = {
-            docs: videoResults,
-            resultsExhausted: result.resultsExhausted,
-            isBadTerm: result.isBadTerm,
-        }
-
         return {
             ...utils.pageSearchResultToState(result),
             resultsExhausted: result.resultsExhausted,
@@ -705,18 +689,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         let result = await this.options.searchBG.searchPages(
             stateToSearchParams(state),
         )
-
-        const videoResults = result.docs.filter(
-            (x) =>
-                x.url.startsWith('twitter.com/') ||
-                x.url.startsWith('mobile.twitter.com/'),
-        )
-
-        result = {
-            docs: videoResults,
-            resultsExhausted: result.resultsExhausted,
-            isBadTerm: result.isBadTerm,
-        }
 
         return {
             ...utils.pageSearchResultToState(result),
