@@ -104,7 +104,7 @@ export default class DirectLinkingBackground {
             annotation,
         }: {
             url: string
-            annotation: Annotation
+            annotation: Pick<Annotation, 'url'>
         },
     ) {
         url = url.startsWith('http') ? url : `https://${url}`
@@ -118,7 +118,9 @@ export default class DirectLinkingBackground {
             { tab },
             { url },
         )
-        const highlightables = pageAnnotations.filter((annot) => annot.selector)
+        const highlightableIds = pageAnnotations
+            .filter((annot) => annot.selector)
+            .map((annot) => annot.url)
 
         const listener = async (tabId, changeInfo) => {
             // Necessary to insert the ribbon/sidebar in case the user has turned  it off.
@@ -137,7 +139,7 @@ export default class DirectLinkingBackground {
                     })
                     await runInTab<InPageUIContentScriptRemoteInterface>(
                         tabId,
-                    ).goToHighlight(annotation, highlightables)
+                    ).goToHighlight(annotation.url, highlightableIds)
                 } catch (err) {
                     throw err
                 } finally {

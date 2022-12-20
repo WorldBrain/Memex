@@ -42,11 +42,16 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
+import type {
+    PageAnnotationsCacheInterface,
+    UnifiedAnnotation,
+} from 'src/annotations/cache/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
     extends Omit<SidebarContainerState, 'annotationModes'> {
     annotationModes: { [url: string]: AnnotationMode }
+    annotationsCache: PageAnnotationsCacheInterface
     // sidebarActions: () => void
 
     setActiveAnnotationUrl?: (url: string) => React.MouseEventHandler
@@ -84,7 +89,7 @@ export interface AnnotationsSidebarProps
     expandFollowedListNotes: (listId: string) => void
 
     bindAnnotationFooterEventProps: (
-        annotation: Pick<Annotation, 'url' | 'body'>,
+        annotation: Pick<UnifiedAnnotation, 'localId' | 'remoteId' | 'body'>,
         followedListId?: string,
     ) => AnnotationFooterEventProps & {
         onGoToAnnotation?: React.MouseEventHandler
@@ -98,7 +103,6 @@ export interface AnnotationsSidebarProps
     sharingAccess: AnnotationSharingAccess
     isSearchLoading: boolean
     isAnnotationCreateShown: boolean
-    annotations: Annotation[]
     theme: Partial<SidebarTheme>
     openCollectionPage: (remoteListId: string) => void
     onShareAllNotesClick: () => void
@@ -116,7 +120,7 @@ export interface AnnotationsSidebarProps
     copyPaster: any
     normalizedPageUrls: string[]
     normalizedPageUrl?: string
-    annotationUrls: () => void
+    getLocalAnnotationIds: () => string[]
     contentSharing: ContentSharingInterface
     annotationsShareAll: any
     copyPageLink: any
@@ -260,7 +264,7 @@ export class AnnotationsSidebar extends React.Component<
         }
     }
 
-    private renderCopyPasterManager(annotationUrls) {
+    private renderCopyPasterManager(localAnnotationIds: string[]) {
         if (!this.state.showAllNotesCopyPaster) {
             return
         }
@@ -280,7 +284,7 @@ export class AnnotationsSidebar extends React.Component<
             >
                 <PageNotesCopyPaster
                     copyPaster={this.props.copyPaster}
-                    annotationUrls={annotationUrls}
+                    annotationUrls={localAnnotationIds}
                     normalizedPageUrls={this.props.normalizedPageUrls}
                 />
             </PopoutBox>
@@ -288,9 +292,9 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderAllNotesCopyPaster() {
-        const annotUrls = this.props.annotationUrls()
+        const localAnnotationIds = this.props.getLocalAnnotationIds()
 
-        return this.renderCopyPasterManager(annotUrls)
+        return this.renderCopyPasterManager(localAnnotationIds)
     }
 
     private renderAllNotesShareMenu() {
@@ -426,15 +430,15 @@ export class AnnotationsSidebar extends React.Component<
                     // If annot is owned by the current user, we allow a whole bunch of other functionality
                     const ownAnnotationProps: Partial<AnnotationEditableProps> = {}
                     if (data.localId != null) {
-                        const localAnnotation = this.props.annotations.find(
-                            (a) => a.url === data.localId,
+                        const localAnnotation = this.props.annotationsCache.getAnnotationByLocalId(
+                            data.localId,
                         )
 
                         ownAnnotationProps.isBulkShareProtected =
                             localAnnotation.isBulkShareProtected
                         ownAnnotationProps.appendRepliesToggle = true
-                        ownAnnotationProps.url = localAnnotation.url
-                        ownAnnotationProps.lists = localAnnotation.lists
+                        ownAnnotationProps.url = localAnnotation.localId
+                        ownAnnotationProps.lists = [] // localAnnotation.unifiedListIds
                         ownAnnotationProps.comment = localAnnotation.comment
                         ownAnnotationProps.isShared = localAnnotation.isShared
                         ownAnnotationProps.lastEdited =
@@ -447,7 +451,11 @@ export class AnnotationsSidebar extends React.Component<
                             listId,
                         )
                         ownAnnotationProps.annotationFooterDependencies = this.props.bindAnnotationFooterEventProps(
-                            { url: data.localId, body: data.body },
+                            {
+                                localId: data.localId,
+                                remoteId: data.id,
+                                body: data.body,
+                            },
                             listId,
                         )
                         ownAnnotationProps.renderListsPickerForAnnotation = this.props.renderListsPickerForAnnotation(
@@ -718,10 +726,12 @@ export class AnnotationsSidebar extends React.Component<
             return this.renderFollowedListNotes(selectedSpace.remoteId, true)
         }
 
-        const selectedSpaceAnnotations = this.props.annotations.filter(
-            ({ lists }) => lists.includes(selectedSpace.localId),
-        )
-        return this.renderAnnotationsEditable(selectedSpaceAnnotations)
+        // TODO: map list IDs
+        return null
+        // const selectedSpaceAnnotations = Object.values(this.props.annotationsCache.annotations.byId).filter(
+        //     ({ unifiedListIds}) => unifiedListIds.includes(selectedSpace.localId.toString()),
+        // )
+        // return this.renderAnnotationsEditable(selectedSpaceAnnotations)
     }
 
     private renderResultsBody() {
@@ -751,7 +761,7 @@ export class AnnotationsSidebar extends React.Component<
             <React.Fragment>
                 {this.props.activeTab === 'annotations' ? (
                     <AnnotationsSectionStyled>
-                        {this.renderAnnotationsEditable(this.props.annotations)}
+                        {/* {this.renderAnnotationsEditable(this.props.annotations)} */}
                     </AnnotationsSectionStyled>
                 ) : (
                     <AnnotationsSectionStyled>
@@ -847,12 +857,13 @@ export class AnnotationsSidebar extends React.Component<
                         zIndex={
                             this.props.activeShareMenuNoteId === annot.url
                                 ? 10000
-                                : this.props.annotations.length - i
+                                : this.props.annotations.allIds.length - i
                         }
                     >
                         <AnnotationEditable
                             {...annot}
                             {...this.props}
+                            lists={annot.lists}
                             body={annot.body}
                             comment={annot.comment}
                             isShared={annot.isShared}

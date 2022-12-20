@@ -10,7 +10,6 @@ import type {
     SharedAnnotationList,
 } from 'src/custom-lists/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
-import type { AnnotationsCacheInterface } from 'src/annotations/annotations-cache'
 import type { SelectedSpaceState, SidebarTheme } from '../types'
 import type {
     AnnotationSharingStates,
@@ -32,19 +31,23 @@ import type { MaybePromise } from 'src/util/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type {
+    PageAnnotationsCacheInterface,
+    UnifiedAnnotation,
+} from 'src/annotations/cache/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
         topBarLeft?: JSX.Element
     }
-    pageUrl?: string
-    getPageUrl: () => MaybePromise<string>
+    fullPageUrl?: string
+    getFullPageUrl: () => MaybePromise<string>
     pageTitle?: string
     searchResultLimit?: number
     showGoToAnnotationBtn?: boolean
     initialState?: 'visible' | 'hidden'
     onClickOutside?: React.MouseEventHandler
-    annotationsCache: AnnotationsCacheInterface
+    annotationsCache: PageAnnotationsCacheInterface
     showAnnotationShareModal?: () => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
 
@@ -162,7 +165,8 @@ export interface SidebarContainerState
     activeListPickerState: ListPickerShowState
 
     pageUrl?: string
-    annotations: Annotation[]
+    lists: PageAnnotationsCacheInterface['lists']
+    annotations: PageAnnotationsCacheInterface['annotations']
     annotationModes: {
         [context in AnnotationEventContext]: {
             [annotationUrl: string]: AnnotationMode
@@ -208,6 +212,12 @@ export interface SidebarContainerState
     immediatelyShareNotes: boolean
 }
 
+type AnnotationInstanceEvent<T> = (
+    | Pick<UnifiedAnnotation, 'unifiedId'>
+    | Pick<UnifiedAnnotation, 'localId' | 'remoteId'>
+) &
+    T
+
 interface SidebarEvents {
     show: { existingWidthState: string }
     hide: null
@@ -241,7 +251,7 @@ interface SidebarEvents {
     updateListsForAnnotation: {
         added: number | null
         deleted: number | null
-        annotationId: string
+        unifiedAnnotationId: string
         options?: { protectAnnotation?: boolean }
     }
     deleteEditCommentTag: { tag: string; annotationUrl: string }
@@ -250,7 +260,7 @@ interface SidebarEvents {
         sharingAccess: AnnotationSharingAccess
     }
 
-    // Annotation boxes
+    // Annotation card instance events
     goToAnnotationInNewTab: {
         context: AnnotationEventContext
         annotationUrl: string

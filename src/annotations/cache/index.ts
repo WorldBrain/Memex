@@ -160,8 +160,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         annotation,
         opts,
     ) => {
+        const now = opts?.now ?? Date.now()
         const nextAnnotation: UnifiedAnnotation = {
             ...annotation,
+            createdWhen: annotation.createdWhen ?? now,
+            lastEdited: annotation.lastEdited ?? annotation.createdWhen ?? now,
             unifiedId: this.generateAnnotationId(),
         }
 

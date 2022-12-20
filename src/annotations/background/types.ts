@@ -100,7 +100,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
         Role,
         {
             url: string
-            annotation: Annotation
+            annotation: Pick<Annotation, 'url'>
         },
         void
     >

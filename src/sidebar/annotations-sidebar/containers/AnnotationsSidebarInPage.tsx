@@ -2,8 +2,8 @@ import * as React from 'react'
 import ReactDOM from 'react-dom'
 
 import { theme } from 'src/common-ui/components/design-library/theme'
-import { HighlightInteractionsInterface } from 'src/highlighting/types'
-import {
+import type { HighlightInteractionsInterface } from 'src/highlighting/types'
+import type {
     SharedInPageUIEvents,
     SidebarActionOptions,
     SharedInPageUIInterface,
@@ -12,13 +12,12 @@ import {
     AnnotationsSidebarContainer,
     Props as ContainerProps,
 } from './AnnotationsSidebarContainer'
-import { AnnotationsSidebarInPageEventEmitter } from '../types'
-import { Annotation } from 'src/annotations/types'
+import type { AnnotationsSidebarInPageEventEmitter } from '../types'
 import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
-import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import type { SidebarContainerLogic } from './logic'
+import type { UnifiedAnnotation } from 'src/annotations/cache/types'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -89,9 +88,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     async componentDidUpdate(prevProps: Props) {
-        const { pageUrl } = this.props
+        const { fullPageUrl: pageUrl } = this.props
 
-        if (pageUrl !== prevProps.pageUrl) {
+        if (pageUrl !== prevProps.fullPageUrl) {
             await this.processEvent('setPageUrl', {
                 pageUrl,
                 rerenderHighlights: true,
@@ -118,9 +117,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             highlighter.removeAnnotationHighlights(urls),
         )
         sidebarEvents.on('renderHighlight', ({ highlight }) =>
-            highlighter.renderHighlight(highlight, () => {
+            highlighter.renderHighlight(highlight, (asdf) => {
                 inPageUI.showSidebar({
-                    annotationUrl: highlight.url,
+                    annotationUrl: highlight.localId,
                     anchor: highlight.selector,
                     action: 'show_annotation',
                 })
@@ -252,7 +251,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     protected bindAnnotationFooterEventProps(
-        annotation: Annotation,
+        annotation: Pick<UnifiedAnnotation, 'localId' | 'remoteId' | 'body'>,
         followedListId?: string,
     ) {
         const boundProps = super.bindAnnotationFooterEventProps(
@@ -264,7 +263,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             ...boundProps,
             onDeleteConfirm: (e) => {
                 boundProps.onDeleteConfirm(e)
-                this.props.highlighter.removeAnnotationHighlight(annotation.url)
+                const unifiedAnnotation = this.props.annotationsCache.getAnnotationByLocalId(
+                    annotation.localId,
+                )
+                this.props.highlighter.removeAnnotationHighlight(
+                    unifiedAnnotation.unifiedId,
+                )
             },
         }
     }

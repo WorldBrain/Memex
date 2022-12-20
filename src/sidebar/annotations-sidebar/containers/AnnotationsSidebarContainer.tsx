@@ -12,7 +12,6 @@ import {
     SidebarContainerOptions,
     INIT_FORM_STATE,
 } from './logic'
-import classNames from 'classnames'
 
 import type {
     SidebarContainerState,
@@ -27,14 +26,12 @@ import {
     AnnotationEditEventProps,
     AnnotationEditGeneralProps,
 } from 'src/annotations/components/AnnotationEdit'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import analytics from 'src/analytics'
-import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { Rnd } from 'react-rnd'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -51,16 +48,15 @@ import {
     SELECT_SPACE_NEGATIVE_LABEL,
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { SIDEBAR_DEFAULT_OPTION } from 'src/sidebar-overlay/constants'
+import { UnifiedAnnotation } from 'src/annotations/cache/types'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
 }
 
 export interface Props extends SidebarContainerOptions {
-    skipTopBarRender?: boolean
     isLockable?: boolean
+    skipTopBarRender?: boolean
     setSidebarWidthforDashboard?: (sidebarWidth) => void
     onNotesSidebarClose?: () => void
 }
@@ -110,21 +106,24 @@ export class AnnotationsSidebarContainer<
         const listId = await this.props.customLists.createCustomList({
             name,
         })
-        this.props.annotationsCache.addNewListData({
+        this.props.annotationsCache.addList({
             name,
-            id: listId,
-            remoteId: null,
-            description: null,
+            localId: listId,
+            unifiedAnnotationIds: [],
+            creator: {
+                type: 'user-reference',
+                id: this.state.currentUserId,
+            },
         })
         return listId
     }
 
     private getListDetailsById: ListDetailsGetter = (listId) => {
-        const { annotationsCache } = this.props
+        const listDetails = this.props.annotationsCache.getListByLocalId(listId)
         return {
-            name: annotationsCache.listData[listId]?.name ?? 'Missing list',
-            isShared: annotationsCache.listData[listId]?.remoteId != null,
-            description: annotationsCache.listData[listId]?.description,
+            name: listDetails?.name ?? 'Missing list',
+            isShared: listDetails?.remoteId != null,
+            description: listDetails?.description,
         }
     }
 
@@ -209,7 +208,7 @@ export class AnnotationsSidebarContainer<
     }
 
     protected bindAnnotationFooterEventProps(
-        annotation: Pick<Annotation, 'url' | 'body'>,
+        annotation: Pick<UnifiedAnnotation, 'localId' | 'remoteId' | 'body'>,
         /** This needs to be defined for footer events for annots in followed lists states  */
         followedListId?: string,
     ): AnnotationFooterEventProps & {
@@ -218,32 +217,32 @@ export class AnnotationsSidebarContainer<
         return {
             onEditIconClick: () =>
                 this.processEvent('setAnnotationEditMode', {
-                    annotationUrl: annotation.url,
+                    annotationUrl: annotation.localId,
                     followedListId,
                     ...DEF_CONTEXT,
                 }),
             onDeleteIconClick: () =>
                 this.processEvent('switchAnnotationMode', {
-                    annotationUrl: annotation.url,
+                    annotationUrl: annotation.localId,
                     followedListId,
                     mode: 'delete',
                     ...DEF_CONTEXT,
                 }),
             onDeleteCancel: () =>
                 this.processEvent('switchAnnotationMode', {
-                    annotationUrl: annotation.url,
+                    annotationUrl: annotation.localId,
                     followedListId,
                     mode: 'default',
                     ...DEF_CONTEXT,
                 }),
             onDeleteConfirm: () =>
                 this.processEvent('deleteAnnotation', {
-                    annotationUrl: annotation.url,
+                    annotationUrl: annotation.localId,
                     ...DEF_CONTEXT,
                 }),
             onShareClick: (mouseEvent) =>
                 this.processEvent('shareAnnotation', {
-                    annotationUrl: annotation.url,
+                    annotationUrl: annotation.localId,
                     ...DEF_CONTEXT,
                     followedListId,
                     mouseEvent,
@@ -252,18 +251,18 @@ export class AnnotationsSidebarContainer<
                 this.props.showGoToAnnotationBtn && annotation.body?.length > 0
                     ? () =>
                           this.processEvent('goToAnnotationInNewTab', {
-                              annotationUrl: annotation.url,
+                              annotationUrl: annotation.localId,
                               ...DEF_CONTEXT,
                           })
                     : undefined,
             onCopyPasterBtnClick: () =>
                 this.processEvent('setCopyPasterAnnotationId', {
-                    id: annotation.url,
+                    id: annotation.localId,
                     followedListId,
                 }),
             onTagIconClick: () =>
                 this.processEvent('setTagPickerAnnotationId', {
-                    id: annotation.url,
+                    id: annotation.localId,
                 }),
             // onListIconClick: () =>
             //     this.processEvent('setListPickerAnnotationId', {
@@ -363,18 +362,6 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    private handleTagsUpdate = (url: string): PickerUpdateHandler => async ({
-        added,
-        deleted,
-    }) => {
-        const annot = this.props.annotationsCache.getAnnotationById(url)
-        const newTags = added
-            ? [...annot.tags, added]
-            : annot.tags.filter((tag) => tag !== deleted)
-
-        await this.props.annotationsCache.update({ ...annot, tags: newTags })
-    }
-
     private handleCopyAllNotesClick: React.MouseEventHandler = (e) => {
         e.preventDefault()
 
@@ -384,14 +371,14 @@ export class AnnotationsSidebarContainer<
     }
 
     private getSpacePickerProps = (
-        annotation: Annotation,
+        annotation: UnifiedAnnotation,
         showExternalConfirmations?: boolean,
     ): SpacePickerDependencies => {
         const { annotationsCache, customLists, contentSharing } = this.props
         // This is to show confirmation modal if the annotation is public and the user is trying to add it to a shared space
         const getUpdateListsEvent = (listId: number) =>
             annotation.isShared &&
-            annotationsCache.listData[listId]?.remoteId != null &&
+            annotationsCache.getListByLocalId(listId)?.remoteId != null &&
             showExternalConfirmations
                 ? 'setSelectNoteSpaceConfirmArgs'
                 : 'updateListsForAnnotation'
@@ -399,17 +386,17 @@ export class AnnotationsSidebarContainer<
             spacesBG: customLists,
             contentSharingBG: contentSharing,
             createNewEntry: this.createNewList,
-            initialSelectedListIds: () => annotation.lists ?? [],
+            initialSelectedListIds: () => [], //annotation.unifiedListIds ?? [],  TODO: map to local IDs
             onSubmit: async () => {
                 await this.processEvent('resetListPickerAnnotationId', {})
 
                 if (
                     this.state.annotationModes.pageAnnotations[
-                        annotation.url
-                    ] === 'edit'
+                        annotation.localId
+                    ] === 'edit' // TODO: replace with new instance states
                 ) {
                     await this.processEvent('editAnnotation', {
-                        annotationUrl: annotation.url,
+                        annotationUrl: annotation.localId,
                         shouldShare: annotation.isShared,
                         isProtected: annotation.isBulkShareProtected,
                         mainBtnPressed: true,
@@ -421,14 +408,14 @@ export class AnnotationsSidebarContainer<
                 this.processEvent(getUpdateListsEvent(listId), {
                     added: listId,
                     deleted: null,
-                    annotationId: annotation.url,
+                    unifiedAnnotationId: annotation.localId,
                     options,
                 }),
             unselectEntry: async (listId) =>
                 this.processEvent('updateListsForAnnotation', {
                     added: null,
                     deleted: listId,
-                    annotationId: annotation.url,
+                    unifiedAnnotationId: annotation.localId,
                 }),
         }
     }
@@ -458,7 +445,7 @@ export class AnnotationsSidebarContainer<
     private renderListPickerForAnnotation = (followedListId?: string) => (
         currentAnnotationId: string,
     ) => {
-        const currentAnnotation = this.props.annotationsCache.getAnnotationById(
+        const currentAnnotation = this.props.annotationsCache.getAnnotationByLocalId(
             currentAnnotationId,
         )
 
@@ -486,7 +473,7 @@ export class AnnotationsSidebarContainer<
     private renderShareMenuForAnnotation = (followedListId?: string) => (
         currentAnnotationId: string,
     ) => {
-        const currentAnnotation = this.props.annotationsCache.getAnnotationById(
+        const currentAnnotation = this.props.annotationsCache.getAnnotationByLocalId(
             currentAnnotationId,
         )
 
@@ -502,7 +489,10 @@ export class AnnotationsSidebarContainer<
 
         return (
             <SingleNoteShareMenu
-                listData={this.props.annotationsCache.listData}
+                getRemoteListIdForLocalId={(localListId) =>
+                    this.props.annotationsCache.getListByLocalId(localListId)
+                        ?.remoteId ?? null
+                }
                 isShared={currentAnnotation.isShared}
                 shareImmediately={this.state.immediatelyShareNotes}
                 contentSharingBG={this.props.contentSharing}
@@ -952,6 +942,7 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
+                            annotationsCache={this.props.annotationsCache}
                             onRemoteSpaceSelect={(remoteListId) =>
                                 this.processEvent('setSelectedSpace', {
                                     remoteListId,
@@ -979,8 +970,10 @@ export class AnnotationsSidebarContainer<
                                     sortingFn,
                                 })
                             }
-                            annotationUrls={() =>
-                                this.state.annotations.map((a) => a.url)
+                            getLocalAnnotationIds={() =>
+                                Object.values(this.state.annotations.byId).map(
+                                    (annot) => annot.localId,
+                                )
                             }
                             normalizedPageUrls={[
                                 normalizeUrl(this.state.pageUrl),

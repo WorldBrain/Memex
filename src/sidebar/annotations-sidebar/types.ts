@@ -1,7 +1,6 @@
-import TypedEventEmitter from 'typed-emitter'
-
-import { Highlight } from 'src/highlighting/types'
-import { ResultWithIndex } from 'src/overview/types'
+import type TypedEventEmitter from 'typed-emitter'
+import type { ResultWithIndex } from 'src/overview/types'
+import type { UnifiedAnnotation } from 'src/annotations/cache/types'
 
 export interface Page {
     url?: string
@@ -22,8 +21,8 @@ export interface ResultsByUrl {
 export { ResultWithIndex }
 
 export interface HighlighterEvents {
-    renderHighlight: (args: { highlight: Highlight }) => void
-    renderHighlights: (args: { highlights: Highlight[] }) => void
+    renderHighlight: (args: { highlight: UnifiedAnnotation }) => void
+    renderHighlights: (args: { highlights: UnifiedAnnotation[] }) => void
     highlightAndScroll: (args: { url: string }) => void
     removeTemporaryHighlights: () => void
     removeAnnotationHighlight: (args: { url: string }) => void

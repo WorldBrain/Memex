@@ -36,7 +36,7 @@ export interface Props extends ShareMenuCommonProps {
     isShared?: boolean
     annotationUrl: string
     shareImmediately?: boolean
-    listData: { [listId: number]: { remoteId?: string } }
+    getRemoteListIdForLocalId: (localListId: number) => string | null
     postShareHook?: (
         state: AnnotationSharingState,
         opts?: { keepListsIfUnsharing?: boolean },
@@ -186,7 +186,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
         if (
             this.props.isShared &&
-            this.props.listData[listId]?.remoteId != null &&
+            this.props.getRemoteListIdForLocalId(listId) != null &&
             selectType === 'select'
         ) {
             this.setState({

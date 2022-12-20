@@ -1,25 +1,33 @@
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { PageList } from 'src/custom-lists/background/types'
 import type { Annotation } from '../types'
-import type { UnifiedAnnotation } from './types'
+import type { UnifiedAnnotation, UnifiedList } from './types'
 
 export const reshapeAnnotationForCache = (
-    annot: Annotation &
-        Required<Pick<Annotation, 'createdWhen' | 'lastEdited'>>,
+    annot: Annotation,
     suppData: { creator: UserReference },
 ): Omit<UnifiedAnnotation, 'unifiedId'> &
-    Partial<Pick<UnifiedAnnotation, 'unifiedId'>> => ({
-    localId: annot.url,
-    unifiedListIds: [],
-    body: annot.body,
-    comment: annot.comment,
-    selector: annot.selector,
-    creator: suppData.creator,
-    normalizedPageUrl: annot.pageUrl,
-    lastEdited: annot.lastEdited.getTime(),
-    createdWhen: annot.createdWhen.getTime(),
-    isBulkShareProtected: !!annot.isBulkShareProtected,
-    isShared: !!annot.isShared,
-})
+    Partial<Pick<UnifiedAnnotation, 'unifiedId'>> => {
+    const createdWhen = annot.createdWhen?.getTime()
+    if (createdWhen == null) {
+        throw new Error(
+            'Cannot reshape annotation missing createdWhen timestamp',
+        )
+    }
+    return {
+        localId: annot.url,
+        unifiedListIds: [],
+        body: annot.body,
+        comment: annot.comment,
+        selector: annot.selector,
+        creator: suppData.creator,
+        normalizedPageUrl: annot.pageUrl,
+        isBulkShareProtected: !!annot.isBulkShareProtected,
+        isShared: !!annot.isShared,
+        lastEdited: annot.lastEdited?.getTime() ?? createdWhen,
+        createdWhen,
+    }
+}
 
 export const reshapeCacheAnnotation = (
     annot: UnifiedAnnotation & Required<Pick<UnifiedAnnotation, 'localId'>>,
@@ -35,4 +43,16 @@ export const reshapeCacheAnnotation = (
     createdWhen: new Date(annot.createdWhen),
     lists: [],
     tags: [],
+})
+
+export const reshapeListForCache = (
+    list: PageList,
+    suppData: { creator: UserReference },
+): Omit<UnifiedList, 'unifiedId'> => ({
+    name: list.name,
+    localId: list.id,
+    remoteId: list.remoteId,
+    creator: suppData.creator,
+    description: list.description,
+    unifiedAnnotationIds: [],
 })

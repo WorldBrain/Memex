@@ -29,8 +29,14 @@ export interface PageAnnotationsCacheInterface {
         lists: Omit<UnifiedList, 'unifiedId'>[],
     ) => { unifiedIds: UnifiedList['unifiedId'][] }
     addAnnotation: (
-        annotation: Omit<UnifiedAnnotation, 'unifiedId'>,
-        opts?: {},
+        annotation: Omit<
+            UnifiedAnnotation,
+            'unifiedId' | 'createdWhen' | 'lastEdited'
+        > &
+            Partial<Pick<UnifiedAnnotation, 'createdWhen' | 'lastEdited'>>,
+        opts?: {
+            now?: number
+        },
     ) => { unifiedId: UnifiedAnnotation['unifiedId'] }
     addList: (
         list: Omit<UnifiedList, 'unifiedId'>,

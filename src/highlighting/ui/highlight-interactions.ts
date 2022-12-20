@@ -481,16 +481,16 @@ export class HighlightRenderer implements HighlightRendererInterface {
         parent.removeChild(highlight)
     }
 
-    removeAnnotationHighlights = (urls: string[]) =>
-        urls.forEach(this.removeAnnotationHighlight)
+    removeAnnotationHighlights = (unifiedIds: string[]) =>
+        unifiedIds.forEach(this.removeAnnotationHighlight)
 
     /**
      * Removes the highlights of a given annotation.
      */
-    removeAnnotationHighlight = (url: string) => {
+    removeAnnotationHighlight = (unifiedId: string) => {
         const baseClass = styles['memex-highlight']
         const highlights = document.querySelectorAll(
-            `.${baseClass}[data-annotation="${url}"]`,
+            `.${baseClass}[data-annotation="${unifiedId}"]`,
         )
         highlights.forEach((highlight) => this._removeHighlight(highlight))
     }

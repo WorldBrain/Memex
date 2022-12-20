@@ -26,8 +26,8 @@ export interface InPageUIContentScriptRemoteInterface
 
     // Highlights
     goToHighlight(
-        annotation: Annotation,
-        pageAnnotations: Annotation[],
+        localAnnotationId: string,
+        pageLocalAnnotationIds: string[],
     ): Promise<void>
     removeHighlights(): Promise<void>
 

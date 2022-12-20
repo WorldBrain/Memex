@@ -226,7 +226,7 @@ export async function main(
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
                 analytics,
                 copyToClipboard,
-                getPageUrl: pageInfo.getPageUrl,
+                getFullPageUrl: pageInfo.getPageUrl,
                 copyPaster,
                 subscription,
                 contentConversationsBG: runInBackground(),
@@ -279,12 +279,12 @@ export async function main(
         insertTooltip: async () => inPageUI.showTooltip(),
         removeTooltip: async () => inPageUI.removeTooltip(),
         insertOrRemoveTooltip: async () => inPageUI.toggleTooltip(),
-        goToHighlight: async (annotation, pageAnnotations) => {
+        goToHighlight: async (localAnnotationId, pageLocalAnnotationIds) => {
             const unifiedAnnotation = annotationsCache.getAnnotationByLocalId(
-                annotation.url,
+                localAnnotationId,
             )
-            const unifiedPageAnnotations = pageAnnotations.map((annot) =>
-                annotationsCache.getAnnotationByLocalId(annot.url),
+            const unifiedPageAnnotations = pageLocalAnnotationIds.map(
+                (localId) => annotationsCache.getAnnotationByLocalId(localId),
             )
             await highlightRenderer.renderHighlights(
                 unifiedPageAnnotations,

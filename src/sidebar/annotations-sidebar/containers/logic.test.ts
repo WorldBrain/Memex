@@ -69,7 +69,7 @@ const setupLogicHelper = async ({
     const analytics = new FakeAnalytics()
     const sidebarLogic = new SidebarContainerLogic({
         sidebarContext: 'dashboard',
-        pageUrl,
+        fullPageUrl: pageUrl,
         auth: backgroundModules.auth.remoteFunctions,
         tags: backgroundModules.tags.remoteFunctions,
         subscription: backgroundModules.auth.subscriptionService,
@@ -90,7 +90,7 @@ const setupLogicHelper = async ({
         focusEditNoteForm,
         focusCreateForm,
         copyToClipboard,
-        getPageUrl: () => pageUrl,
+        getFullPageUrl: () => pageUrl,
     })
 
     const sidebar = device.createElement(sidebarLogic)
@@ -1078,7 +1078,7 @@ describe('SidebarContainerLogic', () => {
                 })
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: annotId,
+                unifiedAnnotationId: annotId,
                 added: DATA.LISTS_1[1].id,
                 deleted: null,
                 options: { protectAnnotation: false },
@@ -1219,7 +1219,7 @@ describe('SidebarContainerLogic', () => {
                 })
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: annotId,
+                unifiedAnnotationId: annotId,
                 added: DATA.LISTS_1[1].id,
                 deleted: null,
                 options: { protectAnnotation: false },
@@ -1310,12 +1310,12 @@ describe('SidebarContainerLogic', () => {
             await sidebar.init()
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: annotId,
+                unifiedAnnotationId: annotId,
                 added: privateListId,
                 deleted: null,
             })
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: annotId,
+                unifiedAnnotationId: annotId,
                 added: publicListId,
                 deleted: null,
                 options: { protectAnnotation: true },
@@ -1434,13 +1434,13 @@ describe('SidebarContainerLogic', () => {
             ])
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 added: privateListIdA, // This list is private - doesn't affect things
                 deleted: null,
             })
             // Make note selectively shared, by choosing to protect it upon shared list add
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 added: publicListIdA,
                 deleted: null,
                 options: { protectAnnotation: true },
@@ -1580,13 +1580,13 @@ describe('SidebarContainerLogic', () => {
             ])
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 added: privateListIdA, // This list is private - doesn't affect things
                 deleted: null,
             })
             // Make note selectively shared, by choosing to protect it upon shared list add
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 added: publicListIdA,
                 deleted: null,
                 options: { protectAnnotation: true },
@@ -1728,13 +1728,13 @@ describe('SidebarContainerLogic', () => {
             ])
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 added: privateListIdA, // This list is private - doesn't affect things
                 deleted: null,
             })
             // Make note selectively shared, by choosing to protect it upon shared list add
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 added: publicListIdA,
                 deleted: null,
                 options: { protectAnnotation: true },
@@ -1874,19 +1874,19 @@ describe('SidebarContainerLogic', () => {
             ])
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 added: privateListIdA, // This list is private - doesn't affect things
                 deleted: null,
             })
             // Make note selectively shared, by choosing to protect it upon shared list add
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 added: publicListIdA,
                 deleted: null,
                 options: { protectAnnotation: true },
             })
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdB,
+                unifiedAnnotationId: publicAnnotIdB,
                 added: publicListIdB,
                 deleted: null,
             })
@@ -2025,7 +2025,7 @@ describe('SidebarContainerLogic', () => {
             ])
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 added: publicListIdA,
                 deleted: null,
                 options: { protectAnnotation: false },
@@ -2053,7 +2053,7 @@ describe('SidebarContainerLogic', () => {
             ])
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 added: privateListIdA,
                 deleted: null,
                 options: { protectAnnotation: false },
@@ -2082,7 +2082,7 @@ describe('SidebarContainerLogic', () => {
 
             // Removing public list from public annot should result in it being selectively shared (protected + unshared)
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 added: null,
                 deleted: publicListIdA,
             })
@@ -2110,7 +2110,7 @@ describe('SidebarContainerLogic', () => {
 
             // Now let's add a shared list to the private annot, making it selectively shared
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: privateAnnotId,
+                unifiedAnnotationId: privateAnnotId,
                 added: publicListIdB,
                 deleted: null,
             })
@@ -2138,7 +2138,7 @@ describe('SidebarContainerLogic', () => {
 
             // Now we make the final public annot selectively shared by removing a shared list from it
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: publicAnnotIdB,
+                unifiedAnnotationId: publicAnnotIdB,
                 added: null,
                 deleted: publicListIdA,
             })
@@ -3551,7 +3551,7 @@ describe('SidebarContainerLogic', () => {
             ])
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: DATA.ANNOT_3.url,
+                unifiedAnnotationId: DATA.ANNOT_3.url,
                 deleted: 0,
                 added: null,
             })
@@ -3611,7 +3611,7 @@ describe('SidebarContainerLogic', () => {
             ])
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: DATA.ANNOT_3.url,
+                unifiedAnnotationId: DATA.ANNOT_3.url,
                 deleted: 2,
                 added: null,
             })
@@ -3671,7 +3671,7 @@ describe('SidebarContainerLogic', () => {
             ])
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: DATA.ANNOT_3.url,
+                unifiedAnnotationId: DATA.ANNOT_3.url,
                 deleted: null,
                 added: 1,
             })
@@ -3739,7 +3739,7 @@ describe('SidebarContainerLogic', () => {
             ).toEqual(undefined)
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: DATA.ANNOT_3.url,
+                unifiedAnnotationId: DATA.ANNOT_3.url,
                 deleted: null,
                 added: 3,
             })
@@ -3753,7 +3753,7 @@ describe('SidebarContainerLogic', () => {
             ).toEqual([DATA.SHARED_ANNOTATIONS[3].reference])
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: DATA.ANNOT_4.url,
+                unifiedAnnotationId: DATA.ANNOT_4.url,
                 deleted: null,
                 added: 3,
             })
@@ -3770,7 +3770,7 @@ describe('SidebarContainerLogic', () => {
             ])
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: DATA.ANNOT_4.url,
+                unifiedAnnotationId: DATA.ANNOT_4.url,
                 deleted: 3,
                 added: null,
             })
@@ -3784,7 +3784,7 @@ describe('SidebarContainerLogic', () => {
             ).toEqual([DATA.SHARED_ANNOTATIONS[3].reference])
 
             await sidebar.processEvent('updateListsForAnnotation', {
-                annotationId: DATA.ANNOT_3.url,
+                unifiedAnnotationId: DATA.ANNOT_3.url,
                 deleted: 3,
                 added: null,
             })

@@ -22,10 +22,6 @@ import SidebarToggle from './header/sidebar-toggle'
 import { Rnd } from 'react-rnd'
 import { AnnotationsSidebarInDashboardResults as NotesSidebar } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { AnnotationsSidebarContainer as NotesSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
-import {
-    AnnotationsCacheInterface,
-    createAnnotationsCache,
-} from 'src/annotations/annotations-cache'
 import { updatePickerValues, stateToSearchParams } from './util'
 import analytics from 'src/analytics'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
@@ -54,11 +50,11 @@ import type { ListDetailsGetter } from 'src/annotations/types'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import SearchCopyPaster from './search-results/components/search-copy-paster'
 import ExpandAllNotes from './search-results/components/expand-all-notes'
-import { toInteger } from 'lodash'
-import SyncStatusMenu, { SyncStatusMenuProps } from './header/sync-status-menu'
+import SyncStatusMenu from './header/sync-status-menu'
 import { SETTINGS_URL } from 'src/constants'
 import { SyncStatusIcon } from './header/sync-status-menu/sync-status-icon'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { PageAnnotationsCache } from 'src/annotations/cache'
 
 export interface Props extends DashboardDependencies {}
 
@@ -116,7 +112,7 @@ export class DashboardContainer extends StatefulUIElement<
             window.open(getListShareUrl({ remoteListId }), '_blank'),
     }
 
-    private annotationsCache: AnnotationsCacheInterface
+    private annotationsCache: PageAnnotationsCache
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
 
     private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
@@ -129,16 +125,9 @@ export class DashboardContainer extends StatefulUIElement<
         super(props, new DashboardLogic(props))
 
         setTimeout(() => this.setupWindowWidthListner(), 500)
-
-        this.annotationsCache = createAnnotationsCache(
-            {
-                contentSharing: props.contentShareBG,
-                annotations: props.annotationsBG,
-                customLists: props.listsBG,
-                tags: props.tagsBG,
-            },
-            { skipPageIndexing: true },
-        )
+        this.annotationsCache = new PageAnnotationsCache({
+            normalizedPageUrl: '',
+        }) // TODO: cache - figure out page URL here
     }
 
     setupWindowWidthListner() {
