@@ -6,6 +6,13 @@
     "background": {
         "scripts": ["lib/browser-polyfill.js", "background.js"]
     },
+    "externally_connectable": {
+        "matches": [
+            "http://localhost:3000/*",
+            "https://staging.memex.social/*",
+            "https://memex.social/*"
+        ]
+    },
     "content_scripts": [
         {
             "matches": ["<all_urls>"],

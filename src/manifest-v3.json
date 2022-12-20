@@ -9,6 +9,9 @@
         "48": "./img/worldbrain-logo-narrow-bw-48.png",
         "128": "./img/worldbrain-logo-narrow-bw.png"
     },
+    "externally_connectable": {
+        "matches": ["http://localhost:3000/feed"]
+    },
     "background": {
         "service_worker": "background.js"
     },
