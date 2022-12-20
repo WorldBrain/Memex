@@ -98,15 +98,15 @@ export async function listenToWebAppMessage(authService: AuthService) {
 
     let reactingToMessage = false
     addListener((sendResponse, messageObj) => {
-        //JS is mostly event-loop concurrent: https://stackoverflow.com/a/5347062
-        //so we have a simple lock here to prevent multiple tabs of the app contacting the extension, this works so-so
-        //this will not prevent multiple instances of the service worker to react
+        // JS is mostly event-loop concurrent: https://stackoverflow.com/a/5347062
+        // So we have a simple lock here to prevent multiple tabs of the app contacting the extension, this works so-so
+        // This will not prevent multiple instances of the service worker to react
         if (reactingToMessage) {
             return false
         }
         reactingToMessage = true
 
-        //can not use a promise here, otherwise the listener will never resolve
+        // Can not use a promise here, otherwise the listener will never resolve
         authService
             .getCurrentUser()
             .then((val) => {
@@ -127,7 +127,7 @@ export async function listenToWebAppMessage(authService: AuthService) {
             })
             .then(() => (reactingToMessage = false))
 
-        //indicates that we want to send an async response
+        // Indicates that we want to send an async response
         return true
     }, expectedOrigins)
 }
