@@ -7,7 +7,7 @@ export const sizeConstants = {
         widthPx: 800,
     },
     listsSidebar: {
-        widthPx: 250,
+        width: 250,
     },
     syncStatusMenu: {
         widthPx: 150,

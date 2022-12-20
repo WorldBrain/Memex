@@ -196,6 +196,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 skip: 0,
             },
             listsSidebar: {
+                spaceSidebarWidth: sizeConstants.listsSidebar.width,
                 addListErrorMessage: null,
                 editListErrorMessage: null,
                 listShareLoadingState: 'pristine',
@@ -331,6 +332,17 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             })
         }
+    }
+
+    setSpaceSidebarWidth: EventHandler<'setSpaceSidebarWidth'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                spaceSidebarWidth: { $set: event.width },
+            },
+        })
     }
 
     checkSharingAccess: EventHandler<'checkSharingAccess'> = async ({

@@ -185,7 +185,8 @@ export class SidebarContainerLogic extends UILogic<
             isWidthLocked: false,
             isLocked: false,
             pageUrl: this.options.pageUrl,
-            showState: this.options.initialState ?? 'hidden',
+            // showState: this.options.initialState ?? 'hidden',
+            showState: 'hidden',
             annotationModes: {
                 pageAnnotations: {},
                 searchResults: {},
@@ -233,7 +234,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        const { pageUrl, annotationsCache } = this.options
+        const { pageUrl, annotationsCache, initialState } = this.options
         annotationsCache.annotationChanges.addListener(
             'newStateIntent',
             this.annotationSubscription,
@@ -246,7 +247,10 @@ export class SidebarContainerLogic extends UILogic<
             const areTagsMigrated = await this.syncSettings.extension.get(
                 'areTagsMigratedToSpaces',
             )
-            this.emitMutation({ shouldShowTagsUIs: { $set: !areTagsMigrated } })
+            this.emitMutation({
+                shouldShowTagsUIs: { $set: !areTagsMigrated },
+                showState: { $set: initialState ?? 'hidden' },
+            })
 
             // If `pageUrl` prop passed down, load search results on init, else just wait
             if (pageUrl != null) {

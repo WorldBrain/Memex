@@ -59,7 +59,6 @@ import SyncStatusMenu, { SyncStatusMenuProps } from './header/sync-status-menu'
 import { SETTINGS_URL } from 'src/constants'
 import { SyncStatusIcon } from './header/sync-status-menu/sync-status-icon'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 export interface Props extends DashboardDependencies {}
 
@@ -455,7 +454,7 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setSearchQuery', { query: '' }),
                 }}
                 sidebarLockedState={{
-                    isSidebarLocked: listsSidebar.isSidebarLocked,
+                    isSidebarLocked: listsSidebar.isSidebarLocked ?? undefined,
                     toggleSidebarLockedState: () => {
                         this.processEvent('setSidebarLocked', {
                             isLocked: !listsSidebar.isSidebarLocked,
@@ -522,6 +521,7 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <ListsSidebarContainer
                 {...listsSidebar}
+                spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
                 lockedState={lockedState}
                 openFeedUrl={() =>
                     this.processEvent('clickFeedActivityIndicator', null)
@@ -1352,6 +1352,8 @@ export class DashboardContainer extends StatefulUIElement<
         }
 
         const isPeeking = this.state.listsSidebar.isSidebarPeeking
+            ? this.state.listsSidebar.isSidebarPeeking
+            : undefined
         return (
             <Container id={'dashboardContainer'}>
                 <SidebarHeaderContainer>
@@ -1386,13 +1388,21 @@ export class DashboardContainer extends StatefulUIElement<
                                 ? '90vh'
                                 : '100vh',
                         }}
-                        peeking={listsSidebar.isSidebarPeeking}
+                        peeking={
+                            listsSidebar.isSidebarPeeking
+                                ? listsSidebar.isSidebarPeeking
+                                : undefined
+                        }
                         position={{
                             x:
                                 listsSidebar.isSidebarLocked &&
                                 `$sizeConstants.header.heightPxpx`,
                         }}
-                        locked={listsSidebar.isSidebarLocked}
+                        locked={
+                            listsSidebar.isSidebarLocked
+                                ? listsSidebar.isSidebarLocked.toString()
+                                : undefined
+                        }
                         onMouseLeave={() => {
                             if (this.state.listsSidebar.isSidebarPeeking) {
                                 this.processEvent('setSidebarPeeking', {
@@ -1406,9 +1416,9 @@ export class DashboardContainer extends StatefulUIElement<
                         }}
                         resizeGrid={[1, 0]}
                         dragAxis={'none'}
-                        minWidth={sizeConstants.listsSidebar.widthPx + 'px'}
+                        minWidth={sizeConstants.listsSidebar.width + 'px'}
                         maxWidth={'500px'}
-                        disableDragging={'true'}
+                        disableDragging={true}
                         enableResizing={{
                             top: false,
                             right: true,
@@ -1418,6 +1428,11 @@ export class DashboardContainer extends StatefulUIElement<
                             bottomRight: false,
                             bottomLeft: false,
                             topLeft: false,
+                        }}
+                        onResizeStop={(e, direction, ref, delta, position) => {
+                            this.processEvent('setSpaceSidebarWidth', {
+                                width: ref.style.width,
+                            })
                         }}
                     >
                         {this.renderListsSidebar()}
@@ -1700,7 +1715,7 @@ const ActivityIndicator = styled.div<{ hasActivities }>`
 
 const SidebarHeaderContainer = styled.div`
     height: 100%;
-    width: ${sizeConstants.listsSidebar.widthPx}px;
+    width: ${sizeConstants.listsSidebar.width}px;
     display: flex;
     position: sticky;
     top: 0px;

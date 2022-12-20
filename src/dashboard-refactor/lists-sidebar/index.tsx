@@ -38,6 +38,7 @@ export interface ListsSidebarProps {
     searchBarProps: ListsSidebarSearchBarProps
     listsGroups: ListsSidebarGroupProps[]
     initDropReceivingState: (listId: number) => DropReceivingState
+    spaceSidebarWidth: number
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -72,7 +73,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         } = this.props
 
         return (
-            <Container>
+            <Container spaceSidebarWidth={this.props.spaceSidebarWidth}>
                 <GlobalStyle />
                 <BottomGroup>
                     <Margin vertical="10px">
@@ -234,10 +235,10 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     }
 }
 
-const Container = styled.div`
+const Container = styled.div<{ spaceSidebarWidth: number }>`
     position: sticky;
     z-index: 2147483645;
-    width: 100%;
+    width: ${(props) => props.spaceSidebarWidth}px;
     display: flex;
     justify-content: center;
     height: fill-available;

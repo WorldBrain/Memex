@@ -44,6 +44,7 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         listData: { [id: number]: ListData }
         followedLists: FollowedListGroup
         localLists: LocalListGroup
+        spaceSidebarWidth: number
 
         inboxUnreadCount: number
         dragOverListId?: number

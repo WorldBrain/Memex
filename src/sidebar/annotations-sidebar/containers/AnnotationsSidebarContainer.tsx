@@ -1079,11 +1079,6 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
     font-family: 'Satoshi', sans-serif;
     box-sizing: content-box;
-    /* animation: ${(props) =>
-        props.sidebarContext === 'in-page' && 'slide-in ease-out'};
-    animation-duration: 0.05s; */
-    transition: all 2s ease;
-    // place it initially at -100%
 
     &:: -webkit-scrollbar {
         display: none;
@@ -1096,7 +1091,7 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
             right: -600px;
             opacity: 0;
         `}
-    
+
     ${(props) =>
         props.isShown === 'visible' &&
         css`
@@ -1107,8 +1102,6 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
 
 
     scrollbar-width: none;
-
- 
 
     @keyframes slide-in {
         0% {

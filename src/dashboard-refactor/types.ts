@@ -133,6 +133,7 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingPageArgs: PageEventArgs
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null
+    setSpaceSidebarWidth: { width: number }
 
     setPrivatizeNoteConfirmArgs: DashboardModalsState['confirmPrivatizeNoteArgs']
     setSelectNoteSpaceConfirmArgs: DashboardModalsState['confirmSelectNoteSpaceArgs']

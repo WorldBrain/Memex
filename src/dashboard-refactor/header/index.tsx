@@ -15,6 +15,10 @@ import type { HoverState } from '../types'
 import { SyncStatusIcon } from './sync-status-menu/sync-status-icon'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import {
+    ColorThemeKeys,
+    IconKeys,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 const Container = styled.div`
     height: ${sizeConstants.header.heightPx}px;
@@ -72,7 +76,7 @@ export interface HeaderProps {
 
 export type Props = HeaderProps & {}
 
-function getSyncStatusIcon(status) {
+function getSyncStatusIcon(status): IconKeys {
     if (status === 'green') {
         return 'check'
     }
@@ -85,7 +89,7 @@ function getSyncStatusIcon(status) {
     }
 }
 
-function getSyncIconColor(status) {
+function getSyncIconColor(status): ColorThemeKeys {
     if (status === 'green') {
         return 'purple'
     }
@@ -135,6 +139,9 @@ export default class Header extends PureComponent<Props> {
             selectedListName: selectedList,
         } = this.props
 
+        const icon = getSyncStatusIcon(syncStatusIconState)
+        const iconColor = getSyncIconColor(syncStatusIconState)
+
         return (
             <Container>
                 {/* <PlaceholderContainer /> */}
@@ -158,9 +165,9 @@ export default class Header extends PureComponent<Props> {
                             }
                             label={'Sync Status'}
                             size={'medium'}
-                            icon={getSyncStatusIcon(syncStatusIconState)}
+                            icon={icon}
                             type={'tertiary'}
-                            iconColor={getSyncIconColor(syncStatusIconState)}
+                            iconColor={iconColor}
                             spinningIcon={syncStatusIconState === 'yellow'}
                             innerRef={this.syncStatusButtonRef}
                         />
