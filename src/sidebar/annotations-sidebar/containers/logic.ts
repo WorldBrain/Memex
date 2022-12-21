@@ -25,7 +25,10 @@ import type {
 } from './types'
 import { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
-import { generateAnnotationUrl } from 'src/annotations/utils'
+import {
+    generateAnnotationUrl,
+    shareOptsToPrivacyLvl,
+} from 'src/annotations/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { initNormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import {
@@ -44,7 +47,10 @@ import type {
     PageAnnotationsCacheInterface,
     UnifiedAnnotation,
 } from 'src/annotations/cache/types'
-import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
+import {
+    reshapeAnnotationForCache,
+    reshapeListForCache,
+} from 'src/annotations/cache/utils'
 import {
     createAnnotation,
     updateAnnotation,
@@ -240,7 +246,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        const { fullPageUrl, annotationsCache, currentUser } = this.options
+        const { fullPageUrl, annotationsCache } = this.options
         annotationsCache.events.addListener(
             'newAnnotationsState',
             this.annotationsSubscription,
@@ -319,28 +325,36 @@ export class SidebarContainerLogic extends UILogic<
 
     private async hydrateCacheAnnotations(fullPageUrl: string) {
         const {
+            contentSharing: contentSharingBG,
             annotations: annotationsBG,
             customLists: customListsBG,
-            currentUser,
             annotationsCache,
+            currentUser,
         } = this.options
-        // const listsData = await customListsBG.fetchAllLists({})
-        // // TODO: load and merge in followed list data
+        const listsData = await customListsBG.fetchAllLists({})
 
-        // annotationsCache.setLists(listsData.map(list => reshapeListForCache(list, { creator: {
-        //     type: 'user-reference',
-        //     id: currentUserId,
-        // } })))
+        annotationsCache.setLists(
+            listsData.map((list) => reshapeListForCache(list, {})),
+        )
 
         const annotationsData = await annotationsBG.listAnnotationsByPageUrl({
             pageUrl: fullPageUrl,
             withLists: true,
         })
 
+        const privacyLvlsByAnnot = await contentSharingBG.findAnnotationPrivacyLevels(
+            { annotationUrls: annotationsData.map((annot) => annot.url) },
+        )
+
         annotationsCache.setAnnotations(
             normalizeUrl(fullPageUrl),
             annotationsData.map((annot) =>
-                reshapeAnnotationForCache(annot, { creator: currentUser }),
+                reshapeAnnotationForCache(annot, {
+                    extraData: {
+                        privacyLevel: privacyLvlsByAnnot[annot.url],
+                        creator: currentUser,
+                    },
+                }),
             ),
         )
     }
@@ -824,9 +838,11 @@ export class SidebarContainerLogic extends UILogic<
                 localId: annotationId,
                 remoteId: remoteAnnotationId ?? undefined,
                 normalizedPageUrl: normalizeUrl(pageUrl),
-                isShared: event.shouldShare,
-                isBulkShareProtected: event.isProtected,
-                unifiedListIds: [], // TODO: resolve list IDS
+                privacyLevel: shareOptsToPrivacyLvl({
+                    shouldShare: event.shouldShare,
+                    isBulkShareProtected: event.isProtected,
+                }),
+                localListIds: [], // TODO: resolve list IDS
                 creator: this.options.currentUser,
                 comment,
             })
@@ -1057,9 +1073,11 @@ export class SidebarContainerLogic extends UILogic<
         this.options.annotationsCache.updateAnnotation({
             ...existing,
             comment,
-            isShared: event.shouldShare,
-            isBulkShareProtected:
-                event.isProtected || !!event.keepListsIfUnsharing,
+            privacyLevel: shareOptsToPrivacyLvl({
+                shouldShare: event.shouldShare,
+                isBulkShareProtected:
+                    event.isProtected || !!event.keepListsIfUnsharing,
+            }),
         })
         await updateAnnotation({
             annotationsBG: this.options.annotations,
@@ -1856,9 +1874,11 @@ export class SidebarContainerLogic extends UILogic<
 
         await this.options.annotationsCache.updateAnnotation({
             ...existing,
-            isBulkShareProtected:
-                privacyState.protected || !!event.keepListsIfUnsharing,
-            isShared: privacyState.public,
+            privacyLevel: shareOptsToPrivacyLvl({
+                shouldShare: privacyState.public,
+                isBulkShareProtected:
+                    privacyState.protected || !!event.keepListsIfUnsharing,
+            }),
             // skipBackendOps: true, // Doing this so as the SingleNoteShareMenu logic will take care of the actual backend updates - we just want UI state updates
         })
     }

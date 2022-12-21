@@ -5,6 +5,7 @@ import type { SharedAnnotation } from '@worldbrain/memex-common/lib/content-shar
 import type { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 import type { Anchor } from 'src/highlighting/types'
 import type { Annotation } from '../types'
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export interface PageAnnotationsCacheEvents {
     updatedPageUrl: (normalizedPageUrl: string) => void
@@ -23,20 +24,15 @@ export interface PageAnnotationsCacheEvents {
 export interface PageAnnotationsCacheInterface {
     setAnnotations: (
         normalizedPageUrl: string,
-        annotations: Omit<UnifiedAnnotation, 'unifiedId'>[],
+        annotations: UnifiedAnnotationForCache[],
+        opts?: { now?: number },
     ) => { unifiedIds: UnifiedAnnotation['unifiedId'][] }
     setLists: (
         lists: Omit<UnifiedList, 'unifiedId'>[],
     ) => { unifiedIds: UnifiedList['unifiedId'][] }
     addAnnotation: (
-        annotation: Omit<
-            UnifiedAnnotation,
-            'unifiedId' | 'createdWhen' | 'lastEdited'
-        > &
-            Partial<Pick<UnifiedAnnotation, 'createdWhen' | 'lastEdited'>>,
-        opts?: {
-            now?: number
-        },
+        annotation: UnifiedAnnotationForCache,
+        opts?: { now?: number },
     ) => { unifiedId: UnifiedAnnotation['unifiedId'] }
     addList: (
         list: Omit<UnifiedList, 'unifiedId'>,
@@ -44,11 +40,7 @@ export interface PageAnnotationsCacheInterface {
     updateAnnotation: (
         updates: Pick<
             UnifiedAnnotation,
-            | 'unifiedId'
-            | 'comment'
-            | 'unifiedListIds'
-            | 'isShared'
-            | 'isBulkShareProtected'
+            'unifiedId' | 'comment' | 'unifiedListIds' | 'privacyLevel'
         >,
         opts?: {
             updateLastEditedTimestamp?: boolean
@@ -69,11 +61,11 @@ export interface PageAnnotationsCacheInterface {
     getListByLocalId: (localId: number) => UnifiedList | null
     getListByRemoteId: (remoteId: string) => UnifiedList | null
 
-    isEmpty: boolean
-    normalizedPageUrl: string
-    events: TypedEventEmitter<PageAnnotationsCacheEvents>
-    annotations: NormalizedState<UnifiedAnnotation>
-    lists: NormalizedState<UnifiedList>
+    readonly isEmpty: boolean
+    readonly normalizedPageUrl: string
+    readonly events: TypedEventEmitter<PageAnnotationsCacheEvents>
+    readonly annotations: NormalizedState<UnifiedAnnotation>
+    readonly lists: NormalizedState<UnifiedList>
     readonly highlights: UnifiedAnnotation[]
 }
 
@@ -92,10 +84,19 @@ export type UnifiedAnnotation = Pick<
     creator?: UserReference
 
     // Misc annotation feature state
-    isShared: boolean
-    isBulkShareProtected: boolean
+    privacyLevel: AnnotationPrivacyLevels
     unifiedListIds: UnifiedList['unifiedId'][]
 }
+
+export type UnifiedAnnotationForCache = Omit<
+    UnifiedAnnotation,
+    'unifiedId' | 'unifiedListIds' | 'createdWhen' | 'lastEdited'
+> &
+    Partial<
+        Pick<UnifiedAnnotation, 'unifiedListIds' | 'createdWhen' | 'lastEdited'>
+    > & {
+        localListIds: number[]
+    }
 
 export interface UnifiedList {
     // Core list data

@@ -5,6 +5,7 @@ import type {
     UnifiedAnnotation,
     PageAnnotationsCacheEvents,
     PageAnnotationsCacheInterface,
+    UnifiedAnnotationForCache,
 } from './types'
 import {
     AnnotationsSorter,
@@ -98,9 +99,36 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         return matchingList ?? null
     }
 
+    private prepareAnnotationForCaching = (
+        { localListIds, ...annotation }: UnifiedAnnotationForCache,
+        opts: { now: number },
+    ): UnifiedAnnotation => {
+        const unifiedListIds = localListIds
+            .map((localListId) => {
+                const unifiedList = this.getListByLocalId(localListId)
+                if (!unifiedList) {
+                    console.warn(
+                        'No cached list data found for given local list IDs on annotation',
+                    )
+                    return null
+                }
+                return unifiedList.unifiedId
+            })
+            .filter((id) => id != null)
+        return {
+            ...annotation,
+            unifiedListIds,
+            createdWhen: annotation.createdWhen ?? opts.now,
+            lastEdited:
+                annotation.lastEdited ?? annotation.createdWhen ?? opts.now,
+            unifiedId: this.generateAnnotationId(),
+        }
+    }
+
     setAnnotations: PageAnnotationsCacheInterface['setAnnotations'] = (
         normalizedPageUrl,
         annotations,
+        { now = Date.now() } = { now: Date.now() },
     ) => {
         this.annotationIdCounter = 0
         if (this.deps.normalizedPageUrl !== normalizedPageUrl) {
@@ -110,10 +138,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         const seedData = [...annotations]
             .sort(this.deps.sortingFn)
-            .map((annot) => ({
-                ...annot,
-                unifiedId: this.generateAnnotationId(),
-            }))
+            .map((annot) => this.prepareAnnotationForCaching(annot, { now }))
         this.annotations = initNormalizedState({
             seedData,
             getId: (annot) => annot.unifiedId,
@@ -158,15 +183,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     addAnnotation: PageAnnotationsCacheInterface['addAnnotation'] = (
         annotation,
-        opts,
+        { now = Date.now() } = { now: Date.now() },
     ) => {
-        const now = opts?.now ?? Date.now()
-        const nextAnnotation: UnifiedAnnotation = {
-            ...annotation,
-            createdWhen: annotation.createdWhen ?? now,
-            lastEdited: annotation.lastEdited ?? annotation.createdWhen ?? now,
-            unifiedId: this.generateAnnotationId(),
-        }
+        const nextAnnotation = this.prepareAnnotationForCaching(annotation, {
+            now,
+        })
 
         this.annotations.allIds = [
             nextAnnotation.unifiedId,
@@ -211,8 +232,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         const nextAnnotation: UnifiedAnnotation = {
             ...previousAnnotation,
             comment: updates.comment,
-            isShared: updates.isShared,
-            isBulkShareProtected: updates.isBulkShareProtected,
+            privacyLevel: updates.privacyLevel,
             unifiedListIds: updates.unifiedListIds,
             lastEdited: opts?.updateLastEditedTimestamp
                 ? opts?.now ?? Date.now()
