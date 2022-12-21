@@ -16,10 +16,11 @@ import {
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 
-export interface PageAnnotationDeps {
+export interface PageAnnotationCacheDeps {
     normalizedPageUrl: string
     sortingFn?: AnnotationsSorter
     events?: TypedEventEmitter<PageAnnotationsCacheEvents>
+    debug?: boolean
 }
 
 export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
@@ -29,7 +30,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     private annotationIdCounter = 0
     private listIdCounter = 0
 
-    constructor(private deps: PageAnnotationDeps) {
+    constructor(private deps: PageAnnotationCacheDeps) {
         deps.sortingFn = deps.sortingFn ?? sortByPagePosition
         deps.events = deps.events ?? new EventEmitter()
     }
@@ -59,6 +60,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     get events(): PageAnnotationsCacheInterface['events'] {
         return this.deps.events
     }
+
+    private warn = (msg: string) =>
+        this.deps.debug ? console.warn(msg) : undefined
 
     getAnnotationsArray: PageAnnotationsCacheInterface['getAnnotationsArray'] = () =>
         normalizedStateToArray(this.annotations)
@@ -107,7 +111,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             .map((localListId) => {
                 const unifiedList = this.getListByLocalId(localListId)
                 if (!unifiedList) {
-                    console.warn(
+                    this.warn(
                         'No cached list data found for given local list IDs on annotation',
                     )
                     return null

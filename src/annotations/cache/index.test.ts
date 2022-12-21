@@ -1,10 +1,36 @@
-import { PageAnnotationDeps, PageAnnotationsCache } from '.'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { PageAnnotationCacheDeps, PageAnnotationsCache } from '.'
 import * as TEST_DATA from './index.test.data'
-import type { UnifiedList, PageAnnotationsCacheEvents } from './types'
+import type {
+    UnifiedList,
+    PageAnnotationsCacheEvents,
+    UnifiedAnnotation,
+    UnifiedAnnotationForCache,
+} from './types'
 
 type EmittedEvent = { event: keyof PageAnnotationsCacheEvents; args: any }
 
-function setupTest(deps: Partial<PageAnnotationDeps> = {}) {
+const reshapeUnifiedAnnotForCaching = (
+    annot: UnifiedAnnotation,
+    lists: UnifiedList[],
+): UnifiedAnnotationForCache => ({
+    ...annot,
+    localListIds: annot.unifiedListIds
+        .map(
+            (unifiedListId) =>
+                lists.find((list) => list.unifiedId === unifiedListId)
+                    ?.localId ?? null,
+        )
+        .filter((localListId) => localListId != null),
+})
+
+const reshapeUnifiedAnnotsForCaching = (
+    annots: UnifiedAnnotation[],
+    lists: UnifiedList[],
+): UnifiedAnnotationForCache[] =>
+    annots.map((annot) => reshapeUnifiedAnnotForCaching(annot, lists))
+
+function setupTest(deps: Partial<PageAnnotationCacheDeps> = {}) {
     const emittedEvents: EmittedEvent[] = []
     const cache = new PageAnnotationsCache({
         sortingFn: () => 0,
@@ -23,15 +49,22 @@ describe('Page annotations cache tests', () => {
     it('should be able to add, remove, and update annotations to/from/in the cache', () => {
         const { cache, emittedEvents } = setupTest()
         const expectedEvents: EmittedEvent[] = []
+        const testAnnotations = TEST_DATA.ANNOTATIONS()
+        const testLists = TEST_DATA.LISTS()
+
+        cache.setLists(testLists)
+        expectedEvents.push({ event: 'newListsState', args: cache.lists })
 
         expect(cache.annotations.allIds).toEqual([])
         expect(cache.annotations.byId).toEqual({})
         expect(emittedEvents).toEqual(expectedEvents)
 
-        const { unifiedId: idA } = cache.addAnnotation(TEST_DATA.ANNOTATIONS[0])
+        const { unifiedId: idA } = cache.addAnnotation(
+            reshapeUnifiedAnnotForCaching(testAnnotations[0], testLists),
+        )
         expectedEvents.push({
             event: 'addedAnnotation',
-            args: { ...TEST_DATA.ANNOTATIONS[0], unifiedId: idA },
+            args: { ...testAnnotations[0], unifiedId: idA },
         })
         expectedEvents.push({
             event: 'newAnnotationsState',
@@ -40,14 +73,16 @@ describe('Page annotations cache tests', () => {
 
         expect(cache.annotations.allIds).toEqual([idA])
         expect(cache.annotations.byId).toEqual({
-            [idA]: { ...TEST_DATA.ANNOTATIONS[0], unifiedId: idA },
+            [idA]: { ...testAnnotations[0], unifiedId: idA },
         })
         expect(emittedEvents).toEqual(expectedEvents)
 
-        const { unifiedId: idB } = cache.addAnnotation(TEST_DATA.ANNOTATIONS[1])
+        const { unifiedId: idB } = cache.addAnnotation(
+            reshapeUnifiedAnnotForCaching(testAnnotations[1], testLists),
+        )
         expectedEvents.push({
             event: 'addedAnnotation',
-            args: { ...TEST_DATA.ANNOTATIONS[1], unifiedId: idB },
+            args: { ...testAnnotations[1], unifiedId: idB },
         })
         expectedEvents.push({
             event: 'newAnnotationsState',
@@ -56,15 +91,17 @@ describe('Page annotations cache tests', () => {
 
         expect(cache.annotations.allIds).toEqual([idB, idA])
         expect(cache.annotations.byId).toEqual({
-            [idA]: { ...TEST_DATA.ANNOTATIONS[0], unifiedId: idA },
-            [idB]: { ...TEST_DATA.ANNOTATIONS[1], unifiedId: idB },
+            [idA]: { ...testAnnotations[0], unifiedId: idA },
+            [idB]: { ...testAnnotations[1], unifiedId: idB },
         })
         expect(emittedEvents).toEqual(expectedEvents)
 
-        const { unifiedId: idC } = cache.addAnnotation(TEST_DATA.ANNOTATIONS[2])
+        const { unifiedId: idC } = cache.addAnnotation(
+            reshapeUnifiedAnnotForCaching(testAnnotations[2], testLists),
+        )
         expectedEvents.push({
             event: 'addedAnnotation',
-            args: { ...TEST_DATA.ANNOTATIONS[2], unifiedId: idC },
+            args: { ...testAnnotations[2], unifiedId: idC },
         })
         expectedEvents.push({
             event: 'newAnnotationsState',
@@ -73,16 +110,16 @@ describe('Page annotations cache tests', () => {
 
         expect(cache.annotations.allIds).toEqual([idC, idB, idA])
         expect(cache.annotations.byId).toEqual({
-            [idA]: { ...TEST_DATA.ANNOTATIONS[0], unifiedId: idA },
-            [idB]: { ...TEST_DATA.ANNOTATIONS[1], unifiedId: idB },
-            [idC]: { ...TEST_DATA.ANNOTATIONS[2], unifiedId: idC },
+            [idA]: { ...testAnnotations[0], unifiedId: idA },
+            [idB]: { ...testAnnotations[1], unifiedId: idB },
+            [idC]: { ...testAnnotations[2], unifiedId: idC },
         })
         expect(emittedEvents).toEqual(expectedEvents)
 
         cache.removeAnnotation({ unifiedId: idB })
         expectedEvents.push({
             event: 'removedAnnotation',
-            args: { ...TEST_DATA.ANNOTATIONS[1], unifiedId: idB },
+            args: { ...testAnnotations[1], unifiedId: idB },
         })
         expectedEvents.push({
             event: 'newAnnotationsState',
@@ -91,17 +128,16 @@ describe('Page annotations cache tests', () => {
 
         expect(cache.annotations.allIds).toEqual([idC, idA])
         expect(cache.annotations.byId).toEqual({
-            [idA]: { ...TEST_DATA.ANNOTATIONS[0], unifiedId: idA },
-            [idC]: { ...TEST_DATA.ANNOTATIONS[2], unifiedId: idC },
+            [idA]: { ...testAnnotations[0], unifiedId: idA },
+            [idC]: { ...testAnnotations[2], unifiedId: idC },
         })
         expect(emittedEvents).toEqual(expectedEvents)
 
         const updatedAnnotationA = {
-            ...TEST_DATA.ANNOTATIONS[0],
+            ...testAnnotations[0],
             unifiedId: idA,
             comment: 'updated comment',
-            isShared: true,
-            isBulkShareProtected: true,
+            privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
         }
         cache.updateAnnotation(updatedAnnotationA)
         expectedEvents.push({
@@ -116,15 +152,15 @@ describe('Page annotations cache tests', () => {
         expect(cache.annotations.allIds).toEqual([idC, idA])
         expect(cache.annotations.byId).toEqual({
             [idA]: updatedAnnotationA,
-            [idC]: { ...TEST_DATA.ANNOTATIONS[2], unifiedId: idC },
+            [idC]: { ...testAnnotations[2], unifiedId: idC },
         })
         expect(emittedEvents).toEqual(expectedEvents)
 
         const now = Date.now()
         const updatedAnnotationC = {
-            ...TEST_DATA.ANNOTATIONS[2],
+            ...testAnnotations[2],
             unifiedId: idC,
-            isShared: false,
+            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
             lastEdited: now,
         }
         cache.updateAnnotation(updatedAnnotationC, {
@@ -183,6 +219,11 @@ describe('Page annotations cache tests', () => {
             normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
         })
         const expectedEvents: EmittedEvent[] = []
+        const testAnnotations = TEST_DATA.ANNOTATIONS()
+        const testLists = TEST_DATA.LISTS()
+
+        cache.setLists(testLists)
+        expectedEvents.push({ event: 'newListsState', args: cache.lists })
 
         expect(cache.normalizedPageUrl).toEqual(TEST_DATA.NORMALIZED_PAGE_URL_1)
         expect(cache.annotations.allIds).toEqual([])
@@ -191,7 +232,10 @@ describe('Page annotations cache tests', () => {
 
         const { unifiedIds: unifiedIdsA } = cache.setAnnotations(
             TEST_DATA.NORMALIZED_PAGE_URL_1,
-            TEST_DATA.ANNOTATIONS.slice(1, 3),
+            reshapeUnifiedAnnotsForCaching(
+                testAnnotations.slice(1, 3),
+                testLists,
+            ),
         )
         expectedEvents.push({
             event: 'newAnnotationsState',
@@ -202,11 +246,11 @@ describe('Page annotations cache tests', () => {
         expect(cache.annotations.allIds).toEqual(unifiedIdsA)
         expect(cache.annotations.byId).toEqual({
             [unifiedIdsA[0]]: {
-                ...TEST_DATA.ANNOTATIONS[1],
+                ...testAnnotations[1],
                 unifiedId: unifiedIdsA[0],
             },
             [unifiedIdsA[1]]: {
-                ...TEST_DATA.ANNOTATIONS[2],
+                ...testAnnotations[2],
                 unifiedId: unifiedIdsA[1],
             },
         })
@@ -214,7 +258,7 @@ describe('Page annotations cache tests', () => {
 
         const { unifiedIds: unifiedIdsB } = cache.setAnnotations(
             TEST_DATA.NORMALIZED_PAGE_URL_2,
-            TEST_DATA.ANNOTATIONS,
+            reshapeUnifiedAnnotsForCaching(testAnnotations, testLists),
         )
         expectedEvents.push({
             event: 'updatedPageUrl',
@@ -229,91 +273,139 @@ describe('Page annotations cache tests', () => {
         expect(cache.annotations.allIds).toEqual(unifiedIdsB)
         expect(cache.annotations.byId).toEqual({
             [unifiedIdsB[0]]: {
-                ...TEST_DATA.ANNOTATIONS[0],
+                ...testAnnotations[0],
                 unifiedId: unifiedIdsB[0],
             },
             [unifiedIdsB[1]]: {
-                ...TEST_DATA.ANNOTATIONS[1],
+                ...testAnnotations[1],
                 unifiedId: unifiedIdsB[1],
             },
             [unifiedIdsB[2]]: {
-                ...TEST_DATA.ANNOTATIONS[2],
+                ...testAnnotations[2],
                 unifiedId: unifiedIdsB[2],
             },
             [unifiedIdsB[3]]: {
-                ...TEST_DATA.ANNOTATIONS[3],
+                ...testAnnotations[3],
                 unifiedId: unifiedIdsB[3],
             },
         })
         expect(emittedEvents).toEqual(expectedEvents)
     })
 
+    it('should not properly resolve local list IDs to cache IDs (for annotations) if lists not yet cached', () => {
+        const { cache } = setupTest({
+            normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
+        })
+        const testAnnotations = TEST_DATA.ANNOTATIONS()
+        const testLists = TEST_DATA.LISTS()
+
+        expect(cache.annotations.allIds).toEqual([])
+        expect(cache.annotations.byId).toEqual({})
+        expect(cache.lists.allIds).toEqual([])
+        expect(cache.lists.byId).toEqual({})
+
+        const { unifiedIds: unifiedIdsA } = cache.setAnnotations(
+            TEST_DATA.NORMALIZED_PAGE_URL_1,
+            reshapeUnifiedAnnotsForCaching(
+                testAnnotations,
+                testLists, // Passing in lists here so input annots come with list IDs, but they won't be resolved to anything, as the cache lacks list data
+            ),
+        )
+
+        expect(cache.annotations.allIds).toEqual(unifiedIdsA)
+        expect(cache.annotations.byId).toEqual({
+            [unifiedIdsA[0]]: {
+                ...testAnnotations[0],
+                unifiedId: unifiedIdsA[0],
+                unifiedListIds: [],
+            },
+            [unifiedIdsA[1]]: {
+                ...testAnnotations[1],
+                unifiedId: unifiedIdsA[1],
+                unifiedListIds: [],
+            },
+            [unifiedIdsA[2]]: {
+                ...testAnnotations[2],
+                unifiedId: unifiedIdsA[2],
+                unifiedListIds: [],
+            },
+            [unifiedIdsA[3]]: {
+                ...testAnnotations[3],
+                unifiedId: unifiedIdsA[3],
+                unifiedListIds: [],
+            },
+        })
+        expect(cache.lists.allIds).toEqual([])
+        expect(cache.lists.byId).toEqual({})
+    })
+
     it('should be able to add, remove, and update lists to/from/in the cache', () => {
         const { cache, emittedEvents } = setupTest()
         const expectedEvents: EmittedEvent[] = []
+        const testLists = TEST_DATA.LISTS()
 
         expect(cache.lists.allIds).toEqual([])
         expect(cache.lists.byId).toEqual({})
         expect(emittedEvents).toEqual(expectedEvents)
 
-        const { unifiedId: idA } = cache.addList(TEST_DATA.LISTS[0])
+        const { unifiedId: idA } = cache.addList(testLists[0])
         expectedEvents.push({
             event: 'addedList',
-            args: { ...TEST_DATA.LISTS[0], unifiedId: idA },
+            args: { ...testLists[0], unifiedId: idA },
         })
         expectedEvents.push({ event: 'newListsState', args: cache.lists })
 
         expect(cache.lists.allIds).toEqual([idA])
         expect(cache.lists.byId).toEqual({
-            [idA]: { ...TEST_DATA.LISTS[0], unifiedId: idA },
+            [idA]: { ...testLists[0], unifiedId: idA },
         })
         expect(emittedEvents).toEqual(expectedEvents)
 
-        const { unifiedId: idB } = cache.addList(TEST_DATA.LISTS[1])
+        const { unifiedId: idB } = cache.addList(testLists[1])
         expectedEvents.push({
             event: 'addedList',
-            args: { ...TEST_DATA.LISTS[1], unifiedId: idB },
+            args: { ...testLists[1], unifiedId: idB },
         })
         expectedEvents.push({ event: 'newListsState', args: cache.lists })
 
         expect(cache.lists.allIds).toEqual([idB, idA])
         expect(cache.lists.byId).toEqual({
-            [idA]: { ...TEST_DATA.LISTS[0], unifiedId: idA },
-            [idB]: { ...TEST_DATA.LISTS[1], unifiedId: idB },
+            [idA]: { ...testLists[0], unifiedId: idA },
+            [idB]: { ...testLists[1], unifiedId: idB },
         })
         expect(emittedEvents).toEqual(expectedEvents)
 
-        const { unifiedId: idC } = cache.addList(TEST_DATA.LISTS[2])
+        const { unifiedId: idC } = cache.addList(testLists[2])
         expectedEvents.push({
             event: 'addedList',
-            args: { ...TEST_DATA.LISTS[2], unifiedId: idC },
+            args: { ...testLists[2], unifiedId: idC },
         })
         expectedEvents.push({ event: 'newListsState', args: cache.lists })
 
         expect(cache.lists.allIds).toEqual([idC, idB, idA])
         expect(cache.lists.byId).toEqual({
-            [idA]: { ...TEST_DATA.LISTS[0], unifiedId: idA },
-            [idB]: { ...TEST_DATA.LISTS[1], unifiedId: idB },
-            [idC]: { ...TEST_DATA.LISTS[2], unifiedId: idC },
+            [idA]: { ...testLists[0], unifiedId: idA },
+            [idB]: { ...testLists[1], unifiedId: idB },
+            [idC]: { ...testLists[2], unifiedId: idC },
         })
         expect(emittedEvents).toEqual(expectedEvents)
 
         cache.removeList({ unifiedId: idB })
         expectedEvents.push({
             event: 'removedList',
-            args: { ...TEST_DATA.LISTS[1], unifiedId: idB },
+            args: { ...testLists[1], unifiedId: idB },
         })
         expectedEvents.push({ event: 'newListsState', args: cache.lists })
 
         expect(cache.lists.allIds).toEqual([idC, idA])
         expect(cache.lists.byId).toEqual({
-            [idA]: { ...TEST_DATA.LISTS[0], unifiedId: idA },
-            [idC]: { ...TEST_DATA.LISTS[2], unifiedId: idC },
+            [idA]: { ...testLists[0], unifiedId: idA },
+            [idC]: { ...testLists[2], unifiedId: idC },
         })
         expect(emittedEvents).toEqual(expectedEvents)
 
         const updatedListA: UnifiedList = {
-            ...TEST_DATA.LISTS[0],
+            ...testLists[0],
             name: 'new list name',
         }
         cache.updateList(updatedListA)
@@ -323,12 +415,12 @@ describe('Page annotations cache tests', () => {
         expect(cache.lists.allIds).toEqual([idC, idA])
         expect(cache.lists.byId).toEqual({
             [idA]: updatedListA,
-            [idC]: { ...TEST_DATA.LISTS[2], unifiedId: idC },
+            [idC]: { ...testLists[2], unifiedId: idC },
         })
         expect(emittedEvents).toEqual(expectedEvents)
 
         const updatedListC: UnifiedList = {
-            ...TEST_DATA.LISTS[2],
+            ...testLists[2],
             description: 'new list description',
         }
         cache.updateList(updatedListC)
@@ -364,38 +456,37 @@ describe('Page annotations cache tests', () => {
     it('should be able to reset lists in the cache', () => {
         const { cache, emittedEvents } = setupTest()
         const expectedEvents: EmittedEvent[] = []
+        const testLists = TEST_DATA.LISTS()
 
         expect(cache.lists.allIds).toEqual([])
         expect(cache.lists.byId).toEqual({})
         expect(emittedEvents).toEqual(expectedEvents)
 
         const { unifiedIds: unifiedIdsA } = cache.setLists(
-            TEST_DATA.LISTS.slice(0, 1),
+            testLists.slice(0, 1),
         )
         expectedEvents.push({ event: 'newListsState', args: cache.lists })
 
         expect(cache.lists.allIds).toEqual(unifiedIdsA)
         expect(cache.lists.byId).toEqual({
             [unifiedIdsA[0]]: {
-                ...TEST_DATA.LISTS[0],
+                ...testLists[0],
                 unifiedId: unifiedIdsA[0],
             },
         })
         expect(emittedEvents).toEqual(expectedEvents)
 
-        const { unifiedIds: unifiedIdsB } = cache.setLists(
-            TEST_DATA.LISTS.slice(1),
-        )
+        const { unifiedIds: unifiedIdsB } = cache.setLists(testLists.slice(1))
         expectedEvents.push({ event: 'newListsState', args: cache.lists })
 
         expect(cache.lists.allIds).toEqual(unifiedIdsB)
         expect(cache.lists.byId).toEqual({
             [unifiedIdsB[0]]: {
-                ...TEST_DATA.LISTS[1],
+                ...testLists[1],
                 unifiedId: unifiedIdsB[0],
             },
             [unifiedIdsB[1]]: {
-                ...TEST_DATA.LISTS[2],
+                ...testLists[2],
                 unifiedId: unifiedIdsB[1],
             },
         })
@@ -404,60 +495,62 @@ describe('Page annotations cache tests', () => {
 
     it('should be able to find annotations and lists in the cache via both their local and remote IDs', () => {
         const { cache } = setupTest()
+        const testLists = TEST_DATA.LISTS()
+        const testAnnotations = TEST_DATA.ANNOTATIONS()
 
-        const { unifiedIds: unifiedListIds } = cache.setLists(TEST_DATA.LISTS)
+        const { unifiedIds: unifiedListIds } = cache.setLists(testLists)
         const { unifiedIds: unifiedAnnotationIds } = cache.setAnnotations(
             TEST_DATA.NORMALIZED_PAGE_URL_1,
-            TEST_DATA.ANNOTATIONS,
+            reshapeUnifiedAnnotsForCaching(testAnnotations, testLists),
         )
 
         expect(
-            cache.getAnnotationByLocalId(TEST_DATA.ANNOTATIONS[0].localId),
+            cache.getAnnotationByLocalId(testAnnotations[0].localId),
         ).toEqual({
-            ...TEST_DATA.ANNOTATIONS[0],
+            ...testAnnotations[0],
             unifiedId: unifiedAnnotationIds[0],
         })
         expect(
-            cache.getAnnotationByLocalId(TEST_DATA.ANNOTATIONS[1].localId),
+            cache.getAnnotationByLocalId(testAnnotations[1].localId),
         ).toEqual({
-            ...TEST_DATA.ANNOTATIONS[1],
+            ...testAnnotations[1],
             unifiedId: unifiedAnnotationIds[1],
         })
         expect(
-            cache.getAnnotationByRemoteId(TEST_DATA.ANNOTATIONS[1].remoteId),
+            cache.getAnnotationByRemoteId(testAnnotations[1].remoteId),
         ).toEqual({
-            ...TEST_DATA.ANNOTATIONS[1],
+            ...testAnnotations[1],
             unifiedId: unifiedAnnotationIds[1],
         })
         expect(
-            cache.getAnnotationByRemoteId(TEST_DATA.ANNOTATIONS[3].remoteId),
+            cache.getAnnotationByRemoteId(testAnnotations[3].remoteId),
         ).toEqual({
-            ...TEST_DATA.ANNOTATIONS[3],
+            ...testAnnotations[3],
             unifiedId: unifiedAnnotationIds[3],
         })
 
-        expect(cache.getListByLocalId(TEST_DATA.LISTS[0].localId)).toEqual({
-            ...TEST_DATA.LISTS[0],
+        expect(cache.getListByLocalId(testLists[0].localId)).toEqual({
+            ...testLists[0],
             unifiedId: unifiedListIds[0],
         })
-        expect(cache.getListByLocalId(TEST_DATA.LISTS[1].localId)).toEqual({
-            ...TEST_DATA.LISTS[1],
+        expect(cache.getListByLocalId(testLists[1].localId)).toEqual({
+            ...testLists[1],
             unifiedId: unifiedListIds[1],
         })
-        expect(cache.getListByRemoteId(TEST_DATA.LISTS[1].remoteId)).toEqual({
-            ...TEST_DATA.LISTS[1],
+        expect(cache.getListByRemoteId(testLists[1].remoteId)).toEqual({
+            ...testLists[1],
             unifiedId: unifiedListIds[1],
         })
-        expect(cache.getListByRemoteId(TEST_DATA.LISTS[2].remoteId)).toEqual({
-            ...TEST_DATA.LISTS[2],
+        expect(cache.getListByRemoteId(testLists[2].remoteId)).toEqual({
+            ...testLists[2],
             unifiedId: unifiedListIds[2],
         })
 
         expect(
-            cache.getAnnotationByLocalId(TEST_DATA.ANNOTATIONS[1].remoteId),
+            cache.getAnnotationByLocalId(testAnnotations[1].remoteId),
         ).toEqual(null)
         expect(
-            cache.getAnnotationByRemoteId(TEST_DATA.ANNOTATIONS[1].localId),
+            cache.getAnnotationByRemoteId(testAnnotations[1].localId),
         ).toEqual(null)
         expect(cache.getAnnotationByLocalId('I dont exist')).toEqual(null)
         expect(cache.getAnnotationByRemoteId('I dont exist')).toEqual(null)

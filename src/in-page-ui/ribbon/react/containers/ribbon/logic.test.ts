@@ -302,7 +302,12 @@ describe('Ribbon logic', () => {
                             Pick<Annotation, 'createdWhen' | 'lastEdited'>
                         >,
                     {
-                        creator: { type: 'user-reference', id: TEST_USER.id },
+                        extraData: {
+                            creator: {
+                                type: 'user-reference',
+                                id: TEST_USER.id,
+                            },
+                        },
                     },
                 ),
             ),

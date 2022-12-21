@@ -49,6 +49,7 @@ import {
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
 import { UnifiedAnnotation } from 'src/annotations/cache/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -374,7 +375,10 @@ export class AnnotationsSidebarContainer<
         const { annotationsCache, customLists, contentSharing } = this.props
         // This is to show confirmation modal if the annotation is public and the user is trying to add it to a shared space
         const getUpdateListsEvent = (listId: number) =>
-            annotation.isShared &&
+            [
+                AnnotationPrivacyLevels.SHARED,
+                AnnotationPrivacyLevels.SHARED_PROTECTED,
+            ].includes(annotation.privacyLevel) &&
             annotationsCache.getListByLocalId(listId)?.remoteId != null &&
             showExternalConfirmations
                 ? 'setSelectNoteSpaceConfirmArgs'
@@ -394,8 +398,14 @@ export class AnnotationsSidebarContainer<
                 ) {
                     await this.processEvent('editAnnotation', {
                         annotationUrl: annotation.localId,
-                        shouldShare: annotation.isShared,
-                        isProtected: annotation.isBulkShareProtected,
+                        shouldShare: [
+                            AnnotationPrivacyLevels.SHARED,
+                            AnnotationPrivacyLevels.SHARED_PROTECTED,
+                        ].includes(annotation.privacyLevel),
+                        isProtected: [
+                            AnnotationPrivacyLevels.PROTECTED,
+                            AnnotationPrivacyLevels.SHARED_PROTECTED,
+                        ].includes(annotation.privacyLevel),
                         mainBtnPressed: true,
                         ...DEF_CONTEXT,
                     })
@@ -490,7 +500,10 @@ export class AnnotationsSidebarContainer<
                     this.props.annotationsCache.getListByLocalId(localListId)
                         ?.remoteId ?? null
                 }
-                isShared={currentAnnotation.isShared}
+                isShared={[
+                    AnnotationPrivacyLevels.SHARED,
+                    AnnotationPrivacyLevels.SHARED_PROTECTED,
+                ].includes(currentAnnotation.privacyLevel)}
                 shareImmediately={this.state.immediatelyShareNotes}
                 contentSharingBG={this.props.contentSharing}
                 annotationsBG={this.props.annotations}

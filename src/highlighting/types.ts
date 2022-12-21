@@ -7,6 +7,11 @@ import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import type { AnalyticsEvent } from 'src/analytics/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
+export type _UnifiedAnnotation = Pick<
+    UnifiedAnnotation,
+    'unifiedId' | 'selector'
+>
+
 export type Highlight = Pick<Annotation, 'url' | 'selector'> & {
     temporary?: boolean
     domElements?: HighlightElement[]
@@ -16,25 +21,25 @@ export type HighlightElement = HTMLElement
 
 export interface HighlightInteractionsInterface {
     renderHighlights: (
-        highlights: UnifiedAnnotation[],
+        highlights: _UnifiedAnnotation[],
         onClick: AnnotationClickHandler,
         temp?: boolean,
     ) => Promise<void>
     renderHighlight: (
-        highlight: UnifiedAnnotation,
+        highlight: _UnifiedAnnotation,
         onClick: AnnotationClickHandler,
         temp?: boolean,
     ) => Promise<void>
-    scrollToHighlight: (highlight: UnifiedAnnotation) => void
-    highlightAndScroll: (annotation: UnifiedAnnotation) => void
+    scrollToHighlight: (highlight: _UnifiedAnnotation) => void
+    highlightAndScroll: (annotation: _UnifiedAnnotation) => void
     attachEventListenersToNewHighlights: (
-        highlight: UnifiedAnnotation,
+        highlight: _UnifiedAnnotation,
         openSidebar: AnnotationClickHandler,
     ) => void
     removeMediumHighlights: () => void
     removeTempHighlights: () => void
-    makeHighlightMedium: (highlight: UnifiedAnnotation) => void
-    makeHighlightDark: (highlight: UnifiedAnnotation) => void
+    makeHighlightMedium: (highlight: _UnifiedAnnotation) => void
+    makeHighlightDark: (highlight: _UnifiedAnnotation) => void
     removeHighlights: (args?: { onlyRemoveDarkHighlights?: boolean }) => void
     _removeHighlight: (highlight: Element) => void
     removeAnnotationHighlight: (url: string) => void

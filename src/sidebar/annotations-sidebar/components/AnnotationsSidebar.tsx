@@ -47,6 +47,7 @@ import type {
     UnifiedAnnotation,
 } from 'src/annotations/cache/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
@@ -436,13 +437,19 @@ export class AnnotationsSidebar extends React.Component<
                             data.localId,
                         )
 
-                        ownAnnotationProps.isBulkShareProtected =
-                            localAnnotation.isBulkShareProtected
+                        ownAnnotationProps.isBulkShareProtected = [
+                            AnnotationPrivacyLevels.PROTECTED,
+                            AnnotationPrivacyLevels.SHARED_PROTECTED,
+                        ].includes(localAnnotation.privacyLevel)
                         ownAnnotationProps.appendRepliesToggle = true
                         ownAnnotationProps.url = localAnnotation.localId
                         ownAnnotationProps.lists = [] // localAnnotation.unifiedListIds
                         ownAnnotationProps.comment = localAnnotation.comment
-                        ownAnnotationProps.isShared = localAnnotation.isShared
+                        ownAnnotationProps.isShared = [
+                            AnnotationPrivacyLevels.SHARED,
+                            AnnotationPrivacyLevels.SHARED_PROTECTED,
+                        ].includes(localAnnotation.privacyLevel)
+                        ownAnnotationProps.appendRepliesToggle = true
                         ownAnnotationProps.lastEdited =
                             localAnnotation.lastEdited
                         ownAnnotationProps.mode = this.props.followedLists.byId[

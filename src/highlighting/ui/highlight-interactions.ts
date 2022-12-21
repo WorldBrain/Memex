@@ -6,6 +6,7 @@ import type {
     HighlightElement,
     SaveAndRenderHighlightDeps,
     HighlightInteractionsInterface,
+    _UnifiedAnnotation as UnifiedAnnotation,
 } from 'src/highlighting/types'
 import type { AnnotationClickHandler } from 'src/highlighting/ui/types'
 import { retryUntil } from 'src/util/retry-until'
@@ -17,7 +18,6 @@ import { generateAnnotationUrl } from 'src/annotations/utils'
 import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
-import type { UnifiedAnnotation } from 'src/annotations/cache/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 
 const styles = require('src/highlighting/ui/styles.css')
@@ -163,7 +163,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
         try {
             const cacheAnnotation = reshapeAnnotationForCache(annotation, {
-                creator: params.currentUser,
+                extraData: { creator: params.currentUser },
             })
             const { unifiedId } = params.annotationsCache.addAnnotation(
                 cacheAnnotation,
