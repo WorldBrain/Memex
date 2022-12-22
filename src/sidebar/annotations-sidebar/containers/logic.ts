@@ -339,7 +339,11 @@ export class SidebarContainerLogic extends UILogic<
         const followedListsData = await pageActivityIndicatorBG.getPageFollowedLists(
             fullPageUrl,
         )
-
+        const pageSharedListIds = (
+            await customListsBG.fetchPageLists({
+                url: fullPageUrl,
+            })
+        ).filter((listId) => remoteListIds[listId] != null)
         const seenFollowedLists = new Set<AutoPk>()
 
         const listsToCache = localListsData.map((list) => {
@@ -382,14 +386,21 @@ export class SidebarContainerLogic extends UILogic<
 
         annotationsCache.setAnnotations(
             normalizeUrl(fullPageUrl),
-            annotationsData.map((annot) =>
-                cacheUtils.reshapeAnnotationForCache(annot, {
+            annotationsData.map((annot) => {
+                const privacyLevel = privacyLvlsByAnnot[annot.url]
+
+                // Inherit parent page shared lists if public annot
+                if (privacyLevel >= AnnotationPrivacyLevels.SHARED) {
+                    annot.lists.push(...pageSharedListIds)
+                }
+
+                return cacheUtils.reshapeAnnotationForCache(annot, {
                     extraData: {
-                        privacyLevel: privacyLvlsByAnnot[annot.url],
                         creator: currentUser,
+                        privacyLevel,
                     },
-                }),
-            ),
+                })
+            }),
         )
     }
 

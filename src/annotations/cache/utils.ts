@@ -13,6 +13,7 @@ export const reshapeAnnotationForCache = (
     annot: Annotation,
     opts: {
         extraData?: Partial<UnifiedAnnotation>
+        /** Generally only makes sense for test assertions - local list IDs will be mapped to cache IDs internally */
         excludeLocalLists?: boolean
     },
 ): UnifiedAnnotationForCache => {
