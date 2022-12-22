@@ -107,6 +107,8 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         { localListIds, ...annotation }: UnifiedAnnotationForCache,
         opts: { now: number },
     ): UnifiedAnnotation => {
+        const unifiedAnnotationId = this.generateAnnotationId()
+
         const unifiedListIds = localListIds
             .map((localListId) => {
                 const unifiedList = this.getListByLocalId(localListId)
@@ -116,16 +118,21 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                     )
                     return null
                 }
+
+                // Side-effect: ensure the list gets a ref back to this annot
+                unifiedList.unifiedAnnotationIds.push(unifiedAnnotationId)
+
                 return unifiedList.unifiedId
             })
             .filter((id) => id != null)
+
         return {
             ...annotation,
             unifiedListIds,
             createdWhen: annotation.createdWhen ?? opts.now,
             lastEdited:
                 annotation.lastEdited ?? annotation.createdWhen ?? opts.now,
-            unifiedId: this.generateAnnotationId(),
+            unifiedId: unifiedAnnotationId,
         }
     }
 

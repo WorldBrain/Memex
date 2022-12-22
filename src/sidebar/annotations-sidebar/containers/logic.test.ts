@@ -17,6 +17,28 @@ import { PageAnnotationsCache } from 'src/annotations/cache'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import { initNormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 
+const mapLocalListIdsToUnified = (
+    localListIds: number[],
+    cache: PageAnnotationsCache,
+): string[] =>
+    localListIds.map(
+        (localListId) =>
+            Object.values(cache.lists.byId).find(
+                (list) => list.localId === localListId,
+            )?.unifiedId ?? `cached list not found for ID: ${localListId}`,
+    )
+
+const mapLocalAnnotIdsToUnified = (
+    localAnnotIds: string[],
+    cache: PageAnnotationsCache,
+): string[] =>
+    localAnnotIds.map(
+        (localAnnotId) =>
+            Object.values(cache.annotations.byId).find(
+                (annot) => annot.localId === localAnnotId,
+            )?.unifiedId ?? `cached annot not found for ID: ${localAnnotId}`,
+    )
+
 const setupLogicHelper = async ({
     device,
     withAuth,
@@ -183,6 +205,14 @@ describe('SidebarContainerLogic', () => {
                         creator: DATA.CREATOR_1,
                         remoteId: DATA.SHARED_LIST_IDS[0],
                         unifiedId: expect.any(String),
+                        unifiedAnnotationIds: mapLocalAnnotIdsToUnified(
+                            [
+                                DATA.ANNOT_1.url,
+                                DATA.ANNOT_2.url, // NOTE: inherited shared list from parent page
+                                DATA.ANNOT_3.url, // NOTE: inherited shared list from parent page
+                            ],
+                            annotationsCache,
+                        ),
                     },
                 }),
                 cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[1], {
@@ -190,6 +220,10 @@ describe('SidebarContainerLogic', () => {
                         creator: DATA.CREATOR_1,
                         remoteId: DATA.SHARED_LIST_IDS[1],
                         unifiedId: expect.any(String),
+                        unifiedAnnotationIds: mapLocalAnnotIdsToUnified(
+                            [DATA.ANNOT_1.url],
+                            annotationsCache,
+                        ),
                     },
                 }),
                 cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[2], {
@@ -198,72 +232,87 @@ describe('SidebarContainerLogic', () => {
                         // creator: DATA.CREATOR_2,
                         remoteId: DATA.SHARED_LIST_IDS[2],
                         unifiedId: expect.any(String),
+                        unifiedAnnotationIds: [],
                     },
                 }),
                 cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[3], {
                     extraData: {
                         unifiedId: expect.any(String),
+                        unifiedAnnotationIds: mapLocalAnnotIdsToUnified(
+                            [DATA.ANNOT_2.url, DATA.ANNOT_3.url],
+                            annotationsCache,
+                        ),
                     },
                 }),
                 cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[4], {
                     extraData: {
                         unifiedId: expect.any(String),
+                        unifiedAnnotationIds: [],
                     },
                 }),
                 cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[5], {
                     extraData: {
                         unifiedId: expect.any(String),
+                        unifiedAnnotationIds: [],
                     },
                 }),
                 cacheUtils.reshapeFollowedListForCache(DATA.FOLLOWED_LISTS[3], {
                     extraData: {
                         unifiedId: expect.any(String),
+                        unifiedAnnotationIds: [],
                     },
                 }),
             ])
 
-            const cachedAnnotations = Object.values(
-                annotationsCache.annotations.byId,
-            )
-            expect(cachedAnnotations).toEqual([
+            expect(Object.values(annotationsCache.annotations.byId)).toEqual([
                 cacheUtils.reshapeAnnotationForCache(DATA.ANNOT_1, {
                     excludeLocalLists: true,
-                    unifiedListIds: expect.any(Array),
                     extraData: {
                         unifiedId: expect.any(String),
                         privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                        unifiedListIds: mapLocalListIdsToUnified(
+                            [DATA.LOCAL_LISTS[0].id, DATA.LOCAL_LISTS[1].id],
+                            annotationsCache,
+                        ),
                     },
                 }),
                 cacheUtils.reshapeAnnotationForCache(DATA.ANNOT_2, {
                     excludeLocalLists: true,
-                    unifiedListIds: expect.any(Array),
                     extraData: {
                         unifiedId: expect.any(String),
                         privacyLevel: AnnotationPrivacyLevels.SHARED,
+                        unifiedListIds: mapLocalListIdsToUnified(
+                            [
+                                DATA.LOCAL_LISTS[0].id, // NOTE: inherited shared list from parent page
+                                DATA.LOCAL_LISTS[3].id,
+                            ],
+                            annotationsCache,
+                        ),
                     },
                 }),
                 cacheUtils.reshapeAnnotationForCache(DATA.ANNOT_3, {
                     excludeLocalLists: true,
-                    unifiedListIds: expect.any(Array),
                     extraData: {
                         unifiedId: expect.any(String),
                         privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
+                        unifiedListIds: mapLocalListIdsToUnified(
+                            [
+                                DATA.LOCAL_LISTS[0].id, // NOTE: inherited shared list from parent page
+                                DATA.LOCAL_LISTS[3].id,
+                            ],
+                            annotationsCache,
+                        ),
                     },
                 }),
                 cacheUtils.reshapeAnnotationForCache(DATA.ANNOT_4, {
                     excludeLocalLists: true,
-                    unifiedListIds: expect.any(Array),
                     extraData: {
                         unifiedId: expect.any(String),
                         privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                        unifiedListIds: [],
                     },
                 }),
             ])
-
-            expect(cachedAnnotations[0].unifiedListIds.length).toBe(2)
-            expect(cachedAnnotations[1].unifiedListIds.length).toBe(1)
-            expect(cachedAnnotations[2].unifiedListIds.length).toBe(1)
-            expect(cachedAnnotations[3].unifiedListIds.length).toBe(0)
         })
     })
 

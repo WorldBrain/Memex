@@ -14,7 +14,6 @@ export const reshapeAnnotationForCache = (
     opts: {
         extraData?: Partial<UnifiedAnnotation>
         excludeLocalLists?: boolean
-        unifiedListIds?: string[]
     },
 ): UnifiedAnnotationForCache => {
     const createdWhen = annot.createdWhen?.getTime()
@@ -25,7 +24,7 @@ export const reshapeAnnotationForCache = (
     }
     return {
         localId: annot.url,
-        unifiedListIds: opts.unifiedListIds ?? [],
+        unifiedListIds: opts.extraData?.unifiedListIds ?? [],
         body: annot.body,
         comment: annot.comment,
         selector: annot.selector,
