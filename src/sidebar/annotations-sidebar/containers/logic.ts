@@ -47,14 +47,13 @@ import type {
     PageAnnotationsCacheInterface,
     UnifiedAnnotation,
 } from 'src/annotations/cache/types'
-import {
-    reshapeAnnotationForCache,
-    reshapeListForCache,
-} from 'src/annotations/cache/utils'
+import * as cacheUtils from 'src/annotations/cache/utils'
 import {
     createAnnotation,
     updateAnnotation,
 } from 'src/annotations/annotation-save-logic'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -328,14 +327,49 @@ export class SidebarContainerLogic extends UILogic<
             contentSharing: contentSharingBG,
             annotations: annotationsBG,
             customLists: customListsBG,
+            pageActivityIndicatorBG,
             annotationsCache,
             currentUser,
         } = this.options
-        const listsData = await customListsBG.fetchAllLists({})
 
-        annotationsCache.setLists(
-            listsData.map((list) => reshapeListForCache(list, {})),
+        const localListsData = await customListsBG.fetchAllLists({})
+        const remoteListIds = await contentSharingBG.getRemoteListIds({
+            localListIds: localListsData.map((list) => list.id),
+        })
+        const followedListsData = await pageActivityIndicatorBG.getPageFollowedLists(
+            fullPageUrl,
         )
+
+        const seenFollowedLists = new Set<AutoPk>()
+
+        const listsToCache = localListsData.map((list) => {
+            let creator: UserReference
+            const remoteId = remoteListIds[list.id]
+            if (remoteId != null && followedListsData[remoteId]) {
+                seenFollowedLists.add(followedListsData[remoteId].sharedList)
+                creator = {
+                    type: 'user-reference',
+                    id: followedListsData[remoteId].creator,
+                }
+            }
+            return cacheUtils.reshapeLocalListForCache(list, {
+                extraData: {
+                    remoteId,
+                    creator,
+                },
+            })
+        })
+
+        // Ensure we cover any followed-only lists (no local data)
+        Object.values(followedListsData)
+            .filter((list) => !seenFollowedLists.has(list.sharedList))
+            .forEach((list) =>
+                listsToCache.push(
+                    cacheUtils.reshapeFollowedListForCache(list, {}),
+                ),
+            )
+
+        annotationsCache.setLists(listsToCache)
 
         const annotationsData = await annotationsBG.listAnnotationsByPageUrl({
             pageUrl: fullPageUrl,
@@ -349,7 +383,7 @@ export class SidebarContainerLogic extends UILogic<
         annotationsCache.setAnnotations(
             normalizeUrl(fullPageUrl),
             annotationsData.map((annot) =>
-                reshapeAnnotationForCache(annot, {
+                cacheUtils.reshapeAnnotationForCache(annot, {
                     extraData: {
                         privacyLevel: privacyLvlsByAnnot[annot.url],
                         creator: currentUser,

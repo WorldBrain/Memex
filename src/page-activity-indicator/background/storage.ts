@@ -56,6 +56,11 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                     collection: 'followedListEntry',
                     operation: 'createObject',
                 },
+                findFollowedListsByIds: {
+                    collection: 'followedList',
+                    operation: 'findObjects',
+                    args: { sharedList: { $in: '$followedListIds:string[]' } },
+                },
                 findAllFollowedLists: {
                     collection: 'followedList',
                     operation: 'findObjects',
@@ -161,6 +166,16 @@ export default class PageActivityIndicatorStorage extends StorageModule {
             updatedWhen: data.updatedWhen ?? Date.now(),
         })
         return object.id
+    }
+
+    async findFollowedListsByIds(
+        followedListIds: AutoPk[],
+    ): Promise<Map<AutoPk, FollowedList>> {
+        const followedLists: FollowedList[] = await this.operation(
+            'findFollowedListsByIds',
+            { followedListIds },
+        )
+        return new Map(followedLists.map((list) => [list.sharedList, list]))
     }
 
     async findAllFollowedLists(): Promise<Map<AutoPk, FollowedList>> {

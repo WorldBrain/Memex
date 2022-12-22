@@ -1,6 +1,7 @@
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type Storex from '@worldbrain/storex'
+import fromPairs from 'lodash/fromPairs'
 import * as Raven from 'src/util/raven'
 import type { ServerStorageModules } from 'src/storage/types'
 import type {
@@ -48,6 +49,7 @@ export class PageActivityIndicatorBackground {
         })
 
         this.remoteFunctions = {
+            getPageFollowedLists: this.getPageFollowedLists,
             getPageActivityStatus: this.getPageActivityStatus,
         }
     }
@@ -130,6 +132,33 @@ export class PageActivityIndicatorBackground {
                 now: opts?.now,
             })
         }
+    }
+
+    private getPageFollowedLists: RemotePageActivityIndicatorInterface['getPageFollowedLists'] = async (
+        fullPageUrl,
+    ) => {
+        const normalizedPageUrl = normalizeUrl(fullPageUrl)
+        const followedListEntries = await this.storage.findFollowedListEntriesByPage(
+            { normalizedPageUrl },
+        )
+
+        const followedListIds = new Set(
+            followedListEntries.map((entry) => entry.followedList),
+        )
+        const followedLists = await this.storage.findFollowedListsByIds([
+            ...followedListIds,
+        ])
+        return fromPairs(
+            [...followedLists.values()].map((list) => [
+                list.sharedList,
+                {
+                    sharedList: list.sharedList,
+                    creator: list.creator,
+                    name: list.name,
+                    hasAnnotations: false, // TODO: set this correctly
+                },
+            ]),
+        )
     }
 
     private getPageActivityStatus: RemotePageActivityIndicatorInterface['getPageActivityStatus'] = async (

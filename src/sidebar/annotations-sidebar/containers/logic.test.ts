@@ -75,6 +75,8 @@ const setupLogicHelper = async ({
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
         customLists: backgroundModules.customLists.remoteFunctions,
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
+        pageActivityIndicatorBG:
+            backgroundModules.pageActivityIndicator.remoteFunctions,
         contentScriptBackground: (backgroundModules.contentScripts
             .remoteFunctions as unknown) as ContentScriptsInterface<'caller'>,
         contentConversationsBG:
@@ -144,6 +146,14 @@ async function setupTestData({ storageManager }: UILogicTestDevice) {
     for (const entry of DATA.ANNOT_LIST_ENTRIES) {
         await storageManager.collection('annotListEntries').createObject(entry)
     }
+
+    for (const list of DATA.FOLLOWED_LISTS) {
+        await storageManager.collection('followedList').createObject(list)
+    }
+
+    for (const entry of DATA.FOLLOWED_LIST_ENTRIES) {
+        await storageManager.collection('followedListEntry').createObject(entry)
+    }
 }
 
 describe('SidebarContainerLogic', () => {
@@ -167,13 +177,51 @@ describe('SidebarContainerLogic', () => {
 
             await sidebar.init()
 
-            expect(Object.values(annotationsCache.lists.byId)).toEqual(
-                DATA.LOCAL_LISTS.map((list) =>
-                    cacheUtils.reshapeListForCache(list, {
-                        extraData: { unifiedId: expect.any(String) },
-                    }),
-                ),
-            )
+            expect(Object.values(annotationsCache.lists.byId)).toEqual([
+                cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[0], {
+                    extraData: {
+                        creator: DATA.CREATOR_1,
+                        remoteId: DATA.SHARED_LIST_IDS[0],
+                        unifiedId: expect.any(String),
+                    },
+                }),
+                cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[1], {
+                    extraData: {
+                        creator: DATA.CREATOR_1,
+                        remoteId: DATA.SHARED_LIST_IDS[1],
+                        unifiedId: expect.any(String),
+                    },
+                }),
+                cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[2], {
+                    extraData: {
+                        // Creator data actually doesn't load here as no entries on TAB_URL_1 to prompt loading of followedList data
+                        // creator: DATA.CREATOR_2,
+                        remoteId: DATA.SHARED_LIST_IDS[2],
+                        unifiedId: expect.any(String),
+                    },
+                }),
+                cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[3], {
+                    extraData: {
+                        unifiedId: expect.any(String),
+                    },
+                }),
+                cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[4], {
+                    extraData: {
+                        unifiedId: expect.any(String),
+                    },
+                }),
+                cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[5], {
+                    extraData: {
+                        unifiedId: expect.any(String),
+                    },
+                }),
+                cacheUtils.reshapeFollowedListForCache(DATA.FOLLOWED_LISTS[3], {
+                    extraData: {
+                        unifiedId: expect.any(String),
+                    },
+                }),
+            ])
+
             const cachedAnnotations = Object.values(
                 annotationsCache.annotations.byId,
             )
@@ -2382,10 +2430,10 @@ describe('SidebarContainerLogic', () => {
     describe.skip('followed lists + annotations', () => {
         async function setupFollowedListsTestData(device: UILogicTestDevice) {
             device.backgroundModules.customLists.remoteFunctions.fetchFollowedListsWithAnnotations = async () => [
-                DATA.FOLLOWED_LISTS[0],
-                DATA.FOLLOWED_LISTS[1],
-                DATA.FOLLOWED_LISTS[2],
-                DATA.FOLLOWED_LISTS[4],
+                DATA.__FOLLOWED_LISTS[0],
+                DATA.__FOLLOWED_LISTS[1],
+                DATA.__FOLLOWED_LISTS[2],
+                DATA.__FOLLOWED_LISTS[4],
             ]
             device.backgroundModules.contentSharing.canWriteToSharedListRemoteId = async () =>
                 false
@@ -2402,54 +2450,54 @@ describe('SidebarContainerLogic', () => {
 
             await device.storageManager.collection('customLists').createObject({
                 id: 0,
-                name: DATA.FOLLOWED_LISTS[0].name,
-                searchableName: DATA.FOLLOWED_LISTS[0].name,
+                name: DATA.__FOLLOWED_LISTS[0].name,
+                searchableName: DATA.__FOLLOWED_LISTS[0].name,
                 createdAt: new Date(),
             })
             await device.storageManager
                 .collection('sharedListMetadata')
                 .createObject({
                     localId: 0,
-                    remoteId: DATA.FOLLOWED_LISTS[0].id,
+                    remoteId: DATA.__FOLLOWED_LISTS[0].id,
                 })
 
             await device.storageManager.collection('customLists').createObject({
                 id: 1,
-                name: DATA.FOLLOWED_LISTS[1].name,
-                searchableName: DATA.FOLLOWED_LISTS[1].name,
+                name: DATA.__FOLLOWED_LISTS[1].name,
+                searchableName: DATA.__FOLLOWED_LISTS[1].name,
                 createdAt: new Date(),
             })
             await device.storageManager
                 .collection('sharedListMetadata')
                 .createObject({
                     localId: 1,
-                    remoteId: DATA.FOLLOWED_LISTS[1].id,
+                    remoteId: DATA.__FOLLOWED_LISTS[1].id,
                 })
 
             await device.storageManager.collection('customLists').createObject({
                 id: 2,
-                name: DATA.FOLLOWED_LISTS[2].name,
-                searchableName: DATA.FOLLOWED_LISTS[2].name,
+                name: DATA.__FOLLOWED_LISTS[2].name,
+                searchableName: DATA.__FOLLOWED_LISTS[2].name,
                 createdAt: new Date(),
             })
             await device.storageManager
                 .collection('sharedListMetadata')
                 .createObject({
                     localId: 2,
-                    remoteId: DATA.FOLLOWED_LISTS[2].id,
+                    remoteId: DATA.__FOLLOWED_LISTS[2].id,
                 })
 
             await device.storageManager.collection('customLists').createObject({
                 id: 3,
-                name: DATA.FOLLOWED_LISTS[3].name,
-                searchableName: DATA.FOLLOWED_LISTS[3].name,
+                name: DATA.__FOLLOWED_LISTS[3].name,
+                searchableName: DATA.__FOLLOWED_LISTS[3].name,
                 createdAt: new Date(),
             })
             await device.storageManager
                 .collection('sharedListMetadata')
                 .createObject({
                     localId: 3,
-                    remoteId: DATA.FOLLOWED_LISTS[3].id,
+                    remoteId: DATA.__FOLLOWED_LISTS[3].id,
                 })
 
             await device.storageManager
@@ -2520,7 +2568,7 @@ describe('SidebarContainerLogic', () => {
                 device,
                 withAuth: true,
             })
-            const remoteListId = DATA.FOLLOWED_LISTS[0].id
+            const remoteListId = DATA.__FOLLOWED_LISTS[0].id
             const expectedEvents = []
 
             expect(sidebar.state.activeTab).toEqual('annotations')
@@ -2599,7 +2647,7 @@ describe('SidebarContainerLogic', () => {
                 device,
                 withAuth: true,
             })
-            const remoteListId = DATA.FOLLOWED_LISTS[4].id
+            const remoteListId = DATA.__FOLLOWED_LISTS[4].id
             const expectedEvents = []
 
             expect(sidebar.state.activeTab).toEqual('annotations')
@@ -2795,7 +2843,7 @@ describe('SidebarContainerLogic', () => {
             })
 
             // This awkwardness is due to the sloppy test data setup
-            const loadedFollowedLists = DATA.FOLLOWED_LISTS.filter(
+            const loadedFollowedLists = DATA.__FOLLOWED_LISTS.filter(
                 (list) => list.sharedAnnotationReferences.length > 0,
             )
 
@@ -2831,7 +2879,7 @@ describe('SidebarContainerLogic', () => {
                 withAuth: true,
             })
 
-            const { id: listId } = DATA.FOLLOWED_LISTS[0]
+            const { id: listId } = DATA.__FOLLOWED_LISTS[0]
             const expectedEvents = []
 
             expect(emittedEvents).toEqual(expectedEvents)
@@ -2938,21 +2986,21 @@ describe('SidebarContainerLogic', () => {
                 },
             })
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[0].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
                 DATA.SHARED_ANNOTATIONS[3].reference,
             ])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[1].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[1].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
                 DATA.SHARED_ANNOTATIONS[1].reference,
             ])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -2961,12 +3009,12 @@ describe('SidebarContainerLogic', () => {
             ])
             expect(sidebar.state.users).toEqual({
                 [DATA.SHARED_ANNOTATIONS[0].creatorReference.id]: {
-                    name: DATA.CREATOR_1.user.displayName,
-                    profileImgSrc: DATA.CREATOR_1.profile.avatarURL,
+                    name: DATA.__CREATOR_1.user.displayName,
+                    profileImgSrc: DATA.__CREATOR_1.profile.avatarURL,
                 },
                 [DATA.SHARED_ANNOTATIONS[3].creatorReference.id]: {
-                    name: DATA.CREATOR_2.user.displayName,
-                    profileImgSrc: DATA.CREATOR_2.profile.avatarURL,
+                    name: DATA.__CREATOR_2.user.displayName,
+                    profileImgSrc: DATA.__CREATOR_2.profile.avatarURL,
                 },
             })
             expect(sidebar.state.conversations).toEqual(
@@ -3009,10 +3057,10 @@ describe('SidebarContainerLogic', () => {
             })
 
             await sidebar.processEvent('expandFollowedListNotes', {
-                listId: DATA.FOLLOWED_LISTS[0].id,
+                listId: DATA.__FOLLOWED_LISTS[0].id,
             })
             await sidebar.processEvent('expandFollowedListNotes', {
-                listId: DATA.FOLLOWED_LISTS[2].id,
+                listId: DATA.__FOLLOWED_LISTS[2].id,
             })
 
             expect(sidebar.state.followedAnnotations).toEqual({
@@ -3068,14 +3116,14 @@ describe('SidebarContainerLogic', () => {
                 },
             })
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[0].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
                 DATA.SHARED_ANNOTATIONS[3].reference,
             ])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -3140,11 +3188,11 @@ describe('SidebarContainerLogic', () => {
                 },
             })
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[0].id]
                     .sharedAnnotationReferences,
             ).toEqual([DATA.SHARED_ANNOTATIONS[0].reference])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -3168,10 +3216,10 @@ describe('SidebarContainerLogic', () => {
             await sidebar.init()
 
             await sidebar.processEvent('expandFollowedListNotes', {
-                listId: DATA.FOLLOWED_LISTS[0].id,
+                listId: DATA.__FOLLOWED_LISTS[0].id,
             })
             await sidebar.processEvent('expandFollowedListNotes', {
-                listId: DATA.FOLLOWED_LISTS[2].id,
+                listId: DATA.__FOLLOWED_LISTS[2].id,
             })
 
             expect(sidebar.state.followedAnnotations).toEqual({
@@ -3197,14 +3245,14 @@ describe('SidebarContainerLogic', () => {
                 }),
             })
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[0].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
                 DATA.SHARED_ANNOTATIONS[3].reference,
             ])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -3251,14 +3299,14 @@ describe('SidebarContainerLogic', () => {
                 }),
             })
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[0].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
                 DATA.SHARED_ANNOTATIONS[3].reference,
             ])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -3303,11 +3351,11 @@ describe('SidebarContainerLogic', () => {
                 }),
             })
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[0].id]
                     .sharedAnnotationReferences,
             ).toEqual([DATA.SHARED_ANNOTATIONS[0].reference])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -3338,10 +3386,10 @@ describe('SidebarContainerLogic', () => {
             await sidebar.init()
 
             await sidebar.processEvent('expandFollowedListNotes', {
-                listId: DATA.FOLLOWED_LISTS[0].id,
+                listId: DATA.__FOLLOWED_LISTS[0].id,
             })
             await sidebar.processEvent('expandFollowedListNotes', {
-                listId: DATA.FOLLOWED_LISTS[2].id,
+                listId: DATA.__FOLLOWED_LISTS[2].id,
             })
 
             expect(sidebar.state.followedAnnotations).toEqual({
@@ -3367,21 +3415,21 @@ describe('SidebarContainerLogic', () => {
                 }),
             })
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[0].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
                 DATA.SHARED_ANNOTATIONS[3].reference,
             ])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[1].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[1].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
                 DATA.SHARED_ANNOTATIONS[1].reference,
             ])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -3426,11 +3474,11 @@ describe('SidebarContainerLogic', () => {
                 }),
             })
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[0].id]
                     .sharedAnnotationReferences,
             ).toEqual([DATA.SHARED_ANNOTATIONS[0].reference]) // No longer in here, as parent page is not
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[1].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[1].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -3438,7 +3486,7 @@ describe('SidebarContainerLogic', () => {
                 DATA.SHARED_ANNOTATIONS[3].reference, // Now in here, as parent page is
             ])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -3470,10 +3518,10 @@ describe('SidebarContainerLogic', () => {
             await sidebar.init()
 
             await sidebar.processEvent('expandFollowedListNotes', {
-                listId: DATA.FOLLOWED_LISTS[0].id,
+                listId: DATA.__FOLLOWED_LISTS[0].id,
             })
             await sidebar.processEvent('expandFollowedListNotes', {
-                listId: DATA.FOLLOWED_LISTS[2].id,
+                listId: DATA.__FOLLOWED_LISTS[2].id,
             })
 
             expect(sidebar.state.followedAnnotations).toEqual({
@@ -3499,21 +3547,21 @@ describe('SidebarContainerLogic', () => {
                 }),
             })
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[0].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
                 DATA.SHARED_ANNOTATIONS[3].reference,
             ])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[1].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[1].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
                 DATA.SHARED_ANNOTATIONS[1].reference,
             ])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -3562,18 +3610,18 @@ describe('SidebarContainerLogic', () => {
                 }),
             })
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[0].id]
                     .sharedAnnotationReferences,
             ).toEqual([DATA.SHARED_ANNOTATIONS[0].reference]) // No longer in here
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[1].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[1].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
                 DATA.SHARED_ANNOTATIONS[1].reference,
             ])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -3622,18 +3670,18 @@ describe('SidebarContainerLogic', () => {
                 }),
             })
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[0].id]
                     .sharedAnnotationReferences,
             ).toEqual([DATA.SHARED_ANNOTATIONS[0].reference])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[1].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[1].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
                 DATA.SHARED_ANNOTATIONS[1].reference,
             ])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -3682,11 +3730,11 @@ describe('SidebarContainerLogic', () => {
                 }),
             })
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[0].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[0].id]
                     .sharedAnnotationReferences,
             ).toEqual([DATA.SHARED_ANNOTATIONS[0].reference])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[1].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[1].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -3694,7 +3742,7 @@ describe('SidebarContainerLogic', () => {
                 DATA.SHARED_ANNOTATIONS[3].reference, // Now here!
             ])
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[2].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[2].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[0].reference,
@@ -3715,10 +3763,10 @@ describe('SidebarContainerLogic', () => {
 
             // Followed list states should be created and removed on final annotation add/removal
             expect(sidebar.state.followedLists.allIds).toEqual(
-                expect.not.arrayContaining([DATA.FOLLOWED_LISTS[3].id]),
+                expect.not.arrayContaining([DATA.__FOLLOWED_LISTS[3].id]),
             )
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[3].id],
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[3].id],
             ).toEqual(undefined)
 
             await sidebar.processEvent('updateListsForAnnotation', {
@@ -3728,10 +3776,10 @@ describe('SidebarContainerLogic', () => {
             })
 
             expect(sidebar.state.followedLists.allIds).toEqual(
-                expect.arrayContaining([DATA.FOLLOWED_LISTS[3].id]),
+                expect.arrayContaining([DATA.__FOLLOWED_LISTS[3].id]),
             )
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[3].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[3].id]
                     .sharedAnnotationReferences,
             ).toEqual([DATA.SHARED_ANNOTATIONS[3].reference])
 
@@ -3742,10 +3790,10 @@ describe('SidebarContainerLogic', () => {
             })
 
             expect(sidebar.state.followedLists.allIds).toEqual(
-                expect.arrayContaining([DATA.FOLLOWED_LISTS[3].id]),
+                expect.arrayContaining([DATA.__FOLLOWED_LISTS[3].id]),
             )
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[3].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[3].id]
                     .sharedAnnotationReferences,
             ).toEqual([
                 DATA.SHARED_ANNOTATIONS[3].reference,
@@ -3759,10 +3807,10 @@ describe('SidebarContainerLogic', () => {
             })
 
             expect(sidebar.state.followedLists.allIds).toEqual(
-                expect.arrayContaining([DATA.FOLLOWED_LISTS[3].id]),
+                expect.arrayContaining([DATA.__FOLLOWED_LISTS[3].id]),
             )
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[3].id]
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[3].id]
                     .sharedAnnotationReferences,
             ).toEqual([DATA.SHARED_ANNOTATIONS[3].reference])
 
@@ -3773,10 +3821,10 @@ describe('SidebarContainerLogic', () => {
             })
 
             expect(sidebar.state.followedLists.allIds).toEqual(
-                expect.not.arrayContaining([DATA.FOLLOWED_LISTS[3].id]),
+                expect.not.arrayContaining([DATA.__FOLLOWED_LISTS[3].id]),
             )
             expect(
-                sidebar.state.followedLists.byId[DATA.FOLLOWED_LISTS[3].id],
+                sidebar.state.followedLists.byId[DATA.__FOLLOWED_LISTS[3].id],
             ).toEqual(undefined)
         })
 
@@ -3790,7 +3838,7 @@ describe('SidebarContainerLogic', () => {
             })
             await sidebar.init()
             const annotationId = DATA.ANNOT_3.url
-            const followedListId = DATA.FOLLOWED_LISTS[2].id
+            const followedListId = DATA.__FOLLOWED_LISTS[2].id
 
             await sidebar.processEvent('expandFollowedListNotes', {
                 listId: followedListId,
@@ -3921,7 +3969,7 @@ describe('SidebarContainerLogic', () => {
             })
             await sidebar.init()
             const annotationId = DATA.ANNOT_3.url
-            const followedListId = DATA.FOLLOWED_LISTS[2].id
+            const followedListId = DATA.__FOLLOWED_LISTS[2].id
 
             await sidebar.processEvent('expandFollowedListNotes', {
                 listId: followedListId,

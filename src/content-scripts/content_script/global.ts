@@ -234,6 +234,7 @@ export async function main(
                 customLists: collectionsBG,
                 contentSharing: runInBackground(),
                 syncSettingsBG: runInBackground(),
+                pageActivityIndicatorBG: runInBackground(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
                 analytics,
                 copyToClipboard,

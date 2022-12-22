@@ -28,14 +28,14 @@ export interface PageAnnotationsCacheInterface {
         opts?: { now?: number },
     ) => { unifiedIds: UnifiedAnnotation['unifiedId'][] }
     setLists: (
-        lists: Omit<UnifiedList, 'unifiedId'>[],
+        lists: UnifiedListForCache[],
     ) => { unifiedIds: UnifiedList['unifiedId'][] }
     addAnnotation: (
         annotation: UnifiedAnnotationForCache,
         opts?: { now?: number },
     ) => { unifiedId: UnifiedAnnotation['unifiedId'] }
     addList: (
-        list: Omit<UnifiedList, 'unifiedId'>,
+        list: UnifiedListForCache,
     ) => { unifiedId: UnifiedList['unifiedId'] }
     updateAnnotation: (
         updates: Pick<
@@ -110,6 +110,8 @@ export interface UnifiedList {
     // Misc list feature state
     unifiedAnnotationIds: UnifiedAnnotation['unifiedId'][]
 }
+
+export type UnifiedListForCache = Omit<UnifiedList, 'unifiedId'>
 
 export interface AnnotationCardInstance {
     instanceId: string

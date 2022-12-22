@@ -1,10 +1,11 @@
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { FollowedList } from 'src/page-activity-indicator/background/types'
 import type { PageList } from 'src/custom-lists/background/types'
 import type { Annotation } from '../types'
 import type {
     UnifiedAnnotation,
     UnifiedAnnotationForCache,
     UnifiedList,
+    UnifiedListForCache,
 } from './types'
 import { shareOptsToPrivacyLvl } from '../utils'
 
@@ -57,18 +58,32 @@ export const reshapeAnnotationForCache = (
 //     tags: [],
 // })
 
-export const reshapeListForCache = (
+export const reshapeLocalListForCache = (
     list: PageList,
-    suppData: {
-        creator?: UserReference
-        extraData?: any
+    opts: {
+        extraData?: Partial<UnifiedList>
     },
-): Omit<UnifiedList, 'unifiedId'> => ({
+): UnifiedListForCache => ({
     name: list.name,
     localId: list.id,
     remoteId: list.remoteId,
-    creator: suppData.creator,
+    creator: opts.extraData?.creator,
     description: list.description,
     unifiedAnnotationIds: [],
-    ...(suppData.extraData ?? {}),
+    ...(opts.extraData ?? {}),
+})
+
+export const reshapeFollowedListForCache = (
+    list: FollowedList,
+    opts: {
+        extraData?: Partial<UnifiedList>
+    },
+): UnifiedListForCache => ({
+    name: list.name,
+    localId: undefined,
+    remoteId: list.sharedList.toString(),
+    creator: { type: 'user-reference', id: list.creator },
+    description: undefined,
+    unifiedAnnotationIds: [],
+    ...(opts.extraData ?? {}),
 })

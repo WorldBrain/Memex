@@ -6,6 +6,7 @@ import type {
 } from 'src/custom-lists/background/types'
 import type {
     SharedAnnotation,
+    SharedAnnotationListEntry,
     SharedAnnotationReference,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
@@ -20,6 +21,11 @@ import type {
     AnnotationPrivacyLevel,
 } from 'src/content-sharing/background/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type {
+    FollowedList,
+    FollowedListEntry,
+} from 'src/page-activity-indicator/background/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export const COMMENT_1 = 'This is a test comment'
 export const TAB_URL_1 = 'https://test.com'
@@ -142,12 +148,22 @@ export const ANNOT_PRIVACY_LVLS: AnnotationPrivacyLevel[] = [
     },
 ]
 
-export const CREATOR_1: UserPublicDetails = {
+export const CREATOR_1: UserReference = {
+    type: 'user-reference',
+    id: TEST_USER.id,
+}
+
+export const CREATOR_2: UserReference = {
+    type: 'user-reference',
+    id: 'test-user-2@test.com',
+}
+
+export const __CREATOR_1: UserPublicDetails = {
     user: { displayName: 'Tester A' },
     profile: { avatarURL: 'https://worldbrain.io/test.jpg' },
 }
 
-export const CREATOR_2: UserPublicDetails = {
+export const __CREATOR_2: UserPublicDetails = {
     user: { displayName: TEST_USER.displayName },
     profile: { avatarURL: 'https://worldbrain.io/test2.jpg' },
 }
@@ -161,21 +177,21 @@ export const __LISTS_1 = [
 export const LOCAL_LISTS: PageList[] = [
     {
         id: 1,
-        name: 'List 1 test',
+        name: 'List 1 - remote shared list',
         isNestable: true,
         isDeletable: true,
         createdAt: new Date('2021-01-19'),
     },
     {
         id: 2,
-        name: 'List 2',
+        name: 'List 2 - remote shared list',
         isNestable: true,
         isDeletable: true,
         createdAt: new Date('2021-01-18'),
     },
     {
         id: 3,
-        name: 'List 3',
+        name: 'List 3 - remote joined list',
         isNestable: true,
         isDeletable: true,
         createdAt: new Date('2021-01-17'),
@@ -274,33 +290,35 @@ export const ANNOT_LIST_ENTRIES: AnnotListEntry[] = [
     },
 ]
 
+export const SHARED_LIST_IDS = [
+    'remote-list-id-1',
+    'remote-list-id-2',
+    'remote-list-id-3',
+    'remote-list-id-4',
+]
+
 export const TEST_LIST_METADATA: SharedListMetadata[] = [
     {
         localId: LOCAL_LISTS[0].id,
-        remoteId: 'remote-id-1',
+        remoteId: SHARED_LIST_IDS[0],
     },
     {
         localId: LOCAL_LISTS[1].id,
-        remoteId: 'remote-id-2',
+        remoteId: SHARED_LIST_IDS[1],
     },
     {
         localId: LOCAL_LISTS[2].id,
-        remoteId: 'remote-id-3',
+        remoteId: SHARED_LIST_IDS[2],
     },
 ]
 
 export const SHARED_ANNOTATIONS: Array<
-    SharedAnnotation & {
-        reference: SharedAnnotationReference
-        creatorReference: UserReference
-        creator: UserPublicDetails
-    }
+    SharedAnnotation & { id: AutoPk; creator: AutoPk }
 > = [
     {
-        reference: { type: 'shared-annotation-reference', id: '1' },
-        creatorReference: { type: 'user-reference', id: '123' },
-        creator: CREATOR_1,
-        normalizedPageUrl: 'test.com',
+        id: '1',
+        normalizedPageUrl: normalizeUrl(TAB_URL_2),
+        creator: CREATOR_2.id,
         body: 'test highlight 1',
         createdWhen: 11111,
         updatedWhen: 11111,
@@ -308,10 +326,9 @@ export const SHARED_ANNOTATIONS: Array<
         selector: '',
     },
     {
-        reference: { type: 'shared-annotation-reference', id: '2' },
-        creatorReference: { type: 'user-reference', id: '123' },
-        creator: CREATOR_1,
-        normalizedPageUrl: 'test.com',
+        id: '2',
+        normalizedPageUrl: normalizeUrl(TAB_URL_2),
+        creator: CREATOR_2.id,
         body: 'test highlight 2',
         comment: 'test comment 1',
         createdWhen: 11111,
@@ -319,30 +336,27 @@ export const SHARED_ANNOTATIONS: Array<
         uploadedWhen: 11111,
     },
     {
-        reference: { type: 'shared-annotation-reference', id: '3' },
-        creatorReference: { type: 'user-reference', id: '123' },
-        creator: CREATOR_1,
-        normalizedPageUrl: 'test.com',
+        id: '3',
+        creator: CREATOR_2.id,
+        normalizedPageUrl: normalizeUrl(TAB_URL_1),
         comment: 'test comment 3',
         createdWhen: 11111,
         updatedWhen: 11111,
         uploadedWhen: 11111,
     },
     {
-        reference: { type: 'shared-annotation-reference', id: '4' },
-        creatorReference: { type: 'user-reference', id: TEST_USER.id },
-        creator: CREATOR_2,
-        normalizedPageUrl: ANNOT_3.pageUrl,
+        id: '4',
+        creator: CREATOR_2.id,
+        normalizedPageUrl: normalizeUrl(TAB_URL_1),
         comment: ANNOT_3.comment,
         createdWhen: ANNOT_3.createdWhen.getTime(),
         updatedWhen: ANNOT_3.lastEdited.getTime(),
         uploadedWhen: 11111,
     },
     {
-        reference: { type: 'shared-annotation-reference', id: '5' },
-        creatorReference: { type: 'user-reference', id: TEST_USER.id },
-        creator: CREATOR_2,
-        normalizedPageUrl: ANNOT_4.pageUrl,
+        id: '5',
+        creator: CREATOR_1.id,
+        normalizedPageUrl: normalizeUrl(TAB_URL_1),
         comment: ANNOT_4.comment,
         createdWhen: ANNOT_4.createdWhen.getTime(),
         updatedWhen: ANNOT_4.lastEdited.getTime(),
@@ -350,7 +364,142 @@ export const SHARED_ANNOTATIONS: Array<
     },
 ]
 
-export const FOLLOWED_LISTS: SharedAnnotationList[] = [
+export const FOLLOWED_LISTS: FollowedList[] = [
+    {
+        sharedList: SHARED_LIST_IDS[0],
+        creator: CREATOR_1.id,
+        name: LOCAL_LISTS[0].name,
+        lastSync: null,
+    },
+    {
+        sharedList: SHARED_LIST_IDS[1],
+        creator: CREATOR_1.id,
+        name: LOCAL_LISTS[1].name,
+        lastSync: new Date('2022-12-22').getTime(),
+    },
+    {
+        sharedList: SHARED_LIST_IDS[2],
+        creator: CREATOR_2.id,
+        name: LOCAL_LISTS[2].name,
+        lastSync: null,
+    },
+    {
+        sharedList: SHARED_LIST_IDS[3],
+        creator: CREATOR_2.id,
+        name: 'test followed-only list',
+        lastSync: new Date('2022-12-22').getTime(),
+    },
+]
+
+export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
+    {
+        hasAnnotations: false,
+        creator: CREATOR_1.id,
+        entryTitle: TAB_TITLE_1,
+        followedList: SHARED_LIST_IDS[0],
+        normalizedPageUrl: normalizeUrl(TAB_URL_1),
+        createdWhen: new Date('2022-12-22').getTime(),
+        updatedWhen: new Date('2022-12-22').getTime(),
+    },
+    {
+        hasAnnotations: true,
+        creator: CREATOR_2.id,
+        entryTitle: TAB_TITLE_2,
+        followedList: SHARED_LIST_IDS[0],
+        normalizedPageUrl: normalizeUrl(TAB_URL_2),
+        createdWhen: new Date('2022-12-22').getTime(),
+        updatedWhen: new Date('2022-12-22').getTime(),
+    },
+    {
+        hasAnnotations: true,
+        creator: CREATOR_2.id,
+        entryTitle: TAB_TITLE_1,
+        followedList: SHARED_LIST_IDS[1],
+        normalizedPageUrl: normalizeUrl(TAB_URL_1),
+        createdWhen: new Date('2022-12-22').getTime(),
+        updatedWhen: new Date('2022-12-22').getTime(),
+    },
+    {
+        hasAnnotations: false,
+        creator: CREATOR_1.id,
+        entryTitle: TAB_TITLE_2,
+        followedList: SHARED_LIST_IDS[2],
+        normalizedPageUrl: normalizeUrl(TAB_URL_2),
+        createdWhen: new Date('2022-12-22').getTime(),
+        updatedWhen: new Date('2022-12-22').getTime(),
+    },
+    {
+        hasAnnotations: true,
+        creator: CREATOR_1.id,
+        entryTitle: TAB_TITLE_1,
+        followedList: SHARED_LIST_IDS[3],
+        normalizedPageUrl: normalizeUrl(TAB_URL_1),
+        createdWhen: new Date('2022-12-22').getTime(),
+        updatedWhen: new Date('2022-12-22').getTime(),
+    },
+]
+
+export const SHARED_ANNOTATION_LIST_ENTRIES: Array<
+    SharedAnnotationListEntry & {
+        id: AutoPk
+        creator: AutoPk
+        sharedList: AutoPk
+        sharedAnnotation: AutoPk
+    }
+> = [
+    {
+        id: '1',
+        creator: CREATOR_2.id,
+        sharedList: SHARED_LIST_IDS[0],
+        normalizedPageUrl: normalizeUrl(TAB_URL_2),
+        sharedAnnotation: SHARED_ANNOTATIONS[0].id,
+        createdWhen: new Date('2022-12-22').getTime(),
+        updatedWhen: new Date('2022-12-22').getTime(),
+        uploadedWhen: new Date('2022-12-22').getTime(),
+    },
+    {
+        id: '2',
+        creator: CREATOR_2.id,
+        sharedList: SHARED_LIST_IDS[0],
+        normalizedPageUrl: normalizeUrl(TAB_URL_2),
+        sharedAnnotation: SHARED_ANNOTATIONS[1].id,
+        createdWhen: new Date('2022-12-22').getTime(),
+        updatedWhen: new Date('2022-12-22').getTime(),
+        uploadedWhen: new Date('2022-12-22').getTime(),
+    },
+    {
+        id: '3',
+        creator: CREATOR_2.id,
+        sharedList: SHARED_LIST_IDS[1],
+        normalizedPageUrl: normalizeUrl(TAB_URL_1),
+        sharedAnnotation: SHARED_ANNOTATIONS[2].id,
+        createdWhen: new Date('2022-12-22').getTime(),
+        updatedWhen: new Date('2022-12-22').getTime(),
+        uploadedWhen: new Date('2022-12-22').getTime(),
+    },
+    {
+        id: '4',
+        creator: CREATOR_1.id,
+        sharedList: SHARED_LIST_IDS[3],
+        normalizedPageUrl: normalizeUrl(TAB_URL_1),
+        sharedAnnotation: SHARED_ANNOTATIONS[3].id,
+        createdWhen: new Date('2022-12-22').getTime(),
+        updatedWhen: new Date('2022-12-22').getTime(),
+        uploadedWhen: new Date('2022-12-22').getTime(),
+    },
+    {
+        id: '5',
+        creator: CREATOR_1.id,
+        sharedList: SHARED_LIST_IDS[3],
+        normalizedPageUrl: normalizeUrl(TAB_URL_1),
+        sharedAnnotation: SHARED_ANNOTATIONS[3].id,
+        createdWhen: new Date('2022-12-22').getTime(),
+        updatedWhen: new Date('2022-12-22').getTime(),
+        uploadedWhen: new Date('2022-12-22').getTime(),
+    },
+]
+
+export const __FOLLOWED_LISTS: SharedAnnotationList[] = [
     {
         id: 'test a',
         name: 'test a',
@@ -412,7 +561,7 @@ export const ANNOTATION_THREADS: PreparedThread[] = [
     {
         sharedAnnotation: SHARED_ANNOTATIONS[0].reference,
         sharedList: {
-            id: FOLLOWED_LISTS[0].id,
+            id: __FOLLOWED_LISTS[0].id,
             type: 'shared-list-reference',
         },
         thread: {
@@ -423,7 +572,7 @@ export const ANNOTATION_THREADS: PreparedThread[] = [
     {
         sharedAnnotation: SHARED_ANNOTATIONS[3].reference,
         sharedList: {
-            id: FOLLOWED_LISTS[0].id,
+            id: __FOLLOWED_LISTS[0].id,
             type: 'shared-list-reference',
         },
         thread: {

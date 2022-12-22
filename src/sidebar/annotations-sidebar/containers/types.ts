@@ -36,6 +36,7 @@ import type {
     UnifiedAnnotation,
 } from 'src/annotations/cache/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -53,6 +54,7 @@ export interface SidebarContainerDependencies {
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
 
     tags: RemoteTagsInterface
+    pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     annotations: AnnotationInterface<'caller'>
     customLists: RemoteCollectionsInterface
     contentSharing: ContentSharingInterface
