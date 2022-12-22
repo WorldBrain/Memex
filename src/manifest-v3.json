@@ -10,7 +10,11 @@
         "128": "./img/worldbrain-logo-narrow-bw.png"
     },
     "externally_connectable": {
-        "matches": ["http://localhost:3000/feed"]
+        "matches": [
+            "http://localhost:3000/*",
+            "https://staging.memex.social/*",
+            "https://memex.social/*"
+        ]
     },
     "background": {
         "service_worker": "background.js"
