@@ -392,7 +392,7 @@ const SidebarItem = styled.div<Props>`
         selectedState?.isSelected &&
         css`
             color: ${(props) => props.theme.colors.darkText};
-            background: ${(props) => props.theme.colors.activeBackground};
+            background: ${(props) => props.theme.colors.darkhover};
         `}
 
 
@@ -409,7 +409,7 @@ const SidebarItem = styled.div<Props>`
         ${({ selectedState }: Props) =>
             selectedState?.isSelected &&
             css`
-                background: ${(props) => props.theme.colors.activeBackground};
+                background: ${(props) => props.theme.colors.darkhover};
             `}
     }
 
