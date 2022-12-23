@@ -104,6 +104,7 @@ const setupLogicHelper = async ({
         contentConversationsBG:
             backgroundModules.contentConversations.remoteFunctions,
         syncSettingsBG: backgroundModules.syncSettings,
+        currentUser: withAuth ? DATA.CREATOR_1 : undefined,
         annotations: annotationsBG,
         events: fakeEmitter as any,
         annotationsCache,
@@ -190,8 +191,9 @@ describe('SidebarContainerLogic', () => {
         }) => {
             const { sidebar, annotationsCache } = await setupLogicHelper({
                 device,
-                fullPageUrl: DATA.TAB_URL_1,
+                withAuth: true,
                 skipInitEvent: true,
+                fullPageUrl: DATA.TAB_URL_1,
             })
 
             expect(annotationsCache.lists).toEqual(initNormalizedState())
@@ -268,6 +270,7 @@ describe('SidebarContainerLogic', () => {
                 cacheUtils.reshapeAnnotationForCache(DATA.ANNOT_1, {
                     excludeLocalLists: true,
                     extraData: {
+                        creator: DATA.CREATOR_1,
                         unifiedId: expect.any(String),
                         privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                         unifiedListIds: mapLocalListIdsToUnified(
@@ -279,6 +282,7 @@ describe('SidebarContainerLogic', () => {
                 cacheUtils.reshapeAnnotationForCache(DATA.ANNOT_2, {
                     excludeLocalLists: true,
                     extraData: {
+                        creator: DATA.CREATOR_1,
                         unifiedId: expect.any(String),
                         privacyLevel: AnnotationPrivacyLevels.SHARED,
                         unifiedListIds: mapLocalListIdsToUnified(
@@ -293,6 +297,7 @@ describe('SidebarContainerLogic', () => {
                 cacheUtils.reshapeAnnotationForCache(DATA.ANNOT_3, {
                     excludeLocalLists: true,
                     extraData: {
+                        creator: DATA.CREATOR_1,
                         unifiedId: expect.any(String),
                         privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
                         unifiedListIds: mapLocalListIdsToUnified(
@@ -307,6 +312,7 @@ describe('SidebarContainerLogic', () => {
                 cacheUtils.reshapeAnnotationForCache(DATA.ANNOT_4, {
                     excludeLocalLists: true,
                     extraData: {
+                        creator: DATA.CREATOR_1,
                         unifiedId: expect.any(String),
                         privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                         unifiedListIds: [],

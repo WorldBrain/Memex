@@ -27,7 +27,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
             withLists?: boolean
             withBookmarks?: boolean
         },
-        Annotation[]
+        Array<Annotation & { createdWhen?: number; lastEdited?: number }>
     >
     createAnnotation: RemotePositionalFunction<
         Role,

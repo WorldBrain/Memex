@@ -46,6 +46,7 @@ import type {
     PageAnnotationsCacheInterface,
     UnifiedAnnotation,
 } from 'src/annotations/cache/types'
+import * as cacheUtils from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
@@ -767,10 +768,15 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         return (
-            <React.Fragment>
+            <>
                 {this.props.activeTab === 'annotations' ? (
                     <AnnotationsSectionStyled>
-                        {/* {this.renderAnnotationsEditable(this.props.annotations)} */}
+                        {this.renderAnnotationsEditable(
+                            cacheUtils.getOwnAnnotationsArray(
+                                this.props.annotationsCache,
+                                this.props.currentUser?.id.toString(),
+                            ),
+                        )}
                     </AnnotationsSectionStyled>
                 ) : (
                     <AnnotationsSectionStyled>
@@ -781,7 +787,7 @@ export class AnnotationsSidebar extends React.Component<
                     location={'sidebar'}
                     theme={{ position: 'fixed' }}
                 /> */}
-            </React.Fragment>
+            </>
         )
     }
 
@@ -843,7 +849,8 @@ export class AnnotationsSidebar extends React.Component<
     //     )
     // }
 
-    private renderAnnotationsEditable(annotations: Annotation[]) {
+    private renderAnnotationsEditable(annotations: UnifiedAnnotation[]) {
+        console.log('got cache annots:', annotations)
         const annots: JSX.Element[] = []
 
         if (this.props.noteCreateState === 'running') {
@@ -858,13 +865,17 @@ export class AnnotationsSidebar extends React.Component<
                     annot,
                 )
                 const ref = React.createRef<_AnnotationEditable>()
-                this.annotationEditRefs[annot.url] = ref
+                this.annotationEditRefs[annot.unifiedId] = ref
+                const isShared =
+                    annot.privacyLevel >= AnnotationPrivacyLevels.SHARED
                 return (
                     <AnnotationBox
-                        key={annot.url}
-                        isActive={this.props.activeAnnotationUrl === annot.url}
+                        key={annot.unifiedId}
+                        isActive={
+                            this.props.activeAnnotationUrl === annot.unifiedId
+                        }
                         zIndex={
-                            this.props.activeShareMenuNoteId === annot.url
+                            this.props.activeShareMenuNoteId === annot.unifiedId
                                 ? 10000
                                 : this.props.annotations.allIds.length - i
                         }
@@ -872,23 +883,28 @@ export class AnnotationsSidebar extends React.Component<
                         <AnnotationEditable
                             {...annot}
                             {...this.props}
-                            lists={annot.lists}
+                            lists={[]} // TODO: Actually pass in needed lists data here
+                            // lists={annot.unifiedListIds.map( )}
                             body={annot.body}
                             comment={annot.comment}
-                            isShared={annot.isShared}
+                            isShared={isShared}
                             createdWhen={annot.createdWhen!}
-                            isBulkShareProtected={annot.isBulkShareProtected}
-                            mode={this.props.annotationModes[annot.url]}
+                            isBulkShareProtected={[
+                                AnnotationPrivacyLevels.PROTECTED,
+                                AnnotationPrivacyLevels.SHARED_PROTECTED,
+                            ].includes(annot.privacyLevel)}
+                            mode={this.props.annotationModes[annot.unifiedId]}
                             isActive={
-                                this.props.activeAnnotationUrl === annot.url
+                                this.props.activeAnnotationUrl ===
+                                annot.unifiedId
                             }
                             onListClick={this.props.onLocalSpaceSelect}
                             onHighlightClick={this.props.setActiveAnnotationUrl(
-                                annot.url,
+                                annot.unifiedId,
                             )}
                             onGoToAnnotation={footerDeps.onGoToAnnotation}
                             annotationEditDependencies={this.props.bindAnnotationEditProps(
-                                annot,
+                                { url: annot.unifiedId, isShared },
                             )}
                             annotationFooterDependencies={footerDeps}
                             isClickable={

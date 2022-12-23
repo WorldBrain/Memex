@@ -21,21 +21,34 @@ import type { AnnotationInterface } from '../background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 
 export const reshapeAnnotationForCache = (
-    annot: Annotation,
+    annot: Annotation & {
+        createdWhen?: Date | number
+        lastEdited?: Date | number
+    },
     opts: {
         extraData?: Partial<UnifiedAnnotation>
         /** Generally only makes sense for test assertions - local list IDs will be mapped to cache IDs internally */
         excludeLocalLists?: boolean
     },
 ): UnifiedAnnotationForCache => {
-    const createdWhen = annot.createdWhen?.getTime()
-    if (createdWhen == null) {
+    if (annot.createdWhen == null) {
         throw new Error(
             'Cannot reshape annotation missing createdWhen timestamp',
         )
     }
+    const createdWhen =
+        typeof annot.createdWhen === 'number'
+            ? annot.createdWhen
+            : annot.createdWhen.getTime()
+    const lastEdited =
+        annot.lastEdited == null
+            ? createdWhen
+            : typeof annot.lastEdited === 'number'
+            ? annot.lastEdited
+            : annot.lastEdited.getTime()
     return {
         localId: annot.url,
         unifiedListIds: opts.extraData?.unifiedListIds ?? [],
@@ -45,7 +58,7 @@ export const reshapeAnnotationForCache = (
         creator: opts.extraData?.creator,
         localListIds: opts.excludeLocalLists ? undefined : annot.lists,
         normalizedPageUrl: annot.pageUrl,
-        lastEdited: annot.lastEdited?.getTime() ?? createdWhen,
+        lastEdited,
         createdWhen,
         privacyLevel: shareOptsToPrivacyLvl({
             shouldShare: annot.isShared,
@@ -101,6 +114,16 @@ export const reshapeFollowedListForCache = (
     ...(opts.extraData ?? {}),
 })
 
+export const getOwnAnnotationsArray = (
+    cache: PageAnnotationsCacheInterface,
+    userId?: string,
+): UnifiedAnnotation[] =>
+    normalizedStateToArray(cache.annotations).filter(
+        (annot) =>
+            annot.creator == null ||
+            (userId ? annot.creator.id === userId : false),
+    )
+
 // NOTE: this is tested as part of the sidebar logic tests
 export async function hydrateCache({
     bgModules,
@@ -148,7 +171,7 @@ export async function hydrateCache({
         })
     })
 
-    // Ensure we cover any followed-only lists (no local data)
+    // Ensure we cover any followed-only lists (lists with no local data)
     Object.values(followedListsData)
         .filter((list) => !seenFollowedLists.has(list.sharedList))
         .forEach((list) =>

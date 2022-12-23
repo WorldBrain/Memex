@@ -226,10 +226,18 @@ export default class DirectLinkingBackground {
             ...args
         }: { pageUrl: string; withTags?: boolean; withBookmarks?: boolean },
     ) => {
-        return this.annotationStorage.listAnnotationsByPageUrl({
-            pageUrl,
-            ...args,
-        })
+        const annotations = await this.annotationStorage.listAnnotationsByPageUrl(
+            {
+                pageUrl,
+                ...args,
+            },
+        )
+
+        return annotations.map((annot) => ({
+            ...annot,
+            createdWhen: annot.createdWhen?.getTime(),
+            lastEdited: (annot.lastEdited ?? annot.createdWhen)?.getTime(),
+        }))
     }
 
     getAllAnnotationsByUrl = async (
