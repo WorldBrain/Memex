@@ -87,6 +87,7 @@ export const reshapeAnnotationForCache = (
 export const reshapeLocalListForCache = (
     list: PageList,
     opts: {
+        hasRemoteAnnotations?: boolean
         extraData?: Partial<UnifiedList>
     },
 ): UnifiedListForCache => ({
@@ -96,12 +97,14 @@ export const reshapeLocalListForCache = (
     creator: opts.extraData?.creator,
     description: list.description,
     unifiedAnnotationIds: [],
+    hasRemoteAnnotations: !!opts.hasRemoteAnnotations,
     ...(opts.extraData ?? {}),
 })
 
 export const reshapeFollowedListForCache = (
     list: FollowedList,
     opts: {
+        hasRemoteAnnotations?: boolean
         extraData?: Partial<UnifiedList>
     },
 ): UnifiedListForCache => ({
@@ -111,6 +114,7 @@ export const reshapeFollowedListForCache = (
     creator: { type: 'user-reference', id: list.creator },
     description: undefined,
     unifiedAnnotationIds: [],
+    hasRemoteAnnotations: !!opts.hasRemoteAnnotations,
     ...(opts.extraData ?? {}),
 })
 
@@ -155,15 +159,18 @@ export async function hydrateCache({
 
     const listsToCache = localListsData.map((list) => {
         let creator: UserReference
+        let hasRemoteAnnotations = false
         const remoteId = remoteListIds[list.id]
         if (remoteId != null && followedListsData[remoteId]) {
             seenFollowedLists.add(followedListsData[remoteId].sharedList)
+            hasRemoteAnnotations = followedListsData[remoteId].hasAnnotations
             creator = {
                 type: 'user-reference',
                 id: followedListsData[remoteId].creator,
             }
         }
         return reshapeLocalListForCache(list, {
+            hasRemoteAnnotations,
             extraData: {
                 remoteId,
                 creator,
@@ -175,7 +182,11 @@ export async function hydrateCache({
     Object.values(followedListsData)
         .filter((list) => !seenFollowedLists.has(list.sharedList))
         .forEach((list) =>
-            listsToCache.push(reshapeFollowedListForCache(list, {})),
+            listsToCache.push(
+                reshapeFollowedListForCache(list, {
+                    hasRemoteAnnotations: list.hasAnnotations,
+                }),
+            ),
         )
 
     args.cache.setLists(listsToCache)

@@ -227,6 +227,7 @@ describe('SidebarContainerLogic', () => {
                     },
                 }),
                 cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[1], {
+                    hasRemoteAnnotations: true,
                     extraData: {
                         creator: DATA.CREATOR_1,
                         remoteId: DATA.SHARED_LIST_IDS[1],
@@ -268,6 +269,7 @@ describe('SidebarContainerLogic', () => {
                     },
                 }),
                 cacheUtils.reshapeFollowedListForCache(DATA.FOLLOWED_LISTS[3], {
+                    hasRemoteAnnotations: true,
                     extraData: {
                         unifiedId: expect.any(String),
                         unifiedAnnotationIds: [],

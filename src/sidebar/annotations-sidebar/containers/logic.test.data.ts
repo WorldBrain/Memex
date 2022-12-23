@@ -492,7 +492,7 @@ export const SHARED_ANNOTATION_LIST_ENTRIES: Array<
         creator: CREATOR_1.id,
         sharedList: SHARED_LIST_IDS[3],
         normalizedPageUrl: normalizeUrl(TAB_URL_1),
-        sharedAnnotation: SHARED_ANNOTATIONS[3].id,
+        sharedAnnotation: SHARED_ANNOTATIONS[4].id,
         createdWhen: new Date('2022-12-22').getTime(),
         updatedWhen: new Date('2022-12-22').getTime(),
         uploadedWhen: new Date('2022-12-22').getTime(),

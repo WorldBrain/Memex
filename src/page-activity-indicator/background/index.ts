@@ -142,20 +142,25 @@ export class PageActivityIndicatorBackground {
             { normalizedPageUrl },
         )
 
-        const followedListIds = new Set(
-            followedListEntries.map((entry) => entry.followedList),
+        const followedListHasAnnotsById = new Map(
+            followedListEntries.map((entry) => [
+                entry.followedList,
+                entry.hasAnnotations,
+            ]),
         )
         const followedLists = await this.storage.findFollowedListsByIds([
-            ...followedListIds,
+            ...followedListHasAnnotsById.keys(),
         ])
         return fromPairs(
             [...followedLists.values()].map((list) => [
                 list.sharedList,
                 {
+                    hasAnnotations: followedListHasAnnotsById.get(
+                        list.sharedList,
+                    ),
                     sharedList: list.sharedList,
                     creator: list.creator,
                     name: list.name,
-                    hasAnnotations: false, // TODO: set this correctly
                 },
             ]),
         )

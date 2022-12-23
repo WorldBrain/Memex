@@ -106,6 +106,7 @@ export interface UnifiedList {
     name: string
     description?: string
     creator?: UserReference
+    hasRemoteAnnotations: boolean
 
     // Misc list feature state
     unifiedAnnotationIds: UnifiedAnnotation['unifiedId'][]
