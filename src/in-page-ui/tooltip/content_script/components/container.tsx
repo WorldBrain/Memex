@@ -19,6 +19,7 @@ import type {
     TooltipInPageUIInterface,
     AnnotationFunctions,
 } from 'src/in-page-ui/tooltip/types'
+import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
 
 export interface Props extends AnnotationFunctions {
     inPageUI: TooltipInPageUIInterface
@@ -176,13 +177,17 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         return (
             <div className="memex-tooltip-container">
                 {showTooltip ? (
-                    <Tooltip
-                        {...position}
-                        state={tooltipState}
-                        tooltipComponent={this.renderTooltipComponent()}
-                        closeTooltip={this.closeTooltip}
-                        openSettings={this.openSettings}
-                    />
+                    <ClickAway
+                        onClickAway={() => this.props.inPageUI.hideTooltip()}
+                    >
+                        <Tooltip
+                            {...position}
+                            state={tooltipState}
+                            tooltipComponent={this.renderTooltipComponent()}
+                            closeTooltip={this.closeTooltip}
+                            openSettings={this.openSettings}
+                        />
+                    </ClickAway>
                 ) : null}
             </div>
         )
