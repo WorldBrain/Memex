@@ -215,8 +215,8 @@ const Row = styled.div<{ isFocused }>`
     width: 100%;
     cursor: pointer;
     border-radius: 5px;
-    padding: 0 7px;
-    margin: 0 2px;
+    padding: 0 9px;
+    margin: 0 -5px;
     overflow: visible;
     color: ${(props) => props.isFocused && props.theme.colors.normalText};
 

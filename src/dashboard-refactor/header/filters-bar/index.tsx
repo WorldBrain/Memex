@@ -287,7 +287,7 @@ const Container = styled.div<{ hidden: boolean }>`
     position: sticky;
     top: 60px;
     background: ${(props) => props.theme.colors.backgroundColor};
-    z-index: 2147483640;
+    z-index: 29;
     border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
 
     ${(props) =>

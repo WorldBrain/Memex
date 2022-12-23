@@ -416,7 +416,7 @@ const EntryList = styled.div`
     position: relative;
     overflow-y: auto;
     max-height: 280px;
-    padding-bottom: 5px;
+    padding: 10px;
 
     scrollbar-width: none;
 
@@ -465,7 +465,6 @@ const OuterSearchBox = styled.div`
 const PickerContainer = styled.div`
     border-radius: 12px;
     width: fill-available;
-    padding: 15px;
 `
 
 const EmptyListsView = styled.div`

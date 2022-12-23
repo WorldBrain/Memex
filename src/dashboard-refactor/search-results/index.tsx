@@ -1259,6 +1259,7 @@ const ResultsContainer = styled(Margin)`
     margin-bottom: 100px;
     width: fill-available;
     padding: 0 24px;
+    z-index: 27;
 `
 
 const TopBarRightSideWrapper = styled.div`

@@ -405,7 +405,7 @@ const BtnContainerStyled = styled.div`
 `
 
 const TopBarContainer = styled(Margin)`
-    z-index: 2147483640;
+    z-index: 50;
     display: flex;
     flex-direction: column;
     justify-content: space-between;

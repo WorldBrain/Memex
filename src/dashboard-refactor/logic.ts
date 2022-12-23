@@ -1039,11 +1039,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 event.pageId,
             )
         }
-
-        await this.options.listsBG.removePageFromList({
-            id: listId,
-            url: event.pageId,
-        })
         this.emitMutation({
             searchResults: mutation,
             listsSidebar:
@@ -1052,6 +1047,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                           inboxUnreadCount: { $apply: (count) => count - 1 },
                       }
                     : {},
+        })
+
+        await this.options.listsBG.removePageFromList({
+            id: listId,
+            url: event.pageId,
         })
     }
 

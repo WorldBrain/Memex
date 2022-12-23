@@ -1083,7 +1083,7 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     &:: -webkit-scrollbar {
         display: none;
     }
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.16, 0.87);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.16, 0.87);
 
     ${(props) =>
         props.isShown === 'hidden' &&
