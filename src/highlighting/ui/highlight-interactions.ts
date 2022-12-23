@@ -394,10 +394,34 @@ export class HighlightRenderer implements HighlightRendererInterface {
         ) as HTMLElement
 
         if ($highlight) {
+            console.log('scrollto')
             $highlight.scrollIntoView({ behavior: 'smooth', block: 'center' })
         } else {
             console.error('MEMEX: Oops, no highlight found to scroll to')
         }
+    }
+    /**
+     * Scrolls the annotation card into ivew of the given annotation on the current page.
+     */
+    scrollCardIntoView = ({ url }: Highlight) => {
+        console.log('exec')
+        const baseClass = 'AnnotationBox'
+        const highlights = document.getElementById('memex-sidebar-container')
+
+        console.log(highlights)
+
+        const highlight = highlights.shadowRoot.getElementById(url)
+
+        highlight.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        console.log(highlight)
+
+        // for (let item of highlights) {
+        //     console.log('item')
+        //     if (item.getAttribute('key') === url) {
+        //         console.log('scrollup')
+        //         item.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        //     }
+        // }
     }
     /**
      * Given an annotation object, highlights that text and removes other highlights
@@ -456,6 +480,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 // make sure to remove all other selections before selecting the new one
                 this.resetHighlightsStyles()
                 this.selectHighlight(highlight)
+                this.scrollCardIntoView(highlight)
             }
 
             highlightEl.addEventListener('click', clickListener, false)

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import Waypoint from 'react-waypoint'
-import styled, { css } from 'styled-components'
+import styled, { css, keyframes } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ConversationReplies } from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
 import type {
@@ -692,6 +692,9 @@ export class AnnotationsSidebar extends React.Component<
                                 ? 10000
                                 : this.props.annotations.length - i
                         }
+                        className={'AnnotationBox'}
+                        id={annot.url}
+                        order={i}
                     >
                         <AnnotationEditable
                             {...annot}
@@ -1085,9 +1088,25 @@ const EmptyMessageContainer = styled.div`
     align-items: center;
     width: fill-available;
 `
-const AnnotationBox = styled.div<{ isActive: boolean; zIndex: number }>`
+
+const openAnimation = keyframes`
+ 0% { padding-bottom: 100px; opacity: 0 }
+ 100% { padding-bottom: 0px; opacity: 1 }
+`
+
+const AnnotationBox = styled.div<{
+    isActive: boolean
+    zIndex: number
+    order: number
+}>`
     width: 99%;
     z-index: ${(props) => props.zIndex};
+
+    animation-name: ${openAnimation};
+    animation-delay: ${(props) => props.order * 50}ms;
+    animation-duration: 0.2s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: backwards;
 `
 
 const SectionCircle = styled.div`
