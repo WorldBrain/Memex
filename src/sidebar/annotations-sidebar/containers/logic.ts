@@ -52,8 +52,6 @@ import {
     createAnnotation,
     updateAnnotation,
 } from 'src/annotations/annotation-save-logic'
-import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -267,7 +265,18 @@ export class SidebarContainerLogic extends UILogic<
 
             // If `pageUrl` prop passed down rehydrate cache
             if (fullPageUrl != null) {
-                await this.hydrateCacheAnnotations(fullPageUrl)
+                await cacheUtils.hydrateCache({
+                    fullPageUrl,
+                    user: this.options.currentUser,
+                    cache: this.options.annotationsCache,
+                    bgModules: {
+                        annotations: this.options.annotations,
+                        customLists: this.options.customLists,
+                        contentSharing: this.options.contentSharing,
+                        pageActivityIndicator: this.options
+                            .pageActivityIndicatorBG,
+                    },
+                })
             }
         })
         this.annotationsLoadComplete.resolve()
@@ -320,88 +329,6 @@ export class SidebarContainerLogic extends UILogic<
                 },
             },
         })
-    }
-
-    private async hydrateCacheAnnotations(fullPageUrl: string) {
-        const {
-            contentSharing: contentSharingBG,
-            annotations: annotationsBG,
-            customLists: customListsBG,
-            pageActivityIndicatorBG,
-            annotationsCache,
-            currentUser,
-        } = this.options
-
-        const localListsData = await customListsBG.fetchAllLists({})
-        const remoteListIds = await contentSharingBG.getRemoteListIds({
-            localListIds: localListsData.map((list) => list.id),
-        })
-        const followedListsData = await pageActivityIndicatorBG.getPageFollowedLists(
-            fullPageUrl,
-        )
-        const pageSharedListIds = (
-            await customListsBG.fetchPageLists({
-                url: fullPageUrl,
-            })
-        ).filter((listId) => remoteListIds[listId] != null)
-        const seenFollowedLists = new Set<AutoPk>()
-
-        const listsToCache = localListsData.map((list) => {
-            let creator: UserReference
-            const remoteId = remoteListIds[list.id]
-            if (remoteId != null && followedListsData[remoteId]) {
-                seenFollowedLists.add(followedListsData[remoteId].sharedList)
-                creator = {
-                    type: 'user-reference',
-                    id: followedListsData[remoteId].creator,
-                }
-            }
-            return cacheUtils.reshapeLocalListForCache(list, {
-                extraData: {
-                    remoteId,
-                    creator,
-                },
-            })
-        })
-
-        // Ensure we cover any followed-only lists (no local data)
-        Object.values(followedListsData)
-            .filter((list) => !seenFollowedLists.has(list.sharedList))
-            .forEach((list) =>
-                listsToCache.push(
-                    cacheUtils.reshapeFollowedListForCache(list, {}),
-                ),
-            )
-
-        annotationsCache.setLists(listsToCache)
-
-        const annotationsData = await annotationsBG.listAnnotationsByPageUrl({
-            pageUrl: fullPageUrl,
-            withLists: true,
-        })
-
-        const privacyLvlsByAnnot = await contentSharingBG.findAnnotationPrivacyLevels(
-            { annotationUrls: annotationsData.map((annot) => annot.url) },
-        )
-
-        annotationsCache.setAnnotations(
-            normalizeUrl(fullPageUrl),
-            annotationsData.map((annot) => {
-                const privacyLevel = privacyLvlsByAnnot[annot.url]
-
-                // Inherit parent page shared lists if public annot
-                if (privacyLevel >= AnnotationPrivacyLevels.SHARED) {
-                    annot.lists.push(...pageSharedListIds)
-                }
-
-                return cacheUtils.reshapeAnnotationForCache(annot, {
-                    extraData: {
-                        creator: currentUser,
-                        privacyLevel,
-                    },
-                })
-            }),
-        )
     }
 
     sortAnnotations: EventHandler<'sortAnnotations'> = ({
@@ -546,8 +473,6 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        const { annotationsCache, currentUser, events } = this.options
-
         if (!isFullUrl(event.pageUrl)) {
             throw new Error(
                 'Tried to set annotation sidebar with a normalized page URL',
@@ -570,7 +495,18 @@ export class SidebarContainerLogic extends UILogic<
 
         await Promise.all([
             executeUITask(this, 'annotationsLoadState', async () => {
-                await this.hydrateCacheAnnotations(event.pageUrl)
+                await cacheUtils.hydrateCache({
+                    fullPageUrl: event.pageUrl,
+                    user: this.options.currentUser,
+                    cache: this.options.annotationsCache,
+                    bgModules: {
+                        annotations: this.options.annotations,
+                        customLists: this.options.customLists,
+                        contentSharing: this.options.contentSharing,
+                        pageActivityIndicator: this.options
+                            .pageActivityIndicatorBG,
+                    },
+                })
             }),
             this.processUIEvent('loadFollowedLists', {
                 previousState: this.withMutation(previousState, mutation),
@@ -579,8 +515,8 @@ export class SidebarContainerLogic extends UILogic<
         ])
 
         if (event.rerenderHighlights) {
-            events?.emit('renderHighlights', {
-                highlights: annotationsCache.highlights,
+            this.options.events?.emit('renderHighlights', {
+                highlights: this.options.annotationsCache.highlights,
             })
         }
     }

@@ -1,13 +1,26 @@
-import type { FollowedList } from 'src/page-activity-indicator/background/types'
-import type { PageList } from 'src/custom-lists/background/types'
+import type {
+    FollowedList,
+    RemotePageActivityIndicatorInterface,
+} from 'src/page-activity-indicator/background/types'
+import type {
+    PageList,
+    RemoteCollectionsInterface,
+} from 'src/custom-lists/background/types'
 import type { Annotation } from '../types'
 import type {
+    PageAnnotationsCacheInterface,
     UnifiedAnnotation,
     UnifiedAnnotationForCache,
     UnifiedList,
     UnifiedListForCache,
 } from './types'
 import { shareOptsToPrivacyLvl } from '../utils'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type { AnnotationInterface } from '../background/types'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation,
@@ -87,3 +100,90 @@ export const reshapeFollowedListForCache = (
     unifiedAnnotationIds: [],
     ...(opts.extraData ?? {}),
 })
+
+// NOTE: this is tested as part of the sidebar logic tests
+export async function hydrateCache({
+    bgModules,
+    ...args
+}: {
+    fullPageUrl: string
+    user: UserReference
+    cache: PageAnnotationsCacheInterface
+    bgModules: {
+        pageActivityIndicator: RemotePageActivityIndicatorInterface
+        contentSharing: ContentSharingInterface
+        annotations: AnnotationInterface<'caller'>
+        customLists: RemoteCollectionsInterface
+    }
+}): Promise<void> {
+    const localListsData = await bgModules.customLists.fetchAllLists({})
+    const remoteListIds = await bgModules.contentSharing.getRemoteListIds({
+        localListIds: localListsData.map((list) => list.id),
+    })
+    const followedListsData = await bgModules.pageActivityIndicator.getPageFollowedLists(
+        args.fullPageUrl,
+    )
+    const pageSharedListIds = (
+        await bgModules.customLists.fetchPageLists({
+            url: args.fullPageUrl,
+        })
+    ).filter((listId) => remoteListIds[listId] != null)
+    const seenFollowedLists = new Set<AutoPk>()
+
+    const listsToCache = localListsData.map((list) => {
+        let creator: UserReference
+        const remoteId = remoteListIds[list.id]
+        if (remoteId != null && followedListsData[remoteId]) {
+            seenFollowedLists.add(followedListsData[remoteId].sharedList)
+            creator = {
+                type: 'user-reference',
+                id: followedListsData[remoteId].creator,
+            }
+        }
+        return reshapeLocalListForCache(list, {
+            extraData: {
+                remoteId,
+                creator,
+            },
+        })
+    })
+
+    // Ensure we cover any followed-only lists (no local data)
+    Object.values(followedListsData)
+        .filter((list) => !seenFollowedLists.has(list.sharedList))
+        .forEach((list) =>
+            listsToCache.push(reshapeFollowedListForCache(list, {})),
+        )
+
+    args.cache.setLists(listsToCache)
+
+    const annotationsData = await bgModules.annotations.listAnnotationsByPageUrl(
+        {
+            pageUrl: args.fullPageUrl,
+            withLists: true,
+        },
+    )
+
+    const privacyLvlsByAnnot = await bgModules.contentSharing.findAnnotationPrivacyLevels(
+        { annotationUrls: annotationsData.map((annot) => annot.url) },
+    )
+
+    args.cache.setAnnotations(
+        normalizeUrl(args.fullPageUrl),
+        annotationsData.map((annot) => {
+            const privacyLevel = privacyLvlsByAnnot[annot.url]
+
+            // Inherit parent page shared lists if public annot
+            if (privacyLevel >= AnnotationPrivacyLevels.SHARED) {
+                annot.lists.push(...pageSharedListIds)
+            }
+
+            return reshapeAnnotationForCache(annot, {
+                extraData: {
+                    creator: args.user,
+                    privacyLevel,
+                },
+            })
+        }),
+    )
+}
