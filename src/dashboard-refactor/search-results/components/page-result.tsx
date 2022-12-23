@@ -218,7 +218,12 @@ export default class PageResultView extends PureComponent<Props> {
                     heightAndWidth="22px"
                     filePath={icons.removeX}
                     darkBackground
-                    onClick={this.props.onRemoveFromListBtnClick}
+                    onClick={(event) => {
+                        {
+                            this.props.onRemoveFromListBtnClick(event)
+                            event.preventDefault()
+                        }
+                    }}
                 />
             </TooltipBox>
         )

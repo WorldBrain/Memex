@@ -600,16 +600,8 @@ export class AnnotationsSidebar extends React.Component<
                                         />
                                     </SectionCircle>
                                     <InfoText>
-                                        Create your first
-                                        <Link
-                                            onClick={() =>
-                                                window.open(
-                                                    'https://links.memex.garden/tutorials/collaborative-spaces',
-                                                )
-                                            }
-                                        >
-                                            collaborative Space
-                                        </Link>
+                                        This page is not yet in a Space <br />{' '}
+                                        you created, follow or collaborate in.
                                     </InfoText>
                                 </EmptyMessageContainer>
                             )}
@@ -1103,8 +1095,8 @@ const AnnotationBox = styled.div<{
     z-index: ${(props) => props.zIndex};
 
     animation-name: ${openAnimation};
-    animation-delay: ${(props) => props.order * 50}ms;
-    animation-duration: 0.2s;
+    animation-delay: ${(props) => props.order * 30}ms;
+    animation-duration: 0.1s;
     animation-timing-function: ease-in-out;
     animation-fill-mode: backwards;
 `

@@ -862,11 +862,12 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             hover: null,
                         }),
-                    onRemoveFromListBtnClick: (day, pageId) => () =>
+                    onRemoveFromListBtnClick: (day, pageId) => () => {
                         this.processEvent('removePageFromList', {
                             day,
                             pageId,
-                        }),
+                        })
+                    },
                     onPageDrag: (day, pageId) => (e) =>
                         this.processEvent('dragPage', {
                             day,
