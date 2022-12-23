@@ -132,55 +132,59 @@ const setupLogicHelper = async ({
     return { sidebar, sidebarLogic, analytics, annotationsCache, emittedEvents }
 }
 
-async function setupTestData({ storageManager }: UILogicTestDevice) {
+async function setupTestData({
+    storageManager,
+    getServerStorage,
+}: UILogicTestDevice) {
+    const { manager: serverStorageManager } = await getServerStorage()
+    for (const entry of DATA.SHARED_ANNOTATION_LIST_ENTRIES) {
+        await serverStorageManager
+            .collection('sharedAnnotationListEntry')
+            .createObject(entry)
+    }
+    for (const annot of DATA.SHARED_ANNOTATIONS) {
+        await serverStorageManager
+            .collection('sharedAnnotation')
+            .createObject(annot)
+    }
     for (const page of DATA.PAGES) {
         await storageManager.collection('pages').createObject(page)
     }
-
     for (const annot of DATA.LOCAL_ANNOTATIONS) {
         await storageManager.collection('annotations').createObject(annot)
     }
-
     for (const annotMetadata of DATA.ANNOT_METADATA) {
         await storageManager
             .collection('sharedAnnotationMetadata')
             .createObject(annotMetadata)
     }
-
     for (const privacyLevel of DATA.ANNOT_PRIVACY_LVLS) {
         await storageManager
             .collection('annotationPrivacyLevels')
             .createObject(privacyLevel)
     }
-
     for (const list of DATA.LOCAL_LISTS) {
         await storageManager.collection('customLists').createObject(list)
     }
-
     for (const description of DATA.LIST_DESCRIPTIONS) {
         await storageManager
             .collection('customListDescriptions')
             .createObject(description)
     }
-
     for (const listMetadata of DATA.TEST_LIST_METADATA) {
         await storageManager
             .collection('sharedListMetadata')
             .createObject(listMetadata)
     }
-
     for (const entry of DATA.PAGE_LIST_ENTRIES) {
         await storageManager.collection('pageListEntries').createObject(entry)
     }
-
     for (const entry of DATA.ANNOT_LIST_ENTRIES) {
         await storageManager.collection('annotListEntries').createObject(entry)
     }
-
     for (const list of DATA.FOLLOWED_LISTS) {
         await storageManager.collection('followedList').createObject(list)
     }
-
     for (const entry of DATA.FOLLOWED_LIST_ENTRIES) {
         await storageManager.collection('followedListEntry').createObject(entry)
     }
@@ -354,6 +358,67 @@ describe('SidebarContainerLogic', () => {
                         ]),
                 ),
             )
+        })
+
+        it('should load remote annotation counts for lists with them upon activating space tab', async ({
+            device,
+        }) => {
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+                withAuth: true,
+                skipInitEvent: true,
+                fullPageUrl: DATA.TAB_URL_1,
+            })
+
+            expect(annotationsCache.lists).toEqual(initNormalizedState())
+            expect(annotationsCache.annotations).toEqual(initNormalizedState())
+            expect(sidebar.state.listInstances).toEqual({})
+            expect(sidebar.state.annotationCardInstances).toEqual({})
+
+            await sidebar.init()
+
+            const defaultListInstanceStates = fromPairs(
+                normalizedStateToArray(annotationsCache.lists).map((list) => [
+                    list.unifiedId,
+                    initListInstance(list),
+                ]),
+            )
+
+            const [unifiedListIdA, unifiedListIdB] = normalizedStateToArray(
+                annotationsCache.lists,
+            )
+                .filter((list) => list.hasRemoteAnnotations)
+                .map((list) => list.unifiedId)
+
+            expect(sidebar.state.listInstances).toEqual({
+                ...defaultListInstanceStates,
+                [unifiedListIdA]: {
+                    ...initListInstance({ unifiedId: unifiedListIdA }),
+                    annotationsCount: -1,
+                    annotationsCountLoadState: 'pristine',
+                },
+                [unifiedListIdB]: {
+                    ...initListInstance({ unifiedId: unifiedListIdB }),
+                    annotationsCount: -1,
+                    annotationsCountLoadState: 'pristine',
+                },
+            })
+
+            await sidebar.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+
+            expect(sidebar.state.listInstances).toEqual({
+                ...defaultListInstanceStates,
+                [unifiedListIdA]: {
+                    ...initListInstance({ unifiedId: unifiedListIdA }),
+                    annotationsCount: 1,
+                    annotationsCountLoadState: 'success',
+                },
+                [unifiedListIdB]: {
+                    ...initListInstance({ unifiedId: unifiedListIdB }),
+                    annotationsCount: 2,
+                    annotationsCountLoadState: 'success',
+                },
+            })
         })
     })
 

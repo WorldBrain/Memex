@@ -1490,6 +1490,51 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
+    private async loadRemoteListAnnotationCounts(
+        state: SidebarContainerState,
+    ): Promise<void> {
+        const { annotationsCache, customLists } = this.options
+        const listsWithRemoteAnnots = normalizedStateToArray(
+            annotationsCache.lists,
+        ).filter((list) => list.hasRemoteAnnotations && list.remoteId != null)
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listInstances: fromPairs(
+                    listsWithRemoteAnnots.map((list) => [
+                        list.unifiedId,
+                        { annotationsCountLoadState: { $set: taskState } },
+                    ]),
+                ),
+            }),
+            async () => {
+                const annotationCountsByList = await customLists.fetchAnnotationCountsForRemoteListsOnPage(
+                    {
+                        normalizedPageUrl: normalizeUrl(state.pageUrl),
+                        sharedListIds: listsWithRemoteAnnots.map(
+                            (list) => list.remoteId!,
+                        ),
+                    },
+                )
+
+                const mutation: UIMutation<
+                    SidebarContainerState['listInstances']
+                > = {}
+
+                for (const { unifiedId, remoteId } of listsWithRemoteAnnots) {
+                    mutation[unifiedId] = {
+                        annotationsCount: {
+                            $set: annotationCountsByList[remoteId] ?? -1,
+                        },
+                    }
+                }
+
+                this.emitMutation({ listInstances: mutation })
+            },
+        )
+    }
+
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
         previousState,
@@ -1525,6 +1570,8 @@ export class SidebarContainerLogic extends UILogic<
             //         url: id,
             //         selector: previousState.followedAnnotations[id].selector,
             //     }))
+
+            await this.loadRemoteListAnnotationCounts(previousState)
         }
 
         if (highlights != null) {

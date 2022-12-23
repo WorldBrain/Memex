@@ -1,4 +1,5 @@
 import Storex from '@worldbrain/storex'
+import fromPairs from 'lodash/fromPairs'
 import { Windows, Tabs, Storage } from 'webextension-polyfill'
 import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
 
@@ -77,6 +78,8 @@ export default class CustomListBackground {
             fetchCollaborativeLists: this.fetchCollaborativeLists,
             fetchListById: this.fetchListById,
             fetchListByName: this.fetchListByName,
+            fetchAnnotationCountsForRemoteListsOnPage: this
+                .fetchAnnotationCountsForRemoteListsOnPage,
             fetchFollowedListsWithAnnotations: this
                 .fetchFollowedListsWithAnnotations,
             fetchSharedListDataWithOwnership: this
@@ -180,6 +183,30 @@ export default class CustomListBackground {
         return [...seenLists].map(
             (id) =>
                 ({ id, type: 'shared-list-reference' } as SharedListReference),
+        )
+    }
+
+    fetchAnnotationCountsForRemoteListsOnPage: RemoteCollectionsInterface['fetchAnnotationCountsForRemoteListsOnPage'] = async ({
+        sharedListIds,
+        normalizedPageUrl,
+    }) => {
+        const { contentSharing } = await this.options.getServerStorage()
+
+        const listEntriesByPageByList = await contentSharing.getAnnotationListEntriesForListsOnPage(
+            {
+                listReferences: sharedListIds.map((id) => ({
+                    type: 'shared-list-reference',
+                    id,
+                })),
+                normalizedPageUrl,
+            },
+        )
+
+        return fromPairs(
+            Object.entries(listEntriesByPageByList).map(([listId, entries]) => [
+                listId,
+                entries.length,
+            ]),
         )
     }
 

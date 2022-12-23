@@ -18,7 +18,9 @@ export const initAnnotationCardInstance = (
     isCommentEditing: false,
 })
 
-export const initListInstance = (list: UnifiedList): ListInstance => ({
+export const initListInstance = (
+    list: Pick<UnifiedList, 'unifiedId'>,
+): ListInstance => ({
     annotationsCountLoadState: 'pristine',
     annotationsLoadState: 'pristine',
     unifiedListId: list.unifiedId,
