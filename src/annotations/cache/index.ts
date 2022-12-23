@@ -6,6 +6,7 @@ import type {
     PageAnnotationsCacheEvents,
     PageAnnotationsCacheInterface,
     UnifiedAnnotationForCache,
+    UnifiedListForCache,
 } from './types'
 import {
     AnnotationsSorter,
@@ -29,6 +30,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     private annotationIdCounter = 0
     private listIdCounter = 0
+    private localListIdsToCacheIds: {
+        [localListId: number]: UnifiedList['unifiedId']
+    } = {}
 
     constructor(private deps: PageAnnotationCacheDeps) {
         deps.sortingFn = deps.sortingFn ?? sortByPagePosition
@@ -88,10 +92,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     getListByLocalId: PageAnnotationsCacheInterface['getListByLocalId'] = (
         localId,
     ) => {
-        const matchingList = Object.values(this.lists.byId).find(
-            (list) => list.localId != null && list.localId === localId,
-        )
-        return matchingList ?? null
+        const unifiedListId = this.localListIdsToCacheIds[localId]
+        if (unifiedListId == null) {
+            return null
+        }
+        return this.lists.byId[unifiedListId] ?? null
     }
 
     getListByRemoteId: PageAnnotationsCacheInterface['getListByRemoteId'] = (
@@ -103,6 +108,16 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         return matchingList ?? null
     }
 
+    private prepareListForCaching = (
+        list: UnifiedListForCache,
+    ): UnifiedList => {
+        const unifiedId = this.generateListId()
+        if (list.localId != null) {
+            this.localListIdsToCacheIds[list.localId] = unifiedId
+        }
+        return { ...list, unifiedId }
+    }
+
     private prepareAnnotationForCaching = (
         { localListIds, ...annotation }: UnifiedAnnotationForCache,
         opts: { now: number },
@@ -111,18 +126,19 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         const unifiedListIds = localListIds
             .map((localListId) => {
-                const unifiedList = this.getListByLocalId(localListId)
-                if (!unifiedList) {
+                const unifiedListId = this.localListIdsToCacheIds[localListId]
+                if (!unifiedListId) {
                     this.warn(
-                        'No cached list data found for given local list IDs on annotation',
+                        'No cached list data found for given local list IDs on annotation - did you remember to cache lists before annotations?',
                     )
                     return null
                 }
 
                 // Side-effect: ensure the list gets a ref back to this annot
+                const unifiedList = this.lists.byId[unifiedListId]
                 unifiedList.unifiedAnnotationIds.push(unifiedAnnotationId)
 
-                return unifiedList.unifiedId
+                return unifiedListId
             })
             .filter((id) => id != null)
 
@@ -161,11 +177,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     setLists: PageAnnotationsCacheInterface['setLists'] = (lists) => {
         this.listIdCounter = 0
+        this.localListIdsToCacheIds = {}
 
-        const seedData = [...lists].map((list) => ({
-            ...list,
-            unifiedId: this.generateListId(),
-        }))
+        const seedData = [...lists].map(this.prepareListForCaching)
         this.lists = initNormalizedState({
             seedData,
             getId: (list) => list.unifiedId,
@@ -215,11 +229,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     }
 
     addList: PageAnnotationsCacheInterface['addList'] = (list) => {
-        const nextList: UnifiedList = {
-            ...list,
-            unifiedId: this.generateListId(),
-        }
-
+        const nextList = this.prepareListForCaching(list)
         this.lists.allIds = [nextList.unifiedId, ...this.lists.allIds]
         this.lists.byId = {
             ...this.lists.byId,
