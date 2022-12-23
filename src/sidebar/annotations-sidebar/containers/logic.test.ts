@@ -10,15 +10,18 @@ import * as DATA from './logic.test.data'
 import * as sharingTestData from 'src/content-sharing/background/index.test.data'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
-import { getInitialAnnotationConversationState } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import normalizeUrl from '@worldbrain/memex-url-utils/lib/normalize'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import * as cacheUtils from 'src/annotations/cache/utils'
-import { initNormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import {
+    initNormalizedState,
+    normalizedStateToArray,
+} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import {
     generateAnnotationCardInstanceId,
     initAnnotationCardInstance,
+    initListInstance,
 } from './utils'
 
 const mapLocalListIdsToUnified = (
@@ -202,6 +205,7 @@ describe('SidebarContainerLogic', () => {
 
             expect(annotationsCache.lists).toEqual(initNormalizedState())
             expect(annotationsCache.annotations).toEqual(initNormalizedState())
+            expect(sidebar.state.listInstances).toEqual({})
             expect(sidebar.state.annotationCardInstances).toEqual({})
 
             await sidebar.init()
@@ -325,6 +329,13 @@ describe('SidebarContainerLogic', () => {
                 }),
             ])
 
+            expect(sidebar.state.listInstances).toEqual(
+                fromPairs(
+                    normalizedStateToArray(
+                        annotationsCache.lists,
+                    ).map((list) => [list.unifiedId, initListInstance(list)]),
+                ),
+            )
             expect(sidebar.state.annotationCardInstances).toEqual(
                 fromPairs(
                     cacheUtils

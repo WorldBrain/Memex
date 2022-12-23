@@ -19,6 +19,9 @@ export const initAnnotationCardInstance = (
 })
 
 export const initListInstance = (list: UnifiedList): ListInstance => ({
+    annotationsCountLoadState: 'pristine',
+    annotationsLoadState: 'pristine',
     unifiedListId: list.unifiedId,
+    annotationsCount: -1,
     isOpen: false,
 })

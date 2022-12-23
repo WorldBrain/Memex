@@ -178,6 +178,7 @@ export interface SidebarContainerState
     }
     activeAnnotationUrl: string | null
 
+    listInstances: { [unifiedListId: UnifiedList['unifiedId']]: ListInstance }
     annotationCardInstances: { [instanceId: string]: AnnotationCardInstance }
 
     showCommentBox: boolean
@@ -374,5 +375,8 @@ export interface AnnotationCardInstance {
 
 export interface ListInstance {
     unifiedListId: UnifiedList['unifiedId']
-    isOpen: boolean // Whether the list instance in "Spaces" tabs is toggled open
+    annotationsCountLoadState: TaskState
+    annotationsLoadState: TaskState
+    annotationsCount: number
+    isOpen: boolean
 }

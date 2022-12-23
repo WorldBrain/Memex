@@ -30,7 +30,10 @@ import {
     shareOptsToPrivacyLvl,
 } from 'src/annotations/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
-import { initNormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import {
+    initNormalizedState,
+    normalizedStateToArray,
+} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,
@@ -55,6 +58,7 @@ import {
 import {
     generateAnnotationCardInstanceId,
     initAnnotationCardInstance,
+    initListInstance,
 } from './utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -212,6 +216,7 @@ export class SidebarContainerLogic extends UILogic<
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
 
+            listInstances: {},
             annotationCardInstances: {},
 
             annotations: initNormalizedState(),
@@ -268,6 +273,13 @@ export class SidebarContainerLogic extends UILogic<
         )
 
         this.emitMutation({
+            listInstances: {
+                $set: fromPairs(
+                    normalizedStateToArray(
+                        annotationsCache.lists,
+                    ).map((list) => [list.unifiedId, initListInstance(list)]),
+                ),
+            },
             annotationCardInstances: {
                 $set: fromPairs(
                     myAnnotations.map((annot) => [
