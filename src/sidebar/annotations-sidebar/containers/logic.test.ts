@@ -16,6 +16,10 @@ import normalizeUrl from '@worldbrain/memex-url-utils/lib/normalize'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import { initNormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import {
+    generateAnnotationCardInstanceId,
+    initAnnotationCardInstance,
+} from './utils'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -198,6 +202,7 @@ describe('SidebarContainerLogic', () => {
 
             expect(annotationsCache.lists).toEqual(initNormalizedState())
             expect(annotationsCache.annotations).toEqual(initNormalizedState())
+            expect(sidebar.state.annotationCardInstances).toEqual({})
 
             await sidebar.init()
 
@@ -319,6 +324,23 @@ describe('SidebarContainerLogic', () => {
                     },
                 }),
             ])
+
+            expect(sidebar.state.annotationCardInstances).toEqual(
+                fromPairs(
+                    cacheUtils
+                        .getOwnAnnotationsArray(
+                            annotationsCache,
+                            DATA.CREATOR_1.id.toString(),
+                        )
+                        .map((annot) => [
+                            generateAnnotationCardInstanceId(
+                                annot,
+                                'annotations-tab',
+                            ),
+                            initAnnotationCardInstance(annot),
+                        ]),
+                ),
+            )
         })
     })
 

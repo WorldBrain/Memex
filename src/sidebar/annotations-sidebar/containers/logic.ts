@@ -52,6 +52,10 @@ import {
     createAnnotation,
     updateAnnotation,
 } from 'src/annotations/annotation-save-logic'
+import {
+    generateAnnotationCardInstanceId,
+    initAnnotationCardInstance,
+} from './utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -208,6 +212,8 @@ export class SidebarContainerLogic extends UILogic<
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
 
+            annotationCardInstances: {},
+
             annotations: initNormalizedState(),
             lists: initNormalizedState(),
 
@@ -242,6 +248,40 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
+    private async hydrateAnnotationsCache(fullPageUrl: string) {
+        const { annotationsCache, currentUser } = this.options
+        await cacheUtils.hydrateCache({
+            fullPageUrl,
+            user: currentUser,
+            cache: annotationsCache,
+            bgModules: {
+                annotations: this.options.annotations,
+                customLists: this.options.customLists,
+                contentSharing: this.options.contentSharing,
+                pageActivityIndicator: this.options.pageActivityIndicatorBG,
+            },
+        })
+
+        const myAnnotations = cacheUtils.getOwnAnnotationsArray(
+            annotationsCache,
+            currentUser?.id.toString(),
+        )
+
+        this.emitMutation({
+            annotationCardInstances: {
+                $set: fromPairs(
+                    myAnnotations.map((annot) => [
+                        generateAnnotationCardInstanceId(
+                            annot,
+                            'annotations-tab',
+                        ),
+                        initAnnotationCardInstance(annot),
+                    ]),
+                ),
+            },
+        })
+    }
+
     init: EventHandler<'init'> = async ({ previousState }) => {
         const { fullPageUrl, annotationsCache } = this.options
         annotationsCache.events.addListener(
@@ -265,18 +305,7 @@ export class SidebarContainerLogic extends UILogic<
 
             // If `pageUrl` prop passed down rehydrate cache
             if (fullPageUrl != null) {
-                await cacheUtils.hydrateCache({
-                    fullPageUrl,
-                    user: this.options.currentUser,
-                    cache: this.options.annotationsCache,
-                    bgModules: {
-                        annotations: this.options.annotations,
-                        customLists: this.options.customLists,
-                        contentSharing: this.options.contentSharing,
-                        pageActivityIndicator: this.options
-                            .pageActivityIndicatorBG,
-                    },
-                })
+                await this.hydrateAnnotationsCache(fullPageUrl)
             }
         })
         this.annotationsLoadComplete.resolve()
@@ -495,18 +524,7 @@ export class SidebarContainerLogic extends UILogic<
 
         await Promise.all([
             executeUITask(this, 'annotationsLoadState', async () => {
-                await cacheUtils.hydrateCache({
-                    fullPageUrl: event.pageUrl,
-                    user: this.options.currentUser,
-                    cache: this.options.annotationsCache,
-                    bgModules: {
-                        annotations: this.options.annotations,
-                        customLists: this.options.customLists,
-                        contentSharing: this.options.contentSharing,
-                        pageActivityIndicator: this.options
-                            .pageActivityIndicatorBG,
-                    },
-                })
+                await this.hydrateAnnotationsCache(event.pageUrl)
             }),
             this.processUIEvent('loadFollowedLists', {
                 previousState: this.withMutation(previousState, mutation),

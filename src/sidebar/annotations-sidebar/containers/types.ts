@@ -34,6 +34,7 @@ import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/t
 import type {
     PageAnnotationsCacheInterface,
     UnifiedAnnotation,
+    UnifiedList,
 } from 'src/annotations/cache/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
@@ -176,6 +177,8 @@ export interface SidebarContainerState
         }
     }
     activeAnnotationUrl: string | null
+
+    annotationCardInstances: { [instanceId: string]: AnnotationCardInstance }
 
     showCommentBox: boolean
     commentBox: EditForm
@@ -352,3 +355,24 @@ interface SidebarEvents {
 export type SidebarContainerEvents = UIEvent<
     AnnotationConversationEvent & SidebarEvents
 >
+
+export type AnnotationCardDropdown =
+    | 'copy-paster'
+    | 'space-picker'
+    | 'share-menu'
+    | 'save-btn'
+    | 'delete-confirm'
+    | 'formatting-help'
+
+export interface AnnotationCardInstance {
+    unifiedAnnotationId: UnifiedAnnotation['unifiedId']
+    dropdownShown?: AnnotationCardDropdown
+    isCommentTruncated: boolean
+    isCommentEditing: boolean
+    comment: string
+}
+
+export interface ListInstance {
+    unifiedListId: UnifiedList['unifiedId']
+    isOpen: boolean // Whether the list instance in "Spaces" tabs is toggled open
+}

@@ -112,23 +112,3 @@ export interface UnifiedList {
 }
 
 export type UnifiedListForCache = Omit<UnifiedList, 'unifiedId'>
-
-export interface AnnotationCardInstance {
-    instanceId: string
-    unifiedAnnotationId: UnifiedAnnotation['unifiedId']
-    comment: string
-    // add other states
-}
-
-export interface ListInstance {
-    instanceId: string
-    unifiedListId: UnifiedList['unifiedId']
-    isOpen: boolean // Whether the list instance in "Spaces" tabs is toggled open
-}
-
-export interface AnnotationsCacheState {
-    annotationInstances: { [id: string]: AnnotationCardInstance }
-    listInstances: { [id: string]: ListInstance }
-    annotations: NormalizedState<UnifiedAnnotation>
-    lists: NormalizedState<UnifiedList>
-}

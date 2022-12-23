@@ -49,6 +49,7 @@ import type {
 import * as cacheUtils from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { generateAnnotationCardInstanceId } from '../containers/utils'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
@@ -850,7 +851,6 @@ export class AnnotationsSidebar extends React.Component<
     // }
 
     private renderAnnotationsEditable(annotations: UnifiedAnnotation[]) {
-        console.log('got cache annots:', annotations)
         const annots: JSX.Element[] = []
 
         if (this.props.noteCreateState === 'running') {
@@ -861,6 +861,21 @@ export class AnnotationsSidebar extends React.Component<
 
         annots.push(
             ...annotations.map((annot, i) => {
+                const instanceId = generateAnnotationCardInstanceId(
+                    annot,
+                    'annotations-tab',
+                )
+                const instanceState = this.props.annotationCardInstances[
+                    instanceId
+                ]
+                if (!instanceState) {
+                    console.warn(
+                        'AnnotationsSidebar rendering: Could not find annotation instance state associated with ID:',
+                        instanceId,
+                    )
+                    return null
+                }
+
                 const footerDeps = this.props.bindAnnotationFooterEventProps(
                     annot,
                 )
@@ -888,12 +903,18 @@ export class AnnotationsSidebar extends React.Component<
                             body={annot.body}
                             comment={annot.comment}
                             isShared={isShared}
-                            createdWhen={annot.createdWhen!}
+                            createdWhen={annot.createdWhen}
                             isBulkShareProtected={[
                                 AnnotationPrivacyLevels.PROTECTED,
                                 AnnotationPrivacyLevels.SHARED_PROTECTED,
                             ].includes(annot.privacyLevel)}
-                            mode={this.props.annotationModes[annot.unifiedId]}
+                            mode={
+                                instanceState.dropdownShown === 'delete-confirm'
+                                    ? 'delete'
+                                    : instanceState.isCommentEditing
+                                    ? 'edit'
+                                    : 'default'
+                            }
                             isActive={
                                 this.props.activeAnnotationUrl ===
                                 annot.unifiedId
