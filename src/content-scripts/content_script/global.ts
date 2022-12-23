@@ -1,10 +1,7 @@
 import 'core-js'
 import { EventEmitter } from 'events'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
-import {
-    injectMemexExtDetectionEl,
-    injectMemexExtensionID,
-} from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
+import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
 
 // import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
@@ -76,10 +73,6 @@ export async function main(
         })
     } else {
         injectMemexExtDetectionEl()
-    }
-
-    if (process.env.NODE_ENV === 'development') {
-        injectMemexExtensionID()
     }
 
     setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
