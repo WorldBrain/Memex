@@ -654,6 +654,7 @@ export class AnnotationsSidebar extends React.Component<
                 <UpdateNotifBanner
                     location={'sidebar'}
                     theme={{ position: 'fixed' }}
+                    sidebarContext={this.props.sidebarContext}
                 />
             </React.Fragment>
         )
@@ -982,7 +983,7 @@ export class AnnotationsSidebar extends React.Component<
                 <TopBar sidebarContext={this.props.sidebarContext}>
                     <>
                         {this.renderTopBarSwitcher()}
-                        {this.renderSharePageButton()}
+                        {/* {this.renderSharePageButton()} */}
                         {/* {this.props.sidebarActions()} */}
                     </>
                 </TopBar>

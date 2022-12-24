@@ -104,8 +104,7 @@ const Banner = styled.div<{
         props.location === 'sidebar' &&
         css`
             grid-gap: 10px;
-            margin: 0 10px 10px -10px;
-            right: 10px;
+            margin: 0 6px 10px -10px;
         `}
 
     ${(props) =>
