@@ -192,7 +192,7 @@ export class SidebarContainerLogic extends UILogic<
                 searchResults: {},
             },
             annotationSharingAccess: 'sharing-allowed',
-
+            readingView: false,
             showAllNotesCopyPaster: false,
             activeCopyPasterAnnotationId: undefined,
             activeTagPickerAnnotationId: undefined,
@@ -235,6 +235,7 @@ export class SidebarContainerLogic extends UILogic<
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         const { pageUrl, annotationsCache, initialState } = this.options
+        this.readingViewStorageListener(true)
         annotationsCache.annotationChanges.addListener(
             'newStateIntent',
             this.annotationSubscription,
@@ -299,6 +300,31 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation(mutation)
     }
 
+    readingViewStorageListener = (enable) => {
+        console.log('enabled', enable)
+        if (enable) {
+            browser.storage.onChanged.addListener((changes) => {
+                this.toggleReadingView(changes, true)
+            })
+        } else {
+            browser.storage.local.set({ readingView: false })
+            browser.storage.onChanged.removeListener((changes) => {
+                this.toggleReadingView(changes, false)
+            })
+        }
+    }
+
+    toggleReadingView = (changes, enable) => {
+        for (let key of Object.entries(changes)) {
+            if (key[0] === 'readingView') {
+                console.log('newvalue', key[1].newValue)
+                this.emitMutation({
+                    readingView: { $set: key[1].newValue },
+                })
+            }
+        }
+    }
+
     sortAnnotations: EventHandler<'sortAnnotations'> = ({
         event: { sortingFn },
     }) => this.options.annotationsCache.sort(sortingFn)
@@ -355,6 +381,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     show: EventHandler<'show'> = async ({ event }) => {
+        this.readingViewStorageListener(true)
         const width =
             event.existingWidthState != null
                 ? event.existingWidthState
@@ -366,6 +393,7 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
     hide: EventHandler<'hide'> = ({ event, previousState }) => {
+        this.readingViewStorageListener(false)
         this.emitMutation({
             showState: { $set: 'hidden' },
             activeAnnotationUrl: { $set: null },

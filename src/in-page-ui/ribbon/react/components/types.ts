@@ -20,6 +20,7 @@ export interface RibbonSubcomponentProps {
     activityIndicator: ActivityIndicatorProps
     spacesBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface
+    isWidthLocked: boolean
 }
 
 export interface RibbonHighlightsProps {
@@ -37,6 +38,9 @@ export interface RibbonSidebarProps {
     openSidebar: (args: any) => void
     closeSidebar: () => void
     setShowSidebarCommentBox: (value: boolean) => void
+    toggleSidebarLock: () => void
+    toggleReadingView: () => void
+    isWidthLocked: boolean
 }
 
 export interface RibbonCommentBoxProps {

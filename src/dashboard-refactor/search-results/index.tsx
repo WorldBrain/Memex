@@ -1233,13 +1233,13 @@ const PageNotesBox = styled(Margin)`
     width: fill-available;
     padding-left: 10px;
     padding-top: 5px;
-    border-left: 4px solid ${(props) => props.theme.colors.lineGrey};
+    border-left: 4px solid ${(props) => props.theme.colors.lightHover};
     z-index: 4;
 `
 
 const Separator = styled.div`
     width: 100%;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
     margin-bottom: -2px;
 `
 

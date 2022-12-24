@@ -979,7 +979,7 @@ export class AnnotationsSidebar extends React.Component<
     render() {
         return (
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
-                <TopBar>
+                <TopBar sidebarContext={this.props.sidebarContext}>
                     <>
                         {this.renderTopBarSwitcher()}
                         {this.renderSharePageButton()}
@@ -1002,7 +1002,6 @@ const TopAreaContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: fill-available;
-    padding: 0 2px;
 `
 
 const AnnotationActions = styled.div`
@@ -1059,10 +1058,12 @@ const TopBar = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 40px;
+    height: ${(props) =>
+        props.sidebarContext === 'dashboard' ? '40px' : '32px'};
+
     background: ${(props) => props.theme.colors.backgroundColor};
     z-index: 11300;
-    padding: 10px 0px 10px 0px;
+    padding: 10px 10px 10px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.darkhover};
 `
 
@@ -1379,7 +1380,7 @@ const TopBarStyled = styled.div`
     align-items: center;
     z-index: 2147483647;
     padding: 7px 8px 5px 3px;
-    height: 40px;
+    height: 32px;
     box-sizing: border-box;
     width: 100%;
 `
@@ -1423,6 +1424,7 @@ const AnnotationsSectionStyled = styled.section`
     height: fill-available;
     flex: 1;
     overflow: scroll;
+    padding: 0 10px;
 
     scrollbar-width: none;
 
@@ -1467,13 +1469,8 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
     }
 
     scrollbar-width: none;
-    padding: 0 15px 0px 40px;
 
-    ${(props) =>
-        props.sidebarContext === 'dashboard' &&
-        css`
-            padding: 0 20px 0px 20px;
-        `};
+    ${(props) => props.sidebarContext === 'dashboard' && css``};
 `
 
 const FeedFrame = styled.iframe`

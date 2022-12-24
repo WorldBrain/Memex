@@ -32,7 +32,7 @@ const Container = styled.div`
     justify-content: center;
     background-color: ${(props) => props.theme.colors.backgroundColor};
     z-index: 2147483641;
-    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lineGrey};
+    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lightHover};
 `
 
 const SearchSection = styled(Margin)<{ sidebarWidth: string }>`

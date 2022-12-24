@@ -1542,8 +1542,8 @@ const HeaderBar = styled.div`
     align-items: center;
     justify-content: center;
     background-color: ${(props) => props.theme.colors.backgroundColor};
-    z-index: 2147483640;
-    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lineGrey};
+    z-index: 30;
+    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lightHover};
 `
 
 const MainContent = styled.div<{ responsiveWidth: string }>`
@@ -1580,7 +1580,7 @@ const ListSidebarContent = styled(Rnd)<{
             height: 100vh;
             background-color: ${(props) =>
                 props.theme.colors.backgroundColorDarker};
-            border-right: solid 1px ${(props) => props.theme.colors.lineGrey};
+            border-right: solid 1px ${(props) => props.theme.colors.lightHover};
             padding-top: ${sizeConstants.header.heightPx}px;
         `}
     ${(props) =>

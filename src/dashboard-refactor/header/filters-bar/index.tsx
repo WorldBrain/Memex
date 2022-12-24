@@ -282,13 +282,13 @@ const DateText = styled.div`
 const Container = styled.div<{ hidden: boolean }>`
     height: fit-content;
     width: fill-available;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
     justify-content: center;
     position: sticky;
     top: 60px;
     background: ${(props) => props.theme.colors.backgroundColor};
     z-index: 29;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-top: 1px solid ${(props) => props.theme.colors.lightHover};
 
     ${(props) =>
         css`

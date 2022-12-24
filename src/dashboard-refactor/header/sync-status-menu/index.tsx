@@ -268,7 +268,7 @@ const Container = styled.div`
 `
 
 const Separator = styled.div`
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
 `
 
 const TopBox = styled(Margin)`

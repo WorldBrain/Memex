@@ -53,6 +53,7 @@ import {
 } from 'src/overview/sharing/constants'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { SIDEBAR_DEFAULT_OPTION } from 'src/sidebar-overlay/constants'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -584,11 +585,31 @@ export class AnnotationsSidebarContainer<
         }
 
         return (
-            <>
-                <TopBarActionBtns
-                    width={this.state.sidebarWidth}
-                    sidebarContext={this.props.sidebarContext}
+            <TopBarActionBtns
+                width={this.state.sidebarWidth}
+                sidebarContext={this.props.sidebarContext}
+            >
+                <TooltipBox
+                    tooltipText={
+                        <TooltipContent>
+                            Close{' '}
+                            <KeyboardShortcuts size="small" keys={['Esc']} />
+                        </TooltipContent>
+                    }
+                    placement="left"
                 >
+                    <IconBoundary>
+                        <Icon
+                            filePath={icons.arrowRight}
+                            height="20px"
+                            width="16px"
+                            onClick={() => this.hideSidebar()}
+                        />
+                    </IconBoundary>
+                </TooltipBox>
+            </TopBarActionBtns>
+        )
+        /* </>
                     {this.props.sidebarContext !== 'dashboard' && (
                         <TopArea>
                             <IconBoundary>
@@ -627,9 +648,8 @@ export class AnnotationsSidebarContainer<
                                 />
                             </IconBoundary>
                         </TopArea>
-                    )}
-
-                    <BottomArea>
+                    )} */
+        /* <BottomArea>
                         {this.props.sidebarContext !== 'dashboard' &&
                             (this.state.isLocked ? (
                                 <TooltipBox
@@ -728,7 +748,8 @@ export class AnnotationsSidebarContainer<
                     </FooterArea>
                 )}
             </>
-        )
+            
+        ) */
     }
 
     private renderTopBar() {
@@ -819,7 +840,10 @@ export class AnnotationsSidebarContainer<
 
         return (
             <ThemeProvider theme={this.props.theme}>
-                <GlobalStyle sidebarWidth={this.state.sidebarWidth} />
+                <GlobalStyle
+                    sidebarWidth={this.state.sidebarWidth}
+                    sidebarContext={this.props.sidebarContext}
+                />
                 <ContainerStyled
                     id={'annotationSidebarContainer'}
                     sidebarContext={this.props.sidebarContext}
@@ -1024,6 +1048,7 @@ export class AnnotationsSidebarContainer<
 
 const GlobalStyle = createGlobalStyle<{
     sidebarWidth: string
+    sidebarContext: string
 }>`
 
     & * {
@@ -1038,7 +1063,7 @@ const GlobalStyle = createGlobalStyle<{
     width: 4px;
     height: 100vh;
     position: absolute;
-    top: 0px;
+    top:  ${(props) => (props.sidebarContext === 'dashboard' ? '40px' : '0px')};
 
         &:hover {
         background: #5671cf30;
@@ -1051,6 +1076,13 @@ const GlobalStyle = createGlobalStyle<{
     #outerContainer {
         width: ${(props) => props.sidebarWidth};
     }
+`
+
+const TooltipContent = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 5px;
 `
 
 const ShareMenuWrapper = styled.div`
@@ -1076,9 +1108,10 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
             ? '2147483641'
             : '2147483646'}; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: ${(props) => props.theme.colors.backgroundColor};
-    border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-left: 1px solid ${(props) => props.theme.colors.lightHover};
     font-family: 'Satoshi', sans-serif;
     box-sizing: content-box;
+    padding-right: 40px;
 
     &:: -webkit-scrollbar {
         display: none;
@@ -1098,32 +1131,16 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
             right: 0px;
             opacity: 1;
         `}
+
+        ${(props) =>
+            props.sidebarContext === 'dashboard' &&
+            css`
+                padding-right: 0px;
+            `}
     
 
 
     scrollbar-width: none;
-
-    @keyframes slide-in {
-        0% {
-            right: -450px;
-            opacity: 0%;
-        }
-        100% {
-            right: 0px;
-            opacity: 100%;
-        }
-    }
-
-    @keyframes slide-out {
-        0% {
-            right: 0px;
-            opacity: 100%;
-        }
-        100% {
-            right: -1000px;
-            opacity: 0%;
-        }
-    }
 `
 
 const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
@@ -1139,8 +1156,8 @@ const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
     ${(props) =>
         props.sidebarContext === 'dashboard' &&
         css`
-            top: 17px;
-            margin-left: -12px;
+            top: 16px;
+            margin-left: -18px;
         `};
 `
 

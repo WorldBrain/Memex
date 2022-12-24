@@ -419,7 +419,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     key: 'add-spaces-btn',
                     image: 'plus',
                     imageColor: 'purple',
-                    tooltipText: 'Add to Spaces',
+                    tooltipText: 'Add Page to Spaces',
                     onClick: () => this.updateSpacePickerState('footer'),
                     buttonRef: this.props.spacePickerButtonRef,
                     active: this.state.showSpacePicker === 'footer',

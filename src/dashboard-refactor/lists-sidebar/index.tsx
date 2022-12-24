@@ -246,7 +246,7 @@ const Container = styled.div<{ spaceSidebarWidth: number }>`
 `
 
 const Separator = styled.div`
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-top: 1px solid ${(props) => props.theme.colors.lightHover};
 
     &::last-child {
         border-top: 'unset';

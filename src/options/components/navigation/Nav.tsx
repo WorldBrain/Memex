@@ -23,7 +23,7 @@ const Root = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    border-right: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-right: 1px solid ${(props) => props.theme.colors.lightHover};
     background-color: ${(props) => props.theme.colors.greyScale1};
 `
 

@@ -81,13 +81,22 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         const sidebarContainer = document.getElementById(
             'memex-sidebar-container',
         )
+        const ribbonContainer = document.getElementById(
+            'memex-ribbon-container',
+        )
 
         if (sidebarContainer && this.state.showState === 'visible') {
-            if (event.target.classList.contains('hypothesis-highlight')) {
+            if (
+                event.target.classList.contains('hypothesis-highlight') ||
+                this.state.readingView
+            ) {
                 return
             }
 
-            if (!event.composedPath().includes(sidebarContainer)) {
+            if (
+                !event.composedPath().includes(sidebarContainer) &&
+                !event.composedPath().includes(ribbonContainer)
+            ) {
                 this.hideSidebar()
             }
         }

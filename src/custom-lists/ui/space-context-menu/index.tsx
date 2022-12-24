@@ -284,7 +284,7 @@ const ContextMenuContainer = styled.div`
     height: fit-content;
     justify-content: center;
     align-items: flex-start;
-    width: 250px;
+    /* width: 250px; */
 `
 
 const SectionTitle = styled.div`
@@ -400,7 +400,7 @@ const MenuButton = styled.div`
     border-radius: 5px;
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
     }
 
     & * {
@@ -440,7 +440,7 @@ const LinkAndRoleBox = styled.div<{
             grid-gap: 5px;
             grid-auto-flow: row;
             border-radius: 6px;
-            outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+            outline: 1px solid ${(props) => props.theme.colors.lightHover};
         }
 
 `
@@ -454,7 +454,7 @@ const LinkBox = styled(Margin)`
     height: 30px;
     cursor: pointer;
     color: ${(props) => props.theme.colors.normalText};
-    border: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border: 1px solid ${(props) => props.theme.colors.lightHover};
     background: ${(props) => props.theme.colors.darkhover};
 `
 

@@ -145,7 +145,7 @@ export interface SidebarContainerState
     isolatedView?: string | null // if null show default view
 
     annotationSharingAccess: AnnotationSharingAccess
-
+    readingView?: boolean
     showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
     activeTagPickerAnnotationId: string | undefined

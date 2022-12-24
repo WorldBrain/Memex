@@ -172,3 +172,7 @@ export const bulletListIcon = browser.runtime.getURL('/img/bulletListIcon.svg')
 export const strikethroughIcon = browser.runtime.getURL(
     '/img/strikethroughIcon.svg',
 )
+export const sideBySide = browser.runtime.getURL('/img/sideBySide.svg')
+export const fullPageReading = browser.runtime.getURL(
+    '/img/fullPageReading.svg',
+)

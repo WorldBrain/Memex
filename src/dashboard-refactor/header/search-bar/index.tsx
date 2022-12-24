@@ -176,7 +176,7 @@ const Input = styled.input`
     }
 
     &:focus ${SearchBarContainer} {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
     }
 `
 
