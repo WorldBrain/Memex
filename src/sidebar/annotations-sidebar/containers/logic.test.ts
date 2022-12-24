@@ -393,12 +393,16 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.listInstances).toEqual({
                 ...defaultListInstanceStates,
                 [unifiedListIdA]: {
-                    ...initListInstance({ unifiedId: unifiedListIdA }),
+                    ...initListInstance(
+                        annotationsCache.lists.byId[unifiedListIdA],
+                    ),
                     annotationsCount: -1,
                     annotationsCountLoadState: 'pristine',
                 },
                 [unifiedListIdB]: {
-                    ...initListInstance({ unifiedId: unifiedListIdB }),
+                    ...initListInstance(
+                        annotationsCache.lists.byId[unifiedListIdB],
+                    ),
                     annotationsCount: -1,
                     annotationsCountLoadState: 'pristine',
                 },
@@ -409,12 +413,16 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.listInstances).toEqual({
                 ...defaultListInstanceStates,
                 [unifiedListIdA]: {
-                    ...initListInstance({ unifiedId: unifiedListIdA }),
+                    ...initListInstance(
+                        annotationsCache.lists.byId[unifiedListIdA],
+                    ),
                     annotationsCount: 1,
                     annotationsCountLoadState: 'success',
                 },
                 [unifiedListIdB]: {
-                    ...initListInstance({ unifiedId: unifiedListIdB }),
+                    ...initListInstance(
+                        annotationsCache.lists.byId[unifiedListIdB],
+                    ),
                     annotationsCount: 2,
                     annotationsCountLoadState: 'success',
                 },
