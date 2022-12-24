@@ -13,7 +13,7 @@ import {
     detectAnnotationConversationThreads,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/logic'
 import type { ConversationIdBuilder } from '@worldbrain/memex-common/lib/content-conversations/ui/types'
-import { Annotation } from 'src/annotations/types'
+import type { Annotation } from 'src/annotations/types'
 import type {
     SidebarContainerDependencies,
     SidebarContainerState,
@@ -23,7 +23,7 @@ import type {
     FollowedListState,
     ListPickerShowState,
 } from './types'
-import { AnnotationsSidebarInPageEventEmitter } from '../types'
+import type { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
 import {
     generateAnnotationUrl,
@@ -1509,7 +1509,7 @@ export class SidebarContainerLogic extends UILogic<
                 ),
             }),
             async () => {
-                const annotationCountsByList = await customLists.fetchAnnotationCountsForRemoteListsOnPage(
+                const annotationRefsByList = await customLists.fetchAnnotationRefsForRemoteListsOnPage(
                     {
                         normalizedPageUrl: normalizeUrl(state.pageUrl),
                         sharedListIds: listsWithRemoteAnnots.map(
@@ -1524,8 +1524,8 @@ export class SidebarContainerLogic extends UILogic<
 
                 for (const { unifiedId, remoteId } of listsWithRemoteAnnots) {
                     mutation[unifiedId] = {
-                        annotationsCount: {
-                            $set: annotationCountsByList[remoteId] ?? -1,
+                        sharedAnnotationReferences: {
+                            $set: annotationRefsByList[remoteId] ?? [],
                         },
                     }
                 }
@@ -1577,6 +1577,65 @@ export class SidebarContainerLogic extends UILogic<
         if (highlights != null) {
             this.options.events?.emit('renderHighlights', { highlights })
         }
+    }
+
+    expandListAnnotations: EventHandler<'expandListAnnotations'> = async ({
+        event,
+        previousState,
+    }) => {
+        const { annotationsCache, annotations } = this.options
+        const listInstanceState =
+            previousState.listInstances[event.unifiedListId]
+        if (listInstanceState?.sharedAnnotationReferences == null) {
+            return
+        }
+
+        this.emitMutation({
+            listInstances: {
+                [event.unifiedListId]: {
+                    isOpen: { $apply: (isOpen) => !isOpen },
+                },
+            },
+        })
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listInstances: {
+                    [event.unifiedListId]: {
+                        annotationsLoadState: { $set: taskState },
+                    },
+                },
+            }),
+            async () => {
+                const sharedAnnotations = await annotations.getSharedAnnotations(
+                    {
+                        sharedAnnotationReferences:
+                            listInstanceState.sharedAnnotationReferences,
+                        withCreatorData: true,
+                    },
+                )
+
+                const annotationCardInstances: SidebarContainerState['annotationCardInstances'] = {}
+                for (const annot of sharedAnnotations) {
+                    const { unifiedId } = annotationsCache.addAnnotation(
+                        cacheUtils.reshapeSharedAnnotationForCache(annot, {}),
+                    )
+                    annotationCardInstances[
+                        generateAnnotationCardInstanceId(
+                            { unifiedId },
+                            event.unifiedListId,
+                        )
+                    ] = initAnnotationCardInstance({ unifiedId })
+                }
+
+                this.emitMutation({
+                    annotationCardInstances: {
+                        $merge: annotationCardInstances,
+                    },
+                })
+            },
+        )
     }
 
     expandFollowedListNotes: EventHandler<'expandFollowedListNotes'> = async ({

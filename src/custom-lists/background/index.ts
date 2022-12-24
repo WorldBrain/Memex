@@ -78,8 +78,8 @@ export default class CustomListBackground {
             fetchCollaborativeLists: this.fetchCollaborativeLists,
             fetchListById: this.fetchListById,
             fetchListByName: this.fetchListByName,
-            fetchAnnotationCountsForRemoteListsOnPage: this
-                .fetchAnnotationCountsForRemoteListsOnPage,
+            fetchAnnotationRefsForRemoteListsOnPage: this
+                .fetchAnnotationRefsForRemoteListsOnPage,
             fetchFollowedListsWithAnnotations: this
                 .fetchFollowedListsWithAnnotations,
             fetchSharedListDataWithOwnership: this
@@ -186,7 +186,7 @@ export default class CustomListBackground {
         )
     }
 
-    fetchAnnotationCountsForRemoteListsOnPage: RemoteCollectionsInterface['fetchAnnotationCountsForRemoteListsOnPage'] = async ({
+    fetchAnnotationRefsForRemoteListsOnPage: RemoteCollectionsInterface['fetchAnnotationRefsForRemoteListsOnPage'] = async ({
         sharedListIds,
         normalizedPageUrl,
     }) => {
@@ -205,7 +205,7 @@ export default class CustomListBackground {
         return fromPairs(
             Object.entries(listEntriesByPageByList).map(([listId, entries]) => [
                 listId,
-                entries.length,
+                entries.map((entry) => entry.sharedAnnotation),
             ]),
         )
     }

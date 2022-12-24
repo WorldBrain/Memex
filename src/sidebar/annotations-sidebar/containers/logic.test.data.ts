@@ -20,7 +20,10 @@ import type {
     SharedAnnotationMetadata,
     AnnotationPrivacyLevel,
 } from 'src/content-sharing/background/types'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import {
+    Anchor,
+    AnnotationPrivacyLevels,
+} from '@worldbrain/memex-common/lib/annotations/types'
 import type {
     FollowedList,
     FollowedListEntry,
@@ -313,7 +316,7 @@ export const TEST_LIST_METADATA: SharedListMetadata[] = [
 ]
 
 export const SHARED_ANNOTATIONS: Array<
-    SharedAnnotation & { id: AutoPk; creator: AutoPk }
+    SharedAnnotation & { id: AutoPk; creator: AutoPk; selector?: Anchor }
 > = [
     {
         id: '1',
@@ -323,7 +326,11 @@ export const SHARED_ANNOTATIONS: Array<
         createdWhen: 11111,
         updatedWhen: 11111,
         uploadedWhen: 11111,
-        selector: '',
+        selector: {
+            descriptor: {
+                content: [{ type: 'TextPositionSelector', start: 0 }],
+            },
+        } as any,
     },
     {
         id: '2',
@@ -334,6 +341,11 @@ export const SHARED_ANNOTATIONS: Array<
         createdWhen: 11111,
         updatedWhen: 11111,
         uploadedWhen: 11111,
+        selector: {
+            descriptor: {
+                content: [{ type: 'TextPositionSelector', start: 0 }],
+            },
+        } as any,
     },
     {
         id: '3',

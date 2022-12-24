@@ -38,6 +38,7 @@ import type {
 } from 'src/annotations/cache/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
+import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -320,6 +321,8 @@ interface SidebarEvents {
     loadFollowedListNotes: { listId: string }
     expandFollowedListNotes: { listId: string }
 
+    expandListAnnotations: { unifiedListId: UnifiedList['unifiedId'] }
+
     // Selected space management
     setSelectedSpace: { remoteListId: string } | { localListId: number } | null
 
@@ -377,6 +380,6 @@ export interface ListInstance {
     unifiedListId: UnifiedList['unifiedId']
     annotationsCountLoadState: TaskState
     annotationsLoadState: TaskState
-    annotationsCount: number
+    sharedAnnotationReferences?: SharedAnnotationReference[]
     isOpen: boolean
 }

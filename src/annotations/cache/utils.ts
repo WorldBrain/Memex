@@ -6,7 +6,7 @@ import type {
     PageList,
     RemoteCollectionsInterface,
 } from 'src/custom-lists/background/types'
-import type { Annotation } from '../types'
+import type { Annotation, SharedAnnotationWithRefs } from '../types'
 import type {
     PageAnnotationsCacheInterface,
     UnifiedAnnotation,
@@ -30,7 +30,7 @@ export const reshapeAnnotationForCache = (
     },
     opts: {
         extraData?: Partial<UnifiedAnnotation>
-        /** Generally only makes sense for test assertions - local list IDs will be mapped to cache IDs internally */
+        /** Generally only used for test assertions - local list IDs will be mapped to cache IDs internally */
         excludeLocalLists?: boolean
     },
 ): UnifiedAnnotationForCache => {
@@ -51,6 +51,7 @@ export const reshapeAnnotationForCache = (
             : annot.lastEdited.getTime()
     return {
         localId: annot.url,
+        remoteId: undefined,
         unifiedListIds: opts.extraData?.unifiedListIds ?? [],
         body: annot.body,
         comment: annot.comment,
@@ -64,6 +65,31 @@ export const reshapeAnnotationForCache = (
             shouldShare: annot.isShared,
             isBulkShareProtected: annot.isBulkShareProtected,
         }),
+        ...(opts.extraData ?? {}),
+    }
+}
+
+export const reshapeSharedAnnotationForCache = (
+    annot: Omit<SharedAnnotationWithRefs, 'creator'>,
+    opts: {
+        extraData?: Partial<UnifiedAnnotation>
+        /** Generally only used test assertions - local list IDs will be mapped to cache IDs internally */
+        excludeLocalLists?: boolean
+    },
+): UnifiedAnnotationForCache => {
+    return {
+        localId: undefined,
+        remoteId: annot.reference.id.toString(),
+        unifiedListIds: opts.extraData?.unifiedListIds ?? [],
+        body: annot.body,
+        comment: annot.comment,
+        selector: annot.selector,
+        creator: annot.creatorReference,
+        localListIds: opts.excludeLocalLists ? undefined : [],
+        normalizedPageUrl: annot.normalizedPageUrl,
+        lastEdited: annot.updatedWhen,
+        createdWhen: annot.createdWhen,
+        privacyLevel: AnnotationPrivacyLevels.SHARED,
         ...(opts.extraData ?? {}),
     }
 }
@@ -198,8 +224,12 @@ export async function hydrateCache({
         },
     )
 
+    const annotationUrls = annotationsData.map((annot) => annot.url)
     const privacyLvlsByAnnot = await bgModules.contentSharing.findAnnotationPrivacyLevels(
-        { annotationUrls: annotationsData.map((annot) => annot.url) },
+        { annotationUrls },
+    )
+    const remoteIdsByAnnot = await bgModules.contentSharing.getRemoteAnnotationIds(
+        { annotationUrls },
     )
 
     args.cache.setAnnotations(
@@ -214,6 +244,7 @@ export async function hydrateCache({
 
             return reshapeAnnotationForCache(annot, {
                 extraData: {
+                    remoteId: remoteIdsByAnnot[annot.url]?.toString(),
                     creator: args.user,
                     privacyLevel,
                 },

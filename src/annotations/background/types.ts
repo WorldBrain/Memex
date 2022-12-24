@@ -1,17 +1,13 @@
-import {
+import type {
     RemoteFunctionRole,
     RemotePositionalFunction,
     RemoteFunction,
 } from 'src/util/webextensionRPC'
-import { Annotation } from 'src/annotations/types'
-import { AnnotSearchParams } from 'src/search/background/types'
-import { Anchor } from 'src/highlighting/types'
-import {
-    SharedAnnotationReference,
-    SharedAnnotation,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
-import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
+import type { Annotation } from 'src/annotations/types'
+import type { AnnotSearchParams } from 'src/search/background/types'
+import type { Anchor } from 'src/highlighting/types'
+import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { SharedAnnotationWithRefs } from '../types'
 
 export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     getAllAnnotationsByUrl: RemotePositionalFunction<
@@ -87,14 +83,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
                 withCreatorData?: boolean
             },
         ],
-        Array<
-            SharedAnnotation & {
-                reference: SharedAnnotationReference
-                creatorReference: UserReference
-                creator?: UserPublicDetails
-                selector?: Anchor
-            }
-        >
+        Array<SharedAnnotationWithRefs>
     >
     goToAnnotationFromSidebar: RemoteFunction<
         Role,

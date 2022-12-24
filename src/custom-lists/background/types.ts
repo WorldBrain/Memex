@@ -91,11 +91,11 @@ export interface RemoteCollectionsInterface {
         skip?: number
         limit?: number
     }): Promise<PageList[]>
-    fetchAnnotationCountsForRemoteListsOnPage(args: {
+    fetchAnnotationRefsForRemoteListsOnPage(args: {
         sharedListIds: string[]
         normalizedPageUrl: string
     }): Promise<{
-        [sharedListId: string]: number
+        [sharedListId: string]: SharedAnnotationReference[]
     }>
     fetchFollowedListsWithAnnotations(args: {
         normalizedPageUrl: string

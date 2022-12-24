@@ -30,8 +30,21 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     private annotationIdCounter = 0
     private listIdCounter = 0
+
+    /**
+     * Reverse index to make local list -> cached ID lookups easy
+     * Main case: annotations are given to cache for caching but only have references to local list IDs
+     */
     private localListIdsToCacheIds: {
         [localListId: number]: UnifiedList['unifiedId']
+    } = {}
+
+    /**
+     * Reverse index to make remote annotation -> cached ID lookups easy
+     * Main case: de-duping downloaded shared annotations that already exist locally and thus are already cached.
+     */
+    private remoteAnnotIdsToCacheIds: {
+        [localAnnotId: string]: UnifiedAnnotation['unifiedId']
     } = {}
 
     constructor(private deps: PageAnnotationCacheDeps) {
@@ -83,10 +96,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     getAnnotationByRemoteId: PageAnnotationsCacheInterface['getAnnotationByRemoteId'] = (
         remoteId,
     ) => {
-        const matchingAnnotation = Object.values(this.annotations.byId).find(
-            (annot) => annot.remoteId != null && annot.remoteId === remoteId,
-        )
-        return matchingAnnotation ?? null
+        const unifiedAnnotId = this.remoteAnnotIdsToCacheIds[remoteId]
+        if (unifiedAnnotId == null) {
+            return null
+        }
+        return this.annotations.byId[unifiedAnnotId] ?? null
     }
 
     getListByLocalId: PageAnnotationsCacheInterface['getListByLocalId'] = (
@@ -123,6 +137,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         opts: { now: number },
     ): UnifiedAnnotation => {
         const unifiedAnnotationId = this.generateAnnotationId()
+        if (annotation.remoteId != null) {
+            this.remoteAnnotIdsToCacheIds[
+                annotation.remoteId
+            ] = unifiedAnnotationId
+        }
 
         const unifiedListIds = localListIds
             .map((localListId) => {
@@ -210,6 +229,17 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         annotation,
         { now = Date.now() } = { now: Date.now() },
     ) => {
+        // This covers the case of adding a downloaded remote annot that already exists locally, and thus would have been cached already
+        //  (currently don't distinguish own remote annots from others')
+        if (annotation.remoteId != null) {
+            const existingId = this.remoteAnnotIdsToCacheIds[
+                annotation.remoteId
+            ]
+            if (existingId != null) {
+                return { unifiedId: existingId }
+            }
+        }
+
         const nextAnnotation = this.prepareAnnotationForCaching(annotation, {
             now,
         })

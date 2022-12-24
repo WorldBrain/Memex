@@ -1,4 +1,10 @@
 import type { Anchor } from 'src/highlighting/types'
+import type {
+    SharedAnnotation,
+    SharedAnnotationReference,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
 
 // export interface Annotation {
 //     /** Unique URL for this annotation. Used as more of an ID; probably not for display. */
@@ -101,3 +107,10 @@ export type SelectionIndices = [number, number]
 export type ListDetailsGetter = (
     id: number,
 ) => { name: string; isShared: boolean; description?: string }
+
+export type SharedAnnotationWithRefs = SharedAnnotation & {
+    reference: SharedAnnotationReference
+    creatorReference: UserReference
+    creator?: UserPublicDetails
+    selector?: Anchor
+}

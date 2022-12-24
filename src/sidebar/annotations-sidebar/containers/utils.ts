@@ -5,12 +5,12 @@ import type {
 import type { AnnotationCardInstance, ListInstance } from './types'
 
 export const generateAnnotationCardInstanceId = (
-    { unifiedId }: UnifiedAnnotation,
+    { unifiedId }: Pick<UnifiedAnnotation, 'unifiedId'>,
     type: UnifiedList['unifiedId'] | 'annotations-tab',
 ): string => `${type}-${unifiedId}`
 
 export const initAnnotationCardInstance = (
-    annot: UnifiedAnnotation,
+    annot: Pick<UnifiedAnnotation, 'unifiedId' | 'comment'>,
 ): AnnotationCardInstance => ({
     unifiedAnnotationId: annot.unifiedId,
     comment: annot.comment ?? '',
@@ -24,9 +24,7 @@ export const initListInstance = (
         'unifiedId' | 'unifiedAnnotationIds' | 'hasRemoteAnnotations'
     >,
 ): ListInstance => ({
-    annotationsCount: list.hasRemoteAnnotations
-        ? -1
-        : list.unifiedAnnotationIds.length,
+    sharedAnnotationReferences: list.hasRemoteAnnotations ? [] : undefined,
     annotationsCountLoadState: 'pristine',
     annotationsLoadState: 'pristine',
     unifiedListId: list.unifiedId,
