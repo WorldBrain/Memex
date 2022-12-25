@@ -454,7 +454,7 @@ const LoadingBox = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 300px;
+    height: 130px;
     width: 100%;
 `
 

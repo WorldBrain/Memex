@@ -1053,7 +1053,6 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
             justify-content: center;
             height: 100vh;
             width: 28px;
-            border-left: 1px solid ${(props) => props.theme.colors.lightHover};
             align-items: flex-start;
             padding: 0 7px 0 5px;
             right: 0px;

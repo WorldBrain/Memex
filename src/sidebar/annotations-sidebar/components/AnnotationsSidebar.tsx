@@ -1101,6 +1101,7 @@ const AnnotationBox = styled.div<{
     animation-duration: 0.1s;
     animation-timing-function: ease-in-out;
     animation-fill-mode: backwards;
+    position: relative;
 `
 
 const SectionCircle = styled.div`
@@ -1469,9 +1470,14 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
         display: none;
     }
 
+    border-right: 1px solid ${(props) => props.theme.colors.lightHover};
     scrollbar-width: none;
 
-    ${(props) => props.sidebarContext === 'dashboard' && css``};
+    ${(props) =>
+        props.sidebarContext === 'dashboard' &&
+        css`
+            border-left: 'unset';
+        `};
 `
 
 const FeedFrame = styled.iframe`
