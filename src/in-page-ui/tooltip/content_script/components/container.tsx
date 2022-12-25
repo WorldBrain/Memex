@@ -52,8 +52,6 @@ async function getShortCut(name: string) {
 
     let shortcut = short.shortcut.split('+')
 
-    console.log(short)
-
     return shortcut
 }
 

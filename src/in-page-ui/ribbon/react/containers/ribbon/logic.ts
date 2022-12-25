@@ -113,6 +113,7 @@ export class RibbonContainerLogic extends UILogic<
     private initLogicResolvable = resolvablePromise()
 
     commentSavedTimeout = 2000
+    readingView = false
 
     constructor(private dependencies: RibbonLogicOptions) {
         super()
@@ -160,6 +161,8 @@ export class RibbonContainerLogic extends UILogic<
     init: EventHandler<'init'> = async (incoming) => {
         const { getPageUrl, syncSettings } = this.dependencies
 
+        this.initReadingViewListeners()
+
         await loadInitial<RibbonContainerState>(this, async () => {
             const [url, areTagsMigrated] = await Promise.all([
                 getPageUrl(),
@@ -175,6 +178,19 @@ export class RibbonContainerLogic extends UILogic<
             await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
         this.initLogicResolvable.resolve()
+    }
+
+    async initReadingViewListeners() {
+        // make sure to reset readingviewValue on sidebar open on new page
+        await browser.storage.local.set({ readingView: false })
+
+        // init window resize event listener
+        window.addEventListener('resize', () => this.resizeReadingWidth())
+
+        // init listeners to local storage flag for reading view
+        browser.storage.onChanged.addListener((changes) => {
+            this.setReadingView(changes)
+        })
     }
 
     hydrateStateFromDB: EventHandler<'hydrateStateFromDB'> = async ({
@@ -223,74 +239,82 @@ export class RibbonContainerLogic extends UILogic<
 
     cleanup() {}
 
-    toggleReadingView: EventHandler<'toggleReadingView'> = ({
+    toggleReadingView: EventHandler<'toggleReadingView'> = async ({
         previousState,
     }) => {
-        console.log('toggle')
-        setLocalStorage('readingView', !previousState.isWidthLocked)
+        // init dom elements and observers
+        let sidebar = document
+            .getElementById('memex-sidebar-container')
+            .shadowRoot.getElementById('annotationSidebarContainer')
 
-        // getLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY).then((width) => {
+        const resizeObserver = new ResizeObserver(() => {
+            this.resizeReadingWidth()
+        })
 
         if (previousState.isWidthLocked) {
-            document.body.style.width = '100%'
-            console.log('remove')
+            // set member variable for internal logic use
+            this.readingView = false
 
+            // set mutation for UI changes
+            this.emitMutation({
+                isWidthLocked: { $set: false },
+            })
+
+            // reset window width
+            document.body.style.width = 'initial'
+
+            // remove listeners and values
+            this.tearDownListeners(resizeObserver, sidebar)
             browser.storage.local.set({ readingView: false })
-            browser.storage.onChanged.removeListener((changes) => {
-                this.setReadingView(changes, false)
-            })
-
-            window.removeEventListener('resize', () => this.resizeReadingWidth)
         } else {
-            console.log('add')
+            // set member variable for internal logic use
+            this.readingView = true
 
-            browser.storage.onChanged.addListener((changes) => {
-                this.setReadingView(changes, true)
+            // set mutation for UI changes
+            this.emitMutation({
+                isWidthLocked: { $set: true },
             })
 
+            // force resize calc
             this.resizeReadingWidth()
-            window.addEventListener('resize', () => this.resizeReadingWidth)
-        }
 
-        this.emitMutation({
-            isWidthLocked: { $set: !previousState.isWidthLocked },
+            // set corret storage values
+            browser.storage.local.set({ readingView: true })
+
+            // observe size changes of sidebar and adjust reading view
+            resizeObserver.observe(sidebar)
+        }
+    }
+
+    setReadingView = (changes) => {
+        if (Object.entries(changes)[0][0] === 'readingView') {
+            this.emitMutation({
+                isWidthLocked: { $set: Object.entries(changes)[0][1].newValue },
+            })
+            this.readingView = Object.entries(changes)[0][1].newValue
+        }
+    }
+
+    tearDownListeners(resizeObserver?, sidebar?) {
+        window.removeEventListener('resize', () => this.resizeReadingWidth())
+        resizeObserver.unobserve(sidebar)
+        browser.storage.onChanged.removeListener((changes) => {
+            this.setReadingView(changes)
         })
     }
 
-    setReadingView = (changes, enable) => {
-        for (let key of Object.entries(changes)) {
-            if (key[0] === 'readingView') {
-                console.log('newvalue', key[1].newValue)
-                this.emitMutation({
-                    isWidthLocked: { $set: key[1].newValue },
-                })
-
-                if (!key[1].newValue) {
-                    console.log('removelistener')
-
-                    window.removeEventListener(
-                        'resize',
-                        () => this.resizeReadingWidth,
-                    )
-                }
-            }
+    resizeReadingWidth() {
+        if (this.readingView === true) {
+            let currentsidebarWidth = document
+                .getElementById('memex-sidebar-container')
+                .shadowRoot.getElementById('annotationSidebarContainer')
+                .offsetWidth
+            let currentWindowWidth = window.innerWidth
+            let readingWidth =
+                currentWindowWidth - currentsidebarWidth - 10 + 'px'
+            document.body.style.width = readingWidth
         }
     }
-
-    resizeReadingWidth(sidebarWidth?: number) {
-        console.log('til')
-        let currentsidebarWidth = document
-            .getElementById('memex-sidebar-container')
-            .shadowRoot.getElementById('annotationSidebarContainer').offsetWidth
-        let currentWindowWidth = window.innerWidth
-        let readingWidth = currentWindowWidth - currentsidebarWidth - 10 + 'px'
-        document.body.style.width = readingWidth
-    }
-
-    // unlockWidth: EventHandler<'unlockWidth'> = () => {
-    //     document.body.style.width = '100%'
-    //     this.emitMutation({ isWidthLocked: { $set: false } })
-    // }
 
     /**
      * This exists due to a race-condition between bookmark shortcut and init hydration logic.

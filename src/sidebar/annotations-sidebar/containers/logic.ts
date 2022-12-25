@@ -235,7 +235,6 @@ export class SidebarContainerLogic extends UILogic<
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         const { pageUrl, annotationsCache, initialState } = this.options
-        this.readingViewStorageListener(true)
         annotationsCache.annotationChanges.addListener(
             'newStateIntent',
             this.annotationSubscription,
@@ -243,6 +242,8 @@ export class SidebarContainerLogic extends UILogic<
 
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.annotationSubscription(annotationsCache.annotations)
+        browser.storage.local.set({ readingView: false })
+        this.readingViewStorageListener(true)
 
         await loadInitial<SidebarContainerState>(this, async () => {
             const areTagsMigrated = await this.syncSettings.extension.get(
@@ -300,24 +301,22 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation(mutation)
     }
 
-    readingViewStorageListener = (enable) => {
-        console.log('enabled', enable)
+    readingViewStorageListener = async (enable) => {
         if (enable) {
-            browser.storage.onChanged.addListener((changes) => {
-                this.toggleReadingView(changes, true)
+            await browser.storage.onChanged.addListener((changes) => {
+                this.toggleReadingView(changes)
             })
         } else {
-            browser.storage.local.set({ readingView: false })
-            browser.storage.onChanged.removeListener((changes) => {
-                this.toggleReadingView(changes, false)
+            await browser.storage.local.set({ readingView: false })
+            await browser.storage.onChanged.removeListener(() => {
+                this.toggleReadingView()
             })
         }
     }
 
-    toggleReadingView = (changes, enable) => {
+    toggleReadingView = (changes?) => {
         for (let key of Object.entries(changes)) {
             if (key[0] === 'readingView') {
-                console.log('newvalue', key[1].newValue)
                 this.emitMutation({
                     readingView: { $set: key[1].newValue },
                 })
@@ -399,7 +398,7 @@ export class SidebarContainerLogic extends UILogic<
             activeAnnotationUrl: { $set: null },
         })
 
-        document.body.style.width = '100%'
+        document.body.style.width = 'initial'
     }
 
     lock: EventHandler<'lock'> = () =>
