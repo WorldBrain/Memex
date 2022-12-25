@@ -32,7 +32,7 @@ export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
 
     render() {
         if (
-            !this.state.isVisible &&
+            !this.state.isVisible ||
             this.props.sidebarContext === 'dashboard'
         ) {
             return null
