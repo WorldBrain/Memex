@@ -86,9 +86,7 @@ const buildConversationId: ConversationIdBuilder = (
 
 export const INIT_FORM_STATE: EditForm = {
     isBookmarked: false,
-    isTagInputActive: false,
     commentText: '',
-    tags: [],
     lists: [],
 }
 
@@ -737,31 +735,6 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    addNewPageComment: EventHandler<'addNewPageComment'> = async ({
-        event,
-    }) => {
-        const mutation: UIMutation<SidebarContainerState> = {
-            showCommentBox: { $set: true },
-        }
-
-        if (event.comment?.length) {
-            mutation.commentBox = {
-                ...mutation.commentBox,
-                commentText: { $set: event.comment },
-            }
-        }
-
-        if (event.tags?.length) {
-            mutation.commentBox = {
-                ...mutation.commentBox,
-                tags: { $set: event.tags },
-            }
-        }
-
-        this.emitMutation(mutation)
-        this.options.focusCreateForm()
-    }
-
     cancelEdit: EventHandler<'cancelEdit'> = ({ event, previousState }) => {
         this.emitMutation({
             annotationModes: {
@@ -787,21 +760,35 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    changeNewPageCommentText: EventHandler<'changeNewPageCommentText'> = ({
-        event,
-    }) => {
-        this.emitMutation({
-            commentBox: { commentText: { $set: event.comment } },
-        })
-    }
-
     receiveSharingAccessChange: EventHandler<'receiveSharingAccessChange'> = ({
         event: { sharingAccess },
     }) => {
         this.emitMutation({ annotationSharingAccess: { $set: sharingAccess } })
     }
 
-    saveNewPageComment: EventHandler<'saveNewPageComment'> = async ({
+    cancelNewPageNote: EventHandler<'cancelNewPageNote'> = () => {
+        this.emitMutation({
+            commentBox: { $set: INIT_FORM_STATE },
+            showCommentBox: { $set: false },
+        })
+    }
+
+    setNewPageNoteText: EventHandler<'setNewPageNoteText'> = async ({
+        event,
+    }) => {
+        if (event.comment.length) {
+            this.emitMutation({
+                showCommentBox: { $set: true },
+                commentBox: {
+                    commentText: { $set: event.comment },
+                },
+            })
+        }
+
+        this.options.focusCreateForm()
+    }
+
+    saveNewPageNote: EventHandler<'saveNewPageNote'> = async ({
         event,
         previousState,
     }) => {
@@ -810,9 +797,10 @@ export class SidebarContainerLogic extends UILogic<
         if (comment.length === 0) {
             return
         }
+        const now = event.now ?? Date.now()
         const annotationId = generateAnnotationUrl({
             pageUrl,
-            now: () => Date.now(),
+            now: () => now,
         })
 
         this.emitMutation({
@@ -825,9 +813,9 @@ export class SidebarContainerLogic extends UILogic<
                 return
             }
 
-            const annotationLists = [...commentBox.lists]
+            const listIds = [...commentBox.lists]
             if (selectedSpace?.localId != null) {
-                annotationLists.push(selectedSpace.localId)
+                listIds.push(selectedSpace.localId)
             }
 
             const { remoteAnnotationId, savePromise } = await createAnnotation({
@@ -835,6 +823,7 @@ export class SidebarContainerLogic extends UILogic<
                     fullPageUrl: pageUrl,
                     comment,
                     localId: annotationId,
+                    createdWhen: new Date(now),
                 },
                 annotationsBG: this.options.annotations,
                 contentSharingBG: this.options.contentSharing,
@@ -853,65 +842,16 @@ export class SidebarContainerLogic extends UILogic<
                     shouldShare: event.shouldShare,
                     isBulkShareProtected: event.isProtected,
                 }),
-                localListIds: [], // TODO: resolve list IDS
                 creator: this.options.currentUser,
+                localListIds: listIds,
+                createdWhen: now,
+                lastEdited: now,
                 comment,
             })
 
             await savePromise
-            // check if annotation has lists with remoteId and reload them
-            // for (const listName of nextAnnotation.lists) {
-            //     const list = await this.options.customLists.fetchListByName({
-            //         name: listName,
-            //     })
-            //     if (list.remoteId) {
-            //         // Want to update the list with the new page comment / note, the following isn't enough though
-            //         // await this.processUIEvent('loadFollowedLists', {
-            //         //     previousState: previousState,
-            //         //     event: null,
-            //         // })
-            //     }
-            // }
-        })
-    }
 
-    cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
-        this.emitMutation({
-            commentBox: { $set: INIT_FORM_STATE },
-            showCommentBox: { $set: false },
-        })
-    }
-
-    private createTagsStateUpdater = (args: {
-        added?: string
-        deleted?: string
-    }): ((tags: string[]) => string[]) => {
-        if (args.added) {
-            return (tags) => {
-                const tag = args.added
-                return tags.includes(tag) ? tags : [...tags, tag]
-            }
-        }
-
-        return (tags) => {
-            const index = tags.indexOf(args.deleted)
-            if (index === -1) {
-                return tags
-            }
-
-            return [...tags.slice(0, index), ...tags.slice(index + 1)]
-        }
-    }
-
-    updateTagsForEdit: EventHandler<'updateTagsForEdit'> = async ({
-        event,
-    }) => {
-        const tagsStateUpdater = this.createTagsStateUpdater(event)
-
-        this.emitMutation({
-            editForms: {
-                [event.annotationUrl]: { tags: { $apply: tagsStateUpdater } },
-            },
+            // TODO: Share annot to lists (maybe updated createAnnotation method)
         })
     }
 
@@ -936,57 +876,12 @@ export class SidebarContainerLogic extends UILogic<
         // })
     }
 
-    setEditCommentTagPicker: EventHandler<'setEditCommentTagPicker'> = ({
+    setNewPageNoteLists: EventHandler<'setNewPageNoteLists'> = async ({
         event,
+        previousState,
     }) => {
-        this.emitMutation({
-            editForms: {
-                [event.annotationUrl]: {
-                    isTagInputActive: { $set: event.active },
-                },
-            },
-        })
-    }
-
-    updateNewPageCommentTags: EventHandler<'updateNewPageCommentTags'> = ({
-        event,
-    }) => {
-        this.emitMutation({
-            commentBox: { tags: { $set: event.tags } },
-        })
-    }
-    updateNewPageCommentLists: EventHandler<
-        'updateNewPageCommentLists'
-    > = async ({ event, previousState }) => {
         this.emitMutation({
             commentBox: { lists: { $set: event.lists } },
-        })
-    }
-
-    private createTagStateDeleteUpdater = (args: { tag: string }) => (
-        tags: string[],
-    ) => {
-        const tagIndex = tags.indexOf(args.tag)
-        if (tagIndex === -1) {
-            return tags
-        }
-
-        tags = [...tags]
-        tags.splice(tagIndex, 1)
-        return tags
-    }
-
-    deleteEditCommentTag: EventHandler<'deleteEditCommentTag'> = ({
-        event,
-    }) => {
-        this.emitMutation({
-            editForms: {
-                [event.annotationUrl]: {
-                    tags: {
-                        $apply: this.createTagStateDeleteUpdater(event),
-                    },
-                },
-            },
         })
     }
 
@@ -1360,10 +1255,7 @@ export class SidebarContainerLogic extends UILogic<
                   }
 
         // If there was existing form state, we want to keep that, else use the stored annot data or defaults
-        if (
-            !previousForm ||
-            (!previousForm?.commentText?.length && !previousForm?.tags?.length)
-        ) {
+        if (!previousForm || !previousForm?.commentText?.length) {
             mutation.editForms = {
                 [event.annotationUrl]: {
                     commentText: { $set: annotation.comment ?? '' },

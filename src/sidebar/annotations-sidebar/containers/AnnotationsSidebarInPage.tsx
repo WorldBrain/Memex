@@ -199,9 +199,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         await (this.logic as SidebarContainerLogic).annotationsLoadComplete
 
         if (event.action === 'comment') {
-            await this.processEvent('addNewPageComment', {
-                comment: event.annotationData?.commentText,
-                tags: event.annotationData?.tags,
+            await this.processEvent('setNewPageNoteText', {
+                comment: event.annotationData?.commentText ?? '',
             })
         } else if (event.action === 'show_annotation') {
             this.activateAnnotation(event.annotationUrl, 'show')

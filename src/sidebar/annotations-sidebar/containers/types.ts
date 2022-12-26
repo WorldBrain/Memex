@@ -77,9 +77,7 @@ export interface SidebarContainerDependencies {
 
 export interface EditForm {
     isBookmarked: boolean
-    isTagInputActive: boolean
     commentText: string
-    tags: string[]
     lists: number[]
 }
 
@@ -239,30 +237,25 @@ interface SidebarEvents {
     sortAnnotations: { sortingFn: AnnotationsSorter }
     setActiveSidebarTab: { tab: SidebarTab }
 
-    // Adding a new page comment
-    addNewPageComment: { comment?: string; tags?: string[] }
-    changeNewPageCommentText: { comment: string }
+    // New page note box
+    setNewPageNoteText: { comment: string }
+    saveNewPageNote: {
+        shouldShare: boolean
+        isProtected?: boolean
+        now?: number
+    }
+    cancelNewPageNote: null
+    setNewPageNoteLists: { lists: number[] }
+
     cancelEdit: { annotationUrl: string }
     changeEditCommentText: { annotationUrl: string; comment: string }
-    saveNewPageComment: { shouldShare: boolean; isProtected?: boolean }
-    cancelNewPageComment: null
-    updateNewPageCommentTags: { tags: string[] }
-    updateNewPageCommentLists: { lists: number[] }
 
-    setEditCommentTagPicker: { annotationUrl: string; active: boolean }
-
-    updateTagsForEdit: {
-        added?: string
-        deleted?: string
-        annotationUrl: string
-    }
     updateListsForAnnotation: {
         added: number | null
         deleted: number | null
         unifiedAnnotationId: string
         options?: { protectAnnotation?: boolean }
     }
-    deleteEditCommentTag: { tag: string; annotationUrl: string }
 
     receiveSharingAccessChange: {
         sharingAccess: AnnotationSharingAccess

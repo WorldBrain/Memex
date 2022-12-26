@@ -328,22 +328,20 @@ export class AnnotationsSidebarContainer<
         const { tags, customLists, contentSharing } = this.props
         return {
             onCommentChange: (comment) =>
-                this.processEvent('changeNewPageCommentText', { comment }),
-            onTagsUpdate: (tags) =>
-                this.processEvent('updateNewPageCommentTags', { tags }),
-            onCancel: () => this.processEvent('cancelNewPageComment', null),
+                this.processEvent('setNewPageNoteText', { comment }),
+            onCancel: () => this.processEvent('cancelNewPageNote', null),
             onSave: (shouldShare, isProtected) =>
-                this.processEvent('saveNewPageComment', {
+                this.processEvent('saveNewPageNote', {
                     shouldShare,
                     isProtected,
                 }),
             tagQueryEntries: (query) => tags.searchForTagSuggestions({ query }),
             addPageToList: (listId) =>
-                this.processEvent('updateNewPageCommentLists', {
+                this.processEvent('setNewPageNoteLists', {
                     lists: [...this.state.commentBox.lists, listId],
                 }),
             removePageFromList: (listId) =>
-                this.processEvent('updateNewPageCommentLists', {
+                this.processEvent('setNewPageNoteLists', {
                     lists: this.state.commentBox.lists.filter(
                         (id) => id !== listId,
                     ),
@@ -354,7 +352,6 @@ export class AnnotationsSidebarContainer<
             spacesBG: customLists,
             loadDefaultTagSuggestions: tags.fetchInitialTagSuggestions,
             comment: this.state.commentBox.commentText,
-            tags: this.state.commentBox.tags,
             lists: this.state.commentBox.lists,
             hoverState: null,
         }
@@ -1018,7 +1015,6 @@ export class AnnotationsSidebarContainer<
                                 this.processEvent('setActiveAnnotationUrl', {
                                     annotationUrl,
                                 })}
-                            isAnnotationCreateShown={this.state.showCommentBox}
                             setPopoutsActive={(isActive) => {
                                 this.processEvent('setPopoutsActive', isActive)
                             }}

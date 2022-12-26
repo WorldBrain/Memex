@@ -107,7 +107,6 @@ export interface AnnotationsSidebarProps
 
     sharingAccess: AnnotationSharingAccess
     isSearchLoading: boolean
-    isAnnotationCreateShown: boolean
     theme: Partial<SidebarTheme>
     openCollectionPage: (remoteListId: string) => void
     onShareAllNotesClick: () => void

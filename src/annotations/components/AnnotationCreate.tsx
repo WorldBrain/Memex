@@ -35,7 +35,6 @@ interface State {
 export interface AnnotationCreateEventProps {
     onSave: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
     onCancel: () => void
-    onTagsUpdate?: (tags: string[]) => void
     onCommentChange: (text: string) => void
     getListDetailsById: ListDetailsGetter
     onTagsHover?: React.MouseEventHandler

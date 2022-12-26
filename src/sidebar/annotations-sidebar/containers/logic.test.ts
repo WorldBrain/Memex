@@ -1,6 +1,10 @@
 import fromPairs from 'lodash/fromPairs'
 import { FakeAnalytics } from 'src/analytics/mock'
-import { SidebarContainerLogic, createEditFormsForAnnotations } from './logic'
+import {
+    SidebarContainerLogic,
+    createEditFormsForAnnotations,
+    INIT_FORM_STATE,
+} from './logic'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
@@ -23,6 +27,7 @@ import {
     initAnnotationCardInstance,
     initListInstance,
 } from './utils'
+import { generateAnnotationUrl } from 'src/annotations/utils'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -196,7 +201,7 @@ describe('SidebarContainerLogic', () => {
     })
     const context = 'pageAnnotations'
 
-    describe('NEW page annotations tab', () => {
+    describe('space tab', () => {
         it('should hydrate the page annotations cache with annotations and lists data from the DB upon init', async ({
             device,
         }) => {
@@ -780,6 +785,210 @@ describe('SidebarContainerLogic', () => {
         })
     })
 
+    describe('new page note box', () => {
+        it('should be able to cancel writing a new comment', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({ device })
+
+            expect(sidebar.state.showCommentBox).toEqual(false)
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            await sidebar.processEvent('setNewPageNoteText', {
+                comment: DATA.COMMENT_1,
+            })
+            expect(sidebar.state.showCommentBox).toEqual(true)
+            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
+
+            await sidebar.processEvent('cancelNewPageNote', null)
+            expect(sidebar.state.showCommentBox).toEqual(false)
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+        })
+
+        it('should be able to save a new comment', async ({ device }) => {
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            await sidebar.processEvent('setNewPageNoteText', {
+                comment: DATA.COMMENT_1,
+            })
+            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
+
+            await sidebar.processEvent('saveNewPageNote', {
+                shouldShare: false,
+                now: 123,
+            })
+
+            const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
+            expect(sidebar.state.annotations.byId[latestCachedAnnotId]).toEqual(
+                {
+                    unifiedId: latestCachedAnnotId,
+                    localId: generateAnnotationUrl({
+                        pageUrl: DATA.TAB_URL_1,
+                        now: () => 123,
+                    }),
+                    remoteId: undefined,
+                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
+                    creator: DATA.CREATOR_1,
+                    comment: DATA.COMMENT_1,
+                    body: undefined,
+                    selector: undefined,
+                    createdWhen: 123,
+                    lastEdited: 123,
+                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                    unifiedListIds: [],
+                },
+            )
+            expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
+        })
+
+        it('should be able to save a new comment in selected space mode', async ({
+            device,
+        }) => {
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+                withAuth: false,
+            })
+
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            await sidebar.processEvent('setNewPageNoteText', {
+                comment: DATA.COMMENT_1,
+            })
+            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
+
+            expect(sidebar.state.commentBox.lists).toEqual([])
+            await sidebar.processEvent('setNewPageNoteLists', {
+                lists: [DATA.LOCAL_LISTS[0].id],
+            })
+            expect(sidebar.state.commentBox.lists).toEqual([
+                DATA.LOCAL_LISTS[0].id,
+            ])
+
+            // TODO: Update this to trigger the `setSelectedSpace` event instead of directly mutating the state
+            sidebar.processMutation({
+                selectedSpace: {
+                    $set: { localId: DATA.LOCAL_LISTS[1].id, remoteId: null },
+                },
+            })
+
+            expect(sidebar.state.commentBox.lists).toEqual([
+                DATA.LOCAL_LISTS[0].id,
+            ])
+
+            const cachedListIds = [
+                DATA.LOCAL_LISTS[0].id,
+                DATA.LOCAL_LISTS[1].id,
+            ].map(
+                (localId) =>
+                    annotationsCache.getListByLocalId(localId).unifiedId,
+            )
+
+            const localAnnotId = generateAnnotationUrl({
+                pageUrl: DATA.TAB_URL_1,
+                now: () => 123,
+            })
+
+            await sidebar.processEvent('saveNewPageNote', {
+                shouldShare: false,
+                now: 123,
+            })
+
+            const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
+            expect(sidebar.state.annotations.byId[latestCachedAnnotId]).toEqual(
+                {
+                    unifiedId: latestCachedAnnotId,
+                    localId: localAnnotId,
+                    remoteId: undefined,
+                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
+                    creator: undefined, // NOTE: we're not auth'd
+                    comment: DATA.COMMENT_1,
+                    body: undefined,
+                    selector: undefined,
+                    createdWhen: 123,
+                    lastEdited: 123,
+                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                    unifiedListIds: cachedListIds,
+                },
+            )
+            expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
+        })
+
+        it('should be able to save a new comment, inheriting spaces from parent page, when save has share intent', async ({
+            device,
+        }) => {
+            const fullPageUrl = DATA.TAB_URL_1
+
+            const { sidebar } = await setupLogicHelper({
+                device,
+                fullPageUrl: fullPageUrl,
+                withAuth: true,
+            })
+
+            expect(sidebar.state.commentBox.commentText).toEqual('')
+            await sidebar.processEvent('setNewPageNoteText', {
+                comment: DATA.COMMENT_1,
+            })
+            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
+            expect(sidebar.state.commentBox.lists).toEqual([])
+            expect(sidebar.state.annotations).toEqual([])
+
+            await sidebar.processEvent('saveNewPageNote', {
+                shouldShare: true,
+            })
+            expect(sidebar.state.annotations).toEqual([
+                expect.objectContaining({
+                    tags: [],
+                    comment: DATA.COMMENT_1,
+                    lists: [DATA.LOCAL_LISTS[0].id],
+                }),
+            ])
+            expect(sidebar.state.commentBox).toEqual(
+                expect.objectContaining({
+                    tags: [],
+                    lists: [],
+                    commentText: '',
+                    isBookmarked: false,
+                }),
+            )
+        })
+
+        it('should block save a new comment with login modal if logged out + share intent set', async ({
+            device,
+        }) => {
+            const { sidebar } = await setupLogicHelper({
+                device,
+                withAuth: false,
+            })
+
+            await sidebar.processEvent('setNewPageNoteText', {
+                comment: DATA.COMMENT_1,
+            })
+            expect(sidebar.state.showLoginModal).toBe(false)
+            await sidebar.processEvent('saveNewPageNote', {
+                shouldShare: true,
+            })
+            expect(sidebar.state.showLoginModal).toBe(true)
+        })
+
+        it('should be able to set focus on comment box', async ({ device }) => {
+            let isCreateFormFocused = false
+            const { sidebar } = await setupLogicHelper({
+                device,
+                focusCreateForm: () => {
+                    isCreateFormFocused = true
+                },
+            })
+
+            expect(isCreateFormFocused).toBe(false)
+            await sidebar.processEvent('setNewPageNoteText', {
+                comment: DATA.COMMENT_1,
+            })
+            expect(isCreateFormFocused).toBe(true)
+        })
+    })
+
     describe.skip('page annotations tab', () => {
         it("should be able to edit an annotation's comment", async ({
             device,
@@ -1026,217 +1235,6 @@ describe('SidebarContainerLogic', () => {
             })
             expect(sidebar.state.activeListPickerState).toEqual(undefined)
             expect(focusedAnnotId).toEqual(DATA.ANNOT_1.url)
-        })
-    })
-
-    // TODO: Figure out why we're passing in all the comment data that's already available in state
-    describe.skip('new comment box', () => {
-        it('should be able to cancel writing a new comment', async ({
-            device,
-        }) => {
-            const { sidebar } = await setupLogicHelper({ device })
-
-            expect(sidebar.state.commentBox.commentText).toEqual('')
-            await sidebar.processEvent('changeNewPageCommentText', {
-                comment: DATA.COMMENT_1,
-            })
-            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
-
-            await sidebar.processEvent('cancelNewPageComment', null)
-            expect(sidebar.state.commentBox.commentText).toEqual('')
-        })
-
-        it('should be able to save a new comment', async ({ device }) => {
-            const { sidebar } = await setupLogicHelper({ device })
-
-            expect(sidebar.state.commentBox.commentText).toEqual('')
-            await sidebar.processEvent('changeNewPageCommentText', {
-                comment: DATA.COMMENT_1,
-            })
-            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
-
-            await sidebar.processEvent('saveNewPageComment', {
-                shouldShare: false,
-            })
-
-            expect(sidebar.state.annotations.allIds.length).toBe(1)
-            expect(sidebar.state.annotations).toEqual([
-                expect.objectContaining({
-                    comment: DATA.COMMENT_1,
-                    tags: [],
-                }),
-            ])
-            expect(sidebar.state.commentBox.commentText).toEqual('')
-        })
-
-        it('should be able to save a new comment in selected space mode', async ({
-            device,
-        }) => {
-            const { sidebar } = await setupLogicHelper({ device })
-
-            expect(sidebar.state.commentBox.commentText).toEqual('')
-            await sidebar.processEvent('changeNewPageCommentText', {
-                comment: DATA.COMMENT_1,
-            })
-            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
-
-            expect(sidebar.state.commentBox.lists).toEqual([])
-            await sidebar.processEvent('updateNewPageCommentLists', {
-                lists: [DATA.__LISTS_1[0].id],
-            })
-            expect(sidebar.state.commentBox.lists).toEqual([
-                DATA.__LISTS_1[0].id,
-            ])
-
-            // TODO: Update this to trigger the `setSelectedSpace` event instead of directly mutating the state
-            sidebar.processMutation({
-                selectedSpace: {
-                    $set: { localId: DATA.__LISTS_1[1].id, remoteId: null },
-                },
-            })
-
-            expect(sidebar.state.commentBox.lists).toEqual([
-                DATA.__LISTS_1[0].id,
-            ])
-
-            await sidebar.processEvent('saveNewPageComment', {
-                shouldShare: false,
-            })
-            expect(sidebar.state.annotations).toEqual([
-                expect.objectContaining({
-                    comment: DATA.COMMENT_1,
-                    lists: [DATA.__LISTS_1[0].id, DATA.__LISTS_1[1].id],
-                }),
-            ])
-            expect(sidebar.state.commentBox.lists).toEqual([])
-            expect(sidebar.state.commentBox.isBookmarked).toBe(false)
-            expect(sidebar.state.commentBox.commentText).toEqual('')
-        })
-
-        it('should be able to save a new comment, inheriting spaces from parent page, when save has share intent', async ({
-            device,
-        }) => {
-            const fullPageUrl = DATA.TAB_URL_1
-            await device.storageManager
-                .collection('customLists')
-                .createObject(DATA.__LISTS_1[0])
-            await device.storageManager
-                .collection('customLists')
-                .createObject(DATA.__LISTS_1[1])
-            await device.storageManager
-                .collection('sharedListMetadata')
-                .createObject({
-                    localId: DATA.__LISTS_1[0].id,
-                    remoteId: 'test-share-1',
-                })
-            await device.storageManager
-                .collection('pageListEntries')
-                .createObject({
-                    listId: DATA.__LISTS_1[0].id,
-                    pageUrl: normalizeUrl(fullPageUrl),
-                    fullUrl: fullPageUrl,
-                })
-            await device.storageManager
-                .collection('pageListEntries')
-                .createObject({
-                    listId: DATA.__LISTS_1[1].id,
-                    pageUrl: normalizeUrl(fullPageUrl),
-                    fullUrl: fullPageUrl,
-                })
-
-            const { sidebar } = await setupLogicHelper({
-                device,
-                fullPageUrl: fullPageUrl,
-                withAuth: true,
-            })
-
-            expect(sidebar.state.commentBox.commentText).toEqual('')
-            await sidebar.processEvent('changeNewPageCommentText', {
-                comment: DATA.COMMENT_1,
-            })
-            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
-            expect(sidebar.state.commentBox.lists).toEqual([])
-            expect(sidebar.state.annotations).toEqual([])
-
-            await sidebar.processEvent('saveNewPageComment', {
-                shouldShare: true,
-            })
-            expect(sidebar.state.annotations).toEqual([
-                expect.objectContaining({
-                    tags: [],
-                    comment: DATA.COMMENT_1,
-                    lists: [DATA.__LISTS_1[0].id],
-                }),
-            ])
-            expect(sidebar.state.commentBox).toEqual(
-                expect.objectContaining({
-                    tags: [],
-                    lists: [],
-                    commentText: '',
-                    isBookmarked: false,
-                }),
-            )
-        })
-
-        it('should block save a new comment with login modal if logged out + share intent set', async ({
-            device,
-        }) => {
-            const { sidebar } = await setupLogicHelper({
-                device,
-                withAuth: false,
-            })
-
-            await sidebar.processEvent('changeNewPageCommentText', {
-                comment: DATA.COMMENT_1,
-            })
-            expect(sidebar.state.showLoginModal).toBe(false)
-            await sidebar.processEvent('saveNewPageComment', {
-                shouldShare: true,
-            })
-            expect(sidebar.state.showLoginModal).toBe(true)
-        })
-
-        it('should be able to hydrate new comment box with state', async ({
-            device,
-        }) => {
-            const { sidebar } = await setupLogicHelper({ device })
-
-            expect(sidebar.state.commentBox.commentText).toEqual('')
-            expect(sidebar.state.showCommentBox).toBe(false)
-
-            await sidebar.processEvent('addNewPageComment', {
-                comment: DATA.COMMENT_1,
-            })
-            expect(sidebar.state.showCommentBox).toBe(true)
-            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
-
-            await sidebar.processEvent('cancelNewPageComment', null)
-            expect(sidebar.state.commentBox.commentText).toEqual('')
-            expect(sidebar.state.showCommentBox).toBe(false)
-
-            await sidebar.processEvent('cancelNewPageComment', null)
-
-            await sidebar.processEvent('addNewPageComment', {
-                comment: DATA.COMMENT_1,
-            })
-            expect(sidebar.state.showCommentBox).toBe(true)
-            expect(sidebar.state.commentBox.commentText).toEqual(DATA.COMMENT_1)
-        })
-
-        it('should be able to set focus on comment box', async ({ device }) => {
-            let isCreateFormFocused = false
-            const { sidebar } = await setupLogicHelper({
-                device,
-                focusCreateForm: () => {
-                    isCreateFormFocused = true
-                },
-            })
-
-            expect(isCreateFormFocused).toBe(false)
-            await sidebar.processEvent('addNewPageComment', {
-                comment: DATA.COMMENT_1,
-            })
-            expect(isCreateFormFocused).toBe(true)
         })
     })
 
