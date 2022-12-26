@@ -28,6 +28,7 @@ import {
     initListInstance,
 } from './utils'
 import { generateAnnotationUrl } from 'src/annotations/utils'
+import type { AnnotationCardMode } from './types'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -986,6 +987,165 @@ describe('SidebarContainerLogic', () => {
                 comment: DATA.COMMENT_1,
             })
             expect(isCreateFormFocused).toBe(true)
+        })
+    })
+
+    describe('annotation card instance events', () => {
+        it('should be able to set an annotation card into edit mode and change comment text', async ({
+            device,
+        }) => {
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+
+            const unifiedAnnotationId = annotationsCache.getAnnotationByLocalId(
+                DATA.LOCAL_ANNOTATIONS[0].url,
+            ).unifiedId
+            const cardId = generateAnnotationCardInstanceId(
+                { unifiedId: unifiedAnnotationId },
+                'annotations-tab',
+            )
+
+            expect(sidebar.state.annotationCardInstances[cardId]).toEqual({
+                unifiedAnnotationId,
+                isCommentTruncated: true,
+                isCommentEditing: false,
+                cardMode: 'none',
+                comment: DATA.LOCAL_ANNOTATIONS[0].comment,
+            })
+
+            await sidebar.processEvent('setAnnotationEditMode', {
+                unifiedAnnotationId,
+                instanceLocation: 'annotations-tab',
+                isEditing: true,
+            })
+
+            expect(sidebar.state.annotationCardInstances[cardId]).toEqual({
+                unifiedAnnotationId,
+                isCommentTruncated: true,
+                isCommentEditing: true,
+                cardMode: 'none',
+                comment: DATA.LOCAL_ANNOTATIONS[0].comment,
+            })
+
+            await sidebar.processEvent('setAnnotationEditCommentText', {
+                unifiedAnnotationId,
+                instanceLocation: 'annotations-tab',
+                comment: 'test comment',
+            })
+
+            expect(sidebar.state.annotationCardInstances[cardId]).toEqual({
+                unifiedAnnotationId,
+                isCommentTruncated: true,
+                isCommentEditing: true,
+                cardMode: 'none',
+                comment: 'test comment',
+            })
+
+            await sidebar.processEvent('setAnnotationEditMode', {
+                unifiedAnnotationId,
+                instanceLocation: 'annotations-tab',
+                isEditing: false,
+            })
+
+            expect(sidebar.state.annotationCardInstances[cardId]).toEqual({
+                unifiedAnnotationId,
+                isCommentTruncated: true,
+                isCommentEditing: false,
+                cardMode: 'none',
+                comment: 'test comment', // NOTE: Updated comment remains
+            })
+        })
+
+        it('should be able to open different dropdowns of an annotation card', async ({
+            device,
+        }) => {
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+
+            const unifiedAnnotationId = annotationsCache.getAnnotationByLocalId(
+                DATA.LOCAL_ANNOTATIONS[0].url,
+            ).unifiedId
+            const cardId = generateAnnotationCardInstanceId(
+                { unifiedId: unifiedAnnotationId },
+                'annotations-tab',
+            )
+
+            const cardModes: AnnotationCardMode[] = [
+                'copy-paster',
+                'space-picker',
+                'share-menu',
+                'save-btn',
+                'delete-confirm',
+                'formatting-help',
+                'none',
+            ]
+            for (const mode of cardModes) {
+                await sidebar.processEvent('setAnnotationCardMode', {
+                    unifiedAnnotationId,
+                    instanceLocation: 'annotations-tab',
+                    mode,
+                })
+                expect(sidebar.state.annotationCardInstances[cardId]).toEqual({
+                    unifiedAnnotationId,
+                    isCommentTruncated: true,
+                    isCommentEditing: false,
+                    cardMode: mode,
+                    comment: DATA.LOCAL_ANNOTATIONS[0].comment,
+                })
+            }
+        })
+
+        it("should be able to set an annotation card's comment to be truncated or not", async ({
+            device,
+        }) => {
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+
+            const unifiedAnnotationId = annotationsCache.getAnnotationByLocalId(
+                DATA.LOCAL_ANNOTATIONS[0].url,
+            ).unifiedId
+            const cardId = generateAnnotationCardInstanceId(
+                { unifiedId: unifiedAnnotationId },
+                'annotations-tab',
+            )
+
+            expect(sidebar.state.annotationCardInstances[cardId]).toEqual({
+                unifiedAnnotationId,
+                isCommentTruncated: true,
+                isCommentEditing: false,
+                cardMode: 'none',
+                comment: DATA.LOCAL_ANNOTATIONS[0].comment,
+            })
+            await sidebar.processEvent('setAnnotationCommentMode', {
+                unifiedAnnotationId,
+                instanceLocation: 'annotations-tab',
+                isTruncated: false,
+            })
+            expect(sidebar.state.annotationCardInstances[cardId]).toEqual({
+                unifiedAnnotationId,
+                isCommentTruncated: false,
+                isCommentEditing: false,
+                cardMode: 'none',
+                comment: DATA.LOCAL_ANNOTATIONS[0].comment,
+            })
+            await sidebar.processEvent('setAnnotationCommentMode', {
+                unifiedAnnotationId,
+                instanceLocation: 'annotations-tab',
+                isTruncated: true,
+            })
+            expect(sidebar.state.annotationCardInstances[cardId]).toEqual({
+                unifiedAnnotationId,
+                isCommentTruncated: true,
+                isCommentEditing: false,
+                cardMode: 'none',
+                comment: DATA.LOCAL_ANNOTATIONS[0].comment,
+            })
         })
     })
 

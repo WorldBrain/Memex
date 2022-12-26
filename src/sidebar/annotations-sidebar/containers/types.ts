@@ -218,11 +218,11 @@ export interface SidebarContainerState
     immediatelyShareNotes: boolean
 }
 
-type AnnotationEvent<T> = {
+export type AnnotationEvent<T> = {
     unifiedAnnotationId: UnifiedAnnotation['unifiedId']
 } & T
 
-type AnnotationCardInstanceEvent<T> = {
+export type AnnotationCardInstanceEvent<T> = {
     instanceLocation: UnifiedList['unifiedId'] | 'annotations-tab'
 } & AnnotationEvent<T>
 
@@ -256,12 +256,6 @@ interface SidebarEvents {
     setAnnotationEditCommentText: AnnotationCardInstanceEvent<{
         comment: string
     }>
-    editAnnotation: AnnotationCardInstanceEvent<{
-        shouldShare: boolean
-        isProtected?: boolean
-        mainBtnPressed?: boolean
-        keepListsIfUnsharing?: boolean
-    }>
     setAnnotationCardMode: AnnotationCardInstanceEvent<{
         mode: AnnotationCardMode
     }>
@@ -271,6 +265,12 @@ interface SidebarEvents {
     }>
 
     // Annotation events
+    editAnnotation: AnnotationEvent<{
+        shouldShare: boolean
+        isProtected?: boolean
+        mainBtnPressed?: boolean
+        keepListsIfUnsharing?: boolean
+    }>
     deleteAnnotation: AnnotationEvent<{}>
     setActiveAnnotation: AnnotationEvent<{}>
     setAnnotationShareInfo: AnnotationEvent<{

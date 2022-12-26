@@ -22,6 +22,7 @@ import type {
     EditForms,
     FollowedListState,
     ListPickerShowState,
+    AnnotationCardInstanceEvent,
 } from './types'
 import type { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
@@ -97,6 +98,14 @@ export const createEditFormsForAnnotations = (annots: Annotation[]) => {
     }
     return state
 }
+
+const getAnnotCardInstanceId = <T = any>(
+    e: AnnotationCardInstanceEvent<T>,
+): string =>
+    generateAnnotationCardInstanceId(
+        { unifiedId: e.unifiedAnnotationId },
+        e.instanceLocation,
+    )
 
 export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
@@ -736,12 +745,50 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     /* -- Annotation card instance events -- */
+    setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    isCommentEditing: { $set: event.isEditing },
+                },
+            },
+        })
+    }
+
     setAnnotationEditCommentText: EventHandler<
         'setAnnotationEditCommentText'
     > = ({ event }) => {
         this.emitMutation({
-            editForms: {
-                [event.annotationUrl]: { commentText: { $set: event.comment } },
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    comment: { $set: event.comment },
+                },
+            },
+        })
+    }
+
+    setAnnotationCommentMode: EventHandler<'setAnnotationCommentMode'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    isCommentTruncated: { $set: event.isTruncated },
+                },
+            },
+        })
+    }
+
+    setAnnotationCardMode: EventHandler<'setAnnotationCardMode'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    cardMode: { $set: event.mode },
+                },
             },
         })
     }
@@ -1208,48 +1255,6 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         await this.setLastSharedAnnotationTimestamp()
-    }
-
-    setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
-        event,
-        previousState,
-    }) => {
-        const previousForm = previousState.editForms[event.annotationUrl]
-        const annotation = this.options.annotationsCache.getAnnotationByLocalId(
-            event.annotationUrl,
-        )
-
-        const mutation: UIMutation<SidebarContainerState> =
-            event.followedListId != null
-                ? {
-                      followedLists: {
-                          byId: {
-                              [event.followedListId]: {
-                                  annotationModes: {
-                                      [event.annotationUrl]: { $set: 'edit' },
-                                  },
-                              },
-                          },
-                      },
-                  }
-                : {
-                      annotationModes: {
-                          [event.context]: {
-                              [event.annotationUrl]: { $set: 'edit' },
-                          },
-                      },
-                  }
-
-        // If there was existing form state, we want to keep that, else use the stored annot data or defaults
-        if (!previousForm || !previousForm?.commentText?.length) {
-            mutation.editForms = {
-                [event.annotationUrl]: {
-                    commentText: { $set: annotation.comment ?? '' },
-                },
-            }
-        }
-
-        this.emitMutation(mutation)
     }
 
     switchAnnotationMode: EventHandler<'switchAnnotationMode'> = ({
