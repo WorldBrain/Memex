@@ -366,7 +366,11 @@ describe('SidebarContainerLogic', () => {
         it('should load remote annotation counts for lists with them upon activating space tab', async ({
             device,
         }) => {
-            const { sidebar, annotationsCache } = await setupLogicHelper({
+            const {
+                sidebar,
+                sidebarLogic,
+                annotationsCache,
+            } = await setupLogicHelper({
                 device,
                 withAuth: true,
                 skipInitEvent: true,
@@ -411,7 +415,9 @@ describe('SidebarContainerLogic', () => {
                 },
             })
 
+            expect(sidebar.state.activeTab).toEqual('annotations')
             await sidebar.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+            expect(sidebar.state.activeTab).toEqual('spaces')
 
             expect(sidebar.state.listInstances).toEqual({
                 ...defaultListInstanceStates,
@@ -444,12 +450,33 @@ describe('SidebarContainerLogic', () => {
                     ],
                 },
             })
+
+            // Verify re-opening the tab doesn't result in re-loads
+            await sidebar.processEvent('setActiveSidebarTab', {
+                tab: 'annotations',
+            })
+            expect(sidebar.state.activeTab).toEqual('annotations')
+
+            let wasBGMethodCalled = false
+            sidebarLogic[
+                'options'
+            ].customLists.fetchAnnotationRefsForRemoteListsOnPage = (() => {
+                wasBGMethodCalled = true
+            }) as any
+
+            await sidebar.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(wasBGMethodCalled).toBe(false)
         })
 
         it('should load remote annotations for a list upon opening a list in space tab', async ({
             device,
         }) => {
-            const { sidebar, annotationsCache } = await setupLogicHelper({
+            const {
+                sidebar,
+                sidebarLogic,
+                annotationsCache,
+            } = await setupLogicHelper({
                 device,
                 withAuth: true,
                 skipInitEvent: true,
@@ -722,9 +749,34 @@ describe('SidebarContainerLogic', () => {
                 ],
             ])
 
-            // TODO: 1. close and re-open a list to assert no extra download takes place
+            // Close then re-open a list to assert no extra download takes place
+            await sidebar.processEvent('expandListAnnotations', {
+                unifiedListId: unifiedListIdA,
+            })
+            let wasBGMethodCalled = false
+            sidebarLogic['options'].annotations.getSharedAnnotations = (() => {
+                wasBGMethodCalled = true
+            }) as any
+            await sidebar.processEvent('expandListAnnotations', {
+                unifiedListId: unifiedListIdA,
+            })
+            expect(wasBGMethodCalled).toBe(false)
 
-            // TODO: 2. open a list without remote annots to assert no download is attempted
+            // Open a list without remote annots to assert no download is attempted
+            const unifiedListIdC = normalizedStateToArray(
+                annotationsCache.lists,
+            ).find((list) => !list.hasRemoteAnnotations).unifiedId
+
+            expect(sidebar.state.listInstances[unifiedListIdC].isOpen).toBe(
+                false,
+            )
+            await sidebar.processEvent('expandListAnnotations', {
+                unifiedListId: unifiedListIdC,
+            })
+            expect(sidebar.state.listInstances[unifiedListIdC].isOpen).toBe(
+                true,
+            )
+            expect(wasBGMethodCalled).toBe(false)
         })
     })
 

@@ -1496,7 +1496,17 @@ export class SidebarContainerLogic extends UILogic<
         const { annotationsCache, customLists } = this.options
         const listsWithRemoteAnnots = normalizedStateToArray(
             annotationsCache.lists,
-        ).filter((list) => list.hasRemoteAnnotations && list.remoteId != null)
+        ).filter(
+            (list) =>
+                list.hasRemoteAnnotations &&
+                list.remoteId != null &&
+                state.listInstances[list.unifiedId]
+                    ?.annotationsCountLoadState === 'pristine', // Ensure it hasn't already been loaded
+        )
+
+        if (!listsWithRemoteAnnots.length) {
+            return
+        }
 
         await executeUITask(
             this,
@@ -1586,7 +1596,7 @@ export class SidebarContainerLogic extends UILogic<
         const { annotationsCache, annotations } = this.options
         const listInstanceState =
             previousState.listInstances[event.unifiedListId]
-        if (listInstanceState?.sharedAnnotationReferences == null) {
+        if (!listInstanceState) {
             return
         }
 
@@ -1597,6 +1607,13 @@ export class SidebarContainerLogic extends UILogic<
                 },
             },
         })
+
+        if (
+            listInstanceState.sharedAnnotationReferences == null ||
+            listInstanceState.annotationsLoadState !== 'pristine'
+        ) {
+            return
+        }
 
         await executeUITask(
             this,
