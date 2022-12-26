@@ -1017,7 +1017,7 @@ describe('SidebarContainerLogic', () => {
                 sidebar.state.annotationModes[context][DATA.ANNOT_1.url],
             ).toEqual('edit')
 
-            await sidebar.processEvent('changeEditCommentText', {
+            await sidebar.processEvent('setAnnotationEditCommentText', {
                 annotationUrl: DATA.ANNOT_1.url,
                 comment: editedComment,
             })
@@ -1059,7 +1059,7 @@ describe('SidebarContainerLogic', () => {
                 annotationUrl: DATA.ANNOT_1.url,
             })
 
-            await sidebar.processEvent('changeEditCommentText', {
+            await sidebar.processEvent('setAnnotationEditCommentText', {
                 annotationUrl: DATA.ANNOT_1.url,
                 comment: editedComment,
             })

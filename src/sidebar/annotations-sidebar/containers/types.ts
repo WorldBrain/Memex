@@ -218,11 +218,13 @@ export interface SidebarContainerState
     immediatelyShareNotes: boolean
 }
 
-type AnnotationInstanceEvent<T> = (
-    | Pick<UnifiedAnnotation, 'unifiedId'>
-    | Pick<UnifiedAnnotation, 'localId' | 'remoteId'>
-) &
-    T
+type AnnotationEvent<T> = {
+    unifiedAnnotationId: UnifiedAnnotation['unifiedId']
+} & T
+
+type AnnotationCardInstanceEvent<T> = {
+    instanceLocation: UnifiedList['unifiedId'] | 'annotations-tab'
+} & AnnotationEvent<T>
 
 interface SidebarEvents {
     show: { existingWidthState: string }
@@ -234,8 +236,11 @@ interface SidebarEvents {
     adjustSidebarWidth: { newWidth: string; isWidthLocked?: boolean }
     setPopoutsActive: boolean
 
-    sortAnnotations: { sortingFn: AnnotationsSorter }
     setActiveSidebarTab: { tab: SidebarTab }
+    sortAnnotations: { sortingFn: AnnotationsSorter }
+    receiveSharingAccessChange: {
+        sharingAccess: AnnotationSharingAccess
+    }
 
     // New page note box
     setNewPageNoteText: { comment: string }
@@ -247,43 +252,46 @@ interface SidebarEvents {
     cancelNewPageNote: null
     setNewPageNoteLists: { lists: number[] }
 
-    cancelEdit: { annotationUrl: string }
-    changeEditCommentText: { annotationUrl: string; comment: string }
+    // Annotation card instance events
+    setAnnotationEditCommentText: AnnotationCardInstanceEvent<{
+        comment: string
+    }>
+    editAnnotation: AnnotationCardInstanceEvent<{
+        shouldShare: boolean
+        isProtected?: boolean
+        mainBtnPressed?: boolean
+        keepListsIfUnsharing?: boolean
+    }>
+    setAnnotationCardMode: AnnotationCardInstanceEvent<{
+        mode: AnnotationCardMode
+    }>
+    setAnnotationEditMode: AnnotationCardInstanceEvent<{ isEditing: boolean }>
+    setAnnotationCommentMode: AnnotationCardInstanceEvent<{
+        isTruncated: boolean
+    }>
 
-    updateListsForAnnotation: {
+    // Annotation events
+    deleteAnnotation: AnnotationEvent<{}>
+    setActiveAnnotation: AnnotationEvent<{}>
+    setAnnotationShareInfo: AnnotationEvent<{
+        keepListsIfUnsharing?: boolean
+        privacyLevel: AnnotationPrivacyLevels
+    }>
+    updateListsForAnnotation: AnnotationEvent<{
         added: number | null
         deleted: number | null
-        unifiedAnnotationId: string
         options?: { protectAnnotation?: boolean }
-    }
+    }>
 
-    receiveSharingAccessChange: {
-        sharingAccess: AnnotationSharingAccess
-    }
+    // Selected space management
+    setSelectedSpace: { unifiedListId: UnifiedList['unifiedId'] | null }
 
-    // Annotation card instance events
     goToAnnotationInNewTab: {
         context: AnnotationEventContext
         annotationUrl: string
     }
     setActiveAnnotationUrl: { annotationUrl: string }
-    setAnnotationEditMode: {
-        context: AnnotationEventContext
-        annotationUrl: string
-        followedListId?: string
-    }
-    editAnnotation: {
-        context: AnnotationEventContext
-        annotationUrl: string
-        shouldShare: boolean
-        isProtected?: boolean
-        mainBtnPressed?: boolean
-        keepListsIfUnsharing?: boolean
-    }
-    deleteAnnotation: {
-        context: AnnotationEventContext
-        annotationUrl: string
-    }
+
     shareAnnotation: {
         context: AnnotationEventContext
         mouseEvent: React.MouseEvent
@@ -297,6 +305,7 @@ interface SidebarEvents {
         followedListId?: string
     }
 
+    // Misc events
     copyNoteLink: { link: string }
     copyPageLink: { link: string }
 
@@ -309,15 +318,12 @@ interface SidebarEvents {
     fetchSuggestedTags: null
     fetchSuggestedDomains: null
 
-    // Followed lists
+    // Followed lists (TODO: REMOVE)
     loadFollowedLists: null
     loadFollowedListNotes: { listId: string }
     expandFollowedListNotes: { listId: string }
 
     expandListAnnotations: { unifiedListId: UnifiedList['unifiedId'] }
-
-    // Selected space management
-    setSelectedSpace: { remoteListId: string } | { localListId: number } | null
 
     updateAnnotationShareInfo: {
         annotationUrl: string
@@ -353,7 +359,8 @@ export type SidebarContainerEvents = UIEvent<
     AnnotationConversationEvent & SidebarEvents
 >
 
-export type AnnotationCardDropdown =
+export type AnnotationCardMode =
+    | 'none'
     | 'copy-paster'
     | 'space-picker'
     | 'share-menu'
@@ -363,9 +370,9 @@ export type AnnotationCardDropdown =
 
 export interface AnnotationCardInstance {
     unifiedAnnotationId: UnifiedAnnotation['unifiedId']
-    dropdownShown?: AnnotationCardDropdown
     isCommentTruncated: boolean
     isCommentEditing: boolean
+    cardMode: AnnotationCardMode
     comment: string
 }
 

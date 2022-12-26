@@ -16,6 +16,7 @@ export const initAnnotationCardInstance = (
     comment: annot.comment ?? '',
     isCommentTruncated: true,
     isCommentEditing: false,
+    cardMode: 'none',
 })
 
 export const initListInstance = (

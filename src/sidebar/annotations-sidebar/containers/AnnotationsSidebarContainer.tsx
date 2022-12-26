@@ -290,7 +290,7 @@ export class AnnotationsSidebarContainer<
                     followedListId,
                 }),
             onCommentChange: (comment) =>
-                this.processEvent('changeEditCommentText', {
+                this.processEvent('setAnnotationEditCommentText', {
                     annotationUrl: annotation.url,
                     comment,
                 }),
@@ -318,7 +318,7 @@ export class AnnotationsSidebarContainer<
                 )
             },
             onEditCancel: () =>
-                this.processEvent('cancelEdit', {
+                this.processEvent('cancelAnnotationEdit', {
                     annotationUrl: annotation.url,
                 }),
         }

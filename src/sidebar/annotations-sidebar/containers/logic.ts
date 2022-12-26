@@ -735,24 +735,10 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    cancelEdit: EventHandler<'cancelEdit'> = ({ event, previousState }) => {
-        this.emitMutation({
-            annotationModes: {
-                pageAnnotations: {
-                    [event.annotationUrl]: { $set: 'default' },
-                },
-            },
-            ...this.applyStateMutationForAllFollowedLists(previousState, {
-                annotationModes: {
-                    [event.annotationUrl]: { $set: 'default' },
-                },
-            }),
-        })
-    }
-
-    changeEditCommentText: EventHandler<'changeEditCommentText'> = ({
-        event,
-    }) => {
+    /* -- Annotation card instance events -- */
+    setAnnotationEditCommentText: EventHandler<
+        'setAnnotationEditCommentText'
+    > = ({ event }) => {
         this.emitMutation({
             editForms: {
                 [event.annotationUrl]: { commentText: { $set: event.comment } },

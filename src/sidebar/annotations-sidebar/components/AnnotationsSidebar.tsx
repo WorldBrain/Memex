@@ -908,7 +908,7 @@ export class AnnotationsSidebar extends React.Component<
                                 AnnotationPrivacyLevels.SHARED_PROTECTED,
                             ].includes(annot.privacyLevel)}
                             mode={
-                                instanceState.dropdownShown === 'delete-confirm'
+                                instanceState.cardMode === 'delete-confirm'
                                     ? 'delete'
                                     : instanceState.isCommentEditing
                                     ? 'edit'
