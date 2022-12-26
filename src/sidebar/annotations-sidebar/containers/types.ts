@@ -175,7 +175,7 @@ export interface SidebarContainerState
             [annotationUrl: string]: AnnotationMode
         }
     }
-    activeAnnotationUrl: string | null
+    activeAnnotationId: UnifiedAnnotation['unifiedId'] | null
 
     listInstances: { [unifiedListId: UnifiedList['unifiedId']]: ListInstance }
     annotationCardInstances: { [instanceId: string]: AnnotationCardInstance }

@@ -495,7 +495,7 @@ export class AnnotationsSidebar extends React.Component<
                                         : this.props.users[data.creatorId]
                                 }
                                 isActive={
-                                    this.props.activeAnnotationUrl === data.id
+                                    this.props.activeAnnotationId === data.id
                                 }
                                 activeShareMenuNoteId={
                                     this.props.activeShareMenuNoteId
@@ -886,7 +886,7 @@ export class AnnotationsSidebar extends React.Component<
                     <AnnotationBox
                         key={annot.unifiedId}
                         isActive={
-                            this.props.activeAnnotationUrl === annot.unifiedId
+                            this.props.activeAnnotationId === annot.unifiedId
                         }
                         zIndex={
                             this.props.activeShareMenuNoteId === annot.unifiedId
@@ -915,7 +915,7 @@ export class AnnotationsSidebar extends React.Component<
                                     : 'default'
                             }
                             isActive={
-                                this.props.activeAnnotationUrl ===
+                                this.props.activeAnnotationId ===
                                 annot.unifiedId
                             }
                             onListClick={this.props.onLocalSpaceSelect}

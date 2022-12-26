@@ -1271,6 +1271,39 @@ describe('SidebarContainerLogic', () => {
                     }),
             ).toBeNull()
         })
+
+        it('should be able to set annotations as being active', async ({
+            device,
+        }) => {
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+            })
+
+            const unifiedAnnotationIdA = annotationsCache.getAnnotationByLocalId(
+                DATA.LOCAL_ANNOTATIONS[0].url,
+            ).unifiedId
+            const unifiedAnnotationIdB = annotationsCache.getAnnotationByLocalId(
+                DATA.LOCAL_ANNOTATIONS[1].url,
+            ).unifiedId
+
+            expect(sidebar.state.activeAnnotationId).toBeNull()
+            await sidebar.processEvent('setActiveAnnotation', {
+                unifiedAnnotationId: unifiedAnnotationIdA,
+            })
+            expect(sidebar.state.activeAnnotationId).toBe(unifiedAnnotationIdA)
+            await sidebar.processEvent('setActiveAnnotation', {
+                unifiedAnnotationId: null,
+            })
+            expect(sidebar.state.activeAnnotationId).toBeNull()
+            await sidebar.processEvent('setActiveAnnotation', {
+                unifiedAnnotationId: unifiedAnnotationIdB,
+            })
+            expect(sidebar.state.activeAnnotationId).toBe(unifiedAnnotationIdB)
+            await sidebar.processEvent('setActiveAnnotation', {
+                unifiedAnnotationId: null,
+            })
+            expect(sidebar.state.activeAnnotationId).toBeNull()
+        })
     })
 
     describe.skip('page annotations tab', () => {

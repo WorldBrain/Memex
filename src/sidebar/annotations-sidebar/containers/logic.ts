@@ -229,7 +229,7 @@ export class SidebarContainerLogic extends UILogic<
             annotations: initNormalizedState(),
             lists: initNormalizedState(),
 
-            activeAnnotationUrl: null, // TODO: make unified ID
+            activeAnnotationId: null, // TODO: make unified ID
 
             showCommentBox: false,
             showCongratsMessage: false,
@@ -438,7 +438,7 @@ export class SidebarContainerLogic extends UILogic<
     hide: EventHandler<'hide'> = ({ event, previousState }) => {
         this.emitMutation({
             showState: { $set: 'hidden' },
-            activeAnnotationUrl: { $set: null },
+            activeAnnotationId: { $set: null },
         })
 
         document.body.style.width = '100%'
@@ -1000,7 +1000,7 @@ export class SidebarContainerLogic extends UILogic<
             url: event.annotationUrl,
         })
         this.emitMutation({
-            activeAnnotationUrl: { $set: event.annotationUrl },
+            activeAnnotationId: { $set: event.annotationUrl },
         })
     }
 
@@ -1009,7 +1009,7 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
     }) => {
         this.emitMutation({
-            activeAnnotationUrl: { $set: event.annotationUrl },
+            activeAnnotationId: { $set: event.annotationUrl },
         })
 
         const annotation = this.options.annotationsCache.getAnnotationByLocalId(
@@ -1038,6 +1038,14 @@ export class SidebarContainerLogic extends UILogic<
         if (existing?.localId != null) {
             await annotationsBG.deleteAnnotation(existing.localId)
         }
+    }
+
+    setActiveAnnotation: EventHandler<'setActiveAnnotation'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            activeAnnotationId: { $set: event.unifiedAnnotationId },
+        })
     }
 
     private updateAnnotationFollowedLists(
