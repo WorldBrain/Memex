@@ -160,8 +160,6 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.props.inPageUI.showSidebar({ action: 'comment' }),
                     openSidebar: this.handleSidebarOpen,
                     closeSidebar: () => this.props.inPageUI.hideSidebar(),
-                    toggleSidebarLock: () =>
-                        this.processEvent('toggleSidebarLock', null),
                     toggleReadingView: () =>
                         this.processEvent('toggleReadingView', null),
                 }}
