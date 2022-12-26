@@ -353,18 +353,21 @@ describe('SidebarContainerLogic', () => {
             )
             expect(sidebar.state.annotationCardInstances).toEqual(
                 fromPairs(
-                    cacheUtils
-                        .getOwnAnnotationsArray(
-                            annotationsCache,
-                            DATA.CREATOR_1.id.toString(),
-                        )
+                    normalizedStateToArray(annotationsCache.annotations)
                         .map((annot) => [
-                            generateAnnotationCardInstanceId(
-                                annot,
-                                'annotations-tab',
-                            ),
-                            initAnnotationCardInstance(annot),
-                        ]),
+                            ...annot.unifiedListIds.map((unifiedListId) => [
+                                generateAnnotationCardInstanceId(
+                                    annot,
+                                    unifiedListId,
+                                ),
+                                initAnnotationCardInstance(annot),
+                            ]),
+                            [
+                                generateAnnotationCardInstanceId(annot),
+                                initAnnotationCardInstance(annot),
+                            ],
+                        ])
+                        .flat(),
                 ),
             )
         })
@@ -563,10 +566,6 @@ describe('SidebarContainerLogic', () => {
                 },
             })
 
-            let annotCardInstancesBefore = {
-                ...sidebar.state.annotationCardInstances,
-            }
-
             await sidebar.processEvent('expandListAnnotations', {
                 unifiedListId: unifiedListIdA,
             })
@@ -628,34 +627,6 @@ describe('SidebarContainerLogic', () => {
                     },
                 ),
             )
-
-            expect(
-                Object.keys(sidebar.state.annotationCardInstances).length,
-            ).toBe(Object.keys(annotCardInstancesBefore).length + 1)
-
-            expect(
-                Object.entries(sidebar.state.annotationCardInstances).filter(
-                    ([instanceId]) =>
-                        !Object.keys(annotCardInstancesBefore).includes(
-                            instanceId,
-                        ),
-                ),
-            ).toEqual([
-                [
-                    generateAnnotationCardInstanceId(
-                        { unifiedId: newCachedAnnotAId },
-                        unifiedListIdA,
-                    ),
-                    initAnnotationCardInstance({
-                        unifiedId: newCachedAnnotAId,
-                    }),
-                ],
-            ])
-
-            // Open the next remote list
-            annotCardInstancesBefore = {
-                ...sidebar.state.annotationCardInstances,
-            }
 
             await sidebar.processEvent('expandListAnnotations', {
                 unifiedListId: unifiedListIdB,
@@ -722,38 +693,6 @@ describe('SidebarContainerLogic', () => {
                     },
                 ),
             )
-
-            expect(
-                Object.keys(sidebar.state.annotationCardInstances).length,
-            ).toBe(Object.keys(annotCardInstancesBefore).length + 2)
-
-            expect(
-                Object.entries(sidebar.state.annotationCardInstances).filter(
-                    ([instanceId]) =>
-                        !Object.keys(annotCardInstancesBefore).includes(
-                            instanceId,
-                        ),
-                ),
-            ).toEqual([
-                [
-                    generateAnnotationCardInstanceId(
-                        { unifiedId: newCachedAnnotBId },
-                        unifiedListIdB,
-                    ),
-                    initAnnotationCardInstance({
-                        unifiedId: newCachedAnnotBId,
-                    }),
-                ],
-                [
-                    generateAnnotationCardInstanceId(
-                        { unifiedId: dedupedCachedAnnotId },
-                        unifiedListIdB,
-                    ),
-                    initAnnotationCardInstance({
-                        unifiedId: dedupedCachedAnnotId,
-                    }),
-                ],
-            ])
 
             // Close then re-open a list to assert no extra download takes place
             await sidebar.processEvent('expandListAnnotations', {
@@ -1267,6 +1206,70 @@ describe('SidebarContainerLogic', () => {
                     lastEdited: now + 1,
                 }),
             )
+        })
+    })
+
+    describe('annotation events', () => {
+        it('should be able to delete annotations', async ({ device }) => {
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+            })
+
+            const unifiedAnnotation = annotationsCache.getAnnotationByLocalId(
+                DATA.LOCAL_ANNOTATIONS[0].url,
+            )
+            const cardIdA = generateAnnotationCardInstanceId(
+                { unifiedId: unifiedAnnotation.unifiedId },
+                'annotations-tab',
+            )
+            const cardIdB = generateAnnotationCardInstanceId(
+                { unifiedId: unifiedAnnotation.unifiedId },
+                annotationsCache.getListByLocalId(DATA.LOCAL_LISTS[0].id)
+                    .unifiedId,
+            )
+            const cardIdC = generateAnnotationCardInstanceId(
+                { unifiedId: unifiedAnnotation.unifiedId },
+                annotationsCache.getListByLocalId(DATA.LOCAL_LISTS[1].id)
+                    .unifiedId,
+            )
+
+            expect(sidebar.state.annotationCardInstances[cardIdA]).toBeDefined()
+            expect(sidebar.state.annotationCardInstances[cardIdB]).toBeDefined()
+            expect(sidebar.state.annotationCardInstances[cardIdC]).toBeDefined()
+            expect(
+                sidebar.state.annotations.byId[unifiedAnnotation.unifiedId],
+            ).toBeDefined()
+            expect(
+                await device.storageManager
+                    .collection('annotations')
+                    .findOneObject({
+                        url: unifiedAnnotation.localId,
+                    }),
+            ).toBeDefined()
+
+            await sidebar.processEvent('deleteAnnotation', {
+                unifiedAnnotationId: unifiedAnnotation.unifiedId,
+            })
+
+            expect(
+                sidebar.state.annotationCardInstances[cardIdA],
+            ).not.toBeDefined()
+            expect(
+                sidebar.state.annotationCardInstances[cardIdB],
+            ).not.toBeDefined()
+            expect(
+                sidebar.state.annotationCardInstances[cardIdC],
+            ).not.toBeDefined()
+            expect(
+                sidebar.state.annotations.byId[unifiedAnnotation.unifiedId],
+            ).not.toBeDefined()
+            expect(
+                await device.storageManager
+                    .collection('annotations')
+                    .findOneObject({
+                        url: unifiedAnnotation.localId,
+                    }),
+            ).toBeNull()
         })
     })
 

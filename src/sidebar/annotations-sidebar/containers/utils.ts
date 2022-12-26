@@ -6,7 +6,7 @@ import type { AnnotationCardInstance, ListInstance } from './types'
 
 export const generateAnnotationCardInstanceId = (
     { unifiedId }: Pick<UnifiedAnnotation, 'unifiedId'>,
-    instanceLocation: UnifiedList['unifiedId'] | 'annotations-tab',
+    instanceLocation: UnifiedList['unifiedId'] = 'annotations-tab',
 ): string => `${instanceLocation}-${unifiedId}`
 
 export const initAnnotationCardInstance = (

@@ -261,42 +261,15 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     private async hydrateAnnotationsCache(fullPageUrl: string) {
-        const { annotationsCache, currentUser } = this.options
         await cacheUtils.hydrateCache({
             fullPageUrl,
-            user: currentUser,
-            cache: annotationsCache,
+            user: this.options.currentUser,
+            cache: this.options.annotationsCache,
             bgModules: {
                 annotations: this.options.annotations,
                 customLists: this.options.customLists,
                 contentSharing: this.options.contentSharing,
                 pageActivityIndicator: this.options.pageActivityIndicatorBG,
-            },
-        })
-
-        const myAnnotations = cacheUtils.getOwnAnnotationsArray(
-            annotationsCache,
-            currentUser?.id.toString(),
-        )
-
-        this.emitMutation({
-            listInstances: {
-                $set: fromPairs(
-                    normalizedStateToArray(
-                        annotationsCache.lists,
-                    ).map((list) => [list.unifiedId, initListInstance(list)]),
-                ),
-            },
-            annotationCardInstances: {
-                $set: fromPairs(
-                    myAnnotations.map((annot) => [
-                        generateAnnotationCardInstanceId(
-                            annot,
-                            'annotations-tab',
-                        ),
-                        initAnnotationCardInstance(annot),
-                    ]),
-                ),
             },
         })
     }
@@ -357,6 +330,14 @@ export class SidebarContainerLogic extends UILogic<
     ) => {
         this.emitMutation({
             lists: { $set: nextLists },
+            listInstances: {
+                $set: fromPairs(
+                    normalizedStateToArray(nextLists).map((list) => [
+                        list.unifiedId,
+                        initListInstance(list),
+                    ]),
+                ),
+            },
         })
     }
 
@@ -366,15 +347,24 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             noteCreateState: { $set: 'success' },
             annotations: { $set: nextAnnotations },
-            editForms: {
-                $apply: (editForms: EditForms) => {
-                    for (const id of nextAnnotations.allIds) {
-                        if (editForms[id] == null) {
-                            editForms[id] = { ...INIT_FORM_STATE }
-                        }
-                    }
-                    return editForms
-                },
+            annotationCardInstances: {
+                $set: fromPairs(
+                    normalizedStateToArray(nextAnnotations)
+                        .map((annot) => [
+                            ...annot.unifiedListIds.map((unifiedListId) => [
+                                generateAnnotationCardInstanceId(
+                                    annot,
+                                    unifiedListId,
+                                ),
+                                initAnnotationCardInstance(annot),
+                            ]),
+                            [
+                                generateAnnotationCardInstanceId(annot),
+                                initAnnotationCardInstance(annot),
+                            ],
+                        ])
+                        .flat(),
+                ),
             },
         })
     }
@@ -1037,24 +1027,17 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    deleteAnnotation: EventHandler<'deleteAnnotation'> = async ({
-        event,
-        previousState,
-    }) => {
+    deleteAnnotation: EventHandler<'deleteAnnotation'> = async ({ event }) => {
         const { annotationsCache, annotations: annotationsBG } = this.options
-        const annotation = annotationsCache.getAnnotationByLocalId(
-            event.annotationUrl,
-        )
-        if (!annotation) {
-            return
-        }
+        const existing =
+            annotationsCache.annotations.byId[event.unifiedAnnotationId]
+        annotationsCache.removeAnnotation({
+            unifiedId: event.unifiedAnnotationId,
+        })
 
-        this.removeAnnotationFromAllFollowedLists(
-            event.annotationUrl,
-            previousState,
-        )
-        annotationsCache.removeAnnotation(annotation)
-        await annotationsBG.deleteAnnotation(annotation.localId)
+        if (existing?.localId != null) {
+            await annotationsBG.deleteAnnotation(existing.localId)
+        }
     }
 
     private updateAnnotationFollowedLists(
