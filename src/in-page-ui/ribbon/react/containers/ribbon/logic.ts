@@ -183,10 +183,10 @@ export class RibbonContainerLogic extends UILogic<
 
     async initReadingViewListeners() {
         // make sure to reset readingviewValue on sidebar open on new page
-        await browser.storage.local.set({ readingView: false })
+        await browser.storage.local.set({ '@Sidebar-reading_view': false })
 
         // init listeners to local storage flag for reading view
-        browser.storage.onChanged.addListener((changes) => {
+        await browser.storage.onChanged.addListener((changes) => {
             this.setReadingView(changes)
         })
     }
@@ -293,7 +293,7 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     setReadingView = (changes: Storage.StorageChange) => {
-        if (Object.entries(changes)[0][0] === 'readingView') {
+        if (Object.entries(changes)[0][0] === '@Sidebar-reading_view') {
             this.emitMutation({
                 isWidthLocked: { $set: Object.entries(changes)[0][1].newValue },
             })

@@ -243,7 +243,7 @@ export class SidebarContainerLogic extends UILogic<
 
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.annotationSubscription(annotationsCache.annotations)
-        browser.storage.local.set({ '@Sidebar-reading_view': false })
+        await browser.storage.local.set({ '@Sidebar-reading_view': false })
         this.readingViewStorageListener(true)
 
         await loadInitial<SidebarContainerState>(this, async () => {
