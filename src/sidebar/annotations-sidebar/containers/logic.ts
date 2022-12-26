@@ -46,6 +46,7 @@ import { resolvablePromise } from 'src/util/promises'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { SharedAnnotationList } from 'src/custom-lists/background/types'
 import { toInteger } from 'lodash'
+import { Storage } from 'webextension-polyfill-ts'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -242,7 +243,7 @@ export class SidebarContainerLogic extends UILogic<
 
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.annotationSubscription(annotationsCache.annotations)
-        browser.storage.local.set({ readingView: false })
+        browser.storage.local.set({ '@Sidebar-reading_view': false })
         this.readingViewStorageListener(true)
 
         await loadInitial<SidebarContainerState>(this, async () => {
@@ -303,20 +304,18 @@ export class SidebarContainerLogic extends UILogic<
 
     readingViewStorageListener = async (enable) => {
         if (enable) {
-            await browser.storage.onChanged.addListener((changes) => {
-                this.toggleReadingView(changes)
-            })
+            await browser.storage.onChanged.addListener(this.toggleReadingView)
         } else {
-            await browser.storage.local.set({ readingView: false })
-            await browser.storage.onChanged.removeListener(() => {
-                this.toggleReadingView()
-            })
+            await browser.storage.local.set({ '@Sidebar-reading_view': false })
+            await browser.storage.onChanged.removeListener(
+                this.toggleReadingView,
+            )
         }
     }
 
-    toggleReadingView = (changes?) => {
+    toggleReadingView = (changes: Storage.StorageChange) => {
         for (let key of Object.entries(changes)) {
-            if (key[0] === 'readingView') {
+            if (key[0] === '@Sidebar-reading_view') {
                 this.emitMutation({
                     readingView: { $set: key[1].newValue },
                 })

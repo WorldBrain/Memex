@@ -10,6 +10,7 @@ import { FocusableComponent } from 'src/annotations/components/types'
 import { Analytics } from 'src/analytics'
 import { setLocalStorage } from 'src/util/storage'
 import browser from 'webextension-polyfill'
+import { Storage } from 'webextension-polyfill-ts'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -184,9 +185,6 @@ export class RibbonContainerLogic extends UILogic<
         // make sure to reset readingviewValue on sidebar open on new page
         await browser.storage.local.set({ readingView: false })
 
-        // init window resize event listener
-        window.addEventListener('resize', () => this.resizeReadingWidth())
-
         // init listeners to local storage flag for reading view
         browser.storage.onChanged.addListener((changes) => {
             this.setReadingView(changes)
@@ -247,9 +245,11 @@ export class RibbonContainerLogic extends UILogic<
             .getElementById('memex-sidebar-container')
             .shadowRoot.getElementById('annotationSidebarContainer')
 
-        const resizeObserver = new ResizeObserver(() => {
-            this.resizeReadingWidth()
-        })
+        if (sidebar == null) {
+            return
+        }
+
+        const resizeObserver = new ResizeObserver(this.resizeReadingWidth)
 
         if (previousState.isWidthLocked) {
             // set member variable for internal logic use
@@ -263,9 +263,12 @@ export class RibbonContainerLogic extends UILogic<
             // reset window width
             document.body.style.width = 'initial'
 
+            // IS NOT WORKING
+            resizeObserver.unobserve(sidebar)
+
             // remove listeners and values
             this.tearDownListeners(resizeObserver, sidebar)
-            browser.storage.local.set({ readingView: false })
+            await browser.storage.local.set({ '@Sidebar-reading_view': false })
         } else {
             // set member variable for internal logic use
             this.readingView = true
@@ -278,15 +281,18 @@ export class RibbonContainerLogic extends UILogic<
             // force resize calc
             this.resizeReadingWidth()
 
-            // set corret storage values
-            browser.storage.local.set({ readingView: true })
+            // init window resize event listener
+            window.addEventListener('resize', this.resizeReadingWidth)
 
             // observe size changes of sidebar and adjust reading view
             resizeObserver.observe(sidebar)
+
+            // set corret storage values
+            await browser.storage.local.set({ '@Sidebar-reading_view': true })
         }
     }
 
-    setReadingView = (changes) => {
+    setReadingView = (changes: Storage.StorageChange) => {
         if (Object.entries(changes)[0][0] === 'readingView') {
             this.emitMutation({
                 isWidthLocked: { $set: Object.entries(changes)[0][1].newValue },
@@ -296,14 +302,14 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     tearDownListeners(resizeObserver?, sidebar?) {
-        window.removeEventListener('resize', () => this.resizeReadingWidth())
-        resizeObserver.unobserve(sidebar)
+        window.removeEventListener('resize', this.resizeReadingWidth)
         browser.storage.onChanged.removeListener((changes) => {
             this.setReadingView(changes)
         })
     }
 
-    resizeReadingWidth() {
+    resizeReadingWidth = () => {
+        // this is here because the unobserve of the sidebar resize action is not working
         if (this.readingView === true) {
             let currentsidebarWidth = document
                 .getElementById('memex-sidebar-container')
