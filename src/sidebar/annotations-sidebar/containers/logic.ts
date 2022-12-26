@@ -744,7 +744,7 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    /* -- Annotation card instance events -- */
+    /* -- START: Annotation card instance events -- */
     setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
         event,
     }) => {
@@ -792,6 +792,91 @@ export class SidebarContainerLogic extends UILogic<
             },
         })
     }
+
+    editAnnotation: EventHandler<'editAnnotation'> = async ({
+        event,
+        previousState,
+    }) => {
+        const cardId = getAnnotCardInstanceId(event)
+        const {
+            annotationCardInstances: { [cardId]: formData },
+            annotations: {
+                byId: { [event.unifiedAnnotationId]: annotationData },
+            },
+        } = previousState
+
+        if (
+            !formData ||
+            annotationData?.creator?.id !== this.options.currentUser?.id ||
+            (event.shouldShare && !(await this.ensureLoggedIn()))
+        ) {
+            return
+        }
+
+        const now = event.now ?? Date.now()
+        const comment = formData.comment.trim()
+
+        // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
+        // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
+        //  to make a SAS annotation private protected upon save btn press
+        // TODO: properly update lists state
+        // existing.lists = event.mainBtnPressed
+        //     ? existing.lists
+        //     : this.getAnnotListsAfterShareStateChange({
+        //           previousState,
+        //           annotationIndex,
+        //           keepListsIfUnsharing: event.keepListsIfUnsharing,
+        //           incomingPrivacyState: {
+        //               public: event.shouldShare,
+        //               protected: !!event.isProtected,
+        //           },
+        //       })
+
+        this.emitMutation({
+            annotationCardInstances: {
+                [cardId]: {
+                    isCommentEditing: { $set: false },
+                },
+            },
+            confirmPrivatizeNoteArgs: {
+                $set: null,
+            },
+        })
+
+        const { remoteAnnotationId, savePromise } = await updateAnnotation({
+            annotationsBG: this.options.annotations,
+            contentSharingBG: this.options.contentSharing,
+            keepListsIfUnsharing: event.keepListsIfUnsharing,
+            annotationData: {
+                comment,
+                localId: annotationData.localId,
+            },
+            shareOpts: {
+                shouldShare: event.shouldShare,
+                shouldCopyShareLink: event.shouldShare,
+                isBulkShareProtected:
+                    event.isProtected || !!event.keepListsIfUnsharing,
+                skipPrivacyLevelUpdate: event.mainBtnPressed,
+            },
+        })
+
+        this.options.annotationsCache.updateAnnotation(
+            {
+                ...annotationData,
+                comment,
+                remoteId: remoteAnnotationId ?? undefined,
+                privacyLevel: shareOptsToPrivacyLvl({
+                    shouldShare: event.shouldShare,
+                    isBulkShareProtected:
+                        event.isProtected || !!event.keepListsIfUnsharing,
+                }),
+            },
+            { updateLastEditedTimestamp: true, now },
+        )
+
+        await savePromise
+    }
+    /* -- END: Annotation card instance events -- */
 
     receiveSharingAccessChange: EventHandler<'receiveSharingAccessChange'> = ({
         event: { sharingAccess },
@@ -949,90 +1034,6 @@ export class SidebarContainerLogic extends UILogic<
         return this.options.annotations.goToAnnotationFromSidebar({
             url: annotation.normalizedPageUrl,
             annotation: { url: annotation.localId },
-        })
-    }
-
-    editAnnotation: EventHandler<'editAnnotation'> = async ({
-        event,
-        previousState,
-    }) => {
-        const {
-            editForms: { [event.annotationUrl]: form },
-        } = previousState
-
-        if (event.shouldShare && !(await this.ensureLoggedIn())) {
-            return
-        }
-
-        const comment = form.commentText.trim()
-        const existing = this.options.annotationsCache.getAnnotationByLocalId(
-            event.annotationUrl,
-        )
-        if (!existing) {
-            return
-        }
-
-        // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
-        // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
-        //  to make a SAS annotation private protected upon save btn press
-        // TODO: properly update lists state
-        // existing.lists = event.mainBtnPressed
-        //     ? existing.lists
-        //     : this.getAnnotListsAfterShareStateChange({
-        //           previousState,
-        //           annotationIndex,
-        //           keepListsIfUnsharing: event.keepListsIfUnsharing,
-        //           incomingPrivacyState: {
-        //               public: event.shouldShare,
-        //               protected: !!event.isProtected,
-        //           },
-        //       })
-
-        this.emitMutation({
-            annotationModes: {
-                [event.context]: {
-                    [event.annotationUrl]: { $set: 'default' },
-                },
-            },
-            editForms: {
-                [event.annotationUrl]: {
-                    $set: { ...INIT_FORM_STATE },
-                },
-            },
-            confirmPrivatizeNoteArgs: {
-                $set: null,
-            },
-            ...this.applyStateMutationForAllFollowedLists(previousState, {
-                annotationModes: {
-                    [event.annotationUrl]: { $set: 'default' },
-                },
-            }),
-        })
-
-        this.options.annotationsCache.updateAnnotation({
-            ...existing,
-            comment,
-            privacyLevel: shareOptsToPrivacyLvl({
-                shouldShare: event.shouldShare,
-                isBulkShareProtected:
-                    event.isProtected || !!event.keepListsIfUnsharing,
-            }),
-        })
-        await updateAnnotation({
-            annotationsBG: this.options.annotations,
-            contentSharingBG: this.options.contentSharing,
-            keepListsIfUnsharing: event.keepListsIfUnsharing,
-            annotationData: {
-                comment,
-                localId: existing.localId,
-            },
-            shareOpts: {
-                shouldShare: event.shouldShare,
-                shouldCopyShareLink: event.shouldShare,
-                isBulkShareProtected:
-                    event.isProtected || !!event.keepListsIfUnsharing,
-                skipPrivacyLevelUpdate: event.mainBtnPressed,
-            },
         })
     }
 

@@ -40,7 +40,11 @@ export interface PageAnnotationsCacheInterface {
     updateAnnotation: (
         updates: Pick<
             UnifiedAnnotation,
-            'unifiedId' | 'comment' | 'unifiedListIds' | 'privacyLevel'
+            | 'unifiedId'
+            | 'remoteId'
+            | 'comment'
+            | 'unifiedListIds'
+            | 'privacyLevel'
         >,
         opts?: {
             updateLastEditedTimestamp?: boolean

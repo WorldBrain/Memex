@@ -263,14 +263,15 @@ interface SidebarEvents {
     setAnnotationCommentMode: AnnotationCardInstanceEvent<{
         isTruncated: boolean
     }>
-
-    // Annotation events
-    editAnnotation: AnnotationEvent<{
+    editAnnotation: AnnotationCardInstanceEvent<{
         shouldShare: boolean
         isProtected?: boolean
         mainBtnPressed?: boolean
         keepListsIfUnsharing?: boolean
+        now?: number
     }>
+
+    // Annotation events
     deleteAnnotation: AnnotationEvent<{}>
     setActiveAnnotation: AnnotationEvent<{}>
     setAnnotationShareInfo: AnnotationEvent<{

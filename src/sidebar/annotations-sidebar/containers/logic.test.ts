@@ -1147,6 +1147,127 @@ describe('SidebarContainerLogic', () => {
                 comment: DATA.LOCAL_ANNOTATIONS[0].comment,
             })
         })
+
+        it('should be able to save an edit of an annotation card', async ({
+            device,
+        }) => {
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+
+            const now = 123
+            const updatedComment = 'updated comment'
+            const unifiedAnnotationId = annotationsCache.getAnnotationByLocalId(
+                DATA.LOCAL_ANNOTATIONS[0].url,
+            ).unifiedId
+            const cardId = generateAnnotationCardInstanceId(
+                { unifiedId: unifiedAnnotationId },
+                'annotations-tab',
+            )
+
+            await sidebar.processEvent('setAnnotationEditMode', {
+                unifiedAnnotationId,
+                instanceLocation: 'annotations-tab',
+                isEditing: true,
+            })
+            await sidebar.processEvent('setAnnotationEditCommentText', {
+                unifiedAnnotationId,
+                instanceLocation: 'annotations-tab',
+                comment: updatedComment,
+            })
+
+            expect(
+                await device.storageManager
+                    .collection('annotations')
+                    .findOneObject({ url: DATA.ANNOT_1.url }),
+            ).toEqual(
+                expect.objectContaining({
+                    comment: DATA.ANNOT_1.comment,
+                }),
+            )
+            expect(sidebar.state.annotations.byId[unifiedAnnotationId]).toEqual(
+                expect.objectContaining({
+                    remoteId: undefined,
+                    comment: DATA.ANNOT_1.comment,
+                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                    lastEdited: DATA.ANNOT_1.lastEdited.getTime(),
+                }),
+            )
+            expect(sidebar.state.annotationCardInstances[cardId]).toEqual({
+                unifiedAnnotationId,
+                isCommentTruncated: true,
+                isCommentEditing: true,
+                cardMode: 'none',
+                comment: updatedComment,
+            })
+
+            // EDIT 1: change only the comment
+            await sidebar.processEvent('editAnnotation', {
+                unifiedAnnotationId,
+                instanceLocation: 'annotations-tab',
+                shouldShare: false,
+                now,
+            })
+
+            // TODO: Fix storage checks (currently changes not persisting)
+            // expect(
+            //     await device.storageManager
+            //         .collection('sharedAnnotationMetadata')
+            //         .findOneObject({ localId: DATA.ANNOT_1.url }),
+            // ).toEqual(null)
+            // expect(
+            //     await device.storageManager
+            //         .collection('annotations')
+            //         .findOneObject({ url: DATA.ANNOT_1.url }),
+            // ).toEqual(
+            //     expect.objectContaining({
+            //         comment: updatedComment,
+            //     }),
+            // )
+            expect(sidebar.state.annotations.byId[unifiedAnnotationId]).toEqual(
+                expect.objectContaining({
+                    remoteId: undefined,
+                    comment: updatedComment,
+                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                    lastEdited: now,
+                }),
+            )
+            expect(sidebar.state.annotationCardInstances[cardId]).toEqual({
+                unifiedAnnotationId,
+                isCommentTruncated: true,
+                isCommentEditing: false,
+                cardMode: 'none',
+                comment: updatedComment,
+            })
+
+            // EDIT 2: make shared + protected
+            await sidebar.processEvent('editAnnotation', {
+                unifiedAnnotationId,
+                instanceLocation: 'annotations-tab',
+                shouldShare: true,
+                isProtected: true,
+                now: now + 1,
+            })
+
+            // const metadata: SharedAnnotationMetadata = await device.storageManager
+            //     .collection('sharedAnnotationMetadata')
+            //     .findOneObject({ localId: DATA.ANNOT_1.url })
+            // expect(metadata).toEqual({
+            //     localId: DATA.ANNOT_1.url,
+            //     remoteId: expect.any(String),
+            //     excludeFromLists: false,
+            // })
+            expect(sidebar.state.annotations.byId[unifiedAnnotationId]).toEqual(
+                expect.objectContaining({
+                    // remoteId: metadata.remoteId,
+                    remoteId: expect.any(String),
+                    comment: updatedComment,
+                    privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    lastEdited: now + 1,
+                }),
+            )
+        })
     })
 
     describe.skip('page annotations tab', () => {

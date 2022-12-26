@@ -283,6 +283,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         const nextAnnotation: UnifiedAnnotation = {
             ...previousAnnotation,
             comment: updates.comment,
+            remoteId: updates.remoteId ?? previousAnnotation.remoteId,
             privacyLevel: updates.privacyLevel,
             unifiedListIds: updates.unifiedListIds,
             lastEdited: opts?.updateLastEditedTimestamp
