@@ -160,10 +160,10 @@ export async function main(
             shouldShare: boolean,
             showSpacePicker?: boolean,
         ) => {
-            // TODO: use inPageUI.selectedSpace to create the annotation in the right scope
+            // TODO: use inPageUI.selectedList to create the annotation in the right scope
             console.debug(
                 'Creating annotation under selected space',
-                inPageUI.selectedSpace,
+                inPageUI.selectedList,
             )
             return highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
                 ...annotationFunctionsParams,

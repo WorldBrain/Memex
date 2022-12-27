@@ -413,14 +413,14 @@ describe('SidebarContainerLogic', () => {
                         annotationsCache.lists.byId[unifiedListIdA],
                     ),
                     sharedAnnotationReferences: [],
-                    annotationsCountLoadState: 'pristine',
+                    annotationRefsLoadState: 'pristine',
                 },
                 [unifiedListIdB]: {
                     ...initListInstance(
                         annotationsCache.lists.byId[unifiedListIdB],
                     ),
                     sharedAnnotationReferences: [],
-                    annotationsCountLoadState: 'pristine',
+                    annotationRefsLoadState: 'pristine',
                 },
             })
 
@@ -434,7 +434,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: false,
                     unifiedListId: unifiedListIdA,
                     annotationsLoadState: 'pristine',
-                    annotationsCountLoadState: 'success',
+                    annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
                             type: 'shared-annotation-reference',
@@ -446,7 +446,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: false,
                     unifiedListId: unifiedListIdB,
                     annotationsLoadState: 'pristine',
-                    annotationsCountLoadState: 'success',
+                    annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
                             type: 'shared-annotation-reference',
@@ -519,14 +519,14 @@ describe('SidebarContainerLogic', () => {
                         annotationsCache.lists.byId[unifiedListIdA],
                     ),
                     sharedAnnotationReferences: [],
-                    annotationsCountLoadState: 'pristine',
+                    annotationRefsLoadState: 'pristine',
                 },
                 [unifiedListIdB]: {
                     ...initListInstance(
                         annotationsCache.lists.byId[unifiedListIdB],
                     ),
                     sharedAnnotationReferences: [],
-                    annotationsCountLoadState: 'pristine',
+                    annotationRefsLoadState: 'pristine',
                 },
             })
 
@@ -540,7 +540,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: false,
                     unifiedListId: unifiedListIdA,
                     annotationsLoadState: 'pristine',
-                    annotationsCountLoadState: 'success',
+                    annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
                             type: 'shared-annotation-reference',
@@ -552,7 +552,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: false,
                     unifiedListId: unifiedListIdB,
                     annotationsLoadState: 'pristine',
-                    annotationsCountLoadState: 'success',
+                    annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
                             type: 'shared-annotation-reference',
@@ -576,7 +576,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: true,
                     unifiedListId: unifiedListIdA,
                     annotationsLoadState: 'success',
-                    annotationsCountLoadState: 'success',
+                    annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
                             type: 'shared-annotation-reference',
@@ -588,7 +588,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: false,
                     unifiedListId: unifiedListIdB,
                     annotationsLoadState: 'pristine',
-                    annotationsCountLoadState: 'success',
+                    annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
                             type: 'shared-annotation-reference',
@@ -638,7 +638,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: true,
                     unifiedListId: unifiedListIdA,
                     annotationsLoadState: 'success',
-                    annotationsCountLoadState: 'success',
+                    annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
                             type: 'shared-annotation-reference',
@@ -650,7 +650,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: true,
                     unifiedListId: unifiedListIdB,
                     annotationsLoadState: 'success',
-                    annotationsCountLoadState: 'success',
+                    annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
                             type: 'shared-annotation-reference',
@@ -806,12 +806,12 @@ describe('SidebarContainerLogic', () => {
                 DATA.LOCAL_LISTS[0].id,
             ])
 
-            // TODO: Update this to trigger the `setSelectedSpace` event instead of directly mutating the state
-            sidebar.processMutation({
-                selectedSpace: {
-                    $set: { localId: DATA.LOCAL_LISTS[1].id, remoteId: null },
-                },
-            })
+            const unifiedListId = annotationsCache.getListByLocalId(
+                DATA.LOCAL_LISTS[1].id,
+            ).unifiedId
+
+            // TODO: Update this to trigger the `setSelectedList` event instead of directly mutating the state
+            sidebar.processMutation({ selectedListId: { $set: unifiedListId } })
 
             expect(sidebar.state.commentBox.lists).toEqual([
                 DATA.LOCAL_LISTS[0].id,
@@ -1303,6 +1303,233 @@ describe('SidebarContainerLogic', () => {
                 unifiedAnnotationId: null,
             })
             expect(sidebar.state.activeAnnotationId).toBeNull()
+        })
+
+    describe('selected space/selected space mode', () => {
+        it('should be able to set selected space mode for a specific joined space', async ({
+            device,
+        }) => {
+            const {
+                sidebar,
+                emittedEvents,
+                annotationsCache,
+            } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+            const expectedEvents = []
+            const joinedCacheList = annotationsCache.getListByLocalId(
+                DATA.LOCAL_LISTS[2].id,
+            )
+
+            expect(sidebar.state.activeTab).toEqual('annotations')
+            expect(sidebar.state.selectedListId).toEqual(null)
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(
+                sidebar.state.listInstances[joinedCacheList.unifiedId]
+                    .annotationsLoadState,
+            ).toEqual('pristine')
+
+            await sidebar.processEvent('setSelectedList', {
+                unifiedListId: joinedCacheList.unifiedId,
+            })
+
+            expectedEvents.push(
+                {
+                    event: 'setSelectedList',
+                    args: joinedCacheList.unifiedId,
+                },
+                //     {
+                //         event: 'renderHighlights',
+                //         args: { highlights: expect.any(Array) },
+                //     },
+            )
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(sidebar.state.selectedListId).toEqual(
+                joinedCacheList.unifiedId,
+            )
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(
+                sidebar.state.listInstances[joinedCacheList.unifiedId]
+                    .annotationsLoadState,
+            ).toEqual('pristine')
+
+            await sidebar.processEvent('setSelectedList', {
+                unifiedListId: null,
+            })
+            expectedEvents.push(
+                //     {
+                //         event: 'renderHighlights',
+                //         args: { highlights: sidebar.state.annotations },
+                //     },
+                {
+                    event: 'setSelectedList',
+                    args: null,
+                },
+            )
+
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(sidebar.state.selectedListId).toEqual(null)
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(
+                sidebar.state.listInstances[joinedCacheList.unifiedId]
+                    .annotationsLoadState,
+            ).toEqual('pristine')
+        })
+
+        it('should be able to set selected space mode for a specific followed-only space', async ({
+            device,
+        }) => {
+            const {
+                sidebar,
+                emittedEvents,
+                annotationsCache,
+            } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+            const followedCacheList = annotationsCache.getListByRemoteId(
+                DATA.SHARED_LIST_IDS[3],
+            )
+            const expectedEvents = []
+
+            expect(sidebar.state.activeTab).toEqual('annotations')
+            expect(sidebar.state.selectedListId).toEqual(null)
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(
+                sidebar.state.listInstances[followedCacheList.unifiedId]
+                    .annotationsLoadState,
+            ).toEqual('pristine')
+            expect(
+                sidebar.state.listInstances[followedCacheList.unifiedId]
+                    .annotationRefsLoadState,
+            ).toEqual('pristine')
+
+            const annotationsCountBefore =
+                sidebar.state.annotations.allIds.length
+            const annotationCardInstanceCountBefore = Object.keys(
+                sidebar.state.annotationCardInstances,
+            ).length
+
+            await sidebar.processEvent('setSelectedList', {
+                unifiedListId: followedCacheList.unifiedId,
+            })
+
+            expectedEvents.push(
+                {
+                    event: 'setSelectedList',
+                    args: followedCacheList.unifiedId,
+                },
+                //     {
+                //         event: 'renderHighlights',
+                //         args: { highlights: expect.any(Array) },
+                //     },
+            )
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(sidebar.state.selectedListId).toEqual(
+                followedCacheList.unifiedId,
+            )
+            expect(emittedEvents).toEqual(expectedEvents)
+            // Verify remote annots got loaded
+            expect(
+                sidebar.state.listInstances[followedCacheList.unifiedId]
+                    .annotationsLoadState,
+            ).toEqual('success')
+            expect(
+                sidebar.state.listInstances[followedCacheList.unifiedId]
+                    .annotationRefsLoadState,
+            ).toEqual('success')
+            expect(sidebar.state.annotations.allIds.length).toBe(
+                annotationsCountBefore + 2,
+            )
+            expect(
+                Object.keys(sidebar.state.annotationCardInstances).length,
+            ).toBe(annotationCardInstanceCountBefore + 4) // 2 for "annotations" tab + 2 for "spaces" tab
+
+            await sidebar.processEvent('setSelectedList', {
+                unifiedListId: null,
+            })
+
+            expectedEvents.push(
+                //     {
+                //         event: 'renderHighlights',
+                //         args: { highlights: sidebar.state.annotations },
+                //     },
+                {
+                    event: 'setSelectedList',
+                    args: null,
+                },
+            )
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(sidebar.state.selectedListId).toEqual(null)
+            expect(emittedEvents).toEqual(expectedEvents)
+        })
+
+        it('should be able to set selected space mode for a specific local-only space', async ({
+            device,
+        }) => {
+            await device.storageManager.collection('customLists').createObject({
+                id: 0,
+                name: 'test',
+            })
+            const {
+                sidebar,
+                emittedEvents,
+                annotationsCache,
+            } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+            const localOnlyCacheList = annotationsCache.getListByLocalId(
+                DATA.LOCAL_LISTS[3].id,
+            )
+            const expectedEvents = []
+
+            expect(sidebar.state.activeTab).toEqual('annotations')
+            expect(sidebar.state.selectedListId).toEqual(null)
+            expect(emittedEvents).toEqual(expectedEvents)
+
+            await sidebar.processEvent('setSelectedList', {
+                unifiedListId: localOnlyCacheList.unifiedId,
+            })
+
+            expectedEvents.push(
+                //     {
+                //         event: 'renderHighlights',
+                //         args: {
+                //             highlights: sidebar.state.annotations.filter(
+                //                 ({ lists }) => lists.includes(localListId),
+                //             ),
+                //         },
+                //     },
+                {
+                    event: 'setSelectedList',
+                    args: localOnlyCacheList.unifiedId,
+                },
+            )
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(sidebar.state.selectedListId).toEqual(
+                localOnlyCacheList.unifiedId,
+            )
+            expect(emittedEvents).toEqual(expectedEvents)
+
+            await sidebar.processEvent('setSelectedList', {
+                unifiedListId: null,
+            })
+
+            expectedEvents.push(
+                //     {
+                //         event: 'renderHighlights',
+                //         args: { highlights: sidebar.state.annotations },
+                //     },
+                {
+                    event: 'setSelectedList',
+                    args: null,
+                },
+            )
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(sidebar.state.selectedListId).toEqual(null)
+            expect(emittedEvents).toEqual(expectedEvents)
         })
     })
 

@@ -26,7 +26,7 @@ export const initListInstance = (
     >,
 ): ListInstance => ({
     sharedAnnotationReferences: list.hasRemoteAnnotations ? [] : undefined,
-    annotationsCountLoadState: 'pristine',
+    annotationRefsLoadState: 'pristine',
     annotationsLoadState: 'pristine',
     unifiedListId: list.unifiedId,
     isOpen: false,

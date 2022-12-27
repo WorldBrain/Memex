@@ -134,8 +134,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const hasSelectedText = anchor.quote.length
 
         const annotationLists = []
-        if (params.inPageUI.selectedSpace) {
-            annotationLists.push(params.inPageUI.selectedSpace.localId)
+        if (params.inPageUI.selectedList) {
+            const selectedList =
+                params.annotationsCache.lists.byId[params.inPageUI.selectedList]
+            if (selectedList.localId != null) {
+                annotationLists.push(selectedList.localId)
+            }
         }
 
         const now = new Date()

@@ -808,15 +808,15 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderSelectedSpacePill() {
+    private renderSelectedListPill() {
         if (
-            // !this.state.selectedSpace?.remoteId ||
+            // !this.state.selectedList?.remoteId ||
             this.state.pillVisibility === 'hide'
         ) {
             return null
         } else {
             // const followedList = this.state.followedLists.byId[
-            //     this.state.selectedSpace.remoteId
+            //     this.state.selectedList.remoteId
             // ]
 
             return (
@@ -874,7 +874,7 @@ export class AnnotationsSidebarContainer<
                                     this.processEvent('setPillVisibility', {
                                         value: 'hide',
                                     })
-                                    this.processEvent('setSelectedSpace', null)
+                                    this.processEvent('setSelectedList', null)
                                 }}
                             />
                         </CloseContainer>
@@ -886,7 +886,7 @@ export class AnnotationsSidebarContainer<
 
     render() {
         if (this.state.showState === 'hidden') {
-            return this.renderSelectedSpacePill()
+            return this.renderSelectedListPill()
         }
 
         const style = {
@@ -952,17 +952,17 @@ export class AnnotationsSidebarContainer<
                             currentUser={this.props.currentUser}
                             annotationsCache={this.props.annotationsCache}
                             onRemoteSpaceSelect={(remoteListId) =>
-                                this.processEvent('setSelectedSpace', {
+                                this.processEvent('setSelectedList', {
                                     remoteListId,
                                 })
                             }
                             onLocalSpaceSelect={(localListId) =>
-                                this.processEvent('setSelectedSpace', {
+                                this.processEvent('setSelectedList', {
                                     localListId,
                                 })
                             }
                             onResetSpaceSelect={() =>
-                                this.processEvent('setSelectedSpace', null)
+                                this.processEvent('setSelectedList', null)
                             }
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}

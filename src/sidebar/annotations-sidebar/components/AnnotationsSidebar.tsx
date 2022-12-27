@@ -21,7 +21,7 @@ import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
 import type { Annotation, ListDetailsGetter } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
-import type { AnnotationMode, SelectedSpaceState, SidebarTheme } from '../types'
+import type { AnnotationMode, SidebarTheme } from '../types'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import {
     AnnotationEditGeneralProps,
@@ -705,7 +705,7 @@ export class AnnotationsSidebar extends React.Component<
         }
     }
 
-    private throwNoSelectedSpaceError() {
+    private throwNoSelectedListError() {
         throw new Error(
             'Isolated view specific render method called when state not set',
         )
@@ -719,29 +719,32 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderAnnotationsEditableForSelectedSpace() {
-        const { selectedSpace, followedLists } = this.props
-        if (selectedSpace == null) {
-            this.throwNoSelectedSpaceError()
+    private renderAnnotationsEditableForSelectedList() {
+        const {
+            selectedListId: selectedList,
+            listInstances,
+            annotationsCache,
+        } = this.props
+        if (selectedList == null) {
+            this.throwNoSelectedListError()
         }
+        const { remoteId, localId } = annotationsCache.lists.byId[selectedList]
+        const listInstance = listInstances[selectedList]
 
-        if (selectedSpace.remoteId != null) {
-            if (
-                followedLists.byId[selectedSpace.remoteId]
-                    ?.annotationsLoadState === 'running'
-            ) {
+        if (remoteId != null) {
+            if (listInstance.annotationsLoadState === 'running') {
                 return this.renderLoader()
             }
 
-            return this.renderFollowedListNotes(selectedSpace.remoteId, true)
+            return this.renderFollowedListNotes(remoteId, true)
         }
 
         // TODO: map list IDs
         return null
-        // const selectedSpaceAnnotations = Object.values(this.props.annotationsCache.annotations.byId).filter(
-        //     ({ unifiedListIds}) => unifiedListIds.includes(selectedSpace.localId.toString()),
+        // const selectedListAnnotations = Object.values(this.props.annotationsCache.annotations.byId).filter(
+        //     ({ unifiedListIds}) => unifiedListIds.includes(selectedList.localId.toString()),
         // )
-        // return this.renderAnnotationsEditable(selectedSpaceAnnotations)
+        // return this.renderAnnotationsEditable(selectedListAnnotations)
     }
 
     private renderResultsBody() {
@@ -754,14 +757,14 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         if (
-            this.props.selectedSpace &&
+            this.props.selectedListId &&
             this.props.activeTab !== 'annotations'
         ) {
             return (
                 <>
-                    {this.renderSelectedSpaceTopBar()}
+                    {this.renderSelectedListTopBar()}
                     <AnnotationsSectionStyled>
-                        {this.renderAnnotationsEditableForSelectedSpace()}
+                        {this.renderAnnotationsEditableForSelectedList()}
                     </AnnotationsSectionStyled>
                 </>
             )
@@ -965,7 +968,7 @@ export class AnnotationsSidebar extends React.Component<
                 bottom={this.props.activeTab === 'annotations' ? '20px' : '0px'}
             >
                 {(this.props.activeTab === 'annotations' ||
-                    this.props.selectedSpace) && (
+                    this.props.selectedListId) && (
                     <>
                         <TopAreaContainer>
                             {this.renderNewAnnotation()}
@@ -1063,22 +1066,22 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderSelectedSpaceTopBar() {
-        const { selectedSpace } = this.props
-        if (!selectedSpace) {
-            this.throwNoSelectedSpaceError()
+    private renderSelectedListTopBar() {
+        const { selectedListId: selectedList } = this.props
+        if (!selectedList) {
+            this.throwNoSelectedListError()
         }
 
         let spaceName: string
         let spaceDescription: string = ''
-        if (selectedSpace.localId == null) {
+        if (selectedList.localId == null) {
             const followedListData = this.props.followedLists.byId[
-                selectedSpace.remoteId
+                selectedList.remoteId
             ]
             spaceName = followedListData?.name ?? 'Missing list'
         } else {
             const listDetails = this.props.getListDetailsById(
-                selectedSpace.localId,
+                selectedList.localId,
             )
             spaceName = listDetails.name
             spaceDescription = listDetails.description
@@ -1107,15 +1110,19 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderPermissionStatusButton() {
-        const { selectedSpace, followedLists, currentUser } = this.props
-        if (!selectedSpace) {
-            this.throwNoSelectedSpaceError()
+        const {
+            selectedListId: selectedList,
+            followedLists,
+            currentUser,
+        } = this.props
+        if (!selectedList) {
+            this.throwNoSelectedListError()
         }
 
-        if (selectedSpace.remoteId != null) {
-            const sharedListData = followedLists.byId[selectedSpace.remoteId]
+        if (selectedList.remoteId != null) {
+            const sharedListData = followedLists.byId[selectedList.remoteId]
 
-            if (selectedSpace.localId == null) {
+            if (selectedList.localId == null) {
                 return (
                     <PermissionInfoButton
                         label="Follower"

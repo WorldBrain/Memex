@@ -136,9 +136,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 },
             )
         })
-        sidebarEvents.on('setSelectedSpace', async (selectedSpace) => {
-            inPageUI.selectedSpace =
-                selectedSpace == null ? null : { ...selectedSpace }
+        sidebarEvents.on('setSelectedList', async (selectedList) => {
+            inPageUI.selectedList = selectedList
         })
     }
 

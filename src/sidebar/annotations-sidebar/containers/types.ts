@@ -10,7 +10,7 @@ import type {
     SharedAnnotationList,
 } from 'src/custom-lists/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
-import type { SelectedSpaceState, SidebarTheme } from '../types'
+import type { SidebarTheme } from '../types'
 import type {
     AnnotationSharingStates,
     ContentSharingInterface,
@@ -158,7 +158,7 @@ export interface SidebarContainerState
     // for the side bar, also known as the isolated view. When a space
     // is selected, all operations default to use that selected space
     // except if explicity told otherwise.
-    selectedSpace: SelectedSpaceState | null
+    selectedListId: UnifiedList['unifiedId'] | null
 
     annotationSharingAccess: AnnotationSharingAccess
 
@@ -285,7 +285,7 @@ interface SidebarEvents {
     }>
 
     // Selected space management
-    setSelectedSpace: { unifiedListId: UnifiedList['unifiedId'] | null }
+    setSelectedList: { unifiedListId: UnifiedList['unifiedId'] | null }
 
     goToAnnotationInNewTab: {
         context: AnnotationEventContext
@@ -379,7 +379,7 @@ export interface AnnotationCardInstance {
 
 export interface ListInstance {
     unifiedListId: UnifiedList['unifiedId']
-    annotationsCountLoadState: TaskState
+    annotationRefsLoadState: TaskState
     annotationsLoadState: TaskState
     sharedAnnotationReferences?: SharedAnnotationReference[]
     isOpen: boolean

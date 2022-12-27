@@ -50,6 +50,7 @@ import { toInteger } from 'lodash'
 import type {
     PageAnnotationsCacheInterface,
     UnifiedAnnotation,
+    UnifiedList,
 } from 'src/annotations/cache/types'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import {
@@ -218,7 +219,7 @@ export class SidebarContainerLogic extends UILogic<
             activeTagPickerAnnotationId: undefined,
             activeListPickerState: undefined,
 
-            selectedSpace: null,
+            selectedListId: null,
 
             commentBox: { ...INIT_FORM_STATE },
             editForms: {},
@@ -900,7 +901,12 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const { commentBox, pageUrl, selectedSpace } = previousState
+        const {
+            lists,
+            pageUrl,
+            commentBox,
+            selectedListId: selectedList,
+        } = previousState
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
@@ -922,8 +928,9 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             const listIds = [...commentBox.lists]
-            if (selectedSpace?.localId != null) {
-                listIds.push(selectedSpace.localId)
+            if (selectedList != null) {
+                const { localId } = lists.byId[selectedList]
+                listIds.push(localId)
             }
 
             const { remoteAnnotationId, savePromise } = await createAnnotation({
@@ -1365,41 +1372,31 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    private async loadRemoteListAnnotationCounts(
+    private async loadRemoteAnnotationReferencesForLists(
         state: SidebarContainerState,
-    ): Promise<void> {
-        const { annotationsCache, customLists } = this.options
-        const listsWithRemoteAnnots = normalizedStateToArray(
-            annotationsCache.lists,
-        ).filter(
-            (list) =>
-                list.hasRemoteAnnotations &&
-                list.remoteId != null &&
-                state.listInstances[list.unifiedId]
-                    ?.annotationsCountLoadState === 'pristine', // Ensure it hasn't already been loaded
-        )
-
-        if (!listsWithRemoteAnnots.length) {
+        lists: UnifiedList[],
+    ): Promise<SidebarContainerState> {
+        if (!lists.length) {
             return
         }
+
+        let nextState = state
 
         await executeUITask(
             this,
             (taskState) => ({
                 listInstances: fromPairs(
-                    listsWithRemoteAnnots.map((list) => [
+                    lists.map((list) => [
                         list.unifiedId,
-                        { annotationsCountLoadState: { $set: taskState } },
+                        { annotationRefsLoadState: { $set: taskState } },
                     ]),
                 ),
             }),
             async () => {
-                const annotationRefsByList = await customLists.fetchAnnotationRefsForRemoteListsOnPage(
+                const annotationRefsByList = await this.options.customLists.fetchAnnotationRefsForRemoteListsOnPage(
                     {
                         normalizedPageUrl: normalizeUrl(state.pageUrl),
-                        sharedListIds: listsWithRemoteAnnots.map(
-                            (list) => list.remoteId!,
-                        ),
+                        sharedListIds: lists.map((list) => list.remoteId!),
                     },
                 )
 
@@ -1407,7 +1404,7 @@ export class SidebarContainerLogic extends UILogic<
                     SidebarContainerState['listInstances']
                 > = {}
 
-                for (const { unifiedId, remoteId } of listsWithRemoteAnnots) {
+                for (const { unifiedId, remoteId } of lists) {
                     mutation[unifiedId] = {
                         sharedAnnotationReferences: {
                             $set: annotationRefsByList[remoteId] ?? [],
@@ -1415,9 +1412,13 @@ export class SidebarContainerLogic extends UILogic<
                     }
                 }
 
+                nextState = this.withMutation(nextState, {
+                    listInstances: mutation,
+                })
                 this.emitMutation({ listInstances: mutation })
             },
         )
+        return nextState
     }
 
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
@@ -1429,7 +1430,7 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         // Don't attempt to re-render highlights on the page if in selected-space mode
-        if (previousState.selectedSpace != null || event.tab === 'feed') {
+        if (previousState.selectedListId != null || event.tab === 'feed') {
             return
         }
 
@@ -1456,7 +1457,20 @@ export class SidebarContainerLogic extends UILogic<
             //         selector: previousState.followedAnnotations[id].selector,
             //     }))
 
-            await this.loadRemoteListAnnotationCounts(previousState)
+            const listsWithRemoteAnnots = normalizedStateToArray(
+                this.options.annotationsCache.lists,
+            ).filter(
+                (list) =>
+                    list.hasRemoteAnnotations &&
+                    list.remoteId != null &&
+                    previousState.listInstances[list.unifiedId]
+                        ?.annotationRefsLoadState === 'pristine', // Ensure it hasn't already been loaded
+            )
+
+            await this.loadRemoteAnnotationReferencesForLists(
+                previousState,
+                listsWithRemoteAnnots,
+            )
         }
 
         if (highlights != null) {
@@ -1464,28 +1478,19 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    expandListAnnotations: EventHandler<'expandListAnnotations'> = async ({
-        event,
-        previousState,
-    }) => {
-        const { annotationsCache, annotations } = this.options
-        const listInstanceState =
-            previousState.listInstances[event.unifiedListId]
-        if (!listInstanceState) {
-            return
-        }
-
-        this.emitMutation({
-            listInstances: {
-                [event.unifiedListId]: {
-                    isOpen: { $apply: (isOpen) => !isOpen },
-                },
-            },
-        })
+    private async maybeLoadListRemoteAnnotations(
+        state: SidebarContainerState,
+        unifiedListId: UnifiedList['unifiedId'],
+    ) {
+        const list = state.lists.byId[unifiedListId]
+        const listInstance = state.listInstances[unifiedListId]
 
         if (
-            listInstanceState.sharedAnnotationReferences == null ||
-            listInstanceState.annotationsLoadState !== 'pristine'
+            !list ||
+            !listInstance ||
+            listInstance.sharedAnnotationReferences == null ||
+            listInstance.annotationsLoadState !== 'pristine' ||
+            !list.hasRemoteAnnotations
         ) {
             return
         }
@@ -1494,29 +1499,31 @@ export class SidebarContainerLogic extends UILogic<
             this,
             (taskState) => ({
                 listInstances: {
-                    [event.unifiedListId]: {
+                    [unifiedListId]: {
                         annotationsLoadState: { $set: taskState },
                     },
                 },
             }),
             async () => {
-                const sharedAnnotations = await annotations.getSharedAnnotations(
+                const sharedAnnotations = await this.options.annotations.getSharedAnnotations(
                     {
                         sharedAnnotationReferences:
-                            listInstanceState.sharedAnnotationReferences,
+                            listInstance.sharedAnnotationReferences,
                         withCreatorData: true,
                     },
                 )
 
                 const annotationCardInstances: SidebarContainerState['annotationCardInstances'] = {}
                 for (const annot of sharedAnnotations) {
-                    const { unifiedId } = annotationsCache.addAnnotation(
+                    const {
+                        unifiedId,
+                    } = this.options.annotationsCache.addAnnotation(
                         cacheUtils.reshapeSharedAnnotationForCache(annot, {}),
                     )
                     annotationCardInstances[
                         generateAnnotationCardInstanceId(
                             { unifiedId },
-                            event.unifiedListId,
+                            unifiedListId,
                         )
                     ] = initAnnotationCardInstance({ unifiedId })
                 }
@@ -1527,6 +1534,24 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 })
             },
+        )
+    }
+
+    expandListAnnotations: EventHandler<'expandListAnnotations'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            listInstances: {
+                [event.unifiedListId]: {
+                    isOpen: { $apply: (isOpen) => !isOpen },
+                },
+            },
+        })
+
+        await this.maybeLoadListRemoteAnnotations(
+            previousState,
+            event.unifiedListId,
         )
     }
 
@@ -1712,80 +1737,60 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    setSelectedSpace: EventHandler<'setSelectedSpace'> = async ({
+    setSelectedList: EventHandler<'setSelectedList'> = async ({
         event,
         previousState,
     }) => {
         // TODO : this is a hack to stop users clicking on space pills before the followed lists have been loaded
         //  Because shit breaks down if they're not loaded and everything's too much of a mess to untangle right now.
         //  Should become much less of a problem once we load followed lists from local DB
-        if (previousState.followedListLoadState !== 'success') {
-            return
-        }
+        // if (previousState.followedListLoadState !== 'success') {
+        //     return
+        // }
 
-        if (event == null) {
-            this.emitMutation({ selectedSpace: { $set: null } })
+        this.options.events.emit('setSelectedList', event.unifiedListId)
+
+        if (event.unifiedListId == null) {
+            this.emitMutation({ selectedListId: { $set: null } })
 
             // this.options.events.emit('renderHighlights', {
             //     highlights: previousState.annotations,
             // })
-            this.options.events.emit('setSelectedSpace', null)
             return
         }
 
-        let remoteListId: string
-        let localListId: number
-        let mutation: UIMutation<SidebarContainerState>
-
-        if ('remoteListId' in event) {
-            remoteListId = event.remoteListId
-            localListId = this.options.annotationsCache.getListByRemoteId(
-                event.remoteListId,
-            )?.localId
-        } else {
-            const listData = this.options.annotationsCache.getListByLocalId(
-                event.localListId,
+        const list = previousState.lists.byId[event.unifiedListId]
+        const listInstance = previousState.listInstances[event.unifiedListId]
+        if (!list || !listInstance) {
+            console.warn(
+                'setSelectedList: could not find matching list for cache ID:',
+                event.unifiedListId,
             )
-            if (listData?.remoteId != null) {
-                remoteListId = listData.remoteId
-            }
-
-            localListId = event.localListId
-
-            if (remoteListId == null) {
-                // this.options.events.emit('renderHighlights', {
-                //     highlights: previousState.annotations.filter(({ lists }) =>
-                //         lists.includes(localListId),
-                //     ),
-                // })
-            }
+            return
         }
 
-        mutation = {
+        this.emitMutation({
             activeTab: { $set: 'spaces' },
-            selectedSpace: {
-                $set: {
-                    localId: localListId,
-                    remoteId: remoteListId ?? null,
-                },
-            },
-        }
+            selectedListId: { $set: event.unifiedListId },
+        })
 
-        const nextState = this.withMutation(previousState, mutation)
-        this.options.events.emit('setSelectedSpace', nextState.selectedSpace)
-
-        this.emitMutation(mutation)
-
-        // If we're setting a remote list AND we haven't already loaded the remote notes for that list, load them
-        if (
-            nextState.selectedSpace?.remoteId != null &&
-            nextState.followedLists.byId[nextState.selectedSpace.remoteId]
-                ?.annotationsLoadState === 'pristine'
-        ) {
-            await this.processUIEvent('loadFollowedListNotes', {
-                previousState: nextState,
-                event: { listId: nextState.selectedSpace.remoteId },
-            })
+        if (list.remoteId != null) {
+            // this.options.events.emit('renderHighlights', {
+            //     highlights: previousState.annotations.filter(({ lists }) =>
+            //         lists.includes(localListId),
+            //     ),
+            // })
+            let nextState = previousState
+            if (listInstance.annotationRefsLoadState === 'pristine') {
+                nextState = await this.loadRemoteAnnotationReferencesForLists(
+                    previousState,
+                    [list],
+                )
+            }
+            await this.maybeLoadListRemoteAnnotations(
+                nextState,
+                event.unifiedListId,
+            )
         }
     }
 

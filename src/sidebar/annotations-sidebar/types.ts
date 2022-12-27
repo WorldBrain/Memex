@@ -1,6 +1,9 @@
 import type TypedEventEmitter from 'typed-emitter'
 import type { ResultWithIndex } from 'src/overview/types'
-import type { UnifiedAnnotation } from 'src/annotations/cache/types'
+import type {
+    UnifiedAnnotation,
+    UnifiedList,
+} from 'src/annotations/cache/types'
 
 export interface Page {
     url?: string
@@ -32,7 +35,7 @@ export interface HighlighterEvents {
 }
 
 export interface AnnotationsSidebarInPageEvents extends HighlighterEvents {
-    setSelectedSpace: (args: SelectedSpaceState) => void
+    setSelectedList: (unifiedListId: UnifiedList['unifiedId']) => void
 }
 
 export interface AnnotationStorageInterface {}
@@ -47,20 +50,3 @@ export interface SidebarTheme {
     topOffsetPx: number
     paddingRight: number
 }
-
-export type SelectedSpaceState =
-    // Followed-only space
-    | {
-          localId: null
-          remoteId: string
-      }
-    // Local-only space
-    | {
-          localId: number
-          remoteId: null
-      }
-    // Joined/own shared space
-    | {
-          remoteId: string
-          localId: number
-      }

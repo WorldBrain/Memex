@@ -16,7 +16,6 @@ import {
     TypedRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
 import type { ContentSharingEvents } from 'src/content-sharing/background/types'
-import type { SelectedSpaceState } from 'src/sidebar/annotations-sidebar/types'
 
 export interface SharedInPageUIDependencies {
     getNormalizedPageUrl: () => MaybePromise<string>
@@ -54,12 +53,12 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
      * instance, how what is the selected space for creating new annotations.
      *
      * The actual original source of truth for this is the
-     * AnnotationSidebarContainer selectedSpace state value. That is
-     * propagated to AnnotationSidebarInPage using selectedSpaceChanged
+     * AnnotationSidebarContainer selectedList state value. That is
+     * propagated to AnnotationSidebarInPage using selectedListChanged
      * UIlogic event, which will then update this value here.
      *
      */
-    selectedSpace: SelectedSpaceState | null = null
+    selectedList: SharedInPageUIInterface['selectedList'] = null
 
     _pendingEvents: {
         sidebarAction?: {
