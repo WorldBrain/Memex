@@ -2,16 +2,13 @@ import type { Annotation, AnnotListEntry } from 'src/annotations/types'
 import type {
     ListDescription,
     PageListEntry,
-    SharedAnnotationList,
 } from 'src/custom-lists/background/types'
 import type {
     SharedAnnotation,
     SharedAnnotationListEntry,
-    SharedAnnotationReference,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
-import type { PreparedThread } from '@worldbrain/memex-common/lib/content-conversations/storage/types'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import type { PageList } from 'src/custom-lists/background/types'
@@ -508,88 +505,5 @@ export const SHARED_ANNOTATION_LIST_ENTRIES: Array<
         createdWhen: new Date('2022-12-22').getTime(),
         updatedWhen: new Date('2022-12-22').getTime(),
         uploadedWhen: new Date('2022-12-22').getTime(),
-    },
-]
-
-export const __FOLLOWED_LISTS: SharedAnnotationList[] = [
-    {
-        id: 'test a',
-        name: 'test a',
-        creatorReference: {
-            id: '123',
-            type: 'user-reference',
-        },
-        sharedAnnotationReferences: [
-            SHARED_ANNOTATIONS[0].reference,
-            SHARED_ANNOTATIONS[3].reference,
-        ],
-    },
-    {
-        id: 'test b',
-        name: 'test b',
-        creatorReference: {
-            id: '123',
-            type: 'user-reference',
-        },
-        sharedAnnotationReferences: [
-            SHARED_ANNOTATIONS[0].reference,
-            SHARED_ANNOTATIONS[1].reference,
-        ],
-    },
-    {
-        id: 'test c',
-        name: 'test c',
-        creatorReference: {
-            id: TEST_USER.id,
-            type: 'user-reference',
-        },
-        sharedAnnotationReferences: [
-            SHARED_ANNOTATIONS[0].reference,
-            SHARED_ANNOTATIONS[2].reference,
-            SHARED_ANNOTATIONS[3].reference,
-        ],
-    },
-    {
-        id: 'test d',
-        name: 'test d',
-        creatorReference: {
-            id: TEST_USER.id,
-            type: 'user-reference',
-        },
-        sharedAnnotationReferences: [],
-    },
-    {
-        id: 'test e',
-        name: 'test e',
-        creatorReference: {
-            id: TEST_USER.id,
-            type: 'user-reference',
-        },
-        sharedAnnotationReferences: [SHARED_ANNOTATIONS[4].reference],
-    },
-]
-
-export const ANNOTATION_THREADS: PreparedThread[] = [
-    {
-        sharedAnnotation: SHARED_ANNOTATIONS[0].reference,
-        sharedList: {
-            id: __FOLLOWED_LISTS[0].id,
-            type: 'shared-list-reference',
-        },
-        thread: {
-            normalizedPageUrl: SHARED_ANNOTATIONS[0].normalizedPageUrl,
-            updatedWhen: 1231231,
-        },
-    },
-    {
-        sharedAnnotation: SHARED_ANNOTATIONS[3].reference,
-        sharedList: {
-            id: __FOLLOWED_LISTS[0].id,
-            type: 'shared-list-reference',
-        },
-        thread: {
-            normalizedPageUrl: SHARED_ANNOTATIONS[3].normalizedPageUrl,
-            updatedWhen: 1231231,
-        },
     },
 ]
