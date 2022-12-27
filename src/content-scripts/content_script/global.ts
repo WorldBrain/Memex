@@ -2,6 +2,10 @@ import 'core-js'
 import { EventEmitter } from 'events'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
+import {
+    MemexOpenLinkDetail,
+    MemexRequestHandledDetail,
+} from '@worldbrain/memex-common/lib/services/memex-extension'
 
 // import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
@@ -368,6 +372,7 @@ export async function main(
     }
 
     injectYoutubeContextMenu(annotationsFunctions)
+    setupWebUIActions()
 
     return inPageUI
 }
@@ -476,4 +481,19 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
     })
 
     observer.observe(document, config)
+}
+
+export function setupWebUIActions() {
+    const confirmRequest = (requestId: number) => {
+        const detail: MemexRequestHandledDetail = { requestId }
+        const event = new CustomEvent('memex:request-handled', { detail })
+        document.dispatchEvent(event)
+    }
+
+    document.addEventListener('memex:open-link', (event) => {
+        const detail = event.detail as MemexOpenLinkDetail
+        console.log('Got request to open page link', detail)
+        // TODO: Do some actual stuff in here
+        confirmRequest(detail.requestId)
+    })
 }
