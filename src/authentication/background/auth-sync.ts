@@ -38,7 +38,14 @@ function addListener(
     expectedOrigins: string[],
 ) {
     //@ts-ignore next-line
-    chrome.runtime.onMessageExternal.addListener(
+    const base = chrome || browser
+
+    if (!base) {
+        return
+    }
+
+    //@ts-ignore next-line
+    base.runtime.onMessageExternal.addListener(
         (message, sender, runtimeSendResponse) => {
             const messageObj = getMessage(message, sender, expectedOrigins)
             if (!messageObj) {
