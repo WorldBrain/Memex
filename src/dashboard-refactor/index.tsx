@@ -59,6 +59,8 @@ import SyncStatusMenu, { SyncStatusMenuProps } from './header/sync-status-menu'
 import { SETTINGS_URL } from 'src/constants'
 import { SyncStatusIcon } from './header/sync-status-menu/sync-status-icon'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import { createYoutubeServiceOptions } from '@worldbrain/memex-common/lib/services/youtube/library'
 
 export interface Props extends DashboardDependencies {}
 
@@ -119,6 +121,8 @@ export class DashboardContainer extends StatefulUIElement<
     private annotationsCache: AnnotationsCacheInterface
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
 
+    youtubeService: YoutubeService
+
     private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
         window.location.hash = '#/' + route
     }
@@ -137,6 +141,7 @@ export class DashboardContainer extends StatefulUIElement<
             },
             { skipPageIndexing: true },
         )
+        this.youtubeService = new YoutubeService(createYoutubeServiceOptions())
     }
 
     private getListDetailsById: ListDetailsGetter = (id) => ({
@@ -632,6 +637,7 @@ export class DashboardContainer extends StatefulUIElement<
                 activePage={this.state.activePageID && true}
                 listData={listsSidebar.listData}
                 getListDetailsById={this.getListDetailsById}
+                youtubeService={this.youtubeService}
                 toggleSortMenuShown={() =>
                     this.processEvent('setSortMenuShown', {
                         isShown: !searchResults.isSortMenuShown,

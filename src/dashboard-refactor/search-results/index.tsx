@@ -50,6 +50,7 @@ import type { ListDetailsGetter } from 'src/annotations/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -78,6 +79,7 @@ export type Props = RootState &
         noteInteractionProps: NoteInteractionAugdProps
         listDetailsProps: ListDetailsProps
         pagePickerProps: PagePickerAugdProps
+        youtubeService: YoutubeService
         onShowAllNotesClick: React.MouseEventHandler
         noResultsType: NoResultsType
         onDismissMobileAd: React.MouseEventHandler
@@ -501,6 +503,7 @@ export default class SearchResultsContainer extends React.Component<
                     activePage={this.props.activePage}
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={this.props.selectedListId}
+                    youtubeService={this.props.youtubeService}
                     getListDetailsById={this.props.getListDetailsById}
                     shareMenuProps={{
                         normalizedPageUrl: page.normalizedUrl,
