@@ -33,8 +33,10 @@ const showHighlights = (options: HighlightDependencies) => {
     const onClickHighlight: AnnotationClickHandler = ({
         unifiedAnnotationId,
         openInEdit,
+        annotation,
     }) => {
         options.inPageUI.showSidebar({
+            annotation: annotation,
             action: openInEdit ? 'edit_annotation' : 'show_annotation',
             annotationUrl: unifiedAnnotationId,
         })
@@ -48,7 +50,7 @@ const showHighlights = (options: HighlightDependencies) => {
 }
 
 const hideHighlights = (options: HighlightDependencies) => {
-    options.highlightRenderer.removeHighlights()
+    options.highlightRenderer.resetHighlightsStyles()
 }
 
 // const registry = globalThis['contentScriptRegistry'] as ContentScriptRegistry

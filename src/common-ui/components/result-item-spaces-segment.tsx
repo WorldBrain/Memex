@@ -159,8 +159,8 @@ const Container = styled.div<{ padding: string }>`
 
 const EditIconContainer = styled.div`
     border: 1px solid ${(props) => props.theme.colors.lineGrey};
-    height: 26px;
-    width: 26px;
+    height: 24px;
+    width: 24px;
     border-radius: 3px;
     display: flex;
     justify-content: center;

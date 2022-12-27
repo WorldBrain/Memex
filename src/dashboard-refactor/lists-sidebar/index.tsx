@@ -38,7 +38,7 @@ export interface ListsSidebarProps {
     searchBarProps: ListsSidebarSearchBarProps
     listsGroups: ListsSidebarGroupProps[]
     initDropReceivingState: (listId: number) => DropReceivingState
-    sidebarWidth: string
+    spaceSidebarWidth: number
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -73,9 +73,9 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         } = this.props
 
         return (
-            <Container>
+            <Container spaceSidebarWidth={this.props.spaceSidebarWidth}>
                 <GlobalStyle />
-                <BottomGroup sidebarWidth={this.props.sidebarWidth}>
+                <BottomGroup>
                     <Margin vertical="10px">
                         <ListsSidebarGroup isExpanded loadingState="success">
                             {this.renderLists(
@@ -235,36 +235,36 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     }
 }
 
-const Container = styled.div`
+const Container = styled.div<{ spaceSidebarWidth: number }>`
     position: sticky;
     z-index: 2147483645;
-    width: 100%;
+    width: ${(props) => props.spaceSidebarWidth}px;
     display: flex;
     justify-content: center;
     height: fill-available;
+    overflow: scroll;
 `
 
 const Separator = styled.div`
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-top: 1px solid ${(props) => props.theme.colors.lightHover};
 
     &::last-child {
         border-top: 'unset';
     }
 `
 
-const BottomGroup = styled.div<{ sidebarWidth: string }>`
+const BottomGroup = styled.div`
     overflow-y: scroll;
     overflow-x: visible;
     height: fill-available;
-    width: ${(props) => props.sidebarWidth};
+    width: fill-available;
     padding-bottom: 100px;
 
     &::-webkit-scrollbar {
-      display: none;
+        display: none;
     }
 
     scrollbar-width: none;
-}
 `
 
 const NoCollectionsMessage = styled.div`
@@ -286,7 +286,7 @@ const NoCollectionsMessage = styled.div`
         cursor: pointer;
     }
 
-    &: hover {
+    &:hover {
         background-color: ${(props) =>
             props.theme.colors.backgroundColorDarker};
     }

@@ -33,7 +33,7 @@ export default function TagsSegment({
                         placement={'right'}
                     >
                         <Icon
-                            filePath={icons.alertRound}
+                            filePath={'warning'}
                             color={'warning'}
                             heightAndWidth="18px"
                             onClick={() =>

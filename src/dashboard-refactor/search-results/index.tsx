@@ -1,6 +1,8 @@
-import React, { PureComponent } from 'react'
-import styled from 'styled-components'
+import React, { PureComponent, useState } from 'react'
+import styled, { css, keyframes } from 'styled-components'
 import Waypoint from 'react-waypoint'
+import browser from 'webextension-polyfill'
+// import { SketchPicker } from 'react-color'
 
 import type {
     RootState,
@@ -19,10 +21,9 @@ import type { RootState as ListSidebarState } from '../lists-sidebar/types'
 import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
     Props as SearchTypeSwitchProps,
-} from './components/search-type-switch'
+} from '@worldbrain/memex-common/lib/common-ui/components/search-type-switch'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
-import NoResults from './components/no-results'
 import { bindFunctionalProps, formatDayGroupTime } from './util'
 import { SortingDropdownMenuBtn } from 'src/sidebar/annotations-sidebar/components/SortingDropdownMenu'
 import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
@@ -37,18 +38,18 @@ import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import DismissibleResultsMessage from './components/dismissible-results-message'
 import MobileAppAd from 'src/sync/components/device-list/mobile-app-ad'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import ListDetails, {
     Props as ListDetailsProps,
 } from './components/list-details'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import ListShareMenu from 'src/overview/sharing/ListShareMenu'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -62,6 +63,7 @@ export type Props = RootState &
         | 'onTwitterSearchSwitch'
         | 'onPDFSearchSwitch'
     > & {
+        isSpacesSidebarLocked?: boolean
         searchFilters?: any
         activePage?: boolean
         searchResults?: any
@@ -104,16 +106,134 @@ export type Props = RootState &
         onListLinkCopy(link: string): Promise<void>
         // updateAllResultNotesShareInfo: (info: NoteShareInfo) => void
         updateAllResultNotesShareInfo: (state: AnnotationSharingStates) => void
+        clearInbox: () => void
     }
 
-export default class SearchResultsContainer extends PureComponent<Props> {
+export interface State {
+    tutorialState: []
+    showTutorialVideo: boolean
+    showHorizontalScrollSwitch: string
+}
+
+export default class SearchResultsContainer extends React.Component<
+    Props,
+    State
+> {
     private renderLoader = (props: { key?: string } = {}) => (
         <Loader {...props}>
             <LoadingIndicator />
         </Loader>
     )
+    componentDidMount() {
+        this.getTutorialState()
+        this.listenToContentSwitcherSizeChanges()
+    }
+
+    listenToContentSwitcherSizeChanges() {
+        let topBarElement = document.getElementById('SearchTypeSwitchContainer')
+
+        if (topBarElement.clientWidth < topBarElement.scrollWidth) {
+            this.setState({
+                showHorizontalScrollSwitch: 'right',
+            })
+        } else {
+            this.setState({
+                showHorizontalScrollSwitch: 'none',
+            })
+        }
+
+        topBarElement.addEventListener('scroll', () => {
+            this.contentSwitcherResizeLogic(topBarElement)
+        })
+
+        const resizeObservation = new ResizeObserver((output) => {
+            this.contentSwitcherResizeLogic(output[0].target)
+        })
+
+        resizeObservation.observe(topBarElement)
+
+        topBarElement.addEventListener('resize', () => {
+            this.contentSwitcherResizeLogic(topBarElement)
+        })
+
+        window.addEventListener('resize', () => {
+            if (topBarElement.clientWidth < topBarElement.scrollWidth) {
+                this.setState({
+                    showHorizontalScrollSwitch: 'right',
+                })
+                if (topBarElement.scrollLeft > 0) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'both',
+                    })
+                }
+                if (
+                    Math.abs(
+                        Math.ceil(
+                            topBarElement.scrollLeft +
+                                topBarElement.clientWidth,
+                        ) - topBarElement.scrollWidth,
+                    ) < 5
+                ) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'left',
+                    })
+                }
+            } else {
+                this.setState({
+                    showHorizontalScrollSwitch: 'none',
+                })
+            }
+        })
+    }
+
+    contentSwitcherResizeLogic(topBarElement) {
+        if (topBarElement.clientWidth < topBarElement.scrollWidth) {
+            this.setState({
+                showHorizontalScrollSwitch: 'right',
+            })
+            if (topBarElement.scrollLeft > 0) {
+                this.setState({
+                    showHorizontalScrollSwitch: 'left',
+                })
+
+                if (
+                    Math.ceil(
+                        topBarElement.scrollLeft + topBarElement.clientWidth,
+                    ) !== topBarElement.scrollWidth
+                ) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'both',
+                    })
+                }
+
+                if (
+                    Math.abs(
+                        Math.ceil(
+                            topBarElement.scrollLeft +
+                                topBarElement.clientWidth,
+                        ) - topBarElement.scrollWidth,
+                    ) < 5
+                ) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'left',
+                    })
+                }
+            }
+        } else {
+            this.setState({
+                showHorizontalScrollSwitch: 'none',
+            })
+            return
+        }
+    }
 
     spaceBtnBarDashboardRef = React.createRef<HTMLDivElement>()
+
+    state = {
+        showTutorialVideo: false,
+        tutorialState: undefined,
+        showHorizontalScrollSwitch: 'none',
+    }
 
     private renderNoteResult = (
         day: number,
@@ -406,6 +526,160 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         )
     }
 
+    private getTutorialState = async () => {
+        const tutorialStateLoaded = await browser.storage.local.get(
+            '@onboarding-dashboard-tutorials',
+        )
+        this.setState({
+            tutorialState:
+                tutorialStateLoaded['@onboarding-dashboard-tutorials'],
+        })
+    }
+
+    private dismissTutorials = async (type) => {
+        let tutorialState = this.state.tutorialState
+        tutorialState[type] = false
+
+        this.setState({
+            tutorialState: tutorialState,
+        })
+
+        await browser.storage.local.set({
+            '@onboarding-dashboard-tutorials': tutorialState,
+        })
+    }
+
+    private renderOnboardingTutorials() {
+        let title
+        let videoURL
+        let readURL
+        let onDismiss
+
+        if (
+            this.state.tutorialState != null &&
+            this.state.tutorialState[this.props.searchType]
+        ) {
+            if (this.props.searchType === 'pages') {
+                title =
+                    'Learn the basics about saving and searching what you read online'
+                videoURL =
+                    'https://share.descript.com/embed/QTnFzKBo7XM?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/webhighlights'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
+            }
+            if (this.props.searchType === 'notes') {
+                title =
+                    'Learn the basics about adding highlights and notes to web content, PDFs and videos'
+                videoURL =
+                    'https://share.descript.com/embed/0HGxOo3duKu?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/webhighlights'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
+            }
+            if (this.props.searchType === 'videos') {
+                title =
+                    'Learn the basics about adding highlights to videos on Youtube, Vimeo and HTML5 videos'
+                videoURL =
+                    'https://share.descript.com/embed/4yYXrC63L95?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/webhighlights'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
+            }
+            if (this.props.searchType === 'twitter') {
+                title =
+                    'Learn the basics about saving and annotating tweets on the web and on mobile'
+                videoURL =
+                    'https://share.descript.com/embed/TVgEKP80LqR?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/webhighlights'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
+            }
+            if (this.props.searchType === 'pdf') {
+                title =
+                    'Learn the basics about annotating PDFs on the web and your hard drive'
+                videoURL =
+                    'https://share.descript.com/embed/Vl7nXyy3sLb?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/webhighlights'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
+            }
+        }
+
+        if (
+            this.props.showMobileAppAd &&
+            this.props.selectedListId === 20201015
+        ) {
+            title = (
+                <MobileAdContainer>
+                    Save pages & create highlights and annotations on your
+                    mobile devices.
+                    <MobileAppAd />
+                </MobileAdContainer>
+            )
+            videoURL = 'https://share.descript.com/embed/Vl7nXyy3sLb?autoplay=1'
+            readURL = 'https://tutorials.memex.garden/webhighlights'
+            onDismiss = this.props.onDismissMobileAd
+        }
+
+        if (title != null) {
+            return (
+                <TutorialContainer
+                    showTutorialVideo={this.state.showTutorialVideo}
+                >
+                    <TutorialContent
+                        showTutorialVideo={this.state.showTutorialVideo}
+                    >
+                        <TutorialTitle>{title}</TutorialTitle>
+                        <TutorialButtons>
+                            <PrimaryAction
+                                size="medium"
+                                type="primary"
+                                iconPosition="right"
+                                icon="longArrowRight"
+                                label="Read More"
+                                onClick={() => window.open(readURL, '_blank')}
+                            />
+
+                            <PrimaryAction
+                                size="medium"
+                                type="tertiary"
+                                label="Dismiss"
+                                onClick={() => onDismiss()}
+                            />
+                        </TutorialButtons>
+                    </TutorialContent>
+                    <TutorialVideoContainer
+                        showTutorialVideo={this.state.showTutorialVideo}
+                    >
+                        {this.state.showTutorialVideo ? (
+                            <TutorialVideo
+                                src={videoURL}
+                                showTutorialVideo={this.state.showTutorialVideo}
+                            />
+                        ) : (
+                            <TutorialVideoBox
+                                onClick={() =>
+                                    this.setState({
+                                        showTutorialVideo: true,
+                                    })
+                                }
+                            >
+                                <TutorialPlayButton>
+                                    <Icon
+                                        hoverOff
+                                        color={'normalText'}
+                                        filePath={'play'}
+                                        heightAndWidth={'20px'}
+                                    />
+                                    Watch
+                                </TutorialPlayButton>
+                                <TutorialBlurPicture />
+                            </TutorialVideoBox>
+                        )}
+                    </TutorialVideoContainer>
+                </TutorialContainer>
+            )
+        } else {
+            return undefined
+        }
+    }
+
     private renderNoResults() {
         if (
             this.props.searchResults.allIds.length === 0 &&
@@ -416,20 +690,21 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 this.props.searchFilters.dateFrom > 0)
         ) {
             return (
-                <ResultsMessage>
-                    <SectionCircle>
+                <NoResultsMessage>
+                    <IconBox heightAndWidth="34px" background="dark">
                         <Icon
                             filePath={icons.searchIcon}
-                            heightAndWidth="24px"
+                            heightAndWidth="18px"
                             color="purple"
                             hoverOff
                         />
-                    </SectionCircle>
-                    <NoResults title="Nothing found for this query" />
-                </ResultsMessage>
+                    </IconBox>
+                    `Nothing found for "{this.props.searchQuery}"`
+                </NoResultsMessage>
             )
         }
 
+        // if the first time using Memex
         if (
             this.props.searchResults.allIds.length === 0 &&
             this.props.searchQuery.length === 0 &&
@@ -437,135 +712,36 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             !this.props.searchFilters.isTagFilterActive &&
             !this.props.searchFilters.isDomainFilterActive
         ) {
-            if (this.props.noResultsType === 'mobile-list-ad') {
+            if (this.props.selectedListId === 20201015) {
                 return (
-                    <ResultsMessage>
-                        <SectionCircle>
+                    <NoResultsMessage>
+                        <IconBox heightAndWidth="34px" background="dark">
                             <Icon
                                 filePath={icons.phone}
-                                heightAndWidth="24px"
+                                heightAndWidth="18px"
                                 color="purple"
                                 hoverOff
                             />
-                        </SectionCircle>
-                        <NoResults title="Save & annotate from your mobile devices">
-                            <DismissibleResultsMessage
-                                onDismiss={this.props.onDismissMobileAd}
-                            >
-                                <MobileAppAd />
-                            </DismissibleResultsMessage>
-                        </NoResults>
-                    </ResultsMessage>
+                        </IconBox>
+                        Nothing saved yet from your mobile devices
+                    </NoResultsMessage>
                 )
             }
 
-            if (this.props.searchType === 'notes') {
-                return (
-                    <ResultsMessage>
-                        <SectionCircle>
-                            <Icon
-                                filePath={icons.highlighterEmpty}
-                                heightAndWidth="24px"
-                                color="purple"
-                                hoverOff
-                            />
-                        </SectionCircle>
-                        <NoResults
-                            title={
-                                <span>
-                                    Make your first highlight or annotation
-                                </span>
-                            }
-                        />
-                    </ResultsMessage>
-                )
-            } else {
-                return (
-                    <ResultsMessage>
-                        <SectionCircle>
+            return (
+                <>
+                    <NoResultsMessage>
+                        <IconBox heightAndWidth="34px" background="dark">
                             <Icon
                                 filePath={icons.heartEmpty}
-                                heightAndWidth="24px"
+                                heightAndWidth="18px"
                                 color="purple"
                                 hoverOff
                             />
-                        </SectionCircle>
-                        <NoResults
-                            title={
-                                <span>
-                                    Save your first website or{' '}
-                                    <ImportInfo
-                                        onClick={() =>
-                                            (window.location.hash = '#/import')
-                                        }
-                                    >
-                                        import your bookmarks.
-                                    </ImportInfo>
-                                </span>
-                            }
-                        ></NoResults>
-                    </ResultsMessage>
-                )
-            }
-        }
-
-        if (
-            this.props.noResultsType === 'mobile-list' &&
-            this.props.searchQuery.length === 0
-        ) {
-            return (
-                <ResultsMessage>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.phone}
-                            heightAndWidth="24px"
-                            color="purple"
-                            hoverOff
-                        />
-                    </SectionCircle>
-                    <NoResults title="Save & annotate from your mobile devices"></NoResults>
-                </ResultsMessage>
-            )
-        }
-
-        if (this.props.noResultsType === 'mobile-list-ad') {
-            return (
-                <ResultsMessage>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.phone}
-                            heightAndWidth="24px"
-                            color="purple"
-                            hoverOff
-                        />
-                    </SectionCircle>
-                    <NoResults title="Save & annotate from your mobile devices">
-                        <DismissibleResultsMessage
-                            onDismiss={this.props.onDismissMobileAd}
-                        >
-                            <MobileAppAd />
-                        </DismissibleResultsMessage>
-                    </NoResults>
-                </ResultsMessage>
-            )
-        }
-
-        if (this.props.noResultsType === 'stop-words') {
-            return (
-                <ResultsMessage>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.searchIcon}
-                            heightAndWidth="24px"
-                            color="purple"
-                            hoverOff
-                        />
-                    </SectionCircle>
-                    <NoResults title="No Results">
-                        Search terms are too common <br />
-                        or have been filtered out to increase performance.
-                    </NoResults>
-                </ResultsMessage>
+                        </IconBox>
+                        Nothing saved yet
+                    </NoResultsMessage>
+                </>
             )
         }
     }
@@ -576,6 +752,13 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         }
 
         if (this.props.searchState === 'running') {
+            return this.renderLoader()
+        }
+
+        if (
+            this.props.clearInboxLoadState === 'running' &&
+            this.props.selectedListId === 20201014
+        ) {
             return this.renderLoader()
         }
 
@@ -687,39 +870,87 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     <ListDetails
                         {...this.props.listDetailsProps}
                         listId={this.props.selectedListId}
+                        clearInbox={this.props.clearInbox}
                     />
                 )}
+                <ReferencesContainer>
+                    {this.props.listData[this.props.selectedListId]?.remoteId !=
+                        null && (
+                        <>
+                            <Icon
+                                hoverOff
+                                heightAndWidth="12px"
+                                color={'iconColor'}
+                                icon={'warning'}
+                            />
+                            <InfoText>
+                                Only your own contributions to this space are
+                                visible locally.
+                            </InfoText>
+                        </>
+                    )}
+                </ReferencesContainer>
                 <PageTopBarBox isDisplayed={this.props.isDisplayed}>
                     <TopBar
                         leftSide={
-                            <ContentTypeSwitchContainer>
-                                <ReferencesContainer>
-                                    {this.props.listData[
-                                        this.props.selectedListId
-                                    ]?.remoteId != null && (
-                                        <>
+                            <ContentTypeSwitchContainer id="ContentTypeSwitchContainer">
+                                <SearchTypeSwitchContainer>
+                                    {this.state.showHorizontalScrollSwitch ===
+                                        'left' ||
+                                    this.state.showHorizontalScrollSwitch ===
+                                        'both' ? (
+                                        <IconContainerLeft>
                                             <Icon
-                                                hoverOff
-                                                heightAndWidth="12px"
-                                                color={'iconColor'}
-                                                icon={icons.alertRound}
+                                                filePath="arrowLeft"
+                                                heightAndWidth="22px"
+                                                onClick={() =>
+                                                    document
+                                                        .getElementById(
+                                                            'SearchTypeSwitchContainer',
+                                                        )
+                                                        .scrollBy({
+                                                            left: -200,
+                                                            top: 0,
+                                                            behavior: 'smooth',
+                                                        })
+                                                }
                                             />
-                                            <InfoText>
-                                                Only your own contributions to
-                                                this space are visible locally.
-                                            </InfoText>
-                                        </>
-                                    )}
-                                </ReferencesContainer>
-                                <SearchTypeSwitch {...this.props} />
+                                        </IconContainerLeft>
+                                    ) : undefined}
+                                    <SearchTypeSwitch {...this.props} />
+                                    {this.state.showHorizontalScrollSwitch ===
+                                        'right' ||
+                                    this.state.showHorizontalScrollSwitch ===
+                                        'both' ? (
+                                        <IconContainerRight>
+                                            <Icon
+                                                filePath="arrowRight"
+                                                heightAndWidth="22px"
+                                                onClick={() =>
+                                                    document
+                                                        .getElementById(
+                                                            'SearchTypeSwitchContainer',
+                                                        )
+                                                        .scrollBy({
+                                                            left: 200,
+                                                            top: 0,
+                                                            behavior: 'smooth',
+                                                        })
+                                                }
+                                            />
+                                        </IconContainerRight>
+                                    ) : undefined}
+                                </SearchTypeSwitchContainer>
                             </ContentTypeSwitchContainer>
                         }
                         rightSide={undefined}
                     />
                 </PageTopBarBox>
+                {this.renderOnboardingTutorials()}
                 {this.renderResultsByDay()}
                 {this.props.areResultsExhausted &&
                     this.props.searchState === 'success' &&
+                    this.props.clearInboxLoadState !== 'running' &&
                     this.props.searchResults.allIds.length > 0 && (
                         <ResultsExhaustedMessage>
                             <Icon
@@ -736,6 +967,168 @@ export default class SearchResultsContainer extends PureComponent<Props> {
     }
 }
 
+const IconContainerRight = styled.div`
+    position: absolute;
+    right: 5px;
+    top: 4px;
+    border-radius: 5px;
+
+    background: ${(props) => props.theme.colors.backgroundColor}70;
+    z-index: 20;
+    backdrop-filter: blur(4px);
+`
+const IconContainerLeft = styled.div`
+    position: absolute;
+    left: 5px;
+    top: 4px;
+    border-radius: 5px;
+
+    background: ${(props) => props.theme.colors.backgroundColor}70;
+    z-index: 20;
+    backdrop-filter: blur(4px);
+`
+
+const SearchTypeSwitchContainer = styled.div`
+    display: flex;
+    grid-gap: 3px;
+    position: relative;
+    width: fill-available;
+    padding-right: 30px;
+`
+
+const MobileAdContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+`
+
+const TutorialVideo = styled.iframe<{ showTutorialVideo: boolean }>`
+    height: 170px;
+    width: auto;
+    border: none;
+    border-radius: 5px;
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            height: 500px;
+            width: fill-available;
+        `}
+`
+
+const TutorialContainer = styled.div<{ showTutorialVideo: boolean }>`
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    grid-gap: 40px;
+    padding: 26px 34px;
+    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    border-radius: 8px;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    width: fill-available;
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            flex-direction: column-reverse;
+            grid-gap: 20px;
+        `}
+`
+
+const TutorialContent = styled.div<{ showTutorialVideo: boolean }>`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
+    height: fill-available;
+    justify-content: space-between;
+    height: 170px;
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            height: 120px;
+        `}
+`
+
+const TutorialTitle = styled.div`
+    font-size: 18px;
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.normalText};
+    line-height: 30px;
+`
+
+const TutorialButtons = styled.div`
+    display: flex;
+    grid-gap: 5px;
+`
+
+const TutorialVideoContainer = styled.div<{ showTutorialVideo: boolean }>`
+    position: relative;
+    height: 170px;
+    width: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            height: 500px;
+            width: fill-available;
+        `}
+`
+
+const TutorialVideoBox = styled.div<{ showTutorialVideo: boolean }>`
+    position: relative;
+    height: 170px;
+    width: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 0.8;
+    }
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            width: fill-available;
+            height: unset;
+        `}
+`
+
+const TutorialBlurPicture = styled.div`
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-image: url('/img/tutorialBlur.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    border-radius: 5px;
+    height: 170px;
+    width: 300px;
+    background-size: cover;
+`
+
+const TutorialPlayButton = styled.div`
+    height: 40px;
+    width: fit-content;
+    padding: 0 15px;
+    background-color: ${(props) => props.theme.colors.lightHover};
+    color: ${(props) => props.theme.colors.normalText};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50px;
+    z-index: 1;
+    font-size: 14px;
+    grid-gap: 5px;
+`
+
 const ResultsExhaustedMessage = styled.div`
     display: flex;
     grid-gap: 10px;
@@ -747,13 +1140,33 @@ const ResultsExhaustedMessage = styled.div`
     font-size: 16px;
     align-items: center;
 `
+const NoResultsMessage = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    color: ${(props) => props.theme.colors.greyScale4};
+    padding: 30px;
+    white-space: nowrap;
+    width: fill-available;
+    justify-content: center;
+    font-size: 18px;
+    align-items: center;
+`
 
 const ContentTypeSwitchContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     grid-gap: 10px;
-    margin-bottom: 5px;
+    width: fill-available;
+    padding: 10px 0px 9px 0px;
+
+    /* overflow-x: scroll;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none; */
 `
 
 const ResultsMessage = styled.div`
@@ -770,17 +1183,15 @@ const InfoText = styled.div`
     font-weight: 300;
 `
 
-const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
-    width: 100%;
-
-    padding: 0px 15px;
+const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
+    /* padding: 0px 15px; */
     height: fit-content;
     max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
     z-index: 2147483639;
     position: sticky;
     top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
     background: ${(props) => props.theme.colors.backgroundColor};
-    margin: 2px 0px;
+    width: fill-available;
 `
 
 const ReferencesContainer = styled.div`
@@ -800,11 +1211,22 @@ const NoteTopBarBox = styled(TopBar)`
     display: flex;
 `
 
+const openAnimation = keyframes`
+ 0% { padding-bottom: 20px; opacity: 0 }
+ 100% { padding-bottom: 0px; opacity: 1 }
+`
+
 const ResultBox = styled(Margin)<{ zIndex: number }>`
     flex-direction: column;
     justify-content: space-between;
     width: 100%;
     z-index: ${(props) => props.zIndex};
+
+    animation-name: ${openAnimation};
+    animation-delay: ${(props) => props.order * 50}ms;
+    animation-duration: 0.2s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: backwards;
 `
 
 const PageNotesBox = styled(Margin)`
@@ -813,13 +1235,13 @@ const PageNotesBox = styled(Margin)`
     width: fill-available;
     padding-left: 10px;
     padding-top: 5px;
-    border-left: 4px solid ${(props) => props.theme.colors.lineGrey};
+    border-left: 4px solid ${(props) => props.theme.colors.lightHover};
     z-index: 4;
 `
 
 const Separator = styled.div`
     width: 100%;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
     margin-bottom: -2px;
 `
 
@@ -839,6 +1261,7 @@ const ResultsContainer = styled(Margin)`
     margin-bottom: 100px;
     width: fill-available;
     padding: 0 24px;
+    z-index: 27;
 `
 
 const TopBarRightSideWrapper = styled.div`

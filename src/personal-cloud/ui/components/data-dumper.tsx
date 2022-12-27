@@ -75,7 +75,7 @@ export default class DataDumper extends UIElement<Props, State, Event> {
         if (backupState === 'error') {
             return (
                 <>
-                    <Icon icon="alertRound" height="20px" />
+                    <Icon icon="warning" height="20px" />
                     <Header>There was an error</Header>
                     <Text>
                         <a href={this.props.supportLink}>Contact support</a> if

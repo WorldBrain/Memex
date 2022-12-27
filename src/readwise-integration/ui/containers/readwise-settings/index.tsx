@@ -12,7 +12,7 @@ import * as selectors from './selectors'
 import { Checkbox } from 'src/common-ui/components'
 
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { withCurrentUser } from 'src/authentication/components/AuthConnector'
@@ -164,13 +164,19 @@ class ReadwiseSettings extends StatefulUIElement<
                             <PrimaryAction
                                 onClick={() => this.confirmSyncKey()}
                                 label={'Confirm'}
+                                icon={'check'}
+                                size={'medium'}
+                                type={'secondary'}
                             />
                         </div>
                     )}
                     {selectors.showKeyRemoveButton(this.state) && (
-                        <SecondaryAction
+                        <PrimaryAction
                             onClick={() => this.removeSyncKey()}
                             label={'Remove'}
+                            icon={'check'}
+                            size={'medium'}
+                            type={'secondary'}
                         />
                     )}
                 </MainBox>

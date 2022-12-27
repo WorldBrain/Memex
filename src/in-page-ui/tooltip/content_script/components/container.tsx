@@ -19,6 +19,16 @@ import type {
     TooltipInPageUIInterface,
     AnnotationFunctions,
 } from 'src/in-page-ui/tooltip/types'
+import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
+import {
+    shortcuts,
+    ShortcutElData,
+} from 'src/options/settings/keyboard-shortcuts'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import type {
+    Shortcut,
+    BaseKeyboardShortcuts,
+} from 'src/in-page-ui/keyboard-shortcuts/types'
 
 export interface Props extends AnnotationFunctions {
     inPageUI: TooltipInPageUIInterface
@@ -33,6 +43,16 @@ interface TooltipContainerState {
     showingCloseMessage?: boolean
     position: { x: number; y: number } | {}
     tooltipState: 'copied' | 'running' | 'pristine' | 'done'
+    keyboardShortCuts: {}
+}
+
+async function getShortCut(name: string) {
+    let keyboardShortcuts = await getKeyboardShortcutsState()
+    const short: Shortcut = keyboardShortcuts[name]
+
+    let shortcut = short.shortcut.split('+')
+
+    return shortcut
 }
 
 class TooltipContainer extends React.Component<Props, TooltipContainerState> {
@@ -40,11 +60,20 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         showTooltip: false,
         position: { x: 250, y: 200 },
         tooltipState: 'copied',
+        keyboardShortCuts: undefined,
     }
 
     async componentDidMount() {
         this.props.inPageUI.events?.on('stateChanged', this.handleUIStateChange)
         this.props.onInit(this.showTooltip)
+
+        this.setState({
+            keyboardShortCuts: {
+                createHighlight: await getShortCut('createHighlight'),
+                createAnnotation: await getShortCut('createAnnotation'),
+                createAnnotationWithSpace: await getShortCut('addToCollection'),
+            },
+        })
     }
 
     componentWillUnmount() {
@@ -157,6 +186,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                         addtoSpace={this.addtoSpace}
                         closeTooltip={this.closeTooltip}
                         state={this.state.tooltipState}
+                        keyboardShortCuts={this.state.keyboardShortCuts}
                     />
                 )
             // case 'running':
@@ -176,13 +206,17 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         return (
             <div className="memex-tooltip-container">
                 {showTooltip ? (
-                    <Tooltip
-                        {...position}
-                        state={tooltipState}
-                        tooltipComponent={this.renderTooltipComponent()}
-                        closeTooltip={this.closeTooltip}
-                        openSettings={this.openSettings}
-                    />
+                    <ClickAway
+                        onClickAway={() => this.props.inPageUI.hideTooltip()}
+                    >
+                        <Tooltip
+                            {...position}
+                            state={tooltipState}
+                            tooltipComponent={this.renderTooltipComponent()}
+                            closeTooltip={this.closeTooltip}
+                            openSettings={this.openSettings}
+                        />
+                    </ClickAway>
                 ) : null}
             </div>
         )

@@ -34,24 +34,56 @@ export const areSearchFiltersEmpty = ({
     !searchFilters.tagsIncluded.length &&
     !searchFilters.searchQuery.length
 
+function getDomainsFilterIncludeSearchType(searchType) {
+    if (searchType === 'videos') {
+        return ['youtube.com', 'vimeo.com']
+    }
+
+    if (searchType === 'twitter') {
+        return ['mobile.twitter.com', 'twitter.com']
+    }
+}
 export const stateToSearchParams = ({
     searchFilters,
     listsSidebar,
+    searchResults,
 }: Pick<
     RootState,
-    'listsSidebar' | 'searchFilters'
+    'listsSidebar' | 'searchFilters' | 'searchResults'
 >): BackgroundSearchParams => {
     const lists = [...searchFilters.spacesIncluded]
     if (listsSidebar.selectedListId != null) {
         lists.push(listsSidebar.selectedListId)
     }
 
+    // Probably Temporary: Add a domain filter for video and twitter type searches
+    const searchType = searchResults.searchType
+    const domainsFilterIncludeSearchType = getDomainsFilterIncludeSearchType(
+        searchType,
+    )
+    let domainsFilterIncluded
+    if (domainsFilterIncludeSearchType != null) {
+        if (searchFilters.domainsIncluded != null) {
+            domainsFilterIncluded = searchFilters.domainsIncluded.concat(
+                domainsFilterIncludeSearchType,
+            )
+        } else {
+            domainsFilterIncluded = domainsFilterIncludeSearchType
+        }
+    }
+
+    // Probably Temporary: Add an additional query word for PDFs
+    let searchQuery = searchFilters.searchQuery
+    if (searchType === 'pdf') {
+        searchQuery = searchQuery.concat(' pdf')
+    }
+
     return {
         lists,
         endDate: searchFilters.dateTo,
         startDate: searchFilters.dateFrom,
-        query: searchFilters.searchQuery,
-        domains: searchFilters.domainsIncluded,
+        query: searchQuery,
+        domains: domainsFilterIncluded,
         domainsExclude: searchFilters.domainsExcluded,
         tagsInc: searchFilters.tagsIncluded,
         tagsExc: searchFilters.tagsExcluded,

@@ -62,6 +62,7 @@ import {
     initAnnotationCardInstance,
     initListInstance,
 } from './utils'
+import { browser, Storage } from 'webextension-polyfill-ts'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -207,13 +208,13 @@ export class SidebarContainerLogic extends UILogic<
             isWidthLocked: false,
             isLocked: false,
             pageUrl: this.options.fullPageUrl,
-            showState: this.options.initialState ?? 'hidden',
+            showState: 'hidden',
             annotationModes: {
                 pageAnnotations: {},
                 searchResults: {},
             },
             annotationSharingAccess: 'sharing-allowed',
-
+            readingView: false,
             showAllNotesCopyPaster: false,
             activeCopyPasterAnnotationId: undefined,
             activeTagPickerAnnotationId: undefined,
@@ -276,7 +277,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        const { fullPageUrl, annotationsCache } = this.options
+        const { fullPageUrl, annotationsCache, initialState } = this.options
         annotationsCache.events.addListener(
             'newAnnotationsState',
             this.annotationsSubscription,
@@ -289,12 +290,17 @@ export class SidebarContainerLogic extends UILogic<
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.annotationsSubscription(annotationsCache.annotations)
         this.listsSubscription(annotationsCache.lists)
+        await browser.storage.local.set({ '@Sidebar-reading_view': false })
+        this.readingViewStorageListener(true)
 
         await loadInitial<SidebarContainerState>(this, async () => {
             const areTagsMigrated = await this.syncSettings.extension.get(
                 'areTagsMigratedToSpaces',
             )
-            this.emitMutation({ shouldShowTagsUIs: { $set: !areTagsMigrated } })
+            this.emitMutation({
+                shouldShowTagsUIs: { $set: !areTagsMigrated },
+                showState: { $set: initialState ?? 'hidden' },
+            })
 
             // If `pageUrl` prop passed down rehydrate cache
             if (fullPageUrl != null) {
@@ -370,6 +376,27 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    readingViewStorageListener = async (enable) => {
+        if (enable) {
+            await browser.storage.onChanged.addListener(this.toggleReadingView)
+        } else {
+            await browser.storage.local.set({ '@Sidebar-reading_view': false })
+            await browser.storage.onChanged.removeListener(
+                this.toggleReadingView,
+            )
+        }
+    }
+
+    toggleReadingView = (changes: Storage.StorageChange) => {
+        for (let key of Object.entries(changes)) {
+            if (key[0] === '@Sidebar-reading_view') {
+                this.emitMutation({
+                    readingView: { $set: key[1].newValue },
+                })
+            }
+        }
+    }
+
     sortAnnotations: EventHandler<'sortAnnotations'> = ({
         event: { sortingFn },
     }) => this.options.annotationsCache.sortAnnotations(sortingFn)
@@ -426,6 +453,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     show: EventHandler<'show'> = async ({ event }) => {
+        this.readingViewStorageListener(true)
         const width =
             event.existingWidthState != null
                 ? event.existingWidthState
@@ -437,12 +465,13 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
     hide: EventHandler<'hide'> = ({ event, previousState }) => {
+        this.readingViewStorageListener(false)
         this.emitMutation({
             showState: { $set: 'hidden' },
             activeAnnotationId: { $set: null },
         })
 
-        document.body.style.width = '100%'
+        document.body.style.width = 'initial'
     }
 
     lock: EventHandler<'lock'> = () =>
@@ -1003,11 +1032,20 @@ export class SidebarContainerLogic extends UILogic<
     setActiveAnnotationUrl: EventHandler<'setActiveAnnotationUrl'> = async ({
         event,
     }) => {
-        this.options.events?.emit('highlightAndScroll', {
-            url: event.annotationUrl,
-        })
+        let annotationURL
+
+        if (event.annotationUrl) {
+            annotationURL = event.annotationUrl
+        } else {
+            // annotationURL = event.annotation.url
+            // this.options.events?.emit('highlightAndScroll', {
+            //     annotation: event.annotation,
+            // })
+        }
+
         this.emitMutation({
             activeAnnotationId: { $set: event.annotationUrl },
+            // activeAnnotationUrl: { $set: annotationURL },
         })
     }
 

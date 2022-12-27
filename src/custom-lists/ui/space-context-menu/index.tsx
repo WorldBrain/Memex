@@ -77,74 +77,70 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             <ShareSectionContainer onClick={wrapClick}>
                 {this.state.inviteLinks.map(
                     ({ link, showCopyMsg, roleID }, linkIndex) => (
-                        <TooltipBox
-                            placement={'bottom'}
-                            strategy={'fixed'}
-                            tooltipText={
-                                sharedListRoleIDToString(roleID) ===
-                                'Contributor' ? (
-                                    <span>
-                                        Add highlights,
-                                        <br /> pages & replies
-                                    </span>
-                                ) : (
-                                    <span>
-                                        View & reply <br />
-                                        to highlights & pages
-                                    </span>
-                                )
-                            }
-                        >
-                            <Margin top={'5px'} key={link}>
-                                <LinkAndRoleBox viewportBreakpoint="normal">
-                                    <PermissionArea>
-                                        <PermissionText
-                                            title={null}
-                                            viewportBreakpoint="normal"
-                                        >
-                                            {sharedListRoleIDToString(roleID) +
-                                                ' Access'}
-                                        </PermissionText>
-                                    </PermissionArea>
-                                    <CopyLinkBox>
-                                        <LinkBox
-                                            left="small"
-                                            onClick={wrapClick((e) =>
+                        <LinkAndRoleBox viewportBreakpoint="normal">
+                            <PermissionArea>
+                                <TooltipBox
+                                    placement={'right'}
+                                    tooltipText={
+                                        sharedListRoleIDToString(roleID) ===
+                                        'Contributor' ? (
+                                            <span>
+                                                Add highlights,
+                                                <br /> pages & replies
+                                            </span>
+                                        ) : (
+                                            <span>
+                                                View & reply <br />
+                                                to highlights & pages
+                                            </span>
+                                        )
+                                    }
+                                >
+                                    <PermissionText
+                                        title={null}
+                                        viewportBreakpoint="normal"
+                                    >
+                                        {sharedListRoleIDToString(roleID) +
+                                            ' Access'}
+                                    </PermissionText>
+                                </TooltipBox>
+                            </PermissionArea>
+                            <CopyLinkBox>
+                                <LinkBox
+                                    left="small"
+                                    onClick={wrapClick((e) =>
+                                        this.processEvent('copyInviteLink', {
+                                            linkIndex,
+                                        }),
+                                    )}
+                                >
+                                    <Link>
+                                        {showCopyMsg
+                                            ? 'Copied to clipboard'
+                                            : link.split('https://')[1]}
+                                    </Link>
+                                    <IconContainer id={'iconContainer'}>
+                                        <Icon
+                                            heightAndWidth="20px"
+                                            filePath={'copy'}
+                                            onClick={wrapClick(() =>
                                                 this.processEvent(
                                                     'copyInviteLink',
                                                     { linkIndex },
                                                 ),
                                             )}
-                                        >
-                                            <Link>
-                                                {showCopyMsg
-                                                    ? 'Copied to clipboard'
-                                                    : link.split('https://')[1]}
-                                            </Link>
-                                            <IconContainer id={'iconContainer'}>
-                                                <Icon
-                                                    heightAndWidth="20px"
-                                                    filePath={'copy'}
-                                                    onClick={wrapClick(() =>
-                                                        this.processEvent(
-                                                            'copyInviteLink',
-                                                            { linkIndex },
-                                                        ),
-                                                    )}
-                                                />
-                                                <Icon
-                                                    heightAndWidth="20px"
-                                                    filePath={'goTo'}
-                                                    onClick={wrapClick(() =>
-                                                        window.open(link),
-                                                    )}
-                                                />
-                                            </IconContainer>
-                                        </LinkBox>
-                                    </CopyLinkBox>
-                                </LinkAndRoleBox>
-                            </Margin>
-                        </TooltipBox>
+                                        />
+                                        <Icon
+                                            heightAndWidth="20px"
+                                            filePath={'goTo'}
+                                            onClick={wrapClick(() =>
+                                                window.open(link),
+                                            )}
+                                        />
+                                    </IconContainer>
+                                </LinkBox>
+                            </CopyLinkBox>
+                        </LinkAndRoleBox>
                     ),
                 )}
             </ShareSectionContainer>
@@ -284,6 +280,7 @@ const ContextMenuContainer = styled.div`
     height: fit-content;
     justify-content: center;
     align-items: flex-start;
+    /* width: 250px; */
 `
 
 const SectionTitle = styled.div`
@@ -304,7 +301,8 @@ const DeleteBox = styled.div`
 `
 
 const PermissionArea = styled.div`
-    z-index: auto;
+    z-index: 31;
+    position: relative;
 `
 
 const EditArea = styled.div`
@@ -323,6 +321,7 @@ const LoadingContainer = styled.div`
     justify-content: center;
     align-items: center;
     width: fill-available;
+    width: 250px;
 `
 
 const ShareSectionContainer = styled.div`
@@ -370,6 +369,7 @@ const MenuContainer = styled.div`
     display: flex;
     flex-direction: column;
     border-radius: 12px;
+    width: 300px;
 `
 
 const TitleBox = styled.div`
@@ -398,7 +398,7 @@ const MenuButton = styled.div`
     border-radius: 5px;
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
     }
 
     & * {
@@ -416,7 +416,7 @@ const LinkAndRoleBox = styled.div<{
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     grid-gap: 5px;
 
     ${(props) =>
@@ -438,7 +438,7 @@ const LinkAndRoleBox = styled.div<{
             grid-gap: 5px;
             grid-auto-flow: row;
             border-radius: 6px;
-            outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+            outline: 1px solid ${(props) => props.theme.colors.lightHover};
         }
 
 `
@@ -452,7 +452,7 @@ const LinkBox = styled(Margin)`
     height: 30px;
     cursor: pointer;
     color: ${(props) => props.theme.colors.normalText};
-    border: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border: 1px solid ${(props) => props.theme.colors.lightHover};
     background: ${(props) => props.theme.colors.darkhover};
 `
 
@@ -498,7 +498,7 @@ const PermissionText = styled.span<{
     white-space: nowrap;
     justify-content: flex-end;
     font-size: 12px;
-    z-index: 0;
+    z-index: 30;
     margin-bottom: 2px;
 
     ${(props) =>

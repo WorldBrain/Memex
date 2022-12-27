@@ -11,6 +11,7 @@ export interface Props extends Partial<LogicDeps> {
     theme?: ThemeProps
     openLink?: (link: string) => void
     location?: string
+    sidebarContext?: string
 }
 
 export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
@@ -30,7 +31,10 @@ export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
     }
 
     render() {
-        if (!this.state.isVisible) {
+        if (
+            !this.state.isVisible ||
+            this.props.sidebarContext === 'dashboard'
+        ) {
             return null
         }
 

@@ -50,6 +50,9 @@ import {
 } from 'src/overview/sharing/constants'
 import { UnifiedAnnotation } from 'src/annotations/cache/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { SIDEBAR_DEFAULT_OPTION } from 'src/sidebar-overlay/constants'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -111,6 +114,7 @@ export class AnnotationsSidebarContainer<
             name,
             localId: listId,
             unifiedAnnotationIds: [],
+            hasRemoteAnnotations: false,
             creator: this.props.currentUser,
         })
         return listId
@@ -146,12 +150,6 @@ export class AnnotationsSidebarContainer<
 
         if (this.props.sidebarContext === 'dashboard') {
             document.addEventListener('keydown', this.listenToEsc)
-
-            setTimeout(() => {
-                this.props.setSidebarWidthforDashboard(
-                    this.state.sidebarWidth || SIDEBAR_WIDTH_STORAGE_KEY,
-                )
-            }, 0)
         }
 
         if (
@@ -171,7 +169,6 @@ export class AnnotationsSidebarContainer<
         if (this.props.sidebarContext === 'dashboard') {
             setTimeout(() => {
                 document.removeEventListener('keydown', this.listenToEsc)
-                this.props.setSidebarWidthforDashboard('0px')
                 this.props.onNotesSidebarClose()
             }, 50)
         }
@@ -591,11 +588,31 @@ export class AnnotationsSidebarContainer<
         }
 
         return (
-            <>
-                <TopBarActionBtns
-                    width={this.state.sidebarWidth}
-                    sidebarContext={this.props.sidebarContext}
+            <TopBarActionBtns
+                width={this.state.sidebarWidth}
+                sidebarContext={this.props.sidebarContext}
+            >
+                <TooltipBox
+                    tooltipText={
+                        <TooltipContent>
+                            Close{' '}
+                            <KeyboardShortcuts size="small" keys={['Esc']} />
+                        </TooltipContent>
+                    }
+                    placement="left"
                 >
+                    <IconBoundary>
+                        <Icon
+                            filePath={icons.arrowRight}
+                            height="20px"
+                            width="16px"
+                            onClick={() => this.hideSidebar()}
+                        />
+                    </IconBoundary>
+                </TooltipBox>
+            </TopBarActionBtns>
+        )
+        /* </>
                     {this.props.sidebarContext !== 'dashboard' && (
                         <TopArea>
                             <IconBoundary>
@@ -634,9 +651,8 @@ export class AnnotationsSidebarContainer<
                                 />
                             </IconBoundary>
                         </TopArea>
-                    )}
-
-                    <BottomArea>
+                    )} */
+        /* <BottomArea>
                         {this.props.sidebarContext !== 'dashboard' &&
                             (this.state.isLocked ? (
                                 <TooltipBox
@@ -735,7 +751,8 @@ export class AnnotationsSidebarContainer<
                     </FooterArea>
                 )}
             </>
-        )
+
+        ) */
     }
 
     private renderTopBar() {
@@ -885,7 +902,10 @@ export class AnnotationsSidebarContainer<
     }
 
     render() {
-        if (this.state.showState === 'hidden') {
+        if (
+            this.state.showState === 'hidden' &&
+            this.props.sidebarContext === 'dashboard'
+        ) {
             return this.renderSelectedListPill()
         }
 
@@ -894,11 +914,15 @@ export class AnnotationsSidebarContainer<
             position: 'relative',
             right: '0px',
             left: 'unset',
+            zIndex: 3,
         } as const
 
         return (
             <ThemeProvider theme={this.props.theme}>
-                <GlobalStyle sidebarWidth={this.state.sidebarWidth} />
+                <GlobalStyle
+                    sidebarWidth={this.state.sidebarWidth}
+                    sidebarContext={this.props.sidebarContext}
+                />
                 <ContainerStyled
                     id={'annotationSidebarContainer'}
                     sidebarContext={this.props.sidebarContext}
@@ -931,20 +955,6 @@ export class AnnotationsSidebarContainer<
                             bottomRight: false,
                             bottomLeft: false,
                             topLeft: false,
-                        }}
-                        onResizeStop={(e, direction, ref, delta, position) => {
-                            // if (this.props.sidebarContext !== 'dashboard') {
-                            this.processEvent('adjustSidebarWidth', {
-                                newWidth: ref.style.width,
-                                isWidthLocked: this.state.isWidthLocked,
-                            })
-                            // }
-
-                            if (this.props.sidebarContext === 'dashboard') {
-                                this.props.setSidebarWidthforDashboard(
-                                    ref.style.width,
-                                )
-                            }
                         }}
                     >
                         <AnnotationsSidebar
@@ -1011,9 +1021,9 @@ export class AnnotationsSidebarContainer<
                             annotationModes={
                                 this.state.annotationModes.pageAnnotations
                             }
-                            setActiveAnnotationUrl={(annotationUrl) => () =>
+                            setActiveAnnotationUrl={(annotation) => () =>
                                 this.processEvent('setActiveAnnotationUrl', {
-                                    annotationUrl,
+                                    annotation,
                                 })}
                             setPopoutsActive={(isActive) => {
                                 this.processEvent('setPopoutsActive', isActive)
@@ -1120,6 +1130,7 @@ export class AnnotationsSidebarContainer<
 
 const GlobalStyle = createGlobalStyle<{
     sidebarWidth: string
+    sidebarContext: string
 }>`
 
     & * {
@@ -1134,7 +1145,7 @@ const GlobalStyle = createGlobalStyle<{
     width: 4px;
     height: 100vh;
     position: absolute;
-    top: 0px;
+    top:  ${(props) => (props.sidebarContext === 'dashboard' ? '40px' : '0px')};
 
         &:hover {
         background: #5671cf30;
@@ -1255,6 +1266,13 @@ const TogglePillMainText = styled.div`
     padding-bottom: 2px;
 `
 
+const TooltipContent = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 5px;
+`
+
 const ShareMenuWrapper = styled.div`
     position: absolute;
     right: 320px;
@@ -1267,63 +1285,50 @@ const PickerWrapper = styled.div`
 `
 
 const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
-    height: 100%;
+    height: 100vh;
     overflow-x: visible;
-    position: fixed;
+    position: ${(props) =>
+        props.sidebarContext === 'dashboard' ? 'sticky' : 'fixed'};
     padding: 0px 0px 10px 0px;
-
-    right: ${({ theme }: Props) => theme?.rightOffsetPx ?? 0}px;
     top: 0px;
-    padding-right: ${({ theme }: Props) => theme?.paddingRight ?? 0}px;
-
     z-index: ${(props) =>
         props.sidebarContext === 'dashboard'
             ? '2147483641'
             : '2147483646'}; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: ${(props) => props.theme.colors.backgroundColor};
-    border-left: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-left: 1px solid ${(props) => props.theme.colors.lightHover};
     font-family: 'Satoshi', sans-serif;
     box-sizing: content-box;
-    animation: ${(props) =>
-        props.sidebarContext === 'in-page' && 'slide-in ease-out'};
-    animation-duration: 0.05s;
-    /* transition : all 2s ease; */
-    // place it initially at -100%
+    padding-right: 40px;
 
     &:: -webkit-scrollbar {
         display: none;
     }
-
-    scrollbar-width: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.16, 0.87);
 
     ${(props) =>
-        props.isShown !== 'visible' &&
+        props.isShown === 'hidden' &&
         css`
-            transition: all 2s ease;
-            transform: translateX(-600px);
+            right: -600px;
+            opacity: 0;
         `}
 
-    @keyframes slide-in {
-        0% {
-            right: -450px;
-            opacity: 0%;
-        }
-        100% {
+    ${(props) =>
+        props.isShown === 'visible' &&
+        css`
             right: 0px;
-            opacity: 100%;
-        }
-    }
+            opacity: 1;
+        `}
 
-    @keyframes slide-out {
-        0% {
-            right: 0px;
-            opacity: 100%;
-        }
-        100% {
-            right: -450px;
-            opacity: 0%;
-        }
-    }
+        ${(props) =>
+            props.sidebarContext === 'dashboard' &&
+            css`
+                padding-right: 0px;
+            `}
+
+
+
+    scrollbar-width: none;
 `
 
 const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
@@ -1339,8 +1344,8 @@ const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
     ${(props) =>
         props.sidebarContext === 'dashboard' &&
         css`
-            top: 17px;
-            margin-left: -12px;
+            top: 16px;
+            margin-left: -18px;
         `};
 `
 

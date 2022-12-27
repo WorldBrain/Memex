@@ -215,8 +215,8 @@ const Row = styled.div<{ isFocused }>`
     width: 100%;
     cursor: pointer;
     border-radius: 5px;
-    padding: 0 7px;
-    margin: 0 2px;
+    padding: 0 9px;
+    margin: 0 -5px;
     overflow: visible;
     color: ${(props) => props.isFocused && props.theme.colors.normalText};
 
@@ -225,19 +225,19 @@ const Row = styled.div<{ isFocused }>`
     }
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
         background: transparent;
     }
 
     ${(props) =>
         props.isFocused &&
         css`
-            outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+            outline: 1px solid ${(props) => props.theme.colors.lightHover};
             background: transparent;
         `}
 
     &:focus {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
         background: transparent;
     }
 `

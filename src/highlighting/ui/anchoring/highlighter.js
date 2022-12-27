@@ -53,7 +53,7 @@
 // @ts-nocheck
 /* eslint-disable */
 import { isNodeInRange } from './range-util'
-import { colorBrandMintGreen } from 'src/common-ui/components/design-library/colors'
+const styles = require('src/highlighting/ui/styles.css')
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
 
@@ -107,7 +107,7 @@ function getPdfCanvas(highlightEl) {
  *   The SVG graphic element that corresponds to the highlight or `null` if
  *   no PDF page was found below the highlight.
  */
-function drawHighlightsAbovePdfCanvas(highlightEl) {
+function drawHighlightsAbovePdfCanvas(highlightEl, highlightsColor) {
     const canvasEl = getPdfCanvas(highlightEl)
     if (!canvasEl || !canvasEl.parentElement) {
         return null
@@ -168,7 +168,8 @@ function drawHighlightsAbovePdfCanvas(highlightEl) {
 
     if (isCssBlendSupported) {
         rect.setAttribute('class', 'hypothesis-svg-highlight')
-        rect.setAttribute('style', `fill: #d4e8ff;`)
+        rect.classList.add(styles['memex-highlight'])
+        rect.style['fill'] = highlightsColor
     } else {
         rect.setAttribute('class', 'hypothesis-svg-highlight is-opaque')
     }
@@ -260,9 +261,10 @@ function wholeTextNodesInRange(range) {
  * @param {string} cssClass - A CSS class to use for the highlight
  * @return {HighlightElement[]} - Elements wrapping text in `normedRange` to add a highlight effect
  */
-export function highlightRange(range, cssClass = 'hypothesis-highlight') {
+export function highlightRange(range, baseClass, highlightsColor) {
     const textNodes = wholeTextNodesInRange(range)
 
+    let cssClass = 'hypothesis-highlight'
     // Check if this range refers to a placeholder for not-yet-rendered text in
     // a PDF. These highlights should be invisible.
     const isPlaceholder =
@@ -304,8 +306,10 @@ export function highlightRange(range, cssClass = 'hypothesis-highlight') {
 
         /** @type {HighlightElement} */
         const highlightEl = document.createElement('hypothesis-highlight')
-        highlightEl.className = cssClass
 
+        // highlightEl.style['background-color'] = highlightsColor
+        highlightEl.className = cssClass
+        highlightEl.classList.add(styles['memex-highlight'])
         nodes[0].parentNode.replaceChild(highlightEl, nodes[0])
         nodes.forEach((node) => highlightEl.appendChild(node))
 
@@ -314,7 +318,10 @@ export function highlightRange(range, cssClass = 'hypothesis-highlight') {
             // above the page's canvas rather than CSS `background-color` on the
             // highlight element. This enables more control over blending of the
             // highlight with the content below.
-            const svgHighlight = drawHighlightsAbovePdfCanvas(highlightEl)
+            const svgHighlight = drawHighlightsAbovePdfCanvas(
+                highlightEl,
+                `rgb(${highlightsColor})`,
+            )
             if (svgHighlight) {
                 highlightEl.className += ' is-transparent'
 

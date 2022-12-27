@@ -37,7 +37,7 @@ const TR = styled.tr`
     width: fill-available;
     display: flex;
     justify-content: space-between;
-    padding: 15px;
+    padding: 15px 0;
     height: 50px;
     align-items: center;
     border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};

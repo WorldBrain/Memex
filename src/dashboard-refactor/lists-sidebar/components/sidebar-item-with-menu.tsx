@@ -38,10 +38,20 @@ export interface Props {
     shareList?: () => Promise<void>
 }
 
-export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
+export interface State {
+    hoverOverListItem: boolean
+}
+
+export default class ListsSidebarItemWithMenu extends React.Component<
+    Props,
+    State
+> {
     private handleSelection: React.MouseEventHandler = (e) =>
         this.props.selectedState.onSelection(this.props.listId)
 
+    state = {
+        hoverOverListItem: false,
+    }
     private handleDragEnter: React.DragEventHandler = (e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -88,15 +98,37 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             }
         }
 
+        if (listId === 2020101) {
+            if (this.props.hasActivity) {
+                return (
+                    <IconContainer>
+                        <ActivityBeacon />
+                    </IconContainer>
+                )
+            }
+        }
+
         if (dropReceivingState?.wasPageDropped) {
-            return <Icon heightAndWidth="14px" filePath={icons.check} />
+            return (
+                <Icon
+                    heightAndWidth="20px"
+                    color="purple"
+                    filePath={icons.check}
+                />
+            )
         }
 
         if (
             dropReceivingState?.canReceiveDroppedItems &&
             dropReceivingState?.isDraggedOver
         ) {
-            return <Icon heightAndWidth="14px" filePath={icons.plus} />
+            return (
+                <Icon
+                    heightAndWidth="20px"
+                    color="purple"
+                    filePath={icons.plus}
+                />
+            )
         }
 
         if (onMoreActionClick) {
@@ -187,7 +219,7 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
         const collaborationIcon = this.props.isCollaborative && (
             <>
                 <TooltipBox tooltipText={'Shared Space'} placement="bottom">
-                    <Icon heightAndWidth="14px" icon={'peopleFine'} hoverOff />
+                    <Icon heightAndWidth="18px" icon={'peopleFine'} hoverOff />
                 </TooltipBox>
             </>
         )
@@ -196,11 +228,6 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             return (
                 <ListTitle
                     selectedState={this.props.selectedState}
-                    // dropReceivingState={dropReceivingState}
-                    // onDragLeave={dropReceivingState?.onDragLeave}
-                    // onDragEnter={this.handleDragEnter}
-                    // onDragOver={(e) => e.preventDefault()} // Needed to allow the `onDrop` event to fire
-                    // onDrop={this.handleDrop}
                     {...this.props}
                 >
                     {this.renderListIcon(this.props.listId)}
@@ -239,7 +266,6 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
             hasActivity,
             listId,
         } = this.props
-
         return (
             <Container>
                 <SidebarItem
@@ -255,16 +281,26 @@ export default class ListsSidebarItemWithMenu extends PureComponent<Props> {
                         e.stopPropagation()
                     }} // Needed to allow the `onDrop` event to fire
                     onDrop={this.handleDrop}
+                    onMouseEnter={() =>
+                        this.setState({ hoverOverListItem: true })
+                    }
+                    onMouseOver={() =>
+                        this.setState({ hoverOverListItem: true })
+                    }
+                    onMouseLeave={() =>
+                        this.setState({ hoverOverListItem: false })
+                    }
                 >
                     <TitleBox> {this.renderTitle()}</TitleBox>
 
                     <IconBox
                         dropReceivingState={dropReceivingState}
                         newItemsCount={newItemsCount}
-                        isActivityFeed={listId === 20201016}
+                        listId={listId}
                         hasActivity={hasActivity}
-                        // onClick={this.handleMoreActionClick}
                         right="10px"
+                        hoverOverListItem={this.state.hoverOverListItem}
+                        isMenuDisplayed={isMenuDisplayed}
                     >
                         {this.renderIcon()}
                     </IconBox>
@@ -285,21 +321,34 @@ const Name = styled.div`
     color: ${(props) => props.theme.colors.normalText};
 `
 
-const IconBox = styled.div<Props>`
-    display: ${(props) =>
-        props.newItemsCount ||
-        props.dropReceivingState?.isDraggedOver ||
-        props.dropReceivingState?.wasPageDropped ||
-        props.isActivityFeed ||
-        props.isMenuDisplayed
-            ? 'flex'
-            : 'None'};
+const IconBox = styled.div<{
+    hoverOverListItem: boolean
+    listId: number
+    dropReceiveingState: DropReceivingState
+}>`
+    display: none;
     height: 100%;
     align-items: center;
     justify-content: flex-end;
     padding-right: 10px;
     padding-left: 5px;
     z-index: 1;
+
+    // list all states in which display flex
+
+    ${(props) =>
+        (props.hoverOverListItem ||
+            props.newItemsCount ||
+            props.dropReceivingState?.isDraggedOver ||
+            props.dropReceivingState?.wasPageDropped ||
+            props.isActivityFeed ||
+            props.listId === 20201014 ||
+            props.listId === 20201015 ||
+            props.listId === 20201016 ||
+            props.isMenuDisplayed) &&
+        css`
+            display: flex;
+        `}
 `
 
 const DropZoneMask = styled.div`
@@ -334,48 +383,6 @@ const SidebarItem = styled.div<Props>`
             ? props.theme.colors.backgroundColorDarker
             : 'transparent'};
 
-    &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
-
-        ${({ selectedState }: Props) =>
-            selectedState?.isSelected &&
-            css`
-                background: ${(props) => props.theme.colors.activeBackground};
-            `}
-    }
-
-    ${({ isMenuDisplayed, dropReceivingState }) =>
-        css`
-            background-color: ${isMenuDisplayed ||
-            (dropReceivingState?.canReceiveDroppedItems &&
-                dropReceivingState?.isDraggedOver)
-                ? `${(props) => props.theme.colors.lightHover}`
-                : `transparent`};
-        `};
-
-
-
-    &:hover ${IconBox} {
-
-        display:
-        ${(props) =>
-            !props.dropReceivingState?.isDraggedOver || props.isMenuDisplayed
-                ? 'flex'
-                : 'None'};
-
-    }
-
-    ${IconBox} {
-        display:
-        ${(props) =>
-            props.dropReceivingState?.isDraggedOver || props.isMenuDisplayed
-                ? 'flex'
-                : 'None'};
-
-}
-
-
-
 
     &:hover ${TitleBox} {
         width: 70%;
@@ -385,7 +392,7 @@ const SidebarItem = styled.div<Props>`
         selectedState?.isSelected &&
         css`
             color: ${(props) => props.theme.colors.darkText};
-            background: ${(props) => props.theme.colors.activeBackground};
+            background: ${(props) => props.theme.colors.darkhover};
         `}
 
 
@@ -396,7 +403,21 @@ const SidebarItem = styled.div<Props>`
             ? `pointer`
             : `not-allowed`};
 
-`
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+
+        ${({ selectedState }: Props) =>
+            selectedState?.isSelected &&
+            css`
+                background: ${(props) => props.theme.colors.darkhover};
+            `}
+    }
+
+    ${(props) =>
+        props.dropReceivingState?.isDraggedOver &&
+        css`
+            outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        `}`
 
 const ListTitle = styled.span<Props>`
     display: flex;

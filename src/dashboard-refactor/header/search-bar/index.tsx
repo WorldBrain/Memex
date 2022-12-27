@@ -123,6 +123,10 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
 
 const Placeholder = styled.div`
     width: 220px;
+
+    @media screen and (max-width: 900px) {
+        width: 120px;
+    }
 `
 
 const textStyles = `
@@ -172,7 +176,7 @@ const Input = styled.input`
     }
 
     &:focus ${SearchBarContainer} {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
     }
 `
 

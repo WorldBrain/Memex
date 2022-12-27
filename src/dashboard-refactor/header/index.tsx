@@ -15,6 +15,10 @@ import type { HoverState } from '../types'
 import { SyncStatusIcon } from './sync-status-menu/sync-status-icon'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import {
+    ColorThemeKeys,
+    IconKeys,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 const Container = styled.div`
     height: ${sizeConstants.header.heightPx}px;
@@ -28,7 +32,7 @@ const Container = styled.div`
     justify-content: center;
     background-color: ${(props) => props.theme.colors.backgroundColor};
     z-index: 2147483641;
-    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lineGrey};
+    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lightHover};
 `
 
 const SearchSection = styled(Margin)<{ sidebarWidth: string }>`
@@ -49,6 +53,10 @@ const RightHeader = styled.div`
     position: absolute;
     right: 30px;
     grid-gap: 10px;
+
+    @media screen and (max-width: 900px) {
+        right: 15px;
+    }
 `
 
 // const PlaceholderContainer = styled.div`
@@ -68,7 +76,7 @@ export interface HeaderProps {
 
 export type Props = HeaderProps & {}
 
-function getSyncStatusIcon(status) {
+function getSyncStatusIcon(status): IconKeys {
     if (status === 'green') {
         return 'check'
     }
@@ -81,7 +89,7 @@ function getSyncStatusIcon(status) {
     }
 }
 
-function getSyncIconColor(status) {
+function getSyncIconColor(status): ColorThemeKeys {
     if (status === 'green') {
         return 'purple'
     }
@@ -131,6 +139,9 @@ export default class Header extends PureComponent<Props> {
             selectedListName: selectedList,
         } = this.props
 
+        const icon = getSyncStatusIcon(syncStatusIconState)
+        const iconColor = getSyncIconColor(syncStatusIconState)
+
         return (
             <Container>
                 {/* <PlaceholderContainer /> */}
@@ -147,18 +158,20 @@ export default class Header extends PureComponent<Props> {
                     />
                 </SearchSection>
                 <RightHeader>
-                    <PrimaryAction
-                        onClick={() =>
-                            syncStatusMenuProps.onToggleDisplayState()
-                        }
-                        label={'Sync Status'}
-                        size={'medium'}
-                        icon={getSyncStatusIcon(syncStatusIconState)}
-                        type={'tertiary'}
-                        iconColor={getSyncIconColor(syncStatusIconState)}
-                        spinningIcon={syncStatusIconState === 'yellow'}
-                        innerRef={this.syncStatusButtonRef}
-                    />
+                    <ActionWrapper>
+                        <PrimaryAction
+                            onClick={() =>
+                                syncStatusMenuProps.onToggleDisplayState()
+                            }
+                            label={'Sync Status'}
+                            size={'medium'}
+                            icon={icon}
+                            type={'tertiary'}
+                            iconColor={iconColor}
+                            spinningIcon={syncStatusIconState === 'yellow'}
+                            innerRef={this.syncStatusButtonRef}
+                        />
+                    </ActionWrapper>
                     <Icon
                         onClick={() => window.open(SETTINGS_URL, '_self')}
                         heightAndWidth="22px"
@@ -175,3 +188,17 @@ export default class Header extends PureComponent<Props> {
         )
     }
 }
+
+const ActionWrapper = styled.div`
+    & span {
+        @media screen and (max-width: 900px) {
+            display: none;
+        }
+    }
+
+    & > div {
+        @media screen and (max-width: 900px) {
+            width: 34px;
+        }
+    }
+`

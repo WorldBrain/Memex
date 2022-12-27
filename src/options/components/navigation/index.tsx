@@ -14,14 +14,19 @@ class Navigation extends Component<Props> {
 
     renderNavLinks() {
         return this.props.routes
-            .filter(route => !route.hideFromSidebar)
+            .filter((route) => !route.hideFromSidebar)
             .map((route, idx) => (
                 <NavLink key={idx} isActive={this.isActive(route)} {...route} />
             ))
     }
 
     render() {
-        return <Nav>{this.renderNavLinks()}</Nav>
+        return (
+            <Nav>
+                <>{this.renderNavLinks()}</>
+                {this.props.children}
+            </Nav>
+        )
     }
 }
 

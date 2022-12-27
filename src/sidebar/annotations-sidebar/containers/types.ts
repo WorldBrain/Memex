@@ -161,7 +161,7 @@ export interface SidebarContainerState
     selectedListId: UnifiedList['unifiedId'] | null
 
     annotationSharingAccess: AnnotationSharingAccess
-
+    readingView?: boolean
     showAllNotesCopyPaster: boolean
     activeCopyPasterAnnotationId: string | undefined
     activeTagPickerAnnotationId: string | undefined
@@ -293,6 +293,7 @@ interface SidebarEvents {
     }
     setActiveAnnotationUrl: { annotationUrl: string }
 
+    // setActiveAnnotationUrl: { annotation?: Annotation; annotationUrl?: string }
     shareAnnotation: {
         context: AnnotationEventContext
         mouseEvent: React.MouseEvent

@@ -1,5 +1,3 @@
-import { areElementStylesDark } from '../../util/dark-mode-detection'
-const styles = require('src/highlighting/ui/styles.css')
 /**
  * Custom implementation of `dom-highlight-range`.
  * The original implementation is available here: https://github.com/Treora/dom-highlight-range
@@ -222,10 +220,7 @@ const highlightNode = (
     // Create a highlight
     const highlight: HTMLElement = document.createElement(highlightTagName)
     highlight.classList.add(highlightClass)
-
-    if (areElementStylesDark(node.parentElement.parentElement)) {
-        highlight.classList.add(styles['dark-mode'])
-    }
+    highlight.classList.add('memex-highlight-inPage')
 
     // Ensure this isn't being called multiple times and creating multiple nested highlights
     if (node.parentNode.nodeName.toLocaleLowerCase() === highlightTagName) {

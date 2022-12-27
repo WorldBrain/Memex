@@ -36,11 +36,13 @@ export interface HighlightInteractionsInterface {
         highlight: _UnifiedAnnotation,
         openSidebar: AnnotationClickHandler,
     ) => void
-    removeMediumHighlights: () => void
+    removeHoveredHighlights: (annotation: _UnifiedAnnotation) => void
     removeTempHighlights: () => void
-    makeHighlightMedium: (highlight: _UnifiedAnnotation) => void
-    makeHighlightDark: (highlight: _UnifiedAnnotation) => void
-    removeHighlights: (args?: { onlyRemoveDarkHighlights?: boolean }) => void
+    hoverOverHighlight: (highlight: _UnifiedAnnotation) => void
+    selectHighlight: (highlight: _UnifiedAnnotation) => void
+    removeSelectedHighlights: (highlight: _UnifiedAnnotation) => void
+    resetHighlightsStyles: () => void
+    // sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
     _removeHighlight: (highlight: Element) => void
     removeAnnotationHighlight: (url: string) => void
     removeAnnotationHighlights: (urls: string[]) => void

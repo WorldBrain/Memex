@@ -64,7 +64,7 @@ const BottomLeft = styled.div`
     height: 50px;
     justify-content: flex-start;
     align-items: center;
-    position: fixed;
+    position: absolute;
     bottom: 20px;
     margin: 0 10px;
     border-radius: 5px;
@@ -75,7 +75,7 @@ const BottomLeft = styled.div`
     }
 
     &:hover {
-        border: 1px solid ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.lightHover};
     }
 `
 

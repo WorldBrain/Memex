@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 const CreateButtons = styled.div`
     display: flex;
@@ -31,6 +32,24 @@ const AnnotationTooltipText = styled.span`
     font-family: 'Satoshi', sans-serif;
     font-style: unset;
     letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    grid-gap: 5px;
+`
+
+const SubSection = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`
+
+const TopSection = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 5px;
 `
 
 export const InitialComponent = ({
@@ -39,14 +58,27 @@ export const InitialComponent = ({
     addtoSpace,
     closeTooltip,
     state,
+    keyboardShortCuts,
 }) => (
     <CreateButtons>
         <ButtonDiv onClick={createHighlight}>
             <TooltipBox
                 tooltipText={
                     <AnnotationTooltipText>
-                        <strong>Highlight</strong>
-                        <br />+ shift to share
+                        <TopSection>
+                            <strong>Highlight</strong>
+                            <KeyboardShortcuts
+                                size={'small'}
+                                keys={keyboardShortCuts['createHighlight']}
+                            />
+                        </TopSection>
+                        <SubSection>
+                            <KeyboardShortcuts
+                                size="small"
+                                optional={'shift'}
+                            />{' '}
+                            to share
+                        </SubSection>
                     </AnnotationTooltipText>
                 }
                 placement="bottom"
@@ -62,8 +94,20 @@ export const InitialComponent = ({
             <TooltipBox
                 tooltipText={
                     <AnnotationTooltipText>
-                        <strong>Annotate</strong>
-                        <br />+ shift to share
+                        <TopSection>
+                            <strong>Add Note</strong>
+                            <KeyboardShortcuts
+                                size={'small'}
+                                keys={keyboardShortCuts['createAnnotation']}
+                            />
+                        </TopSection>
+                        <SubSection>
+                            <KeyboardShortcuts
+                                size="small"
+                                optional={'shift'}
+                            />{' '}
+                            to share
+                        </SubSection>
                     </AnnotationTooltipText>
                 }
                 placement="bottom"
@@ -79,7 +123,24 @@ export const InitialComponent = ({
             <TooltipBox
                 tooltipText={
                     <AnnotationTooltipText>
-                        <strong>Add Highlight to Space</strong>
+                        <TopSection>
+                            <strong>Add to Space</strong>
+                            <KeyboardShortcuts
+                                size={'small'}
+                                keys={
+                                    keyboardShortCuts[
+                                        'createAnnotationWithSpace'
+                                    ]
+                                }
+                            />
+                        </TopSection>
+                        <SubSection>
+                            <KeyboardShortcuts
+                                size="small"
+                                optional={'shift'}
+                            />{' '}
+                            to share
+                        </SubSection>
                     </AnnotationTooltipText>
                 }
                 placement="bottom"
@@ -96,7 +157,6 @@ export const InitialComponent = ({
                 tooltipText={
                     <AnnotationTooltipText>
                         <strong>Close Highlighter</strong>
-                        <br />
                         Disable in Settings
                     </AnnotationTooltipText>
                 }

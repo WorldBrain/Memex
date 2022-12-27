@@ -224,7 +224,7 @@ export const conditionallyTriggerTooltip = delayed(
             position,
         })
     },
-    300,
+    10,
 )
 
 export function calculateTooltipPostion(): TooltipPosition {

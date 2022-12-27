@@ -122,16 +122,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private setupWindowWidthListner() {
-        window.addEventListener('resize', () => {
-            this.emitMutation({
-                windowWidth: { $set: window.innerWidth },
-            })
-        })
-
-        return window.innerWidth
-    }
-
     getInitialState(): State {
         let mode: State['mode'] = 'search'
         if (isDuringInstall(this.options.location)) {
@@ -143,15 +133,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.options.pdfViewerBG.openPdfViewerForNextPdf()
         }
 
-        const appWidth = this.setupWindowWidthListner()
-
         return {
             mode,
             loadState: 'pristine',
             currentUser: null,
-            notesSidebarWidth: '0px',
-            windowWidth: appWidth,
-            spaceSidebarWidth: sizeConstants.listsSidebar.widthPx + 'px',
 
             modals: {
                 showLogin: false,
@@ -191,6 +176,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchPaginationState: 'pristine',
                 activeDay: undefined,
                 activePageID: undefined,
+                clearInboxLoadState: 'pristine',
             },
             searchFilters: {
                 searchQuery: '',
@@ -210,6 +196,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 skip: 0,
             },
             listsSidebar: {
+                spaceSidebarWidth: sizeConstants.listsSidebar.width,
                 addListErrorMessage: null,
                 editListErrorMessage: null,
                 listShareLoadingState: 'pristine',
@@ -345,6 +332,17 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             })
         }
+    }
+
+    setSpaceSidebarWidth: EventHandler<'setSpaceSidebarWidth'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                spaceSidebarWidth: { $set: event.width },
+            },
+        })
     }
 
     checkSharingAccess: EventHandler<'checkSharingAccess'> = async ({
@@ -535,11 +533,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.runSearch(nextState)
     }
 
-    private runSearch = throttle(
+    private runSearch = debounce(
         async (previousState: State, paginate?: boolean) => {
             await this.search({ previousState, event: { paginate } })
         },
-        100,
+        200,
     )
 
     // leaving this here for now in order to finalise the feature for handling the race condition rendering
@@ -582,16 +580,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                         resultsExhausted,
                         searchTermsInvalid,
                     } =
-                        previousState.searchResults.searchType === 'pages'
+                        previousState.searchResults.searchType === 'pages' ||
+                        previousState.searchResults.searchType === 'videos' ||
+                        previousState.searchResults.searchType === 'twitter'
                             ? await this.searchPages(searchState)
                             : previousState.searchResults.searchType === 'notes'
                             ? await this.searchNotes(searchState)
-                            : previousState.searchResults.searchType ===
-                              'videos'
-                            ? await this.searchVideos(searchState)
-                            : previousState.searchResults.searchType ===
-                              'twitter'
-                            ? await this.searchTwitter(searchState)
                             : await this.searchPDFs(searchState)
 
                     let noResultsType: NoResultsType = null
@@ -679,63 +673,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             searchTermsInvalid: result.isBadTerm,
         }
     }
-    private searchVideos = async (state: State) => {
-        let result = await this.options.searchBG.searchPages(
-            stateToSearchParams(state),
-        )
-
-        const videoResults = result.docs.filter(
-            (x) =>
-                x.url.startsWith('youtube.com/watch') ||
-                x.url.startsWith('vimeo.com/'),
-        )
-
-        result = {
-            docs: videoResults,
-            resultsExhausted: result.resultsExhausted,
-            isBadTerm: result.isBadTerm,
-        }
-
-        return {
-            ...utils.pageSearchResultToState(result),
-            resultsExhausted: result.resultsExhausted,
-            searchTermsInvalid: result.isBadTerm,
-        }
-    }
-
-    private searchTwitter = async (state: State) => {
-        let result = await this.options.searchBG.searchPages(
-            stateToSearchParams(state),
-        )
-
-        const videoResults = result.docs.filter(
-            (x) =>
-                x.url.startsWith('twitter.com/') ||
-                x.url.startsWith('mobile.twitter.com/'),
-        )
-
-        result = {
-            docs: videoResults,
-            resultsExhausted: result.resultsExhausted,
-            isBadTerm: result.isBadTerm,
-        }
-
-        return {
-            ...utils.pageSearchResultToState(result),
-            resultsExhausted: result.resultsExhausted,
-            searchTermsInvalid: result.isBadTerm,
-        }
-    }
 
     private searchPDFs = async (state: State) => {
         let result = await this.options.searchBG.searchPages(
             stateToSearchParams(state),
         )
 
-        const videoResults = result.docs.filter((x) => x.url.endsWith('.pdf'))
+        const pdfResults = result.docs.filter((x) => x.url.endsWith('.pdf'))
 
         result = {
-            docs: videoResults,
+            docs: pdfResults,
             resultsExhausted: result.resultsExhausted,
             isBadTerm: result.isBadTerm,
         }
@@ -985,7 +932,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     dragPage: EventHandler<'dragPage'> = async ({ event, previousState }) => {
         const crt = this.options.document.getElementById(DRAG_EL_ID)
         crt.style.display = 'block'
-        event.dataTransfer.setDragImage(crt, 10, 10)
+        event.dataTransfer.setDragImage(crt, 0, 0)
 
         const page = previousState.searchResults.pageData.byId[event.pageId]
         event.dataTransfer.setData(
@@ -1092,11 +1039,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 event.pageId,
             )
         }
-
-        await this.options.listsBG.removePageFromList({
-            id: listId,
-            url: event.pageId,
-        })
         this.emitMutation({
             searchResults: mutation,
             listsSidebar:
@@ -1105,6 +1047,51 @@ export class DashboardLogic extends UILogic<State, Events> {
                           inboxUnreadCount: { $apply: (count) => count - 1 },
                       }
                     : {},
+        })
+
+        await this.options.listsBG.removePageFromList({
+            id: listId,
+            url: event.pageId,
+        })
+    }
+
+    clearInbox: EventHandler<'clearInbox'> = async () => {
+        const listContent = await this.options.listsBG.fetchListById({
+            id: SPECIAL_LIST_IDS.INBOX,
+        })
+        const pages = listContent.pages
+        const filterOutPages = (pages: string[]) =>
+            pages.filter((page) => page === '')
+
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [PAGE_SEARCH_DUMMY_DAY]: {
+                        pages: {
+                            allIds: {
+                                $set: [],
+                            },
+                        },
+                    },
+                },
+                clearInboxLoadState: { $set: 'running' },
+            },
+            listsSidebar: {
+                inboxUnreadCount: { $set: 0 },
+            },
+        })
+
+        for (let page of pages) {
+            await this.options.listsBG.removePageFromList({
+                id: SPECIAL_LIST_IDS.INBOX,
+                url: page,
+            })
+        }
+
+        this.emitMutation({
+            searchResults: {
+                clearInboxLoadState: { $set: 'pristine' },
+            },
         })
     }
 
@@ -2633,22 +2620,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: { selectedListId: { $set: undefined } },
         })
     }
-    /* END - search filter event handlers */
-
-    /* START - lists sidebar event handlers */
-    // setNotesSidebarWidth: EventHandler<'setNotesSidebarWidth'> = async (
-    //     event,
-    //     previousState,
-    // ) => {
-    //     const sidebarWidth = event.notesSidebarWidth
-    //     this.emitMutation({
-    //         notesSidebarWidth: { $set: sidebarWidth },
-    //     })
-    //     this.calculateMainContentWidth({
-    //         previousState,
-    //         event: { notesSidebarWidth: event.notesSidebarWidth },
-    //     })
-    // }
 
     setSidebarLocked: EventHandler<'setSidebarLocked'> = async ({
         event,
@@ -2665,37 +2636,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             'listSidebarLocked',
             event.isLocked,
         )
-        if (
-            previousState.spaceSidebarWidth ===
-                sizeConstants.listsSidebar.widthPx + 'px' &&
-            !previousState.listsSidebar.isSidebarLocked
-        ) {
-            this.calculateMainContentWidth({
-                previousState,
-                event: {
-                    spaceSidebarWidth:
-                        sizeConstants.listsSidebar.widthPx + 'px',
-                },
-            })
-        }
-
-        if (!previousState.listsSidebar.isSidebarLocked) {
-            this.calculateMainContentWidth({
-                previousState,
-                event: {
-                    spaceSidebarWidth:
-                        sizeConstants.listsSidebar.widthPx + 'px',
-                },
-            })
-        }
-        if (previousState.listsSidebar.isSidebarLocked) {
-            this.calculateMainContentWidth({
-                previousState,
-                event: { isSidebarPeeking: true },
-            })
-        }
     }
-
     setSidebarPeeking: EventHandler<'setSidebarPeeking'> = async ({
         event,
         previousState,
@@ -2703,15 +2644,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
         })
-
-        if (event.isPeeking) {
-            this.calculateMainContentWidth({
-                previousState,
-                event: {
-                    isSidebarPeeking: event.isPeeking,
-                },
-            })
-        }
     }
 
     setSidebarToggleHovered: EventHandler<'setSidebarToggleHovered'> = async ({
@@ -2725,63 +2657,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     $set: !listsSidebar.isSidebarLocked && event.isHovered,
                 },
             },
-        })
-    }
-
-    // Set maincontentWidth based on changes to specific states
-
-    calculateMainContentWidth: EventHandler<
-        'calculateMainContentWidth'
-    > = async ({ previousState, event }) => {
-        // Calculate SpaceBarWidth
-
-        // let contentWidth = this.contentWidth
-        let windowWidth = window.innerWidth
-        let spaceSidebarWidth
-        let notesSidebarWidth
-
-        if (event.windowWidth) {
-            windowWidth = event.windowWidth
-        }
-
-        if (event.spaceSidebarWidth) {
-            spaceSidebarWidth = event.spaceSidebarWidth
-        } else {
-            spaceSidebarWidth = previousState.spaceSidebarWidth
-        }
-
-        if (event.notesSidebarWidth) {
-            notesSidebarWidth = event.notesSidebarWidth
-        } else {
-            notesSidebarWidth = previousState.notesSidebarWidth
-        }
-
-        // calculate all values as integers
-        spaceSidebarWidth = spaceSidebarWidth.replace('px', '')
-        spaceSidebarWidth = parseInt(spaceSidebarWidth)
-
-        notesSidebarWidth = notesSidebarWidth.replace('px', '')
-        notesSidebarWidth = parseInt(notesSidebarWidth)
-
-        // Calculate final width in as integer
-
-        let contentWidthInt
-
-        if (event.isSidebarPeeking) {
-            contentWidthInt = windowWidth - notesSidebarWidth
-        } else {
-            contentWidthInt =
-                windowWidth - spaceSidebarWidth - notesSidebarWidth
-        }
-        // spit out final width as px
-        let contentWidthPX = (contentWidthInt + 'px').toString()
-
-        // Calculate total width of main content:
-        this.emitMutation({
-            mainContentWidth: { $set: contentWidthPX },
-            spaceSidebarWidth: { $set: spaceSidebarWidth + 'px' },
-            notesSidebarWidth: { $set: notesSidebarWidth + 'px' },
-            windowWidth: { $set: windowWidth },
         })
     }
 

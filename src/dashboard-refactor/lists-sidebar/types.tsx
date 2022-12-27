@@ -44,6 +44,7 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         listData: { [id: number]: ListData }
         followedLists: FollowedListGroup
         localLists: LocalListGroup
+        spaceSidebarWidth: number
 
         inboxUnreadCount: number
         dragOverListId?: number
@@ -64,16 +65,9 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
 
 export type Events = UIEvent<{
     setSidebarLocked: { isLocked: boolean }
-    setNotesSidebarWidth: { notesSidebarWidth: string }
     setSidebarPeeking: { isPeeking: boolean }
     setSidebarToggleHovered: { isHovered: boolean }
     setListQueryValue: { query: string }
-    calculateMainContentWidth: {
-        spaceSidebarWidth?: string
-        notesSidebarWidth?: string
-        windowWidth?: number
-        isSidebarPeeking?: boolean
-    }
 
     setAddListInputShown: { isShown: boolean }
     cancelListCreate: null

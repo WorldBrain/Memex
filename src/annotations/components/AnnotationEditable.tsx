@@ -424,7 +424,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     key: 'add-spaces-btn',
                     image: 'plus',
                     imageColor: 'purple',
-                    tooltipText: 'Add to Spaces',
+                    tooltipText: 'Add Page to Spaces',
                     onClick: () => this.updateSpacePickerState('footer'),
                     buttonRef: this.props.spacePickerButtonRef,
                     active: this.state.showSpacePicker === 'footer',
@@ -601,7 +601,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     })
                 }}
                 offsetX={10}
-                bigClosingScreen
             >
                 {this.props.renderListsPickerForAnnotation(this.props.url)}
             </PopoutBox>
@@ -661,7 +660,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 >
                     <ItemBox
                         firstDivProps={{
-                            id: this.props.url,
+                            id: this.props.url, // TODO: this should be UnifiedAnnotation ID
                         }}
                         onMouseEnter={() =>
                             this.setState({
@@ -1007,6 +1006,7 @@ const ContentContainer = styled.div<{ isEditMode: boolean }>`
     display: flex;
     box-sizing: border-box;
     flex-direction: column;
+    z-index: 1001;
 
     ${(props) =>
         props.isEditMode &&

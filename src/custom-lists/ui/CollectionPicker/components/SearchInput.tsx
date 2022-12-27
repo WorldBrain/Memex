@@ -93,6 +93,7 @@ const SearchBox = styled.div<{ isFocused: boolean }>`
     margin-bottom: 4px;
     grid-gap: 5px;
     min-height: 20px;
+    margin: 10px 10px 0px 10px;
 
     ${(props) =>
         props.isFocused &&

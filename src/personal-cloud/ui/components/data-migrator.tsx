@@ -93,7 +93,7 @@ export default class DataMigrator extends React.PureComponent<Props> {
             return (
                 <>
                     <TopComponent>
-                        <Icon icon="alertRound" height="20px" />
+                        <Icon icon="warning" height="20px" />
                     </TopComponent>
                     <SectionTitle>
                         There was an error with migrating your data to the cloud

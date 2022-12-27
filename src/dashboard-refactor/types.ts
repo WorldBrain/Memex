@@ -42,10 +42,6 @@ export interface RootState {
     searchFilters: SearchFiltersState
     listsSidebar: ListsSidebarState
     modals: DashboardModalsState
-    spaceSidebarWidth?: string
-    windowWidth?: number
-    mainContentWidth?: string
-    notesSidebarWidth?: string
     activePageID?: string
     activeDay?: number
 }
@@ -137,6 +133,7 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingPageArgs: PageEventArgs
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null
+    setSpaceSidebarWidth: { width: number }
 
     setPrivatizeNoteConfirmArgs: DashboardModalsState['confirmPrivatizeNoteArgs']
     setSelectNoteSpaceConfirmArgs: DashboardModalsState['confirmSelectNoteSpaceArgs']

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import Waypoint from 'react-waypoint'
-import styled, { css } from 'styled-components'
+import styled, { css, keyframes } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ConversationReplies } from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
 import type {
@@ -50,6 +50,7 @@ import * as cacheUtils from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { generateAnnotationCardInstanceId } from '../containers/utils'
+import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
@@ -59,7 +60,10 @@ export interface AnnotationsSidebarProps
     currentUser?: UserReference
     // sidebarActions: () => void
 
-    setActiveAnnotationUrl?: (url: string) => React.MouseEventHandler
+    setActiveAnnotationUrl?: (
+        annotation?: Annotation,
+        annotationUrl?: string,
+    ) => React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
 
     bindSharedAnnotationEventHandlers: (
@@ -502,7 +506,7 @@ export class AnnotationsSidebar extends React.Component<
                                 }
                                 onReplyBtnClick={eventHandlers.onReplyBtnClick}
                                 onHighlightClick={this.props.setActiveAnnotationUrl(
-                                    data.id,
+                                    { annotationUrl: data.id },
                                 )}
                                 onListClick={this.props.onLocalSpaceSelect}
                                 isClickable={
@@ -686,8 +690,8 @@ export class AnnotationsSidebar extends React.Component<
                                         />
                                     </SectionCircle>
                                     <InfoText>
-                                        This page has not been added to a <br />{' '}
-                                        shared or followed Space yet
+                                        This page is not yet in a Space <br />{' '}
+                                        you created, follow or collaborate in.
                                     </InfoText>
                                 </EmptyMessageContainer>
                             )}
@@ -786,10 +790,11 @@ export class AnnotationsSidebar extends React.Component<
                         {this.renderSharedNotesByList()}
                     </AnnotationsSectionStyled>
                 )}
-                {/* <UpdateNotifBanner
+                <UpdateNotifBanner
                     location={'sidebar'}
                     theme={{ position: 'fixed' }}
-                /> */}
+                    sidebarContext={this.props.sidebarContext}
+                />
             </>
         )
     }
@@ -896,6 +901,9 @@ export class AnnotationsSidebar extends React.Component<
                                 ? 10000
                                 : this.props.annotations.allIds.length - i
                         }
+                        className={'AnnotationBox'}
+                        id={annot.url}
+                        order={i}
                     >
                         <AnnotationEditable
                             {...annot}
@@ -924,6 +932,7 @@ export class AnnotationsSidebar extends React.Component<
                             onListClick={this.props.onLocalSpaceSelect}
                             onHighlightClick={this.props.setActiveAnnotationUrl(
                                 annot.unifiedId,
+                                annot,
                             )}
                             onGoToAnnotation={footerDeps.onGoToAnnotation}
                             annotationEditDependencies={this.props.bindAnnotationEditProps(
@@ -1314,9 +1323,10 @@ export class AnnotationsSidebar extends React.Component<
     render() {
         return (
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
-                <TopBar>
+                <TopBar sidebarContext={this.props.sidebarContext}>
                     {this.renderTopBarSwitcher()}
                     {/* {this.renderSharePageButton()} */}
+                    {/* {this.props.sidebarActions()} */}
                 </TopBar>
                 {this.renderPageShareModal()}
                 {this.renderResultsBody()}
@@ -1373,7 +1383,6 @@ const TopAreaContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: fill-available;
-    padding: 0 2px;
 `
 
 const AnnotationActions = styled.div`
@@ -1432,10 +1441,12 @@ const TopBar = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 40px;
+    height: ${(props) =>
+        props.sidebarContext === 'dashboard' ? '40px' : '32px'};
+
     background: ${(props) => props.theme.colors.backgroundColor};
     z-index: 11300;
-    padding: 10px 0px 10px 0px;
+    padding: 10px 10px 10px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.darkhover};
 `
 
@@ -1473,9 +1484,26 @@ const EmptyMessageContainer = styled.div`
     align-items: center;
     width: fill-available;
 `
-const AnnotationBox = styled.div<{ isActive: boolean; zIndex: number }>`
+
+const openAnimation = keyframes`
+ 0% { padding-bottom: 100px; opacity: 0 }
+ 100% { padding-bottom: 0px; opacity: 1 }
+`
+
+const AnnotationBox = styled.div<{
+    isActive: boolean
+    zIndex: number
+    order: number
+}>`
     width: 99%;
     z-index: ${(props) => props.zIndex};
+
+    animation-name: ${openAnimation};
+    animation-delay: ${(props) => props.order * 30}ms;
+    animation-duration: 0.1s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: backwards;
+    position: relative;
 `
 
 const SectionCircle = styled.div`
@@ -1760,7 +1788,7 @@ const TopBarStyled = styled.div`
     align-items: center;
     z-index: 2147483647;
     padding: 7px 8px 5px 3px;
-    height: 40px;
+    height: 32px;
     box-sizing: border-box;
     width: 100%;
 `
@@ -1805,6 +1833,7 @@ const AnnotationsSectionStyled = styled.section`
     height: fill-available;
     flex: 1;
     overflow: scroll;
+    padding: 0 10px;
 
     scrollbar-width: none;
 
@@ -1848,13 +1877,13 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
         display: none;
     }
 
+    border-right: 1px solid ${(props) => props.theme.colors.lightHover};
     scrollbar-width: none;
-    padding: 0 15px 0px 40px;
 
     ${(props) =>
         props.sidebarContext === 'dashboard' &&
         css`
-            padding: 0 20px 0px 20px;
+            border-left: 'unset';
         `};
 `
 

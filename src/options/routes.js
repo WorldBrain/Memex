@@ -19,38 +19,38 @@ export default [
         name: 'Back to Dashboard',
         pathname: '/overview',
         component: DashboardResultsContainer,
-        icon: 'home.svg',
+        icon: 'searchIcon',
         useOwnLayout: true,
     },
     {
         name: 'Settings',
         pathname: '/settings',
         component: Settings,
-        icon: 'settings.svg',
+        icon: 'settings',
     },
     {
         name: 'Import & Integrations',
         pathname: '/import',
         component: ImportContainer,
-        icon: 'integrate.svg',
+        icon: 'integrate',
     },
     {
         name: 'Backup',
         pathname: '/backup',
         component: BackupSettingsContainer,
-        icon: 'import.svg',
+        icon: 'imports',
     },
     {
         name: 'My Account',
         pathname: '/account',
         component: UserScreen,
-        icon: 'personFine.svg',
+        icon: 'personFine',
     },
     {
         name: 'Blocklist',
         pathname: '/blocklist',
         component: Blocklist,
-        icon: 'block.svg',
+        icon: 'block',
     },
     // {
     //     name: 'Privacy',
@@ -67,14 +67,14 @@ export default [
     {
         name: 'Forum',
         pathname: 'https://worldbrain.io/help',
-        icon: 'help.svg',
+        icon: 'helpIcon',
         isExternal: true,
     },
     {
         name: 'Tutorial',
         pathname: 'https://tutorials.memex.garden',
         isExternal: true,
-        icon: 'info.svg',
+        icon: 'info',
     },
     // {
     //     name: 'Get Early Bird Discount',
@@ -85,14 +85,14 @@ export default [
     {
         name: 'User Account',
         pathname: '/account',
-        icon: 'settings.svg',
+        icon: 'settings',
         component: UserScreen,
         hideFromSidebar: true,
     },
     {
         name: 'User Account',
         pathname: '/account-subscriptions',
-        icon: 'settings.svg',
+        icon: 'setting',
         component: (props) => (
             <UserScreen {...props} initiallyShowSubscriptionModal refreshUser />
         ),

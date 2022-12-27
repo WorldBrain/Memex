@@ -35,6 +35,7 @@ import { getAuth, sendPasswordResetEmail, updateEmail } from 'firebase/auth'
 import type { FirebaseError } from 'firebase/app'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { AuthServices } from 'src/services/types'
+import { listenToWebAppMessage } from './auth-sync'
 
 export class AuthBackground {
     authService: AuthService
@@ -144,6 +145,8 @@ export class AuthBackground {
                 )
             },
         }
+
+        listenToWebAppMessage(this.authService)
     }
 
     refreshUserInfo = async () => {

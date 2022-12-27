@@ -45,6 +45,32 @@ const getContentFingerprints: GetContentFingerprints = async () => {
 
 Global.main({ loadRemotely: false, getContentFingerprints }).then(
     (inPageUI) => {
+        inPageUI.events.on('stateChanged', (event) => {
+            const sidebarState = event?.changes?.sidebar
+            let windowWidth = window.innerWidth
+
+            if (sidebarState === true) {
+                let sidebar = document.getElementById('memex-sidebar-container')
+                let sidebarContainer = sidebar.shadowRoot.getElementById(
+                    'annotationSidebarContainer',
+                )
+                let sidebarContainerWidth = sidebarContainer.offsetWidth
+                document.body.style.width =
+                    windowWidth - sidebarContainerWidth + 'px'
+
+                window.addEventListener('resize', () =>
+                    listenToWindowWidthChanges(sidebarContainer),
+                )
+                sidebar.addEventListener('mouseup', () =>
+                    listenToSidebarWidthChanges(sidebarContainer),
+                )
+
+                document.body.classList.add('memexSidebarOpen')
+            } else if (sidebarState === false) {
+                document.body.classList.remove('memexSidebarOpen')
+                document.body.style.width = '100%'
+            }
+        })
         makeRemotelyCallableType<InPDFPageUIContentScriptRemoteInterface>({
             extractPDFContents: async () => {
                 const searchParams = new URLSearchParams(location.search)
@@ -60,41 +86,15 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
                 return extractDataFromPDFDocument(pdf, document.title)
             },
         })
-
-        inPageUI.events.on('stateChanged', (event) => {
-            const sidebarState = event?.changes?.sidebar
-
-            if (sidebarState === true) {
-                document.body.classList.add('memexSidebarOpen')
-                setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '450px')
-
-                let SidebarInitialWidth = getLocalStorage(
-                    SIDEBAR_WIDTH_STORAGE_KEY,
-                ).then((width) => {
-                    let SidebarInitialAsInteger = parseFloat(
-                        width.toString().replace('px', ''),
-                    )
-                    let WindowInitialWidth =
-                        (
-                            window.innerWidth - SidebarInitialAsInteger
-                        ).toString() + 'px'
-                    document.body.style.width = WindowInitialWidth
-                })
-
-                browser.storage.onChanged.addListener((changes) => {
-                    let SidebarWidth = changes[
-                        SIDEBAR_WIDTH_STORAGE_KEY
-                    ].newValue.replace('px', '')
-                    SidebarWidth = parseFloat(SidebarWidth)
-                    let windowWidth = window.innerWidth
-                    let width = (windowWidth - SidebarWidth).toString()
-                    width = width + 'px'
-                    document.body.style.width = width
-                })
-            } else if (sidebarState === false) {
-                document.body.classList.remove('memexSidebarOpen')
-                document.body.style.width = window.innerWidth.toString() + 'px'
-            }
-        })
     },
 )
+
+function listenToWindowWidthChanges(sidebarContainer) {
+    let sidebarContainerWidth = sidebarContainer.offsetWidth
+    document.body.style.width = window.innerWidth - sidebarContainerWidth + 'px'
+}
+
+function listenToSidebarWidthChanges(sidebarContainer) {
+    let sidebarContainerWidth = sidebarContainer.offsetWidth
+    document.body.style.width = window.innerWidth - sidebarContainerWidth + 'px'
+}

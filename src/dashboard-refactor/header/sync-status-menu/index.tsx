@@ -113,6 +113,9 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                                 backgroundColor={'purple'}
                                 label="Login"
                                 onClick={onLoginClick}
+                                size={'medium'}
+                                fullWidth
+                                type={'secondary'}
                             />
                         </ActionButton>
                     </TopBox>
@@ -137,15 +140,19 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                 <RowContainer>
                     <TopBox>
                         <TextBlock color={'warning'}>
-                            There was an error
+                            There was an error.
                         </TextBlock>
-                        <TextBlockSmall>Please contact support</TextBlockSmall>
+                        <TextBlockSmall>Contact support</TextBlockSmall>
                         <ActionButton>
                             <PrimaryAction
                                 label="support@memex.garden"
                                 onClick={() =>
                                     window.open('mailto:support@memex.garden')
                                 }
+                                size={'small'}
+                                icon={'mail'}
+                                fullWidth
+                                type={'secondary'}
                             />
                         </ActionButton>
                     </TopBox>
@@ -257,11 +264,11 @@ const ExternalLink = styled.a`
 `
 
 const Container = styled.div`
-    width: 250px;
+    width: 300px;
 `
 
 const Separator = styled.div`
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
 `
 
 const TopBox = styled(Margin)`
@@ -392,7 +399,7 @@ const TextBlockSmall = styled.div`
     color: ${(props) => props.theme.colors.greyScale8};
     font-size: 14px;
     text-align: left;
-    white-space: nowrap;
+    white-space: pre-wrap;
 `
 
 const ActionButton = styled.div`

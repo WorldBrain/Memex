@@ -226,6 +226,7 @@ export interface RootState {
     noteUpdateState: TaskState
     newNoteCreateState: TaskState
     searchPaginationState: TaskState
+    clearInboxLoadState: TaskState
 
     // Misc local storage flags
     showMobileAppAd: boolean
@@ -298,6 +299,7 @@ export type Events = UIEvent<{
     setPageNotesType: PageEventArgs & { noteType: NotesType }
     setPageHover: PageEventArgs & { hover: ResultHoverState }
     removePageFromList: PageEventArgs
+    clearInbox: null
     dragPage: PageEventArgs & { dataTransfer: DataTransfer }
     dropPage: PageEventArgs
     updatePageNotesShareInfo: PageEventArgs & {
