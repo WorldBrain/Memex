@@ -243,6 +243,12 @@ const Container = styled.div<{ spaceSidebarWidth: number }>`
     justify-content: center;
     height: fill-available;
     overflow: scroll;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const Separator = styled.div`

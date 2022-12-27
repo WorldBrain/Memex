@@ -1561,6 +1561,12 @@ const MainContent = styled.div<{ responsiveWidth: string }>`
         css<{ responsiveWidth: string }>`
             width: ${(props) => props.responsiveWidth};
         `};
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const ListSidebarContent = styled(Rnd)<{
