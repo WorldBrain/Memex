@@ -5,6 +5,8 @@ import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-u
 import {
     MemexOpenLinkDetail,
     MemexRequestHandledDetail,
+    MEMEX_OPEN_LINK_EVENT_NAME,
+    MEMEX_REQUEST_HANDLED_EVENT_NAME,
 } from '@worldbrain/memex-common/lib/services/memex-extension'
 
 // import { setupScrollReporter } from 'src/activity-logger/content_script'
@@ -486,11 +488,13 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
 export function setupWebUIActions() {
     const confirmRequest = (requestId: number) => {
         const detail: MemexRequestHandledDetail = { requestId }
-        const event = new CustomEvent('memex:request-handled', { detail })
+        const event = new CustomEvent(MEMEX_REQUEST_HANDLED_EVENT_NAME, {
+            detail,
+        })
         document.dispatchEvent(event)
     }
 
-    document.addEventListener('memex:open-link', (event) => {
+    document.addEventListener(MEMEX_OPEN_LINK_EVENT_NAME, (event) => {
         const detail = event.detail as MemexOpenLinkDetail
         console.log('Got request to open page link', detail)
         // TODO: Do some actual stuff in here
