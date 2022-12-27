@@ -124,22 +124,7 @@ export type FollowedListState = SharedAnnotationList & {
     activeListPickerState: ListPickerShowState
 }
 
-interface SidebarFollowedListsState {
-    followedListLoadState: TaskState
-    followedLists: NormalizedState<FollowedListState>
-    followedAnnotations: { [annotationId: string]: FollowedListAnnotation }
-
-    users: {
-        [userId: string]: {
-            name: string
-            profileImgSrc?: string
-        }
-    }
-}
-
-export interface SidebarContainerState
-    extends SidebarFollowedListsState,
-        AnnotationConversationsState {
+export interface SidebarContainerState extends AnnotationConversationsState {
     loadState: TaskState
     noteCreateState: TaskState
     annotationsLoadState: TaskState
@@ -170,6 +155,18 @@ export interface SidebarContainerState
     pageUrl?: string
     lists: PageAnnotationsCacheInterface['lists']
     annotations: PageAnnotationsCacheInterface['annotations']
+
+    __listInstance_refsState: TaskState
+    __lists: NormalizedState<FollowedListState>
+    __annotations: { [annotationId: string]: FollowedListAnnotation }
+
+    users: {
+        [userId: string]: {
+            name: string
+            profileImgSrc?: string
+        }
+    }
+
     annotationModes: {
         [context in AnnotationEventContext]: {
             [annotationUrl: string]: AnnotationMode
@@ -291,7 +288,7 @@ interface SidebarEvents {
         context: AnnotationEventContext
         annotationUrl: string
     }
-    setActiveAnnotationUrl: { annotationUrl: string }
+    __setActiveAnnotation: { annotationUrl: string }
 
     // setActiveAnnotationUrl: { annotation?: Annotation; annotationUrl?: string }
     shareAnnotation: {
@@ -300,7 +297,7 @@ interface SidebarEvents {
         annotationUrl: string
         followedListId?: string
     }
-    switchAnnotationMode: {
+    __setAnnotationCardMode: {
         context: AnnotationEventContext
         annotationUrl: string
         mode: AnnotationMode
@@ -321,10 +318,6 @@ interface SidebarEvents {
     fetchSuggestedDomains: null
 
     // Followed lists (TODO: REMOVE)
-    loadFollowedLists: null
-    loadFollowedListNotes: { listId: string }
-    expandFollowedListNotes: { listId: string }
-
     expandListAnnotations: { unifiedListId: UnifiedList['unifiedId'] }
 
     updateAnnotationShareInfo: {

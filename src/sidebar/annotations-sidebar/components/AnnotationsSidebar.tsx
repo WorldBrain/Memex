@@ -359,7 +359,7 @@ export class AnnotationsSidebar extends React.Component<
         listId: string,
         forceRendering: boolean = false,
     ) {
-        const list = this.props.followedLists.byId[listId]
+        const list = this.props.__lists.byId[listId]
         if (
             (!list?.isExpanded || list.annotationsLoadState === 'pristine') &&
             !forceRendering
@@ -395,7 +395,7 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         const annotationsData = list.sharedAnnotationReferences
-            .map((ref) => this.props.followedAnnotations[ref.id])
+            .map((ref) => this.props.__annotations[ref.id])
             .filter((a) => !!a)
 
         console.debug('Annotations Data', annotationsData)
@@ -457,7 +457,7 @@ export class AnnotationsSidebar extends React.Component<
                         ownAnnotationProps.appendRepliesToggle = true
                         ownAnnotationProps.lastEdited =
                             localAnnotation.lastEdited
-                        ownAnnotationProps.mode = this.props.followedLists.byId[
+                        ownAnnotationProps.mode = this.props.__lists.byId[
                             listId
                         ].annotationModes[data.localId]
                         ownAnnotationProps.annotationEditDependencies = this.props.bindAnnotationEditProps(
@@ -546,7 +546,7 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderSharedNotesByList() {
-        const { followedLists } = this.props
+        const { __lists: followedLists } = this.props
         const sharedNotesByList = followedLists.allIds.map((remoteListId) => {
             const listData = followedLists.byId[remoteListId]
 
@@ -556,8 +556,8 @@ export class AnnotationsSidebar extends React.Component<
             let othersAnnotsCount = 0
             for (const { id } of sharedAnnotationReferences) {
                 if (
-                    this.props.followedAnnotations[id]?.creatorId !==
-                    this.props.currentUser?.id
+                    this.props.__annotations[id]?.creatorId !==
+                    this.props.currentUserId
                 ) {
                     othersAnnotsCount++
                 }
@@ -656,9 +656,9 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <SectionTitleContainer>
                 {this.props.activeTab === 'spaces' &&
-                    (this.props.followedListLoadState === 'running' ? (
+                    (this.props.__listInstance - refsState === 'running' ? (
                         this.renderLoader()
-                    ) : this.props.followedListLoadState === 'error' ? (
+                    ) : this.props.__listInstance - refsState === 'error' ? (
                         <FollowedListsMsgContainer>
                             <FollowedListsMsgHead>
                                 Something went wrong
@@ -1012,7 +1012,7 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderTopBarSwitcher() {
-        const { followedLists } = this.props
+        const { __lists: followedLists } = this.props
 
         return (
             <TopBarContainer>
@@ -1031,8 +1031,8 @@ export class AnnotationsSidebar extends React.Component<
                     size={'medium'}
                     iconPosition={'right'}
                     icon={
-                        this.props.followedListLoadState === 'running' ||
-                        this.props.followedListLoadState === 'pristine' ? (
+                        this.props.__listInstance - refsState === 'running' ||
+                        this.props.__listInstance - refsState === 'pristine' ? (
                             <LoadingBox>
                                 <LoadingIndicator size={10} />{' '}
                             </LoadingBox>
@@ -1055,8 +1055,8 @@ export class AnnotationsSidebar extends React.Component<
                     size={'medium'}
                     iconPosition={'right'}
                     icon={
-                        this.props.followedListLoadState === 'running' ||
-                        this.props.followedListLoadState === 'pristine' ? (
+                        this.props.__listInstance - refsState === 'running' ||
+                        this.props.__listInstance - refsState === 'pristine' ? (
                             <LoadingBox>
                                 <LoadingIndicator size={12} />{' '}
                             </LoadingBox>
@@ -1083,9 +1083,9 @@ export class AnnotationsSidebar extends React.Component<
 
         let spaceName: string
         let spaceDescription: string = ''
-        if (selectedList.localId == null) {
-            const followedListData = this.props.followedLists.byId[
-                selectedList.remoteId
+        if (selectedSpace.localId == null) {
+            const followedListData = this.props.__lists.byId[
+                selectedSpace.remoteId
             ]
             spaceName = followedListData?.name ?? 'Missing list'
         } else {
