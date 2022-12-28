@@ -24,7 +24,7 @@ interface ButtonProps {
     renderSpacePicker?: () => JSX.Element
     tabIndex?: number
     newLineOrientation?: boolean
-    spacePickerButtonRef?: React.RefObject<HTMLDivElement>
+    spacePickerButtonRef?: React.RefObject<HTMLElement>
 }
 
 export class AddSpacesButton extends React.Component<
@@ -110,6 +110,7 @@ export default function ListsSegment({
                     renderSpacePicker={renderSpacePicker}
                     tabIndex={tabIndex}
                     newLineOrientation={newLineOrientation}
+                    spacePickerButtonRef={spacePickerButtonRef}
                 />
             </ListsContainer>
         </Container>

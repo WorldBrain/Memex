@@ -220,14 +220,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             tooltipText="Open in Page"
                             placement="bottom"
                         >
-                            <HighlightAction right="2px">
-                                <Icon
-                                    onClick={onGoToAnnotation}
-                                    filePath={icons.goTo}
-                                    heightAndWidth={'18px'}
-                                    padding={'4px'}
-                                />
-                            </HighlightAction>
+                            <Icon
+                                onClick={onGoToAnnotation}
+                                filePath={'goTo'}
+                                heightAndWidth={'18px'}
+                                borderColor={'lightHover'}
+                                background={'backgroundColorDarker'}
+                            />
                         </TooltipBox>
                     )}
                     <TooltipBox
@@ -240,14 +239,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         }
                         placement="bottom"
                     >
-                        <HighlightAction>
-                            <Icon
-                                onClick={footerDeps.onEditIconClick}
-                                icon={'edit'}
-                                heightAndWidth={'18px'}
-                                padding={'4px'}
-                            />
-                        </HighlightAction>
+                        <Icon
+                            onClick={footerDeps.onEditIconClick}
+                            icon={'edit'}
+                            heightAndWidth={'18px'}
+                            borderColor={'lightHover'}
+                            background={'backgroundColorDarker'}
+                        />
                     </TooltipBox>
                 </HighlightActionsBox>
             ) : null
@@ -564,7 +562,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 targetElementRef={referenceElement.current}
                 placement={
                     this.state.showSpacePicker === 'lists-bar'
-                        ? 'bottom-start'
+                        ? 'bottom'
                         : 'bottom-end'
                 }
                 closeComponent={() => {
@@ -680,11 +678,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             )}
                             {this.renderFooter()}
                         </AnnotationStyled>
+                        {this.state.showSpacePicker === 'lists-bar' &&
+                            this.renderSpacePicker(this.spacePickerBarRef)}
+                        {this.renderCopyPaster(this.copyPasterButtonRef)}
                     </ItemBox>
                 </AnnotationBox>
-                {this.state.showSpacePicker === 'lists-bar' &&
-                    this.renderSpacePicker(this.spacePickerBarRef)}
-                {this.renderCopyPaster(this.copyPasterButtonRef)}
                 {this.state.showQuickTutorial && (
                     <PopoutBox
                         targetElementRef={this.tutorialButtonRef.current}
@@ -704,50 +702,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 }
 
-const ShareBtn = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 24px;
-    color: ${(props) => props.theme.colors.greyScale8};
-    font-size: 12px;
-    cursor: pointer;
-    grid-gap: 4px;
-
-    & * {
-        cursor: pointer;
-    }
-`
-
 const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
     margin-top: ${(props) => !props.hasHighlight && '10px'};
-`
-
-const TagPickerWrapper = styled.div`
-    position: relative;
-`
-const ShareMenuWrapper = styled.div`
-    position: relative;
-`
-const CopyPasterWrapper = styled.div`
-    position: relative;
-    left: 70px;
-`
-
-const EditNoteIconBox = styled.div`
-    display: none;
-    position: absolute;
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
-    border: none;
-    outline: none;
-    border-radius: 6px;
-    border: 1px solid ${(props) => props.theme.colors.lineGrey};
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
-
-    &:hover {
-    }
 `
 
 const AnnotationBox = styled(Margin)<{ zIndex: number }>`
@@ -766,12 +722,11 @@ const SaveActionBar = styled.div`
 const HighlightActionsBox = styled.div`
     position: absolute;
     right: 0px;
-    width: 50px;
     display: flex;
     justify-content: flex-end;
     z-index: 10000;
     top: -4px;
-    grid-gap: 3px;
+    grid-gap: 5px;
 `
 
 const NoteTextBox = styled.div<{ hasHighlight: boolean }>`
@@ -804,45 +759,8 @@ const ActionBox = styled.div`
     z-index: 1;
 `
 
-const HighlightAction = styled(Margin)`
-    display: flex;
-    border-radius: 5px;
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
-    margin-top: -3px;
-
-    &:hover {
-    }
-`
-
 const HighlightTextBox = styled.div`
     position: relative;
-`
-
-const AddNoteIcon = styled.button`
-    border: none;
-    width: 20px;
-    height: 20px;
-    opacity: 0.6;
-    background-color: ${(props) => props.theme.colors.primary};
-    mask-image: url(${icons.plus});
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 16px;
-    cursor: pointer;
-`
-
-const GoToHighlightIcon = styled.button`
-    border: none;
-    width: 20px;
-    height: 20px;
-    opacity: 0.6;
-    background-color: ${(props) => props.theme.colors.primary};
-    mask-image: url(${icons.goTo});
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 16px;
-    cursor: pointer;
 `
 
 const HighlightText = styled.span`
@@ -892,10 +810,6 @@ const CommentBox = styled.div`
     /* &:first-child {
         padding: 15px 20px 20px;
     } */
-
-    &:hover ${EditNoteIconBox} {
-        display: flex;
-    }
 
     ${({ theme }: { theme: SidebarAnnotationTheme }) =>
         !theme.hasHighlight &&
@@ -960,26 +874,6 @@ const DeleteConfirmStyled = styled.span`
     color: ${(props) => props.theme.colors.normalText};
     margin-right: 10px;
     text-align: right;
-`
-
-const CancelBtnStyled = styled.button`
-    box-sizing: border-box;
-    cursor: pointer;
-    font-size: 14px;
-    border: none;
-    outline: none;
-    padding: 3px 5px;
-    background: transparent;
-    border-radius: 3px;
-    color: red;
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.backgroundColor};
-    }
-
-    &:focus {
-        background-color: #79797945;
-    }
 `
 
 const BtnContainerStyled = styled.div`
