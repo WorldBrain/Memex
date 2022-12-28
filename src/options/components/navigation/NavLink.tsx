@@ -94,11 +94,17 @@ const RouteItem = styled.li<{ name: string; isActive: boolean }>`
     margin: 0 10px;
     border-radius: 5px;
 
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+
     ${(props) =>
         props.isActive &&
         css`
             overflow: scroll;
-            background-color: ${(props) => props.theme.colors.activeBackground};
+            background-color: ${(props) => props.theme.colors.darkhover};
 
             &:hover {
                 outline: 1px solid ${(props) => props.theme.colors.lightHover};
