@@ -42,7 +42,6 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
-import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
