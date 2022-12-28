@@ -15,7 +15,7 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     tabIndex?: number
     padding?: string
     newLineOrientation?: boolean
-    spacePickerButtonRef?: React.RefObject<HTMLElement>
+    spacePickerButtonRef?: React.RefObject<HTMLDivElement>
 }
 
 interface ButtonProps {
@@ -24,7 +24,7 @@ interface ButtonProps {
     renderSpacePicker?: () => JSX.Element
     tabIndex?: number
     newLineOrientation?: boolean
-    spacePickerButtonRef?: React.RefObject<HTMLElement>
+    spacePickerButtonRef?: React.RefObject<HTMLDivElement>
 }
 
 export class AddSpacesButton extends React.Component<

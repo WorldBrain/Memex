@@ -87,7 +87,7 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private markdownbuttonRef = createRef<HTMLElement>()
-    private spacePickerButtonRef = createRef<HTMLElement>()
+    private spacePickerButtonRef = createRef<HTMLDivElement>()
 
     private editor: MemexEditorInstance
 
