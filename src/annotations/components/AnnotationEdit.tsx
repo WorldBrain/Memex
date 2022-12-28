@@ -6,6 +6,7 @@ import MemexEditor, {
     MemexEditorInstance,
 } from '@worldbrain/memex-common/lib/editor'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 
 interface State {
     editorHeight: string
@@ -33,6 +34,7 @@ export interface AnnotationEditGeneralProps {
     editorHeight?: string
     isShared?: boolean
     isBulkShareProtected?: boolean
+    getYoutubePlayer?(): YoutubePlayer
 }
 
 export interface Props
@@ -121,6 +123,7 @@ class AnnotationEdit extends React.Component<Props> {
         return (
             <EditorContainer editorHeight={this.props.editorHeight}>
                 <MemexEditor
+                    getYoutubePlayer={this.props.getYoutubePlayer}
                     onContentUpdate={(content) =>
                         this.props.onCommentChange(content)
                     }

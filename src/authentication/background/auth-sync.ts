@@ -7,7 +7,8 @@ import {
     logUnpackedMessage,
     logPackedMessage,
 } from '@worldbrain/memex-common/lib/authentication/auth-sync'
-import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
+import type { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
+import type { Runtime } from 'webextension-polyfill'
 
 function validSender(sender: any, expectedOrigins: string[]) {
     if (!(typeof sender === 'object' && typeof sender.origin === 'string')) {
@@ -36,9 +37,10 @@ function addListener(
         messageObj: ReturnType<typeof unpackMessage>,
     ) => void,
     expectedOrigins: string[],
+    runtimeAPI: Runtime.Static,
 ) {
-    //@ts-ignore next-line
-    chrome.runtime.onMessageExternal.addListener(
+    runtimeAPI.onMessageExternal.addListener(
+        //@ts-ignore next-line
         (message, sender, runtimeSendResponse) => {
             const messageObj = getMessage(message, sender, expectedOrigins)
             if (!messageObj) {
@@ -88,7 +90,10 @@ async function loginWithAppTokenHandler(
     }
 }
 
-export async function listenToWebAppMessage(authService: AuthService) {
+export async function listenToWebAppMessage(
+    authService: AuthService,
+    runtimeAPI: Runtime.Static,
+) {
     const expectedOrigins =
         process.env.NODE_ENV === 'production'
             ? ['https://memex.social']
@@ -97,37 +102,41 @@ export async function listenToWebAppMessage(authService: AuthService) {
     await authService.waitForAuthReady()
 
     let reactingToMessage = false
-    addListener((sendResponse, messageObj) => {
-        // JS is mostly event-loop concurrent: https://stackoverflow.com/a/5347062
-        // So we have a simple lock here to prevent multiple tabs of the app contacting the extension, this works so-so
-        // This will not prevent multiple instances of the service worker to react
-        if (reactingToMessage) {
-            return false
-        }
-        reactingToMessage = true
+    addListener(
+        (sendResponse, messageObj) => {
+            // JS is mostly event-loop concurrent: https://stackoverflow.com/a/5347062
+            // So we have a simple lock here to prevent multiple tabs of the app contacting the extension, this works so-so
+            // This will not prevent multiple instances of the service worker to react
+            if (reactingToMessage) {
+                return false
+            }
+            reactingToMessage = true
 
-        // Can not use a promise here, otherwise the listener will never resolve
-        authService
-            .getCurrentUser()
-            .then((val) => {
-                const isLoggedIn = !!val
-                if (isLoggedIn) {
-                    return sendTokenToAppHandler(
-                        authService,
-                        sendResponse,
-                        messageObj,
-                    )
-                } else {
-                    return loginWithAppTokenHandler(
-                        authService,
-                        sendResponse,
-                        messageObj,
-                    )
-                }
-            })
-            .then(() => (reactingToMessage = false))
+            // Can not use a promise here, otherwise the listener will never resolve
+            authService
+                .getCurrentUser()
+                .then((val) => {
+                    const isLoggedIn = !!val
+                    if (isLoggedIn) {
+                        return sendTokenToAppHandler(
+                            authService,
+                            sendResponse,
+                            messageObj,
+                        )
+                    } else {
+                        return loginWithAppTokenHandler(
+                            authService,
+                            sendResponse,
+                            messageObj,
+                        )
+                    }
+                })
+                .then(() => (reactingToMessage = false))
 
-        // Indicates that we want to send an async response
-        return true
-    }, expectedOrigins)
+            // Indicates that we want to send an async response
+            return true
+        },
+        expectedOrigins,
+        runtimeAPI,
+    )
 }

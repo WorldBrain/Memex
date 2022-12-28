@@ -42,6 +42,7 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 export interface AnnotationsSidebarProps
@@ -49,10 +50,7 @@ export interface AnnotationsSidebarProps
     annotationModes: { [url: string]: AnnotationMode }
     // sidebarActions: () => void
 
-    setActiveAnnotationUrl?: (
-        annotation?: Annotation,
-        annotationUrl?: string,
-    ) => React.MouseEventHandler
+    setActiveAnnotationUrl?: (annotationUrl: string) => React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
 
     bindSharedAnnotationEventHandlers: (
@@ -121,6 +119,7 @@ export interface AnnotationsSidebarProps
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
     //postShareHook: (shareInfo) => void+
     setPopoutsActive: (popoutsOpen: boolean) => void
+    getYoutubePlayer?(): YoutubePlayer
 }
 
 interface AnnotationsSidebarState {
@@ -175,73 +174,6 @@ export class AnnotationsSidebar extends React.Component<
     focusCreateForm = () => (this.annotationCreateRef?.current as any).focus()
     focusEditNoteForm = (annotationId: string) =>
         (this.annotationEditRefs[annotationId]?.current).focusEditForm()
-
-    private searchEnterHandler = {
-        test: (e) => e.key === 'Enter',
-        handle: () => undefined,
-    }
-
-    private handleSearchChange = (searchText) => {
-        this.setState({ searchText })
-    }
-
-    private handleSearchClear = () => {
-        this.setState({ searchText: '' })
-    }
-
-    // NOTE: Currently not used
-    private renderSearchSection() {
-        return (
-            <TopSectionStyled>
-                <TopBarStyled>
-                    <Flex>
-                        <ButtonStyled>
-                            {' '}
-                            <SearchIcon />{' '}
-                        </ButtonStyled>
-                        <SearchInputStyled
-                            type="input"
-                            name="query"
-                            autoComplete="off"
-                            placeholder="Search Annotations"
-                            onChange={this.handleSearchChange}
-                            defaultValue={this.state.searchText}
-                            specialHandlers={[this.searchEnterHandler]}
-                        />
-                        {this.state.searchText !== '' && (
-                            <CloseButtonStyled onClick={this.handleSearchClear}>
-                                <CloseIconStyled />
-                                Clear search
-                            </CloseButtonStyled>
-                        )}
-                    </Flex>
-                </TopBarStyled>
-            </TopSectionStyled>
-        )
-    }
-
-    private getListsForAnnotationCreate = (
-        followedLists,
-        isolatedView: string,
-        annotationCreateLists: string[],
-    ) => {
-        // returns lists for AnnotationCreate including isolated view if enabled
-        if (isolatedView) {
-            const isolatedList = followedLists.byId[isolatedView]
-            if (
-                isolatedList.isContributable &&
-                !annotationCreateLists.includes(isolatedList.name)
-            ) {
-                const listsToCreate = [
-                    ...annotationCreateLists,
-                    isolatedList.name,
-                ]
-
-                return listsToCreate
-            }
-        }
-        return annotationCreateLists
-    }
 
     setPopoutsActive() {
         if (
@@ -329,6 +261,7 @@ export class AnnotationsSidebar extends React.Component<
                 <AnnotationCreate
                     {...this.props.annotationCreateProps}
                     ref={this.annotationCreateRef as any}
+                    getYoutubePlayer={this.props.getYoutubePlayer}
                 />
             </NewAnnotationSection>
         )
@@ -468,7 +401,7 @@ export class AnnotationsSidebar extends React.Component<
                                 }
                                 onReplyBtnClick={eventHandlers.onReplyBtnClick}
                                 onHighlightClick={this.props.setActiveAnnotationUrl(
-                                    { annotationUrl: data.id },
+                                    data.id,
                                 )}
                                 isClickable={
                                     this.props.theme.canClickAnnotations &&
@@ -486,6 +419,7 @@ export class AnnotationsSidebar extends React.Component<
                                 spacePickerButtonRef={
                                     this.props.spacePickerButtonRef
                                 }
+                                getYoutubePlayer={this.props.getYoutubePlayer}
                             />
                             <ConversationReplies
                                 newReplyEventHandlers={eventHandlers}
@@ -702,7 +636,7 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.activeAnnotationUrl === annot.url
                             }
                             onHighlightClick={this.props.setActiveAnnotationUrl(
-                                annot,
+                                annot.url,
                             )}
                             onGoToAnnotation={footerDeps.onGoToAnnotation}
                             annotationEditDependencies={this.props.bindAnnotationEditProps(
@@ -719,6 +653,7 @@ export class AnnotationsSidebar extends React.Component<
                             renderShareMenuForAnnotation={this.props.renderShareMenuForAnnotation()}
                             renderCopyPasterForAnnotation={this.props.renderCopyPasterForAnnotation()}
                             renderListsPickerForAnnotation={this.props.renderListsPickerForAnnotation()}
+                            getYoutubePlayer={this.props.getYoutubePlayer}
                         />
                     </AnnotationBox>
                 )

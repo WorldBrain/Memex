@@ -31,7 +31,7 @@ import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -78,6 +78,7 @@ export interface AnnotationProps {
     renderListsPickerForAnnotation?: (id: string) => JSX.Element
     renderCopyPasterForAnnotation?: (id: string) => JSX.Element
     renderShareMenuForAnnotation?: (id: string) => JSX.Element
+    getYoutubePlayer?(): YoutubePlayer
 }
 
 export interface AnnotationEditableEventProps {
@@ -306,6 +307,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         editorHeight={this.state.editorHeight}
                         isShared={this.props.isShared}
                         isBulkShareProtected={this.props.isBulkShareProtected}
+                        getYoutubePlayer={this.props.getYoutubePlayer}
                     />
                 </AnnotationEditContainer>
             )
@@ -343,6 +345,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         <NoteTextBox hasHighlight={this.theme.hasHighlight}>
                             <NoteText
                                 contextLocation={this.props.contextLocation}
+                                getYoutubePlayer={this.props.getYoutubePlayer}
                             >
                                 {text}
                             </NoteText>
@@ -419,7 +422,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     key: 'add-spaces-btn',
                     image: 'plus',
                     imageColor: 'purple',
-                    tooltipText: 'Add Page to Spaces',
+                    tooltipText: 'Add Note to Spaces',
                     onClick: () => this.updateSpacePickerState('footer'),
                     buttonRef: this.props.spacePickerButtonRef,
                     active: this.state.showSpacePicker === 'footer',
@@ -445,21 +448,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             },
             appendRepliesToggle && repliesToggle,
         ]
-    }
-
-    private renderMarkdownHelpButton() {
-        return (
-            <MarkdownButtonContainer
-                onClick={() => this.setState({ showQuickTutorial: true })}
-                ref={this.tutorialButtonRef}
-            >
-                Formatting Help
-                <MarkdownButton
-                    src={icons.helpIcon}
-                    onClick={() => this.setState({ showQuickTutorial: true })}
-                />
-            </MarkdownButtonContainer>
-        )
     }
 
     private renderFooter() {
@@ -565,7 +553,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             />
                             {confirmBtn}
                         </BtnContainerStyled>
-                        {/* {this.renderMarkdownHelpButton()} */}
                     </SaveActionBar>
                 </DeletionBox>
             </DefaultFooterStyled>
@@ -782,36 +769,6 @@ const AnnotationBox = styled(Margin)<{ zIndex: number }>`
     width: 100%;
     align-self: center;
     z-index: ${(props) => props.zIndex};
-`
-
-const EditNoteIcon = styled.div`
-    display: flex;
-    border: none;
-    width: 20px;
-    height: 20px;
-    opacity: 0.6;
-    background-color: ${(props) => props.theme.colors.primary};
-    mask-image: url(${icons.commentEditFull});
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 16px;
-    cursor: pointer;
-`
-const MarkdownButtonContainer = styled.div`
-    display: flex;
-    font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
-    align-items: center;
-    cursor: pointer;
-`
-
-const MarkdownButton = styled.img`
-    display: flex;
-    height: 16px;
-    opacity: 0.8;
-    mask-position: center center;
-    margin-left: 10px;
-    cursor: pointer;
 `
 
 const SaveActionBar = styled.div`

@@ -23,6 +23,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 
 interface State {
     isTagPickerShown: boolean
@@ -61,6 +62,7 @@ export interface AnnotationCreateGeneralProps {
     isRibbonCommentBox?: boolean
     spacesBG?: RemoteCollectionsInterface
     contentSharingBG?: ContentSharingInterface
+    getYoutubePlayer?(): YoutubePlayer
 }
 
 export interface Props
@@ -336,6 +338,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     this.props.isRibbonCommentBox
                                 }
                                 youtubeShortcut={this.state.youtubeShortcut}
+                                getYoutubePlayer={this.props.getYoutubePlayer}
                             />
                         ) : (
                             <EditorDummy

@@ -132,6 +132,7 @@ export async function setupBackgroundIntegrationTest(
         runtime: {
             getURL: () => '',
             onStartup: { addListener: () => {} },
+            onMessageExternal: { addListener: () => {} },
         },
         extension: {
             getURL: () => '',
@@ -155,6 +156,7 @@ export async function setupBackgroundIntegrationTest(
     const auth: AuthBackground = new AuthBackground({
         jobScheduler,
         authServices,
+        runtimeAPI: browserAPIs.runtime,
         remoteEmitter: { emit: async () => {} },
         localStorageArea: browserLocalStorage,
         backendFunctions: {
