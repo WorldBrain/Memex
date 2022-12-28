@@ -49,10 +49,7 @@ export interface AnnotationsSidebarProps
     annotationModes: { [url: string]: AnnotationMode }
     // sidebarActions: () => void
 
-    setActiveAnnotationUrl?: (
-        annotation?: Annotation,
-        annotationUrl?: string,
-    ) => React.MouseEventHandler
+    setActiveAnnotationUrl?: (annotationUrl: string) => React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
 
     bindSharedAnnotationEventHandlers: (
@@ -468,7 +465,7 @@ export class AnnotationsSidebar extends React.Component<
                                 }
                                 onReplyBtnClick={eventHandlers.onReplyBtnClick}
                                 onHighlightClick={this.props.setActiveAnnotationUrl(
-                                    { annotationUrl: data.id },
+                                    data.id,
                                 )}
                                 isClickable={
                                     this.props.theme.canClickAnnotations &&
@@ -702,7 +699,7 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.activeAnnotationUrl === annot.url
                             }
                             onHighlightClick={this.props.setActiveAnnotationUrl(
-                                annot,
+                                annot.url,
                             )}
                             onGoToAnnotation={footerDeps.onGoToAnnotation}
                             annotationEditDependencies={this.props.bindAnnotationEditProps(

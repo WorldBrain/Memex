@@ -748,7 +748,7 @@ export class AnnotationsSidebarContainer<
                     </FooterArea>
                 )}
             </>
-            
+
         ) */
     }
 
@@ -926,9 +926,9 @@ export class AnnotationsSidebarContainer<
                             annotationModes={
                                 this.state.annotationModes.pageAnnotations
                             }
-                            setActiveAnnotationUrl={(annotation) => () =>
+                            setActiveAnnotationUrl={(annotationUrl) => () =>
                                 this.processEvent('setActiveAnnotationUrl', {
-                                    annotation,
+                                    annotationUrl,
                                 })}
                             isAnnotationCreateShown={this.state.showCommentBox}
                             setPopoutsActive={(isActive) => {
@@ -1137,7 +1137,7 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
             css`
                 padding-right: 0px;
             `}
-    
+
 
 
     scrollbar-width: none;

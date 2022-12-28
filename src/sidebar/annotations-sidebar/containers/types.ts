@@ -248,7 +248,7 @@ interface SidebarEvents {
         context: AnnotationEventContext
         annotationUrl: string
     }
-    setActiveAnnotationUrl: { annotation?: Annotation; annotationUrl?: string }
+    setActiveAnnotationUrl: { annotationUrl: string }
     setAnnotationEditMode: {
         context: AnnotationEventContext
         annotationUrl: string
