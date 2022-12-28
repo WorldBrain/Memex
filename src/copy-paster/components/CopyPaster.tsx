@@ -6,7 +6,7 @@ import TemplateEditor from './TemplateEditor'
 import TemplateList from './TemplateList'
 
 const CopyPasterWrapper = styled.div`
-    min-width: 250px;
+    min-width: 270px;
     & * {
         font-family: 'Satoshi', sans-serif;
     }

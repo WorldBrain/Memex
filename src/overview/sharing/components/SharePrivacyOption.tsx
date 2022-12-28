@@ -8,12 +8,13 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 export interface Props {
     icon: IconKeys
     title: string
     shortcut?: string
-    description: string
+    description: string | JSX.Element
     isSelected?: boolean
     hasProtectedOption?: boolean
     onClick: (isProtected?: boolean) => void
@@ -44,40 +45,43 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
 
     render() {
         return (
-            <PrivacyOptionItem
-                onClick={() => this.props.onClick(false)}
-                isSelected={this.props.isSelected}
-                onMouseEnter={this.setHoverState(true)}
-                onMouseLeave={this.setHoverState(false)}
+            <TooltipBox
+                tooltipText={this.props.description}
+                placement={'bottom'}
             >
-                <Icon
-                    heightAndWidth="20px"
-                    icon={this.props.icon}
-                    hoverOff
-                    color={this.props.isSelected ? 'purple' : null}
-                />
-                <PrivacyOptionBox>
-                    <PrivacyOptionTitleBox>
-                        <PrivacyOptionTitle>
-                            {this.props.title}
-                        </PrivacyOptionTitle>
-                        <PrivacyOptionShortcut>
-                            {this.props.shortcut}
-                        </PrivacyOptionShortcut>
-                    </PrivacyOptionTitleBox>
-                    <PrivacyOptionSubTitle>
-                        {this.props.description}
-                    </PrivacyOptionSubTitle>
-                </PrivacyOptionBox>
-                {this.props.isSelected && (
+                <PrivacyOptionItem
+                    onClick={() => this.props.onClick(false)}
+                    isSelected={this.props.isSelected}
+                    onMouseEnter={this.setHoverState(true)}
+                    onMouseLeave={this.setHoverState(false)}
+                >
                     <Icon
-                        heightAndWidth="18px"
-                        filePath={icons.check}
-                        color={'purple'}
+                        heightAndWidth="20px"
+                        icon={this.props.icon}
                         hoverOff
+                        color={this.props.isSelected ? 'purple' : null}
                     />
-                )}
-            </PrivacyOptionItem>
+                    <PrivacyOptionBox>
+                        <PrivacyOptionTitleBox>
+                            <PrivacyOptionTitle>
+                                {this.props.title}
+                                {this.props.isSelected && (
+                                    <Icon
+                                        heightAndWidth="14px"
+                                        filePath={icons.check}
+                                        color={'purple'}
+                                        hoverOff
+                                    />
+                                )}
+                            </PrivacyOptionTitle>
+                            <KeyboardShortcuts
+                                keys={this.props.shortcut.split('+')}
+                                size={'small'}
+                            />
+                        </PrivacyOptionTitleBox>
+                    </PrivacyOptionBox>
+                </PrivacyOptionItem>
+            </TooltipBox>
         )
     }
 }
@@ -93,8 +97,8 @@ const PrivacyOptionItem = styled(Margin)`
     padding: 10px 10px;
     width: fill-available;
     grid-gap: 10px;
-    border-radius: 12px;
-    margin-bottom: 2px;
+    border-radius: 10px;
+    width: 150px;
 
     ${(props) =>
         props.isSelected &&
@@ -128,17 +132,22 @@ const PrivacyOptionBox = styled.div`
 
 const PrivacyOptionTitleBox = styled.div`
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    flex-direction: row;
-    height: 16px;
-    grid-gap: 8px;
+    flex-direction: column;
+    grid-gap: 5px;
+    width: fill-available;
 `
 
 const PrivacyOptionTitle = styled.div`
     font-size: 12px;
+    height: 20px;
     font-weight: bold;
     color: ${(props) => props.theme.colors.normalText};
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: fill-available;
 `
 
 const PrivacyOptionShortcut = styled.div`

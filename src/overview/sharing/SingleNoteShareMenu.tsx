@@ -259,22 +259,12 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                             showLink={this.state.showLink}
                             onCopyLinkClick={this.handleLinkCopy}
                             linkTitleCopy="Link to this annotation"
-                            privacyOptionsTitleCopy="Privacy settings"
+                            privacyOptionsTitleCopy={undefined}
                             isLoading={
                                 this.state.shareState === 'running' ||
                                 this.state.loadState === 'running'
                             }
                             privacyOptions={[
-                                {
-                                    icon: 'globe',
-                                    title: 'Public',
-                                    hasProtectedOption: true,
-                                    onClick: this.handleSetShared,
-                                    isSelected: this.props.isShared,
-                                    shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
-                                    description:
-                                        'Auto-added to Spaces the page is shared to',
-                                },
                                 {
                                     icon: 'personFine',
                                     title: 'Private',
@@ -282,8 +272,26 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                     onClick: this.handleSetPrivate,
                                     isSelected: !this.props.isShared,
                                     shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
-                                    description:
-                                        'Private to you, until shared (in bulk)',
+                                    description: (
+                                        <>
+                                            Private to you <br /> until shared
+                                            (in bulk)
+                                        </>
+                                    ),
+                                },
+                                {
+                                    icon: 'globe',
+                                    title: 'Public',
+                                    hasProtectedOption: true,
+                                    onClick: this.handleSetShared,
+                                    isSelected: this.props.isShared,
+                                    shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
+                                    description: (
+                                        <>
+                                            Auto-shared to Spaces <br /> the
+                                            page is added to{' '}
+                                        </>
+                                    ),
                                 },
                             ]}
                             shortcutHandlerDict={{
@@ -322,13 +330,6 @@ const SectionTitle = styled.div`
     font-weight: 700;
     margin-top: 10px;
     margin-bottom: 5px;
-    padding-left: 15px;
+    padding: 0 20px;
     color: ${(props) => props.theme.colors.normalText};
-`
-
-const SectionSubTitle = styled.div`
-    font-size: 12px;
-    font-weight: 400;
-    padding-left: 15px;
-    color: ${(props) => props.theme.colors.lighterText};
 `

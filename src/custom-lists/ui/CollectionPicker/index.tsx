@@ -461,6 +461,7 @@ const LoadingBox = styled.div`
 const OuterSearchBox = styled.div`
     border-radius: 12px;
     width: ${(props) => (props.width ? props.width : '300px')};
+    padding: 0 5px;
 `
 const PickerContainer = styled.div`
     border-radius: 12px;

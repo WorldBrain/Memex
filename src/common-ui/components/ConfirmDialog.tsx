@@ -31,12 +31,16 @@ export default class ConfirmDialog extends React.PureComponent<Props> {
                     <PrimaryAction
                         label={affirmativeLabel ?? 'Yes'}
                         onClick={handleConfirmation(true)}
-                        fontSize="12px"
+                        type={'primary'}
+                        size={'medium'}
+                        width={'181px'}
                     />
-                    <SecondaryAction
+                    <PrimaryAction
                         label={negativeLabel ?? 'No'}
                         onClick={handleConfirmation(false)}
-                        borderOff
+                        type={'tertiary'}
+                        size={'medium'}
+                        width={'181px'}
                     />
                 </ConfirmBtnRow>
             </Container>
@@ -57,7 +61,7 @@ const TitleText = styled.div`
     color: ${(props) => props.theme.colors.darkerText};
     text-align: center;
     font-weight: 800;
-    line-height: 20px;
+    line-height: 24px;
 `
 
 const SubTitleText = styled.div`
@@ -74,6 +78,7 @@ const ConfirmBtnRow = styled.div`
     display: flex;
     flex-direction: column;
     grid-gap: 10px;
+    align-items: center;
 `
 
 const Container = styled.div`
@@ -81,7 +86,7 @@ const Container = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 30px 20px;
+    padding: 30px 30px;
     grid-gap: 20px;
-    max-width: 500px;
+    max-width: 310px;
 `

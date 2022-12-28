@@ -516,34 +516,42 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         }
 
         return (
-            <DefaultFooterStyled>
-                <PrimaryAction
-                    onClick={footerDeps.onShareClick}
-                    label={shareIconData.label}
-                    icon={shareIconData.icon}
-                    size={'small'}
-                    type={'tertiary'}
-                    innerRef={this.shareButtonRef}
-                    active={this.props.activeShareMenuNoteId && true}
-                />
+            <>
+                <DefaultFooterStyled>
+                    <PrimaryAction
+                        onClick={() =>
+                            this.setState({
+                                showShareMenu: true,
+                            })
+                        }
+                        label={shareIconData.label}
+                        icon={shareIconData.icon}
+                        size={'small'}
+                        type={'tertiary'}
+                        innerRef={this.shareButtonRef}
+                        active={this.state.showShareMenu}
+                    />
 
-                <DeletionBox>
-                    {mode === 'delete' && (
-                        <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
-                    )}
-                    <SaveActionBar>
-                        <BtnContainerStyled>
-                            <Icon
-                                onClick={cancelBtnHandler}
-                                icon={icons.removeX}
-                                color={'normalText'}
-                                heightAndWidth="18px"
-                            />
-                            {confirmBtn}
-                        </BtnContainerStyled>
-                    </SaveActionBar>
-                </DeletionBox>
-            </DefaultFooterStyled>
+                    <DeletionBox>
+                        {mode === 'delete' && (
+                            <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
+                        )}
+                        <SaveActionBar>
+                            <BtnContainerStyled>
+                                <Icon
+                                    onClick={cancelBtnHandler}
+                                    icon={icons.removeX}
+                                    color={'normalText'}
+                                    heightAndWidth="18px"
+                                />
+                                {confirmBtn}
+                            </BtnContainerStyled>
+                        </SaveActionBar>
+                    </DeletionBox>
+                </DefaultFooterStyled>
+                {this.state.showShareMenu &&
+                    this.renderShareMenu(this.shareButtonRef)}
+            </>
         )
     }
 
@@ -911,6 +919,5 @@ const DeletionBox = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid #f0f0f0;
     padding: 5px 5px 5px 15px;
 `
