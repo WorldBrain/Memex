@@ -256,7 +256,7 @@ export default ShareAnnotationMenu
 
 const Menu = styled.div`
     padding: 5px 0px;
-    width: 400px;
+    width: 370px;
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};

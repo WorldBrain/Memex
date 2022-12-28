@@ -213,55 +213,53 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         } = this.props
 
         const actionsBox =
-            this.props.mode != 'edit'
-                ? this.state.hoverEditArea && (
-                      <HighlightActionsBox>
-                          {onGoToAnnotation && (
-                              <TooltipBox
-                                  tooltipText="Open in Page"
-                                  placement="bottom"
-                              >
-                                  <HighlightAction right="2px">
-                                      <Icon
-                                          onClick={onGoToAnnotation}
-                                          filePath={icons.goTo}
-                                          heightAndWidth={'20px'}
-                                          padding={'5px'}
-                                      />
-                                  </HighlightAction>
-                              </TooltipBox>
-                          )}
-                          <TooltipBox
-                              tooltipText={
-                                  <span>
-                                      <strong>Add/Edit Note</strong>
-                                      <br />
-                                      or double-click card
-                                  </span>
-                              }
-                              placement="bottom"
-                          >
-                              <HighlightAction>
-                                  <Icon
-                                      onClick={footerDeps.onEditIconClick}
-                                      icon={'edit'}
-                                      heightAndWidth={'20px'}
-                                      padding={'5px'}
-                                  />
-                              </HighlightAction>
-                          </TooltipBox>
-                      </HighlightActionsBox>
-                  )
-                : null
+            this.props.mode != 'edit' && this.state.hoverCard === true ? (
+                <HighlightActionsBox>
+                    {onGoToAnnotation && (
+                        <TooltipBox
+                            tooltipText="Open in Page"
+                            placement="bottom"
+                        >
+                            <HighlightAction right="2px">
+                                <Icon
+                                    onClick={onGoToAnnotation}
+                                    filePath={icons.goTo}
+                                    heightAndWidth={'18px'}
+                                    padding={'4px'}
+                                />
+                            </HighlightAction>
+                        </TooltipBox>
+                    )}
+                    <TooltipBox
+                        tooltipText={
+                            <span>
+                                <strong>Add/Edit Note</strong>
+                                <br />
+                                or double-click card
+                            </span>
+                        }
+                        placement="bottom"
+                    >
+                        <HighlightAction>
+                            <Icon
+                                onClick={footerDeps.onEditIconClick}
+                                icon={'edit'}
+                                heightAndWidth={'18px'}
+                                padding={'4px'}
+                            />
+                        </HighlightAction>
+                    </TooltipBox>
+                </HighlightActionsBox>
+            ) : null
 
         return (
             <HighlightStyled
-                onMouseEnter={this.props.onHighlightHover}
                 onClick={
                     this.props.isClickable
                         ? this.props.onHighlightClick
                         : undefined
                 }
+                hasComment={this.props.comment.length > 0}
             >
                 <ActionBox>{actionsBox}</ActionBox>
                 <TextTruncated text={this.props.body}>
@@ -318,28 +316,19 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         }
 
         return (
-            <CommentBox onMouseEnter={this.props.onNoteHover}>
-                {!this.theme.hasHighlight &&
-                    annotationFooterDependencies?.onEditIconClick && (
-                        <EditNoteIconBox
-                            tooltipText="Edit Note"
-                            placement="bottom"
-                        >
-                            <TooltipBox
-                                tooltipText="Edit Note"
-                                placement="bottom"
-                            >
-                                <Icon
-                                    onClick={
-                                        annotationFooterDependencies?.onEditIconClick
-                                    }
-                                    icon={'edit'}
-                                    heightAndWidth={'20px'}
-                                    padding={'5px'}
-                                />
-                            </TooltipBox>
-                        </EditNoteIconBox>
-                    )}
+            <CommentBox>
+                {!this.theme.hasHighlight && this.state.hoverCard === true && (
+                    <TooltipBox tooltipText="Edit Note" placement="bottom">
+                        <Icon
+                            onClick={
+                                annotationFooterDependencies?.onEditIconClick
+                            }
+                            icon={'edit'}
+                            heightAndWidth={'20px'}
+                            padding={'5px'}
+                        />
+                    </TooltipBox>
+                )}
                 <TextTruncated text={comment}>
                     {({ text }) => (
                         <NoteTextBox hasHighlight={this.theme.hasHighlight}>
@@ -485,6 +474,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         active={this.state.showShareMenu}
                     />
                     <ItemBoxBottom
+                        borderTop={false}
                         creationInfo={this.creationInfo}
                         actions={this.calcFooterActions()}
                     />
@@ -639,21 +629,26 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     zIndex={this.props.zIndex}
                     top="5px"
                     bottom="2px"
+                    onMouseEnter={() =>
+                        this.setState({
+                            hoverCard: true,
+                        })
+                    }
+                    onMouseOver={() =>
+                        this.setState({
+                            hoverCard: true,
+                        })
+                    }
+                    onMouseLeave={() =>
+                        this.setState({
+                            hoverCard: false,
+                        })
+                    }
                 >
                     <ItemBox
                         firstDivProps={{
                             id: this.props.url,
                         }}
-                        onMouseEnter={() =>
-                            this.setState({
-                                hoverCard: true,
-                            })
-                        }
-                        onMouseLeave={() =>
-                            this.setState({
-                                hoverCard: false,
-                            })
-                        }
                     >
                         <AnnotationStyled>
                             <ContentContainer
@@ -661,16 +656,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     annotationFooterDependencies?.onEditIconClick
                                 }
                                 isEditMode={this.props.mode === 'edit'}
-                                onMouseEnter={() =>
-                                    this.setState({
-                                        hoverEditArea: true,
-                                    })
-                                }
-                                onMouseLeave={() =>
-                                    this.setState({
-                                        hoverEditArea: false,
-                                    })
-                                }
                             >
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
@@ -694,12 +679,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 />
                             )}
                             {this.renderFooter()}
-                            {this.renderCopyPaster(this.copyPasterButtonRef)}
                         </AnnotationStyled>
                     </ItemBox>
-                    {this.state.showSpacePicker === 'lists-bar' &&
-                        this.renderSpacePicker(this.spacePickerBarRef)}
                 </AnnotationBox>
+                {this.state.showSpacePicker === 'lists-bar' &&
+                    this.renderSpacePicker(this.spacePickerBarRef)}
+                {this.renderCopyPaster(this.copyPasterButtonRef)}
                 {this.state.showQuickTutorial && (
                     <PopoutBox
                         targetElementRef={this.tutorialButtonRef.current}
@@ -786,6 +771,7 @@ const HighlightActionsBox = styled.div`
     justify-content: flex-end;
     z-index: 10000;
     top: -4px;
+    grid-gap: 3px;
 `
 
 const NoteTextBox = styled.div<{ hasHighlight: boolean }>`
@@ -820,8 +806,8 @@ const ActionBox = styled.div`
 
 const HighlightAction = styled(Margin)`
     display: flex;
-    border-radius: 6px;
-    border: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-radius: 5px;
+    border: 1px solid ${(props) => props.theme.colors.lightHover};
     background: ${(props) => props.theme.colors.backgroundColorDarker};
     margin-top: -3px;
 
@@ -870,7 +856,7 @@ const HighlightText = styled.span`
     padding: 2px 5px;
 `
 
-const HighlightStyled = styled.div`
+const HighlightStyled = styled.div<{ hasComment: boolean }>`
     font-weight: 400;
     font-size: 14px;
     letter-spacing: 0.5px;
@@ -879,6 +865,12 @@ const HighlightStyled = styled.div`
     line-height: 20px;
     text-align: left;
     line-break: normal;
+
+    ${(props) =>
+        !props.hasComment &&
+        css`
+            padding: 15px 15px 15px 15px;
+        `}
 `
 
 const CommentBox = styled.div`
@@ -916,14 +908,10 @@ const CommentBox = styled.div`
 
 const DefaultFooterStyled = styled.div`
     display: flex;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
     align-items: center;
     padding-left: 15px;
     justify-content: space-between;
-
-    & > div {
-        border-top: none;
-    }
+    border-top: 1px solid ${(props) => props.theme.colors.lightHover};
 `
 
 const AnnotationStyled = styled.div`
