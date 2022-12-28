@@ -905,12 +905,6 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             value,
                         }),
-                    onTagsUpdate: (day, pageId) => (tags) =>
-                        this.processEvent('setPageNewNoteTags', {
-                            day,
-                            pageId,
-                            tags,
-                        }),
                     createNewList: (day, pageId) => async (name) =>
                         this.createNewListViaPicker(name),
                     addPageToList: (day, pageId) => (listId) =>

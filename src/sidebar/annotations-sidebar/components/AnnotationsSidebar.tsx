@@ -543,18 +543,19 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderSharedNotesByList() {
-        const { __lists: followedLists } = this.props
+        const { __lists: followedLists, annotationsCache } = this.props
         const sharedNotesByList = followedLists.allIds.map((remoteListId) => {
             const listData = followedLists.byId[remoteListId]
 
             const sharedAnnotationReferences =
                 listData.sharedAnnotationReferences
+            const unifiedList = annotationsCache.getListByRemoteId(remoteListId)
 
             let othersAnnotsCount = 0
             for (const { id } of sharedAnnotationReferences) {
                 if (
                     this.props.__annotations[id]?.creatorId !==
-                    this.props.currentUserId
+                    this.props.currentUser?.id
                 ) {
                     othersAnnotsCount++
                 }
@@ -652,25 +653,26 @@ export class AnnotationsSidebar extends React.Component<
         })
         return (
             <SectionTitleContainer>
-                {this.props.activeTab === 'spaces' &&
-                    (this.props.__listInstance - refsState === 'running' ? (
-                        this.renderLoader()
-                    ) : this.props.__listInstance - refsState === 'error' ? (
-                        <FollowedListsMsgContainer>
-                            <FollowedListsMsgHead>
-                                Something went wrong
-                            </FollowedListsMsgHead>
-                            <FollowedListsMsg>
-                                Reload the page and if the problem persists{' '}
-                                <ExternalLink
-                                    label="contact
-                                    support"
-                                    href="mailto:support@worldbrain.io"
-                                />
-                                .
-                            </FollowedListsMsg>
-                        </FollowedListsMsgContainer>
-                    ) : (
+                {
+                    this.props.activeTab === 'spaces' && (
+                        // (this.props.listInstances[unifiedList.] __listInstance.refsState === 'running' ? (
+                        //     this.renderLoader()
+                        // ) : this.props.__listInstance - refsState === 'error' ? (
+                        //     <FollowedListsMsgContainer>
+                        //         <FollowedListsMsgHead>
+                        //             Something went wrong
+                        //         </FollowedListsMsgHead>
+                        //         <FollowedListsMsg>
+                        //             Reload the page and if the problem persists{' '}
+                        //             <ExternalLink
+                        //                 label="contact
+                        //                 support"
+                        //                 href="mailto:support@worldbrain.io"
+                        //             />
+                        //             .
+                        //         </FollowedListsMsg>
+                        //     </FollowedListsMsgContainer>
+                        // ) : (
                         <>
                             {followedLists.allIds.length > 0 ? (
                                 <AnnotationContainer>
@@ -693,7 +695,9 @@ export class AnnotationsSidebar extends React.Component<
                                 </EmptyMessageContainer>
                             )}
                         </>
-                    ))}
+                    )
+                    // ))}
+                }
             </SectionTitleContainer>
         )
     }
@@ -899,7 +903,7 @@ export class AnnotationsSidebar extends React.Component<
                                 : this.props.annotations.allIds.length - i
                         }
                         className={'AnnotationBox'}
-                        id={annot.url}
+                        id={annot.unifiedId}
                         order={i}
                     >
                         <AnnotationEditable
@@ -928,7 +932,7 @@ export class AnnotationsSidebar extends React.Component<
                             }
                             onListClick={this.props.onLocalSpaceSelect}
                             onHighlightClick={this.props.setActiveAnnotationUrl(
-                                annot.url,
+                                annot.unifiedId,
                             )}
                             onGoToAnnotation={footerDeps.onGoToAnnotation}
                             annotationEditDependencies={this.props.bindAnnotationEditProps(
@@ -1027,14 +1031,14 @@ export class AnnotationsSidebar extends React.Component<
                     size={'medium'}
                     iconPosition={'right'}
                     icon={
-                        this.props.__listInstance - refsState === 'running' ||
-                        this.props.__listInstance - refsState === 'pristine' ? (
+                        this.props.cacheLoadState === 'running' ||
+                        this.props.cacheLoadState === 'pristine' ? (
                             <LoadingBox>
                                 <LoadingIndicator size={10} />{' '}
                             </LoadingBox>
-                        ) : followedLists.allIds.length > 0 ? (
+                        ) : Object.keys(this.props.listInstances).length > 0 ? (
                             <LoadingBox>
-                                <PageActivityIndicator active={true} />
+                                <PageActivityIndicator active />
                             </LoadingBox>
                         ) : (
                             <LoadingBox>
@@ -1051,8 +1055,8 @@ export class AnnotationsSidebar extends React.Component<
                     size={'medium'}
                     iconPosition={'right'}
                     icon={
-                        this.props.__listInstance - refsState === 'running' ||
-                        this.props.__listInstance - refsState === 'pristine' ? (
+                        this.props.cacheLoadState === 'running' ||
+                        this.props.cacheLoadState === 'pristine' ? (
                             <LoadingBox>
                                 <LoadingIndicator size={12} />{' '}
                             </LoadingBox>
@@ -1072,25 +1076,12 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderSelectedListTopBar() {
-        const { selectedListId: selectedList } = this.props
-        if (!selectedList) {
+        const { selectedListId, annotationsCache } = this.props
+        if (!selectedListId || !annotationsCache.lists.byId[selectedListId]) {
             this.throwNoSelectedListError()
         }
 
-        let spaceName: string
-        let spaceDescription: string = ''
-        if (selectedSpace.localId == null) {
-            const followedListData = this.props.__lists.byId[
-                selectedSpace.remoteId
-            ]
-            spaceName = followedListData?.name ?? 'Missing list'
-        } else {
-            const listDetails = this.props.getListDetailsById(
-                selectedList.localId,
-            )
-            spaceName = listDetails.name
-            spaceDescription = listDetails.description
-        }
+        const selectedList = annotationsCache.lists.byId[selectedListId]
 
         return (
             <IsolatedViewHeaderContainer>
@@ -1106,8 +1097,8 @@ export class AnnotationsSidebar extends React.Component<
                     />
                     {this.renderPermissionStatusButton()}
                 </IsolatedViewHeaderTopBar>
-                <SpaceTitle>{spaceName}</SpaceTitle>
-                <SpaceDescription>{spaceDescription}</SpaceDescription>
+                <SpaceTitle>{selectedList.name}</SpaceTitle>
+                <SpaceDescription>{selectedList.description}</SpaceDescription>
                 {/* {totalAnnotsCountJSX}
                 {othersAnnotsCountJSX} */}
             </IsolatedViewHeaderContainer>
@@ -1115,18 +1106,13 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderPermissionStatusButton() {
-        const {
-            selectedListId: selectedList,
-            followedLists,
-            currentUser,
-        } = this.props
-        if (!selectedList) {
+        const { selectedListId, annotationsCache, currentUser } = this.props
+        if (!selectedListId || !annotationsCache.lists.byId[selectedListId]) {
             this.throwNoSelectedListError()
         }
 
+        const selectedList = annotationsCache.lists.byId[selectedListId]
         if (selectedList.remoteId != null) {
-            const sharedListData = followedLists.byId[selectedList.remoteId]
-
             if (selectedList.localId == null) {
                 return (
                     <PermissionInfoButton
@@ -1146,7 +1132,7 @@ export class AnnotationsSidebar extends React.Component<
                 )
             }
 
-            if (sharedListData.creatorReference.id === currentUser?.id) {
+            if (selectedList.creator?.id === currentUser?.id) {
                 return (
                     <PermissionInfoButton
                         label="Owner"

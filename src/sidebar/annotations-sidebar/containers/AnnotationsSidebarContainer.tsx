@@ -1045,7 +1045,8 @@ export class AnnotationsSidebarContainer<
                                 this.processEvent('paginateSearch', null)
                             }
                             isSearchLoading={
-                                this.state.annotationsLoadState === 'running' ||
+                                this.state.remoteAnnotationsLoadState ===
+                                    'running' ||
                                 this.state.loadState === 'running'
                             }
                             theme={this.props.theme}

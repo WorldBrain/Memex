@@ -122,7 +122,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             highlighter.removeTempHighlights(),
         )
         sidebarEvents.on('highlightAndScroll', (annotation) => {
-            highlighter.highlightAndScroll(annotation.annotation)
+            // TODO: update sidebar events to used cache annots
+            // highlighter.highlightAndScroll(annotation.url)
         })
         sidebarEvents.on('removeAnnotationHighlight', ({ url }) =>
             highlighter.removeAnnotationHighlight(url),
@@ -175,25 +176,26 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         url: string,
         annotationMode: 'edit' | 'edit_spaces' | 'show',
     ) {
-        if (annotationMode === 'show') {
-            this.processEvent('switchAnnotationMode', {
-                annotationUrl: url,
-                context: 'pageAnnotations',
-                mode: 'default',
-            })
-        } else {
-            this.processEvent('setAnnotationEditMode', {
-                annotationUrl: url,
-                context: 'pageAnnotations',
-            })
+        // TODO: update sidebar events to used cache annots
+        // if (annotationMode === 'show') {
+        //     this.processEvent('setAnnotation', {
+        //         annotationUrl: url,
+        //         context: 'pageAnnotations',
+        //         mode: 'default',
+        //     })
+        // } else {
+        //     this.processEvent('setAnnotationEditMode', {
+        //         annotationUrl: url,
+        //         context: 'pageAnnotations',
+        //     })
 
-            if (annotationMode === 'edit_spaces') {
-                this.processEvent('setListPickerAnnotationId', {
-                    id: url,
-                    position: 'lists-bar',
-                })
-            }
-        }
+        //     if (annotationMode === 'edit_spaces') {
+        //         this.processEvent('setListPickerAnnotationId', {
+        //             id: url,
+        //             position: 'lists-bar',
+        //         }
+        //     }
+        // }
 
         this.processEvent('__setActiveAnnotationUrl', { annotationUrl: url })
         const annotationBoxNode = this.getDocument()?.getElementById(url)

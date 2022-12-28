@@ -84,6 +84,7 @@ export function LISTS(): UnifiedList[] {
             unifiedId: LIST_IDS[0],
             localId: 0,
             name: 'test local list',
+            hasRemoteAnnotations: false,
             creator: USER_1,
             unifiedAnnotationIds: [ANNOTATION_IDS[0], ANNOTATION_IDS[1]],
         },
@@ -92,6 +93,7 @@ export function LISTS(): UnifiedList[] {
             localId: 1,
             remoteId: 'remote-list-id-1',
             name: 'test shared list',
+            hasRemoteAnnotations: false,
             description: 'test list description 1',
             creator: USER_1,
             unifiedAnnotationIds: [
@@ -104,6 +106,7 @@ export function LISTS(): UnifiedList[] {
             unifiedId: LIST_IDS[2],
             remoteId: 'remote-list-id-2',
             name: 'test followed list',
+            hasRemoteAnnotations: false,
             creator: USER_2,
             unifiedAnnotationIds: [ANNOTATION_IDS[3]],
         },

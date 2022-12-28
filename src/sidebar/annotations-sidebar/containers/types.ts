@@ -126,8 +126,9 @@ export type FollowedListState = SharedAnnotationList & {
 
 export interface SidebarContainerState extends AnnotationConversationsState {
     loadState: TaskState
+    cacheLoadState: TaskState
     noteCreateState: TaskState
-    annotationsLoadState: TaskState
+    remoteAnnotationsLoadState: TaskState
     secondarySearchState: TaskState
 
     showState: 'visible' | 'hidden'
@@ -156,7 +157,6 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     lists: PageAnnotationsCacheInterface['lists']
     annotations: PageAnnotationsCacheInterface['annotations']
 
-    __listInstance_refsState: TaskState
     __lists: NormalizedState<FollowedListState>
     __annotations: { [annotationId: string]: FollowedListAnnotation }
 

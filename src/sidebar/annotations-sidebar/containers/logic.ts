@@ -194,10 +194,10 @@ export class SidebarContainerLogic extends UILogic<
             activeTab: 'annotations',
 
             loadState: 'pristine',
+            cacheLoadState: 'pristine',
             noteCreateState: 'pristine',
-            annotationsLoadState: 'pristine',
             secondarySearchState: 'pristine',
-            __listInstance_refsState: 'pristine',
+            remoteAnnotationsLoadState: 'pristine',
 
             __lists: initNormalizedState(),
             __annotations: {},
@@ -262,17 +262,19 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     private async hydrateAnnotationsCache(fullPageUrl: string) {
-        await cacheUtils.hydrateCache({
-            fullPageUrl,
-            user: this.options.currentUser,
-            cache: this.options.annotationsCache,
-            bgModules: {
-                annotations: this.options.annotations,
-                customLists: this.options.customLists,
-                contentSharing: this.options.contentSharing,
-                pageActivityIndicator: this.options.pageActivityIndicatorBG,
-            },
-        })
+        await executeUITask(this, 'cacheLoadState', async () =>
+            cacheUtils.hydrateCache({
+                fullPageUrl,
+                user: this.options.currentUser,
+                cache: this.options.annotationsCache,
+                bgModules: {
+                    annotations: this.options.annotations,
+                    customLists: this.options.customLists,
+                    contentSharing: this.options.contentSharing,
+                    pageActivityIndicator: this.options.pageActivityIndicatorBG,
+                },
+            }),
+        )
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
@@ -541,19 +543,13 @@ export class SidebarContainerLogic extends UILogic<
 
         const mutation: UIMutation<SidebarContainerState> = {
             __lists: { $set: initNormalizedState() },
-            __listInstance_refsState: { $set: 'pristine' },
             __annotations: { $set: {} },
             pageUrl: { $set: event.pageUrl },
             users: { $set: {} },
         }
 
         this.emitMutation(mutation)
-
-        await Promise.all([
-            executeUITask(this, 'annotationsLoadState', async () => {
-                await this.hydrateAnnotationsCache(event.pageUrl)
-            }),
-        ])
+        await this.hydrateAnnotationsCache(event.pageUrl)
 
         if (event.rerenderHighlights) {
             this.options.events?.emit('renderHighlights', {
@@ -1007,17 +1003,15 @@ export class SidebarContainerLogic extends UILogic<
     __setActiveAnnotationUrl: EventHandler<
         '__setActiveAnnotationUrl'
     > = async ({ event, previousState }) => {
-        const annotation = previousState.annotations.find(
-            (annot) => annot.url === event.annotationUrl,
-        )
-
-        if (annotation != null) {
-            this.options.events?.emit('highlightAndScroll', { annotation })
-        }
-
-        this.emitMutation({
-            activeAnnotationUrl: { $set: event.annotationUrl },
-        })
+        // const annotation = previousState.annotations.find(
+        //     (annot) => annot.url === event.annotationUrl,
+        // )
+        // if (annotation != null) {
+        //     this.options.events?.emit('highlightAndScroll', { annotation })
+        // }
+        // this.emitMutation({
+        //     activeAnnotationUrl: { $set: event.annotationUrl },
+        // })
     }
 
     goToAnnotationInNewTab: EventHandler<'goToAnnotationInNewTab'> = async ({
