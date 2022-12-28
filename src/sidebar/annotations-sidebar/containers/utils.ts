@@ -2,11 +2,12 @@ import type {
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
+import type { AnnotationCardInstanceLocation } from '../types'
 import type { AnnotationCardInstance, ListInstance } from './types'
 
 export const generateAnnotationCardInstanceId = (
     { unifiedId }: Pick<UnifiedAnnotation, 'unifiedId'>,
-    instanceLocation: UnifiedList['unifiedId'] = 'annotations-tab',
+    instanceLocation: AnnotationCardInstanceLocation = 'annotations-tab',
 ): string => `${instanceLocation}-${unifiedId}`
 
 export const initAnnotationCardInstance = (
@@ -27,6 +28,7 @@ export const initListInstance = (
 ): ListInstance => ({
     sharedAnnotationReferences: list.hasRemoteAnnotations ? [] : undefined,
     annotationRefsLoadState: 'pristine',
+    conversationsLoadState: 'pristine',
     annotationsLoadState: 'pristine',
     unifiedListId: list.unifiedId,
     isOpen: false,

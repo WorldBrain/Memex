@@ -5,12 +5,9 @@ import type {
     AnnotationConversationsState,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/types'
 import type { RemoteTagsInterface } from 'src/tags/background/types'
-import type {
-    RemoteCollectionsInterface,
-    SharedAnnotationList,
-} from 'src/custom-lists/background/types'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
-import type { SidebarTheme } from '../types'
+import type { AnnotationCardInstanceLocation, SidebarTheme } from '../types'
 import type {
     AnnotationSharingStates,
     ContentSharingInterface,
@@ -22,10 +19,6 @@ import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types
 import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 import type { AnnotationsSorter } from '../sorting'
-import type { Annotation } from 'src/annotations/types'
-import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
-import type { Anchor } from 'src/highlighting/types'
-import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
 import type { MaybePromise } from 'src/util/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
@@ -85,44 +78,7 @@ export interface EditForms {
     [annotationUrl: string]: EditForm
 }
 
-export type AnnotationEventContext = 'pageAnnotations' | 'searchResults'
-export type SearchType = 'notes' | 'page' | 'social'
-export type PageType = 'page' | 'all'
-export interface SearchTypeChange {
-    searchType?: 'notes' | 'page' | 'social'
-    resultsSearchType?: 'notes' | 'page' | 'social'
-    pageType?: 'page' | 'all'
-}
-
-export interface FollowedListAnnotation {
-    id: string
-    /** Only should be defined if annotation belongs to local user. */
-    localId: string | null
-    body?: string
-    comment?: string
-    selector?: Anchor
-    createdWhen: number
-    updatedWhen?: number
-    creatorId: string
-}
-
 export type SidebarTab = 'annotations' | 'spaces' | 'feed'
-
-export type ListPickerShowState =
-    | { annotationId: string; position: 'footer' | 'lists-bar' }
-    | undefined
-
-export type FollowedListState = SharedAnnotationList & {
-    isExpanded: boolean
-    isContributable: boolean
-    annotationEditForms: EditForms
-    annotationsLoadState: TaskState
-    conversationsLoadState: TaskState
-    activeShareMenuAnnotationId: string | undefined
-    activeCopyPasterAnnotationId: string | undefined
-    annotationModes: { [annotationId: string]: AnnotationMode }
-    activeListPickerState: ListPickerShowState
-}
 
 export interface SidebarContainerState extends AnnotationConversationsState {
     loadState: TaskState
@@ -149,16 +105,10 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     annotationSharingAccess: AnnotationSharingAccess
     readingView?: boolean
     showAllNotesCopyPaster: boolean
-    activeCopyPasterAnnotationId: string | undefined
-    activeTagPickerAnnotationId: string | undefined
-    activeListPickerState: ListPickerShowState
 
     pageUrl?: string
     lists: PageAnnotationsCacheInterface['lists']
     annotations: PageAnnotationsCacheInterface['annotations']
-
-    __lists: NormalizedState<FollowedListState>
-    __annotations: { [annotationId: string]: FollowedListAnnotation }
 
     users: {
         [userId: string]: {
@@ -167,11 +117,6 @@ export interface SidebarContainerState extends AnnotationConversationsState {
         }
     }
 
-    annotationModes: {
-        [context in AnnotationEventContext]: {
-            [annotationUrl: string]: AnnotationMode
-        }
-    }
     activeAnnotationId: UnifiedAnnotation['unifiedId'] | null
 
     listInstances: { [unifiedListId: UnifiedList['unifiedId']]: ListInstance }
@@ -179,8 +124,6 @@ export interface SidebarContainerState extends AnnotationConversationsState {
 
     showCommentBox: boolean
     commentBox: EditForm
-
-    editForms: EditForms
 
     pageCount: number
     noResults: boolean
@@ -220,7 +163,7 @@ export type AnnotationEvent<T> = {
 } & T
 
 export type AnnotationCardInstanceEvent<T> = {
-    instanceLocation: UnifiedList['unifiedId'] | 'annotations-tab'
+    instanceLocation: AnnotationCardInstanceLocation
 } & AnnotationEvent<T>
 
 interface SidebarEvents {
@@ -248,6 +191,9 @@ interface SidebarEvents {
     }
     cancelNewPageNote: null
     setNewPageNoteLists: { lists: number[] }
+
+    // List instance events
+    expandListAnnotations: { unifiedListId: UnifiedList['unifiedId'] }
 
     // Annotation card instance events
     setAnnotationEditCommentText: AnnotationCardInstanceEvent<{
@@ -281,7 +227,7 @@ interface SidebarEvents {
     setSelectedList: { unifiedListId: UnifiedList['unifiedId'] | null }
 
     goToAnnotationInNewTab: {
-        context: AnnotationEventContext
+        // context: AnnotationEventContext
         annotationUrl: string
     }
     __setActiveAnnotation: { annotationUrl: string }
@@ -289,15 +235,9 @@ interface SidebarEvents {
 
     // setActiveAnnotationUrl: { annotation?: Annotation; annotationUrl?: string }
     shareAnnotation: {
-        context: AnnotationEventContext
+        // context: AnnotationEventContext
         mouseEvent: React.MouseEvent
         annotationUrl: string
-        followedListId?: string
-    }
-    __setAnnotationCardMode: {
-        context: AnnotationEventContext
-        annotationUrl: string
-        mode: AnnotationMode
         followedListId?: string
     }
 
@@ -313,9 +253,6 @@ interface SidebarEvents {
     setAnnotationsExpanded: { value: boolean }
     fetchSuggestedTags: null
     fetchSuggestedDomains: null
-
-    // Followed lists (TODO: REMOVE)
-    expandListAnnotations: { unifiedListId: UnifiedList['unifiedId'] }
 
     updateAnnotationShareInfo: {
         annotationUrl: string
@@ -333,18 +270,7 @@ interface SidebarEvents {
     setSelectNoteSpaceConfirmArgs: SidebarContainerState['confirmSelectNoteSpaceArgs']
 
     setAllNotesCopyPasterShown: { shown: boolean }
-    setCopyPasterAnnotationId: { id: string; followedListId?: string }
-    setTagPickerAnnotationId: { id: string }
-    setListPickerAnnotationId: {
-        id: string
-        position: 'footer' | 'lists-bar'
-        followedListId?: string
-    }
-    resetTagPickerAnnotationId: null
-    resetCopyPasterAnnotationId: null
-    resetListPickerAnnotationId: { id?: string }
     setAllNotesShareMenuShown: { shown: boolean }
-    resetShareMenuNoteId: null
 }
 
 export type SidebarContainerEvents = UIEvent<
@@ -371,6 +297,7 @@ export interface AnnotationCardInstance {
 export interface ListInstance {
     unifiedListId: UnifiedList['unifiedId']
     annotationRefsLoadState: TaskState
+    conversationsLoadState: TaskState
     annotationsLoadState: TaskState
     sharedAnnotationReferences?: SharedAnnotationReference[]
     isOpen: boolean

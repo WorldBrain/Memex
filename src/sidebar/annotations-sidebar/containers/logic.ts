@@ -19,9 +19,6 @@ import type {
     SidebarContainerState,
     SidebarContainerEvents,
     EditForm,
-    EditForms,
-    FollowedListState,
-    ListPickerShowState,
     AnnotationCardInstanceEvent,
 } from './types'
 import type { AnnotationsSidebarInPageEventEmitter } from '../types'
@@ -44,8 +41,6 @@ import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
 import { getInitialAnnotationConversationStates } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { resolvablePromise } from 'src/util/promises'
-import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { SharedAnnotationList } from 'src/custom-lists/background/types'
 import { toInteger } from 'lodash'
 import type {
     PageAnnotationsCacheInterface,
@@ -151,19 +146,17 @@ export class SidebarContainerLogic extends UILogic<
                         }
                     },
                     selectAnnotationData: (state, reference) => {
-                        const annotation = state.__annotations[reference.id]
+                        const annotation = options.annotationsCache.getAnnotationByRemoteId(
+                            reference.id.toString(),
+                        )
                         if (!annotation) {
                             return null
                         }
                         return {
+                            pageCreatorReference: annotation.creator,
                             normalizedPageUrl: normalizeUrl(
                                 state.pageUrl ?? options.fullPageUrl,
                             ),
-
-                            pageCreatorReference: {
-                                id: annotation.creatorId,
-                                type: 'user-reference',
-                            },
                         }
                     },
                     getSharedAnnotationLinkID: ({ id }) =>
@@ -199,8 +192,6 @@ export class SidebarContainerLogic extends UILogic<
             secondarySearchState: 'pristine',
             remoteAnnotationsLoadState: 'pristine',
 
-            __lists: initNormalizedState(),
-            __annotations: {},
             users: {},
             pillVisibility: 'unhover',
 
@@ -208,21 +199,13 @@ export class SidebarContainerLogic extends UILogic<
             isLocked: false,
             pageUrl: this.options.fullPageUrl,
             showState: 'hidden',
-            annotationModes: {
-                pageAnnotations: {},
-                searchResults: {},
-            },
             annotationSharingAccess: 'sharing-allowed',
             readingView: false,
             showAllNotesCopyPaster: false,
-            activeCopyPasterAnnotationId: undefined,
-            activeTagPickerAnnotationId: undefined,
-            activeListPickerState: undefined,
 
             selectedListId: null,
 
             commentBox: { ...INIT_FORM_STATE },
-            editForms: {},
 
             listInstances: {},
             annotationCardInstances: {},
@@ -543,10 +526,7 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         const mutation: UIMutation<SidebarContainerState> = {
-            __lists: { $set: initNormalizedState() },
-            __annotations: { $set: {} },
             pageUrl: { $set: event.pageUrl },
-            users: { $set: {} },
         }
 
         this.emitMutation(mutation)
@@ -557,22 +537,6 @@ export class SidebarContainerLogic extends UILogic<
                 highlights: this.options.annotationsCache.highlights,
             })
         }
-    }
-
-    resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({
-        previousState,
-    }) => {
-        let mutation: UIMutation<SidebarContainerState> = {
-            activeShareMenuNoteId: { $set: undefined },
-            immediatelyShareNotes: { $set: false },
-            confirmPrivatizeNoteArgs: { $set: null },
-            confirmSelectNoteSpaceArgs: { $set: null },
-            ...this.applyStateMutationForAllFollowedLists(previousState, {
-                activeShareMenuAnnotationId: { $set: undefined },
-            }),
-        }
-
-        this.emitMutation(mutation)
     }
 
     setAllNotesShareMenuShown: EventHandler<
@@ -602,104 +566,7 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({
             showAllNotesCopyPaster: { $set: event.shown },
-            activeCopyPasterAnnotationId: { $set: undefined },
         })
-    }
-
-    setCopyPasterAnnotationId: EventHandler<'setCopyPasterAnnotationId'> = ({
-        event,
-        previousState,
-    }) => {
-        if (event.followedListId != null) {
-            const newId =
-                previousState.__lists.byId[event.followedListId]
-                    ?.activeCopyPasterAnnotationId === event.id
-                    ? undefined
-                    : event.id
-
-            this.emitMutation({
-                activeCopyPasterAnnotationId: { $set: undefined },
-                showAllNotesCopyPaster: { $set: false },
-                // followedLists: {
-                //     byId: {
-                //         [event.followedListId]: {
-                //             activeCopyPasterAnnotationId: { $set: newId },
-                //         },
-                //     },
-                // },
-            })
-            return
-        }
-
-        const newId =
-            previousState.activeCopyPasterAnnotationId === event.id
-                ? undefined
-                : event.id
-
-        this.emitMutation({
-            activeCopyPasterAnnotationId: { $set: newId },
-            showAllNotesCopyPaster: { $set: false },
-        })
-    }
-
-    setTagPickerAnnotationId: EventHandler<'setTagPickerAnnotationId'> = ({
-        event,
-        previousState,
-    }) => {
-        const newId =
-            previousState.activeTagPickerAnnotationId === event.id
-                ? undefined
-                : event.id
-
-        this.emitMutation({
-            activeTagPickerAnnotationId: { $set: newId },
-        })
-    }
-
-    resetTagPickerAnnotationId: EventHandler<
-        'resetTagPickerAnnotationId'
-    > = () => {
-        this.emitMutation({ activeTagPickerAnnotationId: { $set: undefined } })
-    }
-
-    setListPickerAnnotationId: EventHandler<'setListPickerAnnotationId'> = ({
-        event,
-        previousState,
-    }) => {
-        const getNextState = (prev: ListPickerShowState): ListPickerShowState =>
-            !prev ||
-            prev.annotationId !== event.id ||
-            prev.position !== event.position
-                ? {
-                      annotationId: event.id,
-                      position: event.position,
-                  }
-                : undefined
-
-        if (event.followedListId != null) {
-            this.emitMutation({
-                activeListPickerState: { $set: undefined },
-                // followedLists: {
-                //     byId: {
-                //         [event.followedListId]: {
-                //             activeListPickerState: {
-                //                 $set: getNextState(
-                //                     previousState.followedLists.byId[
-                //                         event.followedListId
-                //                     ].activeListPickerState,
-                //                 ),
-                //             },
-                //         },
-                //     },
-                // },
-            })
-        } else {
-            this.emitMutation({
-                activeListPickerState: {
-                    $set: getNextState(previousState.activeListPickerState),
-                },
-            })
-        }
     }
 
     // TODO: type properly
@@ -717,33 +584,6 @@ export class SidebarContainerLogic extends UILogic<
         //     ),
         // },
     })
-
-    resetListPickerAnnotationId: EventHandler<
-        'resetListPickerAnnotationId'
-    > = ({ event, previousState }) => {
-        if (event.id != null) {
-            this.options.focusEditNoteForm(event.id)
-        }
-
-        this.emitMutation({
-            activeListPickerState: { $set: undefined },
-            ...this.applyStateMutationForAllFollowedLists(previousState, {
-                activeListPickerState: { $set: undefined },
-            }),
-        })
-    }
-
-    resetCopyPasterAnnotationId: EventHandler<
-        'resetCopyPasterAnnotationId'
-    > = ({ previousState }) => {
-        this.emitMutation({
-            showAllNotesCopyPaster: { $set: false },
-            activeCopyPasterAnnotationId: { $set: undefined },
-            ...this.applyStateMutationForAllFollowedLists(previousState, {
-                activeCopyPasterAnnotationId: { $set: undefined },
-            }),
-        })
-    }
 
     /* -- START: Annotation card instance events -- */
     setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
@@ -1305,7 +1145,7 @@ export class SidebarContainerLogic extends UILogic<
         //     return
         // }
 
-        this.options.events.emit('setSelectedList', event.unifiedListId)
+        this.options.events?.emit('setSelectedList', event.unifiedListId)
 
         if (event.unifiedListId == null) {
             this.emitMutation({ selectedListId: { $set: null } })

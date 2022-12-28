@@ -8,7 +8,6 @@ import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown
 import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import type { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import AnnotationEdit, {
     AnnotationEditGeneralProps,
@@ -47,7 +46,8 @@ export interface AnnotationProps {
     tags: string[]
     lists: number[]
     createdWhen: Date | number
-    mode: AnnotationMode
+    isEditing?: boolean
+    isDeleting?: boolean
     hoverState: NoteResultHoverState
     /** Required to decide how to go to an annotation when it's clicked. */
     unifiedId: string
@@ -73,7 +73,7 @@ export interface AnnotationProps {
         profileImgSrc?: string
     }
     listPickerRenderLocation?: ListPickerShowState
-    onListClick?: (localListId: number) => void
+    onListClick?: (unifiedListId: number) => void
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
@@ -111,13 +111,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     private copyPasterButtonRef = React.createRef<HTMLDivElement>()
 
     static MOD_KEY = getKeyName({ key: 'mod' })
-    static defaultProps: Pick<
-        Props,
-        'mode' | 'hoverState' | 'tags' | 'lists'
-    > = {
+    static defaultProps: Pick<Props, 'hoverState' | 'tags' | 'lists'> = {
         tags: [],
         lists: [],
-        mode: 'default',
         hoverState: null,
     }
 
@@ -199,8 +195,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             cursor: this.props.isClickable ? 'pointer' : 'auto',
             hasComment: this.props.comment?.length > 0,
             hasHighlight: this.props.body?.length > 0,
+            isEditing: this.props.isEditing,
             isActive: this.props.isActive,
-            isEditing: this.props.mode === 'edit',
         }
     }
 
@@ -213,47 +209,46 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             onGoToAnnotation,
         } = this.props
 
-        const actionsBox =
-            this.props.mode != 'edit'
-                ? this.state.hoverEditArea && (
-                      <HighlightActionsBox>
-                          {onGoToAnnotation && (
-                              <TooltipBox
-                                  tooltipText="Open in Page"
-                                  placement="bottom"
-                              >
-                                  <HighlightAction right="2px">
-                                      <Icon
-                                          onClick={onGoToAnnotation}
-                                          filePath={icons.goTo}
-                                          heightAndWidth={'20px'}
-                                          padding={'5px'}
-                                      />
-                                  </HighlightAction>
-                              </TooltipBox>
-                          )}
+        const actionsBox = !this.props.isEditing
+            ? this.state.hoverEditArea && (
+                  <HighlightActionsBox>
+                      {onGoToAnnotation && (
                           <TooltipBox
-                              tooltipText={
-                                  <span>
-                                      <strong>Add/Edit Note</strong>
-                                      <br />
-                                      or double-click card
-                                  </span>
-                              }
+                              tooltipText="Open in Page"
                               placement="bottom"
                           >
-                              <HighlightAction>
+                              <HighlightAction right="2px">
                                   <Icon
-                                      onClick={footerDeps.onEditIconClick}
-                                      icon={'edit'}
+                                      onClick={onGoToAnnotation}
+                                      filePath={icons.goTo}
                                       heightAndWidth={'20px'}
                                       padding={'5px'}
                                   />
                               </HighlightAction>
                           </TooltipBox>
-                      </HighlightActionsBox>
-                  )
-                : null
+                      )}
+                      <TooltipBox
+                          tooltipText={
+                              <span>
+                                  <strong>Add/Edit Note</strong>
+                                  <br />
+                                  or double-click card
+                              </span>
+                          }
+                          placement="bottom"
+                      >
+                          <HighlightAction>
+                              <Icon
+                                  onClick={footerDeps.onEditIconClick}
+                                  icon={'edit'}
+                                  heightAndWidth={'20px'}
+                                  padding={'5px'}
+                              />
+                          </HighlightAction>
+                      </TooltipBox>
+                  </HighlightActionsBox>
+              )
+            : null
 
         return (
             <HighlightStyled
@@ -292,13 +287,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     private renderNote() {
         const {
-            mode,
             comment,
+            isEditing,
             annotationEditDependencies,
             annotationFooterDependencies,
         } = this.props
 
-        if (mode === 'edit') {
+        if (isEditing) {
             return (
                 <AnnotationEditContainer hasHighlight={this.theme.hasHighlight}>
                     <AnnotationEdit
@@ -469,8 +464,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     private renderFooter() {
         const {
-            mode,
             isShared,
+            isEditing,
+            isDeleting,
             isBulkShareProtected,
             annotationEditDependencies: editDeps,
             annotationFooterDependencies: footerDeps,
@@ -485,7 +481,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             this.hasSharedLists,
         )
 
-        if (mode === 'default' || footerDeps == null) {
+        if (!isEditing || footerDeps == null) {
             return (
                 <DefaultFooterStyled>
                     <PrimaryAction
@@ -513,7 +509,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             )
         }
 
-        if (mode === 'delete') {
+        if (isDeleting) {
             cancelBtnHandler = footerDeps.onDeleteCancel
             confirmBtn = (
                 <ActionBtnStyled onClick={footerDeps.onDeleteConfirm}>
@@ -557,7 +553,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 />
 
                 <DeletionBox>
-                    {mode === 'delete' && (
+                    {isDeleting && (
                         <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
                     )}
                     <SaveActionBar>
@@ -680,7 +676,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 onDoubleClick={
                                     annotationFooterDependencies?.onEditIconClick
                                 }
-                                isEditMode={this.props.mode === 'edit'}
+                                isEditMode={this.props.isEditing}
                                 onMouseEnter={() =>
                                     this.setState({
                                         hoverEditArea: true,
@@ -696,7 +692,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 {this.renderNote()}
                             </ContentContainer>
                             {(this.props.lists.length > 0 ||
-                                this.props.mode === 'edit') && (
+                                this.props.isEditing) && (
                                 <ListsSegment
                                     tabIndex={0}
                                     lists={this.displayLists}
@@ -709,7 +705,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                         this.spacePickerBarRef
                                     }
                                     padding={
-                                        this.props.mode === 'edit'
+                                        this.props.isEditing
                                             ? '10px 15px 10px 15px'
                                             : '0px 15px 10px 15px'
                                     }

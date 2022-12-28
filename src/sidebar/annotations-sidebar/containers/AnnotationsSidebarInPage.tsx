@@ -118,19 +118,20 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         inPageUI.events.on('stateChanged', this.handleInPageUIStateChange)
         inPageUI.events.on('sidebarAction', this.handleExternalAction)
 
-        sidebarEvents.on('removeTemporaryHighlights', () =>
-            highlighter.removeTempHighlights(),
-        )
-        sidebarEvents.on('highlightAndScroll', (annotation) => {
-            // TODO: update sidebar events to used cache annots
-            // highlighter.highlightAndScroll(annotation.url)
-        })
-        sidebarEvents.on('removeAnnotationHighlight', ({ url }) =>
-            highlighter.removeAnnotationHighlight(url),
-        )
-        sidebarEvents.on('removeAnnotationHighlights', ({ urls }) =>
-            highlighter.removeAnnotationHighlights(urls),
-        )
+        // No longer used, as of the sidebar refactor
+        // sidebarEvents.on('removeTemporaryHighlights', () =>
+        //     highlighter.removeTempHighlights(),
+        // )
+        // sidebarEvents.on('highlightAndScroll', (annotation) => {
+        //     // TODO: update sidebar events to used cache annots
+        //     // highlighter.highlightAndScroll(annotation.url)
+        // })
+        // sidebarEvents.on('removeAnnotationHighlight', ({ url }) =>
+        //     highlighter.removeAnnotationHighlight(url),
+        // )
+        // sidebarEvents.on('removeAnnotationHighlights', ({ urls }) =>
+        //     highlighter.removeAnnotationHighlights(urls),
+        // )
         sidebarEvents.on('renderHighlight', ({ highlight }) =>
             highlighter.renderHighlight(highlight, (asdf) => {
                 inPageUI.showSidebar({
@@ -176,27 +177,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         url: string,
         annotationMode: 'edit' | 'edit_spaces' | 'show',
     ) {
-        // TODO: update sidebar events to used cache annots
-        // if (annotationMode === 'show') {
-        //     this.processEvent('setAnnotation', {
-        //         annotationUrl: url,
-        //         context: 'pageAnnotations',
-        //         mode: 'default',
-        //     })
-        // } else {
-        //     this.processEvent('setAnnotationEditMode', {
-        //         annotationUrl: url,
-        //         context: 'pageAnnotations',
-        //     })
-
-        //     if (annotationMode === 'edit_spaces') {
-        //         this.processEvent('setListPickerAnnotationId', {
-        //             id: url,
-        //             position: 'lists-bar',
-        //         }
-        //     }
-        // }
-
         this.processEvent('__setActiveAnnotationUrl', { annotationUrl: url })
         const annotationBoxNode = this.getDocument()?.getElementById(url)
 
@@ -265,7 +245,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     protected bindAnnotationFooterEventProps(
-        annotation: Pick<UnifiedAnnotation, 'localId' | 'remoteId' | 'body'>,
+        annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'body'>,
         followedListId?: string,
     ) {
         const boundProps = super.bindAnnotationFooterEventProps(
@@ -277,11 +257,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             ...boundProps,
             onDeleteConfirm: (e) => {
                 boundProps.onDeleteConfirm(e)
-                const unifiedAnnotation = this.props.annotationsCache.getAnnotationByLocalId(
-                    annotation.localId,
-                )
                 this.props.highlighter.removeAnnotationHighlight(
-                    unifiedAnnotation.unifiedId,
+                    annotation.unifiedId,
                 )
             },
         }

@@ -19,9 +19,9 @@ import AnnotationEditable, {
 import type _AnnotationEditable from 'src/annotations/components/AnnotationEditable'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { Flex } from 'src/common-ui/components/design-library/Flex'
-import type { Annotation, ListDetailsGetter } from 'src/annotations/types'
+import type { ListDetailsGetter } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
-import type { AnnotationMode, SidebarTheme } from '../types'
+import type { AnnotationCardInstanceLocation, SidebarTheme } from '../types'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import {
     AnnotationEditGeneralProps,
@@ -54,9 +54,8 @@ import { generateAnnotationCardInstanceId } from '../containers/utils'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
-export interface AnnotationsSidebarProps
-    extends Omit<SidebarContainerState, 'annotationModes'> {
-    annotationModes: { [url: string]: AnnotationMode }
+
+export interface AnnotationsSidebarProps extends SidebarContainerState {
     annotationsCache: PageAnnotationsCacheInterface
     currentUser?: UserReference
     // sidebarActions: () => void
@@ -76,17 +75,16 @@ export interface AnnotationsSidebarProps
     appendLoader?: boolean
 
     renderCopyPasterForAnnotation: (
-        followedListId?: string,
+        instanceLocation: AnnotationCardInstanceLocation,
     ) => (id: string) => JSX.Element
-    renderTagsPickerForAnnotation: (id: string) => JSX.Element
     shareButtonRef: React.RefObject<HTMLDivElement>
     spacePickerButtonRef: React.RefObject<HTMLDivElement>
     activeShareMenuNoteId: string
     renderShareMenuForAnnotation: (
-        followedListId?: string,
+        instanceLocation: AnnotationCardInstanceLocation,
     ) => (id: string) => JSX.Element
     renderListsPickerForAnnotation: (
-        followedListId?: string,
+        instanceLocation: AnnotationCardInstanceLocation,
     ) => (
         id: string,
         referenceElement?: React.RefObject<HTMLDivElement>,
@@ -97,13 +95,13 @@ export interface AnnotationsSidebarProps
 
     bindAnnotationFooterEventProps: (
         annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'body'>,
-        instanceLocation: 'annotations-tab' | UnifiedList['unifiedId'],
+        instanceLocation: AnnotationCardInstanceLocation,
     ) => AnnotationFooterEventProps & {
         onGoToAnnotation?: React.MouseEventHandler
     }
     bindAnnotationEditProps: (
         annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'body'>,
-        instanceLocation: 'annotations-tab' | UnifiedList['unifiedId'],
+        instanceLocation: AnnotationCardInstanceLocation,
     ) => AnnotationEditGeneralProps & AnnotationEditEventProps
     annotationCreateProps: AnnotationCreateProps
 
@@ -115,12 +113,7 @@ export interface AnnotationsSidebarProps
     onCopyBtnClick: () => void
     onMenuItemClick: (sortingFn) => void
 
-    // Event triggered when you either enter a selected space
-    // for the isolated view, or get out of an isolated or leaf
-    // view for a currently selected space. In the last case
-    // listId argument will be null
-    onRemoteSpaceSelect: (remoteListId: string) => void
-    onLocalSpaceSelect: (localListId: number) => void
+    onListSelect: (unifiedListId: UnifiedList['unifiedId']) => void
     onResetSpaceSelect: () => void
 
     copyPaster: any
@@ -418,6 +411,13 @@ export class AnnotationsSidebar extends React.Component<
                     const conversation = this.props.conversations[
                         conversationId
                     ]
+                    const annotationCardId = generateAnnotationCardInstanceId(
+                        annotation,
+                        listData.unifiedId,
+                    )
+                    const annotationCard = this.props.annotationCardInstances[
+                        annotationCardId
+                    ]
                     const sharedAnnotationRef: SharedAnnotationReference = {
                         id: annotation.remoteId,
                         type: 'shared-annotation-reference',
@@ -439,7 +439,7 @@ export class AnnotationsSidebar extends React.Component<
                         ].includes(annotation.privacyLevel)
                         ownAnnotationProps.appendRepliesToggle = true
                         ownAnnotationProps.unifiedId = annotation.unifiedId
-                        ownAnnotationProps.lists = [] // localAnnotation.unifiedListIds
+                        ownAnnotationProps.lists = [] // TODO: localAnnotation.unifiedListIds
                         ownAnnotationProps.comment = annotation.comment
                         ownAnnotationProps.isShared = [
                             AnnotationPrivacyLevels.SHARED,
@@ -447,9 +447,10 @@ export class AnnotationsSidebar extends React.Component<
                         ].includes(annotation.privacyLevel)
                         ownAnnotationProps.appendRepliesToggle = true
                         ownAnnotationProps.lastEdited = annotation.lastEdited
-                        ownAnnotationProps.mode = this.props.__lists.byId[
-                            unifiedListId
-                        ].annotationModes[annotation.localId]
+                        ownAnnotationProps.isEditing =
+                            annotationCard.isCommentEditing
+                        ownAnnotationProps.isDeleting =
+                            annotationCard.cardMode === 'delete-confirm'
                         ownAnnotationProps.annotationEditDependencies = this.props.bindAnnotationEditProps(
                             annotation,
                             unifiedListId,
@@ -498,13 +499,14 @@ export class AnnotationsSidebar extends React.Component<
                                 onHighlightClick={this.props.setActiveAnnotationUrl(
                                     annotation.unifiedId,
                                 )}
-                                onListClick={this.props.onLocalSpaceSelect}
+                                // TODO: update lists in this comp to be cache ones
+                                // onListClick={this.props.onListSelect}
                                 isClickable={
                                     this.props.theme.canClickAnnotations &&
                                     annotation.body?.length > 0
                                 }
                                 repliesLoadingState={
-                                    listData.conversationsLoadState
+                                    listInstance.conversationsLoadState
                                 }
                                 hasReplies={hasReplies}
                                 getListDetailsById={
@@ -560,9 +562,7 @@ export class AnnotationsSidebar extends React.Component<
                 >
                     {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
-                        onClick={() =>
-                            this.props.onRemoteSpaceSelect(unifiedListId)
-                        }
+                        onClick={() => this.props.onListSelect(unifiedListId)}
                         title={listData.name}
                     >
                         <FollowedListTitleContainer>
@@ -912,18 +912,16 @@ export class AnnotationsSidebar extends React.Component<
                                 AnnotationPrivacyLevels.PROTECTED,
                                 AnnotationPrivacyLevels.SHARED_PROTECTED,
                             ].includes(annot.privacyLevel)}
-                            mode={
+                            isEditing={instanceState.isCommentEditing}
+                            isDeleting={
                                 instanceState.cardMode === 'delete-confirm'
-                                    ? 'delete'
-                                    : instanceState.isCommentEditing
-                                    ? 'edit'
-                                    : 'default'
                             }
                             isActive={
                                 this.props.activeAnnotationId ===
                                 annot.unifiedId
                             }
-                            onListClick={this.props.onLocalSpaceSelect}
+                            // TODO: update lists in this comp to be cache ones
+                            // onListClick={this.props.onListSelect}
                             onHighlightClick={this.props.setActiveAnnotationUrl(
                                 annot.unifiedId,
                             )}
@@ -940,9 +938,15 @@ export class AnnotationsSidebar extends React.Component<
                             contextLocation={this.props.sidebarContext}
                             passDownRef={ref}
                             shareButtonRef={this.props.shareButtonRef}
-                            renderShareMenuForAnnotation={this.props.renderShareMenuForAnnotation()}
-                            renderCopyPasterForAnnotation={this.props.renderCopyPasterForAnnotation()}
-                            renderListsPickerForAnnotation={this.props.renderListsPickerForAnnotation()}
+                            renderShareMenuForAnnotation={this.props.renderShareMenuForAnnotation(
+                                'annotations-tab',
+                            )}
+                            renderCopyPasterForAnnotation={this.props.renderCopyPasterForAnnotation(
+                                'annotations-tab',
+                            )}
+                            renderListsPickerForAnnotation={this.props.renderListsPickerForAnnotation(
+                                'annotations-tab',
+                            )}
                         />
                     </AnnotationBox>
                 )
@@ -1006,8 +1010,6 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderTopBarSwitcher() {
-        const { __lists: followedLists } = this.props
-
         return (
             <TopBarContainer>
                 <PrimaryAction
@@ -1054,13 +1056,11 @@ export class AnnotationsSidebar extends React.Component<
                             <LoadingBox>
                                 <LoadingIndicator size={12} />{' '}
                             </LoadingBox>
-                        ) : followedLists.allIds.length > 0 ? (
-                            <LoadingBox>
-                                <PageActivityIndicator active={true} />
-                            </LoadingBox>
                         ) : (
                             <LoadingBox>
-                                <PageActivityIndicator active={false} />
+                                <PageActivityIndicator
+                                    active={this.props.lists.allIds.length > 0}
+                                />
                             </LoadingBox>
                         )
                     }

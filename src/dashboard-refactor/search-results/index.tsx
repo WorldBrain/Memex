@@ -266,7 +266,7 @@ export default class SearchResultsContainer extends React.Component<
             <AnnotationEditable
                 zIndex={zIndex}
                 key={noteId}
-                url={noteId}
+                unifiedId={noteId}
                 tags={noteData.tags}
                 lists={listsToDisplay}
                 body={noteData.highlight}
@@ -282,7 +282,8 @@ export default class SearchResultsContainer extends React.Component<
                         ? new Date(noteData.displayTime)
                         : undefined
                 }
-                mode={noteData.isEditing ? 'edit' : 'default'}
+                isEditing={noteData.isEditing}
+                isDeleting={false}
                 renderCopyPasterForAnnotation={() => (
                     <PageNotesCopyPaster
                         annotationUrls={[noteId]}

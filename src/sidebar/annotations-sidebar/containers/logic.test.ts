@@ -1319,59 +1319,6 @@ describe('SidebarContainerLogic', () => {
             )
         })
 
-        it("should be able to focus the associated edit form on closing an annotation's space picker via the keyboard", async ({
-            device,
-        }) => {
-            let focusedAnnotId: string = null
-            const { sidebar } = await setupLogicHelper({
-                device,
-                focusEditNoteForm: (id) => (focusedAnnotId = id),
-            })
-
-            await sidebar.processEvent('setListPickerAnnotationId', {
-                id: DATA.ANNOT_1.url,
-                position: 'footer',
-            })
-            expect(sidebar.state.activeListPickerState).toEqual({
-                annotationId: DATA.ANNOT_1.url,
-                position: 'footer',
-            })
-            expect(focusedAnnotId).toEqual(null)
-
-            await sidebar.processEvent('setListPickerAnnotationId', {
-                id: DATA.ANNOT_1.url,
-                position: 'lists-bar',
-            })
-            expect(sidebar.state.activeListPickerState).toEqual({
-                annotationId: DATA.ANNOT_1.url,
-                position: 'lists-bar',
-            })
-            expect(focusedAnnotId).toEqual(null)
-
-            await sidebar.processEvent('setListPickerAnnotationId', {
-                id: DATA.ANNOT_1.url,
-                position: 'lists-bar',
-            })
-            expect(sidebar.state.activeListPickerState).toEqual(undefined)
-            expect(focusedAnnotId).toEqual(null)
-
-            await sidebar.processEvent('setListPickerAnnotationId', {
-                id: DATA.ANNOT_1.url,
-                position: 'lists-bar',
-            })
-            expect(sidebar.state.activeListPickerState).toEqual({
-                annotationId: DATA.ANNOT_1.url,
-                position: 'lists-bar',
-            })
-            expect(focusedAnnotId).toEqual(null)
-
-            await sidebar.processEvent('resetListPickerAnnotationId', {
-                id: DATA.ANNOT_1.url,
-            })
-            expect(sidebar.state.activeListPickerState).toEqual(undefined)
-            expect(focusedAnnotId).toEqual(DATA.ANNOT_1.url)
-        })
-
         it('should be able to edit an annotation', async ({ device }) => {
             const { sidebar, annotationsCache } = await setupLogicHelper({
                 device,
@@ -1917,93 +1864,6 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.activeTab).toEqual('spaces')
             expect(sidebar.state.selectedListId).toEqual(null)
             expect(emittedEvents).toEqual(expectedEvents)
-        })
-    })
-
-    describe.skip('TODO: old picker ID states', () => {
-        it('should be able to set active annotation copy paster', async ({
-            device,
-        }) => {
-            const { sidebar } = await setupLogicHelper({ device })
-            const id1 = 'test1'
-            const id2 = 'test2'
-
-            expect(sidebar.state.activeCopyPasterAnnotationId).toBeUndefined()
-            sidebar.processEvent('setCopyPasterAnnotationId', { id: id1 })
-            expect(sidebar.state.activeCopyPasterAnnotationId).toEqual(id1)
-            sidebar.processEvent('setCopyPasterAnnotationId', { id: id2 })
-            expect(sidebar.state.activeCopyPasterAnnotationId).toEqual(id2)
-            sidebar.processEvent('setCopyPasterAnnotationId', { id: undefined })
-            expect(sidebar.state.activeCopyPasterAnnotationId).toBeUndefined()
-        })
-
-        it('should be able to set active annotation tag picker', async ({
-            device,
-        }) => {
-            const { sidebar } = await setupLogicHelper({ device })
-            const id1 = 'test1'
-            const id2 = 'test2'
-
-            expect(sidebar.state.activeTagPickerAnnotationId).toBeUndefined()
-            sidebar.processEvent('setTagPickerAnnotationId', { id: id1 })
-            expect(sidebar.state.activeTagPickerAnnotationId).toEqual(id1)
-            sidebar.processEvent('setTagPickerAnnotationId', { id: id2 })
-            expect(sidebar.state.activeTagPickerAnnotationId).toEqual(id2)
-            sidebar.processEvent('resetTagPickerAnnotationId', null)
-            expect(sidebar.state.activeTagPickerAnnotationId).toBeUndefined()
-        })
-
-        it("should be able to focus the associated edit form on closing an annotation's space picker via the keyboard", async ({
-            device,
-        }) => {
-            let focusedAnnotId: string = null
-            const { sidebar } = await setupLogicHelper({
-                device,
-                focusEditNoteForm: (id) => (focusedAnnotId = id),
-            })
-
-            await sidebar.processEvent('setListPickerAnnotationId', {
-                id: DATA.ANNOT_1.url,
-                position: 'footer',
-            })
-            expect(sidebar.state.activeListPickerState).toEqual({
-                annotationId: DATA.ANNOT_1.url,
-                position: 'footer',
-            })
-            expect(focusedAnnotId).toEqual(null)
-
-            await sidebar.processEvent('setListPickerAnnotationId', {
-                id: DATA.ANNOT_1.url,
-                position: 'lists-bar',
-            })
-            expect(sidebar.state.activeListPickerState).toEqual({
-                annotationId: DATA.ANNOT_1.url,
-                position: 'lists-bar',
-            })
-            expect(focusedAnnotId).toEqual(null)
-
-            await sidebar.processEvent('setListPickerAnnotationId', {
-                id: DATA.ANNOT_1.url,
-                position: 'lists-bar',
-            })
-            expect(sidebar.state.activeListPickerState).toEqual(undefined)
-            expect(focusedAnnotId).toEqual(null)
-
-            await sidebar.processEvent('setListPickerAnnotationId', {
-                id: DATA.ANNOT_1.url,
-                position: 'lists-bar',
-            })
-            expect(sidebar.state.activeListPickerState).toEqual({
-                annotationId: DATA.ANNOT_1.url,
-                position: 'lists-bar',
-            })
-            expect(focusedAnnotId).toEqual(null)
-
-            await sidebar.processEvent('resetListPickerAnnotationId', {
-                id: DATA.ANNOT_1.url,
-            })
-            expect(sidebar.state.activeListPickerState).toEqual(undefined)
-            expect(focusedAnnotId).toEqual(DATA.ANNOT_1.url)
         })
     })
 
@@ -3345,7 +3205,6 @@ describe('SidebarContainerLogic', () => {
 
             // Triggers share menu opening
             await sidebar.processEvent('shareAnnotation', {
-                context: 'pageAnnotations',
                 annotationUrl,
                 mouseEvent: {} as any,
             })
@@ -3378,68 +3237,6 @@ describe('SidebarContainerLogic', () => {
                 }),
             ])
         })
-
-        // it('should not immediately share annotation on click unless shortcut keys held', async ({
-        //     device,
-        // }) => {
-        //     const { directLinking } = device.backgroundModules
-
-        //     const pageUrl = sharingTestData.PAGE_1_DATA.pageDoc.url
-        //     const annotationUrl = await directLinking.createAnnotation(
-        //         {} as any,
-        //         {
-        //             pageUrl,
-        //             title: 'Page title',
-        //             body: 'Annot body',
-        //             comment: 'Annot comment',
-        //             selector: {
-        //                 descriptor: {
-        //                     content: [{ foo: 5 }],
-        //                     strategy: 'eedwdwq',
-        //                 },
-        //                 quote: 'dawadawd',
-        //             },
-        //         },
-        //         { skipPageIndexing: true },
-        //     )
-
-        //     const { sidebar } = await setupLogicHelper({
-        //         device,
-        //         pageUrl,
-        //         withAuth: true,
-        //     })
-        //     await sidebar.processEvent('receiveSharingAccessChange', {
-        //         sharingAccess: 'sharing-allowed',
-        //     })
-
-        //     // Triggers share menu opening
-        //     await sidebar.processEvent('shareAnnotation', {
-        //         context: 'pageAnnotations',
-        //         annotationUrl,
-        //         mouseEvent: {} as any,
-        //     })
-        //     expect(sidebar.state.activeShareMenuNoteId).toEqual(annotationUrl)
-        //     expect(sidebar.state.immediatelyShareNotes).toEqual(false)
-
-        //     await sidebar.processEvent('resetShareMenuNoteId', null)
-        //     expect(sidebar.state.activeShareMenuNoteId).toEqual(undefined)
-
-        //     await sidebar.processEvent('receiveSharingAccessChange', {
-        //         sharingAccess: 'sharing-allowed',
-        //     })
-
-        //     await sidebar.processEvent('shareAnnotation', {
-        //         context: 'pageAnnotations',
-        //         annotationUrl,
-        //         mouseEvent: { metaKey: true, altKey: true } as any,
-        //     })
-        //     expect(sidebar.state.activeShareMenuNoteId).toEqual(annotationUrl)
-        //     expect(sidebar.state.immediatelyShareNotes).toEqual(true)
-
-        //     await sidebar.processEvent('resetShareMenuNoteId', null)
-        //     expect(sidebar.state.activeShareMenuNoteId).toEqual(undefined)
-        //     expect(sidebar.state.immediatelyShareNotes).toEqual(false)
-        // })
 
         it('should detect shared annotations on initialization', async ({
             device,

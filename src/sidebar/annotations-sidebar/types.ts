@@ -1,48 +1,21 @@
 import type TypedEventEmitter from 'typed-emitter'
-import type { ResultWithIndex } from 'src/overview/types'
 import type {
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
 
-export interface Page {
-    url?: string
-    title?: string
-}
-
-export type ClickHandler<T extends HTMLElement> = (
-    e: React.SyntheticEvent<T>,
-) => void
-
-export type SidebarEnv = 'inpage' | 'overview'
-export type AnnotationMode = 'default' | 'edit' | 'delete'
-
-export interface ResultsByUrl {
-    [url: string]: ResultWithIndex
-}
-
-export { ResultWithIndex }
-
-export interface HighlighterEvents {
+export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
+    setSelectedList: (unifiedListId: UnifiedList['unifiedId']) => void
     renderHighlight: (args: { highlight: UnifiedAnnotation }) => void
     renderHighlights: (args: { highlights: UnifiedAnnotation[] }) => void
-    highlightAndScroll: (args: { url: string }) => void
-    removeTemporaryHighlights: () => void
-    removeAnnotationHighlight: (args: { url: string }) => void
-    removeAnnotationHighlights: (args: { urls: string[] }) => void
-    hideHighlights: () => void
-    showHighlights: () => void
-}
-
-export interface AnnotationsSidebarInPageEvents extends HighlighterEvents {
-    setSelectedList: (unifiedListId: UnifiedList['unifiedId']) => void
-}
-
-export interface AnnotationStorageInterface {}
-
-export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<
-    AnnotationsSidebarInPageEvents
->
+    // No longer used, as of the sidebar refactor
+    // highlightAndScroll: (args: { url: string }) => void
+    // removeTemporaryHighlights: () => void
+    // removeAnnotationHighlight: (args: { url: string }) => void
+    // removeAnnotationHighlights: (args: { urls: string[] }) => void
+    // hideHighlights: () => void
+    // showHighlights: () => void
+}>
 
 export interface SidebarTheme {
     canClickAnnotations: boolean
@@ -50,3 +23,7 @@ export interface SidebarTheme {
     topOffsetPx: number
     paddingRight: number
 }
+
+export type AnnotationCardInstanceLocation =
+    | 'annotations-tab'
+    | UnifiedList['unifiedId']
