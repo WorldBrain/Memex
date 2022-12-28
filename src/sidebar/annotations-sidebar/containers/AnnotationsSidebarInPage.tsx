@@ -195,7 +195,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             }
         }
 
-        this.processEvent('setActiveAnnotationUrl', { annotationUrl: url })
+        this.processEvent('__setActiveAnnotationUrl', { annotationUrl: url })
         const annotationBoxNode = this.getDocument()?.getElementById(url)
 
         if (!annotationBoxNode) {

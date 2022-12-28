@@ -1004,24 +1004,20 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    setActiveAnnotationUrl: EventHandler<'setActiveAnnotationUrl'> = async ({
-        event,
-    }) => {
-        let annotationURL
+    __setActiveAnnotationUrl: EventHandler<
+        '__setActiveAnnotationUrl'
+    > = async ({ event, previousState }) => {
+        const annotation = previousState.annotations.find(
+            (annot) => annot.url === event.annotationUrl,
+        )
 
-        // if (event.annotationUrl) {
-        //     annotationURL = event.annotationUrl
-        // } else {
-        //     // annotationURL = event.annotation.url
-        //     // this.options.events?.emit('highlightAndScroll', {
-        //     //     annotation: event.annotation,
-        //     // })
-        // }
+        if (annotation != null) {
+            this.options.events?.emit('highlightAndScroll', { annotation })
+        }
 
-        // this.emitMutation({
-        //     activeAnnotationId: { $set: event.annotationUrl },
-        //     // activeAnnotationUrl: { $set: annotationURL },
-        // })
+        this.emitMutation({
+            activeAnnotationUrl: { $set: event.annotationUrl },
+        })
     }
 
     goToAnnotationInNewTab: EventHandler<'goToAnnotationInNewTab'> = async ({

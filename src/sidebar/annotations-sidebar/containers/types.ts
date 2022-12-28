@@ -289,6 +289,7 @@ interface SidebarEvents {
         annotationUrl: string
     }
     __setActiveAnnotation: { annotationUrl: string }
+    __setActiveAnnotationUrl: { annotationUrl: string }
 
     // setActiveAnnotationUrl: { annotation?: Annotation; annotationUrl?: string }
     shareAnnotation: {
