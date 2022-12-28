@@ -22,7 +22,7 @@ type AnnotationCreateData = {
 
 interface AnnotationUpdateData {
     localId: string
-    comment: string
+    comment: string | null
 }
 
 export interface SaveAnnotationParams<
@@ -128,16 +128,18 @@ export async function updateAnnotation({
     return {
         remoteAnnotationId,
         savePromise: (async () => {
-            await annotationsBG.editAnnotation(
-                annotationData.localId,
-                annotationData.comment
-                    .replace(/\\\[/g, '[')
-                    .replace(/\\\]/g, ']')
-                    .replace(/\\\(/g, '(')
-                    .replace(/\\\)/g, ')')
-                    .replace(/\    \n/g, '')
-                    .replace(/\*   /g, ' * '),
-            )
+            if (annotationData.comment != null) {
+                await annotationsBG.editAnnotation(
+                    annotationData.localId,
+                    annotationData.comment
+                        .replace(/\\\[/g, '[')
+                        .replace(/\\\]/g, ']')
+                        .replace(/\\\(/g, '(')
+                        .replace(/\\\)/g, ')')
+                        .replace(/\    \n/g, '')
+                        .replace(/\*   /g, ' * '),
+                )
+            }
 
             await Promise.all([
                 shareOpts?.shouldShare &&
@@ -145,7 +147,6 @@ export async function updateAnnotation({
                         remoteAnnotationId,
                         annotationUrl: annotationData.localId,
                         shareToLists: true,
-                        skipPrivacyLevelUpdate: true,
                     }),
                 !shareOpts?.skipPrivacyLevelUpdate &&
                     contentSharingBG.setAnnotationPrivacyLevel({

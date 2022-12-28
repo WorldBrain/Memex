@@ -271,10 +271,6 @@ interface SidebarEvents {
     // Annotation events
     deleteAnnotation: AnnotationEvent<{}>
     setActiveAnnotation: AnnotationEvent<{}>
-    setAnnotationShareInfo: AnnotationEvent<{
-        keepListsIfUnsharing?: boolean
-        privacyLevel: AnnotationPrivacyLevels
-    }>
     updateListsForAnnotation: AnnotationEvent<{
         added: number | null
         deleted: number | null

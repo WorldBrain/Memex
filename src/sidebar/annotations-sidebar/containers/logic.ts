@@ -454,6 +454,7 @@ export class SidebarContainerLogic extends UILogic<
             sidebarWidth: { $set: width },
         })
     }
+
     hide: EventHandler<'hide'> = ({ event, previousState }) => {
         this.readingViewStorageListener(false)
         this.emitMutation({
@@ -815,6 +816,7 @@ export class SidebarContainerLogic extends UILogic<
 
         const now = event.now ?? Date.now()
         const comment = formData.comment.trim()
+        const hasCoreAnnotChanged = comment !== annotationData.comment
 
         // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
         // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
@@ -848,7 +850,7 @@ export class SidebarContainerLogic extends UILogic<
             contentSharingBG: this.options.contentSharing,
             keepListsIfUnsharing: event.keepListsIfUnsharing,
             annotationData: {
-                comment,
+                comment: comment !== annotationData.comment ? comment : null,
                 localId: annotationData.localId,
             },
             shareOpts: {
@@ -871,7 +873,7 @@ export class SidebarContainerLogic extends UILogic<
                         event.isProtected || !!event.keepListsIfUnsharing,
                 }),
             },
-            { updateLastEditedTimestamp: true, now },
+            { updateLastEditedTimestamp: hasCoreAnnotChanged, now },
         )
 
         await savePromise
