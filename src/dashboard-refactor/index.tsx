@@ -1469,6 +1469,7 @@ export class DashboardContainer extends StatefulUIElement<
                         )}
                     </MainContent>
                     <NotesSidebar
+                        youtubeService={this.youtubeService}
                         tags={this.props.tagsBG}
                         auth={this.props.authBG}
                         refSidebar={this.notesSidebarRef}
