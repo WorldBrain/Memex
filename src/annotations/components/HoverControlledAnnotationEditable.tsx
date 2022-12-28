@@ -24,6 +24,7 @@ export default class HoverControlledAnnotationEditable extends React.Component<
 
     render() {
         const { passDownRef, ...props } = this.props
+
         return (
             <AnnotationEditable
                 {...props}

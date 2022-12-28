@@ -50,6 +50,7 @@ import { checkPageBlacklisted } from 'src/blacklist/utils'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { runtime } from 'webextension-polyfill'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation

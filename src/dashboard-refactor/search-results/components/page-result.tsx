@@ -27,6 +27,7 @@ import type { ListDetailsGetter } from 'src/annotations/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 
 export interface Props
     extends PageData,
@@ -36,6 +37,7 @@ export interface Props
     getListDetailsById: ListDetailsGetter
     isSearchFilteredByList: boolean
     filteredbyListID: number
+    youtubeService: YoutubeService
     shareMenuProps: Omit<
         ShareMenuProps,
         'annotationsBG' | 'contentSharingBG' | 'customListsBG'
@@ -341,6 +343,7 @@ export default class PageResultView extends PureComponent<Props> {
                             fullTitle={this.props.fullTitle}
                             pdfUrl={this.props.fullPdfUrl}
                             favIcon={this.props.favIconURI}
+                            youtubeService={this.props.youtubeService}
                             removeFromList={this.renderRemoveFromListBtn()}
                             mainContentHover={
                                 this.props.hoverState != null

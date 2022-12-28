@@ -32,6 +32,8 @@ import type { MaybePromise } from 'src/util/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -63,6 +65,8 @@ export interface SidebarContainerDependencies {
     copyToClipboard: (text: string) => Promise<boolean>
     copyPaster: RemoteCopyPasterInterface
     contentScriptBackground: ContentScriptsInterface<'caller'>
+    youtubePlayer?: YoutubePlayer
+    youtubeService?: YoutubeService
 }
 
 export interface EditForm {
