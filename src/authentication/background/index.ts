@@ -36,6 +36,7 @@ import type { FirebaseError } from 'firebase/app'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { AuthServices } from 'src/services/types'
 import { listenToWebAppMessage } from './auth-sync'
+import type { Runtime } from 'webextension-polyfill'
 
 export class AuthBackground {
     authService: AuthService
@@ -48,6 +49,7 @@ export class AuthBackground {
 
     constructor(
         public options: {
+            runtimeAPI: Runtime.Static
             authServices: AuthServices
             jobScheduler: JobScheduler
             localStorageArea: LimitedBrowserStorage
@@ -146,7 +148,7 @@ export class AuthBackground {
             },
         }
 
-        listenToWebAppMessage(this.authService)
+        listenToWebAppMessage(this.authService, options.runtimeAPI)
     }
 
     refreshUserInfo = async () => {

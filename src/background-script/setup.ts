@@ -324,6 +324,7 @@ export function createBackgroundModules(options: {
     const auth =
         options.auth ||
         new AuthBackground({
+            runtimeAPI: options.browserAPIs.runtime,
             authServices: options.authServices,
             jobScheduler: jobScheduler.scheduler,
             remoteEmitter: createRemoteEventEmitter('auth'),

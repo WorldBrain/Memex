@@ -47,6 +47,8 @@ import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/con
 import type { SharedAnnotationList } from 'src/custom-lists/background/types'
 import { toInteger } from 'lodash'
 import { Storage } from 'webextension-polyfill-ts'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -57,6 +59,8 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     focusEditNoteForm: (annotationId: string) => void
     setLoginModalShown?: (isShown: boolean) => void
     setDisplayNameModalShown?: (isShown: boolean) => void
+    youtubePlayer?: YoutubePlayer
+    youtubeService?: YoutubeService
 }
 
 type EventHandler<
@@ -916,20 +920,18 @@ export class SidebarContainerLogic extends UILogic<
 
     setActiveAnnotationUrl: EventHandler<'setActiveAnnotationUrl'> = async ({
         event,
+        previousState,
     }) => {
-        let annotationURL
+        const annotation = previousState.annotations.find(
+            (annot) => annot.url === event.annotationUrl,
+        )
 
-        if (event.annotationUrl) {
-            annotationURL = event.annotationUrl
-        } else {
-            annotationURL = event.annotation.url
-            this.options.events?.emit('highlightAndScroll', {
-                annotation: event.annotation,
-            })
+        if (annotation != null) {
+            this.options.events?.emit('highlightAndScroll', { annotation })
         }
 
         this.emitMutation({
-            activeAnnotationUrl: { $set: annotationURL },
+            activeAnnotationUrl: { $set: event.annotationUrl },
         })
     }
 

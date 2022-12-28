@@ -65,8 +65,8 @@ export interface SidebarContainerDependencies {
     copyToClipboard: (text: string) => Promise<boolean>
     copyPaster: RemoteCopyPasterInterface
     contentScriptBackground: ContentScriptsInterface<'caller'>
-    youtubePlayer: YoutubePlayer
-    youtubeService: YoutubeService
+    youtubePlayer?: YoutubePlayer
+    youtubeService?: YoutubeService
 }
 
 export interface EditForm {
@@ -252,7 +252,7 @@ interface SidebarEvents {
         context: AnnotationEventContext
         annotationUrl: string
     }
-    setActiveAnnotationUrl: { annotation?: Annotation; annotationUrl?: string }
+    setActiveAnnotationUrl: { annotationUrl: string }
     setAnnotationEditMode: {
         context: AnnotationEventContext
         annotationUrl: string

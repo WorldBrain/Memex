@@ -16,7 +16,6 @@ import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { getInitialAnnotationConversationState } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import normalizeUrl from '@worldbrain/memex-url-utils/lib/normalize'
-import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 
 const setupLogicHelper = async ({
     device,
