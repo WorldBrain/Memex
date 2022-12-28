@@ -362,7 +362,6 @@ export default class SearchResultsContainer extends React.Component<
                 annotationFooterDependencies={{
                     onDeleteCancel: () => undefined,
                     onDeleteConfirm: () => undefined,
-                    onTagIconClick: interactionProps.onTagPickerBtnClick,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
                     onEditIconClick: interactionProps.onEditBtnClick,

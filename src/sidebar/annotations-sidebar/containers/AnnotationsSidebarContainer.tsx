@@ -48,11 +48,13 @@ import {
     SELECT_SPACE_NEGATIVE_LABEL,
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
-import { UnifiedAnnotation } from 'src/annotations/cache/types'
+import type {
+    UnifiedAnnotation,
+    UnifiedList,
+} from 'src/annotations/cache/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { SIDEBAR_DEFAULT_OPTION } from 'src/sidebar-overlay/constants'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import { generateAnnotationCardInstanceId } from './utils'
 
 const DEF_CONTEXT: { context: AnnotationEventContext } = {
     context: 'pageAnnotations',
@@ -203,61 +205,61 @@ export class AnnotationsSidebarContainer<
     }
 
     protected bindAnnotationFooterEventProps(
-        annotation: Pick<UnifiedAnnotation, 'localId' | 'remoteId' | 'body'>,
-        /** This needs to be defined for footer events for annots in followed lists states  */
-        followedListId?: string,
+        annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'body'>,
+        instanceLocation: 'annotations-tab' | UnifiedList['unifiedId'],
     ): AnnotationFooterEventProps & {
         onGoToAnnotation?: React.MouseEventHandler
     } {
+        const cardId = generateAnnotationCardInstanceId(
+            annotation,
+            instanceLocation,
+        )
+        const annotationCardInstance = this.state.annotationCardInstances[
+            cardId
+        ]
+        const unifiedAnnotationId = annotation.unifiedId
         return {
             onEditIconClick: () =>
                 this.processEvent('setAnnotationEditMode', {
-                    annotationUrl: annotation.localId,
-                    followedListId,
-                    ...DEF_CONTEXT,
+                    instanceLocation,
+                    unifiedAnnotationId,
+                    isEditing: !annotationCardInstance.isCommentEditing,
                 }),
             onDeleteIconClick: () =>
-                this.processEvent('switchAnnotationMode', {
-                    annotationUrl: annotation.localId,
-                    followedListId,
-                    mode: 'delete',
-                    ...DEF_CONTEXT,
+                this.processEvent('setAnnotationCardMode', {
+                    instanceLocation,
+                    unifiedAnnotationId,
+                    mode: 'delete-confirm',
                 }),
             onDeleteCancel: () =>
-                this.processEvent('switchAnnotationMode', {
-                    annotationUrl: annotation.localId,
-                    followedListId,
-                    mode: 'default',
-                    ...DEF_CONTEXT,
+                this.processEvent('setAnnotationCardMode', {
+                    instanceLocation,
+                    unifiedAnnotationId,
+                    mode: 'none',
                 }),
             onDeleteConfirm: () =>
-                this.processEvent('deleteAnnotation', {
-                    annotationUrl: annotation.localId,
-                    ...DEF_CONTEXT,
-                }),
+                this.processEvent('deleteAnnotation', { unifiedAnnotationId }),
             onShareClick: (mouseEvent) =>
-                this.processEvent('shareAnnotation', {
-                    annotationUrl: annotation.localId,
-                    ...DEF_CONTEXT,
-                    followedListId,
-                    mouseEvent,
+                // TODO: work out if this is needed/how to unfiy with editAnnotation
+                this.processEvent('editAnnotation', {
+                    instanceLocation,
+                    unifiedAnnotationId,
+                    shouldShare: true,
+                    // mouseEvent,
                 }),
             onGoToAnnotation:
                 this.props.showGoToAnnotationBtn && annotation.body?.length > 0
                     ? () =>
                           this.processEvent('goToAnnotationInNewTab', {
-                              annotationUrl: annotation.localId,
+                              annotationUrl: '', // TODO: properly set up this event
                               ...DEF_CONTEXT,
                           })
                     : undefined,
             onCopyPasterBtnClick: () =>
-                this.processEvent('setCopyPasterAnnotationId', {
-                    id: annotation.localId,
-                    followedListId,
-                }),
-            onTagIconClick: () =>
-                this.processEvent('setTagPickerAnnotationId', {
-                    id: annotation.localId,
+                this.processEvent('setAnnotationCardMode', {
+                    instanceLocation,
+                    unifiedAnnotationId,
+                    mode: 'copy-paster',
                 }),
             // onListIconClick: () =>
             //     this.processEvent('setListPickerAnnotationId', {
@@ -269,26 +271,29 @@ export class AnnotationsSidebarContainer<
     }
 
     protected bindAnnotationEditProps = (
-        annotation: Pick<Annotation, 'url' | 'isShared'>,
-        /** This needs to be defined for footer events for annots in followed lists states  */
-        followedListId?: string,
+        annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'privacyLevel'>,
+        instanceLocation: 'annotations-tab' | UnifiedList['unifiedId'],
     ): AnnotationEditEventProps & AnnotationEditGeneralProps => {
-        const { editForms } = this.state
-        // Should only ever be undefined for a moment, between creating a new annot state and
-        //  the time it takes for the BG method to return the generated PK
-        const form = editForms[annotation.url] ?? { ...INIT_FORM_STATE }
-
+        const cardId = generateAnnotationCardInstanceId(
+            annotation,
+            instanceLocation,
+        )
+        const annotationCardInstance = this.state.annotationCardInstances[
+            cardId
+        ]
+        const unifiedAnnotationId = annotation.unifiedId
         return {
-            comment: form.commentText,
+            comment: annotationCardInstance.comment,
             onListsBarPickerBtnClick: () =>
-                this.processEvent('setListPickerAnnotationId', {
-                    id: annotation.url,
-                    position: 'lists-bar',
-                    followedListId,
+                this.processEvent('setAnnotationCardMode', {
+                    instanceLocation,
+                    unifiedAnnotationId,
+                    mode: 'space-picker',
                 }),
             onCommentChange: (comment) =>
                 this.processEvent('setAnnotationEditCommentText', {
-                    annotationUrl: annotation.url,
+                    instanceLocation,
+                    unifiedAnnotationId,
                     comment,
                 }),
             onEditConfirm: (showExternalConfirmations) => (
@@ -298,25 +303,27 @@ export class AnnotationsSidebarContainer<
             ) => {
                 const showConfirmation =
                     showExternalConfirmations &&
-                    annotation.isShared &&
+                    annotation.privacyLevel >= AnnotationPrivacyLevels.SHARED &&
                     !shouldShare
                 return this.processEvent(
                     showConfirmation
                         ? 'setPrivatizeNoteConfirmArgs'
                         : 'editAnnotation',
                     {
-                        annotationUrl: annotation.url,
+                        instanceLocation,
+                        unifiedAnnotationId,
                         shouldShare,
                         isProtected,
                         mainBtnPressed: opts?.mainBtnPressed,
                         keepListsIfUnsharing: opts?.keepListsIfUnsharing,
-                        ...DEF_CONTEXT,
                     },
                 )
             },
             onEditCancel: () =>
-                this.processEvent('cancelAnnotationEdit', {
-                    annotationUrl: annotation.url,
+                this.processEvent('setAnnotationEditMode', {
+                    instanceLocation,
+                    unifiedAnnotationId,
+                    isEditing: false,
                 }),
         }
     }
@@ -383,15 +390,14 @@ export class AnnotationsSidebarContainer<
             createNewEntry: this.createNewList,
             initialSelectedListIds: () => [], //annotation.unifiedListIds ?? [],  TODO: map to local IDs
             onSubmit: async () => {
-                await this.processEvent('resetListPickerAnnotationId', {})
-
                 if (
                     this.state.annotationModes.pageAnnotations[
                         annotation.localId
                     ] === 'edit' // TODO: replace with new instance states
                 ) {
                     await this.processEvent('editAnnotation', {
-                        annotationUrl: annotation.localId,
+                        unifiedAnnotationId: annotation.unifiedId,
+                        instanceLocation: 'annotations-tab',
                         shouldShare: [
                             AnnotationPrivacyLevels.SHARED,
                             AnnotationPrivacyLevels.SHARED_PROTECTED,

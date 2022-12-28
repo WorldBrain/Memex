@@ -45,6 +45,7 @@ import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown
 import type {
     PageAnnotationsCacheInterface,
     UnifiedAnnotation,
+    UnifiedList,
 } from 'src/annotations/cache/types'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
@@ -95,14 +96,14 @@ export interface AnnotationsSidebarProps
     expandFollowedListNotes: (listId: string) => void
 
     bindAnnotationFooterEventProps: (
-        annotation: Pick<UnifiedAnnotation, 'localId' | 'remoteId' | 'body'>,
-        followedListId?: string,
+        annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'body'>,
+        instanceLocation: 'annotations-tab' | UnifiedList['unifiedId'],
     ) => AnnotationFooterEventProps & {
         onGoToAnnotation?: React.MouseEventHandler
     }
     bindAnnotationEditProps: (
-        annotation: Pick<Annotation, 'url' | 'isShared'>,
-        followedListId?: string,
+        annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'body'>,
+        instanceLocation: 'annotations-tab' | UnifiedList['unifiedId'],
     ) => AnnotationEditGeneralProps & AnnotationEditEventProps
     annotationCreateProps: AnnotationCreateProps
 
@@ -352,28 +353,25 @@ export class AnnotationsSidebar extends React.Component<
         </LoadingIndicatorContainer>
     )
 
-    private renderFollowedListNotes(
-        listId: string,
+    private renderListAnnotations(
+        unifiedListId: UnifiedList['unifiedId'],
         forceRendering: boolean = false,
     ) {
-        const list = this.props.__lists.byId[listId]
+        const listData = this.props.lists.byId[unifiedListId]
+        const listInstance = this.props.listInstances[unifiedListId]
         if (
-            (!list?.isExpanded || list.annotationsLoadState === 'pristine') &&
+            (!listInstance.isOpen ||
+                listInstance.annotationsLoadState === 'pristine') &&
             !forceRendering
         ) {
-            console.debug(
-                'Ignore rendering of followed list notes',
-                listId,
-                forceRendering,
-            )
             return null
         }
 
-        if (!list || list.annotationsLoadState === 'running') {
+        if (!listInstance || listInstance.annotationsLoadState === 'running') {
             return this.renderLoader()
         }
 
-        if (list.annotationsLoadState === 'error') {
+        if (listInstance.annotationsLoadState === 'error') {
             return (
                 <FollowedListsMsgContainer>
                     <FollowedListsMsgHead>
@@ -391,11 +389,11 @@ export class AnnotationsSidebar extends React.Component<
             )
         }
 
-        const annotationsData = list.sharedAnnotationReferences
-            .map((ref) => this.props.__annotations[ref.id])
+        const annotationsData = listData.unifiedAnnotationIds
+            .map(
+                (unifiedAnnotId) => this.props.annotations.byId[unifiedAnnotId],
+            )
             .filter((a) => !!a)
-
-        console.debug('Annotations Data', annotationsData)
 
         if (!annotationsData.length) {
             return (
@@ -415,18 +413,18 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedNotesContainer>
-                {annotationsData.map((data) => {
-                    const conversationId = `${list.id}:${data.id}`
+                {annotationsData.map((annotation) => {
+                    const conversationId = `${listData.unifiedId}:${annotation.unifiedId}`
                     const conversation = this.props.conversations[
                         conversationId
                     ]
                     const sharedAnnotationRef: SharedAnnotationReference = {
-                        id: data.id,
+                        id: annotation.remoteId,
                         type: 'shared-annotation-reference',
                     }
                     const eventHandlers = this.props.bindSharedAnnotationEventHandlers(
                         sharedAnnotationRef,
-                        { type: 'shared-list-reference', id: listId },
+                        { type: 'shared-list-reference', id: unifiedListId },
                     )
                     const hasReplies =
                         conversation?.thread != null ||
@@ -434,84 +432,79 @@ export class AnnotationsSidebar extends React.Component<
 
                     // If annot is owned by the current user, we allow a whole bunch of other functionality
                     const ownAnnotationProps: Partial<AnnotationEditableProps> = {}
-                    if (data.localId != null) {
-                        const localAnnotation = this.props.annotationsCache.getAnnotationByLocalId(
-                            data.localId,
-                        )
-
+                    if (annotation.localId != null) {
                         ownAnnotationProps.isBulkShareProtected = [
                             AnnotationPrivacyLevels.PROTECTED,
                             AnnotationPrivacyLevels.SHARED_PROTECTED,
-                        ].includes(localAnnotation.privacyLevel)
+                        ].includes(annotation.privacyLevel)
                         ownAnnotationProps.appendRepliesToggle = true
-                        ownAnnotationProps.url = localAnnotation.localId
+                        ownAnnotationProps.unifiedId = annotation.unifiedId
                         ownAnnotationProps.lists = [] // localAnnotation.unifiedListIds
-                        ownAnnotationProps.comment = localAnnotation.comment
+                        ownAnnotationProps.comment = annotation.comment
                         ownAnnotationProps.isShared = [
                             AnnotationPrivacyLevels.SHARED,
                             AnnotationPrivacyLevels.SHARED_PROTECTED,
-                        ].includes(localAnnotation.privacyLevel)
+                        ].includes(annotation.privacyLevel)
                         ownAnnotationProps.appendRepliesToggle = true
-                        ownAnnotationProps.lastEdited =
-                            localAnnotation.lastEdited
+                        ownAnnotationProps.lastEdited = annotation.lastEdited
                         ownAnnotationProps.mode = this.props.__lists.byId[
-                            listId
-                        ].annotationModes[data.localId]
+                            unifiedListId
+                        ].annotationModes[annotation.localId]
                         ownAnnotationProps.annotationEditDependencies = this.props.bindAnnotationEditProps(
-                            { url: data.localId, isShared: true },
-                            listId,
+                            annotation,
+                            unifiedListId,
                         )
                         ownAnnotationProps.annotationFooterDependencies = this.props.bindAnnotationFooterEventProps(
-                            {
-                                localId: data.localId,
-                                remoteId: data.id,
-                                body: data.body,
-                            },
-                            listId,
+                            annotation,
+                            unifiedListId,
                         )
                         ownAnnotationProps.renderListsPickerForAnnotation = this.props.renderListsPickerForAnnotation(
-                            listId,
+                            unifiedListId,
                         )
                         ownAnnotationProps.renderCopyPasterForAnnotation = this.props.renderCopyPasterForAnnotation(
-                            listId,
+                            unifiedListId,
                         )
                         ownAnnotationProps.renderShareMenuForAnnotation = this.props.renderShareMenuForAnnotation(
-                            listId,
+                            unifiedListId,
                         )
                     }
 
                     return (
-                        <React.Fragment key={data.id}>
+                        <React.Fragment key={annotation.unifiedId}>
                             <AnnotationEditable
                                 isShared
                                 isBulkShareProtected
-                                url={data.id}
-                                body={data.body}
-                                comment={data.comment}
-                                lastEdited={data.updatedWhen}
-                                createdWhen={data.createdWhen}
+                                unifiedId={annotation.unifiedId}
+                                body={annotation.body}
+                                comment={annotation.comment}
+                                lastEdited={annotation.lastEdited}
+                                createdWhen={annotation.createdWhen}
                                 creatorDependencies={
-                                    data.localId != null
+                                    annotation.localId != null ||
+                                    annotation.creator == null
                                         ? null
-                                        : this.props.users[data.creatorId]
+                                        : this.props.users[
+                                              annotation.creator.id
+                                          ]
                                 }
                                 isActive={
-                                    this.props.activeAnnotationId === data.id
+                                    this.props.activeAnnotationId ===
+                                    annotation.unifiedId
                                 }
                                 activeShareMenuNoteId={
                                     this.props.activeShareMenuNoteId
                                 }
                                 onReplyBtnClick={eventHandlers.onReplyBtnClick}
                                 onHighlightClick={this.props.setActiveAnnotationUrl(
-                                    data.id,
+                                    annotation.unifiedId,
                                 )}
                                 onListClick={this.props.onLocalSpaceSelect}
                                 isClickable={
                                     this.props.theme.canClickAnnotations &&
-                                    data.body?.length > 0
+                                    annotation.body?.length > 0
                                 }
                                 repliesLoadingState={
-                                    list.conversationsLoadState
+                                    listData.conversationsLoadState
                                 }
                                 hasReplies={hasReplies}
                                 getListDetailsById={
@@ -528,10 +521,10 @@ export class AnnotationsSidebar extends React.Component<
                                 conversation={conversation}
                                 hasReplies={hasReplies}
                                 annotation={{
-                                    body: data.body,
-                                    linkId: data.id,
-                                    comment: data.comment,
-                                    createdWhen: data.createdWhen,
+                                    body: annotation.body,
+                                    linkId: annotation.unifiedId,
+                                    comment: annotation.comment,
+                                    createdWhen: annotation.createdWhen,
                                     reference: sharedAnnotationRef,
                                 }}
                             />
@@ -543,34 +536,32 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderSharedNotesByList() {
-        const { __lists: followedLists, annotationsCache } = this.props
-        const sharedNotesByList = followedLists.allIds.map((remoteListId) => {
-            const listData = followedLists.byId[remoteListId]
-
-            const sharedAnnotationReferences =
-                listData.sharedAnnotationReferences
-            const unifiedList = annotationsCache.getListByRemoteId(remoteListId)
+        const { lists, listInstances } = this.props
+        const sharedNotesByList = lists.allIds.map((unifiedListId) => {
+            const listData = lists.byId[unifiedListId]
+            const listInstance = listInstances[unifiedListId]
 
             let othersAnnotsCount = 0
-            for (const { id } of sharedAnnotationReferences) {
-                if (
-                    this.props.__annotations[id]?.creatorId !==
-                    this.props.currentUser?.id
-                ) {
-                    othersAnnotsCount++
-                }
-            }
+            // TODO: properly derive this
+            // for (const { id } of listInstance.sharedAnnotationReferences ?? []) {
+            //     if (
+            //         this.props.__annotations[id]?.creatorId !==
+            //         this.props.currentUser?.id
+            //     ) {
+            //         othersAnnotsCount++
+            //     }
+            // }
 
             return (
                 <FollowedListNotesContainer
-                    bottom={listData.isExpanded ? '20px' : '0px'}
-                    key={remoteListId}
+                    bottom={listInstance.isOpen ? '20px' : '0px'}
+                    key={unifiedListId}
                     top="0px"
                 >
                     {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
                         onClick={() =>
-                            this.props.onRemoteSpaceSelect(remoteListId)
+                            this.props.onRemoteSpaceSelect(unifiedListId)
                         }
                         title={listData.name}
                     >
@@ -578,11 +569,11 @@ export class AnnotationsSidebar extends React.Component<
                             <Icon
                                 icon={icons.arrowRight}
                                 heightAndWidth="20px"
-                                rotation={listData.isExpanded && 90}
+                                rotation={listInstance.isOpen && 90}
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     this.props.expandFollowedListNotes(
-                                        remoteListId,
+                                        unifiedListId,
                                     )
                                 }}
                             />
@@ -617,7 +608,7 @@ export class AnnotationsSidebar extends React.Component<
                                         onClick={(e) => {
                                             e.stopPropagation()
                                             this.props.openCollectionPage(
-                                                remoteListId,
+                                                unifiedListId,
                                             )
                                         }}
                                     />
@@ -637,17 +628,18 @@ export class AnnotationsSidebar extends React.Component<
                                     placement={'bottom'}
                                 >
                                     <TotalAnnotationsCounter>
-                                        /
-                                        {
-                                            listData.sharedAnnotationReferences
-                                                .length
-                                        }
+                                        {listInstance.annotationRefsLoadState !==
+                                        'success'
+                                            ? this.renderLoader()
+                                            : listInstance
+                                                  .sharedAnnotationReferences
+                                                  ?.length ?? 0}
                                     </TotalAnnotationsCounter>
                                 </TooltipBox>
                             </FollowedListNoteCount>
                         </ButtonContainer>
                     </FollowedListRow>
-                    {this.renderFollowedListNotes(remoteListId)}
+                    {this.renderListAnnotations(unifiedListId)}
                 </FollowedListNotesContainer>
             )
         })
@@ -674,7 +666,7 @@ export class AnnotationsSidebar extends React.Component<
                         //     </FollowedListsMsgContainer>
                         // ) : (
                         <>
-                            {followedLists.allIds.length > 0 ? (
+                            {lists.allIds.length > 0 ? (
                                 <AnnotationContainer>
                                     {sharedNotesByList}
                                 </AnnotationContainer>
@@ -741,7 +733,7 @@ export class AnnotationsSidebar extends React.Component<
                 return this.renderLoader()
             }
 
-            return this.renderFollowedListNotes(remoteId, true)
+            return this.renderListAnnotations(remoteId, true)
         }
 
         // TODO: map list IDs
@@ -886,6 +878,7 @@ export class AnnotationsSidebar extends React.Component<
 
                 const footerDeps = this.props.bindAnnotationFooterEventProps(
                     annot,
+                    'annotations-tab',
                 )
                 const ref = React.createRef<_AnnotationEditable>()
                 this.annotationEditRefs[annot.unifiedId] = ref
@@ -936,7 +929,8 @@ export class AnnotationsSidebar extends React.Component<
                             )}
                             onGoToAnnotation={footerDeps.onGoToAnnotation}
                             annotationEditDependencies={this.props.bindAnnotationEditProps(
-                                { url: annot.unifiedId, isShared },
+                                annot,
+                                'annotations-tab',
                             )}
                             annotationFooterDependencies={footerDeps}
                             isClickable={

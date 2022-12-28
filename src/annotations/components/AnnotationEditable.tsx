@@ -50,7 +50,7 @@ export interface AnnotationProps {
     mode: AnnotationMode
     hoverState: NoteResultHoverState
     /** Required to decide how to go to an annotation when it's clicked. */
-    url?: string
+    unifiedId: string
     className?: string
     isActive?: boolean
     activeShareMenuNoteId?: string
@@ -602,7 +602,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 }}
                 offsetX={10}
             >
-                {this.props.renderListsPickerForAnnotation(this.props.url)}
+                {this.props.renderListsPickerForAnnotation(
+                    this.props.unifiedId,
+                )}
             </PopoutBox>
         )
     }
@@ -623,7 +625,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 }}
                 offsetX={10}
             >
-                {this.props.renderShareMenuForAnnotation(this.props.url)}
+                {this.props.renderShareMenuForAnnotation(this.props.unifiedId)}
             </PopoutBox>
         )
     }
@@ -644,7 +646,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 }}
                 offsetX={10}
             >
-                {this.props.renderCopyPasterForAnnotation(this.props.url)}
+                {this.props.renderCopyPasterForAnnotation(this.props.unifiedId)}
             </PopoutBox>
         )
     }
@@ -660,7 +662,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 >
                     <ItemBox
                         firstDivProps={{
-                            id: this.props.url, // TODO: this should be UnifiedAnnotation ID
+                            id: this.props.unifiedId,
                         }}
                         onMouseEnter={() =>
                             this.setState({
