@@ -1683,7 +1683,14 @@ const MainFrame = styled.div`
     display: flex;
     flex-direction: row;
     min-height: 100vh;
-    height: 100%;
+    height: fill-available;
+
+    width: fill-available;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const Container = styled.div`
@@ -1692,9 +1699,16 @@ const Container = styled.div`
     width: fill-available;
     background-color: ${(props) => props.theme.colors.backgroundColor};
     min-height: 100vh;
-    height: 100%;
+    height: 100vh;
     /* min-width: fit-content; */
     width: fill-available;
+    overflow: hidden;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 
     & * {
         font-family: 'Satoshi', sans-serif;,

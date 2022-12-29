@@ -948,21 +948,23 @@ export default class SearchResultsContainer extends React.Component<
                     />
                 </PageTopBarBox>
                 {this.renderOnboardingTutorials()}
-                {this.renderResultsByDay()}
-                {this.props.areResultsExhausted &&
-                    this.props.searchState === 'success' &&
-                    this.props.clearInboxLoadState !== 'running' &&
-                    this.props.searchResults.allIds.length > 0 && (
-                        <ResultsExhaustedMessage>
-                            <Icon
-                                filePath="checkRound"
-                                heightAndWidth="22px"
-                                hoverOff
-                                color={'greyScale4'}
-                            />
-                            End of results
-                        </ResultsExhaustedMessage>
-                    )}
+                <ResultsBox>
+                    {this.renderResultsByDay()}
+                    {this.props.areResultsExhausted &&
+                        this.props.searchState === 'success' &&
+                        this.props.clearInboxLoadState !== 'running' &&
+                        this.props.searchResults.allIds.length > 0 && (
+                            <ResultsExhaustedMessage>
+                                <Icon
+                                    filePath="checkRound"
+                                    heightAndWidth="22px"
+                                    hoverOff
+                                    color={'greyScale4'}
+                                />
+                                End of results
+                            </ResultsExhaustedMessage>
+                        )}
+                </ResultsBox>
             </ResultsContainer>
         )
     }
@@ -1258,15 +1260,40 @@ const Loader = styled.div`
     height: 300px;
 `
 
+const ResultsBox = styled.div<{ zIndex: number }>`
+    display: flex;
+    margin-top: 2px;
+    flex-direction: column;
+    width: fill-available;
+    height: fill-available;
+    overflow: scroll;
+    padding-bottom: 100px;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+`
+
 const ResultsContainer = styled(Margin)`
     display: flex;
     flex-direction: column;
     align-self: center;
     max-width: ${sizeConstants.searchResults.widthPx}px;
-    margin-bottom: 100px;
+    margin-bottom: ${sizeConstants.header.heightPx}px;
     width: fill-available;
     padding: 0 24px;
     z-index: 27;
+    height: fill-available;
+
+    width: fill-available;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const TopBarRightSideWrapper = styled.div`

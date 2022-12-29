@@ -38,6 +38,7 @@ const Container = styled.div`
 const SearchSection = styled(Margin)<{ sidebarWidth: string }>`
     justify-content: flex-start !important;
     max-width: 825px !important;
+    height: 60px;
 
     & > div {
         justify-content: flex-start !important;

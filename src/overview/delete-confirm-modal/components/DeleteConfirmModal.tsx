@@ -52,7 +52,6 @@ class DeleteConfirmModal extends PureComponent<Props> {
                 submessage={this.props.submessage}
                 type={'alert'}
                 icon={icons.trash}
-                actionRef={this._action}
             >
                 <PrimaryAction
                     label="Delete"
