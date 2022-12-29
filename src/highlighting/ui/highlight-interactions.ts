@@ -109,7 +109,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
             }
         }
 
-        this.removeSelectedHighlights(this.currentActiveHighlight)
+        if (this.currentActiveHighlight != null) {
+            this.removeSelectedHighlights(this.currentActiveHighlight)
+        }
     }
 
     saveAndRenderHighlightAndEditInSidebar: HighlightInteractionsInterface['saveAndRenderHighlightAndEditInSidebar'] = async (

@@ -135,6 +135,7 @@ export async function main(
     const fullPageUrl = await pageInfo.getPageUrl()
     const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
     const annotationsCache = new PageAnnotationsCache({ normalizedPageUrl })
+    window['__annotationsCache'] = annotationsCache
 
     const annotationFunctionsParams = {
         inPageUI,

@@ -399,7 +399,9 @@ export class AnnotationsSidebar extends React.Component<
                             hoverOff
                         />
                     </SectionCircle>
-                    <InfoText>No notes exist in this Space anymore.</InfoText>
+                    <InfoText>
+                        No notes exist in this Space for this page.
+                    </InfoText>
                 </EmptyMessageContainer>
             )
         }
@@ -628,8 +630,9 @@ export class AnnotationsSidebar extends React.Component<
                                     placement={'bottom'}
                                 >
                                     <TotalAnnotationsCounter>
-                                        {listInstance.annotationRefsLoadState !==
-                                        'success'
+                                        {listData.hasRemoteAnnotations &&
+                                        listInstance.annotationRefsLoadState !==
+                                            'success'
                                             ? this.renderLoader()
                                             : listInstance
                                                   .sharedAnnotationReferences
@@ -645,51 +648,27 @@ export class AnnotationsSidebar extends React.Component<
         })
         return (
             <SectionTitleContainer>
-                {
-                    this.props.activeTab === 'spaces' && (
-                        // (this.props.listInstances[unifiedList.] __listInstance.refsState === 'running' ? (
-                        //     this.renderLoader()
-                        // ) : this.props.__listInstance - refsState === 'error' ? (
-                        //     <FollowedListsMsgContainer>
-                        //         <FollowedListsMsgHead>
-                        //             Something went wrong
-                        //         </FollowedListsMsgHead>
-                        //         <FollowedListsMsg>
-                        //             Reload the page and if the problem persists{' '}
-                        //             <ExternalLink
-                        //                 label="contact
-                        //                 support"
-                        //                 href="mailto:support@worldbrain.io"
-                        //             />
-                        //             .
-                        //         </FollowedListsMsg>
-                        //     </FollowedListsMsgContainer>
-                        // ) : (
-                        <>
-                            {lists.allIds.length > 0 ? (
-                                <AnnotationContainer>
-                                    {sharedNotesByList}
-                                </AnnotationContainer>
-                            ) : (
-                                <EmptyMessageContainer>
-                                    <SectionCircle>
-                                        <Icon
-                                            filePath={icons.collectionsEmpty}
-                                            heightAndWidth="20px"
-                                            color="purple"
-                                            hoverOff
-                                        />
-                                    </SectionCircle>
-                                    <InfoText>
-                                        This page is not yet in a Space <br />{' '}
-                                        you created, follow or collaborate in.
-                                    </InfoText>
-                                </EmptyMessageContainer>
-                            )}
-                        </>
-                    )
-                    // ))}
-                }
+                {this.props.activeTab === 'spaces' &&
+                    (lists.allIds.length > 0 ? (
+                        <AnnotationContainer>
+                            {sharedNotesByList}
+                        </AnnotationContainer>
+                    ) : (
+                        <EmptyMessageContainer>
+                            <SectionCircle>
+                                <Icon
+                                    filePath={icons.collectionsEmpty}
+                                    heightAndWidth="20px"
+                                    color="purple"
+                                    hoverOff
+                                />
+                            </SectionCircle>
+                            <InfoText>
+                                This page is not yet in a Space <br /> you
+                                created, follow or collaborate in.
+                            </InfoText>
+                        </EmptyMessageContainer>
+                    ))}
             </SectionTitleContainer>
         )
     }
@@ -717,23 +696,21 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderAnnotationsEditableForSelectedList() {
-        const {
-            selectedListId: selectedList,
-            listInstances,
-            annotationsCache,
-        } = this.props
-        if (selectedList == null) {
+        const { listInstances, selectedListId, annotationsCache } = this.props
+        if (selectedListId == null) {
             this.throwNoSelectedListError()
         }
-        const { remoteId, localId } = annotationsCache.lists.byId[selectedList]
-        const listInstance = listInstances[selectedList]
+        const { remoteId, localId } = annotationsCache.lists.byId[
+            selectedListId
+        ]
+        const listInstance = listInstances[selectedListId]
 
         if (remoteId != null) {
             if (listInstance.annotationsLoadState === 'running') {
                 return this.renderLoader()
             }
 
-            return this.renderListAnnotations(remoteId, true)
+            return this.renderListAnnotations(selectedListId, true)
         }
 
         // TODO: map list IDs

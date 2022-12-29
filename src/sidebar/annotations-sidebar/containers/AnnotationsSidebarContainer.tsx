@@ -862,7 +862,9 @@ export class AnnotationsSidebarContainer<
                                     this.processEvent('setPillVisibility', {
                                         value: 'hide',
                                     })
-                                    this.processEvent('setSelectedList', null)
+                                    this.processEvent('setSelectedList', {
+                                        unifiedListId: null,
+                                    })
                                 }}
                             />
                         </CloseContainer>
@@ -938,7 +940,9 @@ export class AnnotationsSidebarContainer<
                                 })
                             }
                             onResetSpaceSelect={() =>
-                                this.processEvent('setSelectedList', null)
+                                this.processEvent('setSelectedList', {
+                                    unifiedListId: null,
+                                })
                             }
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}
