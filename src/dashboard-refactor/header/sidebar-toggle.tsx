@@ -32,7 +32,6 @@ export const BtnBackground = styled.div`
     background-repeat: no-repeat;
     background-position: center center;
     border-radius: 3px;
-    background: red;
 `
 
 export const HamburgerButton = styled.div`
@@ -54,8 +53,8 @@ export const RightArrow = styled.div`
 
 const TriggerArea = styled.div`
     position: absolute;
-    height: 100px;
-    width: 100px;
+    height: 80px;
+    width: 180px;
     left: 0px;
     top: 0px;
 `
@@ -78,6 +77,7 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
                 // onMouseLeave={onHoverLeave}
                 onClick={toggleSidebarLockedState}
                 onMouseEnter={onHoverEnter}
+                onMouseOver={onHoverEnter}
                 id="testingthis"
             >
                 {!isSidebarLocked ? (

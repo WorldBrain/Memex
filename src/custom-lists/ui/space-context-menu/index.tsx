@@ -170,21 +170,23 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                     <DetailsText>
                         This does NOT delete the pages in it
                     </DetailsText>
-                    <PrimaryAction
-                        onClick={wrapClick(this.props.onDeleteSpaceConfirm)}
-                        label={'Delete'}
-                        icon={'trash'}
-                        type={'secondary'}
-                        size={'medium'}
-                    />
-                    <PrimaryAction
-                        onClick={wrapClick(() =>
-                            this.processEvent('cancelDeleteSpace', null),
-                        )}
-                        label={'Cancel'}
-                        type={'tertiary'}
-                        size={'medium'}
-                    />
+                    <ButtonRow>
+                        <PrimaryAction
+                            onClick={wrapClick(this.props.onDeleteSpaceConfirm)}
+                            label={'Delete'}
+                            icon={'trash'}
+                            type={'secondary'}
+                            size={'medium'}
+                        />
+                        <PrimaryAction
+                            onClick={wrapClick(() =>
+                                this.processEvent('cancelDeleteSpace', null),
+                            )}
+                            label={'Cancel'}
+                            type={'tertiary'}
+                            size={'medium'}
+                        />
+                    </ButtonRow>
                 </DeleteBox>
             )
         }
@@ -268,6 +270,14 @@ const ButtonBox = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
+    grid-gap: 5px;
+`
+const ButtonRow = styled.div`
+    width: fill-available;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 5px;
 `
 
 const ContextMenuContainer = styled.div`
@@ -275,7 +285,7 @@ const ContextMenuContainer = styled.div`
     grid-gap: 5px;
     flex-direction: column;
     width: fill-available;
-    padding: 5px 10px 10px 10px;
+    padding: 10px 10px 10px 10px;
     min-height: fit-content;
     height: fit-content;
     justify-content: center;
@@ -285,8 +295,8 @@ const ContextMenuContainer = styled.div`
 
 const SectionTitle = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.normalText};
-    font-weight: 600;
+    color: ${(props) => props.theme.colors.greyScale8};
+    font-weight: 400;
     width: 100%;
     display: flex;
     justify-content: flex-start;
@@ -298,6 +308,7 @@ const DeleteBox = styled.div`
     justify-content: center;
     flex-direction: column;
     width: fill-available;
+    padding: 15px;
 `
 
 const PermissionArea = styled.div`
@@ -380,33 +391,7 @@ const TitleBox = styled.div`
     font-weight: bold;
     color: ${(props) => props.theme.colors.normalText};
     justify-content: center;
-`
-
-const MenuButton = styled.div`
-    height: 36px;
-    font-family: 'Satoshi', sans-serif;
-    font-weight: ${fonts.primary.weight.normal};
-    color: ${(props) => props.theme.colors.normalText};
-    font-size: 14px;
-    line-height: 18px;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    cursor: pointer;
-    padding: 0px 5px;
-    border-radius: 5px;
-
-    &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
-    }
-
-    & * {
-        cursor: pointer;
-    }
-    & > div {
-        width: auto;
-    }
+    font-size: 16px;
 `
 
 const LinkAndRoleBox = styled.div<{
@@ -482,10 +467,10 @@ const DetailsText = styled.span`
     opacity: 0.8;
     font-size: 14px;
     font-family: 'Satoshi', sans-serif;
-    font-weight: ${fonts.primary.weight.normal};
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale8};
     margin-bottom: 5px;
     margin-top: -5px;
+    text-align: center;
 `
 
 const PermissionText = styled.span<{
