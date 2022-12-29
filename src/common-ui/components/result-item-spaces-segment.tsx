@@ -42,15 +42,26 @@ export class AddSpacesButton extends React.Component<
                 type="tertiary"
                 size="small"
                 icon="plus"
+                iconColor={'purple'}
                 onClick={(e) => {
                     this.props.onEditBtnClick?.(e)
                 }}
-                active={this.props.renderSpacePicker != null}
-                width="24px"
                 height="24px"
+                width={
+                    this.props.hasNoLists ||
+                    this.props.newLineOrientation === true
+                        ? 'fit-content'
+                        : '24px'
+                }
                 label={
                     (this.props.hasNoLists ||
                         this.props.newLineOrientation === true) && <>Spaces</>
+                }
+                padding={
+                    this.props.hasNoLists ||
+                    this.props.newLineOrientation === true
+                        ? '2px 4px 2px 0px'
+                        : 'initial'
                 }
             />
         )

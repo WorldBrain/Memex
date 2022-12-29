@@ -679,7 +679,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     }
                                     padding={
                                         this.props.mode === 'edit'
-                                            ? '10px 15px 10px 15px'
+                                            ? '10px 15px 10px 10px'
                                             : '0px 15px 10px 15px'
                                     }
                                 />
@@ -831,7 +831,7 @@ const CommentBox = styled.div`
 const DefaultFooterStyled = styled.div`
     display: flex;
     align-items: center;
-    padding-left: 15px;
+    padding-left: 5px;
     justify-content: space-between;
     border-top: 1px solid ${(props) => props.theme.colors.lightHover};
 `
@@ -858,7 +858,7 @@ const AnnotationStyled = styled.div`
     ${({ theme }) =>
         theme.isActive &&
         `
-        outline: 2px solid #5671cfb8;
+        outline: 1px solid ${theme.colors.primaryLight}70;
     `};
 `
 

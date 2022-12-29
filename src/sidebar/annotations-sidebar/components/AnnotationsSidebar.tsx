@@ -1145,6 +1145,7 @@ const AnnotationContainer = styled(Margin)`
     height: fill-available;
     overflow: scroll;
     padding-bottom: 100px;
+    flex: 1;
 
     scrollbar-width: none;
 
