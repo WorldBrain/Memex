@@ -144,10 +144,10 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
 
         const unifiedListIds = [
-            ...new Set([
-                ...(annotation.unifiedListIds ?? []),
-                ...localListIds
-                    .map((localListId) => {
+            ...new Set(
+                [
+                    ...(annotation.unifiedListIds ?? []),
+                    ...localListIds.map((localListId) => {
                         const unifiedListId = this.localListIdsToCacheIds[
                             localListId
                         ]
@@ -159,15 +159,16 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                         }
 
                         return unifiedListId
-                    })
-                    .filter((id) => id != null),
-            ]),
+                    }),
+                ].filter((id) => id != null && this.lists.byId[id] != null),
+            ),
         ]
 
         // Ensure each list gets a ref back to this annot
         unifiedListIds.forEach((unifiedListId) => {
-            const unifiedList = this.lists.byId[unifiedListId]
-            unifiedList.unifiedAnnotationIds.push(unifiedAnnotationId)
+            this.lists.byId[unifiedListId]?.unifiedAnnotationIds.push(
+                unifiedAnnotationId,
+            )
         })
 
         return {

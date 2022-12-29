@@ -513,6 +513,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         creationInfo={this.creationInfo}
                         actions={this.calcFooterActions()}
                     />
+                    {this.renderSpacePicker(this.props.spacePickerButtonRef)}
+                    {this.renderShareMenu(this.shareButtonRef)}
                 </DefaultFooterStyled>
             )
         }

@@ -531,6 +531,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: false,
                     unifiedListId: unifiedListIdA,
                     annotationsLoadState: 'pristine',
+                    conversationsLoadState: 'pristine',
                     annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
@@ -543,6 +544,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: false,
                     unifiedListId: unifiedListIdB,
                     annotationsLoadState: 'pristine',
+                    conversationsLoadState: 'pristine',
                     annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
@@ -637,6 +639,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: false,
                     unifiedListId: unifiedListIdA,
                     annotationsLoadState: 'pristine',
+                    conversationsLoadState: 'pristine',
                     annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
@@ -649,6 +652,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: false,
                     unifiedListId: unifiedListIdB,
                     annotationsLoadState: 'pristine',
+                    conversationsLoadState: 'pristine',
                     annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
@@ -673,6 +677,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: true,
                     unifiedListId: unifiedListIdA,
                     annotationsLoadState: 'success',
+                    conversationsLoadState: 'pristine',
                     annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
@@ -685,6 +690,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: false,
                     unifiedListId: unifiedListIdB,
                     annotationsLoadState: 'pristine',
+                    conversationsLoadState: 'pristine',
                     annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
@@ -720,6 +726,7 @@ describe('SidebarContainerLogic', () => {
                         excludeLocalLists: true,
                         extraData: {
                             unifiedId: expect.any(String),
+                            unifiedListIds: [unifiedListIdA],
                         },
                     },
                 ),
@@ -735,6 +742,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: true,
                     unifiedListId: unifiedListIdA,
                     annotationsLoadState: 'success',
+                    conversationsLoadState: 'pristine',
                     annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
@@ -747,6 +755,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: true,
                     unifiedListId: unifiedListIdB,
                     annotationsLoadState: 'success',
+                    conversationsLoadState: 'pristine',
                     annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
@@ -786,6 +795,7 @@ describe('SidebarContainerLogic', () => {
                         excludeLocalLists: true,
                         extraData: {
                             unifiedId: newCachedAnnotBId,
+                            unifiedListIds: [unifiedListIdB],
                         },
                     },
                 ),
