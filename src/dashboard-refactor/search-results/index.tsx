@@ -1066,7 +1066,9 @@ const TutorialButtons = styled.div`
 const TutorialVideoContainer = styled.div<{ showTutorialVideo: boolean }>`
     position: relative;
     height: 170px;
-    width: 300px;
+    max-width: 300px;
+    width: 100%;
+    min-width: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1083,7 +1085,8 @@ const TutorialVideoContainer = styled.div<{ showTutorialVideo: boolean }>`
 const TutorialVideoBox = styled.div<{ showTutorialVideo: boolean }>`
     position: relative;
     height: 170px;
-    width: 300px;
+    max-width: 300px;
+    width: fill-available;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1111,7 +1114,8 @@ const TutorialBlurPicture = styled.div`
     background-position: center center;
     border-radius: 5px;
     height: 170px;
-    width: 300px;
+    max-width: 300px;
+    width: fill-available;
     background-size: cover;
 `
 
