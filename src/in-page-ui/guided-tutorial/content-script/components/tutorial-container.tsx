@@ -105,8 +105,8 @@ export default class TutorialContainer extends React.Component<Props, State> {
                                 <PrimaryAction
                                     onClick={this.prevCard}
                                     label={'Back'}
-                                    backgroundColor={'darkhover'}
-                                    fontColor={'normalText'}
+                                    type={'tertiary'}
+                                    size={'medium'}
                                 />
                             ) : (
                                 <div />
@@ -117,10 +117,10 @@ export default class TutorialContainer extends React.Component<Props, State> {
                                     <PrimaryAction
                                         onClick={this.nextCard}
                                         label={'Next'}
-                                        backgroundColor={'purple'}
-                                        fontColor={'backgroundColor'}
-                                        // icon={'longArrowRight'}
-                                        // iconPosition={'right'}
+                                        type={'primary'}
+                                        size={'medium'}
+                                        icon={'longArrowRight'}
+                                        iconPosition={'right'}
                                         // iconSize={'22px'}
                                     />
                                 )
@@ -128,8 +128,10 @@ export default class TutorialContainer extends React.Component<Props, State> {
                                 <PrimaryAction
                                     label={'Finish'}
                                     onClick={this.props.finishTutorial}
-                                    backgroundColor={'purple'}
-                                    fontColor={'backgroundColor'}
+                                    type={'primary'}
+                                    size={'medium'}
+                                    icon={'check'}
+                                    iconPosition={'left'}
                                 />
                             )}
                         </CardFooter>
@@ -230,10 +232,7 @@ const TutorialCardContainer = styled.div<{
 }>`
     top: ${(props) => (props.top ? props.top : null)};
     bottom: ${(props) => (props.bottom ? props.bottom : null)};
-    left: ${(props) =>
-        props.left
-            ? (props.screenWidth - props.width.replace('px', '')) / 2 + 'px'
-            : null};
+    left: auto;
     right: ${(props) => (props.right ? props.right : null)};
     width: ${(props) => (props.width ? props.width : '650px')};
     height: ${(props) => props.height && props.height};

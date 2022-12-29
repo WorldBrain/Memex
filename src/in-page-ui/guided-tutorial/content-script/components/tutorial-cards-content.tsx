@@ -7,6 +7,7 @@ import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-n
 import browser from 'webextension-polyfill'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 // tutorial step like in the mockup
 export type TutorialStepContent = {
@@ -276,17 +277,9 @@ export const tutorialSteps: TutorialStepContent[] = [
                     <ContentArea>
                         <TitleArea>
                             <Title>Bookmark this Page</Title>
-                            <ShortCutContainer>
-                                <ShortCutBlock>
-                                    <ShortCutText>
-                                        {getKeyName({ key: 'alt' })}
-                                    </ShortCutText>
-                                </ShortCutBlock>{' '}
-                                +{' '}
-                                <ShortCutBlock>
-                                    <ShortCutText>S</ShortCutText>
-                                </ShortCutBlock>{' '}
-                            </ShortCutContainer>
+                            <KeyboardShortcuts
+                                keys={[getKeyName({ key: 'alt' }), 'S']}
+                            />
                         </TitleArea>
                         <Description>
                             Use the heart icon in the quick action bar or use
@@ -318,17 +311,9 @@ export const tutorialSteps: TutorialStepContent[] = [
                     <ContentArea>
                         <TitleArea>
                             <Title>Add this page to a Space</Title>
-                            <ShortCutContainer>
-                                <ShortCutBlock>
-                                    <ShortCutText>
-                                        {getKeyName({ key: 'alt' })}
-                                    </ShortCutText>
-                                </ShortCutBlock>{' '}
-                                +{' '}
-                                <ShortCutBlock>
-                                    <ShortCutText>C</ShortCutText>
-                                </ShortCutBlock>{' '}
-                            </ShortCutContainer>
+                            <KeyboardShortcuts
+                                keys={[getKeyName({ key: 'alt' }), 'C']}
+                            />
                         </TitleArea>
                         <Description>
                             Spaces are like tags that you can share and
@@ -360,17 +345,9 @@ export const tutorialSteps: TutorialStepContent[] = [
                     <ContentArea>
                         <TitleArea>
                             <Title>Create a Highlight</Title>
-                            <ShortCutContainer>
-                                <ShortCutBlock>
-                                    <ShortCutText>
-                                        {getKeyName({ key: 'alt' })}
-                                    </ShortCutText>
-                                </ShortCutBlock>{' '}
-                                +{' '}
-                                <ShortCutBlock>
-                                    <ShortCutText>A</ShortCutText>
-                                </ShortCutBlock>{' '}
-                            </ShortCutContainer>
+                            <KeyboardShortcuts
+                                keys={[getKeyName({ key: 'alt' }), 'A']}
+                            />
                         </TitleArea>
                         <Description>
                             Select some text and use the tooltip, or use
@@ -402,17 +379,9 @@ export const tutorialSteps: TutorialStepContent[] = [
                     <ContentArea>
                         <TitleArea>
                             <Title>View your Highlights</Title>
-                            <ShortCutContainer>
-                                <ShortCutBlock>
-                                    <ShortCutText>
-                                        {getKeyName({ key: 'alt' })}
-                                    </ShortCutText>
-                                </ShortCutBlock>{' '}
-                                +{' '}
-                                <ShortCutBlock>
-                                    <ShortCutText>Q</ShortCutText>
-                                </ShortCutBlock>{' '}
-                            </ShortCutContainer>
+                            <KeyboardShortcuts
+                                keys={[getKeyName({ key: 'alt' }), 'Q']}
+                            />
                         </TitleArea>
                         <Description>
                             Click on the highlight or open the sidebar via the
@@ -447,17 +416,9 @@ export const tutorialSteps: TutorialStepContent[] = [
                             <Title>
                                 Search everything you saved or annotated
                             </Title>
-                            <ShortCutContainer>
-                                <ShortCutBlock>
-                                    <ShortCutText>
-                                        {getKeyName({ key: 'alt' })}
-                                    </ShortCutText>
-                                </ShortCutBlock>{' '}
-                                +{' '}
-                                <ShortCutBlock>
-                                    <ShortCutText>F</ShortCutText>
-                                </ShortCutBlock>{' '}
-                            </ShortCutContainer>
+                            <KeyboardShortcuts
+                                keys={[getKeyName({ key: 'alt' }), 'F']}
+                            />
                         </TitleArea>
                         <Description>
                             Click on the search icon in the Quick Action Ribbon.
@@ -668,9 +629,9 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </FinishContainer>
             </>
         ),
-        top: '25%',
+        top: '12%',
         bottom: null,
-        left: '0px',
+        left: 'auto',
         width: '500px',
         height: 'fit-content',
     },
