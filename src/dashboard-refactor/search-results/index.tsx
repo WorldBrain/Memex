@@ -861,12 +861,6 @@ export default class SearchResultsContainer extends React.Component<
     render() {
         return (
             <ResultsContainer bottom="100px">
-                {/* {this.props.isSubscriptionBannerShown && (
-                    <PioneerPlanBanner
-                        onHideClick={this.props.onDismissSubscriptionBanner}
-                        width="fill-available"
-                    />
-                )} */}
                 {this.props.selectedListId != null && (
                     <ListDetails
                         {...this.props.listDetailsProps}
@@ -1146,6 +1140,7 @@ const ResultsExhaustedMessage = styled.div`
     justify-content: center;
     font-size: 16px;
     align-items: center;
+    max-width: ${sizeConstants.searchResults.widthPx}px;
 `
 const NoResultsMessage = styled.div`
     display: flex;
@@ -1193,7 +1188,7 @@ const InfoText = styled.div`
 const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     /* padding: 0px 15px; */
     height: fit-content;
-    max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
+    max-width: calc(${sizeConstants.searchResults.widthPx}px);
     z-index: 2147483639;
     position: sticky;
     top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
@@ -1211,6 +1206,7 @@ const ReferencesContainer = styled.div`
     align-items: center;
     justify-content: flex-start;
     grid-gap: 5px;
+    max-width: ${sizeConstants.searchResults.widthPx}px;
 `
 
 const NoteTopBarBox = styled(TopBar)`
@@ -1268,6 +1264,7 @@ const ResultsBox = styled.div<{ zIndex: number }>`
     height: fill-available;
     overflow: scroll;
     padding-bottom: 100px;
+    align-items: center;
 
     &::-webkit-scrollbar {
         display: none;
@@ -1280,7 +1277,7 @@ const ResultsContainer = styled(Margin)`
     display: flex;
     flex-direction: column;
     align-self: center;
-    max-width: ${sizeConstants.searchResults.widthPx}px;
+    width: fill-available;
     margin-bottom: ${sizeConstants.header.heightPx}px;
     width: fill-available;
     padding: 0 24px;

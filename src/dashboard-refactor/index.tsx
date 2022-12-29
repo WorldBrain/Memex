@@ -1584,7 +1584,6 @@ const ListSidebarContent = styled(Rnd)<{
     flex-direction: column;
     justify-content: start;
     z-index: 3000;
-    z-index: 2147483645;
     left: 0px;
 
     ${(props) =>
@@ -1720,6 +1719,7 @@ const PeekTrigger = styled.div`
     width: 10px;
     position: fixed;
     background: transparent;
+    z-index: 50;
 `
 
 const SidebarToggleBox = styled(Margin)`

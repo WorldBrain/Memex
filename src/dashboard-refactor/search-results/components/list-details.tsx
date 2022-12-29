@@ -12,6 +12,7 @@ import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-n
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { sizeConstants } from '../../constants'
 
 export interface Props {
     listName: string
@@ -411,6 +412,7 @@ const TopBarContainer = styled(Margin)`
     justify-content: space-between;
     border-radius: 10px;
     padding: 20px 0 5px 0;
+    max-width: ${sizeConstants.searchResults.widthPx}px;
 `
 
 const MarkdownButtonContainer = styled.div`

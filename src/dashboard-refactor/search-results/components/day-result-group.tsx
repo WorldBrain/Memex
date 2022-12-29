@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
-
+import { sizeConstants } from '../../constants'
 export interface Props {
     when?: string
     zIndex?: number
@@ -25,6 +25,7 @@ const DayContainer = styled.div<{ zIndex: number }>`
     flex-direction: column;
     width: fill-available;
     z-index: ${(props) => props.zIndex};
+    max-width: ${sizeConstants.searchResults.widthPx}px;
 `
 
 const DayWhenText = styled.h1`
