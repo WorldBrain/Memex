@@ -334,7 +334,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     this.props.autoFocus ||
                                     this.state.onEditClick
                                 }
-                                placeholder={`Type away for a private note. Save with{' '} ${AnnotationCreate.MOD_KEY} + Enter, + 'Shift' to share.`}
+                                placeholder={`Add a private note. Save with ${AnnotationCreate.MOD_KEY} + Enter, + Shift to share.`}
                                 isRibbonCommentBox={
                                     this.props.isRibbonCommentBox
                                 }
