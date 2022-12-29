@@ -432,7 +432,7 @@ export class AnnotationsSidebar extends React.Component<
                         conversation?.thread != null ||
                         conversation?.replies.length > 0
 
-                    // If annot is owned by the current user, we allow a whole bunch of other functionality
+                    // If annot is owned by the current user (locally available), we allow a whole bunch of other functionality
                     const ownAnnotationProps: Partial<AnnotationEditableProps> = {}
                     if (annotation.localId != null) {
                         ownAnnotationProps.isBulkShareProtected = [

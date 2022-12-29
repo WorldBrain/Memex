@@ -12,7 +12,10 @@ import {
     AnnotationsSidebarContainer,
     Props as ContainerProps,
 } from './AnnotationsSidebarContainer'
-import type { AnnotationsSidebarInPageEventEmitter } from '../types'
+import type {
+    AnnotationCardInstanceLocation,
+    AnnotationsSidebarInPageEventEmitter,
+} from '../types'
 import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
@@ -246,13 +249,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
     protected bindAnnotationFooterEventProps(
         annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'body'>,
-        followedListId?: string,
+        instanceLocation: AnnotationCardInstanceLocation,
     ) {
         const boundProps = super.bindAnnotationFooterEventProps(
             annotation,
-            followedListId,
+            instanceLocation,
         )
-
         return {
             ...boundProps,
             onDeleteConfirm: (e) => {

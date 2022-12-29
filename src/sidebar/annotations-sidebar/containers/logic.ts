@@ -1092,25 +1092,24 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 )
 
-                const annotationCardInstances: SidebarContainerState['annotationCardInstances'] = {}
+                const usersData: SidebarContainerState['users'] = {}
                 for (const annot of sharedAnnotations) {
-                    const {
-                        unifiedId,
-                    } = this.options.annotationsCache.addAnnotation(
-                        cacheUtils.reshapeSharedAnnotationForCache(annot, {}),
+                    if (annot.creator?.user.displayName != null) {
+                        usersData[annot.creatorReference.id] = {
+                            name: annot.creator.user.displayName,
+                            profileImgSrc: annot.creator.profile?.avatarURL,
+                        }
+                    }
+
+                    this.options.annotationsCache.addAnnotation(
+                        cacheUtils.reshapeSharedAnnotationForCache(annot, {
+                            extraData: { unifiedListIds: [unifiedListId] },
+                        }),
                     )
-                    annotationCardInstances[
-                        generateAnnotationCardInstanceId(
-                            { unifiedId },
-                            unifiedListId,
-                        )
-                    ] = initAnnotationCardInstance({ unifiedId })
                 }
 
                 this.emitMutation({
-                    annotationCardInstances: {
-                        $merge: annotationCardInstances,
-                    },
+                    users: { $merge: usersData },
                 })
             },
         )

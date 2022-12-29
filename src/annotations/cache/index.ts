@@ -143,23 +143,32 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             ] = unifiedAnnotationId
         }
 
-        const unifiedListIds = localListIds
-            .map((localListId) => {
-                const unifiedListId = this.localListIdsToCacheIds[localListId]
-                if (!unifiedListId) {
-                    this.warn(
-                        'No cached list data found for given local list IDs on annotation - did you remember to cache lists before annotations?',
-                    )
-                    return null
-                }
+        const unifiedListIds = [
+            ...new Set([
+                ...(annotation.unifiedListIds ?? []),
+                ...localListIds
+                    .map((localListId) => {
+                        const unifiedListId = this.localListIdsToCacheIds[
+                            localListId
+                        ]
+                        if (!unifiedListId) {
+                            this.warn(
+                                'No cached list data found for given local list IDs on annotation - did you remember to cache lists before annotations?',
+                            )
+                            return null
+                        }
 
-                // Side-effect: ensure the list gets a ref back to this annot
-                const unifiedList = this.lists.byId[unifiedListId]
-                unifiedList.unifiedAnnotationIds.push(unifiedAnnotationId)
+                        return unifiedListId
+                    })
+                    .filter((id) => id != null),
+            ]),
+        ]
 
-                return unifiedListId
-            })
-            .filter((id) => id != null)
+        // Ensure each list gets a ref back to this annot
+        unifiedListIds.forEach((unifiedListId) => {
+            const unifiedList = this.lists.byId[unifiedListId]
+            unifiedList.unifiedAnnotationIds.push(unifiedAnnotationId)
+        })
 
         return {
             ...annotation,

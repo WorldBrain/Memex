@@ -234,25 +234,27 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                               </HighlightAction>
                           </TooltipBox>
                       )}
-                      <TooltipBox
-                          tooltipText={
-                              <span>
-                                  <strong>Add/Edit Note</strong>
-                                  <br />
-                                  or double-click card
-                              </span>
-                          }
-                          placement="bottom"
-                      >
-                          <HighlightAction>
-                              <Icon
-                                  onClick={footerDeps.onEditIconClick}
-                                  icon={'edit'}
-                                  heightAndWidth={'20px'}
-                                  padding={'5px'}
-                              />
-                          </HighlightAction>
-                      </TooltipBox>
+                      {footerDeps?.onEditIconClick && (
+                          <TooltipBox
+                              tooltipText={
+                                  <span>
+                                      <strong>Add/Edit Note</strong>
+                                      <br />
+                                      or double-click card
+                                  </span>
+                              }
+                              placement="bottom"
+                          >
+                              <HighlightAction>
+                                  <Icon
+                                      onClick={footerDeps.onEditIconClick}
+                                      icon={'edit'}
+                                      heightAndWidth={'20px'}
+                                      padding={'5px'}
+                                  />
+                              </HighlightAction>
+                          </TooltipBox>
+                      )}
                   </HighlightActionsBox>
               )
             : null
@@ -469,6 +471,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         )
     }
 
+    // TODO: Sort out the confusing conditions in here
     private renderFooter() {
         const {
             isShared,
@@ -491,25 +494,25 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         if ((!isEditing && !isDeleting) || footerDeps == null) {
             return (
                 <DefaultFooterStyled>
-                    <PrimaryAction
-                        onClick={() =>
-                            this.setState({
-                                showShareMenu: true,
-                            })
-                        }
-                        label={shareIconData.label}
-                        icon={shareIconData.icon}
-                        size={'small'}
-                        type={'tertiary'}
-                        innerRef={this.shareButtonRef}
-                        active={this.state.showShareMenu}
-                    />
+                    {footerDeps != null && (
+                        <PrimaryAction
+                            onClick={() =>
+                                this.setState({
+                                    showShareMenu: true,
+                                })
+                            }
+                            label={shareIconData.label}
+                            icon={shareIconData.icon}
+                            size={'small'}
+                            type={'tertiary'}
+                            innerRef={this.shareButtonRef}
+                            active={this.state.showShareMenu}
+                        />
+                    )}
                     <ItemBoxBottom
                         creationInfo={this.creationInfo}
                         actions={this.calcFooterActions()}
                     />
-                    {this.renderSpacePicker(this.props.spacePickerButtonRef)}
-                    {this.renderShareMenu(this.shareButtonRef)}
                 </DefaultFooterStyled>
             )
         }
@@ -576,6 +579,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         </BtnContainerStyled>
                         {/* {this.renderMarkdownHelpButton()} */}
                     </SaveActionBar>
+                    {this.renderSpacePicker(this.props.spacePickerButtonRef)}
                     {this.renderShareMenu(this.shareButtonRef)}
                 </DeletionBox>
             </DefaultFooterStyled>
