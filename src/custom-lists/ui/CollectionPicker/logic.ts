@@ -35,6 +35,7 @@ export interface SpacePickerDependencies {
     spacesBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface
     width?: string
+    autoFocus?: boolean
 }
 
 // TODO: This needs cleanup - so inconsistent
@@ -153,6 +154,7 @@ export default class SpacePickerLogic extends UILogic<
                     selectedListIds: { $set: selectedEntries },
                     displayEntries: { $set: this.defaultEntries },
                 })
+                this._updateFocus(0, this.defaultEntries)
             })
 
             await executeUITask(this, 'loadingShareStates', async () => {
@@ -466,6 +468,9 @@ export default class SpacePickerLogic extends UILogic<
 
             this.emitMutation({ displayEntries: { $set: displayEntries } })
             this._setCreateEntryDisplay(displayEntries, query)
+            if (displayEntries.length > 0) {
+                this._updateFocus(0, displayEntries)
+            }
         })
     }
 

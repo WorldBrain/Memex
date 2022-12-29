@@ -214,7 +214,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
             >
                 <DomainPicker
                     {...this.props.domainPickerProps}
-                    searchInputPlaceholder="Add domain filters"
+                    searchInputPlaceholder="Add a domain filters"
                     removeToolTipText="Remove filter"
                 />
             </PopoutBox>

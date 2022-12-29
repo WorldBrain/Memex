@@ -3,23 +3,22 @@ import styled from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 interface Props {
     onPress: () => void
     children?: ReactNode | ReactNode[]
     resultItem: ReactNode
+    resultsCount: number
 }
 
 export default (props: Props) => {
     return (
         <AddNew onClick={props.onPress}>
             <ContentBox>
-                <Icon
-                    icon={icons.plus}
-                    color={'backgroundColor'}
-                    heightAndWidth={'18px'}
-                    hoverOff
-                />
                 <Title>Create "{props.resultItem}"</Title>
+                {props.resultsCount === 0 && (
+                    <KeyboardShortcuts size={'small'} keys={['Enter']} />
+                )}
             </ContentBox>
             {props.children}
         </AddNew>
@@ -65,4 +64,5 @@ const Title = styled.span`
     color: ${(props) => props.theme.colors.backgroundColor};
     font-size: 14px;
     display: flex;
+    flex: 1;
 `

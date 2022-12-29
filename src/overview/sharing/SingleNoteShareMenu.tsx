@@ -315,6 +315,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                 'unselect',
                             )}
                             width={'fill-available'}
+                            autoFocus={false}
                         />
                     </>
                 ) : (

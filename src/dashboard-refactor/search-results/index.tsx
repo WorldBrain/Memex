@@ -786,7 +786,11 @@ export default class SearchResultsContainer extends React.Component<
         }
 
         if (this.props.searchPaginationState === 'running') {
-            days.push(this.renderLoader({ key: 'pagination-loader' }))
+            days.push(
+                <PaginationLoaderBox>
+                    {this.renderLoader({ key: 'pagination-loader' })}
+                </PaginationLoaderBox>,
+            )
         } else if (
             !this.props.areResultsExhausted &&
             this.props.searchState !== 'pristine'
@@ -963,6 +967,10 @@ export default class SearchResultsContainer extends React.Component<
         )
     }
 }
+
+const PaginationLoaderBox = styled.div`
+    margin-top: -30px;
+`
 
 const IconContainerRight = styled.div`
     position: absolute;

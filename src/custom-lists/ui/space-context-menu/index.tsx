@@ -275,7 +275,7 @@ const ContextMenuContainer = styled.div`
     grid-gap: 5px;
     flex-direction: column;
     width: fill-available;
-    padding: 15px 17px 10px 17px;
+    padding: 5px 10px 10px 10px;
     min-height: fit-content;
     height: fit-content;
     justify-content: center;

@@ -114,15 +114,15 @@ export default function ListsSegment({
                                 </ListSpaceContainer>
                             )
                         })}
+                    <AddSpacesButton
+                        hasNoLists={lists.length === 0}
+                        onEditBtnClick={onEditBtnClick}
+                        renderSpacePicker={renderSpacePicker}
+                        tabIndex={tabIndex}
+                        newLineOrientation={newLineOrientation}
+                        spacePickerButtonRef={spacePickerButtonRef}
+                    />
                 </SpacesListContainer>
-                <AddSpacesButton
-                    hasNoLists={lists.length === 0}
-                    onEditBtnClick={onEditBtnClick}
-                    renderSpacePicker={renderSpacePicker}
-                    tabIndex={tabIndex}
-                    newLineOrientation={newLineOrientation}
-                    spacePickerButtonRef={spacePickerButtonRef}
-                />
             </ListsContainer>
         </Container>
     )
@@ -132,6 +132,7 @@ const SpacesListContainer = styled.div`
     width: fill-available;
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
 `
 
 const Container = styled.div<{ padding: string }>`

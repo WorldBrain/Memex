@@ -38,6 +38,7 @@ interface State {
 
 class ShareAnnotationMenu extends PureComponent<Props, State> {
     copyTimeout?: ReturnType<typeof setTimeout>
+    menuRef: React.RefObject<HTMLDivElement>
     state: State = { copyState: 'pristine' }
 
     componentDidMount() {
@@ -99,7 +100,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
     private renderMain() {
         return (
-            <Menu context={this.props.context}>
+            <Menu ref={this.menuRef} context={this.props.context}>
                 {this.props.isLoading ? (
                     <LoadingBox>
                         <LoadingIndicator size={30} />
@@ -183,6 +184,10 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     }
 
     render() {
+        if (this.menuRef) {
+            this.menuRef.current.focus()
+        }
+
         return this.renderMain()
     }
 }

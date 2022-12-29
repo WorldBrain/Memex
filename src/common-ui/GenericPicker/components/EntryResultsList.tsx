@@ -49,7 +49,7 @@ const StyledContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin: 0 5px;
+    margin: 5px 0px 0 0px;
     border-radius: 6px;
     flex-direction: column;
 
