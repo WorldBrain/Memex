@@ -7,11 +7,7 @@ import AnnotationsSidebar, {
     AnnotationsSidebar as AnnotationsSidebarComponent,
     AnnotationsSidebarProps,
 } from '../components/AnnotationsSidebar'
-import {
-    SidebarContainerLogic,
-    SidebarContainerOptions,
-    INIT_FORM_STATE,
-} from './logic'
+import { SidebarContainerLogic, SidebarContainerOptions } from './logic'
 
 import type { SidebarContainerState, SidebarContainerEvents } from './types'
 import { ConfirmModal } from 'src/common-ui/components'
@@ -417,22 +413,18 @@ export class AnnotationsSidebarContainer<
     }
 
     private renderCopyPasterManagerForAnnotation = (
-        followedListId?: string,
-    ) => (currentAnnotationId: string) => {
-        // const state =
-        //     followedListId != null
-        //         ? this.state.followedLists.byId[followedListId]
-        //               .activeCopyPasterAnnotationId
-        //         : this.state.activeCopyPasterAnnotationId
-
-        // if (state !== currentAnnotationId) {
-        //     return null
-        // }
-
+        instanceLocation: AnnotationCardInstanceLocation,
+    ) => (unifiedId: UnifiedAnnotation['unifiedId']) => {
+        const annotation = this.props.annotationsCache.annotations.byId[
+            unifiedId
+        ]
+        if (!annotation.localId) {
+            return
+        }
         return (
             <PageNotesCopyPaster
                 copyPaster={this.props.copyPaster}
-                annotationUrls={[currentAnnotationId]}
+                annotationUrls={[annotation.localId]}
                 normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
             />
         )
@@ -440,11 +432,10 @@ export class AnnotationsSidebarContainer<
 
     private renderListPickerForAnnotation = (
         instanceLocation: AnnotationCardInstanceLocation,
-    ) => (currentAnnotationId: string) => {
-        const annotation = this.props.annotationsCache.getAnnotationByLocalId(
-            currentAnnotationId,
-        )
-
+    ) => (unifiedId: UnifiedAnnotation['unifiedId']) => {
+        const annotation = this.props.annotationsCache.annotations.byId[
+            unifiedId
+        ]
         return (
             <CollectionPicker
                 {...this.getSpacePickerProps({
@@ -458,10 +449,13 @@ export class AnnotationsSidebarContainer<
 
     private renderShareMenuForAnnotation = (
         instanceLocation: AnnotationCardInstanceLocation,
-    ) => (currentAnnotationId: string) => {
-        const annotation = this.props.annotationsCache.getAnnotationByLocalId(
-            currentAnnotationId,
-        )
+    ) => (unifiedId: UnifiedAnnotation['unifiedId']) => {
+        const annotation = this.props.annotationsCache.annotations.byId[
+            unifiedId
+        ]
+        if (!annotation.localId) {
+            return
+        }
         return (
             <SingleNoteShareMenu
                 getRemoteListIdForLocalId={(localListId) =>
@@ -476,10 +470,10 @@ export class AnnotationsSidebarContainer<
                 contentSharingBG={this.props.contentSharing}
                 annotationsBG={this.props.annotations}
                 copyLink={(link) => this.processEvent('copyNoteLink', { link })}
-                annotationUrl={currentAnnotationId}
+                annotationUrl={annotation.localId}
                 postShareHook={(state, opts) =>
                     this.processEvent('updateAnnotationShareInfo', {
-                        annotationUrl: currentAnnotationId,
+                        annotationUrl: annotation.localId,
                         privacyLevel: state.privacyLevel,
                         keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                     })

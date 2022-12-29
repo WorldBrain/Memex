@@ -21,7 +21,7 @@ import type { AnnotationInterface } from 'src/annotations/background/types'
 import browser from 'webextension-polyfill'
 import * as PDFs from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
 import { throttle } from 'lodash'
-import { hexToRgb } from 'hex-to-rgb'
+import hexToRgb from 'hex-to-rgb'
 
 const styles = require('src/highlighting/ui/styles.css')
 

@@ -773,7 +773,7 @@ export class AnnotationsSidebar extends React.Component<
                     <AnnotationsSectionStyled>
                         {this.renderAnnotationsEditable(
                             cacheUtils.getOwnAnnotationsArray(
-                                this.props.annotationsCache,
+                                this.props.annotations,
                                 this.props.currentUser?.id.toString(),
                             ),
                         )}

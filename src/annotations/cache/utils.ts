@@ -145,10 +145,10 @@ export const reshapeFollowedListForCache = (
 })
 
 export const getOwnAnnotationsArray = (
-    cache: PageAnnotationsCacheInterface,
+    annotations: PageAnnotationsCacheInterface['annotations'],
     userId?: string,
 ): UnifiedAnnotation[] =>
-    normalizedStateToArray(cache.annotations).filter(
+    normalizedStateToArray(annotations).filter(
         (annot) =>
             annot.creator == null ||
             (userId ? annot.creator.id === userId : false),

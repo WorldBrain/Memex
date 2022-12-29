@@ -31,6 +31,7 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
+import type { UnifiedAnnotation } from '../cache/types'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -77,9 +78,15 @@ export interface AnnotationProps {
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
-    renderListsPickerForAnnotation?: (id: string) => JSX.Element
-    renderCopyPasterForAnnotation?: (id: string) => JSX.Element
-    renderShareMenuForAnnotation?: (id: string) => JSX.Element
+    renderListsPickerForAnnotation?: (
+        unifiedId: UnifiedAnnotation['unifiedId'],
+    ) => JSX.Element
+    renderCopyPasterForAnnotation?: (
+        unifiedId: UnifiedAnnotation['unifiedId'],
+    ) => JSX.Element
+    renderShareMenuForAnnotation?: (
+        unifiedId: UnifiedAnnotation['unifiedId'],
+    ) => JSX.Element
 }
 
 export interface AnnotationEditableEventProps {
@@ -481,7 +488,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             this.hasSharedLists,
         )
 
-        if (!isEditing || footerDeps == null) {
+        if ((!isEditing && !isDeleting) || footerDeps == null) {
             return (
                 <DefaultFooterStyled>
                     <PrimaryAction
@@ -501,10 +508,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         creationInfo={this.creationInfo}
                         actions={this.calcFooterActions()}
                     />
-                    {this.state.showSpacePicker === 'footer' &&
-                        this.renderSpacePicker(this.props.spacePickerButtonRef)}
-                    {this.state.showShareMenu &&
-                        this.renderShareMenu(this.shareButtonRef)}
+                    {this.renderSpacePicker(this.props.spacePickerButtonRef)}
+                    {this.renderShareMenu(this.shareButtonRef)}
                 </DefaultFooterStyled>
             )
         }
@@ -543,15 +548,18 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         return (
             <DefaultFooterStyled>
                 <PrimaryAction
-                    onClick={footerDeps.onShareClick}
+                    onClick={() =>
+                        this.setState({
+                            showShareMenu: true,
+                        })
+                    }
                     label={shareIconData.label}
                     icon={shareIconData.icon}
                     size={'small'}
                     type={'tertiary'}
                     innerRef={this.shareButtonRef}
-                    active={this.props.activeShareMenuNoteId && true}
+                    active={this.state.showShareMenu}
                 />
-
                 <DeletionBox>
                     {isDeleting && (
                         <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
@@ -568,6 +576,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         </BtnContainerStyled>
                         {/* {this.renderMarkdownHelpButton()} */}
                     </SaveActionBar>
+                    {this.renderShareMenu(this.shareButtonRef)}
                 </DeletionBox>
             </DefaultFooterStyled>
         )
