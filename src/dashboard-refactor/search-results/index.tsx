@@ -1023,6 +1023,7 @@ const TutorialContainer = styled.div<{ showTutorialVideo: boolean }>`
     margin-top: 20px;
     margin-bottom: 40px;
     width: fill-available;
+    max-width: calc(${sizeConstants.searchResults.widthPx}px - 70px);
 
     ${(props) =>
         props.showTutorialVideo &&

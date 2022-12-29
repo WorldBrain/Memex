@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import Mousetrap from 'mousetrap'
 import { TaskState } from 'ui-logic-core/lib/types'
 
@@ -99,7 +99,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
     private renderMain() {
         return (
-            <Menu>
+            <Menu context={this.props.context}>
                 {this.props.isLoading ? (
                     <LoadingBox>
                         <LoadingIndicator size={30} />
@@ -111,7 +111,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                 <PrivacyContainer
                                     isLinkShown={this.props.showLink}
                                 >
-                                    <TopArea>
+                                    <TopArea context={this.props.context}>
                                         {this.props.privacyOptionsTitleCopy ? (
                                             <PrivacyTitle>
                                                 {
@@ -183,13 +183,14 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     }
 
     render() {
+        console.log(this.props.context)
         return this.renderMain()
     }
 }
 
 export default ShareAnnotationMenu
 
-const Menu = styled.div`
+const Menu = styled.div<{ context: string }>`
     padding: 5px 0px;
     width: 370px;
     z-index: 10;
@@ -201,15 +202,36 @@ const Menu = styled.div`
     &:first-child {
         padding: 15px 0px 0px 0px;
     }
+
+    ${(props) =>
+        props.context === 'AllNotesShare' &&
+        css`
+            height: fit-content;
+            width: 350px;
+
+            &:first-child {
+                padding: 15px 15px 15px 15px;
+            }
+        `};
 `
 
-const TopArea = styled.div`
+const TopArea = styled.div<{ context: string }>`
     padding: 10px 15px 10px 15px;
     height: 80px;
 
     &:first-child {
         padding: 0px 15px 0px 15px;
     }
+
+    ${(props) =>
+        props.context === 'AllNotesShare' &&
+        css`
+            height: fit-content;
+
+            &:first-child {
+                padding: unset;
+            }
+        `};
 `
 
 const LinkCopierBox = styled.div`
@@ -277,9 +299,9 @@ const PrivacyContainer = styled.div<{ isLinkShown: boolean }>`
 
 const PrivacyTitle = styled.div`
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 400;
     margin-bottom: 10px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale8};
     white-space: nowrap;
 `
 

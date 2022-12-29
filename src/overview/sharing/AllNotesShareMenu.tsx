@@ -116,14 +116,14 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                         shortcut: `shift+${AllNotesShareMenu.MOD_KEY}+enter`,
                         description:
                             'Auto-added to Spaces the page is shared to',
-                        icon: 'webLogo',
+                        icon: 'globe',
                         onClick: this.handleSetShared,
                     },
                     {
                         title: 'Private',
                         shortcut: `${AllNotesShareMenu.MOD_KEY}+enter`,
                         description: 'Private to you, until made public',
-                        icon: 'person',
+                        icon: 'personFine',
                         onClick: this.handleSetPrivate,
                     },
                 ]}
