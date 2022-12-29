@@ -183,7 +183,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     }
 
     render() {
-        console.log(this.props.context)
         return this.renderMain()
     }
 }
