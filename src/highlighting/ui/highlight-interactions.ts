@@ -19,9 +19,10 @@ import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/util
 import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import browser from 'webextension-polyfill'
-import * as PDFs from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
+import * as PDFjsHighlighting from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
 import { throttle } from 'lodash'
 import hexToRgb from 'hex-to-rgb'
+import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
 
 const styles = require('src/highlighting/ui/styles.css')
 
@@ -83,8 +84,8 @@ export class HighlightRenderer implements HighlightRendererInterface {
     private highlightedElsByUnifiedAnnotId: {
         [unifiedId: string]: HTMLElement[]
     } = {}
-    defaultHighlightColor
-    currentActiveHighlight
+    private highlightColor = DEFAULT_HIGHLIGHT_COLOR
+    private currentActiveHighlight: UnifiedAnnotation
 
     constructor(
         private deps: {
@@ -92,6 +93,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
         },
     ) {
         document.addEventListener('click', this.handleOutsideHighlightClick)
+
+        browser.storage.onChanged.addListener((changes) => {
+            if (changes[HIGHLIGHT_COLOR_KEY]?.newValue != null) {
+                this.highlightColor = changes[HIGHLIGHT_COLOR_KEY].newValue
+            }
+        })
     }
 
     private handleOutsideHighlightClick = async (e: MouseEvent) => {
@@ -247,7 +254,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         onClick,
         temporary = false,
     ) => {
-        let highlightColor = this.defaultHighlightColor
+        let highlightColor = this.highlightColor
         if (!highlight?.selector?.descriptor?.content) {
             return
         }
@@ -284,7 +291,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 for (let highlights of highlightedElements) {
                     highlights.style.setProperty(
                         '--defaultHighlightColorCSS',
-                        this.defaultHighlightColor,
+                        this.highlightColor,
                     )
 
                     if (highlights.parentNode.nodeName === 'A') {
@@ -324,16 +331,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
         onClick,
         temp,
     ) => {
-        const highlightsColor = await browser.storage.local.get(
-            '@highlight-colors',
-        )
-        this.defaultHighlightColor = hexToRgb(
-            highlightsColor['@highlight-colors'],
-        ).toString()
-
-        browser.storage.onChanged.addListener((change) => {
-            this.defaultHighlightColor = change['@highlight-colors'].newValue
+        const {
+            [HIGHLIGHT_COLOR_KEY]: highlightsColor,
+        } = await browser.storage.local.get({
+            [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
         })
+        this.highlightColor = hexToRgb(highlightsColor).toString()
 
         await Promise.all(
             highlights.map(async (highlight) => {
@@ -553,7 +556,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
             if (!highlight.classList.contains('selectedHighlight')) {
                 highlight.style.setProperty(
                     '--defaultHighlightColorCSS',
-                    this.defaultHighlightColor,
+                    this.highlightColor,
                 )
             }
         })
@@ -575,7 +578,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 // highlight.style['background-color'] = this.defaultHighlightColor
                 highlight.style.setProperty(
                     '--defaultHighlightColorCSS',
-                    this.defaultHighlightColor,
+                    this.highlightColor,
                 )
             }
         })
@@ -594,7 +597,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const pdfViewer = globalThis.PDFViewerApplication?.pdfViewer
 
         if (pdfViewer) {
-            PDFs.anchor(
+            PDFjsHighlighting.anchor(
                 document.body,
                 annotation?.selector.descriptor.content,
                 true,
@@ -606,7 +609,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
             highlight.classList.remove(styles['hoveredHighlight'])
             highlight.style.setProperty(
                 '--defaultHighlightColorCSS',
-                this.defaultHighlightColor,
+                this.highlightColor,
             )
         })
     }
@@ -622,7 +625,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 highlight.classList.remove(styles['selectedHighlight'])
                 highlight.style.setProperty(
                     '--defaultHighlightColorCSS',
-                    this.defaultHighlightColor,
+                    this.highlightColor,
                 )
                 // highlight.style['background-color'] = this.defaultHighlightColor
                 // highlight.style['border-bottom'] = 'unset'
@@ -643,13 +646,13 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 highlight.classList.remove(styles['selectedHighlight'])
                 highlight.style.setProperty(
                     '--defaultHighlightColorCSS',
-                    this.defaultHighlightColor,
+                    this.highlightColor,
                 )
             } else {
                 highlight.classList.remove(styles['selectedHighlight'])
                 highlight.style.setProperty(
                     '--defaultHighlightColorCSS',
-                    this.defaultHighlightColor,
+                    this.highlightColor,
                 )
             }
         })

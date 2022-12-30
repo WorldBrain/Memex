@@ -31,6 +31,10 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { HexColorPicker } from 'react-colorful'
+import {
+    DEFAULT_HIGHLIGHT_COLOR,
+    HIGHLIGHT_COLOR_KEY,
+} from 'src/highlighting/constants'
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
@@ -82,7 +86,7 @@ export default class Ribbon extends Component<Props, State> {
         shortcutsReady: false,
         blockListValue: this.getDomain(window.location.href),
         showColorPicker: false,
-        pickerColor: '',
+        pickerColor: DEFAULT_HIGHLIGHT_COLOR,
     }
 
     constructor(props: Props) {
@@ -105,19 +109,16 @@ export default class Ribbon extends Component<Props, State> {
     async componentDidMount() {
         this.keyboardShortcuts = await getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
-        this.initialiseHighlightColor()
+        await this.initialiseHighlightColor()
     }
 
     async initialiseHighlightColor() {
-        const highlightColor = await browser.storage.local.get(
-            '@highlight-colors',
-        )
-
-        let highlightColorNew = highlightColor['@highlight-colors']
-
-        this.setState({
-            pickerColor: highlightColorNew,
+        const {
+            [HIGHLIGHT_COLOR_KEY]: highlightsColor,
+        } = await browser.storage.local.get({
+            [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
         })
+        this.setState({ pickerColor: highlightsColor })
     }
 
     updatePickerColor(value) {
@@ -136,7 +137,7 @@ export default class Ribbon extends Component<Props, State> {
 
     async saveHighlightColor() {
         await browser.storage.local.set({
-            '@highlight-colors': this.state.pickerColor,
+            [HIGHLIGHT_COLOR_KEY]: this.state.pickerColor,
         })
     }
 
@@ -1226,7 +1227,7 @@ export const GlobalStyle = createGlobalStyle`
     user-select: none;
     cursor: default;
   }
-  
+
   .react-colorful__saturation {
     position: relative;
     flex-grow: 1;
@@ -1236,7 +1237,7 @@ export const GlobalStyle = createGlobalStyle`
     background-image: linear-gradient(to top, #000, rgba(0, 0, 0, 0)),
       linear-gradient(to right, #fff, rgba(255, 255, 255, 0));
   }
-  
+
   .react-colorful__pointer-fill,
   .react-colorful__alpha-gradient {
     content: "";
@@ -1248,19 +1249,19 @@ export const GlobalStyle = createGlobalStyle`
     pointer-events: none;
     border-radius: inherit;
   }
-  
+
   /* Improve elements rendering on light backgrounds */
   .react-colorful__alpha-gradient,
   .react-colorful__saturation {
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
   }
-  
+
   .react-colorful__hue,
   .react-colorful__alpha {
     position: relative;
     height: 24px;
   }
-  
+
   .react-colorful__hue {
     background: linear-gradient(
       to right,
@@ -1273,11 +1274,11 @@ export const GlobalStyle = createGlobalStyle`
       #f00 100%
     );
   }
-  
+
   .react-colorful__last-control {
     border-radius: 0 0 8px 8px;
   }
-  
+
   .react-colorful__interactive {
     position: absolute;
     left: 0;
@@ -1289,7 +1290,7 @@ export const GlobalStyle = createGlobalStyle`
     /* Don't trigger the default scrolling behavior when the event is originating from this element */
     touch-action: none;
   }
-  
+
   .react-colorful__pointer {
     position: absolute;
     z-index: 1;
@@ -1302,26 +1303,26 @@ export const GlobalStyle = createGlobalStyle`
     border-radius: 50%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
-  
+
   .react-colorful__interactive:focus .react-colorful__pointer {
     transform: translate(-50%, -50%) scale(1.1);
   }
-  
+
   /* Chessboard-like pattern for alpha related elements */
   .react-colorful__alpha,
   .react-colorful__alpha-pointer {
     background-color: #fff;
     background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill-opacity=".05"><rect x="8" width="8" height="8"/><rect y="8" width="8" height="8"/></svg>');
   }
-  
+
   /* Display the saturation pointer over the hue one */
   .react-colorful__saturation-pointer {
     z-index: 3;
   }
-  
+
   /* Display the hue pointer over the alpha one */
   .react-colorful__hue-pointer {
     z-index: 2;
   }
-  
+
 `
