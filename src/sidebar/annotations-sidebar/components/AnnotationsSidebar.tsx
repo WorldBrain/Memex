@@ -115,7 +115,8 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     onCopyBtnClick: () => void
     onMenuItemClick: (sortingFn) => void
 
-    onListSelect: (unifiedListId: UnifiedList['unifiedId']) => void
+    onUnifiedListSelect: (unifiedListId: UnifiedList['unifiedId']) => void
+    onLocalListSelect: (localListId: number) => void
     onResetSpaceSelect: () => void
 
     copyPaster: any
@@ -447,7 +448,10 @@ export class AnnotationsSidebar extends React.Component<
                         ].includes(annotation.privacyLevel)
                         ownAnnotationProps.appendRepliesToggle = true
                         ownAnnotationProps.unifiedId = annotation.unifiedId
-                        ownAnnotationProps.lists = [] // TODO: localAnnotation.unifiedListIds
+                        ownAnnotationProps.lists = cacheUtils.getLocalListIdsForCacheIds(
+                            this.props.annotationsCache,
+                            annotation.unifiedListIds,
+                        )
                         ownAnnotationProps.comment = annotation.comment
                         ownAnnotationProps.isShared = [
                             AnnotationPrivacyLevels.SHARED,
@@ -507,8 +511,7 @@ export class AnnotationsSidebar extends React.Component<
                                 onHighlightClick={this.props.setActiveAnnotation(
                                     annotation.unifiedId,
                                 )}
-                                // TODO: update lists in this comp to be cache ones
-                                // onListClick={this.props.onListSelect}
+                                onListClick={this.props.onLocalListSelect}
                                 isClickable={
                                     this.props.theme.canClickAnnotations &&
                                     annotation.body?.length > 0
@@ -570,7 +573,9 @@ export class AnnotationsSidebar extends React.Component<
                 >
                     {/* <React.Fragment key={listId}> */}
                     <FollowedListRow
-                        onClick={() => this.props.onListSelect(unifiedListId)}
+                        onClick={() =>
+                            this.props.onUnifiedListSelect(unifiedListId)
+                        }
                         title={listData.name}
                     >
                         <FollowedListTitleContainer>
@@ -885,8 +890,10 @@ export class AnnotationsSidebar extends React.Component<
                         <AnnotationEditable
                             {...annot}
                             {...this.props}
-                            lists={[]} // TODO: Actually pass in needed lists data here
-                            // lists={annot.unifiedListIds.map( )}
+                            lists={cacheUtils.getLocalListIdsForCacheIds(
+                                this.props.annotationsCache,
+                                annot.unifiedListIds,
+                            )}
                             body={annot.body}
                             comment={annot.comment}
                             isShared={isShared}
@@ -903,8 +910,7 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.activeAnnotationId ===
                                 annot.unifiedId
                             }
-                            // TODO: update lists in this comp to be cache ones
-                            // onListClick={this.props.onListSelect}
+                            onListClick={this.props.onLocalListSelect}
                             onHighlightClick={this.props.setActiveAnnotation(
                                 annot.unifiedId,
                             )}

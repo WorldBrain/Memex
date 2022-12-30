@@ -170,6 +170,14 @@ export const getListHighlightsArray = (
 ): UnifiedAnnotation[] =>
     cache.highlights.filter((annot) => annot.unifiedListIds.includes(listId))
 
+export const getLocalListIdsForCacheIds = (
+    cache: Pick<PageAnnotationsCacheInterface, 'lists'>,
+    cacheIds: string[],
+): number[] =>
+    cacheIds
+        .map((listId) => cache.lists.byId[listId]?.localId)
+        .filter((id) => id != null)
+
 // NOTE: this is tested as part of the sidebar logic tests
 export async function hydrateCache({
     bgModules,

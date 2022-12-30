@@ -46,6 +46,7 @@ import type {
 } from 'src/annotations/cache/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import * as cacheUtils from 'src/annotations/cache/utils'
 import { generateAnnotationCardInstanceId } from './utils'
 import type { AnnotationCardInstanceLocation } from '../types'
 
@@ -112,11 +113,11 @@ export class AnnotationsSidebarContainer<
     }
 
     private getListDetailsById: ListDetailsGetter = (listId) => {
-        const listDetails = this.props.annotationsCache.getListByLocalId(listId)
+        const list = this.props.annotationsCache.getListByLocalId(listId)
         return {
-            name: listDetails?.name ?? 'Missing list',
-            isShared: listDetails?.remoteId != null,
-            description: listDetails?.description,
+            name: list?.name ?? 'Missing list',
+            isShared: list?.remoteId != null,
+            description: list?.description,
         }
     }
 
@@ -374,40 +375,46 @@ export class AnnotationsSidebarContainer<
             params.showExternalConfirmations
                 ? 'setSelectNoteSpaceConfirmArgs'
                 : 'updateListsForAnnotation'
+
         return {
             spacesBG: customLists,
             contentSharingBG: contentSharing,
             createNewEntry: this.createNewList,
-            initialSelectedListIds: () => [], //annotation.unifiedListIds ?? [],  TODO: map to local IDs
+            initialSelectedListIds: () =>
+                cacheUtils.getLocalListIdsForCacheIds(
+                    annotationsCache,
+                    params.annotation.unifiedListIds,
+                ),
             onSubmit: async () => {
-                if (annotationCardInstance.isCommentEditing) {
-                    await this.processEvent('editAnnotation', {
-                        unifiedAnnotationId: params.annotation.unifiedId,
-                        instanceLocation: 'annotations-tab',
-                        shouldShare: [
-                            AnnotationPrivacyLevels.SHARED,
-                            AnnotationPrivacyLevels.SHARED_PROTECTED,
-                        ].includes(params.annotation.privacyLevel),
-                        isProtected: [
-                            AnnotationPrivacyLevels.PROTECTED,
-                            AnnotationPrivacyLevels.SHARED_PROTECTED,
-                        ].includes(params.annotation.privacyLevel),
-                        mainBtnPressed: true,
-                    })
+                if (!annotationCardInstance.isCommentEditing) {
+                    return
                 }
+                await this.processEvent('editAnnotation', {
+                    unifiedAnnotationId: params.annotation.unifiedId,
+                    instanceLocation: params.instanceLocation,
+                    shouldShare: [
+                        AnnotationPrivacyLevels.SHARED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(params.annotation.privacyLevel),
+                    isProtected: [
+                        AnnotationPrivacyLevels.PROTECTED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(params.annotation.privacyLevel),
+                    mainBtnPressed: true,
+                })
             },
             selectEntry: async (listId, options) =>
                 this.processEvent(getUpdateListsEvent(listId), {
                     added: listId,
                     deleted: null,
-                    unifiedAnnotationId: params.annotation.localId,
+                    unifiedAnnotationId: params.annotation.unifiedId,
                     options,
                 }),
             unselectEntry: async (listId) =>
                 this.processEvent('updateListsForAnnotation', {
                     added: null,
                     deleted: listId,
-                    unifiedAnnotationId: params.annotation.localId,
+                    unifiedAnnotationId: params.annotation.unifiedId,
                 }),
         }
     }
@@ -934,11 +941,21 @@ export class AnnotationsSidebarContainer<
                             {...this.state}
                             currentUser={this.props.currentUser}
                             annotationsCache={this.props.annotationsCache}
-                            onListSelect={(unifiedListId) =>
+                            onUnifiedListSelect={(unifiedListId) =>
                                 this.processEvent('setSelectedList', {
                                     unifiedListId,
                                 })
                             }
+                            onLocalListSelect={async (localListId) => {
+                                const unifiedList = this.props.annotationsCache.getListByLocalId(
+                                    localListId,
+                                )
+                                if (unifiedList != null) {
+                                    await this.processEvent('setSelectedList', {
+                                        unifiedListId: unifiedList.unifiedId,
+                                    })
+                                }
+                            }}
                             onResetSpaceSelect={() =>
                                 this.processEvent('setSelectedList', {
                                     unifiedListId: null,

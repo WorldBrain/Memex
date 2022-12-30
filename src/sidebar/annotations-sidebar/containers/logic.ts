@@ -58,6 +58,7 @@ import {
     initListInstance,
 } from './utils'
 import { browser, Storage } from 'webextension-polyfill-ts'
+import type { AnnotationSharingState } from 'src/content-sharing/background/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -836,14 +837,66 @@ export class SidebarContainerLogic extends UILogic<
 
     updateListsForAnnotation: EventHandler<
         'updateListsForAnnotation'
-    > = async ({ event, previousState }) => {
+    > = async ({ event }) => {
+        const {
+            annotationsCache,
+            contentSharing: contentSharingBG,
+        } = this.options
         this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
-        // TODO: proeprly map lists here
-        // this.options.annotationsCache.updateAnnotation({
-        //     unifiedId: event.unifiedAnnotationId,
+        const existing =
+            annotationsCache.annotations.byId[event.unifiedAnnotationId]
+        if (!existing) {
+            console.warn(
+                "Attempted to update lists for annotation that isn't cached:",
+                event,
+                annotationsCache,
+            )
+            return
+        }
+        if (!existing.localId) {
+            console.warn(
+                `Attempted to update lists for annotation that isn't owned:`,
+                event,
+                annotationsCache,
+            )
+            return
+        }
 
-        // })
+        const unifiedListIds = new Set(existing.unifiedListIds)
+        let bgPromise: Promise<{ sharingState: AnnotationSharingState }>
+        if (event.added != null) {
+            const cacheListId = annotationsCache.getListByLocalId(event.added)
+                ?.unifiedId
+            unifiedListIds.add(cacheListId)
+            bgPromise = contentSharingBG.shareAnnotationToSomeLists({
+                annotationUrl: existing.localId,
+                localListIds: [event.added],
+                protectAnnotation: event.options?.protectAnnotation,
+            })
+        } else if (event.deleted != null) {
+            const cacheListId = annotationsCache.getListByLocalId(event.deleted)
+                ?.unifiedId
+            unifiedListIds.delete(cacheListId)
+            bgPromise = contentSharingBG.unshareAnnotationFromList({
+                annotationUrl: existing.localId,
+                localListId: event.deleted,
+            })
+        }
+
+        annotationsCache.updateAnnotation({
+            comment: existing.comment,
+            remoteId: existing.remoteId,
+            unifiedListIds: [...unifiedListIds],
+            unifiedId: event.unifiedAnnotationId,
+            privacyLevel: event.options?.protectAnnotation
+                ? AnnotationPrivacyLevels.PROTECTED
+                : existing.privacyLevel,
+        })
+
+        // TODO: update state again with result here
+        // TODO: ensure private->public inherits page shared lists
+        const { sharingState } = await bgPromise
     }
 
     setNewPageNoteLists: EventHandler<'setNewPageNoteLists'> = async ({

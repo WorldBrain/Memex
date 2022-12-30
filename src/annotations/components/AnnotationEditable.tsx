@@ -515,7 +515,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         creationInfo={this.creationInfo}
                         actions={this.calcFooterActions()}
                     />
-                    {this.renderSpacePicker(this.props.spacePickerButtonRef)}
+                    {this.renderSpacePicker(
+                        this.props.spacePickerButtonRef,
+                        'footer',
+                    )}
                     {this.renderShareMenu(this.shareButtonRef)}
                 </DefaultFooterStyled>
             )
@@ -583,20 +586,21 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         </BtnContainerStyled>
                         {/* {this.renderMarkdownHelpButton()} */}
                     </SaveActionBar>
-                    {this.renderSpacePicker(this.props.spacePickerButtonRef)}
+                    {this.renderSpacePicker(
+                        this.props.spacePickerButtonRef,
+                        'footer',
+                    )}
                     {this.renderShareMenu(this.shareButtonRef)}
                 </DeletionBox>
             </DefaultFooterStyled>
         )
     }
 
-    private renderSpacePicker(referenceElement: React.RefObject<HTMLElement>) {
-        if (
-            !(
-                this.state.showSpacePicker === 'lists-bar' ||
-                this.state.showSpacePicker === 'footer'
-            )
-        ) {
+    private renderSpacePicker = (
+        referenceElement: React.RefObject<HTMLElement>,
+        showWhen: ListPickerShowState,
+    ) => {
+        if (this.state.showSpacePicker !== showWhen) {
             return
         }
 
@@ -734,8 +738,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             {this.renderCopyPaster(this.copyPasterButtonRef)}
                         </AnnotationStyled>
                     </ItemBox>
-                    {this.state.showSpacePicker === 'lists-bar' &&
-                        this.renderSpacePicker(this.spacePickerBarRef)}
+                    {this.renderSpacePicker(
+                        this.spacePickerBarRef,
+                        'lists-bar',
+                    )}
                 </AnnotationBox>
                 {this.state.showQuickTutorial && (
                     <PopoutBox
