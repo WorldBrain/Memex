@@ -1198,7 +1198,7 @@ const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     /* padding: 0px 15px; */
     height: fit-content;
     max-width: calc(${sizeConstants.searchResults.widthPx}px);
-    z-index: 2147483639;
+    z-index: 30;
     position: sticky;
     top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
     background: ${(props) => props.theme.colors.backgroundColor};
