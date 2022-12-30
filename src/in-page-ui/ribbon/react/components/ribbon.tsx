@@ -56,6 +56,7 @@ interface State {
     blockListValue: string
     showColorPicker: boolean
     pickerColor: string
+    showPickerSave: boolean
 }
 
 export default class Ribbon extends Component<Props, State> {
@@ -82,7 +83,8 @@ export default class Ribbon extends Component<Props, State> {
         shortcutsReady: false,
         blockListValue: this.getDomain(window.location.href),
         showColorPicker: false,
-        pickerColor: '',
+        showPickerSave: false,
+        pickerColor: DEFAULT_HIGHLIGHT_COLOR,
     }
 
     constructor(props: Props) {
@@ -123,6 +125,7 @@ export default class Ribbon extends Component<Props, State> {
     updatePickerColor(value) {
         this.setState({
             pickerColor: value,
+            showPickerSave: true,
         })
 
         let highlights: HTMLCollection = document.getElementsByTagName(
@@ -135,6 +138,9 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     async saveHighlightColor() {
+        this.setState({
+            showPickerSave: false,
+        })
         await browser.storage.local.set({
             '@highlight-colors': this.state.pickerColor,
         })
@@ -264,12 +270,14 @@ export default class Ribbon extends Component<Props, State> {
                             })
                         }
                     />
-                    <PrimaryAction
-                        size={'small'}
-                        label={'Save Color'}
-                        type={'primary'}
-                        onClick={() => this.saveHighlightColor()}
-                    />
+                    {this.state.showPickerSave ? (
+                        <PrimaryAction
+                            size={'small'}
+                            label={'Save Color'}
+                            type={'primary'}
+                            onClick={() => this.saveHighlightColor()}
+                        />
+                    ) : undefined}
                 </PickerButtonTopBar>
                 <TextField
                     value={this.state.pickerColor}
@@ -445,6 +453,19 @@ export default class Ribbon extends Component<Props, State> {
                             ) : (
                                 <InfoText>Enable Ribbon</InfoText>
                             )}
+                        </ExtraButtonRow>
+                        <ExtraButtonRow
+                            onClick={(event) => {
+                                this.setState({
+                                    showColorPicker: true,
+                                })
+                                event.stopPropagation()
+                            }}
+                        >
+                            <ColorPickerCircle
+                                backgroundColor={this.state.pickerColor}
+                            />
+                            <InfoText>Change Highlight Color</InfoText>
                         </ExtraButtonRow>
                         <ExtraButtonRow
                             onClick={
@@ -915,6 +936,14 @@ export default class Ribbon extends Component<Props, State> {
     }
 }
 
+const ColorPickerCircle = styled.div<{ backgroundColor: string }>`
+    height: 18px;
+    width: 18px;
+    background-color: ${(props) => props.backgroundColor};
+    border-radius: 50px;
+    margin: 5px;
+`
+
 const UpperArea = styled.div`
     display: flex;
     flex-direction: column;
@@ -932,6 +961,9 @@ const PickerButtonTopBar = styled.div`
     justify-content: space-between;
     align-items: center;
     width: fill-available;
+
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    padding: 0 0 10px 0;
 `
 
 const ExtraButtonContainer = styled.div`
@@ -942,8 +974,8 @@ const ColorPickerContainer = styled.div`
     display: flex;
     flex-direction: column;
     grid-gap: 10px;
-    padding: 15px;
-    width: 250px;
+    padding: 10px 15px 15px 15px;
+    width: 200px;
 `
 
 const HexPickerContainer = styled.div`
