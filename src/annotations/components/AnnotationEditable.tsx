@@ -691,7 +691,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         <AnnotationStyled>
                             <ContentContainer
                                 onDoubleClick={
-                                    annotationFooterDependencies?.onEditIconClick
+                                    this.props.isEditing
+                                        ? undefined
+                                        : annotationFooterDependencies?.onEditIconClick
                                 }
                                 isEditMode={this.props.isEditing}
                                 onMouseEnter={() =>
