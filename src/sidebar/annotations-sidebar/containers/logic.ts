@@ -1067,12 +1067,24 @@ export class SidebarContainerLogic extends UILogic<
         if (
             !list ||
             !listInstance ||
+            list.remoteId == null ||
             listInstance.sharedAnnotationReferences == null ||
             listInstance.annotationsLoadState !== 'pristine' ||
             !list.hasRemoteAnnotations
         ) {
             return
         }
+
+        this.emitMutation({
+            conversations: {
+                $merge: getInitialAnnotationConversationStates(
+                    listInstance.sharedAnnotationReferences.map(({ id }) => ({
+                        linkId: id.toString(),
+                    })),
+                    (annotationId) => `${list.remoteId}:${annotationId}`,
+                ),
+            },
+        })
 
         await executeUITask(
             this,
@@ -1110,6 +1122,38 @@ export class SidebarContainerLogic extends UILogic<
 
                 this.emitMutation({
                     users: { $merge: usersData },
+                })
+            },
+        )
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listInstances: {
+                    [unifiedListId]: {
+                        conversationsLoadState: { $set: taskState },
+                    },
+                },
+            }),
+            async () => {
+                await detectAnnotationConversationThreads(this as any, {
+                    buildConversationId,
+                    annotationReferences:
+                        listInstance.sharedAnnotationReferences,
+                    sharedListReference: {
+                        type: 'shared-list-reference',
+                        id: list.remoteId,
+                    },
+                    getThreadsForAnnotations: ({
+                        annotationReferences,
+                        sharedListReference,
+                    }) =>
+                        this.options.contentConversationsBG.getThreadsForSharedAnnotations(
+                            {
+                                sharedAnnotationReferences: annotationReferences,
+                                sharedListReference,
+                            },
+                        ),
                 })
             },
         )

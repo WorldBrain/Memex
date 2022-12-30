@@ -411,7 +411,8 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <FollowedNotesContainer>
                 {annotationsData.map((annotation) => {
-                    const conversationId = `${listData.unifiedId}:${annotation.unifiedId}`
+                    // TODO: Handle when list has no remoteID (should not afford conversation logic)
+                    const conversationId = `${listData.remoteId}:${annotation.unifiedId}`
                     const conversation = this.props.conversations[
                         conversationId
                     ]
@@ -428,7 +429,10 @@ export class AnnotationsSidebar extends React.Component<
                     }
                     const eventHandlers = this.props.bindSharedAnnotationEventHandlers(
                         sharedAnnotationRef,
-                        { type: 'shared-list-reference', id: unifiedListId },
+                        {
+                            type: 'shared-list-reference',
+                            id: listData.remoteId,
+                        },
                     )
                     const hasReplies =
                         conversation?.thread != null ||
