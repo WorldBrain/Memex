@@ -268,7 +268,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                     this.props
                                                         .onAddContributorsClick
                                                 }
-                                                size={'large'}
+                                                size={'medium'}
                                                 type={'primary'}
                                                 label={'Share Space'}
                                                 icon={'invite'}
@@ -284,7 +284,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                     this.props
                                                         .onAddContributorsClick
                                                 }
-                                                size={'large'}
+                                                size={'medium'}
                                                 type={'primary'}
                                                 label={'Share Space'}
                                                 icon={'invite'}
@@ -354,10 +354,6 @@ const SpaceButtonRow = styled.div`
     display: flex;
     grid-gap: 15px;
     align-items: center;
-
-    & > div {
-        grid-gap: 15px;
-    }
 `
 
 const TitleContainer = styled.div`
