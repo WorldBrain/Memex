@@ -134,7 +134,7 @@ export default class DirectLinkingBackground {
                     await runInTab<InPageUIContentScriptRemoteInterface>(
                         tabId,
                     ).showSidebar({
-                        annotationUrl: annotation.url,
+                        annotationLocalId: annotation.url,
                         action: 'show_annotation',
                     })
                     await runInTab<InPageUIContentScriptRemoteInterface>(
@@ -181,9 +181,8 @@ export default class DirectLinkingBackground {
             await runInTab<InPageUIContentScriptRemoteInterface>(
                 tabId,
             ).showSidebar({
-                anchor,
                 action: 'show_annotation',
-                annotationUrl: unifiedAnnotationId,
+                annotationLocalId: unifiedAnnotationId,
             })
         } else {
             const actions: { [Action in InPageUIRibbonAction]: boolean } = {

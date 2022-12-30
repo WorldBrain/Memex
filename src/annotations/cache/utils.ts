@@ -144,15 +144,31 @@ export const reshapeFollowedListForCache = (
     ...(opts.extraData ?? {}),
 })
 
-export const getOwnAnnotationsArray = (
-    annotations: PageAnnotationsCacheInterface['annotations'],
+export const getUserAnnotationsArray = (
+    cache: Pick<PageAnnotationsCacheInterface, 'annotations'>,
     userId?: string,
 ): UnifiedAnnotation[] =>
-    normalizedStateToArray(annotations).filter(
+    normalizedStateToArray(cache.annotations).filter(
         (annot) =>
             annot.creator == null ||
             (userId ? annot.creator.id === userId : false),
     )
+
+export const getUserHighlightsArray = (
+    cache: Pick<PageAnnotationsCacheInterface, 'highlights'>,
+    userId?: string,
+): UnifiedAnnotation[] =>
+    cache.highlights.filter(
+        (annot) =>
+            annot.creator == null ||
+            (userId ? annot.creator.id === userId : false),
+    )
+
+export const getListHighlightsArray = (
+    cache: Pick<PageAnnotationsCacheInterface, 'highlights'>,
+    listId: UnifiedList['unifiedId'],
+): UnifiedAnnotation[] =>
+    cache.highlights.filter((annot) => annot.unifiedListIds.includes(listId))
 
 // NOTE: this is tested as part of the sidebar logic tests
 export async function hydrateCache({
@@ -160,7 +176,7 @@ export async function hydrateCache({
     ...args
 }: {
     fullPageUrl: string
-    user: UserReference
+    user?: UserReference
     cache: PageAnnotationsCacheInterface
     bgModules: {
         pageActivityIndicator: RemotePageActivityIndicatorInterface

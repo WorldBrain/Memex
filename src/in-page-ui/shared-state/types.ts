@@ -1,7 +1,10 @@
 import type TypedEventEmitter from 'typed-emitter'
 import type { Anchor } from 'src/highlighting/types'
 import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
-import type { UnifiedList } from 'src/annotations/cache/types'
+import type {
+    UnifiedAnnotation,
+    UnifiedList,
+} from 'src/annotations/cache/types'
 import type { Annotation } from 'src/highlighting/ui/types/api'
 
 export type InPageUISidebarAction =
@@ -27,8 +30,8 @@ export interface IncomingAnnotationData {
 export interface SidebarActionOptions {
     action: InPageUISidebarAction
     anchor?: Anchor
-    annotation?: Annotation
-    annotationUrl?: string
+    annotationLocalId?: string
+    annotationCacheId?: UnifiedAnnotation['unifiedId']
     annotationData?: IncomingAnnotationData
     annotationSharingAccess?: AnnotationSharingAccess
 }

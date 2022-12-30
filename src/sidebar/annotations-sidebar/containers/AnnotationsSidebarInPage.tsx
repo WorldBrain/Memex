@@ -21,6 +21,7 @@ import LoginModal from 'src/overview/sharing/components/LoginModal'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import type { SidebarContainerLogic } from './logic'
 import type { UnifiedAnnotation } from 'src/annotations/cache/types'
+import { ANNOT_BOX_ID_PREFIX } from '../constants'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -136,10 +137,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         //     highlighter.removeAnnotationHighlights(urls),
         // )
         sidebarEvents.on('renderHighlight', ({ highlight }) =>
-            highlighter.renderHighlight(highlight, (asdf) => {
+            highlighter.renderHighlight(highlight, () => {
                 inPageUI.showSidebar({
-                    annotationUrl: highlight.localId,
-                    anchor: highlight.selector,
+                    annotationCacheId: highlight.unifiedId,
                     action: 'show_annotation',
                 })
             }),
@@ -147,12 +147,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         sidebarEvents.on('renderHighlights', async ({ highlights }) => {
             await highlighter.renderHighlights(
                 highlights,
-                ({ unifiedAnnotationId }) => {
+                ({ unifiedAnnotationId }) =>
                     inPageUI.showSidebar({
-                        annotationUrl: unifiedAnnotationId,
+                        annotationCacheId: unifiedAnnotationId,
                         action: 'show_annotation',
-                    })
-                },
+                    }),
             )
         })
         sidebarEvents.on('setSelectedList', async (selectedList) => {
@@ -177,11 +176,13 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     private activateAnnotation(
-        url: string,
+        unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
         annotationMode: 'edit' | 'edit_spaces' | 'show',
     ) {
-        this.processEvent('__setActiveAnnotationUrl', { annotationUrl: url })
-        const annotationBoxNode = this.getDocument()?.getElementById(url)
+        this.processEvent('setActiveAnnotation', { unifiedAnnotationId })
+        const annotationBoxNode = this.getDocument()?.getElementById(
+            ANNOT_BOX_ID_PREFIX + unifiedAnnotationId,
+        )
 
         if (!annotationBoxNode) {
             return
@@ -201,11 +202,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 comment: event.annotationData?.commentText ?? '',
             })
         } else if (event.action === 'show_annotation') {
-            this.activateAnnotation(event.annotationUrl, 'show')
+            this.activateAnnotation(event.annotationCacheId, 'show')
         } else if (event.action === 'edit_annotation') {
-            this.activateAnnotation(event.annotationUrl, 'edit')
+            this.activateAnnotation(event.annotationCacheId, 'edit')
         } else if (event.action === 'edit_annotation_spaces') {
-            this.activateAnnotation(event.annotationUrl, 'edit_spaces')
+            this.activateAnnotation(event.annotationCacheId, 'edit_spaces')
         } else if (event.action === 'set_sharing_access') {
             await this.processEvent('receiveSharingAccessChange', {
                 sharingAccess: event.annotationSharingAccess,

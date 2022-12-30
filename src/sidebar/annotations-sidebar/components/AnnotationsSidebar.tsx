@@ -60,7 +60,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     currentUser?: UserReference
     // sidebarActions: () => void
 
-    setActiveAnnotationUrl?: (annotationUrl: string) => React.MouseEventHandler
+    setActiveAnnotation: (
+        annotationId: UnifiedAnnotation['unifiedId'],
+    ) => React.MouseEventHandler
     getListDetailsById: ListDetailsGetter
 
     bindSharedAnnotationEventHandlers: (
@@ -498,7 +500,7 @@ export class AnnotationsSidebar extends React.Component<
                                     this.props.activeShareMenuNoteId
                                 }
                                 onReplyBtnClick={eventHandlers.onReplyBtnClick}
-                                onHighlightClick={this.props.setActiveAnnotationUrl(
+                                onHighlightClick={this.props.setActiveAnnotation(
                                     annotation.unifiedId,
                                 )}
                                 // TODO: update lists in this comp to be cache ones
@@ -749,8 +751,8 @@ export class AnnotationsSidebar extends React.Component<
                 {this.props.activeTab === 'annotations' ? (
                     <AnnotationsSectionStyled>
                         {this.renderAnnotationsEditable(
-                            cacheUtils.getOwnAnnotationsArray(
-                                this.props.annotations,
+                            cacheUtils.getUserAnnotationsArray(
+                                { annotations: this.props.annotations },
                                 this.props.currentUser?.id.toString(),
                             ),
                         )}
@@ -899,7 +901,7 @@ export class AnnotationsSidebar extends React.Component<
                             }
                             // TODO: update lists in this comp to be cache ones
                             // onListClick={this.props.onListSelect}
-                            onHighlightClick={this.props.setActiveAnnotationUrl(
+                            onHighlightClick={this.props.setActiveAnnotation(
                                 annot.unifiedId,
                             )}
                             onGoToAnnotation={footerDeps.onGoToAnnotation}

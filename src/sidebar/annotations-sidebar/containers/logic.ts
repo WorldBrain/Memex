@@ -244,7 +244,10 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    private async hydrateAnnotationsCache(fullPageUrl: string) {
+    private async hydrateAnnotationsCache(
+        fullPageUrl: string,
+        opts: { renderHighlights: boolean },
+    ) {
         await executeUITask(this, 'cacheLoadState', async () =>
             cacheUtils.hydrateCache({
                 fullPageUrl,
@@ -258,6 +261,18 @@ export class SidebarContainerLogic extends UILogic<
                 },
             }),
         )
+
+        if (opts.renderHighlights) {
+            this.renderOwnHighlights()
+        }
+    }
+
+    private renderOwnHighlights = () => {
+        const highlights = cacheUtils.getUserHighlightsArray(
+            this.options.annotationsCache,
+            this.options.currentUser?.id.toString(),
+        )
+        this.options.events?.emit('renderHighlights', { highlights })
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
@@ -288,7 +303,9 @@ export class SidebarContainerLogic extends UILogic<
 
             // If `pageUrl` prop passed down rehydrate cache
             if (fullPageUrl != null) {
-                await this.hydrateAnnotationsCache(fullPageUrl)
+                await this.hydrateAnnotationsCache(fullPageUrl, {
+                    renderHighlights: true,
+                })
             }
         })
         this.annotationsLoadComplete.resolve()
@@ -530,13 +547,9 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         this.emitMutation(mutation)
-        await this.hydrateAnnotationsCache(event.pageUrl)
-
-        if (event.rerenderHighlights) {
-            this.options.events?.emit('renderHighlights', {
-                highlights: this.options.annotationsCache.highlights,
-            })
-        }
+        await this.hydrateAnnotationsCache(event.pageUrl, {
+            renderHighlights: event.rerenderHighlights,
+        })
     }
 
     setAllNotesShareMenuShown: EventHandler<
@@ -842,20 +855,6 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    __setActiveAnnotationUrl: EventHandler<
-        '__setActiveAnnotationUrl'
-    > = async ({ event, previousState }) => {
-        // const annotation = previousState.annotations.find(
-        //     (annot) => annot.url === event.annotationUrl,
-        // )
-        // if (annotation != null) {
-        //     this.options.events?.emit('highlightAndScroll', { annotation })
-        // }
-        // this.emitMutation({
-        //     activeAnnotationUrl: { $set: event.annotationUrl },
-        // })
-    }
-
     goToAnnotationInNewTab: EventHandler<'goToAnnotationInNewTab'> = async ({
         event,
         previousState,
@@ -894,10 +893,35 @@ export class SidebarContainerLogic extends UILogic<
 
     setActiveAnnotation: EventHandler<'setActiveAnnotation'> = async ({
         event,
+        previousState,
     }) => {
         this.emitMutation({
             activeAnnotationId: { $set: event.unifiedAnnotationId },
         })
+        if (event.mode) {
+            const cardId = generateAnnotationCardInstanceId({
+                unifiedId: event.unifiedAnnotationId,
+            })
+
+            // Likely a highlight for another user's annotation, thus non-existent in "annotations" tab
+            if (previousState.annotationCardInstances[cardId] == null) {
+                return
+            }
+
+            if (event.mode === 'edit') {
+                this.emitMutation({
+                    annotationCardInstances: {
+                        [cardId]: { isCommentEditing: { $set: true } },
+                    },
+                })
+            } else if (event.mode === 'edit_spaces') {
+                this.emitMutation({
+                    annotationCardInstances: {
+                        [cardId]: { cardMode: { $set: 'space-picker' } },
+                    },
+                })
+            }
+        }
     }
 
     shareAnnotation: EventHandler<'shareAnnotation'> = async ({ event }) => {
@@ -1013,29 +1037,9 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        let highlights: UnifiedAnnotation[]
         if (event.tab === 'annotations') {
-            highlights = this.options.annotationsCache.highlights
+            this.renderOwnHighlights()
         } else if (event.tab === 'spaces') {
-            // TODO: Work this out in new model
-            // highlights = previousState.followedLists.allIds
-            //     .filter((id) => previousState.followedLists.byId[id].isExpanded)
-            //     .map(
-            //         (id) =>
-            //             previousState.followedLists.byId[id]
-            //                 .sharedAnnotationReferences,
-            //     )
-            //     .flat()
-            //     .map((ref) => ref.id.toString())
-            //     .filter(
-            //         (id) =>
-            //             previousState.followedAnnotations[id]?.selector != null,
-            //     )
-            //     .map((id) => ({
-            //         url: id,
-            //         selector: previousState.followedAnnotations[id].selector,
-            //     }))
-
             const listsWithRemoteAnnots = normalizedStateToArray(
                 this.options.annotationsCache.lists,
             ).filter(
@@ -1050,10 +1054,6 @@ export class SidebarContainerLogic extends UILogic<
                 previousState,
                 listsWithRemoteAnnots,
             )
-        }
-
-        if (highlights != null) {
-            this.options.events?.emit('renderHighlights', { highlights })
         }
     }
 
@@ -1148,10 +1148,7 @@ export class SidebarContainerLogic extends UILogic<
 
         if (event.unifiedListId == null) {
             this.emitMutation({ selectedListId: { $set: null } })
-
-            // this.options.events.emit('renderHighlights', {
-            //     highlights: previousState.annotations,
-            // })
+            this.renderOwnHighlights()
             return
         }
 
@@ -1171,11 +1168,6 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         if (list.remoteId != null) {
-            // this.options.events.emit('renderHighlights', {
-            //     highlights: previousState.annotations.filter(({ lists }) =>
-            //         lists.includes(localListId),
-            //     ),
-            // })
             let nextState = previousState
             if (listInstance.annotationRefsLoadState === 'pristine') {
                 nextState = await this.loadRemoteAnnotationReferencesForLists(
@@ -1187,6 +1179,13 @@ export class SidebarContainerLogic extends UILogic<
                 nextState,
                 event.unifiedListId,
             )
+
+            this.options.events?.emit('renderHighlights', {
+                highlights: cacheUtils.getListHighlightsArray(
+                    this.options.annotationsCache,
+                    event.unifiedListId,
+                ),
+            })
         }
     }
 

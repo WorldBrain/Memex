@@ -32,6 +32,8 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import type { UnifiedAnnotation } from '../cache/types'
+import type { AnnotationCardInstanceLocation } from 'src/sidebar/annotations-sidebar/types'
+import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -673,7 +675,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 >
                     <ItemBox
                         firstDivProps={{
-                            id: this.props.unifiedId,
+                            id: ANNOT_BOX_ID_PREFIX + this.props.unifiedId,
                         }}
                         onMouseEnter={() =>
                             this.setState({

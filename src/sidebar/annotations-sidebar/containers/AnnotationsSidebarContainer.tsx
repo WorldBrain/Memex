@@ -988,9 +988,9 @@ export class AnnotationsSidebarContainer<
                             appendLoader={
                                 this.state.secondarySearchState === 'running'
                             }
-                            setActiveAnnotationUrl={(annotationUrl) => () =>
-                                this.processEvent('__setActiveAnnotationUrl', {
-                                    annotationUrl,
+                            setActiveAnnotation={(unifiedAnnotationId) => () =>
+                                this.processEvent('setActiveAnnotation', {
+                                    unifiedAnnotationId,
                                 })}
                             setPopoutsActive={(isActive) => {
                                 this.processEvent('setPopoutsActive', isActive)

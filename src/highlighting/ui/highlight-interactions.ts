@@ -134,7 +134,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
         if (annotation) {
             await params.inPageUI.showSidebar({
-                annotationUrl: annotation.url,
+                annotationLocalId: annotation.url,
                 action: params.showSpacePicker
                     ? 'edit_annotation_spaces'
                     : 'edit_annotation',
@@ -233,7 +233,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     { ...cacheAnnotation, unifiedId },
                     ({ openInEdit, unifiedAnnotationId }) => {
                         params.inPageUI.showSidebar({
-                            annotationUrl: unifiedAnnotationId,
+                            annotationCacheId: unifiedAnnotationId,
                             action: openInEdit
                                 ? 'edit_annotation'
                                 : 'show_annotation',
@@ -331,6 +331,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         onClick,
         temp,
     ) => {
+        this.removeAllHighlights()
         const {
             [HIGHLIGHT_COLOR_KEY]: highlightsColor,
         } = await browser.storage.local.get({
@@ -424,16 +425,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
      * Scrolls the annotation card into ivew of the given annotation on the current page.
      */
     private scrollCardIntoView = ({ unifiedId }: UnifiedAnnotation) => {
-        console.log('exec')
         const baseClass = 'AnnotationBox'
         const highlights = document.getElementById('memex-sidebar-container')
 
-        console.log(highlights)
-
         const highlight = highlights.shadowRoot.getElementById(unifiedId)
 
-        highlight.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        console.log(highlight)
+        highlight?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 
         // for (let item of highlights) {
         //     console.log('item')
@@ -470,6 +467,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         )
 
         newHighlights.forEach((highlightEl: HTMLElement) => {
+            this.currentActiveHighlight = highlight
             highlightEl.dataset.annotation = highlight.unifiedId
 
             if (highlightEl.parentNode.nodeName === 'A') {
@@ -502,15 +500,15 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
             highlightEl.addEventListener('click', clickListener, false)
 
-            const mouseenterListener = (e) => {
+            const mouseenterListener = (e: MouseEvent) => {
                 if (
-                    !e.target.dataset.annotation ||
-                    e.target.dataset.annotation === this.currentActiveHighlight
+                    !(e.target as HTMLElement).dataset?.annotation ||
+                    (e.target as HTMLElement).dataset?.annotation ===
+                        this.currentActiveHighlight?.unifiedId
                 ) {
                     return
-                } else {
-                    this.hoverOverHighlight(highlight)
                 }
+                this.hoverOverHighlight(highlight)
             }
             highlightEl.addEventListener(
                 'mouseenter',
@@ -518,10 +516,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 false,
             )
 
-            const mouseleaveListener = (e) => {
+            const mouseleaveListener = (e: MouseEvent) => {
                 if (
-                    !e.target.dataset.annotation ||
-                    e.target.dataset.annotation === this.currentActiveHighlight
+                    !(e.target as HTMLElement).dataset?.annotation ||
+                    (e.target as HTMLElement).dataset?.annotation ===
+                        this.currentActiveHighlight?.unifiedId
                 ) {
                     return
                 }
@@ -535,10 +534,17 @@ export class HighlightRenderer implements HighlightRendererInterface {
         })
     }
 
-    removeTempHighlights = () => {
-        const baseClass = styles['memex-highlight-tmp']
+    private removeHighlights = (baseClass: string) => {
         const prevHighlights = document.querySelectorAll(`.${baseClass}`)
         prevHighlights.forEach((highlight) => this._removeHighlight(highlight))
+    }
+
+    removeTempHighlights = () => {
+        this.removeHighlights(styles['memex-highlight-tmp'])
+    }
+
+    removeAllHighlights = () => {
+        this.removeHighlights(styles['memex-highlight'])
     }
 
     hoverOverHighlight: HighlightInteractionsInterface['hoverOverHighlight'] = ({
@@ -590,7 +596,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
     selectHighlight: HighlightInteractionsInterface['selectHighlight'] = (
         annotation,
     ) => {
-        this.currentActiveHighlight = annotation.unifiedId
+        this.currentActiveHighlight = annotation
         const highlights = document.querySelectorAll(
             `[data-annotation="${annotation.unifiedId}"]`,
         )
@@ -631,7 +637,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 // highlight.style['border-bottom'] = 'unset'
             }
         })
-        this.currentActiveHighlight = ''
+        this.currentActiveHighlight = null
     }
     /**
      * Return highlights to normal state
@@ -641,7 +647,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         highlights.forEach((highlight: HTMLElement) => {
             if (
                 highlight.getAttribute('data-annotation') ===
-                this.currentActiveHighlight
+                this.currentActiveHighlight?.unifiedId
             ) {
                 highlight.classList.remove(styles['selectedHighlight'])
                 highlight.style.setProperty(

@@ -303,13 +303,19 @@ describe('SidebarContainerLogic', () => {
         it('should hydrate the page annotations cache with annotations and lists data from the DB upon init', async ({
             device,
         }) => {
-            const { sidebar, annotationsCache } = await setupLogicHelper({
+            const {
+                sidebar,
+                annotationsCache,
+                emittedEvents,
+            } = await setupLogicHelper({
                 device,
                 withAuth: true,
                 skipInitEvent: true,
                 fullPageUrl: DATA.TAB_URL_1,
             })
+            const expectedEvents = []
 
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(annotationsCache.lists).toEqual(initNormalizedState())
             expect(annotationsCache.annotations).toEqual(initNormalizedState())
             expect(sidebar.state.listInstances).toEqual({})
@@ -317,6 +323,12 @@ describe('SidebarContainerLogic', () => {
 
             await sidebar.init()
 
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: { highlights: annotationsCache.highlights },
+            })
+
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(Object.values(annotationsCache.lists.byId)).toEqual([
                 cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[0], {
                     extraData: {
@@ -475,6 +487,7 @@ describe('SidebarContainerLogic', () => {
             const {
                 sidebar,
                 sidebarLogic,
+                emittedEvents,
                 annotationsCache,
             } = await setupLogicHelper({
                 device,
@@ -482,13 +495,20 @@ describe('SidebarContainerLogic', () => {
                 skipInitEvent: true,
                 fullPageUrl: DATA.TAB_URL_1,
             })
+            const expectedEvents = []
 
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(annotationsCache.lists).toEqual(initNormalizedState())
             expect(annotationsCache.annotations).toEqual(initNormalizedState())
             expect(sidebar.state.listInstances).toEqual({})
             expect(sidebar.state.annotationCardInstances).toEqual({})
 
             await sidebar.init()
+
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: { highlights: annotationsCache.highlights },
+            })
 
             const defaultListInstanceStates = fromPairs(
                 normalizedStateToArray(annotationsCache.lists).map((list) => [
@@ -503,6 +523,7 @@ describe('SidebarContainerLogic', () => {
                 .filter((list) => list.hasRemoteAnnotations)
                 .map((list) => list.unifiedId)
 
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.listInstances).toEqual({
                 ...defaultListInstanceStates,
                 [unifiedListIdA]: {
@@ -563,6 +584,13 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('setActiveSidebarTab', {
                 tab: 'annotations',
             })
+
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: { highlights: annotationsCache.highlights },
+            })
+
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.activeTab).toEqual('annotations')
 
             let wasBGMethodCalled = false
@@ -573,6 +601,8 @@ describe('SidebarContainerLogic', () => {
             }) as any
 
             await sidebar.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.activeTab).toEqual('spaces')
             expect(wasBGMethodCalled).toBe(false)
         })
@@ -1628,20 +1658,72 @@ describe('SidebarContainerLogic', () => {
             const unifiedAnnotationIdB = annotationsCache.getAnnotationByLocalId(
                 DATA.LOCAL_ANNOTATIONS[1].url,
             ).unifiedId
+            const cardIdA = generateAnnotationCardInstanceId({
+                unifiedId: unifiedAnnotationIdA,
+            })
+            const cardIdB = generateAnnotationCardInstanceId({
+                unifiedId: unifiedAnnotationIdB,
+            })
 
             expect(sidebar.state.activeAnnotationId).toBeNull()
+            expect(sidebar.state.annotationCardInstances[cardIdA]).toEqual(
+                expect.objectContaining({
+                    cardMode: 'none',
+                    isCommentEditing: false,
+                }),
+            )
+
             await sidebar.processEvent('setActiveAnnotation', {
                 unifiedAnnotationId: unifiedAnnotationIdA,
             })
             expect(sidebar.state.activeAnnotationId).toBe(unifiedAnnotationIdA)
+            expect(sidebar.state.annotationCardInstances[cardIdA]).toEqual(
+                expect.objectContaining({
+                    cardMode: 'none',
+                    isCommentEditing: false,
+                }),
+            )
+
             await sidebar.processEvent('setActiveAnnotation', {
                 unifiedAnnotationId: null,
             })
             expect(sidebar.state.activeAnnotationId).toBeNull()
+
+            await sidebar.processEvent('setActiveAnnotation', {
+                unifiedAnnotationId: unifiedAnnotationIdA,
+                mode: 'edit',
+            })
+            expect(sidebar.state.activeAnnotationId).toBe(unifiedAnnotationIdA)
+            expect(sidebar.state.annotationCardInstances[cardIdA]).toEqual(
+                expect.objectContaining({
+                    cardMode: 'none',
+                    isCommentEditing: true,
+                }),
+            )
+
+            await sidebar.processEvent('setActiveAnnotation', {
+                unifiedAnnotationId: null,
+            })
+            expect(sidebar.state.activeAnnotationId).toBeNull()
+            expect(sidebar.state.annotationCardInstances[cardIdB]).toEqual(
+                expect.objectContaining({
+                    cardMode: 'none',
+                    isCommentEditing: false,
+                }),
+            )
+
             await sidebar.processEvent('setActiveAnnotation', {
                 unifiedAnnotationId: unifiedAnnotationIdB,
+                mode: 'edit_spaces',
             })
             expect(sidebar.state.activeAnnotationId).toBe(unifiedAnnotationIdB)
+            expect(sidebar.state.annotationCardInstances[cardIdB]).toEqual(
+                expect.objectContaining({
+                    cardMode: 'space-picker',
+                    isCommentEditing: false,
+                }),
+            )
+
             await sidebar.processEvent('setActiveAnnotation', {
                 unifiedAnnotationId: null,
             })
@@ -1661,7 +1743,13 @@ describe('SidebarContainerLogic', () => {
                 device,
                 withAuth: true,
             })
-            const expectedEvents = []
+            const expectedEvents: any[] = [
+                {
+                    event: 'renderHighlights',
+                    args: { highlights: annotationsCache.highlights },
+                },
+            ]
+
             const joinedCacheList = annotationsCache.getListByLocalId(
                 DATA.LOCAL_LISTS[2].id,
             )
@@ -1683,10 +1771,17 @@ describe('SidebarContainerLogic', () => {
                     event: 'setSelectedList',
                     args: joinedCacheList.unifiedId,
                 },
-                //     {
-                //         event: 'renderHighlights',
-                //         args: { highlights: expect.any(Array) },
-                //     },
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: annotationsCache.highlights.filter(
+                            ({ unifiedListIds }) =>
+                                unifiedListIds.includes(
+                                    joinedCacheList.unifiedId,
+                                ),
+                        ),
+                    },
+                },
             )
             expect(sidebar.state.activeTab).toEqual('spaces')
             expect(sidebar.state.selectedListId).toEqual(
@@ -1702,13 +1797,13 @@ describe('SidebarContainerLogic', () => {
                 unifiedListId: null,
             })
             expectedEvents.push(
-                //     {
-                //         event: 'renderHighlights',
-                //         args: { highlights: sidebar.state.annotations },
-                //     },
                 {
                     event: 'setSelectedList',
                     args: null,
+                },
+                {
+                    event: 'renderHighlights',
+                    args: { highlights: annotationsCache.highlights },
                 },
             )
 
@@ -1735,7 +1830,12 @@ describe('SidebarContainerLogic', () => {
             const followedCacheList = annotationsCache.getListByRemoteId(
                 DATA.SHARED_LIST_IDS[3],
             )
-            const expectedEvents = []
+            const expectedEvents: any[] = [
+                {
+                    event: 'renderHighlights',
+                    args: { highlights: annotationsCache.highlights },
+                },
+            ]
 
             expect(sidebar.state.activeTab).toEqual('annotations')
             expect(sidebar.state.selectedListId).toEqual(null)
@@ -1764,10 +1864,17 @@ describe('SidebarContainerLogic', () => {
                     event: 'setSelectedList',
                     args: followedCacheList.unifiedId,
                 },
-                //     {
-                //         event: 'renderHighlights',
-                //         args: { highlights: expect.any(Array) },
-                //     },
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: annotationsCache.highlights.filter(
+                            ({ unifiedListIds }) =>
+                                unifiedListIds.includes(
+                                    followedCacheList.unifiedId,
+                                ),
+                        ),
+                    },
+                },
             )
             expect(sidebar.state.activeTab).toEqual('spaces')
             expect(sidebar.state.selectedListId).toEqual(
@@ -1795,13 +1902,13 @@ describe('SidebarContainerLogic', () => {
             })
 
             expectedEvents.push(
-                //     {
-                //         event: 'renderHighlights',
-                //         args: { highlights: sidebar.state.annotations },
-                //     },
                 {
                     event: 'setSelectedList',
                     args: null,
+                },
+                {
+                    event: 'renderHighlights',
+                    args: { highlights: annotationsCache.highlights },
                 },
             )
             expect(sidebar.state.activeTab).toEqual('spaces')
@@ -1827,7 +1934,12 @@ describe('SidebarContainerLogic', () => {
             const localOnlyCacheList = annotationsCache.getListByLocalId(
                 DATA.LOCAL_LISTS[3].id,
             )
-            const expectedEvents = []
+            const expectedEvents: any[] = [
+                {
+                    event: 'renderHighlights',
+                    args: { highlights: annotationsCache.highlights },
+                },
+            ]
 
             expect(sidebar.state.activeTab).toEqual('annotations')
             expect(sidebar.state.selectedListId).toEqual(null)
@@ -1838,17 +1950,20 @@ describe('SidebarContainerLogic', () => {
             })
 
             expectedEvents.push(
-                //     {
-                //         event: 'renderHighlights',
-                //         args: {
-                //             highlights: sidebar.state.annotations.filter(
-                //                 ({ lists }) => lists.includes(localListId),
-                //             ),
-                //         },
-                //     },
                 {
                     event: 'setSelectedList',
                     args: localOnlyCacheList.unifiedId,
+                },
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: annotationsCache.highlights.filter(
+                            ({ unifiedListIds }) =>
+                                unifiedListIds.includes(
+                                    localOnlyCacheList.unifiedId,
+                                ),
+                        ),
+                    },
                 },
             )
             expect(sidebar.state.activeTab).toEqual('spaces')
@@ -1862,13 +1977,13 @@ describe('SidebarContainerLogic', () => {
             })
 
             expectedEvents.push(
-                //     {
-                //         event: 'renderHighlights',
-                //         args: { highlights: sidebar.state.annotations },
-                //     },
                 {
                     event: 'setSelectedList',
                     args: null,
+                },
+                {
+                    event: 'renderHighlights',
+                    args: { highlights: annotationsCache.highlights },
                 },
             )
             expect(sidebar.state.activeTab).toEqual('spaces')

@@ -216,7 +216,9 @@ interface SidebarEvents {
 
     // Annotation events
     deleteAnnotation: AnnotationEvent<{}>
-    setActiveAnnotation: AnnotationEvent<{}>
+    setActiveAnnotation: AnnotationEvent<{
+        mode?: 'show' | 'edit' | 'edit_spaces'
+    }>
     updateListsForAnnotation: AnnotationEvent<{
         added: number | null
         deleted: number | null
@@ -230,10 +232,7 @@ interface SidebarEvents {
         // context: AnnotationEventContext
         annotationUrl: string
     }
-    __setActiveAnnotation: { annotationUrl: string }
-    __setActiveAnnotationUrl: { annotationUrl: string }
 
-    // setActiveAnnotationUrl: { annotation?: Annotation; annotationUrl?: string }
     shareAnnotation: {
         // context: AnnotationEventContext
         mouseEvent: React.MouseEvent

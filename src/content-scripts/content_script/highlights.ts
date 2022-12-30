@@ -33,12 +33,10 @@ const showHighlights = (options: HighlightDependencies) => {
     const onClickHighlight: AnnotationClickHandler = ({
         unifiedAnnotationId,
         openInEdit,
-        annotation,
     }) => {
         options.inPageUI.showSidebar({
-            annotation: annotation,
             action: openInEdit ? 'edit_annotation' : 'show_annotation',
-            annotationUrl: unifiedAnnotationId,
+            annotationCacheId: unifiedAnnotationId,
         })
     }
 

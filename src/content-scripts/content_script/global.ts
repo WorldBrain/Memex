@@ -51,6 +51,7 @@ import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-ind
 import { runtime } from 'webextension-polyfill'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { hydrateCache } from 'src/annotations/cache/utils'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -136,6 +137,18 @@ export async function main(
     const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
     const annotationsCache = new PageAnnotationsCache({ normalizedPageUrl })
     window['__annotationsCache'] = annotationsCache
+
+    const loadCacheDataPromise = hydrateCache({
+        fullPageUrl,
+        user: currentUser,
+        cache: annotationsCache,
+        bgModules: {
+            annotations: annotationsBG,
+            customLists: runInBackground(),
+            contentSharing: runInBackground(),
+            pageActivityIndicator: pageActivityIndicatorBG,
+        },
+    })
 
     const annotationFunctionsParams = {
         inPageUI,
@@ -274,6 +287,7 @@ export async function main(
 
     // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
     // so it is included in this global content script where it adds less than 500kb.
+    await loadCacheDataPromise
     await contentScriptRegistry.registerHighlightingScript(highlightMain)
 
     // 5. Registers remote functions that can be used to interact with components
