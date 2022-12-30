@@ -260,12 +260,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 hasComment={this.props.comment.length > 0}
             >
                 <ActionBox>{actionsBox}</ActionBox>
-                <TextTruncated text={this.props.body}>
-                    {({ text }) => (
-                        <HighlightTextBox>
-                            <HighlightText>{text}</HighlightText>
-                        </HighlightTextBox>
-                    )}
+                <TextTruncated isHighlight text={this.props.body}>
+                    {({ text }) => <HighlightTextBox>{text}</HighlightTextBox>}
                 </TextTruncated>
             </HighlightStyled>
         )
@@ -772,14 +768,14 @@ const HighlightTextBox = styled.div`
 `
 
 const HighlightText = styled.span`
-    box-decoration-break: clone;
+    /* box-decoration-break: clone;
     overflow: hidden;
     line-height: 25px;
     font-style: normal;
     border-radius: 3px;
     background-color: ${(props) => props.theme.colors.highlightColorDefault};
     color: ${(props) => props.theme.colors.black};
-    padding: 2px 5px;
+    padding: 2px 5px; */
 `
 
 const HighlightStyled = styled.div<{ hasComment: boolean }>`
@@ -807,7 +803,7 @@ const CommentBox = styled.div`
     word-wrap: break-word;
     white-space: pre-wrap;
     margin: 0px;
-    padding: 10px 20px 10px;
+    padding: 5px 20px 10px;
     line-height: 1.4;
     text-align: left;
     //border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
@@ -822,6 +818,7 @@ const CommentBox = styled.div`
     ${({ theme }: { theme: SidebarAnnotationTheme }) =>
         !theme.hasHighlight &&
         `
+        padding: 10px 20px 10px;
         border-top: none;
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;

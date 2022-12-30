@@ -1,5 +1,5 @@
 import * as React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import { TextTruncator } from 'src/annotations/types'
 import { truncateText } from 'src/annotations/utils'
@@ -12,6 +12,7 @@ export interface Props {
     text: string
     truncateText?: TextTruncator
     children: (props: { text: string }) => JSX.Element
+    isHighlight?: boolean
 }
 
 interface State {
@@ -55,13 +56,24 @@ class TextTruncated extends React.Component<Props, State> {
             ? this.state.truncatedText
             : this.props.text
 
+        const textArray = text
+            .split(/\r?\n|\r|\n/g)
+            .filter((item) => item.length > 0)
+
         return (
-            <TruncatedBox>
-                {this.props.children({ text })}
+            <TruncatedBox isHighlight={this.props.isHighlight}>
+                {this.props.isHighlight
+                    ? textArray.map((line) => (
+                          <TextContent isHighlight={this.props.isHighlight}>
+                              <span>{line}</span>
+                          </TextContent>
+                      ))
+                    : this.props.children({ text })}
                 <ToggleMoreBox>
                     {this.state.needsTruncation && (
                         <ToggleMoreButtonStyled
                             onClick={this.toggleTextTruncation}
+                            isHighlight={this.props.isHighlight}
                         >
                             <Icon
                                 filePath={
@@ -81,17 +93,37 @@ class TextTruncated extends React.Component<Props, State> {
     }
 }
 
-const TruncatedBox = styled.div`
+const TextContent = styled.div<{ isHighlight: boolean }>`
+    display: inline;
+    ${(props) =>
+        props.isHighlight &&
+        css`
+            & > span {
+                box-decoration-break: clone;
+                overflow: hidden;
+                line-height: 24px;
+                font-style: normal;
+                border-radius: 3px;
+                background-color: ${(props) =>
+                    props.theme.colors.highlightColorDefault};
+                color: ${(props) => props.theme.colors.black};
+                padding: 2px 5px;
+            }
+        `};
+`
+
+const TruncatedBox = styled.div<{ isHighlight: boolean }>`
     display: flex;
     flex-direction: column;
     width: 100%;
     justify-content: flex-end;
+    grid-gap: 5px;
 `
 
-const ToggleMoreButtonStyled = styled.div`
+const ToggleMoreButtonStyled = styled.div<{ isHighlight: boolean }>`
     margin: 2px 0 0 0px;
     cursor: pointer;
-    padding: 2px 5px;
+    padding: 0px 5px;
     border-radius: 3px;
     font-size: 12px;
     color: grey;
@@ -101,7 +133,8 @@ const ToggleMoreButtonStyled = styled.div`
     grid-gap: 5px;
     align-items: center;
     background-color: ${(props) => props.theme.colors.backgroundColorDarker};
-    margin-top: -25px;
+    margin-top: -10px;
+    height: 24px;
 
     &:hover {
         background-color: ${(props) => props.theme.colors.lightHover};
@@ -110,6 +143,12 @@ const ToggleMoreButtonStyled = styled.div`
     & * {
         cursor: pointer;
     }
+
+    ${(props) =>
+        props.isHighlight &&
+        css`
+            margin-top: -28px;
+        `};
 `
 
 const ToggleMoreBox = styled.div`
