@@ -483,20 +483,6 @@ export default class Ribbon extends Component<Props, State> {
                             ) : (
                                 <InfoText>Show Highlights</InfoText>
                             )}
-                            <ButtonPositioning>
-                                <PrimaryAction
-                                    label={'Change Color'}
-                                    size={'small'}
-                                    type={'primary'}
-                                    onClick={(event) => {
-                                        this.setState({
-                                            showColorPicker: true,
-                                        })
-                                        event.stopPropagation()
-                                    }}
-                                    innerRef={this.changeColorRef}
-                                />
-                            </ButtonPositioning>
                         </ExtraButtonRow>
 
                         <ExtraButtonRow
