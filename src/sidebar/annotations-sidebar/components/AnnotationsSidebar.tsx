@@ -355,10 +355,12 @@ export class AnnotationsSidebar extends React.Component<
     ) {
         const listData = this.props.lists.byId[unifiedListId]
         const listInstance = this.props.listInstances[unifiedListId]
+
+        // TODO: Simplify this confusing condition
         if (
-            (!listInstance.isOpen ||
-                listInstance.annotationsLoadState === 'pristine') &&
-            !forceRendering
+            !(listInstance.isOpen || forceRendering) ||
+            (listData.hasRemoteAnnotations &&
+                listInstance.annotationsLoadState === 'pristine')
         ) {
             return null
         }
@@ -645,9 +647,12 @@ export class AnnotationsSidebar extends React.Component<
                                         listInstance.annotationRefsLoadState !==
                                             'success'
                                             ? this.renderLoader()
-                                            : listInstance
+                                            : listData.hasRemoteAnnotations
+                                            ? listInstance
                                                   .sharedAnnotationReferences
-                                                  ?.length ?? 0}
+                                                  ?.length ?? 0
+                                            : listData.unifiedAnnotationIds
+                                                  .length}
                                     </TotalAnnotationsCounter>
                                 </TooltipBox>
                             </FollowedListNoteCount>
@@ -707,29 +712,20 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderAnnotationsEditableForSelectedList() {
-        const { listInstances, selectedListId, annotationsCache } = this.props
+        const { listInstances, selectedListId } = this.props
         if (selectedListId == null) {
             this.throwNoSelectedListError()
         }
-        const { remoteId, localId } = annotationsCache.lists.byId[
-            selectedListId
-        ]
+        const listData = this.props.lists.byId[selectedListId]
         const listInstance = listInstances[selectedListId]
 
-        if (remoteId != null) {
-            if (listInstance.annotationsLoadState === 'running') {
-                return this.renderLoader()
-            }
-
-            return this.renderListAnnotations(selectedListId, true)
+        if (
+            listData.remoteId != null &&
+            listInstance.annotationsLoadState === 'running'
+        ) {
+            return this.renderLoader()
         }
-
-        // TODO: map list IDs
-        return null
-        // const selectedListAnnotations = Object.values(this.props.annotationsCache.annotations.byId).filter(
-        //     ({ unifiedListIds}) => unifiedListIds.includes(selectedList.localId.toString()),
-        // )
-        // return this.renderAnnotationsEditable(selectedListAnnotations)
+        return this.renderListAnnotations(selectedListId, true)
     }
 
     private renderResultsBody() {

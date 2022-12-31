@@ -2656,7 +2656,7 @@ describe('SidebarContainerLogic', () => {
             ])
 
             await sidebar.processEvent('updateAnnotationShareInfo', {
-                annotationUrl: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 privacyLevel: AnnotationPrivacyLevels.PRIVATE,
             })
 
@@ -2950,7 +2950,7 @@ describe('SidebarContainerLogic', () => {
             ])
 
             await sidebar.processEvent('updateAnnotationShareInfo', {
-                annotationUrl: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 privacyLevel: AnnotationPrivacyLevels.PROTECTED,
             })
 
@@ -3101,7 +3101,7 @@ describe('SidebarContainerLogic', () => {
             ])
 
             await sidebar.processEvent('updateAnnotationShareInfo', {
-                annotationUrl: publicAnnotIdA,
+                unifiedAnnotationId: publicAnnotIdA,
                 privacyLevel: AnnotationPrivacyLevels.SHARED,
             })
 
