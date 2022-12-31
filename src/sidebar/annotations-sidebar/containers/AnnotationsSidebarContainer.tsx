@@ -849,46 +849,51 @@ export class AnnotationsSidebarContainer<
                             All annotations added to Space
                         </TogglePillHoverSmallText>
                         <TogglePillMainText>
-                            Collaborative Space
-                            {/* {followedList.name} */}
+                            {
+                                this.props.annotationsCache.lists.byId[
+                                    this.state.selectedListId
+                                ].name
+                            }
                         </TogglePillMainText>
                     </IsolatedPillContent>
-                    <TooltipBox
-                        tooltipText={'Exit focus mode for this Space'}
-                        placement={'top-end'}
-                        strategy={'fixed'}
-                    >
-                        <CloseContainer
-                            pillVisibility={this.state.pillVisibility}
-                        >
-                            <Icon
-                                filePath="removeX"
-                                heightAndWidth="22px"
-                                onClick={(event) => {
-                                    event.stopPropagation()
-                                    this.processEvent('setPillVisibility', {
-                                        value: 'hide',
-                                    })
-                                    this.processEvent('setSelectedList', {
-                                        unifiedListId: null,
-                                    })
-                                }}
-                            />
-                        </CloseContainer>
-                    </TooltipBox>
+                    <CloseContainer pillVisibility={this.state.pillVisibility}>
+                        <CloseBox>
+                            <TooltipBox
+                                tooltipText={'Exit focus mode for this Space'}
+                                placement={'left-start'}
+                            >
+                                <Icon
+                                    filePath="removeX"
+                                    heightAndWidth="22px"
+                                    onClick={(event) => {
+                                        event.stopPropagation()
+                                        this.processEvent('setPillVisibility', {
+                                            value: 'hide',
+                                        })
+                                        this.processEvent('setSelectedList', {
+                                            unifiedListId: null,
+                                        })
+                                    }}
+                                />
+                            </TooltipBox>
+                        </CloseBox>
+                    </CloseContainer>
                 </IsolatedViewPill>
             )
         }
     }
 
     render() {
-        if (
-            this.state.showState === 'hidden' &&
-            this.props.sidebarContext === 'dashboard'
-        ) {
-            return this.renderSelectedListPill()
-        }
+        const selectedList = this.state.selectedListId ?? undefined
 
+        if (selectedList) {
+            if (
+                this.state.showState === 'hidden' &&
+                this.props.sidebarContext === 'in-page'
+            ) {
+                return this.renderSelectedListPill()
+            }
+        }
         const style = {
             height: '100%',
             position: 'relative',
@@ -1187,6 +1192,10 @@ const IconContainer = styled.div<{ pillVisibility: string }>`
         css`
             height: 45px;
         `}
+`
+
+const CloseBox = styled.div`
+    position: relative;
 `
 
 const CloseContainer = styled.div<{ pillVisibility: string }>`
