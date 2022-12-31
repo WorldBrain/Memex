@@ -594,6 +594,15 @@ export class AnnotationsSidebar extends React.Component<
                             />
                             <FollowedListTitle>
                                 {listData.name}
+                                {listData.creator?.id ===
+                                    this.props.currentUser?.id &&
+                                listData.remoteId != null ? (
+                                    <Icon
+                                        filePath="peopleFine"
+                                        heightAndWidth="20px"
+                                        hoverOff
+                                    />
+                                ) : undefined}
                             </FollowedListTitle>
                         </FollowedListTitleContainer>
                         <ButtonContainer>
@@ -1768,6 +1777,9 @@ const FollowedListTitle = styled.span<{ context: string }>`
     text-overflow: ellipsis;
     overflow-x: hidden;
     color: ${(props) => props.theme.colors.normalText};
+    display: flex;
+    grid-gap: 5px;
+    align-items: center;
 `
 const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
     font-weight: bold;
