@@ -235,20 +235,26 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             this.props.mode != 'edit' && this.state.hoverCard === true ? (
                 <HighlightActionsBox>
                     {this.state.needsTruncation && (
-                        <PrimaryAction
-                            icon={
-                                this.state.isTruncated ? 'expand' : 'compress'
-                            }
-                            size="small"
-                            height="24px"
-                            onClick={() => this.toggleTextTruncation()}
-                            label={
+                        <TooltipBox
+                            tooltipText={
                                 this.state.isTruncated
-                                    ? 'Show More'
+                                    ? 'Expand Note'
                                     : 'Show Less'
                             }
-                            type={'forth'}
-                        />
+                            placement="bottom"
+                        >
+                            <Icon
+                                onClick={() => this.toggleTextTruncation()}
+                                filePath={
+                                    this.state.isTruncated
+                                        ? 'expand'
+                                        : 'compress'
+                                }
+                                heightAndWidth={'18px'}
+                                borderColor={'lightHover'}
+                                background={'backgroundColorDarker'}
+                            />
+                        </TooltipBox>
                     )}
                     {onGoToAnnotation && (
                         <TooltipBox
@@ -758,7 +764,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 }
 
 const Highlightbar = styled.div`
-    background-color: ${(props) => props.theme.colors.highlightColorDefault};
+    background-color: ${(props) => props.theme.colors.purple};
     margin-right: 10px;
     border-radius: 2px;
     width: 4px;
@@ -817,8 +823,9 @@ const NoteText = styled(Markdown)`
 `
 
 const ActionBox = styled.div`
-    position: relative;
     z-index: 1;
+    position: absolute;
+    right: 15px;
 `
 
 const HighlightTextBox = styled.div`
@@ -845,6 +852,7 @@ const HighlightStyled = styled.div<{ hasComment: boolean }>`
     line-height: 20px;
     text-align: left;
     line-break: normal;
+    display: flex;
 
     ${(props) =>
         !props.hasComment &&
