@@ -50,17 +50,12 @@ function getSelectionHtml(selection, pageUrl) {
         }
     }
 
-    console.log(pageUrl)
-
     let htmlImproved = specialHTMLhandling(html, pageUrl)
-
-    console.log(htmlImproved)
     return turndownService.turndown(htmlImproved)
 }
 
 function specialHTMLhandling(html, pageUrl) {
     if (pageUrl.includes === '.wikipedia.org') {
-        console.log('replace')
         html.replace('href="/', 'href="https://en.wikipedia.org/')
         html.replace('src="//', 'src="https://')
 
@@ -206,8 +201,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
             },
         )
 
-        console.log('params', params)
-
         await this._saveAndRenderHighlight(params)
     }
 
@@ -236,12 +229,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const anchor = await extractAnchorFromSelection(selection, pageUrl)
 
         const body = anchor && anchor.quote
-        console.log('anchor', anchor)
         const hasSelectedText = anchor.quote.length
 
         const annotation: Annotation = {
             url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
-            body: hasSelectedText ? anchor.quote : undefined,
+            body: hasSelectedText ? body : undefined,
             pageUrl,
             tags: [],
             lists: [],
@@ -437,7 +429,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
         ) as HTMLElement
 
         if ($highlight) {
-            console.log('scrollto')
             $highlight.scrollIntoView({ behavior: 'smooth', block: 'center' })
         } else {
             console.error('MEMEX: Oops, no highlight found to scroll to')
@@ -447,16 +438,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
      * Scrolls the annotation card into ivew of the given annotation on the current page.
      */
     scrollCardIntoView = ({ url }: Highlight) => {
-        console.log('exec')
         const baseClass = 'AnnotationBox'
         const highlights = document.getElementById('memex-sidebar-container')
-
-        console.log(highlights)
 
         const highlight = highlights.shadowRoot.getElementById(url)
 
         highlight.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        console.log(highlight)
 
         // for (let item of highlights) {
         //     console.log('item')

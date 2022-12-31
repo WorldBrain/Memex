@@ -52,12 +52,6 @@ class TextTruncated extends React.Component<Props, State> {
     render() {
         const text = this.props.text
 
-        console.log('test', text)
-
-        const textArray = text
-            .split(/\r?\n|\r|\n/g)
-            .filter((item) => item.length > 0)
-
         return (
             <TruncatedContainer>
                 <TruncatedBox isHighlight={this.props.isHighlight}>
