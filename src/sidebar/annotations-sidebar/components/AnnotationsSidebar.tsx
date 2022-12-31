@@ -729,6 +729,10 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderResultsBody() {
+        const selectedList = this.props.annotationsCache.lists.byId[
+            this.props.selectedListId
+        ]
+
         if (this.props.activeTab === 'feed') {
             return this.renderFeed()
         }
@@ -745,6 +749,8 @@ export class AnnotationsSidebar extends React.Component<
                 <>
                     {this.renderSelectedListTopBar()}
                     <AnnotationsSectionStyled>
+                        {}
+                        {this.renderNewAnnotation()}
                         {this.renderAnnotationsEditableForSelectedList()}
                     </AnnotationsSectionStyled>
                 </>
@@ -963,7 +969,9 @@ export class AnnotationsSidebar extends React.Component<
                     this.props.selectedListId) && (
                     <>
                         <TopAreaContainer>
-                            {this.renderNewAnnotation()}
+                            <NewAnnotationBoxMyAnnotations>
+                                {this.renderNewAnnotation()}
+                            </NewAnnotationBoxMyAnnotations>
                             {annots.length > 1 && (
                                 <AnnotationActions>
                                     {this.renderTopBarActionButtons()}
@@ -1071,8 +1079,6 @@ export class AnnotationsSidebar extends React.Component<
                         size="small"
                         label="All Spaces"
                         onClick={() => this.props.onResetSpaceSelect()}
-                        fontColor={'greyScale8'}
-                        iconColor={'greyScale8'}
                     />
                     {this.renderPermissionStatusButton()}
                 </IsolatedViewHeaderTopBar>
@@ -1084,79 +1090,126 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
+    private spaceOwnershipStatus() {
+        const selectedList = this.props.annotationsCache.lists.byId[
+            this.props.selectedListId
+        ]
+
+        if (selectedList.remoteId != null && selectedList.localId == null) {
+            return 'Follower'
+        }
+
+        if (selectedList.creator?.id === this.props.currentUser?.id) {
+            return 'Creator'
+        }
+
+        if (
+            selectedList.remoteId != null &&
+            selectedList.localId != null &&
+            selectedList.creator?.id !== this.props.currentUser?.id
+        ) {
+            return 'Contributor'
+        }
+
+        return undefined
+    }
+
     private renderPermissionStatusButton() {
         const { selectedListId, annotationsCache, currentUser } = this.props
         if (!selectedListId || !annotationsCache.lists.byId[selectedListId]) {
             this.throwNoSelectedListError()
         }
 
-        const selectedList = annotationsCache.lists.byId[selectedListId]
-        if (selectedList.remoteId != null) {
-            if (selectedList.localId == null) {
-                return (
-                    <PermissionInfoButton
-                        label="Follower"
-                        type="secondary"
-                        size="small"
-                        icon="plus"
-                    >
-                        <Icon
-                            filePath="plusIcon"
-                            color="greyScale8"
-                            heightAndWidth="20px"
-                            hoverOff
-                        />
-                        Follower
-                    </PermissionInfoButton>
-                )
-            }
+        const permissionStatus = this.spaceOwnershipStatus()
 
-            if (selectedList.creator?.id === currentUser?.id) {
+        const selectedList = this.props.annotationsCache.lists.byId[
+            this.props.selectedListId
+        ]
+
+        if (permissionStatus === 'Follower') {
+            return (
+                <PermissionInfoButton
+                    label="Follower"
+                    type="secondary"
+                    size="small"
+                    icon="plus"
+                >
+                    <Icon
+                        filePath="plusIcon"
+                        color="greyScale8"
+                        heightAndWidth="20px"
+                        hoverOff
+                    />
+                    Follower
+                </PermissionInfoButton>
+            )
+        }
+
+        if (permissionStatus === 'Creator') {
+            if (selectedList.remoteId == null) {
                 return (
-                    <PermissionInfoButton
-                        label="Owner"
-                        type="secondary"
+                    <PrimaryAction
+                        type="tertiary"
                         size="small"
-                        icon="plus"
-                    >
-                        <Icon
-                            filePath="personFine"
-                            color="greyScale8"
-                            heightAndWidth="20px"
-                            hoverOff
-                        />
-                        Creator
-                    </PermissionInfoButton>
+                        icon="link"
+                        label={'Share Space'}
+                        onClick={null}
+                        fontColor={'greyScale8'}
+                    />
                 )
             } else {
                 return (
-                    <TooltipBox
-                        tooltipText={
-                            <span>
-                                You can add pages & <br /> annotations to this
-                                Space
-                            </span>
-                        }
-                        placement={'bottom-end'}
-                    >
-                        <PermissionInfoButton
-                            label="Contributor"
-                            type="secondary"
+                    <CreatorActionButtons>
+                        <PrimaryAction
+                            type="tertiary"
                             size="small"
-                            icon="plus"
-                        >
-                            <Icon
-                                filePath="peopleFine"
-                                color="greyScale8"
-                                heightAndWidth="20px"
-                                hoverOff
-                            />
-                            Contributor
-                        </PermissionInfoButton>
-                    </TooltipBox>
+                            icon="link"
+                            label={'Share Space'}
+                            onClick={null}
+                            fontColor={'greyScale8'}
+                        />
+                        <PrimaryAction
+                            type="forth"
+                            size="small"
+                            icon="personFine"
+                            label={'Creator'}
+                            onClick={null}
+                            fontColor={'greyScale8'}
+                        />
+                    </CreatorActionButtons>
                 )
             }
-        } else {
+        }
+
+        if (permissionStatus === 'Contributor') {
+            return (
+                <TooltipBox
+                    tooltipText={
+                        <span>
+                            You can add pages & <br /> annotations to this Space
+                        </span>
+                    }
+                    placement={'bottom-end'}
+                >
+                    <PermissionInfoButton
+                        label="Contributor"
+                        type="secondary"
+                        size="small"
+                        icon="plus"
+                    >
+                        <Icon
+                            filePath="peopleFine"
+                            color="greyScale8"
+                            heightAndWidth="20px"
+                            hoverOff
+                        />
+                        Contributor
+                    </PermissionInfoButton>
+                </TooltipBox>
+            )
+        }
+
+        if (permissionStatus == null) {
             // Local-only spaces don't show a button
             return null
         }
@@ -1301,6 +1354,18 @@ export default AnnotationsSidebar
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
 
+const CreatorActionButtons = styled.div`
+    display: flex;
+    align-items: center;
+    flex-direction: flex-end;
+    grid-gap: 5px;
+`
+
+const NewAnnotationBoxMyAnnotations = styled.div`
+    display: flex;
+    margin-bottom: 15px;
+`
+
 const OthersAnnotationCounter = styled.div`
     display: flex;
     align-items: flex-end;
@@ -1417,8 +1482,7 @@ const IsolatedViewHeaderContainer = styled.div`
     justify-content: flex-start;
     grid-gap: 10px;
     flex-direction: column;
-    margin-bottom: 30px;
-    padding: 0 0 0 10px;
+    padding: 10px 10px 0 15px;
     z-index: 20;
 `
 
@@ -1426,7 +1490,7 @@ const IsolatedViewHeaderTopBar = styled.div`
     display: flex;
     align-items: center;
     height: 30px;
-    margin: 10px 0px 0px -10px;
+    margin: 0px 0px 0px -10px;
     justify-content: space-between;
     width: fill-available;
 `
@@ -1779,7 +1843,6 @@ const NewAnnotationSection = styled.section`
     justify-content: flex-start;
     align-items: flex-start;
     width: fill-available;
-    margin-bottom: 8px;
     z-index: 11200;
 `
 
@@ -1794,7 +1857,7 @@ const AnnotationsSectionStyled = styled.section`
     height: fill-available;
     flex: 1;
     overflow: scroll;
-    padding: 0 10px;
+    padding: 5px 10px 0px 10px;
 
     scrollbar-width: none;
 

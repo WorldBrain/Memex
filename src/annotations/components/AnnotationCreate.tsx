@@ -499,7 +499,6 @@ const TextBoxContainerStyled = styled.div`
     font-size: 14px;
     width: 100%;
     border-radius: 8px;
-    margin-bottom: 10px;
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
