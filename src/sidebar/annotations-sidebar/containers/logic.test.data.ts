@@ -123,7 +123,7 @@ export const ANNOT_METADATA: SharedAnnotationMetadata[] = [
 export const ANNOT_PRIVACY_LVLS: AnnotationPrivacyLevel[] = [
     {
         annotation: ANNOT_1.url,
-        privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
         createdWhen: new Date('2022-12-20'),
     },
     {
@@ -143,7 +143,7 @@ export const ANNOT_PRIVACY_LVLS: AnnotationPrivacyLevel[] = [
     },
     {
         annotation: ANNOT_5.url,
-        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+        privacyLevel: AnnotationPrivacyLevels.PRIVATE,
         createdWhen: new Date('2022-12-20'),
     },
 ]
@@ -238,7 +238,7 @@ export const PAGES = [
     },
     {
         url: normalizeUrl(TAB_URL_2),
-        fullUrl: TAB_URL_1,
+        fullUrl: TAB_URL_2,
         domain: 'test.com',
         hostname: 'test.com',
         fullTitle: TAB_TITLE_2,
@@ -275,10 +275,6 @@ export const ANNOT_LIST_ENTRIES: AnnotListEntry[] = [
     {
         url: ANNOT_1.url,
         listId: LOCAL_LISTS[1].id,
-    },
-    {
-        url: ANNOT_2.url,
-        listId: LOCAL_LISTS[3].id,
     },
     {
         url: ANNOT_3.url,

@@ -110,6 +110,9 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     lists: PageAnnotationsCacheInterface['lists']
     annotations: PageAnnotationsCacheInterface['annotations']
 
+    /** This state is kept so annotations can easily "inherit" shared lists from their parent page upon becoming public. */
+    pageSharedListIds: UnifiedList['unifiedId'][]
+
     users: {
         [userId: string]: {
             name: string
@@ -224,21 +227,16 @@ interface SidebarEvents {
         deleted: number | null
         options?: { protectAnnotation?: boolean }
     }>
+    updateAnnotationShareInfo: AnnotationEvent<{
+        keepListsIfUnsharing?: boolean
+        privacyLevel: AnnotationPrivacyLevels
+    }>
+    updateAllAnnotationsShareInfo: AnnotationSharingStates
 
     // Selected space management
     setSelectedList: { unifiedListId: UnifiedList['unifiedId'] | null }
 
-    goToAnnotationInNewTab: {
-        // context: AnnotationEventContext
-        annotationUrl: string
-    }
-
-    shareAnnotation: {
-        // context: AnnotationEventContext
-        mouseEvent: React.MouseEvent
-        annotationUrl: string
-        followedListId?: string
-    }
+    goToAnnotationInNewTab: { annotationUrl: string }
 
     // Misc events
     copyNoteLink: { link: string }
@@ -252,13 +250,6 @@ interface SidebarEvents {
     setAnnotationsExpanded: { value: boolean }
     fetchSuggestedTags: null
     fetchSuggestedDomains: null
-
-    updateAnnotationShareInfo: {
-        annotationUrl: string
-        keepListsIfUnsharing?: boolean
-        privacyLevel: AnnotationPrivacyLevels
-    }
-    updateAllAnnotationsShareInfo: AnnotationSharingStates
 
     setLoginModalShown: { shown: boolean }
     setDisplayNameSetupModalShown: { shown: boolean }

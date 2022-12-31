@@ -213,6 +213,7 @@ export class SidebarContainerLogic extends UILogic<
 
             annotations: initNormalizedState(),
             lists: initNormalizedState(),
+            pageSharedListIds: [],
 
             activeAnnotationId: null, // TODO: make unified ID
 
@@ -249,19 +250,36 @@ export class SidebarContainerLogic extends UILogic<
         fullPageUrl: string,
         opts: { renderHighlights: boolean },
     ) {
-        await executeUITask(this, 'cacheLoadState', async () =>
-            cacheUtils.hydrateCache({
+        const { annotationsCache, customLists } = this.options
+        await executeUITask(this, 'cacheLoadState', async () => {
+            await cacheUtils.hydrateCache({
                 fullPageUrl,
+                cache: annotationsCache,
                 user: this.options.currentUser,
-                cache: this.options.annotationsCache,
                 bgModules: {
+                    customLists,
                     annotations: this.options.annotations,
-                    customLists: this.options.customLists,
                     contentSharing: this.options.contentSharing,
                     pageActivityIndicator: this.options.pageActivityIndicatorBG,
                 },
-            }),
-        )
+            })
+
+            // TODO: Maybe this state is better off inside the cache
+            const pageLocalListIds = await customLists.fetchPageLists({
+                url: fullPageUrl,
+            })
+
+            this.emitMutation({
+                pageSharedListIds: {
+                    $set: pageLocalListIds
+                        .map((localListId) =>
+                            annotationsCache.getListByLocalId(localListId),
+                        )
+                        .filter((unifiedList) => unifiedList?.remoteId != null)
+                        .map((unifiedList) => unifiedList.unifiedId),
+                },
+            })
+        })
 
         if (opts.renderHighlights) {
             this.renderOwnHighlights()
@@ -977,47 +995,6 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    shareAnnotation: EventHandler<'shareAnnotation'> = async ({ event }) => {
-        if (!(await this.ensureLoggedIn())) {
-            return
-        }
-
-        const mutation: UIMutation<SidebarContainerState> =
-            event.followedListId != null
-                ? {
-                      //   followedLists: {
-                      //       byId: {
-                      //           [event.followedListId]: {
-                      //               activeShareMenuAnnotationId: {
-                      //                   $set: event.annotationUrl,
-                      //               },
-                      //           },
-                      //       },
-                      //   },
-                  }
-                : {
-                      activeShareMenuNoteId: { $set: event.annotationUrl },
-                  }
-
-        if (navigator.platform === 'MacIntel') {
-            const immediateShare =
-                event.mouseEvent.metaKey && event.mouseEvent.altKey
-            this.emitMutation({
-                ...mutation,
-                immediatelyShareNotes: { $set: !!immediateShare },
-            })
-        } else {
-            const immediateShare =
-                event.mouseEvent.ctrlKey && event.mouseEvent.altKey
-            this.emitMutation({
-                ...mutation,
-                immediatelyShareNotes: { $set: !!immediateShare },
-            })
-        }
-
-        await this.setLastSharedAnnotationTimestamp()
-    }
-
     setAnnotationsExpanded: EventHandler<'setAnnotationsExpanded'> = (
         incoming,
     ) => {}
@@ -1333,59 +1310,47 @@ export class SidebarContainerLogic extends UILogic<
     updateAnnotationShareInfo: EventHandler<
         'updateAnnotationShareInfo'
     > = async ({ previousState, event }) => {
-        // const annotationIndex = previousState.annotations.findIndex(
-        //     (a) => a.url === event.annotationUrl,
-        // )
-        const annotationIndex = -1
-        if (annotationIndex === -1) {
+        const existing =
+            previousState.annotations.byId[event.unifiedAnnotationId]
+
+        if (existing.privacyLevel === event.privacyLevel) {
             return
         }
-        const privacyState = getAnnotationPrivacyState(event.privacyLevel)
-        const existing = previousState.annotations.byId[annotationIndex]
-        const oldLists = [...existing.unifiedListIds]
 
-        // existing.unifiedListIds= this.getAnnotListsAfterShareStateChange({
-        //     previousState,
-        //     annotationIndex,
-        //     incomingPrivacyState: privacyState,
-        //     keepListsIfUnsharing: event.keepListsIfUnsharing,
-        // })
+        let unifiedListIds = [...existing.unifiedListIds]
+        let privacyLevel = event.privacyLevel
 
-        if (!event.keepListsIfUnsharing) {
-            const makingPublic = [
-                AnnotationPrivacyLevels.SHARED,
-                AnnotationPrivacyLevels.SHARED_PROTECTED,
-            ].includes(event.privacyLevel)
-
-            if (makingPublic) {
-                // this.updateAnnotationFollowedLists(
-                //     event.annotationUrl,
-                //     previousState,
-                //     {
-                //         add: existing.unifiedListIds.filter(
-                //             (listId) => !oldLists.includes(listId),
-                //         ),
-                //         remove: oldLists.filter(
-                //             (listId) => !existing.unifiedListIds.includes(listId),
-                //         ),
-                //     },
-                // )
+        if (
+            existing.privacyLevel >= AnnotationPrivacyLevels.SHARED &&
+            event.privacyLevel <= AnnotationPrivacyLevels.PRIVATE
+        ) {
+            if (event.keepListsIfUnsharing) {
+                // Keep all lists, but need to change level to 'protected'
+                privacyLevel = AnnotationPrivacyLevels.PROTECTED
             } else {
-                // this.removeAnnotationFromAllFollowedLists(
-                //     event.annotationUrl,
-                //     previousState,
-                // )
+                // Keep only private lists
+                unifiedListIds = unifiedListIds.filter((listId) => {
+                    const list = previousState.lists.byId[listId]
+                    return !list?.remoteId
+                })
             }
+        } else if (
+            existing.privacyLevel <= AnnotationPrivacyLevels.PRIVATE &&
+            event.privacyLevel >= AnnotationPrivacyLevels.SHARED
+        ) {
+            // Need to inherit parent page's shared lists
+            unifiedListIds = Array.from(
+                new Set([
+                    ...unifiedListIds,
+                    ...previousState.pageSharedListIds,
+                ]),
+            )
         }
 
-        await this.options.annotationsCache.updateAnnotation({
+        this.options.annotationsCache.updateAnnotation({
             ...existing,
-            privacyLevel: shareOptsToPrivacyLvl({
-                shouldShare: privacyState.public,
-                isBulkShareProtected:
-                    privacyState.protected || !!event.keepListsIfUnsharing,
-            }),
-            // skipBackendOps: true, // Doing this so as the SingleNoteShareMenu logic will take care of the actual backend updates - we just want UI state updates
+            privacyLevel,
+            unifiedListIds,
         })
     }
 

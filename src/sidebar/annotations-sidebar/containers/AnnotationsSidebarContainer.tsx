@@ -480,8 +480,8 @@ export class AnnotationsSidebarContainer<
                 annotationUrl={annotation.localId}
                 postShareHook={(state, opts) =>
                     this.processEvent('updateAnnotationShareInfo', {
-                        annotationUrl: annotation.localId,
                         privacyLevel: state.privacyLevel,
+                        unifiedAnnotationId: annotation.unifiedId,
                         keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                     })
                 }
