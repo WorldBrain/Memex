@@ -351,6 +351,9 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedNotesContainer>
+                <NewAnnotationBoxMyAnnotations>
+                    {this.renderNewAnnotation()}
+                </NewAnnotationBoxMyAnnotations>
                 {annotationsData.map((annotation) => {
                     // TODO: Handle when list has no remoteID (should not afford conversation logic)
                     const conversationId = `${listData.remoteId}:${annotation.unifiedId}`
@@ -595,8 +598,6 @@ export class AnnotationsSidebar extends React.Component<
             }
         })
 
-        console.log(allSpaces)
-
         if (allSpaces.length > 0) {
             let mySpaces = allSpaces.filter(
                 (list) => this.spaceOwnershipStatus(list) === 'Creator',
@@ -772,7 +773,6 @@ export class AnnotationsSidebar extends React.Component<
                 <>
                     {this.renderSelectedListTopBar()}
                     <AnnotationsSectionStyled>
-                        {this.renderNewAnnotation()}
                         {this.renderAnnotationsEditableForSelectedList()}
                     </AnnotationsSectionStyled>
                 </>
@@ -1034,6 +1034,7 @@ export class AnnotationsSidebar extends React.Component<
                     active={this.props.activeTab === 'annotations'}
                     type={'tertiary'}
                     size={'medium'}
+                    padding={'0px 6px'}
                 />
                 <PrimaryAction
                     onClick={this.props.setActiveTab('spaces')}
@@ -1042,6 +1043,7 @@ export class AnnotationsSidebar extends React.Component<
                     type={'tertiary'}
                     size={'medium'}
                     iconPosition={'right'}
+                    padding={'0px 6px'}
                     icon={
                         this.props.cacheLoadState === 'running' ||
                         this.props.cacheLoadState === 'pristine' ? (
@@ -1066,6 +1068,7 @@ export class AnnotationsSidebar extends React.Component<
                     type={'tertiary'}
                     size={'medium'}
                     iconPosition={'right'}
+                    padding={'0px 6px'}
                     icon={
                         this.props.cacheLoadState === 'running' ||
                         this.props.cacheLoadState === 'pristine' ? (
@@ -1115,18 +1118,14 @@ export class AnnotationsSidebar extends React.Component<
 
     private spaceOwnershipStatus(listData) {
         if (listData.remoteId != null && listData.localId == null) {
-            console.log('Follower')
             return 'Follower'
         }
 
-        if (!listData.creator?.id) {
-            if (
-                listData.creator?.id == null &&
-                listData.creator?.id === this.props.currentUser?.id
-            ) {
-                console.log('Creator')
-                return 'Creator'
-            }
+        // if (listData.creator?.id === this.props.currentUser?.id) {
+        //     return 'Creator'
+        // }
+        if (listData.creator?.id == null) {
+            return 'Creator'
         }
 
         if (
@@ -1134,7 +1133,6 @@ export class AnnotationsSidebar extends React.Component<
             listData.localId != null &&
             listData.creator?.id !== this.props.currentUser?.id
         ) {
-            console.log('Contributor')
             return 'Contributor'
         }
 
@@ -1409,7 +1407,7 @@ const SpaceTypeSectionHeader = styled.div`
     color: ${(props) => props.theme.colors.iconColor};
     font-weight: 300;
     font-size: 14px;
-    padding: 30px 20px 30px 20px;
+    padding: 30px 20px 30px 15px;
     flex-direction: row;
     letter-spacing: 1px;
 `
@@ -1437,7 +1435,8 @@ const CreatorActionButtons = styled.div`
 
 const NewAnnotationBoxMyAnnotations = styled.div`
     display: flex;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
+    margin-top: 5px;
 `
 
 const OthersAnnotationCounter = styled.div``
@@ -1487,8 +1486,6 @@ const AnnotationActions = styled.div`
     padding: 0 10px;
     width: fill-available;
     height: 20px;
-    margin-top: -5px;
-    margin-bottom: 5px;
 `
 
 const ActionButtons = styled.div`
@@ -1747,7 +1744,6 @@ const FollowedListRow = styled(Margin)<{ context: string }>`
     border-radius: 8px;
     height: 40px;
     padding: 5px 15px 5px 10px;
-    margin: 0 2px;
     z-index: 20;
 
     &:first-child {
@@ -1917,6 +1913,7 @@ const NewAnnotationSection = styled.section`
     align-items: flex-start;
     width: fill-available;
     z-index: 11200;
+    margin-top: 5px;
 `
 
 const AnnotationsSectionStyled = styled.div`

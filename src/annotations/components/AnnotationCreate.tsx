@@ -318,7 +318,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <>
                 <TextBoxContainerStyled>
-                    <EditorContainer vertical="10px">
+                    <EditorContainer>
                         {this.state.onEditClick ? (
                             <MemexEditor
                                 onKeyDown={this.handleInputKeyDown}
@@ -474,6 +474,8 @@ const FooterContainer = styled.div`
     align-items: flex-start;
     z-index: 998;
     width: fill-available;
+    margin-top: 5px;
+    margin-bottom: 5px;
 `
 
 const SaveActionBar = styled.div`
