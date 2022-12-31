@@ -32,7 +32,7 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
-
+import { truncateText } from 'src/annotations/utils'
 export interface HighlightProps extends AnnotationProps {
     body: string
     comment?: string
@@ -98,6 +98,9 @@ interface State {
     showCopyPaster: boolean
     hoverEditArea: boolean
     hoverCard: boolean
+    isTruncated?: boolean
+    needsTruncation: boolean
+    truncatedText: string
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
@@ -128,6 +131,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         showCopyPaster: false,
         hoverEditArea: false,
         hoverCard: false,
+        isTruncated: false,
+        needsTruncation: true,
+        truncatedText: '',
     }
 
     focusEditForm() {
@@ -136,6 +142,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     componentDidMount() {
         this.textAreaHeight()
+        const { isTooLong, text } = truncateText(this.props.body)
+
+        this.setState({
+            isTruncated: isTooLong,
+            needsTruncation: isTooLong,
+            truncatedText: text,
+        })
     }
 
     private updateSpacePickerState(showState: ListPickerShowState) {
@@ -203,6 +216,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         }
     }
 
+    private toggleTextTruncation() {
+        this.setState({
+            isTruncated: !this.state.isTruncated,
+        })
+    }
+
     private renderHighlightBody() {
         if (!this.props.body) {
             return
@@ -215,6 +234,22 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         const actionsBox =
             this.props.mode != 'edit' && this.state.hoverCard === true ? (
                 <HighlightActionsBox>
+                    {this.state.needsTruncation && (
+                        <PrimaryAction
+                            icon={
+                                this.state.isTruncated ? 'expand' : 'compress'
+                            }
+                            size="small"
+                            height="24px"
+                            onClick={() => this.toggleTextTruncation()}
+                            label={
+                                this.state.isTruncated
+                                    ? 'Show More'
+                                    : 'Show Less'
+                            }
+                            type={'forth'}
+                        />
+                    )}
                     {onGoToAnnotation && (
                         <TooltipBox
                             tooltipText="Open in Page"
@@ -259,10 +294,28 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 }
                 hasComment={this.props.comment.length > 0}
             >
-                <ActionBox>{actionsBox}</ActionBox>
-                <TextTruncated isHighlight text={this.props.body}>
-                    {({ text }) => <HighlightTextBox>{text}</HighlightTextBox>}
-                </TextTruncated>
+                <Highlightbar />
+                <>
+                    <ActionBox>{actionsBox}</ActionBox>
+                    <Markdown pageUrl={this.props.url}>
+                        {this.state.isTruncated
+                            ? this.state.truncatedText
+                            : this.props.body}
+                    </Markdown>
+                    {/* <TextTruncated
+                    isTruncated={this.state.isTruncated}
+                    needsTruncation={this.state.needsTruncation}
+                    truncatedText={this.state.truncatedText}
+                    toggleTextTruncate={() => this.toggleTextTruncation()}
+                    isHighlight
+                    text={
+                        this.state.isTruncated
+                            ? this.state.truncatedText
+                            : this.props.body
+                    }
+                    pageUrl={this.props.url}
+                /> */}
+                </>
             </HighlightStyled>
         )
     }
@@ -309,6 +362,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             return null
         }
 
+        let { text } = truncateText(comment)
+
         return (
             <CommentBox>
                 {!this.theme.hasHighlight && this.state.hoverCard === true && (
@@ -323,18 +378,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         />
                     </TooltipBox>
                 )}
-                <TextTruncated text={comment}>
-                    {({ text }) => (
-                        <NoteTextBox hasHighlight={this.theme.hasHighlight}>
-                            <NoteText
-                                contextLocation={this.props.contextLocation}
-                                getYoutubePlayer={this.props.getYoutubePlayer}
-                            >
-                                {text}
-                            </NoteText>
-                        </NoteTextBox>
-                    )}
-                </TextTruncated>
+                <NoteTextBox hasHighlight={this.theme.hasHighlight}>
+                    <NoteText
+                        contextLocation={this.props.contextLocation}
+                        getYoutubePlayer={this.props.getYoutubePlayer}
+                    >
+                        {this.state.isTruncated ? text : comment}
+                    </NoteText>
+                </NoteTextBox>
             </CommentBox>
         )
     }
@@ -706,6 +757,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 }
 
+const Highlightbar = styled.div`
+    background-color: ${(props) => props.theme.colors.highlightColorDefault};
+    margin-right: 10px;
+    border-radius: 2px;
+    width: 4px;
+`
+
 const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
     margin-top: ${(props) => !props.hasHighlight && '10px'};
 `
@@ -803,12 +861,12 @@ const CommentBox = styled.div`
     word-wrap: break-word;
     white-space: pre-wrap;
     margin: 0px;
-    padding: 5px 20px 10px;
+    padding: 10px 20px 10px;
     line-height: 1.4;
     text-align: left;
     //border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
     overflow: visible;
-    flex-direction: row-reverse;
+    flex-direction: row;
     display: flex;
 
     /* &:first-child {

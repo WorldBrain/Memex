@@ -27,13 +27,55 @@ import browser from 'webextension-polyfill'
 import * as PDFs from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
 import { throttle } from 'lodash'
 import hexToRgb from 'hex-to-rgb'
+import TurndownService from 'turndown'
+
+const turndownService = new TurndownService({
+    headingStyle: 'atx',
+    hr: '---',
+    codeBlockStyle: 'fenced',
+})
 
 const styles = require('src/highlighting/ui/styles.css')
 
+function getSelectionHtml(selection, pageUrl) {
+    var html = ''
+    if (typeof selection != 'undefined') {
+        var sel = selection
+        if (sel.rangeCount) {
+            var container = document.createElement('div')
+            for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                container.appendChild(sel.getRangeAt(i).cloneContents())
+            }
+            html = container.innerHTML
+        }
+    }
+
+    console.log(pageUrl)
+
+    let htmlImproved = specialHTMLhandling(html, pageUrl)
+
+    console.log(htmlImproved)
+    return turndownService.turndown(htmlImproved)
+}
+
+function specialHTMLhandling(html, pageUrl) {
+    if (pageUrl.includes === '.wikipedia.org') {
+        console.log('replace')
+        html.replace('href="/', 'href="https://en.wikipedia.org/')
+        html.replace('src="//', 'src="https://')
+
+        return html
+    }
+
+    return html
+}
+
 export const extractAnchorFromSelection = async (
     selection: Selection,
+    pageUrl: string,
 ): Promise<Anchor> => {
-    const quote = selection.toString()
+    const quote2 = selection.toString()
+    const quote = getSelectionHtml(selection, pageUrl)
     const descriptor = await anchoring.selectionToDescriptor({ selection })
     return {
         quote,
@@ -164,6 +206,8 @@ export class HighlightRenderer implements HighlightRendererInterface {
             },
         )
 
+        console.log('params', params)
+
         await this._saveAndRenderHighlight(params)
     }
 
@@ -189,16 +233,15 @@ export class HighlightRenderer implements HighlightRendererInterface {
             return null
         }
 
-        const anchor = await extractAnchorFromSelection(selection)
+        const anchor = await extractAnchorFromSelection(selection, pageUrl)
 
         const body = anchor && anchor.quote
+        console.log('anchor', anchor)
         const hasSelectedText = anchor.quote.length
 
         const annotation: Annotation = {
             url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
-            body: hasSelectedText
-                ? anchor.quote
-                : videoTimeStampForComment && undefined,
+            body: hasSelectedText ? anchor.quote : undefined,
             pageUrl,
             tags: [],
             lists: [],
