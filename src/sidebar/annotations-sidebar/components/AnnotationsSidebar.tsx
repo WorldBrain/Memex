@@ -490,153 +490,227 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderSharedNotesByList() {
-        const { lists, listInstances } = this.props
-        const sharedNotesByList = lists.allIds.map((unifiedListId) => {
-            const listData = lists.byId[unifiedListId]
-            const listInstance = listInstances[unifiedListId]
-
-            let othersAnnotsCount = 0
-            // TODO: properly derive this
-            // for (const { id } of listInstance.sharedAnnotationReferences ?? []) {
-            //     if (
-            //         this.props.__annotations[id]?.creatorId !==
-            //         this.props.currentUser?.id
-            //     ) {
-            //         othersAnnotsCount++
-            //     }
-            // }
-
-            return (
-                <FollowedListNotesContainer
-                    bottom={listInstance.isOpen ? '20px' : '0px'}
-                    key={unifiedListId}
-                    top="0px"
-                >
-                    {/* <React.Fragment key={listId}> */}
-                    <FollowedListRow
-                        onClick={() =>
-                            this.props.onUnifiedListSelect(unifiedListId)
-                        }
-                        title={listData.name}
-                    >
-                        <FollowedListTitleContainer>
-                            <Icon
-                                icon={icons.arrowRight}
-                                heightAndWidth="20px"
-                                rotation={listInstance.isOpen && 90}
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    this.props.expandFollowedListNotes(
-                                        unifiedListId,
-                                    )
-                                }}
-                            />
-                            <FollowedListTitle>
-                                {listData.name}
-                                {listData.creator?.id ===
-                                    this.props.currentUser?.id &&
-                                listData.remoteId != null ? (
-                                    <Icon
-                                        filePath="peopleFine"
-                                        heightAndWidth="20px"
-                                        hoverOff
-                                    />
-                                ) : undefined}
-                            </FollowedListTitle>
-                        </FollowedListTitleContainer>
-                        <ButtonContainer>
-                            <ActionButtons>
-                                {/* <TooltipBox
-                                    tooltipText="Open space in isolated view"
-                                    placement="left"
-                                >
-                                    <Icon
-                                        icon="edit"
-                                        height="16px"
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            this.props.onRemoteSpaceSelect(
-                                                remoteListId,
-                                            )
-                                        }}
-                                    />
-                                </TooltipBox> */}
-                                <TooltipBox
-                                    tooltipText="Go to Space"
-                                    placement="left"
-                                >
-                                    <Icon
-                                        icon="goTo"
-                                        height="20px"
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            this.props.openCollectionPage(
-                                                unifiedListId,
-                                            )
-                                        }}
-                                    />
-                                </TooltipBox>
-                            </ActionButtons>
-                            <FollowedListNoteCount active left="5px">
-                                <TooltipBox
-                                    tooltipText={'Annotations by Others'}
-                                    placement={'bottom'}
-                                >
-                                    <OthersAnnotationCounter>
-                                        {othersAnnotsCount}
-                                    </OthersAnnotationCounter>
-                                </TooltipBox>
-                                <TooltipBox
-                                    tooltipText={'Total Annotations'}
-                                    placement={'bottom'}
-                                >
-                                    <TotalAnnotationsCounter>
-                                        {listData.hasRemoteAnnotations &&
-                                        listInstance.annotationRefsLoadState !==
-                                            'success'
-                                            ? this.renderLoader()
-                                            : listData.hasRemoteAnnotations
-                                            ? listInstance
-                                                  .sharedAnnotationReferences
-                                                  ?.length ?? 0
-                                            : listData.unifiedAnnotationIds
-                                                  .length}
-                                    </TotalAnnotationsCounter>
-                                </TooltipBox>
-                            </FollowedListNoteCount>
-                        </ButtonContainer>
-                    </FollowedListRow>
-                    {this.renderListAnnotations(unifiedListId)}
-                </FollowedListNotesContainer>
-            )
-        })
+    private renderSpacesItem(
+        unifiedListId,
+        listData,
+        listInstance,
+        othersAnnotsCount,
+    ) {
         return (
-            <SectionTitleContainer>
-                {this.props.activeTab === 'spaces' &&
-                    (lists.allIds.length > 0 ? (
-                        <AnnotationContainer>
-                            {sharedNotesByList}
-                        </AnnotationContainer>
-                    ) : (
-                        <EmptyMessageContainer>
-                            <SectionCircle>
+            <FollowedListNotesContainer
+                bottom={listInstance.isOpen ? '20px' : '0px'}
+                key={unifiedListId}
+                top="0px"
+            >
+                <FollowedListRow
+                    onClick={() =>
+                        this.props.onUnifiedListSelect(unifiedListId)
+                    }
+                    title={listData.name}
+                >
+                    <FollowedListTitleContainer>
+                        <Icon
+                            icon={icons.arrowRight}
+                            heightAndWidth="20px"
+                            rotation={listInstance.isOpen && 90}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                this.props.expandFollowedListNotes(
+                                    unifiedListId,
+                                )
+                            }}
+                        />
+                        <FollowedListTitle>
+                            {listData.name}
+                            {listData.creator?.id ===
+                                this.props.currentUser?.id &&
+                            listData.remoteId != null ? (
                                 <Icon
-                                    filePath={icons.collectionsEmpty}
+                                    filePath="peopleFine"
                                     heightAndWidth="20px"
-                                    color="purple"
                                     hoverOff
                                 />
-                            </SectionCircle>
-                            <InfoText>
-                                This page is not yet in a Space <br /> you
-                                created, follow or collaborate in.
-                            </InfoText>
-                        </EmptyMessageContainer>
-                    ))}
-            </SectionTitleContainer>
+                            ) : undefined}
+                        </FollowedListTitle>
+                    </FollowedListTitleContainer>
+                    <ButtonContainer>
+                        <ActionButtons>
+                            <TooltipBox
+                                tooltipText="Go to Space"
+                                placement="left"
+                            >
+                                <Icon
+                                    icon="goTo"
+                                    height="20px"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        this.props.openCollectionPage(
+                                            unifiedListId,
+                                        )
+                                    }}
+                                />
+                            </TooltipBox>
+                        </ActionButtons>
+                        <FollowedListNoteCount active left="5px">
+                            <TooltipBox
+                                tooltipText={'Annotations by Others'}
+                                placement={'bottom'}
+                            >
+                                <OthersAnnotationCounter>
+                                    {othersAnnotsCount}
+                                </OthersAnnotationCounter>
+                            </TooltipBox>
+                            <TooltipBox
+                                tooltipText={'Total Annotations'}
+                                placement={'bottom'}
+                            >
+                                <TotalAnnotationsCounter>
+                                    /
+                                    {listData.hasRemoteAnnotations &&
+                                    listInstance.annotationRefsLoadState !==
+                                        'success'
+                                        ? this.renderLoader()
+                                        : listData.hasRemoteAnnotations
+                                        ? listInstance
+                                              .sharedAnnotationReferences
+                                              ?.length ?? 0
+                                        : listData.unifiedAnnotationIds.length}
+                                </TotalAnnotationsCounter>
+                            </TooltipBox>
+                        </FollowedListNoteCount>
+                    </ButtonContainer>
+                </FollowedListRow>
+                {this.renderListAnnotations(unifiedListId)}
+            </FollowedListNotesContainer>
         )
     }
+
+    private renderSharedNotesByList() {
+        const { lists, listInstances } = this.props
+        let allSpaces = []
+
+        lists.allIds.map((unifiedListId) => {
+            if (lists.byId[unifiedListId].unifiedAnnotationIds.length > 0) {
+                allSpaces.push(lists.byId[unifiedListId])
+            }
+        })
+
+        console.log(allSpaces)
+
+        if (allSpaces.length > 0) {
+            let mySpaces = allSpaces.filter(
+                (list) => this.spaceOwnershipStatus(list) === 'Creator',
+            )
+
+            let followedSpaces = allSpaces.filter(
+                (list) => this.spaceOwnershipStatus(list) === 'Follower',
+            )
+
+            let joinedSpaces = allSpaces.filter(
+                (list) => this.spaceOwnershipStatus(list) === 'Contributor',
+            )
+
+            return (
+                <>
+                    <SpaceTypeSection>
+                        <SpaceTypeSectionHeader>
+                            My Spaces ({mySpaces.length})
+                        </SpaceTypeSectionHeader>
+                        {mySpaces.length > 0 ? (
+                            <SpaceTypeSectionContainer>
+                                {mySpaces.map((item) => {
+                                    let othersAnnotsCount = 0
+                                    const listData = lists.byId[item.unifiedId]
+                                    const listInstance =
+                                        listInstances[item.unifiedId]
+
+                                    return this.renderSpacesItem(
+                                        item.unifiedId,
+                                        listData,
+                                        listInstance,
+                                        othersAnnotsCount,
+                                    )
+                                })}
+                            </SpaceTypeSectionContainer>
+                        ) : undefined}
+                    </SpaceTypeSection>
+
+                    <SpaceTypeSection>
+                        <SpaceTypeSectionHeader>
+                            Followed Spaces ({followedSpaces.length})
+                        </SpaceTypeSectionHeader>
+                        {followedSpaces.length > 0 ? (
+                            <SpaceTypeSectionContainer>
+                                {followedSpaces.map((item) => {
+                                    let othersAnnotsCount = 0
+                                    const listData = lists.byId[item.unifiedId]
+                                    const listInstance =
+                                        listInstances[item.unifiedId]
+
+                                    this.renderSpacesItem(
+                                        item.unifiedId,
+                                        listData,
+                                        listInstance,
+                                        othersAnnotsCount,
+                                    )
+                                })}
+                            </SpaceTypeSectionContainer>
+                        ) : undefined}
+                    </SpaceTypeSection>
+
+                    <SpaceTypeSection>
+                        <SpaceTypeSectionHeader>
+                            Joined Spaces ({joinedSpaces.length})
+                        </SpaceTypeSectionHeader>
+                        {joinedSpaces.length > 0 ? (
+                            <SpaceTypeSectionContainer>
+                                {joinedSpaces.map((item) => {
+                                    let othersAnnotsCount = 0
+                                    const listData = lists.byId[item.unifiedId]
+                                    const listInstance =
+                                        listInstances[item.unifiedId]
+
+                                    this.renderSpacesItem(
+                                        item.unifiedId,
+                                        listData,
+                                        listInstance,
+                                        othersAnnotsCount,
+                                    )
+                                })}
+                            </SpaceTypeSectionContainer>
+                        ) : undefined}
+                    </SpaceTypeSection>
+                </>
+            )
+        } else {
+            return (
+                <EmptyMessageContainer>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.collectionsEmpty}
+                            heightAndWidth="20px"
+                            color="purple"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <InfoText>
+                        This page is not yet in a Space <br /> you created,
+                        follow or collaborate in.
+                    </InfoText>
+                </EmptyMessageContainer>
+            )
+        }
+    }
+
+    // TODO: properly derive this
+    // for (const { id } of listInstance.sharedAnnotationReferences ?? []) {
+    //     if (
+    //         this.props.__annotations[id]?.creatorId !==
+    //         this.props.currentUser?.id
+    //     ) {
+    //         othersAnnotsCount++
+    //     }
+    // }
 
     private whichFeed = () => {
         if (process.env.NODE_ENV === 'production') {
@@ -698,7 +772,6 @@ export class AnnotationsSidebar extends React.Component<
                 <>
                     {this.renderSelectedListTopBar()}
                     <AnnotationsSectionStyled>
-                        {}
                         {this.renderNewAnnotation()}
                         {this.renderAnnotationsEditableForSelectedList()}
                     </AnnotationsSectionStyled>
@@ -1040,24 +1113,28 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private spaceOwnershipStatus() {
-        const selectedList = this.props.annotationsCache.lists.byId[
-            this.props.selectedListId
-        ]
-
-        if (selectedList.remoteId != null && selectedList.localId == null) {
+    private spaceOwnershipStatus(listData) {
+        if (listData.remoteId != null && listData.localId == null) {
+            console.log('Follower')
             return 'Follower'
         }
 
-        if (selectedList.creator?.id === this.props.currentUser?.id) {
-            return 'Creator'
+        if (!listData.creator?.id) {
+            if (
+                listData.creator?.id == null &&
+                listData.creator?.id === this.props.currentUser?.id
+            ) {
+                console.log('Creator')
+                return 'Creator'
+            }
         }
 
         if (
-            selectedList.remoteId != null &&
-            selectedList.localId != null &&
-            selectedList.creator?.id !== this.props.currentUser?.id
+            listData.remoteId != null &&
+            listData.localId != null &&
+            listData.creator?.id !== this.props.currentUser?.id
         ) {
+            console.log('Contributor')
             return 'Contributor'
         }
 
@@ -1070,11 +1147,11 @@ export class AnnotationsSidebar extends React.Component<
             this.throwNoSelectedListError()
         }
 
-        const permissionStatus = this.spaceOwnershipStatus()
-
         const selectedList = this.props.annotationsCache.lists.byId[
             this.props.selectedListId
         ]
+
+        const permissionStatus = this.spaceOwnershipStatus(selectedList)
 
         if (permissionStatus === 'Follower') {
             return (
@@ -1313,9 +1390,43 @@ export class AnnotationsSidebar extends React.Component<
 }
 
 export default AnnotationsSidebar
-
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
+
+const SpaceTypeSection = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: fill-available;
+
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    &:first-child {
+        margin-top: -10px;
+    }
+`
+
+const SpaceTypeSectionHeader = styled.div`
+    display: flex;
+    color: ${(props) => props.theme.colors.iconColor};
+    font-weight: 300;
+    font-size: 14px;
+    padding: 30px 20px 30px 20px;
+    flex-direction: row;
+    letter-spacing: 1px;
+`
+
+const SpaceTypeSectionContainer = styled.div<{ SpaceTypeSectionOpen: boolean }>`
+    display: flex;
+    flex-direction: column;
+    width: fill-available;
+    padding-bottom: 30px;
+    margin-top: -20px;
+
+    ${(props) =>
+        props.SpaceTypeSectionOpen &&
+        css`
+            display: flex;
+        `};
+`
 
 const CreatorActionButtons = styled.div`
     display: flex;
@@ -1329,16 +1440,11 @@ const NewAnnotationBoxMyAnnotations = styled.div`
     margin-bottom: 15px;
 `
 
-const OthersAnnotationCounter = styled.div`
-    display: flex;
-    align-items: flex-end;
-    line-height: 19px;
-`
+const OthersAnnotationCounter = styled.div``
 const TotalAnnotationsCounter = styled.div`
-    font-size: 12px;
+    font-size: 16px;
     color: ${(props) => props.theme.colors.greyScale8};
-    display: flex;
-    align-items: flex-end;
+    letter-spacing: 4px;
 `
 
 const PermissionInfoButton = styled.div`
@@ -1564,7 +1670,7 @@ const FollowedListNotesContainer = styled(Margin)`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    height: fill-available;
+    height: fit-content;
 `
 
 const SectionTitleContainer = styled(Margin)`
@@ -1741,8 +1847,8 @@ const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
     font-size: 16px;
     display: flex;
     color: ${(props) => props.theme.colors.normalText};
-    grid-gap: 3px;
-    align-items: flex-end;
+    grid-gap: 4px;
+    align-items: center;
 `
 
 const CloseIconStyled = styled.div<{ background: string }>`
@@ -1813,7 +1919,7 @@ const NewAnnotationSection = styled.section`
     z-index: 11200;
 `
 
-const AnnotationsSectionStyled = styled.section`
+const AnnotationsSectionStyled = styled.div`
     font-family: 'Satoshi', sans-serif;
     background: ${(props) => props.theme.colors.backgroundColor};
     color: ${(props) => props.theme.colors.normalText};

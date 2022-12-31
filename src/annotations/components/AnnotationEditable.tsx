@@ -310,15 +310,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 }
                 hasComment={this.props.comment.length > 0}
             >
+                <ActionBox>{actionsBox}</ActionBox>
                 <Highlightbar />
-                <>
-                    <ActionBox>{actionsBox}</ActionBox>
-                    <Markdown pageUrl={this.props.pageUrl}>
-                        {this.state.isTruncated
-                            ? this.state.truncatedText
-                            : this.props.body}
-                    </Markdown>
-                </>
+                <Markdown pageUrl={this.props.pageUrl}>
+                    {this.state.isTruncated
+                        ? this.state.truncatedText
+                        : this.props.body}
+                </Markdown>
             </HighlightStyled>
         )
     }
@@ -361,23 +359,26 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             )
         }
 
-        if (!comment == null) {
+        if (comment.length === 0) {
             return
         }
 
         return (
             <CommentBox>
                 {!this.theme.hasHighlight && this.state.hoverCard === true && (
-                    <TooltipBox tooltipText="Edit Note" placement="bottom">
-                        <Icon
-                            onClick={
-                                annotationFooterDependencies?.onEditIconClick
-                            }
-                            icon={'edit'}
-                            heightAndWidth={'20px'}
-                            padding={'5px'}
-                        />
-                    </TooltipBox>
+                    <ActionBox>
+                        <TooltipBox tooltipText="Edit Note" placement="bottom">
+                            <Icon
+                                onClick={
+                                    annotationFooterDependencies?.onEditIconClick
+                                }
+                                icon={'edit'}
+                                heightAndWidth={'18px'}
+                                borderColor={'lightHover'}
+                                background={'backgroundColorDarker'}
+                            />
+                        </TooltipBox>
+                    </ActionBox>
                 )}
                 <NoteTextBox hasHighlight={this.theme.hasHighlight}>
                     <NoteText
@@ -785,6 +786,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         )
     }
 }
+
+const HighlightContent = styled.div`
+    position: relative;
+    width: fill-available;
+`
 
 const Highlightbar = styled.div`
     background-color: ${(props) => props.theme.colors.purple};
