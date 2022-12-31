@@ -5,6 +5,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { padding } from 'polished'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     onEditBtnClick: React.MouseEventHandler
     lists: Array<{ id: number; name: string; isShared: boolean }>
@@ -14,7 +15,7 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     tabIndex?: number
     padding?: string
     newLineOrientation?: boolean
-    spacePickerButtonRef?: React.RefObject<HTMLElement>
+    spacePickerButtonRef?: React.RefObject<HTMLDivElement>
 }
 
 interface ButtonProps {
@@ -23,7 +24,7 @@ interface ButtonProps {
     renderSpacePicker?: () => JSX.Element
     tabIndex?: number
     newLineOrientation?: boolean
-    spacePickerButtonRef?: React.RefObject<HTMLElement>
+    spacePickerButtonRef?: React.RefObject<HTMLDivElement>
 }
 
 export class AddSpacesButton extends React.Component<
@@ -36,41 +37,36 @@ export class AddSpacesButton extends React.Component<
 
     render() {
         return (
-            <SpacePickerButtonWrapper>
-                <AddSpacesButtonContainer
-                    ref={this.props.spacePickerButtonRef}
-                    tabIndex={this.props.tabIndex}
-                    onClick={(e) => {
-                        this.props.onEditBtnClick?.(e)
-                    }}
-                >
-                    <EditIconContainer>
-                        <Icon
-                            filePath={icons.plus}
-                            height={'16px'}
-                            color={'purple'}
-                            hoverOff
-                        />
-                    </EditIconContainer>
-                    {(this.props.hasNoLists ||
-                        this.props.newLineOrientation === true) && <>Spaces</>}
-                </AddSpacesButtonContainer>
-            </SpacePickerButtonWrapper>
+            <PrimaryAction
+                innerRef={this.props.spacePickerButtonRef}
+                type="tertiary"
+                size="small"
+                icon="plus"
+                iconColor={'purple'}
+                onClick={(e) => {
+                    this.props.onEditBtnClick?.(e)
+                }}
+                height="24px"
+                width={
+                    this.props.hasNoLists ||
+                    this.props.newLineOrientation === true
+                        ? 'fit-content'
+                        : '24px'
+                }
+                label={
+                    (this.props.hasNoLists ||
+                        this.props.newLineOrientation === true) && <>Spaces</>
+                }
+                padding={
+                    this.props.hasNoLists ||
+                    this.props.newLineOrientation === true
+                        ? '2px 4px 2px 0px'
+                        : 'initial'
+                }
+            />
         )
     }
 }
-
-const SpacePickerButtonWrapper = styled.div`
-    display: flex;
-    flex-direction: column;
-    cursor: pointer;
-`
-
-const SpacePickerWrapper = styled.div`
-    position: relative;
-
-    width: 0rem;
-`
 
 export default function ListsSegment({
     lists,
@@ -86,14 +82,6 @@ export default function ListsSegment({
     return (
         <Container padding={padding} {...props}>
             <ListsContainer newLineOrientation={newLineOrientation === true}>
-                <AddSpacesButton
-                    hasNoLists={lists.length === 0}
-                    onEditBtnClick={onEditBtnClick}
-                    renderSpacePicker={renderSpacePicker}
-                    tabIndex={tabIndex}
-                    newLineOrientation={newLineOrientation}
-                    spacePickerButtonRef={spacePickerButtonRef}
-                />
                 <SpacesListContainer>
                     {lists
                         .filter(
@@ -129,6 +117,14 @@ export default function ListsSegment({
                                 </ListSpaceContainer>
                             )
                         })}
+                    <AddSpacesButton
+                        hasNoLists={lists.length === 0}
+                        onEditBtnClick={onEditBtnClick}
+                        renderSpacePicker={renderSpacePicker}
+                        tabIndex={tabIndex}
+                        newLineOrientation={newLineOrientation}
+                        spacePickerButtonRef={spacePickerButtonRef}
+                    />
                 </SpacesListContainer>
             </ListsContainer>
         </Container>
@@ -139,6 +135,7 @@ const SpacesListContainer = styled.div`
     width: fill-available;
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
 `
 
 const Container = styled.div<{ padding: string }>`
@@ -157,39 +154,11 @@ const Container = styled.div<{ padding: string }>`
     width: fill-available;
 `
 
-const EditIconContainer = styled.div`
-    border: 1px solid ${(props) => props.theme.colors.lineGrey};
-    height: 24px;
-    width: 24px;
-    border-radius: 3px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-
-    & * {
-        cursor: pointer;
-    }
-`
-
-const AddSpacesButtonContainer = styled.div`
-    font-size: 12px;
-    font-weight: 400;
-    justify-content: center;
-    margin-right: 10px;
-    display: flex;
-    cursor: pointer;
-    align-items: center;
-    white-space: nowrap;
-    font-family: 'Poppins', sans-serif;
-    color: ${(props) => props.theme.colors.normalText};
-    grid-gap: 5px;
-`
 const ListsContainer = styled.div<{ newLineOrientation }>`
     display: flex;
-    align-items: flex-start;
+    align-items: ${(props) =>
+        props.newLineOrientation ? ' flex-start' : 'center'};
     flex-direction: ${(props) => (props.newLineOrientation ? 'column' : 'row')};
-    grid-gap: 5px;
 `
 
 const ListSpaceContainer = styled.div<{ onClick: React.MouseEventHandler }>`

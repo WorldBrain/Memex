@@ -52,6 +52,7 @@ import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/t
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { generateAnnotationCardInstanceId } from '../containers/utils'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -132,6 +133,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     //postShareHook: (shareInfo) => void
     //postShareHook: (shareInfo) => void+
     setPopoutsActive: (popoutsOpen: boolean) => void
+    getYoutubePlayer?(): YoutubePlayer
 }
 
 interface AnnotationsSidebarState {
@@ -185,73 +187,6 @@ export class AnnotationsSidebar extends React.Component<
     focusEditNoteForm = (annotationId: string) =>
         (this.annotationEditRefs[annotationId]?.current).focusEditForm()
 
-    private searchEnterHandler = {
-        test: (e) => e.key === 'Enter',
-        handle: () => undefined,
-    }
-
-    private handleSearchChange = (searchText) => {
-        this.setState({ searchText })
-    }
-
-    private handleSearchClear = () => {
-        this.setState({ searchText: '' })
-    }
-
-    // NOTE: Currently not used
-    private renderSearchSection() {
-        return (
-            <TopSectionStyled>
-                <TopBarStyled>
-                    <Flex>
-                        <ButtonStyled>
-                            {' '}
-                            <SearchIcon />{' '}
-                        </ButtonStyled>
-                        <SearchInputStyled
-                            type="input"
-                            name="query"
-                            autoComplete="off"
-                            placeholder="Search Annotations"
-                            onChange={this.handleSearchChange}
-                            defaultValue={this.state.searchText}
-                            specialHandlers={[this.searchEnterHandler]}
-                        />
-                        {this.state.searchText !== '' && (
-                            <CloseButtonStyled onClick={this.handleSearchClear}>
-                                <CloseIconStyled />
-                                Clear search
-                            </CloseButtonStyled>
-                        )}
-                    </Flex>
-                </TopBarStyled>
-            </TopSectionStyled>
-        )
-    }
-
-    private getListsForAnnotationCreate = (
-        followedLists,
-        isolatedView: string,
-        annotationCreateLists: string[],
-    ) => {
-        // returns lists for AnnotationCreate including isolated view if enabled
-        if (isolatedView) {
-            const isolatedList = followedLists.byId[isolatedView]
-            if (
-                isolatedList.isContributable &&
-                !annotationCreateLists.includes(isolatedList.name)
-            ) {
-                const listsToCreate = [
-                    ...annotationCreateLists,
-                    isolatedList.name,
-                ]
-
-                return listsToCreate
-            }
-        }
-        return annotationCreateLists
-    }
-
     setPopoutsActive() {
         if (
             this.state.showAllNotesCopyPaster ||
@@ -276,6 +211,7 @@ export class AnnotationsSidebar extends React.Component<
                 targetElementRef={this.copyButtonRef.current}
                 placement={'bottom-end'}
                 offsetX={5}
+                offsetY={5}
                 closeComponent={() => {
                     this.setState({
                         showAllNotesCopyPaster: false,
@@ -309,6 +245,7 @@ export class AnnotationsSidebar extends React.Component<
                 targetElementRef={this.bulkEditButtonRef.current}
                 placement={'bottom-end'}
                 offsetX={5}
+                offsetY={5}
                 closeComponent={() =>
                     this.setState({
                         showAllNotesShareMenu: false,
@@ -338,6 +275,7 @@ export class AnnotationsSidebar extends React.Component<
                 <AnnotationCreate
                     {...this.props.annotationCreateProps}
                     ref={this.annotationCreateRef as any}
+                    getYoutubePlayer={this.props.getYoutubePlayer}
                 />
             </NewAnnotationSection>
         )
@@ -487,6 +425,7 @@ export class AnnotationsSidebar extends React.Component<
                     return (
                         <React.Fragment key={annotation.unifiedId}>
                             <AnnotationEditable
+                                pageUrl={this.props.pageUrl}
                                 isShared
                                 isBulkShareProtected
                                 unifiedId={annotation.unifiedId}
@@ -530,6 +469,7 @@ export class AnnotationsSidebar extends React.Component<
                                 spacePickerButtonRef={
                                     this.props.spacePickerButtonRef
                                 }
+                                getYoutubePlayer={this.props.getYoutubePlayer}
                             />
                             <ConversationReplies
                                 newReplyEventHandlers={eventHandlers}
@@ -947,6 +887,7 @@ export class AnnotationsSidebar extends React.Component<
                             renderListsPickerForAnnotation={this.props.renderListsPickerForAnnotation(
                                 'annotations-tab',
                             )}
+                            getYoutubePlayer={this.props.getYoutubePlayer}
                         />
                     </AnnotationBox>
                 )
@@ -1234,6 +1175,7 @@ export class AnnotationsSidebar extends React.Component<
                 targetElementRef={this.sortDropDownButtonRef.current}
                 placement={'bottom-end'}
                 offsetX={5}
+                offsetY={5}
                 closeComponent={() =>
                     this.setState({
                         showSortDropDown: false,
@@ -1279,45 +1221,57 @@ export class AnnotationsSidebar extends React.Component<
                 {this.renderAllNotesCopyPaster()}
                 {this.renderAllNotesShareMenu()}
                 <TopBarActionBtns>
-                    <Icon
-                        filePath={icons.sort}
-                        onClick={async () => {
-                            await this.setState({
-                                showSortDropDown: true,
-                            })
-                            this.setPopoutsActive()
-                        }}
-                        height="18px"
-                        width="20px"
-                        containerRef={this.sortDropDownButtonRef}
-                        active={this.state.showSortDropDown}
-                    />
-                    <Icon
-                        filePath={icons.copy}
-                        onClick={async () => {
-                            await this.setState({
-                                showAllNotesCopyPaster: true,
-                            })
-                            this.setPopoutsActive()
-                        }}
-                        height="18px"
-                        width="20px"
-                        containerRef={this.copyButtonRef}
-                        active={this.state.showAllNotesCopyPaster}
-                    />
-                    <Icon
-                        filePath={icons.multiEdit}
-                        onClick={async () => {
-                            await this.setState({
-                                showAllNotesShareMenu: true,
-                            })
-                            this.setPopoutsActive()
-                        }}
-                        active={this.state.showAllNotesShareMenu}
-                        height="18px"
-                        width="20px"
-                        containerRef={this.bulkEditButtonRef}
-                    />
+                    <TooltipBox tooltipText={'Sort Notes'} placement={'bottom'}>
+                        <Icon
+                            filePath={icons.sort}
+                            onClick={async () => {
+                                await this.setState({
+                                    showSortDropDown: true,
+                                })
+                                this.setPopoutsActive()
+                            }}
+                            height="18px"
+                            width="20px"
+                            containerRef={this.sortDropDownButtonRef}
+                            active={this.state.showSortDropDown}
+                        />
+                    </TooltipBox>
+                    <TooltipBox
+                        tooltipText={'Copy & Paste Note'}
+                        placement={'bottom'}
+                    >
+                        <Icon
+                            filePath={icons.copy}
+                            onClick={async () => {
+                                await this.setState({
+                                    showAllNotesCopyPaster: true,
+                                })
+                                this.setPopoutsActive()
+                            }}
+                            height="18px"
+                            width="20px"
+                            containerRef={this.copyButtonRef}
+                            active={this.state.showAllNotesCopyPaster}
+                        />
+                    </TooltipBox>
+                    <TooltipBox
+                        tooltipText={'Bulk Share Notes'}
+                        placement={'bottom-end'}
+                    >
+                        <Icon
+                            filePath={icons.multiEdit}
+                            onClick={async () => {
+                                await this.setState({
+                                    showAllNotesShareMenu: true,
+                                })
+                                this.setPopoutsActive()
+                            }}
+                            active={this.state.showAllNotesShareMenu}
+                            height="18px"
+                            width="20px"
+                            containerRef={this.bulkEditButtonRef}
+                        />
+                    </TooltipBox>
                 </TopBarActionBtns>
             </>
         )
@@ -1631,6 +1585,7 @@ const AnnotationContainer = styled(Margin)`
     height: fill-available;
     overflow: scroll;
     padding-bottom: 100px;
+    flex: 1;
 
     scrollbar-width: none;
 

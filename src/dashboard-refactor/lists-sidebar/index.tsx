@@ -73,7 +73,13 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         } = this.props
 
         return (
-            <Container spaceSidebarWidth={this.props.spaceSidebarWidth}>
+            <Container
+                onMouseOver={
+                    !this.props.lockedState.isSidebarLocked &&
+                    this.props.peekState.setSidebarPeekState(true)
+                }
+                spaceSidebarWidth={this.props.spaceSidebarWidth}
+            >
                 <GlobalStyle />
                 <BottomGroup>
                     <Margin vertical="10px">
@@ -243,6 +249,12 @@ const Container = styled.div<{ spaceSidebarWidth: number }>`
     justify-content: center;
     height: fill-available;
     overflow: scroll;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const Separator = styled.div`

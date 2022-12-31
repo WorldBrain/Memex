@@ -12,6 +12,7 @@ import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-n
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { sizeConstants } from '../../constants'
 
 export interface Props {
     listName: string
@@ -267,7 +268,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                     this.props
                                                         .onAddContributorsClick
                                                 }
-                                                size={'large'}
+                                                size={'medium'}
                                                 type={'primary'}
                                                 label={'Share Space'}
                                                 icon={'invite'}
@@ -283,7 +284,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                     this.props
                                                         .onAddContributorsClick
                                                 }
-                                                size={'large'}
+                                                size={'medium'}
                                                 type={'primary'}
                                                 label={'Share Space'}
                                                 icon={'invite'}
@@ -353,10 +354,6 @@ const SpaceButtonRow = styled.div`
     display: flex;
     grid-gap: 15px;
     align-items: center;
-
-    & > div {
-        grid-gap: 15px;
-    }
 `
 
 const TitleContainer = styled.div`
@@ -411,6 +408,7 @@ const TopBarContainer = styled(Margin)`
     justify-content: space-between;
     border-radius: 10px;
     padding: 20px 0 5px 0;
+    max-width: ${sizeConstants.searchResults.widthPx}px;
 `
 
 const MarkdownButtonContainer = styled.div`

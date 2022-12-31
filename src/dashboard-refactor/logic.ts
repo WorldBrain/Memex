@@ -1148,14 +1148,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                     )
                 }
 
-                await this.options.searchBG.delPages([pageId])
-
                 this.emitMutation({
                     searchResults: resultsMutation,
                     modals: {
                         deletingPageArgs: { $set: undefined },
                     },
                 })
+                await this.options.searchBG.delPages([pageId])
             },
         )
     }

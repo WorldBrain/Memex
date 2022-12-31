@@ -44,7 +44,7 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
     render() {
         return (
             <SortingContainer>
-                <SortingTitle>Sort Notes</SortingTitle>
+                {/* <SortingTitle>Sort Notes</SortingTitle> */}
                 <DropdownMenuBtn
                     onMenuItemClick={this.props.onMenuItemClick}
                     menuItems={this.props.menuItems}

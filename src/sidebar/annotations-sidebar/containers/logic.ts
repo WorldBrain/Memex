@@ -59,6 +59,8 @@ import {
 } from './utils'
 import { browser, Storage } from 'webextension-polyfill-ts'
 import type { AnnotationSharingState } from 'src/content-sharing/background/types'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -69,6 +71,8 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     focusEditNoteForm: (annotationId: string) => void
     setLoginModalShown?: (isShown: boolean) => void
     setDisplayNameModalShown?: (isShown: boolean) => void
+    youtubePlayer?: YoutubePlayer
+    youtubeService?: YoutubeService
 }
 
 type EventHandler<

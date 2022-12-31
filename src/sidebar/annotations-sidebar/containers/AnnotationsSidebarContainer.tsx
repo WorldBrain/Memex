@@ -49,12 +49,17 @@ import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components
 import * as cacheUtils from 'src/annotations/cache/utils'
 import { generateAnnotationCardInstanceId } from './utils'
 import type { AnnotationCardInstanceLocation } from '../types'
+import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/lib/common-ui/components/block-content'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
     skipTopBarRender?: boolean
     setSidebarWidthforDashboard?: (sidebarWidth) => void
     onNotesSidebarClose?: () => void
+    youtubeService?: YoutubeService
+    getYoutubePlayer?(): YoutubePlayer
 }
 
 export class AnnotationsSidebarContainer<
@@ -590,152 +595,15 @@ export class AnnotationsSidebarContainer<
                 </TooltipBox>
             </TopBarActionBtns>
         )
-        /* </>
-                    {this.props.sidebarContext !== 'dashboard' && (
-                        <TopArea>
-                            <IconBoundary>
-                                <Icon
-                                    heightAndWidth="16px"
-                                    filePath={
-                                        'heartEmpty'
-                                        // this.props.bookmark.isBookmarked
-                                        //     ? icons.heartFull
-                                        //     : icons.heartEmpty
-                                    }
-                                />
-                            </IconBoundary>
-                            <IconBoundary>
-                                <Icon
-                                    // onClick={() =>
-                                    // }
-                                    heightAndWidth="16px"
-                                    filePath={
-                                        'collectionsEmpty'
-                                        // this.props.bookmark.isBookmarked
-                                        //     ? icons.heartFull
-                                        //     : icons.heartEmpty
-                                    }
-                                />
-                            </IconBoundary>
-                            <IconBoundary>
-                                <Icon
-                                    heightAndWidth="16px"
-                                    filePath={
-                                        'searchIcon'
-                                        // this.props.bookmark.isBookmarked
-                                        //     ? icons.heartFull
-                                        //     : icons.heartEmpty
-                                    }
-                                />
-                            </IconBoundary>
-                        </TopArea>
-                    )} */
-        /* <BottomArea>
-                        {this.props.sidebarContext !== 'dashboard' &&
-                            (this.state.isLocked ? (
-                                <TooltipBox
-                                    tooltipText="Unlock sidebar"
-                                    placement="left"
-                                >
-                                    <IconBoundary>
-                                        <Icon
-                                            filePath={icons.arrowRight}
-                                            heightAndWidth="16px"
-                                            onClick={this.toggleSidebarLock}
-                                        />
-                                    </IconBoundary>
-                                </TooltipBox>
-                            ) : (
-                                <TooltipBox
-                                    tooltipText="Lock sidebar open"
-                                    placement="left"
-                                >
-                                    <IconBoundary>
-                                        <Icon
-                                            filePath={icons.arrowLeft}
-                                            heightAndWidth="16px"
-                                            onClick={this.toggleSidebarLock}
-                                        />
-                                    </IconBoundary>
-                                </TooltipBox>
-                            ))}
-                        {this.props.sidebarContext !== 'dashboard' &&
-                            (!this.state.isWidthLocked ? (
-                                <TooltipBox
-                                    tooltipText="Adjust Page Width"
-                                    placement="left"
-                                >
-                                    <IconBoundary>
-                                        <Icon
-                                            filePath={icons.compress}
-                                            heightAndWidth="16px"
-                                            onClick={() =>
-                                                this.toggleSidebarWidthLock()
-                                            }
-                                        />
-                                    </IconBoundary>
-                                </TooltipBox>
-                            ) : (
-                                <TooltipBox
-                                    tooltipText="Full page width"
-                                    placement="left"
-                                >
-                                    <IconBoundary>
-                                        <Icon
-                                            filePath={icons.expand}
-                                            heightAndWidth="16px"
-                                            onClick={() =>
-                                                this.toggleSidebarWidthLock()
-                                            }
-                                        />
-                                    </IconBoundary>
-                                </TooltipBox>
-                            ))}
-                        <TooltipBox tooltipText="Close (ESC)" placement="left">
-                            <IconBoundary>
-                                <Icon
-                                    filePath={icons.removeX}
-                                    heightAndWidth="16px"
-                                    onClick={() => this.hideSidebar()}
-                                />
-                            </IconBoundary>
-                        </TooltipBox>
-                    </BottomArea>
-                </TopBarActionBtns>
-                {this.props.sidebarContext !== 'dashboard' && (
-                    <FooterArea>
-                        <IconBoundary>
-                            <Icon
-                                heightAndWidth="16px"
-                                filePath={
-                                    'settings'
-                                    // this.props.bookmark.isBookmarked
-                                    //     ? icons.heartFull
-                                    //     : icons.heartEmpty
-                                }
-                            />
-                        </IconBoundary>
-                        <IconBoundary>
-                            <Icon
-                                heightAndWidth="16px"
-                                filePath={
-                                    'helpIcon'
-                                    // this.props.bookmark.isBookmarked
-                                    //     ? icons.heartFull
-                                    //     : icons.heartEmpty
-                                }
-                            />
-                        </IconBoundary>
-                    </FooterArea>
-                )}
-            </>
-
-        ) */
     }
 
-    private renderTopBar() {
-        if (this.props.skipTopBarRender) {
-            return null
+    renderTopBar() {
+        let playerId
+        let player = undefined
+        if (this.state.pageUrl && this.props.sidebarContext === 'dashboard') {
+            const normalizedUrl = normalizeUrl(this.state.pageUrl ?? undefined)
+            playerId = getBlockContentYoutubePlayerId(normalizedUrl)
+            player = this.props.youtubeService.getPlayerByElementId(playerId)
         }
 
         return (
@@ -966,6 +834,7 @@ export class AnnotationsSidebarContainer<
                                     unifiedListId: null,
                                 })
                             }
+                            // getYoutubePlayer={() => getBlockContentYoutubePlayerId}
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}
                             ref={this.sidebarRef}

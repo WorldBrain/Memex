@@ -337,28 +337,32 @@ class SpacePicker extends StatefulUIElement<
                     </>
                 ) : (
                     <PickerContainer>
-                        <PickerSearchInput
-                            searchInputPlaceholder={
-                                this.props.searchInputPlaceholder ??
-                                'Search & Add Spaces'
-                            }
-                            showPlaceholder={
-                                this.state.selectedListIds.length === 0
-                            }
-                            searchInputRef={this.handleSetSearchInputRef}
-                            onChange={this.handleSearchInputChanged}
-                            onKeyPress={this.handleKeyPress}
-                            value={this.state.query}
-                            loading={
-                                this.state.loadingQueryResults === 'running'
-                            }
-                            before={
-                                <EntrySelectedList
-                                    entries={this.selectedDisplayEntries}
-                                    onPress={this.handleSelectedListPress}
-                                />
-                            }
-                        />
+                        <SearchContainer>
+                            <PickerSearchInput
+                                searchInputPlaceholder={
+                                    this.props.searchInputPlaceholder ??
+                                    'Search & Add Spaces'
+                                }
+                                showPlaceholder={
+                                    this.state.selectedListIds.length === 0
+                                }
+                                searchInputRef={this.handleSetSearchInputRef}
+                                onChange={this.handleSearchInputChanged}
+                                onKeyPress={this.handleKeyPress}
+                                value={this.state.query}
+                                loading={
+                                    this.state.loadingQueryResults === 'running'
+                                }
+                                before={
+                                    <EntrySelectedList
+                                        entries={this.selectedDisplayEntries}
+                                        onPress={this.handleSelectedListPress}
+                                    />
+                                }
+                                autoFocus={this.props.autoFocus}
+                            />
+                        </SearchContainer>
+
                         <EntryList ref={this.displayListRef}>
                             {!(
                                 (this.state.query === '' &&
@@ -377,6 +381,7 @@ class SpacePicker extends StatefulUIElement<
                             <AddNewEntry
                                 resultItem={this.state.newEntryName}
                                 onPress={this.handleNewListPress}
+                                resultsCount={this.state.displayEntries.length}
                             />
                         )}
                     </PickerContainer>
@@ -389,7 +394,6 @@ class SpacePicker extends StatefulUIElement<
         return (
             <ThemeProvider theme={Colors.lightTheme}>
                 <OuterSearchBox
-                    onKeyPress={this.handleKeyPress}
                     onClick={this.handleOuterSearchBoxClick}
                     width={this.props.width}
                 >
@@ -400,8 +404,14 @@ class SpacePicker extends StatefulUIElement<
     }
 }
 
+const SearchContainer = styled.div`
+    margin: 5px 5px 0px 5px;
+`
+
 const PrimaryActionBox = styled.div`
-    padding: 10px 0px 0px 10px;
+    padding: 2px 0px 5px 0px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
 `
 
 const EntryListHeader = styled.div`
@@ -461,6 +471,8 @@ const LoadingBox = styled.div`
 const OuterSearchBox = styled.div`
     border-radius: 12px;
     width: ${(props) => (props.width ? props.width : '300px')};
+    padding: 0 5px;
+    padding-top: 5px;
 `
 const PickerContainer = styled.div`
     border-radius: 12px;

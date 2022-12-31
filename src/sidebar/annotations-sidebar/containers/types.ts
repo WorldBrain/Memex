@@ -32,6 +32,8 @@ import type {
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -66,6 +68,8 @@ export interface SidebarContainerDependencies {
     copyToClipboard: (text: string) => Promise<boolean>
     copyPaster: RemoteCopyPasterInterface
     contentScriptBackground: ContentScriptsInterface<'caller'>
+    youtubePlayer?: YoutubePlayer
+    youtubeService?: YoutubeService
 }
 
 export interface EditForm {

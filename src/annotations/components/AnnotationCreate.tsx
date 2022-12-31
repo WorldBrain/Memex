@@ -23,6 +23,8 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 interface State {
     isTagPickerShown: boolean
@@ -60,6 +62,7 @@ export interface AnnotationCreateGeneralProps {
     isRibbonCommentBox?: boolean
     spacesBG?: RemoteCollectionsInterface
     contentSharingBG?: ContentSharingInterface
+    getYoutubePlayer?(): YoutubePlayer
 }
 
 export interface Props
@@ -84,7 +87,7 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private markdownbuttonRef = createRef<HTMLElement>()
-    private spacePickerButtonRef = createRef<HTMLElement>()
+    private spacePickerButtonRef = createRef<HTMLDivElement>()
 
     private editor: MemexEditorInstance
 
@@ -330,11 +333,12 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     this.props.autoFocus ||
                                     this.state.onEditClick
                                 }
-                                placeholder={`Add private note.\n Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
+                                placeholder={`Add a private note. Save with ${AnnotationCreate.MOD_KEY} + Enter, + Shift to share.`}
                                 isRibbonCommentBox={
                                     this.props.isRibbonCommentBox
                                 }
                                 youtubeShortcut={this.state.youtubeShortcut}
+                                getYoutubePlayer={this.props.getYoutubePlayer}
                             />
                         ) : (
                             <EditorDummy
@@ -344,7 +348,17 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     })
                                 }
                             >
-                                Add private note (share with 'shift + enter')
+                                Add private note. Save with{' '}
+                                <KeyboardShortcuts
+                                    keys={[AnnotationCreate.MOD_KEY, 'Enter']}
+                                    size="small"
+                                />
+                                +{' '}
+                                <KeyboardShortcuts
+                                    optional="Shift"
+                                    size="small"
+                                />{' '}
+                                to share.
                             </EditorDummy>
                         )}
                     </EditorContainer>

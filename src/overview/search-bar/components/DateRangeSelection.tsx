@@ -445,6 +445,7 @@ const DateTitleContainer = styled.div`
     display: flex;
     justify-content: space-around;
     align-items: center;
+    z-index: 1;
 `
 
 const DatepickerInput = styled.div`

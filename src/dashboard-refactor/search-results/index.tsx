@@ -50,6 +50,7 @@ import type { ListDetailsGetter } from 'src/annotations/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -78,6 +79,7 @@ export type Props = RootState &
         noteInteractionProps: NoteInteractionAugdProps
         listDetailsProps: ListDetailsProps
         pagePickerProps: PagePickerAugdProps
+        youtubeService: YoutubeService
         onShowAllNotesClick: React.MouseEventHandler
         noResultsType: NoResultsType
         onDismissMobileAd: React.MouseEventHandler
@@ -503,6 +505,7 @@ export default class SearchResultsContainer extends React.Component<
                     activePage={this.props.activePage}
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={this.props.selectedListId}
+                    youtubeService={this.props.youtubeService}
                     getListDetailsById={this.props.getListDetailsById}
                     shareMenuProps={{
                         normalizedPageUrl: page.normalizedUrl,
@@ -785,7 +788,11 @@ export default class SearchResultsContainer extends React.Component<
         }
 
         if (this.props.searchPaginationState === 'running') {
-            days.push(this.renderLoader({ key: 'pagination-loader' }))
+            days.push(
+                <PaginationLoaderBox>
+                    {this.renderLoader({ key: 'pagination-loader' })}
+                </PaginationLoaderBox>,
+            )
         } else if (
             !this.props.areResultsExhausted &&
             this.props.searchState !== 'pristine'
@@ -860,12 +867,6 @@ export default class SearchResultsContainer extends React.Component<
     render() {
         return (
             <ResultsContainer bottom="100px">
-                {/* {this.props.isSubscriptionBannerShown && (
-                    <PioneerPlanBanner
-                        onHideClick={this.props.onDismissSubscriptionBanner}
-                        width="fill-available"
-                    />
-                )} */}
                 {this.props.selectedListId != null && (
                     <ListDetails
                         {...this.props.listDetailsProps}
@@ -947,25 +948,31 @@ export default class SearchResultsContainer extends React.Component<
                     />
                 </PageTopBarBox>
                 {this.renderOnboardingTutorials()}
-                {this.renderResultsByDay()}
-                {this.props.areResultsExhausted &&
-                    this.props.searchState === 'success' &&
-                    this.props.clearInboxLoadState !== 'running' &&
-                    this.props.searchResults.allIds.length > 0 && (
-                        <ResultsExhaustedMessage>
-                            <Icon
-                                filePath="checkRound"
-                                heightAndWidth="22px"
-                                hoverOff
-                                color={'greyScale4'}
-                            />
-                            End of results
-                        </ResultsExhaustedMessage>
-                    )}
+                <ResultsBox>
+                    {this.renderResultsByDay()}
+                    {this.props.areResultsExhausted &&
+                        this.props.searchState === 'success' &&
+                        this.props.clearInboxLoadState !== 'running' &&
+                        this.props.searchResults.allIds.length > 0 && (
+                            <ResultsExhaustedMessage>
+                                <Icon
+                                    filePath="checkRound"
+                                    heightAndWidth="22px"
+                                    hoverOff
+                                    color={'greyScale4'}
+                                />
+                                End of results
+                            </ResultsExhaustedMessage>
+                        )}
+                </ResultsBox>
             </ResultsContainer>
         )
     }
 }
+
+const PaginationLoaderBox = styled.div`
+    margin-top: -30px;
+`
 
 const IconContainerRight = styled.div`
     position: absolute;
@@ -1026,6 +1033,7 @@ const TutorialContainer = styled.div<{ showTutorialVideo: boolean }>`
     margin-top: 20px;
     margin-bottom: 40px;
     width: fill-available;
+    max-width: calc(${sizeConstants.searchResults.widthPx}px - 70px);
 
     ${(props) =>
         props.showTutorialVideo &&
@@ -1065,7 +1073,9 @@ const TutorialButtons = styled.div`
 const TutorialVideoContainer = styled.div<{ showTutorialVideo: boolean }>`
     position: relative;
     height: 170px;
-    width: 300px;
+    max-width: 300px;
+    width: 100%;
+    min-width: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1082,7 +1092,8 @@ const TutorialVideoContainer = styled.div<{ showTutorialVideo: boolean }>`
 const TutorialVideoBox = styled.div<{ showTutorialVideo: boolean }>`
     position: relative;
     height: 170px;
-    width: 300px;
+    max-width: 300px;
+    width: fill-available;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1110,7 +1121,8 @@ const TutorialBlurPicture = styled.div`
     background-position: center center;
     border-radius: 5px;
     height: 170px;
-    width: 300px;
+    max-width: 300px;
+    width: fill-available;
     background-size: cover;
 `
 
@@ -1139,6 +1151,7 @@ const ResultsExhaustedMessage = styled.div`
     justify-content: center;
     font-size: 16px;
     align-items: center;
+    max-width: ${sizeConstants.searchResults.widthPx}px;
 `
 const NoResultsMessage = styled.div`
     display: flex;
@@ -1186,8 +1199,8 @@ const InfoText = styled.div`
 const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     /* padding: 0px 15px; */
     height: fit-content;
-    max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
-    z-index: 2147483639;
+    max-width: calc(${sizeConstants.searchResults.widthPx}px);
+    z-index: 30;
     position: sticky;
     top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
     background: ${(props) => props.theme.colors.backgroundColor};
@@ -1204,6 +1217,7 @@ const ReferencesContainer = styled.div`
     align-items: center;
     justify-content: flex-start;
     grid-gap: 5px;
+    max-width: ${sizeConstants.searchResults.widthPx}px;
 `
 
 const NoteTopBarBox = styled(TopBar)`
@@ -1253,15 +1267,41 @@ const Loader = styled.div`
     height: 300px;
 `
 
+const ResultsBox = styled.div<{ zIndex: number }>`
+    display: flex;
+    margin-top: 2px;
+    flex-direction: column;
+    width: fill-available;
+    height: fill-available;
+    overflow: scroll;
+    padding-bottom: 100px;
+    align-items: center;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+`
+
 const ResultsContainer = styled(Margin)`
     display: flex;
     flex-direction: column;
     align-self: center;
-    max-width: ${sizeConstants.searchResults.widthPx}px;
-    margin-bottom: 100px;
+    width: fill-available;
+    margin-bottom: ${sizeConstants.header.heightPx}px;
     width: fill-available;
     padding: 0 24px;
     z-index: 27;
+    height: fill-available;
+
+    width: fill-available;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const TopBarRightSideWrapper = styled.div`

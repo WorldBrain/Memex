@@ -212,7 +212,7 @@ const Row = styled.div<{ isFocused }>`
     justify-content: space-between;
     transition: background 0.3s;
     height: 40px;
-    width: 100%;
+    width: fill-available;
     cursor: pointer;
     border-radius: 5px;
     padding: 0 9px;
@@ -246,7 +246,7 @@ const NameWrapper = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-    max-width: 70%;
+    max-width: 80%;
     font-size: 14px;
     width: 100%;
 `

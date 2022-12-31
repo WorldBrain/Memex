@@ -52,6 +52,7 @@ import { runtime } from 'webextension-polyfill'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { hydrateCache } from 'src/annotations/cache/utils'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation

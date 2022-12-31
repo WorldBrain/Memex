@@ -55,6 +55,8 @@ import { SETTINGS_URL } from 'src/constants'
 import { SyncStatusIcon } from './header/sync-status-menu/sync-status-icon'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PageAnnotationsCache } from 'src/annotations/cache'
+import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import { createYoutubeServiceOptions } from '@worldbrain/memex-common/lib/services/youtube/library'
 
 export interface Props extends DashboardDependencies {}
 
@@ -115,6 +117,8 @@ export class DashboardContainer extends StatefulUIElement<
     private annotationsCache: PageAnnotationsCache
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
 
+    youtubeService: YoutubeService
+
     private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
         window.location.hash = '#/' + route
     }
@@ -127,6 +131,7 @@ export class DashboardContainer extends StatefulUIElement<
         this.annotationsCache = new PageAnnotationsCache({
             normalizedPageUrl: '',
         }) // TODO: cache - figure out page URL here
+        this.youtubeService = new YoutubeService(createYoutubeServiceOptions())
     }
 
     private getListDetailsById: ListDetailsGetter = (id) => ({
@@ -622,6 +627,7 @@ export class DashboardContainer extends StatefulUIElement<
                 activePage={this.state.activePageID && true}
                 listData={listsSidebar.listData}
                 getListDetailsById={this.getListDetailsById}
+                youtubeService={this.youtubeService}
                 toggleSortMenuShown={() =>
                     this.processEvent('setSortMenuShown', {
                         isShown: !searchResults.isSortMenuShown,
@@ -1447,6 +1453,7 @@ export class DashboardContainer extends StatefulUIElement<
                         )}
                     </MainContent>
                     <NotesSidebar
+                        youtubeService={this.youtubeService}
                         tags={this.props.tagsBG}
                         auth={this.props.authBG}
                         refSidebar={this.notesSidebarRef}
@@ -1545,6 +1552,12 @@ const MainContent = styled.div<{ responsiveWidth: string }>`
         css<{ responsiveWidth: string }>`
             width: ${(props) => props.responsiveWidth};
         `};
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const ListSidebarContent = styled(Rnd)<{
@@ -1555,7 +1568,6 @@ const ListSidebarContent = styled(Rnd)<{
     flex-direction: column;
     justify-content: start;
     z-index: 3000;
-    z-index: 2147483645;
     left: 0px;
 
     ${(props) =>
@@ -1654,7 +1666,14 @@ const MainFrame = styled.div`
     display: flex;
     flex-direction: row;
     min-height: 100vh;
-    height: 100%;
+    height: fill-available;
+
+    width: fill-available;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const Container = styled.div`
@@ -1663,9 +1682,16 @@ const Container = styled.div`
     width: fill-available;
     background-color: ${(props) => props.theme.colors.backgroundColor};
     min-height: 100vh;
-    height: 100%;
+    height: 100vh;
     /* min-width: fit-content; */
     width: fill-available;
+    overflow: hidden;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 
     & * {
         font-family: 'Satoshi', sans-serif;,
@@ -1677,6 +1703,7 @@ const PeekTrigger = styled.div`
     width: 10px;
     position: fixed;
     background: transparent;
+    z-index: 50;
 `
 
 const SidebarToggleBox = styled(Margin)`

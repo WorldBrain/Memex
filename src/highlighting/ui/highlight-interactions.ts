@@ -22,14 +22,51 @@ import browser from 'webextension-polyfill'
 import * as PDFjsHighlighting from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
 import { throttle } from 'lodash'
 import hexToRgb from 'hex-to-rgb'
+import TurndownService from 'turndown'
 import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
+
+const turndownService = new TurndownService({
+    headingStyle: 'atx',
+    hr: '---',
+    codeBlockStyle: 'fenced',
+})
 
 const styles = require('src/highlighting/ui/styles.css')
 
+function getSelectionHtml(selection, pageUrl) {
+    var html = ''
+    if (typeof selection != 'undefined') {
+        var sel = selection
+        if (sel.rangeCount) {
+            var container = document.createElement('div')
+            for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                container.appendChild(sel.getRangeAt(i).cloneContents())
+            }
+            html = container.innerHTML
+        }
+    }
+
+    let htmlImproved = specialHTMLhandling(html, pageUrl)
+    return turndownService.turndown(htmlImproved)
+}
+
+function specialHTMLhandling(html, pageUrl) {
+    if (pageUrl.includes === '.wikipedia.org') {
+        html.replace('href="/', 'href="https://en.wikipedia.org/')
+        html.replace('src="//', 'src="https://')
+
+        return html
+    }
+
+    return html
+}
+
 export const extractAnchorFromSelection = async (
     selection: Selection,
+    pageUrl: string,
 ): Promise<Anchor> => {
-    const quote = selection.toString()
+    const quote2 = selection.toString()
+    const quote = getSelectionHtml(selection, pageUrl)
     const descriptor = await anchoring.selectionToDescriptor({ selection })
     return {
         quote,
@@ -179,7 +216,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
             return null
         }
 
-        const anchor = await extractAnchorFromSelection(selection)
+        const anchor = await extractAnchorFromSelection(selection, pageUrl)
 
         const body = anchor && anchor.quote
         const hasSelectedText = anchor.quote.length
@@ -197,9 +234,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const annotation: Annotation &
             Required<Pick<Annotation, 'createdWhen' | 'lastEdited'>> = {
             url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
-            body: hasSelectedText
-                ? anchor.quote
-                : videoTimeStampForComment && undefined,
+            body: hasSelectedText ? body : undefined,
             pageUrl,
             tags: [],
             lists: annotationLists,
@@ -415,7 +450,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
         ) as HTMLElement
 
         if ($highlight) {
-            console.log('scrollto')
             $highlight.scrollIntoView({ behavior: 'smooth', block: 'center' })
         } else {
             console.error('MEMEX: Oops, no highlight found to scroll to')

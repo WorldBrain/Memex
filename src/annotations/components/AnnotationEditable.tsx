@@ -13,7 +13,6 @@ import AnnotationEdit, {
     AnnotationEditGeneralProps,
     AnnotationEditEventProps,
 } from 'src/annotations/components/AnnotationEdit'
-import TextTruncated from 'src/annotations/components/parts/TextTruncated'
 import SaveBtn from 'src/annotations/components/save-btn'
 import type { SidebarAnnotationTheme, ListDetailsGetter } from '../types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -34,7 +33,8 @@ import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import type { UnifiedAnnotation } from '../cache/types'
 import type { AnnotationCardInstanceLocation } from 'src/sidebar/annotations-sidebar/types'
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
-
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { truncateText } from 'src/annotations/utils'
 export interface HighlightProps extends AnnotationProps {
     body: string
     comment?: string
@@ -89,6 +89,8 @@ export interface AnnotationProps {
     renderShareMenuForAnnotation?: (
         unifiedId: UnifiedAnnotation['unifiedId'],
     ) => JSX.Element
+    getYoutubePlayer?(): YoutubePlayer
+    pageUrl?: string
 }
 
 export interface AnnotationEditableEventProps {
@@ -108,6 +110,9 @@ interface State {
     showCopyPaster: boolean
     hoverEditArea: boolean
     hoverCard: boolean
+    isTruncated?: boolean
+    needsTruncation: boolean
+    truncatedText: string
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
@@ -134,6 +139,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         showCopyPaster: false,
         hoverEditArea: false,
         hoverCard: false,
+        isTruncated: false,
+        needsTruncation: true,
+        truncatedText: '',
     }
 
     focusEditForm() {
@@ -142,6 +150,15 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     componentDidMount() {
         this.textAreaHeight()
+        if (this.props.body != null) {
+            const { isTooLong, text } = truncateText(this.props.body)
+
+            this.setState({
+                isTruncated: isTooLong,
+                needsTruncation: isTooLong,
+                truncatedText: text,
+            })
+        }
     }
 
     private updateSpacePickerState(showState: ListPickerShowState) {
@@ -209,6 +226,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         }
     }
 
+    private toggleTextTruncation() {
+        this.setState({
+            isTruncated: !this.state.isTruncated,
+        })
+    }
+
     private renderHighlightBody() {
         if (!this.props.body) {
             return
@@ -218,66 +241,84 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             onGoToAnnotation,
         } = this.props
 
-        const actionsBox = !this.props.isEditing
-            ? this.state.hoverEditArea && (
-                  <HighlightActionsBox>
-                      {onGoToAnnotation && (
-                          <TooltipBox
-                              tooltipText="Open in Page"
-                              placement="bottom"
-                          >
-                              <HighlightAction right="2px">
-                                  <Icon
-                                      onClick={onGoToAnnotation}
-                                      filePath={icons.goTo}
-                                      heightAndWidth={'20px'}
-                                      padding={'5px'}
-                                  />
-                              </HighlightAction>
-                          </TooltipBox>
-                      )}
-                      {footerDeps?.onEditIconClick && (
-                          <TooltipBox
-                              tooltipText={
-                                  <span>
-                                      <strong>Add/Edit Note</strong>
-                                      <br />
-                                      or double-click card
-                                  </span>
-                              }
-                              placement="bottom"
-                          >
-                              <HighlightAction>
-                                  <Icon
-                                      onClick={footerDeps.onEditIconClick}
-                                      icon={'edit'}
-                                      heightAndWidth={'20px'}
-                                      padding={'5px'}
-                                  />
-                              </HighlightAction>
-                          </TooltipBox>
-                      )}
-                  </HighlightActionsBox>
-              )
-            : null
+        const actionsBox =
+            !this.props.isEditing && this.state.hoverCard === true ? (
+                <HighlightActionsBox>
+                    {this.state.needsTruncation && (
+                        <TooltipBox
+                            tooltipText={
+                                this.state.isTruncated
+                                    ? 'Expand Note'
+                                    : 'Show Less'
+                            }
+                            placement="bottom"
+                        >
+                            <Icon
+                                onClick={() => this.toggleTextTruncation()}
+                                filePath={
+                                    this.state.isTruncated
+                                        ? 'expand'
+                                        : 'compress'
+                                }
+                                heightAndWidth={'18px'}
+                                borderColor={'lightHover'}
+                                background={'backgroundColorDarker'}
+                            />
+                        </TooltipBox>
+                    )}
+                    {onGoToAnnotation && (
+                        <TooltipBox
+                            tooltipText="Open in Page"
+                            placement="bottom"
+                        >
+                            <Icon
+                                onClick={onGoToAnnotation}
+                                filePath={'goTo'}
+                                heightAndWidth={'18px'}
+                                borderColor={'lightHover'}
+                                background={'backgroundColorDarker'}
+                            />
+                        </TooltipBox>
+                    )}
+                    <TooltipBox
+                        tooltipText={
+                            <span>
+                                <strong>Add/Edit Note</strong>
+                                <br />
+                                or double-click card
+                            </span>
+                        }
+                        placement="bottom"
+                    >
+                        <Icon
+                            onClick={footerDeps.onEditIconClick}
+                            icon={'edit'}
+                            heightAndWidth={'18px'}
+                            borderColor={'lightHover'}
+                            background={'backgroundColorDarker'}
+                        />
+                    </TooltipBox>
+                </HighlightActionsBox>
+            ) : null
 
         return (
             <HighlightStyled
-                onMouseEnter={this.props.onHighlightHover}
                 onClick={
                     this.props.isClickable
                         ? this.props.onHighlightClick
                         : undefined
                 }
+                hasComment={this.props.comment.length > 0}
             >
-                <ActionBox>{actionsBox}</ActionBox>
-                <TextTruncated text={this.props.body}>
-                    {({ text }) => (
-                        <HighlightTextBox>
-                            <HighlightText>{text}</HighlightText>
-                        </HighlightTextBox>
-                    )}
-                </TextTruncated>
+                <Highlightbar />
+                <>
+                    <ActionBox>{actionsBox}</ActionBox>
+                    <Markdown pageUrl={this.props.pageUrl}>
+                        {this.state.isTruncated
+                            ? this.state.truncatedText
+                            : this.props.body}
+                    </Markdown>
+                </>
             </HighlightStyled>
         )
     }
@@ -314,49 +355,40 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         editorHeight={this.state.editorHeight}
                         isShared={this.props.isShared}
                         isBulkShareProtected={this.props.isBulkShareProtected}
+                        getYoutubePlayer={this.props.getYoutubePlayer}
                     />
                 </AnnotationEditContainer>
             )
         }
 
-        if (!comment?.length) {
-            return null
+        if (!comment == null) {
+            return
         }
 
         return (
-            <CommentBox onMouseEnter={this.props.onNoteHover}>
-                {!this.theme.hasHighlight &&
-                    annotationFooterDependencies?.onEditIconClick && (
-                        <EditNoteIconBox
-                            tooltipText="Edit Note"
-                            placement="bottom"
-                        >
-                            <TooltipBox
-                                tooltipText="Edit Note"
-                                placement="bottom"
-                            >
-                                <Icon
-                                    onClick={
-                                        annotationFooterDependencies?.onEditIconClick
-                                    }
-                                    icon={'edit'}
-                                    heightAndWidth={'20px'}
-                                    padding={'5px'}
-                                />
-                            </TooltipBox>
-                        </EditNoteIconBox>
-                    )}
-                <TextTruncated text={comment}>
-                    {({ text }) => (
-                        <NoteTextBox hasHighlight={this.theme.hasHighlight}>
-                            <NoteText
-                                contextLocation={this.props.contextLocation}
-                            >
-                                {text}
-                            </NoteText>
-                        </NoteTextBox>
-                    )}
-                </TextTruncated>
+            <CommentBox>
+                {!this.theme.hasHighlight && this.state.hoverCard === true && (
+                    <TooltipBox tooltipText="Edit Note" placement="bottom">
+                        <Icon
+                            onClick={
+                                annotationFooterDependencies?.onEditIconClick
+                            }
+                            icon={'edit'}
+                            heightAndWidth={'20px'}
+                            padding={'5px'}
+                        />
+                    </TooltipBox>
+                )}
+                <NoteTextBox hasHighlight={this.theme.hasHighlight}>
+                    <NoteText
+                        contextLocation={this.props.contextLocation}
+                        getYoutubePlayer={this.props.getYoutubePlayer}
+                    >
+                        {this.state.isTruncated
+                            ? truncateText(comment)
+                            : comment}
+                    </NoteText>
+                </NoteTextBox>
             </CommentBox>
         )
     }
@@ -430,7 +462,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     key: 'add-spaces-btn',
                     image: 'plus',
                     imageColor: 'purple',
-                    tooltipText: 'Add Page to Spaces',
+                    tooltipText: 'Add Note to Spaces',
                     onClick: () => this.updateSpacePickerState('footer'),
                     buttonRef: this.props.spacePickerButtonRef,
                     active: this.state.showSpacePicker === 'footer',
@@ -458,22 +490,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         ]
     }
 
-    private renderMarkdownHelpButton() {
-        return (
-            <MarkdownButtonContainer
-                onClick={() => this.setState({ showQuickTutorial: true })}
-                ref={this.tutorialButtonRef}
-            >
-                Formatting Help
-                <MarkdownButton
-                    src={icons.helpIcon}
-                    onClick={() => this.setState({ showQuickTutorial: true })}
-                />
-            </MarkdownButtonContainer>
-        )
-    }
-
-    // TODO: Sort out the confusing conditions in here
     private renderFooter() {
         const {
             isShared,
@@ -512,6 +528,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         />
                     )}
                     <ItemBoxBottom
+                        borderTop={false}
                         creationInfo={this.creationInfo}
                         actions={this.calcFooterActions()}
                     />
@@ -570,6 +587,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     innerRef={this.shareButtonRef}
                     active={this.state.showShareMenu}
                 />
+
                 <DeletionBox>
                     {isDeleting && (
                         <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
@@ -590,7 +608,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         this.props.spacePickerButtonRef,
                         'footer',
                     )}
-                    {this.renderShareMenu(this.shareButtonRef)}
+                    {this.state.showShareMenu &&
+                        this.renderShareMenu(this.shareButtonRef)}
                 </DeletionBox>
             </DefaultFooterStyled>
         )
@@ -609,7 +628,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 targetElementRef={referenceElement.current}
                 placement={
                     this.state.showSpacePicker === 'lists-bar'
-                        ? 'bottom-start'
+                        ? 'bottom'
                         : 'bottom-end'
                 }
                 closeComponent={() => {
@@ -676,21 +695,26 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     zIndex={this.props.zIndex}
                     top="5px"
                     bottom="2px"
+                    onMouseEnter={() =>
+                        this.setState({
+                            hoverCard: true,
+                        })
+                    }
+                    onMouseOver={() =>
+                        this.setState({
+                            hoverCard: true,
+                        })
+                    }
+                    onMouseLeave={() =>
+                        this.setState({
+                            hoverCard: false,
+                        })
+                    }
                 >
                     <ItemBox
                         firstDivProps={{
                             id: ANNOT_BOX_ID_PREFIX + this.props.unifiedId,
                         }}
-                        onMouseEnter={() =>
-                            this.setState({
-                                hoverCard: true,
-                            })
-                        }
-                        onMouseLeave={() =>
-                            this.setState({
-                                hoverCard: false,
-                            })
-                        }
                     >
                         <AnnotationStyled>
                             <ContentContainer
@@ -729,14 +753,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     }
                                     padding={
                                         this.props.isEditing
-                                            ? '10px 15px 10px 15px'
+                                            ? '10px 15px 10px 10px'
                                             : '0px 15px 10px 15px'
                                     }
                                 />
                             )}
                             {this.renderFooter()}
-                            {this.renderCopyPaster(this.copyPasterButtonRef)}
                         </AnnotationStyled>
+                        {this.renderCopyPaster(this.copyPasterButtonRef)}
                     </ItemBox>
                     {this.renderSpacePicker(
                         this.spacePickerBarRef,
@@ -762,86 +786,21 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 }
 
-const ShareBtn = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 24px;
-    color: ${(props) => props.theme.colors.greyScale8};
-    font-size: 12px;
-    cursor: pointer;
-    grid-gap: 4px;
-
-    & * {
-        cursor: pointer;
-    }
+const Highlightbar = styled.div`
+    background-color: ${(props) => props.theme.colors.purple};
+    margin-right: 10px;
+    border-radius: 2px;
+    width: 4px;
 `
 
 const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
     margin-top: ${(props) => !props.hasHighlight && '10px'};
 `
 
-const TagPickerWrapper = styled.div`
-    position: relative;
-`
-const ShareMenuWrapper = styled.div`
-    position: relative;
-`
-const CopyPasterWrapper = styled.div`
-    position: relative;
-    left: 70px;
-`
-
-const EditNoteIconBox = styled.div`
-    display: none;
-    position: absolute;
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
-    border: none;
-    outline: none;
-    border-radius: 6px;
-    border: 1px solid ${(props) => props.theme.colors.lineGrey};
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
-
-    &:hover {
-    }
-`
-
 const AnnotationBox = styled(Margin)<{ zIndex: number }>`
     width: 100%;
     align-self: center;
     z-index: ${(props) => props.zIndex};
-`
-
-const EditNoteIcon = styled.div`
-    display: flex;
-    border: none;
-    width: 20px;
-    height: 20px;
-    opacity: 0.6;
-    background-color: ${(props) => props.theme.colors.primary};
-    mask-image: url(${icons.commentEditFull});
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 16px;
-    cursor: pointer;
-`
-const MarkdownButtonContainer = styled.div`
-    display: flex;
-    font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
-    align-items: center;
-    cursor: pointer;
-`
-
-const MarkdownButton = styled.img`
-    display: flex;
-    height: 16px;
-    opacity: 0.8;
-    mask-position: center center;
-    margin-left: 10px;
-    cursor: pointer;
 `
 
 const SaveActionBar = styled.div`
@@ -854,11 +813,11 @@ const SaveActionBar = styled.div`
 const HighlightActionsBox = styled.div`
     position: absolute;
     right: 0px;
-    width: 50px;
     display: flex;
     justify-content: flex-end;
     z-index: 10000;
     top: -4px;
+    grid-gap: 5px;
 `
 
 const NoteTextBox = styled.div<{ hasHighlight: boolean }>`
@@ -887,63 +846,27 @@ const NoteText = styled(Markdown)`
 `
 
 const ActionBox = styled.div`
-    position: relative;
     z-index: 1;
-`
-
-const HighlightAction = styled(Margin)`
-    display: flex;
-    border-radius: 6px;
-    border: 1px solid ${(props) => props.theme.colors.lineGrey};
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
-    margin-top: -3px;
-
-    &:hover {
-    }
+    position: absolute;
+    right: 15px;
 `
 
 const HighlightTextBox = styled.div`
     position: relative;
 `
 
-const AddNoteIcon = styled.button`
-    border: none;
-    width: 20px;
-    height: 20px;
-    opacity: 0.6;
-    background-color: ${(props) => props.theme.colors.primary};
-    mask-image: url(${icons.plus});
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 16px;
-    cursor: pointer;
-`
-
-const GoToHighlightIcon = styled.button`
-    border: none;
-    width: 20px;
-    height: 20px;
-    opacity: 0.6;
-    background-color: ${(props) => props.theme.colors.primary};
-    mask-image: url(${icons.goTo});
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 16px;
-    cursor: pointer;
-`
-
 const HighlightText = styled.span`
-    box-decoration-break: clone;
+    /* box-decoration-break: clone;
     overflow: hidden;
     line-height: 25px;
     font-style: normal;
     border-radius: 3px;
     background-color: ${(props) => props.theme.colors.highlightColorDefault};
     color: ${(props) => props.theme.colors.black};
-    padding: 2px 5px;
+    padding: 2px 5px; */
 `
 
-const HighlightStyled = styled.div`
+const HighlightStyled = styled.div<{ hasComment: boolean }>`
     font-weight: 400;
     font-size: 14px;
     letter-spacing: 0.5px;
@@ -952,6 +875,14 @@ const HighlightStyled = styled.div`
     line-height: 20px;
     text-align: left;
     line-break: normal;
+    display: flex;
+    position: relative;
+
+    ${(props) =>
+        !props.hasComment &&
+        css`
+            padding: 15px 15px 15px 15px;
+        `}
 `
 
 const CommentBox = styled.div`
@@ -967,20 +898,17 @@ const CommentBox = styled.div`
     text-align: left;
     //border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
     overflow: visible;
-    flex-direction: row-reverse;
+    flex-direction: row;
     display: flex;
 
     /* &:first-child {
         padding: 15px 20px 20px;
     } */
 
-    &:hover ${EditNoteIconBox} {
-        display: flex;
-    }
-
     ${({ theme }: { theme: SidebarAnnotationTheme }) =>
         !theme.hasHighlight &&
         `
+        padding: 10px 20px 10px;
         border-top: none;
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;
@@ -989,14 +917,10 @@ const CommentBox = styled.div`
 
 const DefaultFooterStyled = styled.div`
     display: flex;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
     align-items: center;
-    padding-left: 15px;
+    padding-left: 5px;
     justify-content: space-between;
-
-    & > div {
-        border-top: none;
-    }
+    border-top: 1px solid ${(props) => props.theme.colors.lightHover};
 `
 
 const AnnotationStyled = styled.div`
@@ -1021,7 +945,7 @@ const AnnotationStyled = styled.div`
     ${({ theme }) =>
         theme.isActive &&
         `
-        outline: 2px solid #5671cfb8;
+        outline: 1px solid ${theme.colors.primaryLight}70;
     `};
 `
 
@@ -1045,26 +969,6 @@ const DeleteConfirmStyled = styled.span`
     color: ${(props) => props.theme.colors.normalText};
     margin-right: 10px;
     text-align: right;
-`
-
-const CancelBtnStyled = styled.button`
-    box-sizing: border-box;
-    cursor: pointer;
-    font-size: 14px;
-    border: none;
-    outline: none;
-    padding: 3px 5px;
-    background: transparent;
-    border-radius: 3px;
-    color: red;
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.backgroundColor};
-    }
-
-    &:focus {
-        background-color: #79797945;
-    }
 `
 
 const BtnContainerStyled = styled.div`
@@ -1102,6 +1006,5 @@ const DeletionBox = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid #f0f0f0;
     padding: 5px 5px 5px 15px;
 `

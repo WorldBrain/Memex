@@ -6,6 +6,7 @@ import { ConfirmModal, ConfirmModalProps } from '../../../common-ui/components'
 export interface Props extends ConfirmModalProps {
     deleteDocs: () => Promise<void>
     submessage?: string
+    onClose: () => Promise<void>
 }
 
 class DeleteConfirmModal extends PureComponent<Props> {
@@ -13,11 +14,32 @@ class DeleteConfirmModal extends PureComponent<Props> {
 
     constructor(props) {
         super(props)
-        this._action = React.createRef()
+        this._action = React.createRef<HTMLDivElement>()
     }
 
     componentDidMount() {
         this._action.current.focus()
+        this._action.current.addEventListener(
+            'keydown',
+            this.handleConfirmEvent,
+        )
+    }
+
+    componentWillUnmount() {
+        this._action.current.removeEventListener(
+            'keydown',
+            this.handleConfirmEvent,
+        )
+    }
+
+    handleConfirmEvent = (event) => {
+        if (event.key === 'Enter') {
+            this.props.deleteDocs()
+            this.props.onClose()
+        }
+        if (event.key === 'Escape') {
+            this.props.onClose()
+        }
     }
 
     render() {
@@ -35,10 +57,10 @@ class DeleteConfirmModal extends PureComponent<Props> {
                     label="Delete"
                     onClick={deleteDocs}
                     innerRef={this._action}
-                    tabIndex={0}
                     type={'secondary'}
                     size={'large'}
                     bold
+                    tabIndex={-1}
                 />
             </ConfirmModal>
         )

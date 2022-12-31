@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ChangeEventHandler } from 'react'
 import styled, { css } from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 import { Loader, Search as SearchIcon } from '@styled-icons/feather'
@@ -6,6 +6,7 @@ import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { KeyEvent } from '../types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 
 interface Props {
     onChange: (value: string) => void
@@ -38,7 +39,8 @@ export const keyEvents: KeyEvent[] = [
 export class PickerSearchInput extends React.Component<Props, State> {
     state = { isFocused: false }
 
-    onChange = (value: string) => this.props.onChange(value)
+    onChange: ChangeEventHandler = (e) =>
+        this.props.onChange((e.target as HTMLInputElement).value)
 
     handleSpecialKeyPress = {
         test: (e: KeyboardEvent) => keyEvents.includes(e.key as KeyEvent),
@@ -47,30 +49,18 @@ export class PickerSearchInput extends React.Component<Props, State> {
 
     render() {
         return (
-            <SearchBox isFocused={this.state.isFocused} id={'pickerSearchBox'}>
-                <Icon
-                    filePath={icons.searchIcon}
-                    heightAndWidth="14px"
-                    hoverOff
-                />
-                {/* {this.props.before} */}
-                <SearchInput
-                    placeholder={this.props.searchInputPlaceholder}
-                    defaultValue={this.props.value}
-                    onChange={this.onChange}
-                    onKeyDown={(e) => {
-                        e.stopPropagation()
-                    }}
-                    onFocus={() => this.setState({ isFocused: true })}
-                    onBlur={() => this.setState({ isFocused: false })}
-                    specialHandlers={[this.handleSpecialKeyPress]}
-                    type={'input'}
-                    updateRef={this.props.searchInputRef}
-                    autoFocus
-                    size="5"
-                />
-                {this.props.loading && <Loader size={20} />}
-            </SearchBox>
+            <SearchInput
+                id={'pickerSearchBox'}
+                placeholder={this.props.searchInputPlaceholder}
+                value={this.props.value}
+                onChange={this.onChange}
+                onKeyDown={(e) => {
+                    this.props.onKeyPress(e.key), e.stopPropagation()
+                }}
+                type={'input'}
+                componentRef={this.props.searchInputRef}
+                autoFocus
+            />
         )
     }
 }
@@ -102,7 +92,7 @@ const SearchBox = styled.div`
         `}
 `
 
-const SearchInput = styled(TextInputControlled)`
+const SearchInput = styled(TextField)`
     border: none;
     background-image: none;
     background-color: transparent;
