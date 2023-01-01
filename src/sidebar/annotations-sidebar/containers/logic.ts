@@ -160,7 +160,7 @@ export class SidebarContainerLogic extends UILogic<
                         return {
                             pageCreatorReference: annotation.creator,
                             normalizedPageUrl: normalizeUrl(
-                                state.pageUrl ?? options.fullPageUrl,
+                                state.fullPageUrl ?? options.fullPageUrl,
                             ),
                         }
                     },
@@ -202,7 +202,7 @@ export class SidebarContainerLogic extends UILogic<
 
             isWidthLocked: false,
             isLocked: false,
-            pageUrl: this.options.fullPageUrl,
+            fullPageUrl: this.options.fullPageUrl,
             showState: 'hidden',
             annotationSharingAccess: 'sharing-allowed',
             readingView: false,
@@ -561,12 +561,12 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
 
-        if (previousState.pageUrl === event.pageUrl) {
+        if (previousState.fullPageUrl === event.pageUrl) {
             return
         }
 
         const mutation: UIMutation<SidebarContainerState> = {
-            pageUrl: { $set: event.pageUrl },
+            fullPageUrl: { $set: event.pageUrl },
         }
 
         this.emitMutation(mutation)
@@ -790,7 +790,7 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         const {
             lists,
-            pageUrl,
+            fullPageUrl: pageUrl,
             commentBox,
             selectedListId: selectedList,
         } = previousState
@@ -1032,7 +1032,7 @@ export class SidebarContainerLogic extends UILogic<
             async () => {
                 const annotationRefsByList = await this.options.customLists.fetchAnnotationRefsForRemoteListsOnPage(
                     {
-                        normalizedPageUrl: normalizeUrl(state.pageUrl),
+                        normalizedPageUrl: normalizeUrl(state.fullPageUrl),
                         sharedListIds: lists.map((list) => list.remoteId!),
                     },
                 )

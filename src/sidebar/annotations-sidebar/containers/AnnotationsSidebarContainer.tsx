@@ -127,7 +127,7 @@ export class AnnotationsSidebarContainer<
     }
 
     toggleSidebarShowForPageId(pageId: string) {
-        const isAlreadyOpenForOtherPage = pageId !== this.state.pageUrl
+        const isAlreadyOpenForOtherPage = pageId !== this.state.fullPageUrl
 
         if (this.state.showState === 'hidden' || isAlreadyOpenForOtherPage) {
             this.setPageUrl(pageId)
@@ -437,7 +437,7 @@ export class AnnotationsSidebarContainer<
             <PageNotesCopyPaster
                 copyPaster={this.props.copyPaster}
                 annotationUrls={[annotation.localId]}
-                normalizedPageUrls={[normalizeUrl(this.state.pageUrl)]}
+                normalizedPageUrls={[normalizeUrl(this.state.fullPageUrl)]}
             />
         )
     }
@@ -600,8 +600,13 @@ export class AnnotationsSidebarContainer<
     renderTopBar() {
         let playerId
         let player = undefined
-        if (this.state.pageUrl && this.props.sidebarContext === 'dashboard') {
-            const normalizedUrl = normalizeUrl(this.state.pageUrl ?? undefined)
+        if (
+            this.state.fullPageUrl &&
+            this.props.sidebarContext === 'dashboard'
+        ) {
+            const normalizedUrl = normalizeUrl(
+                this.state.fullPageUrl ?? undefined,
+            )
             playerId = getBlockContentYoutubePlayerId(normalizedUrl)
             player = this.props.youtubeService.getPlayerByElementId(playerId)
         }
@@ -677,81 +682,79 @@ export class AnnotationsSidebarContainer<
             this.state.pillVisibility === 'hide'
         ) {
             return null
-        } else {
-            // const followedList = this.state.followedLists.byId[
-            //     this.state.selectedList.remoteId
-            // ]
-
-            return (
-                <IsolatedViewPill
-                    onClick={() => {
-                        this.processEvent('setPillVisibility', {
-                            value: 'unhover',
-                        })
-                        this.showSidebar()
-                    }}
-                    onMouseOver={() =>
-                        this.processEvent('setPillVisibility', {
-                            value: 'hover',
-                        })
-                    }
-                    onMouseLeave={() =>
-                        this.processEvent('setPillVisibility', {
-                            value: 'unhover',
-                        })
-                    }
-                    pillVisibility={this.state.pillVisibility}
-                >
-                    <IconContainer pillVisibility={this.state.pillVisibility}>
-                        <Icon
-                            filePath="highlight"
-                            heightAndWidth="20px"
-                            hoverOff
-                            color="purple"
-                        />
-                    </IconContainer>
-                    <IsolatedPillContent>
-                        <TogglePillHoverSmallText
-                            pillVisibility={this.state.pillVisibility}
-                        >
-                            All annotations added to Space
-                        </TogglePillHoverSmallText>
-                        <TogglePillMainText>
-                            {
-                                this.props.annotationsCache.lists.byId[
-                                    this.state.selectedListId
-                                ].name
-                            }
-                        </TogglePillMainText>
-                    </IsolatedPillContent>
-                    <CloseContainer pillVisibility={this.state.pillVisibility}>
-                        <CloseBox>
-                            <TooltipBox
-                                tooltipText={'Exit focus mode for this Space'}
-                                placement={'left-start'}
-                            >
-                                <Icon
-                                    filePath="removeX"
-                                    heightAndWidth="22px"
-                                    onClick={(event) => {
-                                        event.stopPropagation()
-                                        this.processEvent('setPillVisibility', {
-                                            value: 'hide',
-                                        })
-                                        this.processEvent('setSelectedList', {
-                                            unifiedListId: null,
-                                        })
-                                    }}
-                                />
-                            </TooltipBox>
-                        </CloseBox>
-                    </CloseContainer>
-                </IsolatedViewPill>
-            )
         }
+        return (
+            <IsolatedViewPill
+                onClick={() => {
+                    this.processEvent('setPillVisibility', {
+                        value: 'unhover',
+                    })
+                    this.showSidebar()
+                }}
+                onMouseOver={() =>
+                    this.processEvent('setPillVisibility', {
+                        value: 'hover',
+                    })
+                }
+                onMouseLeave={() =>
+                    this.processEvent('setPillVisibility', {
+                        value: 'unhover',
+                    })
+                }
+                pillVisibility={this.state.pillVisibility}
+            >
+                <IconContainer pillVisibility={this.state.pillVisibility}>
+                    <Icon
+                        filePath="highlight"
+                        heightAndWidth="20px"
+                        hoverOff
+                        color="purple"
+                    />
+                </IconContainer>
+                <IsolatedPillContent>
+                    <TogglePillHoverSmallText
+                        pillVisibility={this.state.pillVisibility}
+                    >
+                        All annotations added to Space
+                    </TogglePillHoverSmallText>
+                    <TogglePillMainText>
+                        {
+                            this.props.annotationsCache.lists.byId[
+                                this.state.selectedListId
+                            ].name
+                        }
+                    </TogglePillMainText>
+                </IsolatedPillContent>
+                <CloseContainer pillVisibility={this.state.pillVisibility}>
+                    <CloseBox>
+                        <TooltipBox
+                            tooltipText={'Exit focus mode for this Space'}
+                            placement={'left-start'}
+                        >
+                            <Icon
+                                filePath="removeX"
+                                heightAndWidth="22px"
+                                onClick={(event) => {
+                                    event.stopPropagation()
+                                    this.processEvent('setPillVisibility', {
+                                        value: 'hide',
+                                    })
+                                    this.processEvent('setSelectedList', {
+                                        unifiedListId: null,
+                                    })
+                                }}
+                            />
+                        </TooltipBox>
+                    </CloseBox>
+                </CloseContainer>
+            </IsolatedViewPill>
+        )
     }
 
     render() {
+        if (!this.state.fullPageUrl) {
+            return null
+        }
         const selectedList = this.state.selectedListId ?? undefined
 
         if (selectedList) {
@@ -855,9 +858,11 @@ export class AnnotationsSidebarContainer<
                                 )
                             }
                             normalizedPageUrls={[
-                                normalizeUrl(this.state.pageUrl),
+                                normalizeUrl(this.state.fullPageUrl),
                             ]}
-                            normalizedPageUrl={normalizeUrl(this.state.pageUrl)}
+                            normalizedPageUrl={normalizeUrl(
+                                this.state.fullPageUrl,
+                            )}
                             copyPaster={this.props.copyPaster}
                             contentSharing={this.props.contentSharing}
                             annotationsShareAll={this.props.annotations}

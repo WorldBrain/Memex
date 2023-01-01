@@ -110,7 +110,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     readingView?: boolean
     showAllNotesCopyPaster: boolean
 
-    pageUrl?: string
+    fullPageUrl?: string
     lists: PageAnnotationsCacheInterface['lists']
     annotations: PageAnnotationsCacheInterface['annotations']
 

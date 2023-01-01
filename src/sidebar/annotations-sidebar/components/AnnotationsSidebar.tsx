@@ -428,7 +428,7 @@ export class AnnotationsSidebar extends React.Component<
                     return (
                         <React.Fragment key={annotation.unifiedId}>
                             <AnnotationEditable
-                                pageUrl={this.props.pageUrl}
+                                pageUrl={this.props.fullPageUrl}
                                 isShared
                                 isBulkShareProtected
                                 unifiedId={annotation.unifiedId}
