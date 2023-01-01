@@ -366,17 +366,16 @@ export class HighlightRenderer implements HighlightRendererInterface {
         onClick,
         temp,
     ) => {
-        this.removeAllHighlights()
-        if (!highlights.length) {
-            return
-        }
-
         const {
             [HIGHLIGHT_COLOR_KEY]: highlightsColor,
         } = await browser.storage.local.get({
             [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
         })
         this.highlightColor = hexToRgb(highlightsColor).toString()
+        this.removeAllHighlights()
+        if (!highlights.length) {
+            return
+        }
 
         await Promise.all(
             highlights.map(async (highlight) => {
