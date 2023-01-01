@@ -154,21 +154,28 @@ export const getUserAnnotationsArray = (
             (userId ? annot.creator.id === userId : false),
     )
 
+export const getHighlightAnnotationsArray = (
+    cache: Pick<PageAnnotationsCacheInterface, 'annotations'>,
+): UnifiedAnnotation[] =>
+    normalizedStateToArray(cache.annotations).filter((a) => a.body?.length > 0)
+
 export const getUserHighlightsArray = (
-    cache: Pick<PageAnnotationsCacheInterface, 'highlights'>,
+    cache: Pick<PageAnnotationsCacheInterface, 'annotations'>,
     userId?: string,
 ): UnifiedAnnotation[] =>
-    cache.highlights.filter(
+    getHighlightAnnotationsArray(cache).filter(
         (annot) =>
             annot.creator == null ||
             (userId ? annot.creator.id === userId : false),
     )
 
 export const getListHighlightsArray = (
-    cache: Pick<PageAnnotationsCacheInterface, 'highlights'>,
+    cache: Pick<PageAnnotationsCacheInterface, 'annotations'>,
     listId: UnifiedList['unifiedId'],
 ): UnifiedAnnotation[] =>
-    cache.highlights.filter((annot) => annot.unifiedListIds.includes(listId))
+    getHighlightAnnotationsArray(cache).filter((annot) =>
+        annot.unifiedListIds.includes(listId),
+    )
 
 export const getLocalListIdsForCacheIds = (
     cache: Pick<PageAnnotationsCacheInterface, 'lists'>,

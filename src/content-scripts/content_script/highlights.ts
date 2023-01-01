@@ -1,5 +1,4 @@
 import type { HighlightDependencies, HighlightsScriptMain } from './types'
-import type { AnnotationClickHandler } from 'src/highlighting/ui/types'
 // import { bodyLoader } from 'src/util/loader'
 
 export const main: HighlightsScriptMain = async (options) => {
@@ -13,7 +12,7 @@ export const main: HighlightsScriptMain = async (options) => {
 
     options.inPageUI.events.on('componentShouldDestroy', async (event) => {
         if (event.component === 'highlights') {
-            await hideHighlights(options)
+            hideHighlights(options)
         }
     })
     options.inPageUI.events.on('stateChanged', async (event) => {
@@ -22,27 +21,21 @@ export const main: HighlightsScriptMain = async (options) => {
         }
 
         if (event.newState.highlights) {
-            showHighlights(options)
+            await showHighlights(options)
         } else {
             hideHighlights(options)
         }
     })
 }
 
-const showHighlights = (options: HighlightDependencies) => {
-    const onClickHighlight: AnnotationClickHandler = ({
-        unifiedAnnotationId,
-        openInEdit,
-    }) => {
-        options.inPageUI.showSidebar({
-            action: openInEdit ? 'edit_annotation' : 'show_annotation',
-            annotationCacheId: unifiedAnnotationId,
-        })
-    }
-
-    options.highlightRenderer.renderHighlights(
+const showHighlights = async (options: HighlightDependencies) => {
+    await options.highlightRenderer.renderHighlights(
         options.annotationsCache.getAnnotationsArray(),
-        onClickHighlight,
+        ({ unifiedAnnotationId, openInEdit }) =>
+            options.inPageUI.showSidebar({
+                action: openInEdit ? 'edit_annotation' : 'show_annotation',
+                annotationCacheId: unifiedAnnotationId,
+            }),
         false,
     )
 }

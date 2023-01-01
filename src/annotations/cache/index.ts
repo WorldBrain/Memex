@@ -58,13 +58,6 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     getLastAssignedAnnotationId = (): string =>
         (this.annotationIdCounter - 1).toString()
     getLastAssignedListId = (): string => (this.listIdCounter - 1).toString()
-
-    get highlights(): UnifiedAnnotation[] {
-        return normalizedStateToArray(this.annotations).filter(
-            (a) => a.body?.length > 0,
-        )
-    }
-
     get isEmpty(): PageAnnotationsCacheInterface['isEmpty'] {
         return this.annotations.allIds.length === 0
     }

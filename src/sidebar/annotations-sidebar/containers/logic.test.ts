@@ -326,7 +326,11 @@ describe('SidebarContainerLogic', () => {
 
             expectedEvents.push({
                 event: 'renderHighlights',
-                args: { highlights: annotationsCache.highlights },
+                args: {
+                    highlights: cacheUtils.getHighlightAnnotationsArray(
+                        annotationsCache,
+                    ),
+                },
             })
 
             expect(emittedEvents).toEqual(expectedEvents)
@@ -513,10 +517,13 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.annotationCardInstances).toEqual({})
 
             await sidebar.init()
-
             expectedEvents.push({
                 event: 'renderHighlights',
-                args: { highlights: annotationsCache.highlights },
+                args: {
+                    highlights: cacheUtils.getHighlightAnnotationsArray(
+                        annotationsCache,
+                    ),
+                },
             })
 
             const defaultListInstanceStates = fromPairs(
@@ -550,11 +557,16 @@ describe('SidebarContainerLogic', () => {
                     annotationRefsLoadState: 'pristine',
                 },
             })
-
             expect(sidebar.state.activeTab).toEqual('annotations')
-            await sidebar.processEvent('setActiveSidebarTab', { tab: 'spaces' })
-            expect(sidebar.state.activeTab).toEqual('spaces')
 
+            await sidebar.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: { highlights: [] },
+            })
+
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.listInstances).toEqual({
                 ...defaultListInstanceStates,
                 [unifiedListIdA]: {
@@ -593,10 +605,13 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('setActiveSidebarTab', {
                 tab: 'annotations',
             })
-
             expectedEvents.push({
                 event: 'renderHighlights',
-                args: { highlights: annotationsCache.highlights },
+                args: {
+                    highlights: cacheUtils.getHighlightAnnotationsArray(
+                        annotationsCache,
+                    ),
+                },
             })
 
             expect(emittedEvents).toEqual(expectedEvents)
@@ -610,6 +625,10 @@ describe('SidebarContainerLogic', () => {
             }) as any
 
             await sidebar.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: { highlights: [] },
+            })
 
             expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.activeTab).toEqual('spaces')
@@ -622,6 +641,7 @@ describe('SidebarContainerLogic', () => {
             const {
                 sidebar,
                 sidebarLogic,
+                emittedEvents,
                 annotationsCache,
             } = await setupLogicHelper({
                 device,
@@ -629,13 +649,23 @@ describe('SidebarContainerLogic', () => {
                 skipInitEvent: true,
                 fullPageUrl: DATA.TAB_URL_1,
             })
+            const expectedEvents = []
 
             expect(annotationsCache.lists).toEqual(initNormalizedState())
             expect(annotationsCache.annotations).toEqual(initNormalizedState())
             expect(sidebar.state.listInstances).toEqual({})
             expect(sidebar.state.annotationCardInstances).toEqual({})
+            expect(emittedEvents).toEqual(expectedEvents)
 
             await sidebar.init()
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: {
+                    highlights: cacheUtils.getHighlightAnnotationsArray(
+                        annotationsCache,
+                    ),
+                },
+            })
 
             const defaultListInstanceStates = fromPairs(
                 normalizedStateToArray(annotationsCache.lists).map((list) => [
@@ -671,7 +701,14 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('setActiveSidebarTab', {
                 tab: 'spaces',
             })
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: {
+                    highlights: [],
+                },
+            })
 
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.listInstances).toEqual({
                 ...defaultListInstanceStates,
                 [unifiedListIdA]: {
@@ -709,14 +746,24 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('expandListAnnotations', {
                 unifiedListId: unifiedListIdA,
             })
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: {
+                    highlights: cacheUtils.getListHighlightsArray(
+                        annotationsCache,
+                        unifiedListIdA,
+                    ),
+                },
+            })
 
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.listInstances).toEqual({
                 ...defaultListInstanceStates,
                 [unifiedListIdA]: {
                     isOpen: true,
                     unifiedListId: unifiedListIdA,
                     annotationsLoadState: 'success',
-                    conversationsLoadState: 'pristine',
+                    conversationsLoadState: 'success',
                     annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
@@ -745,10 +792,9 @@ describe('SidebarContainerLogic', () => {
             })
 
             // Assert the 1 annotation was downloaded, cached, and a new card instance state created
-            const newCachedAnnotAId =
-                annotationsCache['remoteAnnotIdsToCacheIds'][
-                    DATA.SHARED_ANNOTATIONS[2].id
-                ]
+            const newCachedAnnotAId = annotationsCache[
+                'remoteAnnotIdsToCacheIds'
+            ].get(DATA.SHARED_ANNOTATIONS[2].id.toString())
             expect(
                 annotationsCache.annotations.byId[newCachedAnnotAId],
             ).toEqual(
@@ -774,14 +820,30 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('expandListAnnotations', {
                 unifiedListId: unifiedListIdB,
             })
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: {
+                    highlights: [
+                        ...cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            unifiedListIdA,
+                        ),
+                        ...cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            unifiedListIdB,
+                        ),
+                    ],
+                },
+            })
 
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.listInstances).toEqual({
                 ...defaultListInstanceStates,
                 [unifiedListIdA]: {
                     isOpen: true,
                     unifiedListId: unifiedListIdA,
                     annotationsLoadState: 'success',
-                    conversationsLoadState: 'pristine',
+                    conversationsLoadState: 'success',
                     annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
@@ -794,7 +856,7 @@ describe('SidebarContainerLogic', () => {
                     isOpen: true,
                     unifiedListId: unifiedListIdB,
                     annotationsLoadState: 'success',
-                    conversationsLoadState: 'pristine',
+                    conversationsLoadState: 'success',
                     annotationRefsLoadState: 'success',
                     sharedAnnotationReferences: [
                         {
@@ -810,14 +872,12 @@ describe('SidebarContainerLogic', () => {
             })
 
             // Assert the 2 annotation were downloaded, cached (with one being de-duped, already existing locally), and new card instance states created
-            const newCachedAnnotBId =
-                annotationsCache['remoteAnnotIdsToCacheIds'][
-                    DATA.SHARED_ANNOTATIONS[3].id
-                ]
-            const dedupedCachedAnnotId =
-                annotationsCache['remoteAnnotIdsToCacheIds'][
-                    DATA.SHARED_ANNOTATIONS[4].id
-                ]
+            const newCachedAnnotBId = annotationsCache[
+                'remoteAnnotIdsToCacheIds'
+            ].get(DATA.SHARED_ANNOTATIONS[3].id.toString())
+            const dedupedCachedAnnotId = annotationsCache[
+                'remoteAnnotIdsToCacheIds'
+            ].get(DATA.SHARED_ANNOTATIONS[4].id.toString())
             expect(
                 annotationsCache.annotations.byId[newCachedAnnotBId],
             ).toEqual(
@@ -844,13 +904,44 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('expandListAnnotations', {
                 unifiedListId: unifiedListIdA,
             })
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: {
+                    highlights: [
+                        ...cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            unifiedListIdB,
+                        ),
+                    ],
+                },
+            })
+
+            expect(emittedEvents).toEqual(expectedEvents)
             let wasBGMethodCalled = false
             sidebarLogic['options'].annotations.getSharedAnnotations = (() => {
                 wasBGMethodCalled = true
             }) as any
+
             await sidebar.processEvent('expandListAnnotations', {
                 unifiedListId: unifiedListIdA,
             })
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: {
+                    highlights: [
+                        ...cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            unifiedListIdA,
+                        ),
+                        ...cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            unifiedListIdB,
+                        ),
+                    ],
+                },
+            })
+
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(wasBGMethodCalled).toBe(false)
 
             // Open a list without remote annots to assert no download is attempted
@@ -861,9 +952,31 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.listInstances[unifiedListIdC].isOpen).toBe(
                 false,
             )
+
             await sidebar.processEvent('expandListAnnotations', {
                 unifiedListId: unifiedListIdC,
             })
+            expectedEvents.push({
+                event: 'renderHighlights',
+                args: {
+                    highlights: [
+                        ...cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            unifiedListIdA,
+                        ),
+                        ...cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            unifiedListIdB,
+                        ),
+                        ...cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            unifiedListIdC,
+                        ),
+                    ],
+                },
+            })
+
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.listInstances[unifiedListIdC].isOpen).toBe(
                 true,
             )
@@ -1755,7 +1868,11 @@ describe('SidebarContainerLogic', () => {
             const expectedEvents: any[] = [
                 {
                     event: 'renderHighlights',
-                    args: { highlights: annotationsCache.highlights },
+                    args: {
+                        highlights: cacheUtils.getHighlightAnnotationsArray(
+                            annotationsCache,
+                        ),
+                    },
                 },
             ]
 
@@ -1783,11 +1900,9 @@ describe('SidebarContainerLogic', () => {
                 {
                     event: 'renderHighlights',
                     args: {
-                        highlights: annotationsCache.highlights.filter(
-                            ({ unifiedListIds }) =>
-                                unifiedListIds.includes(
-                                    joinedCacheList.unifiedId,
-                                ),
+                        highlights: cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            joinedCacheList.unifiedId,
                         ),
                     },
                 },
@@ -1812,7 +1927,7 @@ describe('SidebarContainerLogic', () => {
                 },
                 {
                     event: 'renderHighlights',
-                    args: { highlights: annotationsCache.highlights },
+                    args: { highlights: [] },
                 },
             )
 
@@ -1842,7 +1957,11 @@ describe('SidebarContainerLogic', () => {
             const expectedEvents: any[] = [
                 {
                     event: 'renderHighlights',
-                    args: { highlights: annotationsCache.highlights },
+                    args: {
+                        highlights: cacheUtils.getHighlightAnnotationsArray(
+                            annotationsCache,
+                        ),
+                    },
                 },
             ]
 
@@ -1876,11 +1995,9 @@ describe('SidebarContainerLogic', () => {
                 {
                     event: 'renderHighlights',
                     args: {
-                        highlights: annotationsCache.highlights.filter(
-                            ({ unifiedListIds }) =>
-                                unifiedListIds.includes(
-                                    followedCacheList.unifiedId,
-                                ),
+                        highlights: cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            followedCacheList.unifiedId,
                         ),
                     },
                 },
@@ -1917,7 +2034,7 @@ describe('SidebarContainerLogic', () => {
                 },
                 {
                     event: 'renderHighlights',
-                    args: { highlights: annotationsCache.highlights },
+                    args: { highlights: [] },
                 },
             )
             expect(sidebar.state.activeTab).toEqual('spaces')
@@ -1946,7 +2063,11 @@ describe('SidebarContainerLogic', () => {
             const expectedEvents: any[] = [
                 {
                     event: 'renderHighlights',
-                    args: { highlights: annotationsCache.highlights },
+                    args: {
+                        highlights: cacheUtils.getHighlightAnnotationsArray(
+                            annotationsCache,
+                        ),
+                    },
                 },
             ]
 
@@ -1966,11 +2087,9 @@ describe('SidebarContainerLogic', () => {
                 {
                     event: 'renderHighlights',
                     args: {
-                        highlights: annotationsCache.highlights.filter(
-                            ({ unifiedListIds }) =>
-                                unifiedListIds.includes(
-                                    localOnlyCacheList.unifiedId,
-                                ),
+                        highlights: cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            localOnlyCacheList.unifiedId,
                         ),
                     },
                 },
@@ -1992,7 +2111,7 @@ describe('SidebarContainerLogic', () => {
                 },
                 {
                     event: 'renderHighlights',
-                    args: { highlights: annotationsCache.highlights },
+                    args: { highlights: [] },
                 },
             )
             expect(sidebar.state.activeTab).toEqual('spaces')

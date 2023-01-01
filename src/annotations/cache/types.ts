@@ -70,7 +70,6 @@ export interface PageAnnotationsCacheInterface {
     readonly events: TypedEventEmitter<PageAnnotationsCacheEvents>
     readonly annotations: NormalizedState<UnifiedAnnotation>
     readonly lists: NormalizedState<UnifiedList>
-    readonly highlights: UnifiedAnnotation[]
 }
 
 export type UnifiedAnnotation = Pick<

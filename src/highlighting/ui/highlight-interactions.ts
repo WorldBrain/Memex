@@ -367,6 +367,10 @@ export class HighlightRenderer implements HighlightRendererInterface {
         temp,
     ) => {
         this.removeAllHighlights()
+        if (!highlights.length) {
+            return
+        }
+
         const {
             [HIGHLIGHT_COLOR_KEY]: highlightsColor,
         } = await browser.storage.local.get({

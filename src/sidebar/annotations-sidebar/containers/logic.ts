@@ -286,16 +286,44 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         if (opts.renderHighlights) {
-            this.renderOwnHighlights()
+            this.renderOwnHighlights(annotationsCache)
         }
     }
 
-    private renderOwnHighlights = () => {
+    private renderOwnHighlights = ({
+        annotations,
+    }: Pick<SidebarContainerState, 'annotations'>) => {
         const highlights = cacheUtils.getUserHighlightsArray(
-            this.options.annotationsCache,
+            { annotations },
             this.options.currentUser?.id.toString(),
         )
-        this.options.events?.emit('renderHighlights', { highlights })
+        this.options.events?.emit('renderHighlights', {
+            highlights,
+        })
+    }
+
+    private renderOpenSpaceInstanceHighlights = ({
+        annotations,
+        listInstances,
+        lists,
+    }: Pick<
+        SidebarContainerState,
+        'annotations' | 'lists' | 'listInstances'
+    >) => {
+        const highlights = Object.values(listInstances)
+            .filter((instance) => instance.isOpen)
+            .map(
+                (instance) =>
+                    lists.byId[instance.unifiedListId]?.unifiedAnnotationIds ??
+                    [],
+            )
+            .flat()
+            .map((unifiedAnnotId) => annotations.byId[unifiedAnnotId])
+            .filter((annot) => annot.body?.length > 0 && annot.selector != null)
+
+        this.options.events?.emit('renderHighlights', {
+            highlights,
+        })
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
@@ -1013,11 +1041,10 @@ export class SidebarContainerLogic extends UILogic<
         state: SidebarContainerState,
         lists: UnifiedList[],
     ): Promise<SidebarContainerState> {
-        if (!lists.length) {
-            return
-        }
-
         let nextState = state
+        if (!lists.length) {
+            return nextState
+        }
 
         await executeUITask(
             this,
@@ -1072,7 +1099,7 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         if (event.tab === 'annotations') {
-            this.renderOwnHighlights()
+            this.renderOwnHighlights(previousState)
         } else if (event.tab === 'spaces') {
             const listsWithRemoteAnnots = normalizedStateToArray(
                 this.options.annotationsCache.lists,
@@ -1084,10 +1111,11 @@ export class SidebarContainerLogic extends UILogic<
                         ?.annotationRefsLoadState === 'pristine', // Ensure it hasn't already been loaded
             )
 
-            await this.loadRemoteAnnotationReferencesForLists(
+            const nextState = await this.loadRemoteAnnotationReferencesForLists(
                 previousState,
                 listsWithRemoteAnnots,
             )
+            this.renderOpenSpaceInstanceHighlights(nextState)
         }
     }
 
@@ -1197,18 +1225,29 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        this.emitMutation({
+        const listInstanceMutation: UIMutation<SidebarContainerState> = {
             listInstances: {
                 [event.unifiedListId]: {
                     isOpen: { $apply: (isOpen) => !isOpen },
                 },
             },
-        })
+        }
+        const nextState = this.withMutation(previousState, listInstanceMutation)
+        this.emitMutation(listInstanceMutation)
 
         await this.maybeLoadListRemoteAnnotations(
             previousState,
             event.unifiedListId,
         )
+
+        // NOTE: It's important the annots+lists states are gotten from the cache here as the above async call
+        //   can result in new annotations being added to the cache which won't yet update this logic class' state
+        //   (though they cache's state will be up-to-date)
+        this.renderOpenSpaceInstanceHighlights({
+            annotations: this.options.annotationsCache.annotations,
+            lists: this.options.annotationsCache.lists,
+            listInstances: nextState.listInstances,
+        })
     }
 
     setSelectedList: EventHandler<'setSelectedList'> = async ({
@@ -1226,7 +1265,7 @@ export class SidebarContainerLogic extends UILogic<
 
         if (event.unifiedListId == null) {
             this.emitMutation({ selectedListId: { $set: null } })
-            this.renderOwnHighlights()
+            this.renderOpenSpaceInstanceHighlights(previousState)
             return
         }
 
@@ -1257,14 +1296,14 @@ export class SidebarContainerLogic extends UILogic<
                 nextState,
                 event.unifiedListId,
             )
-
-            this.options.events?.emit('renderHighlights', {
-                highlights: cacheUtils.getListHighlightsArray(
-                    this.options.annotationsCache,
-                    event.unifiedListId,
-                ),
-            })
         }
+
+        this.options.events?.emit('renderHighlights', {
+            highlights: cacheUtils.getListHighlightsArray(
+                this.options.annotationsCache,
+                event.unifiedListId,
+            ),
+        })
     }
 
     setAnnotationShareModalShown: EventHandler<
