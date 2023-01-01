@@ -53,6 +53,7 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import { generateAnnotationCardInstanceId } from '../containers/utils'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 

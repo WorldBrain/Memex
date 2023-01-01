@@ -960,6 +960,7 @@ const ContentContainer = styled.div<{ isEditMode: boolean }>`
     box-sizing: border-box;
     flex-direction: column;
     z-index: 1001;
+    position: relative;
 
     ${(props) =>
         props.isEditMode &&

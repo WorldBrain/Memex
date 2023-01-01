@@ -598,19 +598,6 @@ export class AnnotationsSidebarContainer<
     }
 
     renderTopBar() {
-        let playerId
-        let player = undefined
-        if (
-            this.state.fullPageUrl &&
-            this.props.sidebarContext === 'dashboard'
-        ) {
-            const normalizedUrl = normalizeUrl(
-                this.state.fullPageUrl ?? undefined,
-            )
-            playerId = getBlockContentYoutubePlayerId(normalizedUrl)
-            player = this.props.youtubeService.getPlayerByElementId(playerId)
-        }
-
         return (
             <>
                 <TopBarActionBtns
@@ -752,6 +739,19 @@ export class AnnotationsSidebarContainer<
     }
 
     render() {
+        let playerId
+        let player = undefined
+        if (
+            this.state.fullPageUrl &&
+            this.props.sidebarContext === 'dashboard'
+        ) {
+            const normalizedUrl = normalizeUrl(
+                this.state.fullPageUrl ?? undefined,
+            )
+            playerId = getBlockContentYoutubePlayerId(normalizedUrl)
+            player = this.props.youtubeService.getPlayerByElementId(playerId)
+        }
+
         if (!this.state.fullPageUrl) {
             return null
         }
@@ -837,7 +837,7 @@ export class AnnotationsSidebarContainer<
                                     unifiedListId: null,
                                 })
                             }
-                            // getYoutubePlayer={() => getBlockContentYoutubePlayerId}
+                            getYoutubePlayer={() => player}
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}
                             ref={this.sidebarRef}
