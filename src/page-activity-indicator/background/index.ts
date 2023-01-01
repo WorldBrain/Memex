@@ -136,6 +136,7 @@ export class PageActivityIndicatorBackground {
 
     private getPageFollowedLists: RemotePageActivityIndicatorInterface['getPageFollowedLists'] = async (
         fullPageUrl,
+        extraFollowedListIds,
     ) => {
         const normalizedPageUrl = normalizeUrl(fullPageUrl)
         const followedListEntries = await this.storage.findFollowedListEntriesByPage(
@@ -150,14 +151,14 @@ export class PageActivityIndicatorBackground {
         )
         const followedLists = await this.storage.findFollowedListsByIds([
             ...followedListHasAnnotsById.keys(),
+            ...(extraFollowedListIds ?? []),
         ])
         return fromPairs(
             [...followedLists.values()].map((list) => [
                 list.sharedList,
                 {
-                    hasAnnotations: followedListHasAnnotsById.get(
-                        list.sharedList,
-                    ),
+                    hasAnnotations:
+                        followedListHasAnnotsById.get(list.sharedList) ?? false,
                     sharedList: list.sharedList,
                     creator: list.creator,
                     name: list.name,

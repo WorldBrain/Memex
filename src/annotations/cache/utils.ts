@@ -199,6 +199,7 @@ export async function hydrateCache({
     })
     const followedListsData = await bgModules.pageActivityIndicator.getPageFollowedLists(
         args.fullPageUrl,
+        Object.values(remoteListIds),
     )
     const pageSharedListIds = (
         await bgModules.customLists.fetchPageLists({
@@ -208,7 +209,7 @@ export async function hydrateCache({
     const seenFollowedLists = new Set<AutoPk>()
 
     const listsToCache = localListsData.map((list) => {
-        let creator: UserReference
+        let creator: UserReference = args.user
         let hasRemoteAnnotations = false
         const remoteId = remoteListIds[list.id]
         if (remoteId != null && followedListsData[remoteId]) {

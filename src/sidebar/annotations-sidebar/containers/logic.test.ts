@@ -366,8 +366,7 @@ describe('SidebarContainerLogic', () => {
                 }),
                 cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[2], {
                     extraData: {
-                        // Creator data actually doesn't load here as no entries on TAB_URL_1 to prompt loading of followedList data
-                        // creator: DATA.CREATOR_2,
+                        creator: DATA.CREATOR_2,
                         remoteId: DATA.SHARED_LIST_IDS[2],
                         unifiedId: expect.any(String),
                         unifiedAnnotationIds: [],
@@ -375,6 +374,7 @@ describe('SidebarContainerLogic', () => {
                 }),
                 cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[3], {
                     extraData: {
+                        creator: DATA.CREATOR_1,
                         unifiedId: expect.any(String),
                         unifiedAnnotationIds: mapLocalAnnotIdsToUnified(
                             [DATA.ANNOT_3.url],
@@ -384,12 +384,14 @@ describe('SidebarContainerLogic', () => {
                 }),
                 cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[4], {
                     extraData: {
+                        creator: DATA.CREATOR_1,
                         unifiedId: expect.any(String),
                         unifiedAnnotationIds: [],
                     },
                 }),
                 cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[5], {
                     extraData: {
+                        creator: DATA.CREATOR_1,
                         unifiedId: expect.any(String),
                         unifiedAnnotationIds: [],
                     },

@@ -25,6 +25,7 @@ export type PageActivityStatus =
 export interface RemotePageActivityIndicatorInterface {
     getPageFollowedLists: (
         fullPageUrl: string,
+        extraFollowedListIds?: string[],
     ) => Promise<{
         [remoteListId: string]: Pick<
             FollowedList,
