@@ -1121,10 +1121,7 @@ export class AnnotationsSidebar extends React.Component<
             return 'Follower'
         }
 
-        // if (listData.creator?.id === this.props.currentUser?.id) {
-        //     return 'Creator'
-        // }
-        if (listData.creator?.id == null) {
+        if (listData.creator?.id === this.props.currentUser?.id) {
             return 'Creator'
         }
 

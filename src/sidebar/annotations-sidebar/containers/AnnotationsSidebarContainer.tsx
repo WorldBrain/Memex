@@ -1178,6 +1178,7 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
         css`
             right: -600px;
             opacity: 0;
+            position: fixed;
         `}
 
     ${(props) =>
@@ -1187,11 +1188,11 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
             opacity: 1;
         `}
 
-        ${(props) =>
-            props.sidebarContext === 'dashboard' &&
-            css`
-                padding-right: 0px;
-            `}
+    ${(props) =>
+        props.sidebarContext === 'dashboard' &&
+        css`
+            padding-right: 0px;
+        `}
 
 
 
