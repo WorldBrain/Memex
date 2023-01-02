@@ -148,15 +148,15 @@ export class AnnotationsSidebarContainer<
             document.addEventListener('keydown', this.listenToEsc)
         }
 
-        if (
-            this.state.isWidthLocked ||
-            this.props.sidebarContext === 'dashboard'
-        ) {
-            this.processEvent('adjustSidebarWidth', {
-                newWidth: this.state.sidebarWidth,
-                isWidthLocked: true,
-            })
-        }
+        // if (
+        //     this.state.isWidthLocked ||
+        //     this.props.sidebarContext === 'dashboard'
+        // ) {
+        //     this.processEvent('adjustSidebarWidth', {
+        //         newWidth: this.state.sidebarWidth,
+        //         isWidthLocked: true,
+        //     })
+        // }
     }
 
     hideSidebar() {
@@ -794,7 +794,13 @@ export class AnnotationsSidebarContainer<
                         className="sidebar-draggable"
                         resizeGrid={[1, 0]}
                         dragAxis={'none'}
-                        minWidth={SIDEBAR_WIDTH_STORAGE_KEY}
+                        minWidth={
+                            parseFloat(
+                                SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
+                            ) -
+                            40 +
+                            'px'
+                        }
                         maxWidth={'1000px'}
                         disableDragging={true}
                         enableResizing={{
