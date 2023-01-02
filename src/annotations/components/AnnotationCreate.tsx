@@ -513,7 +513,7 @@ const TextBoxContainerStyled = styled.div`
     display: flex;
     flex-direction: column;
     font-size: 14px;
-    width: 100%;
+    width: calc(100% - 1px);
     border-radius: 8px;
 
     & * {

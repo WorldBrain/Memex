@@ -1058,7 +1058,8 @@ export class AnnotationsSidebar extends React.Component<
                             <LoadingBox>
                                 <LoadingIndicator size={10} />{' '}
                             </LoadingBox>
-                        ) : Object.keys(this.props.listInstances).length > 0 ? (
+                        ) : Object.keys(this.props.listInstances).length > 0 &&
+                          this.props.pageHasNetworkAnnotations ? (
                             <LoadingBox>
                                 <PageActivityIndicator active />
                             </LoadingBox>
@@ -1077,20 +1078,20 @@ export class AnnotationsSidebar extends React.Component<
                     size={'medium'}
                     iconPosition={'right'}
                     padding={'0px 6px'}
-                    icon={
-                        this.props.cacheLoadState === 'running' ||
-                        this.props.cacheLoadState === 'pristine' ? (
-                            <LoadingBox>
-                                <LoadingIndicator size={12} />{' '}
-                            </LoadingBox>
-                        ) : (
-                            <LoadingBox>
-                                <PageActivityIndicator
-                                    active={this.props.lists.allIds.length > 0}
-                                />
-                            </LoadingBox>
-                        )
-                    }
+                    // icon={
+                    //     this.props.feed === 'running' ||
+                    //     this.props.cacheLoadState === 'pristine' ? (
+                    //         <LoadingBox>
+                    //             <LoadingIndicator size={12} />{' '}
+                    //         </LoadingBox>
+                    //     ) : (
+                    //         <LoadingBox>
+                    //             <PageActivityIndicator
+                    //                 active={this.props.lists.allIds.length > 0}
+                    //             />
+                    //         </LoadingBox>
+                    //     )
+                    // }
                 />
             </TopBarContainer>
         )
@@ -1530,6 +1531,12 @@ const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
     height: 12px;
     font-size: 12px;
     display: flex;
+
+    ${(props) =>
+        !props.active &&
+        css`
+            background-color: transparent;
+        `};
 `
 
 const TopBar = styled.div`

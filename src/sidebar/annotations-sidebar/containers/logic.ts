@@ -246,6 +246,7 @@ export class SidebarContainerLogic extends UILogic<
             showAllNotesShareMenu: false,
             activeShareMenuNoteId: undefined,
             immediatelyShareNotes: false,
+            pageHasNetworkAnnotations: false,
         }
     }
 
@@ -270,6 +271,16 @@ export class SidebarContainerLogic extends UILogic<
         if (opts.renderHighlights) {
             this.renderOwnHighlights(this.options.annotationsCache)
         }
+
+        const hasNetworkActivity = await this.options.pageActivityIndicatorBG.getPageActivityStatus(
+            fullPageUrl,
+        )
+
+        this.emitMutation({
+            pageHasNetworkAnnotations: {
+                $set: hasNetworkActivity != 'no-activity',
+            },
+        })
     }
 
     private renderOwnHighlights = ({
@@ -344,6 +355,9 @@ export class SidebarContainerLogic extends UILogic<
                     renderHighlights: true,
                 })
             }
+        })
+        this.emitMutation({
+            cacheLoadState: { $set: 'success' },
         })
         this.annotationsLoadComplete.resolve()
     }

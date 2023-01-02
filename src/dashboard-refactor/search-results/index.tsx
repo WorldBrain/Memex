@@ -51,6 +51,7 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -230,6 +231,7 @@ export default class SearchResultsContainer extends React.Component<
     }
 
     spaceBtnBarDashboardRef = React.createRef<HTMLDivElement>()
+    sortButtonRef = React.createRef<HTMLDivElement>()
 
     state = {
         showTutorialVideo: false,
@@ -407,42 +409,36 @@ export default class SearchResultsContainer extends React.Component<
                     {...boundAnnotCreateProps}
                     contextLocation={'dashboard'}
                 />
-                {noteIds[notesType].length > 0 && (
-                    <>
-                        <Margin top="-12px" />
-                        <NoteTopBarBox
-                            leftSide={
-                                <TopBarRightSideWrapper>
-                                    <TooltipBox
-                                        tooltipText="Sort Annotations"
-                                        placement="bottom"
-                                    >
-                                        <Icon
-                                            filePath={icons.sort}
-                                            onClick={() =>
-                                                this.props.toggleSortMenuShown()
-                                            }
-                                            height="18px"
-                                            width="20px"
-                                        />
-                                    </TooltipBox>
-                                    {this.renderSortingMenuDropDown(
-                                        normalizedUrl,
-                                        day,
-                                    )}
-                                </TopBarRightSideWrapper>
-                            }
-                        />
-                    </>
-                )}
-                {noteIds[notesType].map((noteId, index) => {
-                    const zIndex = noteIds[notesType].length - index
-                    return this.renderNoteResult(
-                        day,
-                        normalizedUrl,
-                        zIndex,
-                    )(noteId)
-                })}
+                <NoteResultContainer>
+                    {noteIds[notesType].length > 0 && (
+                        <SortButtonContainer>
+                            <TooltipBox
+                                tooltipText="Sort Annotations"
+                                placement="bottom"
+                            >
+                                <Icon
+                                    filePath={icons.sort}
+                                    onClick={() =>
+                                        this.props.toggleSortMenuShown()
+                                    }
+                                    height="16px"
+                                    width="16px"
+                                    background="backgroundColor"
+                                    containerRef={this.sortButtonRef}
+                                />
+                            </TooltipBox>
+                            {this.renderSortingMenuDropDown(normalizedUrl, day)}
+                        </SortButtonContainer>
+                    )}
+                    {noteIds[notesType].map((noteId, index) => {
+                        const zIndex = noteIds[notesType].length - index
+                        return this.renderNoteResult(
+                            day,
+                            normalizedUrl,
+                            zIndex,
+                        )(noteId)
+                    })}
+                </NoteResultContainer>
             </PageNotesBox>
         )
     }
@@ -453,12 +449,10 @@ export default class SearchResultsContainer extends React.Component<
         }
 
         return (
-            <HoverBox
-                withRelativeContainer
-                left={'-30px'}
-                padding={'10px'}
-                top={'30px'}
-                width={'150px'}
+            <PopoutBox
+                closeComponent={() => this.props.toggleSortMenuShown()}
+                placement="right-start"
+                targetElementRef={this.sortButtonRef.current}
             >
                 <SortingDropdownMenuBtn
                     onMenuItemClick={({ sortingFn }) =>
@@ -467,9 +461,8 @@ export default class SearchResultsContainer extends React.Component<
                             normalizedUrl,
                         )(sortingFn)
                     }
-                    onClickOutSide={() => this.props.toggleSortMenuShown()}
                 />
-            </HoverBox>
+            </PopoutBox>
         )
     }
 
@@ -970,6 +963,21 @@ export default class SearchResultsContainer extends React.Component<
     }
 }
 
+const NoteResultContainer = styled.div`
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+`
+
+const SortButtonContainer = styled.div`
+    position: absolute;
+    top: 6px;
+    left: -23px;
+    z-index: 100;
+`
+
 const PaginationLoaderBox = styled.div`
     margin-top: -30px;
 `
@@ -1251,6 +1259,8 @@ const PageNotesBox = styled(Margin)`
     padding-top: 5px;
     border-left: 4px solid ${(props) => props.theme.colors.lightHover};
     z-index: 4;
+    position: relative;
+    align-items: flex-start;
 `
 
 const Separator = styled.div`

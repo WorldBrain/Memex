@@ -53,7 +53,7 @@ export const truncateText: TextTruncator = (
 
         return { isTooLong: false, text }
     } else {
-        return { isTooLong: false, text: '' }
+        return { isTooLong: false, text: undefined }
     }
 }
 

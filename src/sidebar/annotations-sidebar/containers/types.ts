@@ -160,6 +160,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showAllNotesShareMenu: boolean
     activeShareMenuNoteId: string | undefined
     immediatelyShareNotes: boolean
+    pageHasNetworkAnnotations: boolean
 }
 
 export type AnnotationEvent<T> = {
