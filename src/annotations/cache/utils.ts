@@ -208,9 +208,6 @@ export async function hydrateCache({
         args.fullPageUrl,
         Object.values(remoteListIds),
     )
-    const pageLocalListIds = await bgModules.customLists.fetchPageLists({
-        url: args.fullPageUrl,
-    })
     const seenFollowedLists = new Set<AutoPk>()
 
     const listsToCache = localListsData.map((list) => {
@@ -262,6 +259,10 @@ export async function hydrateCache({
         { annotationUrls },
     )
 
+    const pageLocalListIds = await bgModules.customLists.fetchPageLists({
+        url: args.fullPageUrl,
+    })
+
     args.cache.setAnnotations(
         annotationsData.map((annot) => {
             const privacyLevel = privacyLvlsByAnnot[annot.url]
@@ -269,9 +270,10 @@ export async function hydrateCache({
             // Inherit parent page shared lists if public annot
             if (privacyLevel >= AnnotationPrivacyLevels.SHARED) {
                 annot.lists.push(
-                    ...pageLocalListIds.filter(
-                        (listId) => remoteListIds[listId] != null,
-                    ),
+                    ...pageLocalListIds.filter((localListId) => {
+                        const cachedList = args.cache.lists.byId[localListId]
+                        return cachedList?.remoteId != null
+                    }),
                 )
             }
 

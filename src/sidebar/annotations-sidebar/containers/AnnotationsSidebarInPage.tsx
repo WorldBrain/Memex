@@ -106,11 +106,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     async componentDidUpdate(prevProps: Props) {
-        const { fullPageUrl: pageUrl } = this.props
+        const { fullPageUrl } = this.props
 
-        if (pageUrl !== prevProps.fullPageUrl) {
+        if (fullPageUrl !== prevProps.fullPageUrl) {
             await this.processEvent('setPageUrl', {
-                pageUrl,
+                fullPageUrl,
                 rerenderHighlights: true,
             })
         }

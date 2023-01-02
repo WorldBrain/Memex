@@ -28,10 +28,10 @@ import type { BackupInterface } from 'src/backup-restore/background/types'
 import type { SearchFiltersState, SearchFilterEvents } from './header/types'
 import type { UIServices } from 'src/services/ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
-import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import type { PDFRemoteInterface } from 'src/pdf/background/types'
+import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 
 export interface RootState {
     loadState: TaskState
@@ -70,6 +70,7 @@ export interface DashboardDependencies {
     annotationsBG: AnnotationInterface<'caller'>
     activityIndicatorBG: ActivityIndicatorInterface
     syncSettingsBG: RemoteSyncSettingsInterface
+    pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     pdfViewerBG: PDFRemoteInterface
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']

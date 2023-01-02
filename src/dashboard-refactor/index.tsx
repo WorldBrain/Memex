@@ -79,6 +79,7 @@ export class DashboardContainer extends StatefulUIElement<
         | 'document'
         | 'location'
         | 'localStorage'
+        | 'pageActivityIndicatorBG'
         | 'contentConversationsBG'
         | 'activityIndicatorBG'
         | 'contentShareBG'
@@ -98,6 +99,7 @@ export class DashboardContainer extends StatefulUIElement<
         document: window.document,
         location: window.location,
         localStorage: browser.storage.local,
+        pageActivityIndicatorBG: runInBackground(),
         contentConversationsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
         contentShareBG: runInBackground(),
@@ -1463,6 +1465,9 @@ export class DashboardContainer extends StatefulUIElement<
                         annotations={this.props.annotationsBG}
                         contentSharing={this.props.contentShareBG}
                         syncSettingsBG={this.props.syncSettingsBG}
+                        pageActivityIndicatorBG={
+                            this.props.pageActivityIndicatorBG
+                        }
                         contentConversationsBG={
                             this.props.contentConversationsBG
                         }

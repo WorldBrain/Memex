@@ -243,7 +243,11 @@ interface SidebarEvents {
     copyNoteLink: { link: string }
     copyPageLink: { link: string }
 
-    setPageUrl: { pageUrl: string; rerenderHighlights?: boolean }
+    setPageUrl: {
+        fullPageUrl: string
+        skipListsLoad?: boolean
+        rerenderHighlights?: boolean
+    }
 
     // Search
     paginateSearch: null

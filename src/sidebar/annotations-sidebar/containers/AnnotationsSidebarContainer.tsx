@@ -126,13 +126,12 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    toggleSidebarShowForPageId(pageId: string) {
-        const isAlreadyOpenForOtherPage = pageId !== this.state.fullPageUrl
+    async toggleSidebarShowForPageId(fullPageUrl: string) {
+        const isAlreadyOpenForOtherPage = fullPageUrl !== this.state.fullPageUrl
 
         if (this.state.showState === 'hidden' || isAlreadyOpenForOtherPage) {
-            this.setPageUrl(pageId)
-
             this.showSidebar()
+            await this.processEvent('setPageUrl', { fullPageUrl })
         } else if (this.state.showState === 'visible') {
             this.hideSidebar()
         }
@@ -193,10 +192,6 @@ export class AnnotationsSidebarContainer<
                 isWidthLocked: true,
             })
         }
-    }
-
-    setPageUrl = (pageUrl: string) => {
-        this.processEvent('setPageUrl', { pageUrl })
     }
 
     protected bindAnnotationFooterEventProps(
@@ -907,10 +902,11 @@ export class AnnotationsSidebarContainer<
                             handleScrollPagination={() =>
                                 this.processEvent('paginateSearch', null)
                             }
-                            isSearchLoading={
+                            isDataLoading={
                                 this.state.remoteAnnotationsLoadState ===
                                     'running' ||
-                                this.state.loadState === 'running'
+                                this.state.loadState === 'running' ||
+                                this.state.cacheLoadState === 'running'
                             }
                             theme={this.props.theme}
                             renderCopyPasterForAnnotation={
@@ -1188,11 +1184,11 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
             opacity: 1;
         `}
 
-    ${(props) =>
-        props.sidebarContext === 'dashboard' &&
-        css`
-            padding-right: 0px;
-        `}
+        ${(props) =>
+            props.sidebarContext === 'dashboard' &&
+            css`
+                padding-right: 0px;
+            `}
 
 
 

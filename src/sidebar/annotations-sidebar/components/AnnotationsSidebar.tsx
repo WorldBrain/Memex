@@ -110,7 +110,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     annotationCreateProps: AnnotationCreateProps
 
     sharingAccess: AnnotationSharingAccess
-    isSearchLoading: boolean
+    isDataLoading: boolean
     theme: Partial<SidebarTheme>
     openCollectionPage: (remoteListId: string) => void
     onShareAllNotesClick: () => void
@@ -762,7 +762,7 @@ export class AnnotationsSidebar extends React.Component<
             return this.renderFeed()
         }
 
-        if (this.props.isSearchLoading) {
+        if (this.props.isDataLoading) {
             return this.renderLoader()
         }
 

@@ -465,9 +465,9 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ sidebarWidth: { $set: event.newWidth } })
 
         if (event.isWidthLocked) {
-            let SidebarWidth = toInteger(event.newWidth.replace('px', ''))
+            let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)
             let windowWidth = window.innerWidth
-            let width = (windowWidth - SidebarWidth).toString()
+            let width = (windowWidth - sidebarWidth).toString()
             width = width + 'px'
             document.body.style.width = width
         }
@@ -569,22 +569,22 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        if (!isFullUrl(event.pageUrl)) {
+        if (!isFullUrl(event.fullPageUrl)) {
             throw new Error(
                 'Tried to set annotation sidebar with a normalized page URL',
             )
         }
 
-        if (previousState.fullPageUrl === event.pageUrl) {
+        if (previousState.fullPageUrl === event.fullPageUrl) {
             return
         }
 
         const mutation: UIMutation<SidebarContainerState> = {
-            fullPageUrl: { $set: event.pageUrl },
+            fullPageUrl: { $set: event.fullPageUrl },
         }
 
         this.emitMutation(mutation)
-        await this.hydrateAnnotationsCache(event.pageUrl, {
+        await this.hydrateAnnotationsCache(event.fullPageUrl, {
             renderHighlights: event.rerenderHighlights,
         })
     }
