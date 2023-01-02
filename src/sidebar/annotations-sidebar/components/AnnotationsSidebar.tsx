@@ -425,11 +425,10 @@ export class AnnotationsSidebar extends React.Component<
                             unifiedListId,
                         )
                     }
-
                     return (
                         <React.Fragment key={annotation.unifiedId}>
                             <AnnotationEditable
-                                pageUrl={this.props.fullPageUrl}
+                                pageUrl={this.props.normalizedPageUrl}
                                 isShared
                                 isBulkShareProtected
                                 unifiedId={annotation.unifiedId}
@@ -919,6 +918,7 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.annotationsCache,
                                 annot.unifiedListIds,
                             )}
+                            pageUrl={this.props.normalizedPageUrl}
                             body={annot.body}
                             comment={annot.comment}
                             isShared={isShared}

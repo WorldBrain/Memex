@@ -110,9 +110,11 @@ interface State {
     showCopyPaster: boolean
     hoverEditArea: boolean
     hoverCard: boolean
-    isTruncated?: boolean
-    needsTruncation: boolean
-    truncatedText: string
+    isTruncatedNote?: boolean
+    isTruncatedHighlight?: boolean
+    truncatedTextHighlight: string
+    truncatedTextComment: string
+    needsTruncation?: boolean
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
@@ -139,9 +141,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         showCopyPaster: false,
         hoverEditArea: false,
         hoverCard: false,
-        isTruncated: false,
-        needsTruncation: true,
-        truncatedText: '',
+        isTruncatedNote: false,
+        isTruncatedHighlight: false,
+        truncatedTextHighlight: '',
+        truncatedTextComment: '',
+        needsTruncation: false,
     }
 
     focusEditForm() {
@@ -150,15 +154,15 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     componentDidMount() {
         this.textAreaHeight()
-        if (this.props.body != null) {
-            const { isTooLong, text } = truncateText(this.props.body)
-
-            this.setState({
-                isTruncated: isTooLong,
-                needsTruncation: isTooLong,
-                truncatedText: text,
-            })
-        }
+        this.setState({
+            isTruncatedNote: truncateText(this.props.comment)['isTooLong'],
+            isTruncatedHighlight: truncateText(this.props.body)['isTooLong'],
+            truncatedTextHighlight: truncateText(this.props.body)['text'],
+            truncatedTextComment: truncateText(this.props.comment)['text'],
+            needsTruncation:
+                truncateText(this.props.comment)['isTooLong'] ||
+                truncateText(this.props.body)['isTooLong'],
+        })
     }
 
     private updateSpacePickerState(showState: ListPickerShowState) {
@@ -227,9 +231,17 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 
     private toggleTextTruncation() {
-        this.setState({
-            isTruncated: !this.state.isTruncated,
-        })
+        if (this.state.isTruncatedHighlight || this.state.isTruncatedNote) {
+            this.setState({
+                isTruncatedNote: false,
+                isTruncatedHighlight: false,
+            })
+        } else {
+            this.setState({
+                isTruncatedNote: true,
+                isTruncatedHighlight: true,
+            })
+        }
     }
 
     private renderHighlightBody() {
@@ -247,7 +259,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     {this.state.needsTruncation && (
                         <TooltipBox
                             tooltipText={
-                                this.state.isTruncated
+                                this.state.isTruncatedHighlight ||
+                                this.state.isTruncatedNote
                                     ? 'Expand Note'
                                     : 'Show Less'
                             }
@@ -256,7 +269,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             <Icon
                                 onClick={() => this.toggleTextTruncation()}
                                 filePath={
-                                    this.state.isTruncated
+                                    this.state.isTruncatedHighlight ||
+                                    this.state.isTruncatedNote
                                         ? 'expand'
                                         : 'compress'
                                 }
@@ -300,7 +314,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     </TooltipBox>
                 </HighlightActionsBox>
             ) : null
-
         return (
             <HighlightStyled
                 onClick={
@@ -313,8 +326,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 <ActionBox>{actionsBox}</ActionBox>
                 <Highlightbar />
                 <Markdown pageUrl={this.props.pageUrl}>
-                    {this.state.isTruncated
-                        ? this.state.truncatedText
+                    {this.state.isTruncatedHighlight
+                        ? this.state.truncatedTextHighlight
                         : this.props.body}
                 </Markdown>
             </HighlightStyled>
@@ -385,8 +398,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         contextLocation={this.props.contextLocation}
                         getYoutubePlayer={this.props.getYoutubePlayer}
                     >
-                        {this.state.isTruncated
-                            ? truncateText(comment)
+                        {this.state.isTruncatedNote
+                            ? this.state.truncatedTextComment
                             : comment}
                     </NoteText>
                 </NoteTextBox>
