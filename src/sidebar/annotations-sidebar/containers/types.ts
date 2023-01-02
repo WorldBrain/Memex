@@ -20,7 +20,6 @@ import type { ContentScriptsInterface } from 'src/content-scripts/background/typ
 import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 import type { AnnotationsSorter } from '../sorting'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
-import type { MaybePromise } from 'src/util/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
@@ -40,15 +39,16 @@ export interface SidebarContainerDependencies {
         topBarLeft?: JSX.Element
     }
     fullPageUrl?: string
-    getFullPageUrl: () => MaybePromise<string>
     pageTitle?: string
     searchResultLimit?: number
     showGoToAnnotationBtn?: boolean
     initialState?: 'visible' | 'hidden'
     onClickOutside?: React.MouseEventHandler
-    annotationsCache: PageAnnotationsCacheInterface
     showAnnotationShareModal?: () => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
+
+    shouldHydrateCacheOnInit?: boolean
+    annotationsCache: PageAnnotationsCacheInterface
 
     tags: RemoteTagsInterface
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface

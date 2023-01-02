@@ -8,6 +8,7 @@ import type { HighlightRendererInterface } from 'src/highlighting/ui/highlight-i
 import type { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import type { MaybePromise } from 'src/util/types'
 
 export interface ContentScriptRegistry {
     registerRibbonScript(main: RibbonScriptMain): Promise<void>
@@ -21,7 +22,9 @@ export type SidebarScriptMain = (
     dependencies: Omit<
         SidebarContainerDependencies,
         'pageUrl' | 'sidebarContext'
-    >,
+    > & {
+        getFullPageUrl: () => MaybePromise<string>
+    },
 ) => Promise<void>
 
 export type RibbonScriptMain = (

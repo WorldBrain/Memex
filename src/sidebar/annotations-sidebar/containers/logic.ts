@@ -309,7 +309,12 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        const { fullPageUrl, annotationsCache, initialState } = this.options
+        const {
+            fullPageUrl,
+            shouldHydrateCacheOnInit,
+            annotationsCache,
+            initialState,
+        } = this.options
         annotationsCache.events.addListener(
             'newAnnotationsState',
             this.cacheAnnotationsSubscription,
@@ -334,8 +339,7 @@ export class SidebarContainerLogic extends UILogic<
                 showState: { $set: initialState ?? 'hidden' },
             })
 
-            // If `pageUrl` prop passed down rehydrate cache
-            if (fullPageUrl != null) {
+            if (shouldHydrateCacheOnInit && fullPageUrl != null) {
                 await this.hydrateAnnotationsCache(fullPageUrl, {
                     renderHighlights: true,
                 })

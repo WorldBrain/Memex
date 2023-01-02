@@ -104,6 +104,7 @@ const setupLogicHelper = async ({
     const sidebarLogic = new SidebarContainerLogic({
         fullPageUrl,
         sidebarContext: 'dashboard',
+        shouldHydrateCacheOnInit: true,
         auth: backgroundModules.auth.remoteFunctions,
         tags: backgroundModules.tags.remoteFunctions,
         subscription: backgroundModules.auth.subscriptionService,
@@ -127,7 +128,6 @@ const setupLogicHelper = async ({
         focusEditNoteForm,
         focusCreateForm,
         copyToClipboard,
-        getFullPageUrl: () => fullPageUrl,
     })
 
     const sidebar = device.createElement(sidebarLogic)
