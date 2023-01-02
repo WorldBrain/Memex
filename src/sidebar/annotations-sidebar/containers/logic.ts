@@ -987,29 +987,30 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             activeAnnotationId: { $set: event.unifiedAnnotationId },
         })
-        if (event.mode) {
-            const cardId = generateAnnotationCardInstanceId({
-                unifiedId: event.unifiedAnnotationId,
+        if (!event.mode) {
+            return
+        }
+        const cardId = generateAnnotationCardInstanceId({
+            unifiedId: event.unifiedAnnotationId,
+        })
+
+        // Likely a highlight for another user's annotation, thus non-existent in "annotations" tab
+        if (previousState.annotationCardInstances[cardId] == null) {
+            return
+        }
+
+        if (event.mode === 'edit') {
+            this.emitMutation({
+                annotationCardInstances: {
+                    [cardId]: { isCommentEditing: { $set: true } },
+                },
             })
-
-            // Likely a highlight for another user's annotation, thus non-existent in "annotations" tab
-            if (previousState.annotationCardInstances[cardId] == null) {
-                return
-            }
-
-            if (event.mode === 'edit') {
-                this.emitMutation({
-                    annotationCardInstances: {
-                        [cardId]: { isCommentEditing: { $set: true } },
-                    },
-                })
-            } else if (event.mode === 'edit_spaces') {
-                this.emitMutation({
-                    annotationCardInstances: {
-                        [cardId]: { cardMode: { $set: 'space-picker' } },
-                    },
-                })
-            }
+        } else if (event.mode === 'edit_spaces') {
+            this.emitMutation({
+                annotationCardInstances: {
+                    [cardId]: { cardMode: { $set: 'space-picker' } },
+                },
+            })
         }
     }
 

@@ -167,11 +167,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 action: 'create',
             },
         )
-        const annotation = await this._saveAndRenderHighlight(params)
+        const annotationCacheId = await this._saveAndRenderHighlight(params)
 
-        if (annotation) {
+        if (annotationCacheId) {
             await params.inPageUI.showSidebar({
-                annotationLocalId: annotation.url,
+                annotationCacheId,
                 action: params.showSpacePicker
                     ? 'edit_annotation_spaces'
                     : 'edit_annotation',
@@ -196,7 +196,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
     private async _saveAndRenderHighlight(
         params: SaveAndRenderHighlightDeps,
-    ): Promise<Annotation | null> {
+    ): Promise<UnifiedAnnotation['unifiedId'] | null> {
         const selection = params.getSelection()
         const { pageUrl, title } = await params.getUrlAndTitle()
 
@@ -276,12 +276,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     },
                 ),
             ])
+            return unifiedId
         } catch (err) {
             this.removeAnnotationHighlight(annotation.url)
             throw err
         }
-
-        return annotation
     }
 
     renderHighlight: HighlightInteractionsInterface['renderHighlight'] = async (

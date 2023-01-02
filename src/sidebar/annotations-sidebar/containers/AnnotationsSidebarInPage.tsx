@@ -175,11 +175,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         return containerNode?.getRootNode() as Document
     }
 
-    private activateAnnotation(
+    private async activateAnnotation(
         unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
         annotationMode: 'edit' | 'edit_spaces' | 'show',
     ) {
-        this.processEvent('setActiveAnnotation', { unifiedAnnotationId })
+        await this.processEvent('setActiveAnnotation', {
+            unifiedAnnotationId,
+            mode: annotationMode,
+        })
         const annotationBoxNode = this.getDocument()?.getElementById(
             ANNOT_BOX_ID_PREFIX + unifiedAnnotationId,
         )
@@ -202,11 +205,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 comment: event.annotationData?.commentText ?? '',
             })
         } else if (event.action === 'show_annotation') {
-            this.activateAnnotation(event.annotationCacheId, 'show')
+            await this.activateAnnotation(event.annotationCacheId, 'show')
         } else if (event.action === 'edit_annotation') {
-            this.activateAnnotation(event.annotationCacheId, 'edit')
+            await this.activateAnnotation(event.annotationCacheId, 'edit')
         } else if (event.action === 'edit_annotation_spaces') {
-            this.activateAnnotation(event.annotationCacheId, 'edit_spaces')
+            await this.activateAnnotation(
+                event.annotationCacheId,
+                'edit_spaces',
+            )
         } else if (event.action === 'set_sharing_access') {
             await this.processEvent('receiveSharingAccessChange', {
                 sharingAccess: event.annotationSharingAccess,

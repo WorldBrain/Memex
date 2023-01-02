@@ -5,7 +5,6 @@ export interface AnnotationFooterEventProps {
     onDeleteCancel: React.MouseEventHandler
     onDeleteIconClick: React.MouseEventHandler
     onEditIconClick: React.MouseEventHandler
-    // onListIconClick: React.MouseEventHandler
     onShareClick: React.MouseEventHandler
     onCopyPasterBtnClick: React.MouseEventHandler
 }
