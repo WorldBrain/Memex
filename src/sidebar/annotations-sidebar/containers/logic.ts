@@ -342,15 +342,14 @@ export class SidebarContainerLogic extends UILogic<
         this.readingViewStorageListener(true)
 
         await loadInitial<SidebarContainerState>(this, async () => {
-            const areTagsMigrated = await this.syncSettings.extension.get(
-                'areTagsMigratedToSpaces',
-            )
             this.emitMutation({
-                shouldShowTagsUIs: { $set: !areTagsMigrated },
                 showState: { $set: initialState ?? 'hidden' },
             })
 
-            if (shouldHydrateCacheOnInit && fullPageUrl != null) {
+            if (
+                // shouldHydrateCacheOnInit &&
+                fullPageUrl != null
+            ) {
                 await this.hydrateAnnotationsCache(fullPageUrl, {
                     renderHighlights: true,
                 })
