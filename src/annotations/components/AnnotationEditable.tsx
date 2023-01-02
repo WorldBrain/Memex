@@ -35,10 +35,12 @@ import type { AnnotationCardInstanceLocation } from 'src/sidebar/annotations-sid
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { truncateText } from 'src/annotations/utils'
+
 export interface HighlightProps extends AnnotationProps {
     body: string
     comment?: string
 }
+
 export interface NoteProps extends AnnotationProps {
     body?: string
     comment: string
@@ -51,6 +53,7 @@ export interface AnnotationProps {
     createdWhen: Date | number
     isEditing?: boolean
     isDeleting?: boolean
+    initShowSpacePicker?: ListPickerShowState
     hoverState: NoteResultHoverState
     /** Required to decide how to go to an annotation when it's clicked. */
     unifiedId: string
@@ -163,6 +166,18 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 truncateText(this.props.comment)['isTooLong'] ||
                 truncateText(this.props.body)['isTooLong'],
         })
+    }
+
+    // This is a hack to ensure this state, which isn't available on init, only gets set once
+    private hasInitShowSpacePickerChanged = false
+    componentDidUpdate(prevProps: Readonly<Props>) {
+        if (
+            !this.hasInitShowSpacePickerChanged &&
+            this.props.initShowSpacePicker !== prevProps.initShowSpacePicker
+        ) {
+            this.hasInitShowSpacePickerChanged = true
+            this.setState({ showSpacePicker: this.props.initShowSpacePicker })
+        }
     }
 
     private updateSpacePickerState(showState: ListPickerShowState) {

@@ -53,7 +53,6 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import { generateAnnotationCardInstanceId } from '../containers/utils'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
-import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -407,14 +406,16 @@ export class AnnotationsSidebar extends React.Component<
                             annotationCard.isCommentEditing
                         ownAnnotationProps.isDeleting =
                             annotationCard.cardMode === 'delete-confirm'
-                        ownAnnotationProps.annotationEditDependencies = this.props.bindAnnotationEditProps(
+                        const editDeps = this.props.bindAnnotationEditProps(
                             annotation,
                             unifiedListId,
                         )
-                        ownAnnotationProps.annotationFooterDependencies = this.props.bindAnnotationFooterEventProps(
+                        const footerDeps = this.props.bindAnnotationFooterEventProps(
                             annotation,
                             unifiedListId,
                         )
+                        ownAnnotationProps.annotationEditDependencies = editDeps
+                        ownAnnotationProps.annotationFooterDependencies = footerDeps
                         ownAnnotationProps.renderListsPickerForAnnotation = this.props.renderListsPickerForAnnotation(
                             unifiedListId,
                         )
@@ -424,6 +425,10 @@ export class AnnotationsSidebar extends React.Component<
                         ownAnnotationProps.renderShareMenuForAnnotation = this.props.renderShareMenuForAnnotation(
                             unifiedListId,
                         )
+                        ownAnnotationProps.initShowSpacePicker =
+                            annotationCard.cardMode === 'share-menu'
+                                ? 'footer'
+                                : 'hide'
                     }
                     return (
                         <React.Fragment key={annotation.unifiedId}>
@@ -873,10 +878,7 @@ export class AnnotationsSidebar extends React.Component<
 
         annots.push(
             ...annotations.map((annot, i) => {
-                const instanceId = generateAnnotationCardInstanceId(
-                    annot,
-                    'annotations-tab',
-                )
+                const instanceId = generateAnnotationCardInstanceId(annot)
                 const instanceState = this.props.annotationCardInstances[
                     instanceId
                 ]
@@ -952,6 +954,11 @@ export class AnnotationsSidebar extends React.Component<
                             contextLocation={this.props.sidebarContext}
                             passDownRef={ref}
                             shareButtonRef={this.props.shareButtonRef}
+                            initShowSpacePicker={
+                                instanceState.cardMode === 'space-picker'
+                                    ? 'footer'
+                                    : 'hide'
+                            }
                             renderShareMenuForAnnotation={this.props.renderShareMenuForAnnotation(
                                 'annotations-tab',
                             )}
