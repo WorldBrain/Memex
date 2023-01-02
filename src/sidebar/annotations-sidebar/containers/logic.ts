@@ -464,13 +464,13 @@ export class SidebarContainerLogic extends UILogic<
     adjustSidebarWidth: EventHandler<'adjustSidebarWidth'> = ({ event }) => {
         this.emitMutation({ sidebarWidth: { $set: event.newWidth } })
 
-        if (event.isWidthLocked) {
-            let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)
-            let windowWidth = window.innerWidth
-            let width = (windowWidth - sidebarWidth).toString()
-            width = width + 'px'
-            document.body.style.width = width
-        }
+        // if (event.isWidthLocked) {
+        //     let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)
+        //     let windowWidth = window.innerWidth
+        //     let width = (windowWidth - sidebarWidth).toString()
+        //     width = width + 'px'
+        //     document.body.style.width = width
+        // }
     }
 
     setPopoutsActive: EventHandler<'setPopoutsActive'> = async ({ event }) => {
