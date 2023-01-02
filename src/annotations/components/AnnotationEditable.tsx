@@ -157,15 +157,45 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     componentDidMount() {
         this.textAreaHeight()
-        this.setState({
-            isTruncatedNote: truncateText(this.props.comment)['isTooLong'],
-            isTruncatedHighlight: truncateText(this.props.body)['isTooLong'],
-            truncatedTextHighlight: truncateText(this.props.body)['text'],
-            truncatedTextComment: truncateText(this.props.comment)['text'],
-            needsTruncation:
-                truncateText(this.props.comment)['isTooLong'] ||
-                truncateText(this.props.body)['isTooLong'],
-        })
+
+        let needsTruncation
+
+        if (this.props.comment?.length || this.props.body?.length) {
+            if (
+                truncateText(this.props?.comment)['isTooLong'] ||
+                truncateText(this.props?.body)['isTooLong']
+            ) {
+                needsTruncation = true
+            }
+        }
+
+        if (this.props.comment) {
+            this.setState({
+                isTruncatedNote:
+                    truncateText(this.props?.comment)['isTooLong'] ?? false,
+                truncatedTextComment:
+                    truncateText(this.props?.comment)['text'] ?? '',
+            })
+        }
+
+        if (this.props.body) {
+            this.setState({
+                isTruncatedHighlight:
+                    truncateText(this.props?.body)['isTooLong'] ?? false,
+                truncatedTextHighlight:
+                    truncateText(this.props?.body)['text'] ?? '',
+            })
+        }
+
+        if (this.props?.body || this.props?.comment) {
+            this.setState({
+                needsTruncation:
+                    truncateText(this.props?.comment)['isTooLong'] ||
+                    truncateText(this.props?.body)['isTooLong']
+                        ? true
+                        : false,
+            })
+        }
     }
 
     // This is a hack to ensure this state, which isn't available on init, only gets set once
