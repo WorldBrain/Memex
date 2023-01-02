@@ -281,9 +281,9 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderLoader = (key?: string) => (
+    private renderLoader = (key?: string, size?: number) => (
         <LoadingIndicatorContainer key={key}>
-            <LoadingIndicatorStyled />
+            <LoadingIndicatorStyled size={size ? size : undefined} />
         </LoadingIndicatorContainer>
     )
 
@@ -545,7 +545,7 @@ export class AnnotationsSidebar extends React.Component<
                         <ActionButtons>
                             <TooltipBox
                                 tooltipText="Go to Space"
-                                placement="left"
+                                placement="bottom"
                             >
                                 <Icon
                                     icon="goTo"
@@ -559,33 +559,35 @@ export class AnnotationsSidebar extends React.Component<
                                 />
                             </TooltipBox>
                         </ActionButtons>
-                        <FollowedListNoteCount active left="5px">
-                            <TooltipBox
-                                tooltipText={'Annotations by Others'}
-                                placement={'bottom'}
-                            >
-                                <OthersAnnotationCounter>
-                                    {othersAnnotsCount}
-                                </OthersAnnotationCounter>
-                            </TooltipBox>
-                            <TooltipBox
-                                tooltipText={'Total Annotations'}
-                                placement={'bottom'}
-                            >
-                                <TotalAnnotationsCounter>
-                                    /
-                                    {listData.hasRemoteAnnotations &&
-                                    listInstance.annotationRefsLoadState !==
-                                        'success'
-                                        ? this.renderLoader()
-                                        : listData.hasRemoteAnnotations
-                                        ? listInstance
-                                              .sharedAnnotationReferences
-                                              ?.length ?? 0
-                                        : listData.unifiedAnnotationIds.length}
-                                </TotalAnnotationsCounter>
-                            </TooltipBox>
-                        </FollowedListNoteCount>
+                        {listInstance.annotationRefsLoadState !== 'success' &&
+                        listData.hasRemoteAnnotations ? (
+                            this.renderLoader(undefined, 20)
+                        ) : (
+                            <FollowedListNoteCount active left="5px">
+                                <TooltipBox
+                                    tooltipText={'Annotations by Others'}
+                                    placement={'bottom-end'}
+                                >
+                                    <OthersAnnotationCounter>
+                                        {othersAnnotsCount}
+                                    </OthersAnnotationCounter>
+                                </TooltipBox>
+                                <TooltipBox
+                                    tooltipText={'Total Annotations'}
+                                    placement={'bottom-end'}
+                                >
+                                    <TotalAnnotationsCounter>
+                                        /
+                                        {listData.hasRemoteAnnotations
+                                            ? listInstance
+                                                  .sharedAnnotationReferences
+                                                  ?.length ?? 0
+                                            : listData.unifiedAnnotationIds
+                                                  .length}
+                                    </TotalAnnotationsCounter>
+                                </TooltipBox>
+                            </FollowedListNoteCount>
+                        )}
                     </ButtonContainer>
                 </FollowedListRow>
                 {this.renderListAnnotations(unifiedListId)}
@@ -598,7 +600,10 @@ export class AnnotationsSidebar extends React.Component<
         let allSpaces = []
 
         lists.allIds.map((unifiedListId) => {
-            if (lists.byId[unifiedListId].unifiedAnnotationIds.length > 0) {
+            if (
+                lists.byId[unifiedListId].unifiedAnnotationIds.length > 0 ||
+                lists.byId[unifiedListId].hasRemoteAnnotations
+            ) {
                 allSpaces.push(lists.byId[unifiedListId])
             }
         })
@@ -653,7 +658,7 @@ export class AnnotationsSidebar extends React.Component<
                                     const listInstance =
                                         listInstances[item.unifiedId]
 
-                                    this.renderSpacesItem(
+                                    return this.renderSpacesItem(
                                         item.unifiedId,
                                         listData,
                                         listInstance,
@@ -676,7 +681,7 @@ export class AnnotationsSidebar extends React.Component<
                                     const listInstance =
                                         listInstances[item.unifiedId]
 
-                                    this.renderSpacesItem(
+                                    return this.renderSpacesItem(
                                         item.unifiedId,
                                         listData,
                                         listInstance,
@@ -1406,6 +1411,10 @@ const SpaceTypeSection = styled.div`
     &:first-child {
         margin-top: -10px;
     }
+
+    &:last-child {
+        border-bottom: none;
+    }
 `
 
 const SpaceTypeSectionHeader = styled.div`
@@ -1450,6 +1459,8 @@ const TotalAnnotationsCounter = styled.div`
     font-size: 16px;
     color: ${(props) => props.theme.colors.greyScale8};
     letter-spacing: 4px;
+    display: flex;
+    align-items: center;
 `
 
 const PermissionInfoButton = styled.div`
@@ -1679,7 +1690,7 @@ const FollowedListNotesContainer = styled(Margin)`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    height: fit-content;
+    height: fill-available;
 `
 
 const SectionTitleContainer = styled(Margin)`

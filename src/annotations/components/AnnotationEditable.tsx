@@ -339,24 +339,26 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             />
                         </TooltipBox>
                     )}
-                    <TooltipBox
-                        tooltipText={
-                            <span>
-                                <strong>Add/Edit Note</strong>
-                                <br />
-                                or double-click card
-                            </span>
-                        }
-                        placement="bottom"
-                    >
-                        <Icon
-                            onClick={footerDeps.onEditIconClick}
-                            icon={'edit'}
-                            heightAndWidth={'18px'}
-                            borderColor={'lightHover'}
-                            background={'backgroundColorDarker'}
-                        />
-                    </TooltipBox>
+                    {footerDeps?.onEditIconClick ? (
+                        <TooltipBox
+                            tooltipText={
+                                <span>
+                                    <strong>Add/Edit Note</strong>
+                                    <br />
+                                    or double-click card
+                                </span>
+                            }
+                            placement="bottom"
+                        >
+                            <Icon
+                                onClick={footerDeps.onEditIconClick}
+                                icon={'edit'}
+                                heightAndWidth={'18px'}
+                                borderColor={'lightHover'}
+                                background={'backgroundColorDarker'}
+                            />
+                        </TooltipBox>
+                    ) : undefined}
                 </HighlightActionsBox>
             ) : null
         return (

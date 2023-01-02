@@ -1158,7 +1158,6 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     overflow-x: visible;
     position: ${(props) =>
         props.sidebarContext === 'dashboard' ? 'sticky' : 'fixed'};
-    padding: 0px 0px 10px 0px;
     top: 0px;
     z-index: ${(props) =>
         props.sidebarContext === 'dashboard'
@@ -1168,7 +1167,7 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     border-left: 1px solid ${(props) => props.theme.colors.lightHover};
     font-family: 'Satoshi', sans-serif;
     box-sizing: content-box;
-    padding-right: 40px;
+    right: 40px;
 
     &:: -webkit-scrollbar {
         display: none;
@@ -1186,15 +1185,15 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     ${(props) =>
         props.isShown === 'visible' &&
         css`
-            right: 0px;
             opacity: 1;
         `}
 
-        ${(props) =>
-            props.sidebarContext === 'dashboard' &&
-            css`
-                padding-right: 0px;
-            `}
+    ${(props) =>
+        props.sidebarContext === 'dashboard' &&
+        css`
+            padding-right: 0px;
+            right: 0px;
+        `}
 
 
 
