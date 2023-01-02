@@ -8,7 +8,10 @@ import type { Annotation } from '../types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export interface PageAnnotationsCacheEvents {
-    updatedPageUrl: (normalizedPageUrl: string) => void
+    updatedPageData: (
+        normalizedPageUrl: string,
+        remoteListIds: UnifiedList['unifiedId'][],
+    ) => void
     newListsState: (lists: NormalizedState<UnifiedList>) => void
     newAnnotationsState: (
         annotations: NormalizedState<UnifiedAnnotation>,
@@ -22,8 +25,11 @@ export interface PageAnnotationsCacheEvents {
 }
 
 export interface PageAnnotationsCacheInterface {
-    setAnnotations: (
+    setPageData: (
         normalizedPageUrl: string,
+        remoteListIds: UnifiedList['unifiedId'][],
+    ) => void
+    setAnnotations: (
         annotations: UnifiedAnnotationForCache[],
         opts?: { now?: number },
     ) => { unifiedIds: UnifiedAnnotation['unifiedId'][] }
@@ -48,6 +54,7 @@ export interface PageAnnotationsCacheInterface {
         >,
         opts?: {
             updateLastEditedTimestamp?: boolean
+            keepListsIfUnsharing?: boolean
             now?: number
         },
     ) => void
@@ -70,6 +77,11 @@ export interface PageAnnotationsCacheInterface {
     readonly events: TypedEventEmitter<PageAnnotationsCacheEvents>
     readonly annotations: NormalizedState<UnifiedAnnotation>
     readonly lists: NormalizedState<UnifiedList>
+    /**
+     * Kept so annotations can "inherit" shared lists from their parent page upon becoming public.
+     * NOTE: doesn't contain any private/local-only list IDs.
+     */
+    readonly pageRemoteListIds: UnifiedList['unifiedId'][]
 }
 
 export type UnifiedAnnotation = Pick<

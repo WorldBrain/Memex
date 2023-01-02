@@ -16,6 +16,7 @@ import {
     initNormalizedState,
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export interface PageAnnotationCacheDeps {
     normalizedPageUrl: string
@@ -25,6 +26,7 @@ export interface PageAnnotationCacheDeps {
 }
 
 export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
+    pageRemoteListIds: PageAnnotationsCacheInterface['pageRemoteListIds'] = []
     annotations: PageAnnotationsCacheInterface['annotations'] = initNormalizedState()
     lists: PageAnnotationsCacheInterface['lists'] = initNormalizedState()
 
@@ -174,18 +176,23 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
     }
 
-    setAnnotations: PageAnnotationsCacheInterface['setAnnotations'] = (
+    setPageData: PageAnnotationsCacheInterface['setPageData'] = (
         normalizedPageUrl,
+        remoteListIds,
+    ) => {
+        if (this.deps.normalizedPageUrl !== normalizedPageUrl) {
+            this.deps.normalizedPageUrl = normalizedPageUrl
+        }
+        this.pageRemoteListIds = remoteListIds
+        this.events.emit('updatedPageData', normalizedPageUrl, remoteListIds)
+    }
+
+    setAnnotations: PageAnnotationsCacheInterface['setAnnotations'] = (
         annotations,
         { now = Date.now() } = { now: Date.now() },
     ) => {
         this.annotationIdCounter = 0
         this.remoteAnnotIdsToCacheIds.clear()
-
-        if (this.deps.normalizedPageUrl !== normalizedPageUrl) {
-            this.deps.normalizedPageUrl = normalizedPageUrl
-            this.events.emit('updatedPageUrl', normalizedPageUrl)
-        }
 
         const seedData = [...annotations]
             .sort(this.deps.sortingFn)
@@ -280,30 +287,58 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         updates,
         opts,
     ) => {
-        const previousAnnotation = this.annotations.byId[updates.unifiedId]
-        if (!previousAnnotation) {
+        const previous = this.annotations.byId[updates.unifiedId]
+        if (!previous) {
             throw new Error('No existing cached annotation found to update')
         }
 
-        const nextAnnotation: UnifiedAnnotation = {
-            ...previousAnnotation,
+        let unifiedListIds = [...previous.unifiedListIds]
+        let privacyLevel = updates.privacyLevel
+
+        if (previous.privacyLevel === updates.privacyLevel) {
+            unifiedListIds = [...updates.unifiedListIds]
+        } else if (
+            previous.privacyLevel >= AnnotationPrivacyLevels.SHARED &&
+            updates.privacyLevel <= AnnotationPrivacyLevels.PRIVATE
+        ) {
+            if (opts.keepListsIfUnsharing) {
+                // Keep all lists, but need to change level to 'protected'
+                privacyLevel = AnnotationPrivacyLevels.PROTECTED
+            } else {
+                // Keep only private lists
+                unifiedListIds = unifiedListIds.filter(
+                    (listId) => !this.lists.byId[listId]?.remoteId,
+                )
+            }
+        } else if (
+            previous.privacyLevel <= AnnotationPrivacyLevels.PRIVATE &&
+            updates.privacyLevel >= AnnotationPrivacyLevels.SHARED
+        ) {
+            // Need to inherit parent page's shared lists if sharing
+            unifiedListIds = Array.from(
+                new Set([...unifiedListIds, ...this.pageRemoteListIds]),
+            )
+        }
+
+        const next: UnifiedAnnotation = {
+            ...previous,
+            privacyLevel,
+            unifiedListIds,
             comment: updates.comment,
-            remoteId: updates.remoteId ?? previousAnnotation.remoteId,
-            privacyLevel: updates.privacyLevel,
-            unifiedListIds: updates.unifiedListIds,
+            remoteId: updates.remoteId ?? previous.remoteId,
             lastEdited: opts?.updateLastEditedTimestamp
                 ? opts?.now ?? Date.now()
-                : previousAnnotation.lastEdited,
+                : previous.lastEdited,
         }
 
         this.annotations = {
             ...this.annotations,
             byId: {
                 ...this.annotations.byId,
-                [updates.unifiedId]: nextAnnotation,
+                [updates.unifiedId]: next,
             },
         }
-        this.events.emit('updatedAnnotation', nextAnnotation)
+        this.events.emit('updatedAnnotation', next)
         this.events.emit('newAnnotationsState', this.annotations)
     }
 

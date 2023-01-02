@@ -163,13 +163,17 @@ describe('Page annotations cache tests', () => {
             privacyLevel: AnnotationPrivacyLevels.PRIVATE,
             lastEdited: now,
         }
+        const expectedAnnotationC = {
+            ...updatedAnnotationC,
+            unifiedListIds: [], // We're making it private, so this shared list should get dropped
+        }
         cache.updateAnnotation(updatedAnnotationC, {
             updateLastEditedTimestamp: true,
             now,
         })
         expectedEvents.push({
             event: 'updatedAnnotation',
-            args: updatedAnnotationC,
+            args: expectedAnnotationC,
         })
         expectedEvents.push({
             event: 'newAnnotationsState',
@@ -179,14 +183,14 @@ describe('Page annotations cache tests', () => {
         expect(cache.annotations.allIds).toEqual([idC, idA])
         expect(cache.annotations.byId).toEqual({
             [idA]: updatedAnnotationA,
-            [idC]: updatedAnnotationC,
+            [idC]: expectedAnnotationC,
         })
         expect(emittedEvents).toEqual(expectedEvents)
 
         cache.removeAnnotation(updatedAnnotationC)
         expectedEvents.push({
             event: 'removedAnnotation',
-            args: updatedAnnotationC,
+            args: expectedAnnotationC,
         })
         expectedEvents.push({
             event: 'newAnnotationsState',
@@ -214,6 +218,11 @@ describe('Page annotations cache tests', () => {
         expect(emittedEvents).toEqual(expectedEvents)
     })
 
+    it('updating annotation privacy levels should change lists', () => {
+        // TODO: This functionality currently tested in sidebar logic tests. Should move to here (see: 'privacy level state changes')
+        expect(true).toBe(true)
+    })
+
     it('should be able to reset page URL and annotations in the cache', () => {
         const { cache, emittedEvents } = setupTest({
             normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
@@ -231,7 +240,6 @@ describe('Page annotations cache tests', () => {
         expect(emittedEvents).toEqual(expectedEvents)
 
         const { unifiedIds: unifiedIdsA } = cache.setAnnotations(
-            TEST_DATA.NORMALIZED_PAGE_URL_1,
             reshapeUnifiedAnnotsForCaching(
                 testAnnotations.slice(1, 3),
                 testLists,
@@ -257,16 +265,16 @@ describe('Page annotations cache tests', () => {
         expect(emittedEvents).toEqual(expectedEvents)
 
         const { unifiedIds: unifiedIdsB } = cache.setAnnotations(
-            TEST_DATA.NORMALIZED_PAGE_URL_2,
             reshapeUnifiedAnnotsForCaching(testAnnotations, testLists),
         )
-        expectedEvents.push({
-            event: 'updatedPageUrl',
-            args: cache.normalizedPageUrl,
-        })
+        cache.setPageData(TEST_DATA.NORMALIZED_PAGE_URL_2, [])
         expectedEvents.push({
             event: 'newAnnotationsState',
             args: cache.annotations,
+        })
+        expectedEvents.push({
+            event: 'updatedPageData',
+            args: TEST_DATA.NORMALIZED_PAGE_URL_2,
         })
 
         expect(cache.normalizedPageUrl).toEqual(TEST_DATA.NORMALIZED_PAGE_URL_2)
@@ -305,7 +313,6 @@ describe('Page annotations cache tests', () => {
         expect(cache.lists.byId).toEqual({})
 
         const { unifiedIds: unifiedIdsA } = cache.setAnnotations(
-            TEST_DATA.NORMALIZED_PAGE_URL_1,
             reshapeUnifiedAnnotsForCaching(
                 testAnnotations,
                 testLists, // Passing in lists here so input annots come with list IDs, but they won't be resolved to anything, as the cache lacks list data
@@ -500,7 +507,6 @@ describe('Page annotations cache tests', () => {
 
         const { unifiedIds: unifiedListIds } = cache.setLists(testLists)
         const { unifiedIds: unifiedAnnotationIds } = cache.setAnnotations(
-            TEST_DATA.NORMALIZED_PAGE_URL_1,
             reshapeUnifiedAnnotsForCaching(testAnnotations, testLists),
         )
 

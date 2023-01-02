@@ -294,7 +294,6 @@ describe('Ribbon logic', () => {
 
         await ribbon.init()
         annotationsCache.setAnnotations(
-            normalizedPageUrl,
             [DATA.ANNOT_1, DATA.ANNOT_2].map((annot) =>
                 reshapeAnnotationForCache(
                     annot as Annotation &

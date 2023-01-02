@@ -114,9 +114,6 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     lists: PageAnnotationsCacheInterface['lists']
     annotations: PageAnnotationsCacheInterface['annotations']
 
-    /** This state is kept so annotations can easily "inherit" shared lists from their parent page upon becoming public. */
-    pageSharedListIds: UnifiedList['unifiedId'][]
-
     users: {
         [userId: string]: {
             name: string

@@ -217,7 +217,6 @@ export class SidebarContainerLogic extends UILogic<
 
             annotations: initNormalizedState(),
             lists: initNormalizedState(),
-            pageSharedListIds: [],
 
             activeAnnotationId: null, // TODO: make unified ID
 
@@ -254,39 +253,22 @@ export class SidebarContainerLogic extends UILogic<
         fullPageUrl: string,
         opts: { renderHighlights: boolean },
     ) {
-        const { annotationsCache, customLists } = this.options
         await executeUITask(this, 'cacheLoadState', async () => {
             await cacheUtils.hydrateCache({
                 fullPageUrl,
-                cache: annotationsCache,
                 user: this.options.currentUser,
+                cache: this.options.annotationsCache,
                 bgModules: {
-                    customLists,
+                    customLists: this.options.customLists,
                     annotations: this.options.annotations,
                     contentSharing: this.options.contentSharing,
                     pageActivityIndicator: this.options.pageActivityIndicatorBG,
                 },
             })
-
-            // TODO: Maybe this state is better off inside the cache
-            const pageLocalListIds = await customLists.fetchPageLists({
-                url: fullPageUrl,
-            })
-
-            this.emitMutation({
-                pageSharedListIds: {
-                    $set: pageLocalListIds
-                        .map((localListId) =>
-                            annotationsCache.getListByLocalId(localListId),
-                        )
-                        .filter((unifiedList) => unifiedList?.remoteId != null)
-                        .map((unifiedList) => unifiedList.unifiedId),
-                },
-            })
         })
 
         if (opts.renderHighlights) {
-            this.renderOwnHighlights(annotationsCache)
+            this.renderOwnHighlights(this.options.annotationsCache)
         }
     }
 
@@ -330,16 +312,16 @@ export class SidebarContainerLogic extends UILogic<
         const { fullPageUrl, annotationsCache, initialState } = this.options
         annotationsCache.events.addListener(
             'newAnnotationsState',
-            this.annotationsSubscription,
+            this.cacheAnnotationsSubscription,
         )
         annotationsCache.events.addListener(
             'newListsState',
-            this.listsSubscription,
+            this.cacheListsSubscription,
         )
 
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
-        this.annotationsSubscription(annotationsCache.annotations)
-        this.listsSubscription(annotationsCache.lists)
+        this.cacheAnnotationsSubscription(annotationsCache.annotations)
+        this.cacheListsSubscription(annotationsCache.lists)
         await browser.storage.local.set({ '@Sidebar-reading_view': false })
         this.readingViewStorageListener(true)
 
@@ -365,15 +347,15 @@ export class SidebarContainerLogic extends UILogic<
     cleanup = () => {
         this.options.annotationsCache.events.removeListener(
             'newAnnotationsState',
-            this.annotationsSubscription,
+            this.cacheAnnotationsSubscription,
         )
         this.options.annotationsCache.events.removeListener(
             'newListsState',
-            this.listsSubscription,
+            this.cacheListsSubscription,
         )
     }
 
-    private listsSubscription = (
+    private cacheListsSubscription = (
         nextLists: PageAnnotationsCacheInterface['lists'],
     ) => {
         this.emitMutation({
@@ -389,7 +371,7 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    private annotationsSubscription = (
+    private cacheAnnotationsSubscription = (
         nextAnnotations: PageAnnotationsCacheInterface['annotations'],
     ) => {
         this.emitMutation({
@@ -1360,41 +1342,13 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        let unifiedListIds = [...existing.unifiedListIds]
-        let privacyLevel = event.privacyLevel
-
-        if (
-            existing.privacyLevel >= AnnotationPrivacyLevels.SHARED &&
-            event.privacyLevel <= AnnotationPrivacyLevels.PRIVATE
-        ) {
-            if (event.keepListsIfUnsharing) {
-                // Keep all lists, but need to change level to 'protected'
-                privacyLevel = AnnotationPrivacyLevels.PROTECTED
-            } else {
-                // Keep only private lists
-                unifiedListIds = unifiedListIds.filter((listId) => {
-                    const list = previousState.lists.byId[listId]
-                    return !list?.remoteId
-                })
-            }
-        } else if (
-            existing.privacyLevel <= AnnotationPrivacyLevels.PRIVATE &&
-            event.privacyLevel >= AnnotationPrivacyLevels.SHARED
-        ) {
-            // Need to inherit parent page's shared lists
-            unifiedListIds = Array.from(
-                new Set([
-                    ...unifiedListIds,
-                    ...previousState.pageSharedListIds,
-                ]),
-            )
-        }
-
-        this.options.annotationsCache.updateAnnotation({
-            ...existing,
-            privacyLevel,
-            unifiedListIds,
-        })
+        this.options.annotationsCache.updateAnnotation(
+            {
+                ...existing,
+                privacyLevel: event.privacyLevel,
+            },
+            { keepListsIfUnsharing: event.keepListsIfUnsharing },
+        )
     }
 
     // private getAnnotListsAfterShareStateChange(params: {
