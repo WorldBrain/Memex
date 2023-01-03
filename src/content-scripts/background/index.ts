@@ -60,8 +60,8 @@ export class ContentScriptsBackground {
 
     private async doSomethingInNewTab(
         fullPageUrl: string,
-        something: (tabId: number) => Promise<void>,
-        delayBeforeExecution = 500,
+        something: (tabId: number) => Promise<true>,
+        retryDelay = 200,
     ) {
         const { browserAPIs } = this.options
         const activeTab = await browserAPIs.tabs.create({
@@ -75,11 +75,28 @@ export class ContentScriptsBackground {
         ) => {
             if (tabId === activeTab.id && changeInfo.status === 'complete') {
                 try {
+                    // Continues to retry `something` every `retryDelay` ms until it resolves
+                    // NOTE: it does this as the content script loads are async and we currently don't
+                    //      have any way of knowing when they're ready. When not ready, the RPC Promise hangs.
+                    let itWorked = false
+                    let i = 0
+                    while (!itWorked) {
+                        console.log('try in tab #', ++i)
+                        const done = await Promise.race([
+                            delay(retryDelay),
+                            something(tabId),
+                        ])
+
+                        if (done) {
+                            console.log('IT WORKED!')
+                            itWorked = true
+                        }
+                    }
                     // TODO: This wait is a hack to mitigate trying to use the remote function `showSidebar` before it's ready
                     // it should be registered in the tab setup, but is not available immediately on this tab onUpdate handler
                     // since it is fired on the page complete, not on our content script setup complete.
-                    await delay(delayBeforeExecution)
-                    await something(tabId)
+                    // await delay(delayBeforeExecution)
+                    // await something(tabId)
                 } catch (err) {
                     throw err
                 } finally {
@@ -104,6 +121,7 @@ export class ContentScriptsBackground {
                 action: 'selected_list_mode_from_web_ui',
                 sharedListId,
             })
+            return true
         })
     }
 
@@ -124,6 +142,7 @@ export class ContentScriptsBackground {
             await runInTab<InPageUIContentScriptRemoteInterface>(
                 tabId,
             ).goToHighlight(annotationCacheId)
+            return true
         })
     }
 
