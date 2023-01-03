@@ -1262,6 +1262,16 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    markFeedAsRead: EventHandler<'markFeedAsRead'> = async () => {
+        console.log('marked', await this.options.activityIndicatorBG)
+        await this.options.activityIndicatorBG.markActivitiesAsSeen()
+        await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
+
+        this.emitMutation({
+            hasFeedActivity: { $set: false },
+        })
+    }
+
     private async setLocallyAvailableSelectedList(
         state: SidebarContainerState,
         unifiedListId: UnifiedList['unifiedId'],

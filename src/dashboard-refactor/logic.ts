@@ -3274,7 +3274,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        this.options.openFeed()
+        // this.options.openFeed()
 
         if (previousState.listsSidebar.hasFeedActivity) {
             await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
@@ -3304,12 +3304,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         if (previousState.listsSidebar.hasFeedActivity) {
-            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
+            console.log('setnewactivity')
             this.emitMutation({
                 listsSidebar: {
                     hasFeedActivity: { $set: false },
                 },
             })
+            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
+            await this.options.activityIndicatorBG.markActivitiesAsSeen()
         }
     }
     /* END - lists sidebar event handlers */

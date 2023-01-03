@@ -134,6 +134,8 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     //postShareHook: (shareInfo) => void+
     setPopoutsActive: (popoutsOpen: boolean) => void
     getYoutubePlayer?(): YoutubePlayer
+    clickFeedActivityIndicator?: () => void
+    hasFeedActivity?: boolean
 }
 
 interface AnnotationsSidebarState {
@@ -1079,27 +1081,26 @@ export class AnnotationsSidebar extends React.Component<
                     }
                 />
                 <PrimaryAction
-                    onClick={this.props.setActiveTab('feed')}
+                    onClick={this.props.clickFeedActivityIndicator}
                     label={'Feed'}
                     active={this.props.activeTab === 'feed'}
                     type={'tertiary'}
                     size={'medium'}
                     iconPosition={'right'}
                     padding={'0px 6px'}
-                    // icon={
-                    //     this.props.feed === 'running' ||
-                    //     this.props.cacheLoadState === 'pristine' ? (
-                    //         <LoadingBox>
-                    //             <LoadingIndicator size={12} />{' '}
-                    //         </LoadingBox>
-                    //     ) : (
-                    //         <LoadingBox>
-                    //             <PageActivityIndicator
-                    //                 active={this.props.lists.allIds.length > 0}
-                    //             />
-                    //         </LoadingBox>
-                    //     )
-                    // }
+                    icon={
+                        this.props.hasFeedActivity ? (
+                            <>
+                                <LoadingBox>
+                                    <PageActivityIndicator active />
+                                </LoadingBox>
+                            </>
+                        ) : (
+                            <LoadingBox>
+                                <PageActivityIndicator active={false} />
+                            </LoadingBox>
+                        )
+                    }
                 />
             </TopBarContainer>
         )

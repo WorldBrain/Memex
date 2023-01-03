@@ -70,6 +70,8 @@ export interface SidebarContainerDependencies {
     copyPaster: RemoteCopyPasterInterface
     youtubePlayer?: YoutubePlayer
     youtubeService?: YoutubeService
+    hasFeedActivity?: boolean
+    clickFeedActivityIndicator?: () => void
 }
 
 export interface EditForm {
@@ -162,6 +164,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     activeShareMenuNoteId: string | undefined
     immediatelyShareNotes: boolean
     pageHasNetworkAnnotations: boolean
+    hasFeedActivity?: boolean
 }
 
 export type AnnotationEvent<T> = {
@@ -200,6 +203,7 @@ interface SidebarEvents {
 
     // List instance events
     expandListAnnotations: { unifiedListId: UnifiedList['unifiedId'] }
+    markFeedAsRead: null
 
     // Annotation card instance events
     setAnnotationEditCommentText: AnnotationCardInstanceEvent<{

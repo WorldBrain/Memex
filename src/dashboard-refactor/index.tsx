@@ -1457,6 +1457,13 @@ export class DashboardContainer extends StatefulUIElement<
                         )}
                     </MainContent>
                     <NotesSidebar
+                        hasFeedActivity={listsSidebar.hasFeedActivity}
+                        clickFeedActivityIndicator={() =>
+                            this.processEvent(
+                                'clickFeedActivityIndicator',
+                                null,
+                            )
+                        }
                         shouldHydrateCacheOnInit
                         annotationsCache={this.props.annotationsCache}
                         youtubeService={this.youtubeService}
