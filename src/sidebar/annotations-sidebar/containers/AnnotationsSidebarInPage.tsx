@@ -205,6 +205,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.processEvent('setNewPageNoteText', {
                 comment: event.annotationData?.commentText ?? '',
             })
+        } else if (event.action === 'selected_list_mode_from_web_ui') {
+            await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+            await browser.storage.local.set({
+                '@Sidebar-reading_view': true,
+            })
+            await this.processEvent('setSelectedListFromWebUI', {
+                sharedListId: event.sharedListId,
+            })
         } else if (event.action === 'show_annotation') {
             await this.activateAnnotation(event.annotationCacheId, 'show')
         } else if (event.action === 'edit_annotation') {
@@ -220,13 +228,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
         } else if (event.action === 'show_shared_spaces') {
             await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
-        } else if (event.action === 'selected_list_mode_from_web_ui') {
-            await browser.storage.local.set({
-                '@Sidebar-reading_view': true,
-            })
-            await this.processEvent('setSelectedListFromWebUI', {
-                sharedListId: event.sharedListId,
-            })
         }
 
         this.forceUpdate()

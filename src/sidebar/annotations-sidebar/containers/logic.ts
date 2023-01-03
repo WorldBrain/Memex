@@ -1338,6 +1338,10 @@ export class SidebarContainerLogic extends UILogic<
     setSelectedListFromWebUI: EventHandler<
         'setSelectedListFromWebUI'
     > = async ({ event, previousState }) => {
+        this.emitMutation({
+            activeTab: { $set: 'spaces' },
+        })
+
         const { annotationsCache, customLists, fullPageUrl } = this.options
 
         const cachedList = annotationsCache.getListByRemoteId(
@@ -1405,7 +1409,6 @@ export class SidebarContainerLogic extends UILogic<
             })
 
             this.emitMutation({
-                activeTab: { $set: 'spaces' },
                 selectedListId: { $set: unifiedList.unifiedId },
                 // NOTE: this is the only time we're manually mutating the listInstances state outside the cache subscription - maybe there's a "cleaner" way to do this
                 listInstances: {

@@ -1184,6 +1184,7 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
 
     ${(props) =>
         props.sidebarContext === 'dashboard' &&
+        props.isShown === 'visible' &&
         css`
             padding-right: 0px;
             right: 0px;

@@ -1512,7 +1512,7 @@ const AnnotationActions = styled.div`
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding: 0 10px;
+    padding: 5 10px;
     width: fill-available;
     height: 20px;
 `
