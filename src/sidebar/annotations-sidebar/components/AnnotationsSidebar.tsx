@@ -93,7 +93,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         referenceElement?: React.RefObject<HTMLDivElement>,
     ) => JSX.Element
 
-    setActiveTab: (tab: SidebarTab) => React.MouseEventHandler
+    setActiveTab: (tab: SidebarTab) => void
     expandFollowedListNotes: (listId: string) => void
 
     bindAnnotationFooterEventProps: (
@@ -1043,6 +1043,11 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
+    private onFeedClick() {
+        this.props.clickFeedActivityIndicator()
+        this.props.setActiveTab('feed')
+    }
+
     private renderTopBarSwitcher() {
         return (
             <TopBarContainer>
@@ -1081,7 +1086,10 @@ export class AnnotationsSidebar extends React.Component<
                     }
                 />
                 <PrimaryAction
-                    onClick={this.props.clickFeedActivityIndicator}
+                    onClick={
+                        this.props.setActiveTab('feed')
+                        // this.props.clickFeedActivityIndicator,
+                    }
                     label={'Feed'}
                     active={this.props.activeTab === 'feed'}
                     type={'tertiary'}
