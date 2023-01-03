@@ -177,13 +177,18 @@ export default class RibbonHolder extends StatefulUIElement<
                         />
                     </div>
                 )}
-                {this.props.setUpOptions.showPageActivityIndicator && (
-                    <PageActivityIndicator
-                        onGoToClick={() =>
-                            this.processEvent('openSidebarToSharedSpaces', null)
-                        }
-                    />
-                )}
+                {this.props.setUpOptions.showPageActivityIndicator &&
+                    !this.state.isSidebarOpen &&
+                    !this.state.keepPageActivityIndicatorHidden && (
+                        <PageActivityIndicator
+                            onGoToClick={() =>
+                                this.processEvent(
+                                    'openSidebarToSharedSpaces',
+                                    null,
+                                )
+                            }
+                        />
+                    )}
             </>
         )
     }

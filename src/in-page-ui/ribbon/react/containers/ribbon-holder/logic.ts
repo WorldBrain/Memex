@@ -9,6 +9,7 @@ import type {
 export interface RibbonHolderState {
     state: 'visible' | 'hidden'
     isSidebarOpen: boolean
+    keepPageActivityIndicatorHidden: boolean
 }
 
 export type RibbonHolderEvents = UIEvent<{
@@ -43,6 +44,7 @@ export class RibbonHolderLogic extends UILogic<
                 ? 'visible'
                 : 'hidden',
             isSidebarOpen: this.dependencies.inPageUI.componentsShown.sidebar,
+            keepPageActivityIndicatorHidden: false,
         }
     }
 
@@ -84,5 +86,11 @@ export class RibbonHolderLogic extends UILogic<
         newState: InPageUIComponentShowState
     }) => {
         this.emitMutation({ isSidebarOpen: { $set: event.newState.sidebar } })
+
+        if (event.newState.sidebar === true) {
+            this.emitMutation({
+                keepPageActivityIndicatorHidden: { $set: true },
+            })
+        }
     }
 }
