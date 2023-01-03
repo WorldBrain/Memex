@@ -191,10 +191,6 @@ export class PageIndexingBackground {
         pageContentInfo[
             contentInfo.primaryIdentifier.normalizedUrl
         ] = contentInfo
-        await this.options.pageIndexingSettingsStore.set(
-            'pageContentInfo',
-            pageContentInfo,
-        )
 
         // Keep track of the orig ID passed into this function, as an alias ID of the main content info
         if (
@@ -240,6 +236,10 @@ export class PageIndexingBackground {
                 lastVisited: this.options.getNow(),
             })
         }
+        await this.options.pageIndexingSettingsStore.set(
+            'pageContentInfo',
+            pageContentInfo,
+        )
         if (stored && hasNewLocators) {
             await this.storeLocators(contentInfo.primaryIdentifier)
         }
