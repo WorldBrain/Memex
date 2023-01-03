@@ -104,6 +104,9 @@ export async function main(
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const tagsBG = runInBackground<RemoteTagsInterface>()
+    const contentScriptsBG = runInBackground<
+        ContentScriptsInterface<'caller'>
+    >()
     const collectionsBG = runInBackground<RemoteCollectionsInterface>()
     const pageActivityIndicatorBG = runInBackground<
         RemotePageActivityIndicatorInterface
@@ -356,6 +359,7 @@ export async function main(
         }),
     })
     const loadContentScript = createContentScriptLoader({
+        contentScriptsBG,
         loadRemotely: params.loadRemotely,
     })
     if (
@@ -402,19 +406,20 @@ export async function main(
     }
 
     injectYoutubeContextMenu(annotationsFunctions)
-    setupWebUIActions()
+    setupWebUIActions({ contentScriptsBG })
 
     return inPageUI
 }
 
 type ContentScriptLoader = (component: ContentScriptComponent) => Promise<void>
-export function createContentScriptLoader(args: { loadRemotely: boolean }) {
+export function createContentScriptLoader(args: {
+    contentScriptsBG: ContentScriptsInterface<'caller'>
+    loadRemotely: boolean
+}) {
     const remoteLoader: ContentScriptLoader = async (
         component: ContentScriptComponent,
     ) => {
-        await runInBackground<
-            ContentScriptsInterface<'caller'>
-        >().injectContentScriptComponent({
+        await args.contentScriptsBG.injectContentScriptComponent({
             component,
         })
     }
@@ -513,7 +518,9 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
     observer.observe(document, config)
 }
 
-export function setupWebUIActions() {
+export function setupWebUIActions(args: {
+    contentScriptsBG: ContentScriptsInterface<'caller'>
+}) {
     const confirmRequest = (requestId: number) => {
         const detail: MemexRequestHandledDetail = { requestId }
         const event = new CustomEvent(MEMEX_REQUEST_HANDLED_EVENT_NAME, {
@@ -522,10 +529,14 @@ export function setupWebUIActions() {
         document.dispatchEvent(event)
     }
 
-    document.addEventListener(MEMEX_OPEN_LINK_EVENT_NAME, (event) => {
+    document.addEventListener(MEMEX_OPEN_LINK_EVENT_NAME, async (event) => {
         const detail = event.detail as MemexOpenLinkDetail
         console.log('Got request to open page link', detail)
-        // TODO: Do some actual stuff in here
         confirmRequest(detail.requestId)
+
+        await args.contentScriptsBG.openPageWithSidebarInSelectedListMode({
+            fullPageUrl: detail.originalPageUrl,
+            sharedListId: detail.sharedListId,
+        })
     })
 }

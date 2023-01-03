@@ -5,7 +5,6 @@ import type {
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
-import type { Annotation } from 'src/highlighting/ui/types/api'
 
 export type InPageUISidebarAction =
     | 'comment'
@@ -14,6 +13,8 @@ export type InPageUISidebarAction =
     | 'show_annotation'
     | 'set_sharing_access'
     | 'show_shared_spaces'
+    | 'selected_list_mode_from_web_ui'
+
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'
 export type InPageUIComponentShowState = {
@@ -27,10 +28,13 @@ export interface IncomingAnnotationData {
     tags?: string[]
 }
 
+// TODO: Improve this type so possible fields depend on `action` type
 export interface SidebarActionOptions {
     action: InPageUISidebarAction
     anchor?: Anchor
     annotationLocalId?: string
+    /** Set this for 'selected_list_mode_from_web_ui' */
+    sharedListId?: string
     annotationCacheId?: UnifiedAnnotation['unifiedId']
     annotationData?: IncomingAnnotationData
     annotationSharingAccess?: AnnotationSharingAccess
