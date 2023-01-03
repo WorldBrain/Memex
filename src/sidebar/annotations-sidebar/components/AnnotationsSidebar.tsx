@@ -508,7 +508,7 @@ export class AnnotationsSidebar extends React.Component<
     ) {
         return (
             <FollowedListNotesContainer
-                bottom={listInstance.isOpen ? '20px' : '0px'}
+                bottom={listInstance.isOpen ? '0px' : '0px'}
                 key={unifiedListId}
                 top="0px"
             >
@@ -1004,7 +1004,7 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedListNotesContainer
-                bottom={this.props.activeTab === 'annotations' ? '20px' : '0px'}
+                bottom={this.props.activeTab === 'annotations' ? '00px' : '0px'}
             >
                 {(this.props.activeTab === 'annotations' ||
                     this.props.selectedListId) && (
@@ -1130,6 +1130,7 @@ export class AnnotationsSidebar extends React.Component<
                         type="tertiary"
                         size="small"
                         label="All Spaces"
+                        fontColor="iconColor"
                         onClick={() => this.props.onResetSpaceSelect()}
                     />
                     {this.renderPermissionStatusButton()}
@@ -1736,7 +1737,7 @@ const FollowedNotesContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: 100%;
-    padding-bottom: 150px;
+    padding-bottom: 60px;
 `
 
 const FollowedListsMsgContainer = styled.div`
