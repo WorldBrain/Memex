@@ -320,7 +320,7 @@ export class RibbonContainerLogic extends UILogic<
                 .offsetWidth
             let currentWindowWidth = window.innerWidth
             let readingWidth =
-                currentWindowWidth - currentsidebarWidth - 10 + 'px'
+                currentWindowWidth - currentsidebarWidth - 50 + 'px'
             document.body.style.width = readingWidth
         }
     }
