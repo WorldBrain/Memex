@@ -1043,6 +1043,7 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
     width: 24px;
     height: 400px;
     right: -40px;
+    position: sticky;
     display: flex;
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;

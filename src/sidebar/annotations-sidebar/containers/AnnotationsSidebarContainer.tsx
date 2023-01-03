@@ -147,16 +147,6 @@ export class AnnotationsSidebarContainer<
         if (this.props.sidebarContext === 'dashboard') {
             document.addEventListener('keydown', this.listenToEsc)
         }
-
-        // if (
-        //     this.state.isWidthLocked ||
-        //     this.props.sidebarContext === 'dashboard'
-        // ) {
-        //     this.processEvent('adjustSidebarWidth', {
-        //         newWidth: this.state.sidebarWidth,
-        //         isWidthLocked: true,
-        //     })
-        // }
     }
 
     hideSidebar() {
@@ -816,6 +806,10 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
+                            hasFeedActivity={this.props.hasFeedActivity}
+                            clickFeedActivityIndicator={() =>
+                                this.processEvent('markFeedAsRead', null)
+                            }
                             currentUser={this.props.currentUser}
                             annotationsCache={this.props.annotationsCache}
                             onUnifiedListSelect={(unifiedListId) =>

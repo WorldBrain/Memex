@@ -1263,7 +1263,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     markFeedAsRead: EventHandler<'markFeedAsRead'> = async () => {
-        // await this.options.activityIndicatorBG.markActivitiesAsSeen()
+        // const activityindicator = await this.options.activityIndicatorBG.markActivitiesAsSeen()
         // await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
 
         this.emitMutation({

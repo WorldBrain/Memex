@@ -61,7 +61,8 @@ export class ContentScriptsBackground {
     private async doSomethingInNewTab(
         fullPageUrl: string,
         something: (tabId: number) => Promise<true>,
-        retryDelay = 200,
+        retryDelay = 500,
+        delayBeforeExecution = 2000,
     ) {
         const { browserAPIs } = this.options
         const activeTab = await browserAPIs.tabs.create({
@@ -74,10 +75,12 @@ export class ContentScriptsBackground {
             changeInfo: Tabs.OnUpdatedChangeInfoType,
         ) => {
             if (tabId === activeTab.id && changeInfo.status === 'complete') {
+                await delay(delayBeforeExecution)
                 try {
                     // Continues to retry `something` every `retryDelay` ms until it resolves
                     // NOTE: it does this as the content script loads are async and we currently don't
                     //      have any way of knowing when they're ready. When not ready, the RPC Promise hangs.
+
                     let itWorked = false
                     let i = 0
                     while (!itWorked) {

@@ -118,6 +118,8 @@ export class RibbonContainerLogic extends UILogic<
 
     commentSavedTimeout = 2000
     readingView = false
+    sidebar
+    resizeObserver
 
     constructor(private dependencies: RibbonLogicOptions) {
         super()
@@ -182,16 +184,21 @@ export class RibbonContainerLogic extends UILogic<
             await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
         this.initLogicResolvable.resolve()
+
+        this.sidebar = document
+            .getElementById('memex-sidebar-container')
+            .shadowRoot.getElementById('annotationSidebarContainer')
     }
 
     async initReadingViewListeners() {
         // make sure to reset readingviewValue on sidebar open on new page
         await browser.storage.local.set({ '@Sidebar-reading_view': false })
-
         // init listeners to local storage flag for reading view
         await browser.storage.onChanged.addListener((changes) => {
-            this.setReadingView(changes)
+            this.setReadingWidthOnListener(changes)
         })
+
+        this.resizeObserver = new ResizeObserver(this.resizeReadingWidth)
     }
 
     hydrateStateFromDB: EventHandler<'hydrateStateFromDB'> = async ({
@@ -243,72 +250,65 @@ export class RibbonContainerLogic extends UILogic<
     toggleReadingView: EventHandler<'toggleReadingView'> = async ({
         previousState,
     }) => {
-        // init dom elements and observers
-        let sidebar = document
+        this.sidebar = document
             .getElementById('memex-sidebar-container')
             .shadowRoot.getElementById('annotationSidebarContainer')
-
-        if (sidebar == null) {
-            return
-        }
-
-        const resizeObserver = new ResizeObserver(this.resizeReadingWidth)
-
         if (previousState.isWidthLocked) {
-            // set member variable for internal logic use
-            this.readingView = false
-
-            // set mutation for UI changes
-            this.emitMutation({
-                isWidthLocked: { $set: false },
-            })
-
-            // reset window width
-            document.body.style.width = 'initial'
-
-            // IS NOT WORKING
-            resizeObserver.unobserve(sidebar)
-
-            // remove listeners and values
-            this.tearDownListeners(resizeObserver, sidebar)
-            await browser.storage.local.set({ '@Sidebar-reading_view': false })
+            this.resetReadingWidth()
         } else {
-            // set member variable for internal logic use
-            this.readingView = true
-
-            // set mutation for UI changes
-            this.emitMutation({
-                isWidthLocked: { $set: true },
-            })
-
-            // force resize calc
-            this.resizeReadingWidth()
-
-            // init window resize event listener
-            window.addEventListener('resize', this.resizeReadingWidth)
-
-            // observe size changes of sidebar and adjust reading view
-            resizeObserver.observe(sidebar)
-
-            // set corret storage values
-            await browser.storage.local.set({ '@Sidebar-reading_view': true })
+            this.setReadingWidth()
         }
     }
 
-    setReadingView = (changes: Storage.StorageChange) => {
+    setReadingWidth = async () => {
+        // set member variable for internal logic use
+        this.readingView = true
+
+        // force resize calc
+        this.resizeReadingWidth()
+
+        // set mutation for UI changes
+        this.emitMutation({
+            isWidthLocked: { $set: true },
+        })
+
+        // init window resize event listener
+        window.addEventListener('resize', this.resizeReadingWidth)
+        this.resizeObserver.observe(this.sidebar)
+        await browser.storage.local.set({ '@Sidebar-reading_view': true })
+    }
+    resetReadingWidth = async () => {
+        // set member variable for internal logic use
+        this.readingView = false
+
+        // set mutation for UI changes
+        this.emitMutation({
+            isWidthLocked: { $set: false },
+        })
+
+        // reset window width
+        document.body.style.width = 'initial'
+
+        // remove listeners and values
+        this.tearDownListeners()
+        await browser.storage.local.set({ '@Sidebar-reading_view': false })
+    }
+
+    setReadingWidthOnListener = (changes: Storage.StorageChange) => {
         if (Object.entries(changes)[0][0] === '@Sidebar-reading_view') {
             this.emitMutation({
                 isWidthLocked: { $set: Object.entries(changes)[0][1].newValue },
             })
             this.readingView = Object.entries(changes)[0][1].newValue
-        }
-    }
 
-    tearDownListeners(resizeObserver?, sidebar?) {
-        window.removeEventListener('resize', this.resizeReadingWidth)
-        browser.storage.onChanged.removeListener((changes) => {
-            this.setReadingView(changes)
-        })
+            if (Object.entries(changes)[0][1].newValue) {
+                this.setReadingWidth()
+            }
+
+            if (!Object.entries(changes)[0][1].newValue) {
+                this.resetReadingWidth()
+            }
+        }
     }
 
     resizeReadingWidth = () => {
@@ -323,6 +323,14 @@ export class RibbonContainerLogic extends UILogic<
                 currentWindowWidth - currentsidebarWidth - 50 + 'px'
             document.body.style.width = readingWidth
         }
+    }
+
+    tearDownListeners() {
+        window.removeEventListener('resize', this.resizeReadingWidth)
+        browser.storage.onChanged.removeListener((changes) => {
+            this.setReadingWidthOnListener(changes)
+        })
+        this.resizeObserver.disconnect()
     }
 
     /**

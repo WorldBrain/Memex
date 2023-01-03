@@ -22,6 +22,7 @@ import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import type { SidebarContainerLogic } from './logic'
 import type { UnifiedAnnotation } from 'src/annotations/cache/types'
 import { ANNOT_BOX_ID_PREFIX } from '../constants'
+import browser from 'webextension-polyfill'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -220,6 +221,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         } else if (event.action === 'show_shared_spaces') {
             await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
         } else if (event.action === 'selected_list_mode_from_web_ui') {
+            await browser.storage.local.set({
+                '@Sidebar-reading_view': true,
+            })
             await this.processEvent('setSelectedListFromWebUI', {
                 sharedListId: event.sharedListId,
             })

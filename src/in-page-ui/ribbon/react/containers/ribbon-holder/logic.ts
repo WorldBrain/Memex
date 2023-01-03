@@ -77,6 +77,9 @@ export class RibbonHolderLogic extends UILogic<
     openSidebarToSharedSpaces: EventHandler<
         'openSidebarToSharedSpaces'
     > = async ({}) => {
+        this.emitMutation({
+            keepPageActivityIndicatorHidden: { $set: true },
+        })
         await this.dependencies.inPageUI.showSidebar({
             action: 'show_shared_spaces',
         })
