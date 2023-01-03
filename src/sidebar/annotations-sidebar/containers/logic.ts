@@ -59,8 +59,9 @@ import {
 } from './utils'
 import { browser, Storage } from 'webextension-polyfill-ts'
 import type { AnnotationSharingState } from 'src/content-sharing/background/types'
-import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
-import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -196,6 +197,7 @@ export class SidebarContainerLogic extends UILogic<
             noteCreateState: 'pristine',
             secondarySearchState: 'pristine',
             remoteAnnotationsLoadState: 'pristine',
+            foreignSelectedListLoadState: 'pristine',
 
             users: {},
             pillVisibility: 'unhover',
@@ -398,13 +400,20 @@ export class SidebarContainerLogic extends UILogic<
                 $set: fromPairs(
                     normalizedStateToArray(nextAnnotations)
                         .map((annot) => [
-                            ...annot.unifiedListIds.map((unifiedListId) => [
-                                generateAnnotationCardInstanceId(
-                                    annot,
-                                    unifiedListId,
-                                ),
-                                initAnnotationCardInstance(annot),
-                            ]),
+                            ...annot.unifiedListIds
+                                // Don't create annot card instances for foreign lists (won't show up in spaces tab)
+                                .filter(
+                                    (unifiedListId) =>
+                                        !this.options.annotationsCache.lists
+                                            .byId[unifiedListId]?.isForeignList,
+                                )
+                                .map((unifiedListId) => [
+                                    generateAnnotationCardInstanceId(
+                                        annot,
+                                        unifiedListId,
+                                    ),
+                                    initAnnotationCardInstance(annot),
+                                ]),
                             [
                                 generateAnnotationCardInstanceId(annot),
                                 initAnnotationCardInstance(annot),
@@ -1253,6 +1262,46 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    private async setLocallyAvailableSelectedList(
+        state: SidebarContainerState,
+        unifiedListId: UnifiedList['unifiedId'],
+    ) {
+        this.options.events?.emit('setSelectedList', unifiedListId)
+
+        const list = state.lists.byId[unifiedListId]
+        const listInstance = state.listInstances[unifiedListId]
+        if (!list || !listInstance) {
+            console.warn(
+                'setSelectedList: could not find matching list for cache ID:',
+                unifiedListId,
+            )
+            return
+        }
+
+        this.emitMutation({
+            activeTab: { $set: 'spaces' },
+            selectedListId: { $set: unifiedListId },
+        })
+
+        if (list.remoteId != null) {
+            let nextState = state
+            if (listInstance.annotationRefsLoadState === 'pristine') {
+                nextState = await this.loadRemoteAnnotationReferencesForLists(
+                    state,
+                    [list],
+                )
+            }
+            await this.maybeLoadListRemoteAnnotations(nextState, unifiedListId)
+        }
+
+        this.options.events?.emit('renderHighlights', {
+            highlights: cacheUtils.getListHighlightsArray(
+                this.options.annotationsCache,
+                unifiedListId,
+            ),
+        })
+    }
+
     setSelectedList: EventHandler<'setSelectedList'> = async ({
         event,
         previousState,
@@ -1264,49 +1313,147 @@ export class SidebarContainerLogic extends UILogic<
         //     return
         // }
 
-        this.options.events?.emit('setSelectedList', event.unifiedListId)
-
         if (event.unifiedListId == null) {
+            this.options.events?.emit('setSelectedList', null)
             this.emitMutation({ selectedListId: { $set: null } })
             this.renderOpenSpaceInstanceHighlights(previousState)
             return
         }
 
-        const list = previousState.lists.byId[event.unifiedListId]
-        const listInstance = previousState.listInstances[event.unifiedListId]
-        if (!list || !listInstance) {
-            console.warn(
-                'setSelectedList: could not find matching list for cache ID:',
-                event.unifiedListId,
+        await this.setLocallyAvailableSelectedList(
+            previousState,
+            event.unifiedListId,
+        )
+    }
+
+    setSelectedListFromWebUI: EventHandler<
+        'setSelectedListFromWebUI'
+    > = async ({ event, previousState }) => {
+        const { annotationsCache, customLists, fullPageUrl } = this.options
+
+        const cachedList = annotationsCache.getListByRemoteId(
+            event.sharedListId,
+        )
+
+        // If locally available, proceed as usual
+        if (cachedList) {
+            await this.setLocallyAvailableSelectedList(
+                previousState,
+                cachedList.unifiedId,
             )
             return
         }
 
-        this.emitMutation({
-            activeTab: { $set: 'spaces' },
-            selectedListId: { $set: event.unifiedListId },
-        })
-
-        if (list.remoteId != null) {
-            let nextState = previousState
-            if (listInstance.annotationRefsLoadState === 'pristine') {
-                nextState = await this.loadRemoteAnnotationReferencesForLists(
-                    previousState,
-                    [list],
-                )
-            }
-            await this.maybeLoadListRemoteAnnotations(
-                nextState,
-                event.unifiedListId,
+        if (!fullPageUrl) {
+            throw new Error(
+                'Could not load remote list data for selected list mode without `props.fullPageUrl` being set in sidebar',
             )
         }
 
-        this.options.events?.emit('renderHighlights', {
-            highlights: cacheUtils.getListHighlightsArray(
-                this.options.annotationsCache,
-                event.unifiedListId,
-            ),
+        // Else we're dealing with a foreign list which we need to load remotely
+        await executeUITask(this, 'foreignSelectedListLoadState', async () => {
+            const sharedList = await customLists.fetchSharedListDataWithPageAnnotations(
+                {
+                    remoteListId: event.sharedListId,
+                    normalizedPageUrl: normalizeUrl(fullPageUrl),
+                },
+            )
+            if (!sharedList) {
+                throw new Error(
+                    `Could not load remote list data for selected list mode - ID: ${event.sharedListId}`,
+                )
+            }
+            const unifiedList = annotationsCache.addList({
+                remoteId: event.sharedListId,
+                name: sharedList.title,
+                creator: sharedList.creator,
+                description: sharedList.description,
+                isForeignList: true,
+                hasRemoteAnnotations: true,
+                unifiedAnnotationIds: [], // Will be populated soon when annots get cached
+            })
+
+            let sharedAnnotationReferences: SharedAnnotationReference[] = []
+
+            sharedList.sharedAnnotations.forEach((sharedAnnot) => {
+                sharedAnnotationReferences.push(sharedAnnot.reference)
+                annotationsCache.addAnnotation({
+                    body: sharedAnnot.body,
+                    creator: sharedAnnot.creator,
+                    comment: sharedAnnot.comment,
+                    lastEdited: sharedAnnot.updatedWhen,
+                    createdWhen: sharedAnnot.createdWhen,
+                    selector:
+                        sharedAnnot.selector != null
+                            ? JSON.parse(sharedAnnot.selector)
+                            : undefined,
+                    remoteId: sharedAnnot.reference.id.toString(),
+                    normalizedPageUrl: sharedAnnot.normalizedPageUrl,
+                    unifiedListIds: [unifiedList.unifiedId],
+                    privacyLevel: AnnotationPrivacyLevels.SHARED,
+                    localListIds: [],
+                })
+            })
+
+            this.emitMutation({
+                activeTab: { $set: 'spaces' },
+                selectedListId: { $set: unifiedList.unifiedId },
+                // NOTE: this is the only time we're manually mutating the listInstances state outside the cache subscription - maybe there's a "cleaner" way to do this
+                listInstances: {
+                    [unifiedList.unifiedId]: {
+                        annotationRefsLoadState: { $set: 'success' },
+                        conversationsLoadState: { $set: 'success' },
+                        annotationsLoadState: { $set: 'success' },
+                        sharedAnnotationReferences: {
+                            $set: sharedAnnotationReferences,
+                        },
+                    },
+                },
+            })
+
+            this.options.events?.emit('renderHighlights', {
+                highlights: cacheUtils.getListHighlightsArray(
+                    this.options.annotationsCache,
+                    unifiedList.unifiedId,
+                ),
+            })
         })
+
+        // const list = previousState.lists.byId[event.unifiedListId]
+        // const listInstance = previousState.listInstances[event.unifiedListId]
+        // if (!list || !listInstance) {
+        //     console.warn(
+        //         'setSelectedList: could not find matching list for cache ID:',
+        //         event.unifiedListId,
+        //     )
+        //     return
+        // }
+
+        // this.emitMutation({
+        //     activeTab: { $set: 'spaces' },
+        //     selectedListId: { $set: event.unifiedListId },
+        // })
+
+        // if (list.remoteId != null) {
+        //     let nextState = previousState
+        //     if (listInstance.annotationRefsLoadState === 'pristine') {
+        //         nextState = await this.loadRemoteAnnotationReferencesForLists(
+        //             previousState,
+        //             [list],
+        //         )
+        //     }
+        //     await this.maybeLoadListRemoteAnnotations(
+        //         nextState,
+        //         event.unifiedListId,
+        //     )
+        // }
+
+        // this.options.events?.emit('renderHighlights', {
+        //     highlights: cacheUtils.getListHighlightsArray(
+        //         this.options.annotationsCache,
+        //         event.unifiedListId,
+        //     ),
+        // })
     }
 
     setAnnotationShareModalShown: EventHandler<

@@ -1048,7 +1048,7 @@ describe('SidebarContainerLogic', () => {
                 expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
             })
 
-            it('should be able to save a new comment in selected space mode', async ({
+            it('should be able to save a new comment in selected list mode', async ({
                 device,
             }) => {
                 const { sidebar, annotationsCache } = await setupLogicHelper({
@@ -1853,8 +1853,8 @@ describe('SidebarContainerLogic', () => {
         })
     })
 
-    describe('selected space/selected space mode', () => {
-        it('should be able to set selected space mode for a specific joined space', async ({
+    describe('selected list mode', () => {
+        it('should be able to set selected list mode for a specific joined space', async ({
             device,
         }) => {
             const {
@@ -1940,7 +1940,7 @@ describe('SidebarContainerLogic', () => {
             ).toEqual('pristine')
         })
 
-        it('should be able to set selected space mode for a specific followed-only space', async ({
+        it('should be able to set selected list mode for a specific followed-only space', async ({
             device,
         }) => {
             const {
@@ -2042,7 +2042,7 @@ describe('SidebarContainerLogic', () => {
             expect(emittedEvents).toEqual(expectedEvents)
         })
 
-        it('should be able to set selected space mode for a specific local-only space', async ({
+        it('should be able to set selected list mode for a specific local-only space', async ({
             device,
         }) => {
             await device.storageManager.collection('customLists').createObject({
@@ -2117,6 +2117,340 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.activeTab).toEqual('spaces')
             expect(sidebar.state.selectedListId).toEqual(null)
             expect(emittedEvents).toEqual(expectedEvents)
+        })
+
+        it('should be able to set selected list mode from the Web UI for a locally available space', async ({
+            device,
+        }) => {
+            const {
+                sidebar,
+                emittedEvents,
+                annotationsCache,
+            } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+
+            const sharedListId = DATA.SHARED_LIST_IDS[3]
+            const followedCacheList = annotationsCache.getListByRemoteId(
+                sharedListId,
+            )
+            const expectedEvents: any[] = [
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: cacheUtils.getHighlightAnnotationsArray(
+                            annotationsCache,
+                        ),
+                    },
+                },
+            ]
+
+            expect(sidebar.state.activeTab).toEqual('annotations')
+            expect(sidebar.state.selectedListId).toEqual(null)
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(
+                sidebar.state.listInstances[followedCacheList.unifiedId]
+                    .annotationsLoadState,
+            ).toEqual('pristine')
+            expect(
+                sidebar.state.listInstances[followedCacheList.unifiedId]
+                    .annotationRefsLoadState,
+            ).toEqual('pristine')
+
+            const annotationsCountBefore =
+                sidebar.state.annotations.allIds.length
+            const annotationCardInstanceCountBefore = Object.keys(
+                sidebar.state.annotationCardInstances,
+            ).length
+
+            await sidebar.processEvent('setSelectedListFromWebUI', {
+                sharedListId,
+            })
+
+            expectedEvents.push(
+                {
+                    event: 'setSelectedList',
+                    args: followedCacheList.unifiedId,
+                },
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            followedCacheList.unifiedId,
+                        ),
+                    },
+                },
+            )
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(sidebar.state.selectedListId).toEqual(
+                followedCacheList.unifiedId,
+            )
+            expect(emittedEvents).toEqual(expectedEvents)
+            // Verify remote annots got loaded
+            expect(
+                sidebar.state.listInstances[followedCacheList.unifiedId]
+                    .annotationsLoadState,
+            ).toEqual('success')
+            expect(
+                sidebar.state.listInstances[followedCacheList.unifiedId]
+                    .annotationRefsLoadState,
+            ).toEqual('success')
+            expect(sidebar.state.annotations.allIds.length).toBe(
+                annotationsCountBefore + 2,
+            )
+            expect(
+                Object.keys(sidebar.state.annotationCardInstances).length,
+            ).toBe(annotationCardInstanceCountBefore + 4) // 2 for "annotations" tab + 2 for "spaces" tab
+        })
+
+        it('should be able to set selected list mode from the Web UI for a NON-locally available space', async ({
+            device,
+        }) => {
+            const {
+                sidebar,
+                emittedEvents,
+                annotationsCache,
+            } = await setupLogicHelper({
+                device,
+                withAuth: true,
+            })
+
+            // Let's add a new sharedList + entries to test with
+            const {
+                manager: serverStorageManager,
+            } = await device.getServerStorage()
+            const sharedListId = 'my-test-list-111'
+            await serverStorageManager.collection('sharedList').createObject({
+                id: sharedListId,
+                title: sharedListId,
+                description: sharedListId,
+                creator: DATA.CREATOR_2.id,
+                createdWhen: Date.now(),
+                updatedWhen: Date.now(),
+            })
+
+            const annots = [
+                {
+                    id: sharedListId + '1',
+                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
+                    creator: DATA.CREATOR_2.id,
+                    body: 'test highlight 1',
+                    createdWhen: 11111,
+                    updatedWhen: 11111,
+                    uploadedWhen: 11111,
+                    selector: {
+                        descriptor: {
+                            content: [
+                                { type: 'TextPositionSelector', start: 0 },
+                            ],
+                        },
+                    } as any,
+                },
+                {
+                    id: sharedListId + '2',
+                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
+                    creator: DATA.CREATOR_2.id,
+                    body: 'test highlight 2',
+                    comment: 'test comment 2',
+                    createdWhen: 11111,
+                    updatedWhen: 11111,
+                    uploadedWhen: 11111,
+                    selector: {
+                        descriptor: {
+                            content: [
+                                { type: 'TextPositionSelector', start: 0 },
+                            ],
+                        },
+                    } as any,
+                },
+            ]
+            const annotListEntries = [
+                {
+                    id: sharedListId + '1',
+                    creator: DATA.CREATOR_2.id,
+                    sharedList: sharedListId,
+                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
+                    sharedAnnotation: annots[0].id,
+                    createdWhen: new Date('2022-12-22').getTime(),
+                    updatedWhen: new Date('2022-12-22').getTime(),
+                    uploadedWhen: new Date('2022-12-22').getTime(),
+                },
+                {
+                    id: sharedListId + '2',
+                    creator: DATA.CREATOR_2.id,
+                    sharedList: sharedListId,
+                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
+                    sharedAnnotation: annots[1].id,
+                    createdWhen: new Date('2022-12-22').getTime(),
+                    updatedWhen: new Date('2022-12-22').getTime(),
+                    uploadedWhen: new Date('2022-12-22').getTime(),
+                },
+            ]
+            for (const annot of annots) {
+                await serverStorageManager
+                    .collection('sharedAnnotation')
+                    .createObject({
+                        ...annot,
+                        selector: JSON.stringify(annot.selector),
+                    })
+            }
+            for (const entry of annotListEntries) {
+                await serverStorageManager
+                    .collection('sharedAnnotationListEntry')
+                    .createObject(entry)
+            }
+
+            const expectedEvents: any[] = [
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: cacheUtils.getHighlightAnnotationsArray(
+                            annotationsCache,
+                        ),
+                    },
+                },
+            ]
+
+            expect(sidebar.state.foreignSelectedListLoadState).toEqual(
+                'pristine',
+            )
+            expect(sidebar.state.activeTab).toEqual('annotations')
+            expect(sidebar.state.selectedListId).toEqual(null)
+            expect(emittedEvents).toEqual(expectedEvents)
+
+            const listsBefore = [...sidebar.state.lists.allIds]
+            const listInstancesCountBefore = Object.keys(
+                sidebar.state.listInstances,
+            ).length
+            const annotationsBefore = [...sidebar.state.annotations.allIds]
+            const annotationCardInstanceCountBefore = Object.keys(
+                sidebar.state.annotationCardInstances,
+            ).length
+
+            await sidebar.processEvent('setSelectedListFromWebUI', {
+                sharedListId,
+            })
+
+            const unifiedForeignListId = annotationsCache.getLastAssignedListId()
+
+            expectedEvents.push(
+                // {
+                //     event: 'setSelectedList',
+                //     args: followedCacheList.unifiedId,
+                // },
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            unifiedForeignListId,
+                        ),
+                    },
+                },
+            )
+            expect(sidebar.state.foreignSelectedListLoadState).toEqual(
+                'success',
+            )
+            expect(sidebar.state.activeTab).toEqual('spaces')
+            expect(sidebar.state.selectedListId).toEqual(unifiedForeignListId)
+            expect(emittedEvents).toEqual(expectedEvents)
+
+            // Verify remote list data got loaded
+            expect(sidebar.state.lists.allIds).toEqual([
+                unifiedForeignListId,
+                ...listsBefore,
+            ])
+            expect(sidebar.state.lists.byId[unifiedForeignListId]).toEqual({
+                unifiedId: unifiedForeignListId,
+                remoteId: sharedListId,
+                name: sharedListId,
+                description: sharedListId,
+                creator: DATA.CREATOR_2,
+                hasRemoteAnnotations: true,
+                isForeignList: true,
+                unifiedAnnotationIds: [expect.any(String), expect.any(String)],
+            })
+            expect(Object.keys(sidebar.state.listInstances).length).toBe(
+                listInstancesCountBefore + 1,
+            )
+            expect(sidebar.state.listInstances[unifiedForeignListId]).toEqual({
+                unifiedListId: unifiedForeignListId,
+                annotationRefsLoadState: 'success',
+                conversationsLoadState: 'success',
+                annotationsLoadState: 'success',
+                sharedAnnotationReferences: [
+                    { type: 'shared-annotation-reference', id: annots[0].id },
+                    { type: 'shared-annotation-reference', id: annots[1].id },
+                ],
+                isOpen: false,
+            })
+
+            // Verify remote annots got loaded
+            const unifiedForeignAnnotIds = sidebar.state.annotations.allIds.filter(
+                (id) => !annotationsBefore.includes(id),
+            )
+            expect(unifiedForeignAnnotIds.length).toBe(2)
+            expect(
+                Object.keys(sidebar.state.annotationCardInstances).length,
+            ).toBe(annotationCardInstanceCountBefore + 2) // 2 for "annotations" tab + 0 for "spaces" tab
+            expect(
+                sidebar.state.annotations.byId[unifiedForeignAnnotIds[1]],
+            ).toEqual({
+                unifiedId: unifiedForeignAnnotIds[1],
+                remoteId: annots[0].id,
+                body: annots[0].body,
+                comment: annots[0].comment,
+                selector: annots[0].selector,
+                normalizedPageUrl: annots[0].normalizedPageUrl,
+                lastEdited: annots[0].updatedWhen,
+                createdWhen: annots[0].createdWhen,
+                creator: DATA.CREATOR_2,
+                privacyLevel: AnnotationPrivacyLevels.SHARED,
+                unifiedListIds: [unifiedForeignListId],
+            })
+            expect(
+                sidebar.state.annotations.byId[unifiedForeignAnnotIds[0]],
+            ).toEqual({
+                unifiedId: unifiedForeignAnnotIds[0],
+                remoteId: annots[1].id,
+                body: annots[1].body,
+                comment: annots[1].comment,
+                selector: annots[1].selector,
+                normalizedPageUrl: annots[1].normalizedPageUrl,
+                lastEdited: annots[1].updatedWhen,
+                createdWhen: annots[1].createdWhen,
+                creator: DATA.CREATOR_2,
+                privacyLevel: AnnotationPrivacyLevels.SHARED,
+                unifiedListIds: [unifiedForeignListId],
+            })
+            expect(
+                sidebar.state.annotationCardInstances[
+                    generateAnnotationCardInstanceId({
+                        unifiedId: unifiedForeignAnnotIds[0],
+                    })
+                ],
+            ).toEqual({
+                unifiedAnnotationId: unifiedForeignAnnotIds[0],
+                isCommentTruncated: true,
+                isCommentEditing: false,
+                cardMode: 'none',
+                comment: annots[1].comment,
+            })
+            expect(
+                sidebar.state.annotationCardInstances[
+                    generateAnnotationCardInstanceId({
+                        unifiedId: unifiedForeignAnnotIds[1],
+                    })
+                ],
+            ).toEqual({
+                unifiedAnnotationId: unifiedForeignAnnotIds[1],
+                isCommentTruncated: true,
+                isCommentEditing: false,
+                cardMode: 'none',
+                comment: '',
+            })
         })
     })
 

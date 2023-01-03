@@ -123,6 +123,9 @@ export interface UnifiedList {
     creator?: UserReference
     hasRemoteAnnotations: boolean
 
+    /** Denotes whether or not this list was loaded via a web UI page link AND has no locally available data. */
+    isForeignList?: boolean
+
     // Misc list feature state
     unifiedAnnotationIds: UnifiedAnnotation['unifiedId'][]
 }

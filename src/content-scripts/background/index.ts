@@ -20,6 +20,8 @@ export class ContentScriptsBackground {
         this.remoteFunctions = {
             goToAnnotationFromDashboardSidebar: this
                 .goToAnnotationFromDashboardSidebar,
+            openPageWithSidebarInSelectedListMode: this
+                .openPageWithSidebarInSelectedListMode,
             injectContentScriptComponent: this.injectContentScriptComponent,
             getCurrentTab: async ({ tab }) => ({
                 id: tab.id,
@@ -87,6 +89,22 @@ export class ContentScriptsBackground {
         }
 
         browserAPIs.tabs.onUpdated.addListener(listener)
+    }
+
+    openPageWithSidebarInSelectedListMode: ContentScriptsInterface<
+        'provider'
+    >['openPageWithSidebarInSelectedListMode'] = async (
+        { tab },
+        { fullPageUrl, sharedListId },
+    ) => {
+        await this.doSomethingInNewTab(fullPageUrl, async (tabId) => {
+            await runInTab<InPageUIContentScriptRemoteInterface>(
+                tabId,
+            ).showSidebar({
+                action: 'selected_list_mode_from_web_ui',
+                sharedListId,
+            })
+        })
     }
 
     goToAnnotationFromDashboardSidebar: ContentScriptsInterface<

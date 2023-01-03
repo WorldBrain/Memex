@@ -158,16 +158,6 @@ export const CREATOR_2: UserReference = {
     id: 'test-user-2@test.com',
 }
 
-export const __CREATOR_1: UserPublicDetails = {
-    user: { displayName: 'Tester A' },
-    profile: { avatarURL: 'https://worldbrain.io/test.jpg' },
-}
-
-export const __CREATOR_2: UserPublicDetails = {
-    user: { displayName: TEST_USER.displayName },
-    profile: { avatarURL: 'https://worldbrain.io/test2.jpg' },
-}
-
 export const __LISTS_1 = [
     { id: 1, name: 'test 1' },
     { id: 2, name: 'test 2' },

@@ -82,6 +82,8 @@ export default class CustomListBackground {
                 .fetchAnnotationRefsForRemoteListsOnPage,
             fetchFollowedListsWithAnnotations: this
                 .fetchFollowedListsWithAnnotations,
+            fetchSharedListDataWithPageAnnotations: this
+                .fetchSharedListDataWithPageAnnotations,
             fetchSharedListDataWithOwnership: this
                 .fetchSharedListDataWithOwnership,
             fetchListPagesByUrl: this.fetchListPagesByUrl,
@@ -317,6 +319,46 @@ export default class CustomListBackground {
                 isFollowed: true,
                 createdAt: new Date(sharedList.createdWhen),
             }))
+    }
+
+    fetchSharedListDataWithPageAnnotations: RemoteCollectionsInterface['fetchSharedListDataWithPageAnnotations'] = async ({
+        normalizedPageUrl,
+        remoteListId,
+    }) => {
+        const { contentSharing } = await this.options.getServerStorage()
+        const listReference: SharedListReference = {
+            id: remoteListId,
+            type: 'shared-list-reference',
+        }
+        const sharedList = await contentSharing.getListByReference(
+            listReference,
+        )
+        if (sharedList == null) {
+            return null
+        }
+
+        const {
+            [normalizedPageUrl]: annotations,
+        } = await contentSharing.getAnnotationsForPagesInList({
+            listReference,
+            normalizedPageUrls: [normalizedPageUrl],
+        })
+
+        if (!annotations) {
+            return null
+        }
+
+        return {
+            ...sharedList,
+            sharedAnnotations: annotations.map(({ annotation }) => ({
+                ...annotation,
+                creator: { type: 'user-reference', id: annotation.creator },
+                reference: {
+                    type: 'shared-annotation-reference',
+                    id: annotation.id,
+                },
+            })),
+        }
     }
 
     fetchSharedListDataWithOwnership: RemoteCollectionsInterface['fetchSharedListDataWithOwnership'] = async ({

@@ -771,7 +771,10 @@ export class AnnotationsSidebar extends React.Component<
             return this.renderFeed()
         }
 
-        if (this.props.isDataLoading) {
+        if (
+            this.props.isDataLoading ||
+            this.props.foreignSelectedListLoadState === 'running'
+        ) {
             return this.renderLoader()
         }
 

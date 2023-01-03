@@ -1,4 +1,8 @@
-import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type {
+    SharedAnnotation,
+    SharedAnnotationReference,
+    SharedList,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { SpaceDisplayEntry } from '../ui/CollectionPicker/logic'
 
@@ -20,6 +24,16 @@ export interface PageListEntry {
     createdAt: Date
     listId: number
     fullUrl: string
+}
+
+export type SharedListWithAnnotations = SharedList & {
+    creator: UserReference
+    sharedAnnotations: Array<
+        SharedAnnotation & {
+            creator: UserReference
+            reference: SharedAnnotationReference
+        }
+    >
 }
 
 export interface ListDescription {
@@ -87,6 +101,10 @@ export interface RemoteCollectionsInterface {
     fetchSharedListDataWithOwnership(args: {
         remoteListId: string
     }): Promise<PageList | null>
+    fetchSharedListDataWithPageAnnotations(args: {
+        remoteListId: string
+        normalizedPageUrl: string
+    }): Promise<SharedListWithAnnotations | null>
     fetchCollaborativeLists(args: {
         skip?: number
         limit?: number

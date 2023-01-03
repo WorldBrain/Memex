@@ -88,8 +88,9 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     loadState: TaskState
     cacheLoadState: TaskState
     noteCreateState: TaskState
-    remoteAnnotationsLoadState: TaskState
     secondarySearchState: TaskState
+    remoteAnnotationsLoadState: TaskState
+    foreignSelectedListLoadState: TaskState
 
     showState: 'visible' | 'hidden'
     isLocked: boolean
@@ -237,6 +238,7 @@ interface SidebarEvents {
 
     // Selected space management
     setSelectedList: { unifiedListId: UnifiedList['unifiedId'] | null }
+    setSelectedListFromWebUI: { sharedListId: string }
 
     goToAnnotationInNewTab: {
         unifiedAnnotationId: UnifiedAnnotation['unifiedId']
