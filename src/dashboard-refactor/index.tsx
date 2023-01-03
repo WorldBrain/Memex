@@ -79,6 +79,8 @@ export class DashboardContainer extends StatefulUIElement<
         | 'document'
         | 'location'
         | 'localStorage'
+        | 'annotationsCache'
+        | 'contentScriptsBG'
         | 'pageActivityIndicatorBG'
         | 'contentConversationsBG'
         | 'activityIndicatorBG'
@@ -102,6 +104,7 @@ export class DashboardContainer extends StatefulUIElement<
         pageActivityIndicatorBG: runInBackground(),
         contentConversationsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
+        contentScriptsBG: runInBackground(),
         contentShareBG: runInBackground(),
         syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
@@ -111,12 +114,14 @@ export class DashboardContainer extends StatefulUIElement<
         listsBG: runInBackground(),
         tagsBG: runInBackground(),
         authBG: runInBackground(),
+        annotationsCache: new PageAnnotationsCache({
+            normalizedPageUrl: '', // TODO: cache - figure out page URL here
+        }),
         openFeed: () => window.open(getFeedUrl(), '_blank'),
         openCollectionPage: (remoteListId) =>
             window.open(getListShareUrl({ remoteListId }), '_blank'),
     }
 
-    private annotationsCache: PageAnnotationsCache
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
 
     youtubeService: YoutubeService
@@ -130,9 +135,6 @@ export class DashboardContainer extends StatefulUIElement<
     constructor(props: Props) {
         super(props, new DashboardLogic(props))
 
-        this.annotationsCache = new PageAnnotationsCache({
-            normalizedPageUrl: '',
-        }) // TODO: cache - figure out page URL here
         this.youtubeService = new YoutubeService(createYoutubeServiceOptions())
     }
 
@@ -1456,7 +1458,7 @@ export class DashboardContainer extends StatefulUIElement<
                     </MainContent>
                     <NotesSidebar
                         shouldHydrateCacheOnInit
-                        annotationsCache={this.annotationsCache}
+                        annotationsCache={this.props.annotationsCache}
                         youtubeService={this.youtubeService}
                         tags={this.props.tagsBG}
                         auth={this.props.authBG}
@@ -1464,6 +1466,7 @@ export class DashboardContainer extends StatefulUIElement<
                         customLists={this.props.listsBG}
                         annotations={this.props.annotationsBG}
                         contentSharing={this.props.contentShareBG}
+                        contentScriptsBG={this.props.contentScriptsBG}
                         syncSettingsBG={this.props.syncSettingsBG}
                         pageActivityIndicatorBG={
                             this.props.pageActivityIndicatorBG

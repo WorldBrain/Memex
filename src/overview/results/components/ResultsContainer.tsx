@@ -87,10 +87,10 @@ class ResultsContainer extends React.Component<Props, State> {
     }
 
     private goToAnnotation = async (annotation: Annotation) => {
-        await this.annotations.goToAnnotationFromSidebar({
-            url: annotation.pageUrl,
-            annotation,
-        })
+        // await this.annotations.goToAnnotationFromSidebar({
+        //     url: annotation.pageUrl,
+        //     annotation,
+        // })
     }
 
     private getOnboardingStatus = async () => {

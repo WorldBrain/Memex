@@ -57,6 +57,7 @@ export interface SidebarContainerDependencies {
     contentSharing: ContentSharingInterface
     contentConversationsBG: ContentConversationsInterface
     syncSettingsBG: RemoteSyncSettingsInterface
+    contentScriptsBG: ContentScriptsInterface<'caller'>
     auth: AuthRemoteFunctionsInterface
     subscription: SubscriptionsService
     theme?: MemexTheme & Partial<SidebarTheme>
@@ -67,7 +68,6 @@ export interface SidebarContainerDependencies {
     analytics: Analytics
     copyToClipboard: (text: string) => Promise<boolean>
     copyPaster: RemoteCopyPasterInterface
-    contentScriptBackground: ContentScriptsInterface<'caller'>
     youtubePlayer?: YoutubePlayer
     youtubeService?: YoutubeService
 }
@@ -238,7 +238,9 @@ interface SidebarEvents {
     // Selected space management
     setSelectedList: { unifiedListId: UnifiedList['unifiedId'] | null }
 
-    goToAnnotationInNewTab: { annotationUrl: string }
+    goToAnnotationInNewTab: {
+        unifiedAnnotationId: UnifiedAnnotation['unifiedId']
+    }
 
     // Misc events
     copyNoteLink: { link: string }

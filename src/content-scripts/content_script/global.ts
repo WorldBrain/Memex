@@ -263,7 +263,7 @@ export async function main(
                 copyPaster,
                 subscription,
                 contentConversationsBG: runInBackground(),
-                contentScriptBackground: runInBackground(),
+                contentScriptsBG: runInBackground(),
             })
             components.sidebar?.resolve()
         },
@@ -313,17 +313,15 @@ export async function main(
         insertTooltip: async () => inPageUI.showTooltip(),
         removeTooltip: async () => inPageUI.removeTooltip(),
         insertOrRemoveTooltip: async () => inPageUI.toggleTooltip(),
-        goToHighlight: async (localAnnotationId, pageLocalAnnotationIds) => {
-            const unifiedAnnotation = annotationsCache.getAnnotationByLocalId(
-                localAnnotationId,
-            )
-            const unifiedPageAnnotations = pageLocalAnnotationIds.map(
-                (localId) => annotationsCache.getAnnotationByLocalId(localId),
-            )
-            await highlightRenderer.renderHighlights(
-                unifiedPageAnnotations,
-                annotationsBG.toggleSidebarOverlay,
-            )
+        goToHighlight: async (annotationCacheId) => {
+            const unifiedAnnotation =
+                annotationsCache.annotations.byId[annotationCacheId]
+            if (!unifiedAnnotation) {
+                console.warn(
+                    "Tried to go to highlight in new page that doesn't exist in cache",
+                )
+                return
+            }
             highlightRenderer.highlightAndScroll(unifiedAnnotation)
         },
         createHighlight: annotationsFunctions.createHighlight({

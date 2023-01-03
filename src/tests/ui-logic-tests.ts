@@ -61,6 +61,7 @@ export function makeMultiDeviceUILogicTestFactory(
     }
 }
 
+// TODO: properly type this (see usages)
 export function insertBackgroundFunctionTab(remoteFunctions, tab: any = {}) {
     return mapValues(remoteFunctions, (f) => {
         return (...args: any[]) => {

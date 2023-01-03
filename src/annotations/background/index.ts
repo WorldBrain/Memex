@@ -76,9 +76,6 @@ export default class DirectLinkingBackground {
             toggleSidebarOverlay: this.toggleSidebarOverlay.bind(this),
             toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
             getAnnotBookmark: this.getAnnotBookmark.bind(this),
-            goToAnnotationFromSidebar: this.goToAnnotationFromDashboardSidebar.bind(
-                this,
-            ),
             getSharedAnnotations: this.getSharedAnnotations,
             getListIdsForAnnotation: this.getListIdsForAnnotation,
         }
@@ -95,61 +92,6 @@ export default class DirectLinkingBackground {
         })
 
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
-    }
-
-    async goToAnnotationFromDashboardSidebar(
-        { tab }: TabArg,
-        {
-            url,
-            annotation,
-        }: {
-            url: string
-            annotation: Pick<Annotation, 'url'>
-        },
-    ) {
-        url = url.startsWith('http') ? url : `https://${url}`
-
-        const activeTab = await this.options.browserAPIs.tabs.create({
-            active: true,
-            url,
-        })
-
-        const pageAnnotations = await this.getAllAnnotationsByUrl(
-            { tab },
-            { url },
-        )
-        const highlightableIds = pageAnnotations
-            .filter((annot) => annot.selector)
-            .map((annot) => annot.url)
-
-        const listener = async (tabId, changeInfo) => {
-            // Necessary to insert the ribbon/sidebar in case the user has turned  it off.
-            if (tabId === activeTab.id && changeInfo.status === 'complete') {
-                try {
-                    // TODO: This wait is a hack to mitigate trying to use the remote function `showSidebar` before it's ready
-                    // it should be registered in the tab setup, but is not available immediately on this tab onUpdate handler
-                    // since it is fired on the page complete, not on our content script setup complete.
-                    await new Promise((resolve) => setTimeout(resolve, 500))
-
-                    await runInTab<InPageUIContentScriptRemoteInterface>(
-                        tabId,
-                    ).showSidebar({
-                        annotationLocalId: annotation.url,
-                        action: 'show_annotation',
-                    })
-                    await runInTab<InPageUIContentScriptRemoteInterface>(
-                        tabId,
-                    ).goToHighlight(annotation.url, highlightableIds)
-                } catch (err) {
-                    throw err
-                } finally {
-                    this.options.browserAPIs.tabs.onUpdated.removeListener(
-                        listener,
-                    )
-                }
-            }
-        }
-        this.options.browserAPIs.tabs.onUpdated.addListener(listener)
     }
 
     async toggleSidebarOverlay(

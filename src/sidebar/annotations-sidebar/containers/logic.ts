@@ -959,25 +959,28 @@ export class SidebarContainerLogic extends UILogic<
 
     goToAnnotationInNewTab: EventHandler<'goToAnnotationInNewTab'> = async ({
         event,
-        previousState,
     }) => {
         this.emitMutation({
-            activeAnnotationId: { $set: event.annotationUrl },
+            activeAnnotationId: { $set: event.unifiedAnnotationId },
         })
 
-        const annotation = this.options.annotationsCache.getAnnotationByLocalId(
-            event.annotationUrl,
-        )
+        const annotation = this.options.annotationsCache.annotations.byId[
+            event.unifiedAnnotationId
+        ]
         if (!annotation) {
             throw new Error(
-                `Could not find cached annotation data for ID: ${event.annotationUrl}`,
+                `Could not find cached annotation data for ID: ${event.unifiedAnnotationId}`,
             )
         }
 
-        return this.options.annotations.goToAnnotationFromSidebar({
-            url: annotation.normalizedPageUrl,
-            annotation: { url: annotation.localId },
-        })
+        return this.options.contentScriptsBG.goToAnnotationFromDashboardSidebar(
+            {
+                fullPageUrl:
+                    this.options.fullPageUrl ??
+                    'https://' + annotation.normalizedPageUrl,
+                annotationCacheId: event.unifiedAnnotationId,
+            },
+        )
     }
 
     deleteAnnotation: EventHandler<'deleteAnnotation'> = async ({ event }) => {

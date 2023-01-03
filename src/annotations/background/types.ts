@@ -85,14 +85,6 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
         ],
         Array<SharedAnnotationWithRefs>
     >
-    goToAnnotationFromSidebar: RemoteFunction<
-        Role,
-        {
-            url: string
-            annotation: Pick<Annotation, 'url'>
-        },
-        void
-    >
 }
 
 export interface CreateAnnotationParams {

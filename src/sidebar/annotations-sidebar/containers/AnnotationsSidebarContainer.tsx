@@ -241,9 +241,7 @@ export class AnnotationsSidebarContainer<
                 this.props.showGoToAnnotationBtn && annotation.body?.length > 0
                     ? () =>
                           this.processEvent('goToAnnotationInNewTab', {
-                              annotationUrl: this.props.annotationsCache
-                                  .annotations.byId[unifiedAnnotationId]
-                                  .localId,
+                              unifiedAnnotationId,
                           })
                     : undefined,
             onCopyPasterBtnClick: () =>
