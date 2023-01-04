@@ -307,10 +307,11 @@ export class AnnotationsSidebarContainer<
             onCommentChange: (comment) =>
                 this.processEvent('setNewPageNoteText', { comment }),
             onCancel: () => this.processEvent('cancelNewPageNote', null),
-            onSave: (shouldShare, isProtected) =>
+            onSave: (shouldShare, isProtected, listInstanceId) =>
                 this.processEvent('saveNewPageNote', {
                     shouldShare,
                     isProtected,
+                    listInstanceId,
                 }),
             tagQueryEntries: (query) => tags.searchForTagSuggestions({ query }),
             addPageToList: (listId) =>

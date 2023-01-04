@@ -848,10 +848,18 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             const listIds = [...commentBox.lists]
-            if (selectedListId != null) {
-                const { localId, remoteId } = lists.byId[selectedListId]
-                listIds.push(localId)
+            const maybeAddLocalListIdForCacheList = (
+                unifiedListId?: UnifiedList['unifiedId'],
+            ) => {
+                if (unifiedListId != null) {
+                    const { localId } = lists.byId[unifiedListId]
+                    if (localId != null) {
+                        listIds.push(localId)
+                    }
+                }
             }
+            maybeAddLocalListIdForCacheList(selectedListId)
+            maybeAddLocalListIdForCacheList(event.listInstanceId)
 
             const { remoteAnnotationId, savePromise } = await createAnnotation({
                 annotationData: {

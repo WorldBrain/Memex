@@ -197,6 +197,8 @@ interface SidebarEvents {
         shouldShare: boolean
         isProtected?: boolean
         annotationId?: string
+        /** To be set if being called from a toggled list instance's create form. */
+        listInstanceId?: UnifiedList['unifiedId']
         now?: number
     }
     cancelNewPageNote: null

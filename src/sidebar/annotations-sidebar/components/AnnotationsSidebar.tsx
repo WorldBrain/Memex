@@ -106,7 +106,13 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'body'>,
         instanceLocation: AnnotationCardInstanceLocation,
     ) => AnnotationEditGeneralProps & AnnotationEditEventProps
-    annotationCreateProps: AnnotationCreateProps
+    annotationCreateProps: Omit<AnnotationCreateProps, 'onSave'> & {
+        onSave: (
+            shouldShare: boolean,
+            isProtected: boolean,
+            listInstanceId?: UnifiedList['unifiedId'],
+        ) => Promise<void>
+    }
 
     sharingAccess: AnnotationSharingAccess
     isDataLoading: boolean
@@ -271,11 +277,20 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderNewAnnotation() {
+    private renderNewAnnotation(
+        toggledListInstanceId?: UnifiedList['unifiedId'],
+    ) {
         return (
             <NewAnnotationSection>
                 <AnnotationCreate
                     {...this.props.annotationCreateProps}
+                    onSave={(shouldShare, isProtected) =>
+                        this.props.annotationCreateProps.onSave(
+                            shouldShare,
+                            isProtected,
+                            toggledListInstanceId,
+                        )
+                    }
                     ref={this.annotationCreateRef as any}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                 />
@@ -291,14 +306,14 @@ export class AnnotationsSidebar extends React.Component<
 
     private renderListAnnotations(
         unifiedListId: UnifiedList['unifiedId'],
-        forceRendering: boolean = false,
+        selectedListMode: boolean = false,
     ) {
         const listData = this.props.lists.byId[unifiedListId]
         const listInstance = this.props.listInstances[unifiedListId]
 
         // TODO: Simplify this confusing condition
         if (
-            !(listInstance.isOpen || forceRendering) ||
+            !(listInstance.isOpen || selectedListMode) ||
             (listData.hasRemoteAnnotations &&
                 listInstance.annotationsLoadState === 'pristine')
         ) {
@@ -354,7 +369,9 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <FollowedNotesContainer>
                 <NewAnnotationBoxMyAnnotations>
-                    {this.renderNewAnnotation()}
+                    {this.renderNewAnnotation(
+                        !selectedListMode ? unifiedListId : undefined,
+                    )}
                 </NewAnnotationBoxMyAnnotations>
                 {annotationsData.map((annotation) => {
                     // TODO: Handle when list has no remoteID (should not afford conversation logic)
