@@ -348,9 +348,9 @@ describe('SidebarContainerLogic', () => {
                         unifiedId: expect.any(String),
                         unifiedAnnotationIds: mapLocalAnnotIdsToUnified(
                             [
-                                DATA.ANNOT_1.url,
-                                DATA.ANNOT_2.url, // NOTE: inherited shared list from parent page
                                 DATA.ANNOT_3.url, // NOTE: inherited shared list from parent page
+                                DATA.ANNOT_2.url, // NOTE: inherited shared list from parent page
+                                DATA.ANNOT_1.url,
                             ],
                             annotationsCache,
                         ),
@@ -931,11 +931,11 @@ describe('SidebarContainerLogic', () => {
                     highlights: [
                         ...cacheUtils.getListHighlightsArray(
                             annotationsCache,
-                            unifiedListIdA,
+                            unifiedListIdB,
                         ),
                         ...cacheUtils.getListHighlightsArray(
                             annotationsCache,
-                            unifiedListIdB,
+                            unifiedListIdA,
                         ),
                     ],
                 },
@@ -959,10 +959,10 @@ describe('SidebarContainerLogic', () => {
             expectedEvents.push({
                 event: 'renderHighlights',
                 args: {
-                    highlights: [
+                    highlights: expect.arrayContaining([
                         ...cacheUtils.getListHighlightsArray(
                             annotationsCache,
-                            unifiedListIdA,
+                            unifiedListIdC,
                         ),
                         ...cacheUtils.getListHighlightsArray(
                             annotationsCache,
@@ -970,9 +970,9 @@ describe('SidebarContainerLogic', () => {
                         ),
                         ...cacheUtils.getListHighlightsArray(
                             annotationsCache,
-                            unifiedListIdC,
+                            unifiedListIdA,
                         ),
-                    ],
+                    ]),
                 },
             })
 

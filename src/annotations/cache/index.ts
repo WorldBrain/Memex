@@ -167,7 +167,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         // Ensure each list gets a ref back to this annot
         unifiedListIds.forEach((unifiedListId) => {
-            this.lists.byId[unifiedListId]?.unifiedAnnotationIds.push(
+            this.lists.byId[unifiedListId]?.unifiedAnnotationIds.unshift(
                 unifiedAnnotationId,
             )
         })
