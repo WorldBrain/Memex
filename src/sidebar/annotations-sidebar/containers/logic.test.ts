@@ -447,8 +447,8 @@ describe('SidebarContainerLogic', () => {
                         privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
                         unifiedListIds: mapLocalListIdsToUnified(
                             [
-                                DATA.LOCAL_LISTS[3].id,
                                 DATA.LOCAL_LISTS[0].id, // NOTE: inherited shared list from parent page
+                                DATA.LOCAL_LISTS[3].id,
                             ],
                             annotationsCache,
                         ),

@@ -29,7 +29,7 @@ export function ANNOTATIONS(): UnifiedAnnotation[] {
             createdWhen: 1,
             lastEdited: 1,
             unifiedListIds: [LIST_IDS[0], LIST_IDS[1]],
-            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            privacyLevel: AnnotationPrivacyLevels.PROTECTED,
         },
         {
             unifiedId: ANNOTATION_IDS[1],
@@ -46,7 +46,7 @@ export function ANNOTATIONS(): UnifiedAnnotation[] {
             createdWhen: 2,
             lastEdited: 2,
             unifiedListIds: [LIST_IDS[0]],
-            privacyLevel: AnnotationPrivacyLevels.SHARED,
+            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
         },
         {
             unifiedId: ANNOTATION_IDS[2],
@@ -62,7 +62,7 @@ export function ANNOTATIONS(): UnifiedAnnotation[] {
             createdWhen: 3,
             lastEdited: 3,
             unifiedListIds: [LIST_IDS[1]],
-            privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
+            privacyLevel: AnnotationPrivacyLevels.PROTECTED,
         },
         {
             unifiedId: ANNOTATION_IDS[3],
@@ -72,7 +72,7 @@ export function ANNOTATIONS(): UnifiedAnnotation[] {
             creator: USER_2,
             createdWhen: 3,
             lastEdited: 3,
-            unifiedListIds: [LIST_IDS[1]],
+            unifiedListIds: [LIST_IDS[0]],
             privacyLevel: AnnotationPrivacyLevels.SHARED,
         },
     ]

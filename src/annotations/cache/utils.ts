@@ -268,19 +268,25 @@ export async function hydrateCache({
             const privacyLevel = privacyLvlsByAnnot[annot.url]
 
             // Inherit parent page shared lists if public annot
-            if (privacyLevel >= AnnotationPrivacyLevels.SHARED) {
-                annot.lists.push(
-                    ...pageLocalListIds.filter((localListId) => {
-                        const cachedList = args.cache.lists.byId[localListId]
-                        return cachedList?.remoteId != null
-                    }),
-                )
-            }
+            const unifiedListIds =
+                privacyLevel >= AnnotationPrivacyLevels.SHARED
+                    ? pageLocalListIds
+                          .map((localListId) => {
+                              const cachedList = args.cache.getListByLocalId(
+                                  localListId,
+                              )
+                              return cachedList?.remoteId != null
+                                  ? cachedList.unifiedId
+                                  : null
+                          })
+                          .filter((id) => id != null)
+                    : undefined
 
             return reshapeAnnotationForCache(annot, {
                 extraData: {
                     remoteId: remoteIdsByAnnot[annot.url]?.toString(),
                     creator: args.user,
+                    unifiedListIds,
                     privacyLevel,
                 },
             })
