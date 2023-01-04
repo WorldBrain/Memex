@@ -158,12 +158,6 @@ export const CREATOR_2: UserReference = {
     id: 'test-user-2@test.com',
 }
 
-export const __LISTS_1 = [
-    { id: 1, name: 'test 1' },
-    { id: 2, name: 'test 2' },
-    { id: 3, name: 'test 3' },
-]
-
 export const LOCAL_LISTS: PageList[] = [
     {
         id: 1,

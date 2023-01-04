@@ -824,7 +824,13 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const { lists, commentBox, fullPageUrl, selectedListId } = previousState
+        const {
+            lists,
+            commentBox,
+            fullPageUrl,
+            selectedListId,
+            activeTab,
+        } = previousState
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
@@ -858,7 +864,10 @@ export class SidebarContainerLogic extends UILogic<
                     }
                 }
             }
-            maybeAddLocalListIdForCacheList(selectedListId)
+            // Adding a new annot in selected space mode should only work on the "Spaces" tab
+            if (activeTab === 'spaces') {
+                maybeAddLocalListIdForCacheList(selectedListId)
+            }
             maybeAddLocalListIdForCacheList(event.listInstanceId)
 
             const { remoteAnnotationId, savePromise } = await createAnnotation({
@@ -893,6 +902,7 @@ export class SidebarContainerLogic extends UILogic<
             })
 
             await savePromise
+            // TODO: maybe move this call inside `createAnnotation` fn
             await this.options.contentSharing.shareAnnotationToSomeLists({
                 annotationUrl: annotationId,
                 localListIds: listIds,
