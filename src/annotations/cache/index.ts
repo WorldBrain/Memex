@@ -138,6 +138,8 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             )
         }
 
+        let privacyLevel = annotation.privacyLevel
+
         const unifiedListIds = [
             ...new Set(
                 [
@@ -151,6 +153,10 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                                 'No cached list data found for given local list IDs on annotation - did you remember to cache lists before annotations?',
                             )
                             return null
+                        }
+
+                        if (this.lists.byId[unifiedListId]?.remoteId != null) {
+                            privacyLevel = AnnotationPrivacyLevels.PROTECTED
                         }
 
                         return unifiedListId
@@ -168,6 +174,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         return {
             ...annotation,
+            privacyLevel,
             unifiedListIds,
             createdWhen: annotation.createdWhen ?? opts.now,
             lastEdited:
@@ -298,7 +305,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         if (previous.privacyLevel === updates.privacyLevel) {
             unifiedListIds = [...updates.unifiedListIds]
         } else if (
-            previous.privacyLevel >= AnnotationPrivacyLevels.SHARED &&
+            previous.privacyLevel !== AnnotationPrivacyLevels.PRIVATE &&
             updates.privacyLevel <= AnnotationPrivacyLevels.PRIVATE
         ) {
             if (opts.keepListsIfUnsharing) {

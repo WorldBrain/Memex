@@ -824,21 +824,18 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const {
-            lists,
-            fullPageUrl: pageUrl,
-            commentBox,
-            selectedListId: selectedList,
-        } = previousState
+        const { lists, commentBox, fullPageUrl, selectedListId } = previousState
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
         }
         const now = event.now ?? Date.now()
-        const annotationId = generateAnnotationUrl({
-            pageUrl,
-            now: () => now,
-        })
+        const annotationId =
+            event.annotationId ??
+            generateAnnotationUrl({
+                pageUrl: fullPageUrl,
+                now: () => now,
+            })
 
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },
@@ -851,15 +848,15 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             const listIds = [...commentBox.lists]
-            if (selectedList != null) {
-                const { localId } = lists.byId[selectedList]
+            if (selectedListId != null) {
+                const { localId, remoteId } = lists.byId[selectedListId]
                 listIds.push(localId)
             }
 
             const { remoteAnnotationId, savePromise } = await createAnnotation({
                 annotationData: {
-                    fullPageUrl: pageUrl,
                     comment,
+                    fullPageUrl,
                     localId: annotationId,
                     createdWhen: new Date(now),
                 },
@@ -875,7 +872,7 @@ export class SidebarContainerLogic extends UILogic<
             this.options.annotationsCache.addAnnotation({
                 localId: annotationId,
                 remoteId: remoteAnnotationId ?? undefined,
-                normalizedPageUrl: normalizeUrl(pageUrl),
+                normalizedPageUrl: normalizeUrl(fullPageUrl),
                 privacyLevel: shareOptsToPrivacyLvl({
                     shouldShare: event.shouldShare,
                     isBulkShareProtected: event.isProtected,
@@ -888,8 +885,10 @@ export class SidebarContainerLogic extends UILogic<
             })
 
             await savePromise
-
-            // TODO: Share annot to lists (maybe updated createAnnotation method)
+            await this.options.contentSharing.shareAnnotationToSomeLists({
+                annotationUrl: annotationId,
+                localListIds: listIds,
+            })
         })
     }
 

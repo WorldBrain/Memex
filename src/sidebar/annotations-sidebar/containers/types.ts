@@ -196,6 +196,7 @@ interface SidebarEvents {
     saveNewPageNote: {
         shouldShare: boolean
         isProtected?: boolean
+        annotationId?: string
         now?: number
     }
     cancelNewPageNote: null
