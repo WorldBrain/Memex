@@ -2068,9 +2068,23 @@ describe('SidebarContainerLogic', () => {
         it('should be able to set annotations as being active', async ({
             device,
         }) => {
-            const { sidebar, annotationsCache } = await setupLogicHelper({
+            const {
+                sidebar,
+                annotationsCache,
+                emittedEvents,
+            } = await setupLogicHelper({
                 device,
             })
+            const expectedEvents: any[] = [
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: cacheUtils.getHighlightAnnotationsArray(
+                            annotationsCache,
+                        ),
+                    },
+                },
+            ]
 
             const unifiedAnnotationIdA = annotationsCache.getAnnotationByLocalId(
                 DATA.LOCAL_ANNOTATIONS[0].url,
@@ -2085,6 +2099,7 @@ describe('SidebarContainerLogic', () => {
                 unifiedId: unifiedAnnotationIdB,
             })
 
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.activeAnnotationId).toBeNull()
             expect(sidebar.state.annotationCardInstances[cardIdA]).toEqual(
                 expect.objectContaining({
@@ -2096,6 +2111,9 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('setActiveAnnotation', {
                 unifiedAnnotationId: unifiedAnnotationIdA,
             })
+            // No expected event emission as annot is not a highlight
+
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.activeAnnotationId).toBe(unifiedAnnotationIdA)
             expect(sidebar.state.annotationCardInstances[cardIdA]).toEqual(
                 expect.objectContaining({
@@ -2136,6 +2154,16 @@ describe('SidebarContainerLogic', () => {
                 unifiedAnnotationId: unifiedAnnotationIdB,
                 mode: 'edit_spaces',
             })
+            // This one, however, is a highlight
+            expectedEvents.push({
+                event: 'highlightAndScroll',
+                args: {
+                    highlight:
+                        annotationsCache.annotations.byId[unifiedAnnotationIdB],
+                },
+            })
+
+            expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.activeAnnotationId).toBe(unifiedAnnotationIdB)
             expect(sidebar.state.annotationCardInstances[cardIdB]).toEqual(
                 expect.objectContaining({

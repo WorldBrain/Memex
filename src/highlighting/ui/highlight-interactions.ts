@@ -485,7 +485,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
     ) => {
         this.removeSelectedHighlights(annotation)
         this.resetHighlightsStyles()
-        this.removeSelectedHighlights(this.currentActiveHighlight)
+        if (this.currentActiveHighlight) {
+            this.removeSelectedHighlights(this.currentActiveHighlight)
+        }
         this.selectHighlight(annotation)
         this.scrollToHighlight(annotation)
     }

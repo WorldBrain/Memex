@@ -8,8 +8,8 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
     setSelectedList: (unifiedListId: UnifiedList['unifiedId']) => void
     renderHighlight: (args: { highlight: UnifiedAnnotation }) => void
     renderHighlights: (args: { highlights: UnifiedAnnotation[] }) => void
+    highlightAndScroll: (args: { highlight: UnifiedAnnotation }) => void
     // No longer used, as of the sidebar refactor
-    // highlightAndScroll: (args: { url: string }) => void
     // removeTemporaryHighlights: () => void
     // removeAnnotationHighlight: (args: { url: string }) => void
     // removeAnnotationHighlights: (args: { urls: string[] }) => void

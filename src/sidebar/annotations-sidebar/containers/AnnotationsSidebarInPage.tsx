@@ -127,16 +127,15 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         // sidebarEvents.on('removeTemporaryHighlights', () =>
         //     highlighter.removeTempHighlights(),
         // )
-        // sidebarEvents.on('highlightAndScroll', (annotation) => {
-        //     // TODO: update sidebar events to used cache annots
-        //     // highlighter.highlightAndScroll(annotation.url)
-        // })
         // sidebarEvents.on('removeAnnotationHighlight', ({ url }) =>
         //     highlighter.removeAnnotationHighlight(url),
         // )
         // sidebarEvents.on('removeAnnotationHighlights', ({ urls }) =>
         //     highlighter.removeAnnotationHighlights(urls),
         // )
+        sidebarEvents.on('highlightAndScroll', ({ highlight }) => {
+            highlighter.highlightAndScroll(highlight)
+        })
         sidebarEvents.on('renderHighlight', ({ highlight }) =>
             highlighter.renderHighlight(highlight, () => {
                 inPageUI.showSidebar({
