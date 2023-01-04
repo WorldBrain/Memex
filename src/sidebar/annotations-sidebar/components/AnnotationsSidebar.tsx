@@ -368,11 +368,14 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedNotesContainer>
-                <NewAnnotationBoxMyAnnotations>
-                    {this.renderNewAnnotation(
-                        !selectedListMode ? unifiedListId : undefined,
-                    )}
-                </NewAnnotationBoxMyAnnotations>
+                {(this.spaceOwnershipStatus(listData) === 'Contributor' ||
+                    this.spaceOwnershipStatus(listData) === 'Creator') && (
+                    <NewAnnotationBoxMyAnnotations>
+                        {this.renderNewAnnotation(
+                            !selectedListMode ? unifiedListId : undefined,
+                        )}
+                    </NewAnnotationBoxMyAnnotations>
+                )}
                 {annotationsData.map((annotation) => {
                     // TODO: Handle when list has no remoteID (should not afford conversation logic)
                     const conversationId = `${listData.remoteId}:${annotation.unifiedId}`
@@ -452,6 +455,8 @@ export class AnnotationsSidebar extends React.Component<
                     return (
                         <React.Fragment key={annotation.unifiedId}>
                             <AnnotationEditable
+                                creatorId={annotation.creator?.id}
+                                currentUserId={this.props.currentUser?.id}
                                 pageUrl={this.props.normalizedPageUrl}
                                 isShared
                                 isBulkShareProtected
@@ -943,6 +948,8 @@ export class AnnotationsSidebar extends React.Component<
                         <AnnotationEditable
                             {...annot}
                             {...this.props}
+                            creatorId={annot.creator?.id}
+                            currentUserId={this.props.currentUser?.id}
                             lists={cacheUtils.getLocalListIdsForCacheIds(
                                 this.props.annotationsCache,
                                 annot.unifiedListIds,

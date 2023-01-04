@@ -94,6 +94,8 @@ export interface AnnotationProps {
     ) => JSX.Element
     getYoutubePlayer?(): YoutubePlayer
     pageUrl?: string
+    creatorId?: string | number
+    currentUserId?: string | number
 }
 
 export interface AnnotationEditableEventProps {
@@ -339,7 +341,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             />
                         </TooltipBox>
                     )}
-                    {footerDeps?.onEditIconClick ? (
+                    {footerDeps?.onEditIconClick &&
+                    this.props.currentUserId === this.props.creatorId ? (
                         <TooltipBox
                             tooltipText={
                                 <span>
@@ -425,21 +428,26 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
         return (
             <CommentBox>
-                {!this.theme.hasHighlight && this.state.hoverCard === true && (
-                    <ActionBox>
-                        <TooltipBox tooltipText="Edit Note" placement="bottom">
-                            <Icon
-                                onClick={
-                                    annotationFooterDependencies?.onEditIconClick
-                                }
-                                icon={'edit'}
-                                heightAndWidth={'18px'}
-                                borderColor={'lightHover'}
-                                background={'backgroundColorDarker'}
-                            />
-                        </TooltipBox>
-                    </ActionBox>
-                )}
+                {!this.theme.hasHighlight &&
+                    this.state.hoverCard === true &&
+                    this.props.currentUserId === this.props.creatorId && (
+                        <ActionBox>
+                            <TooltipBox
+                                tooltipText="Edit Note"
+                                placement="bottom"
+                            >
+                                <Icon
+                                    onClick={
+                                        annotationFooterDependencies?.onEditIconClick
+                                    }
+                                    icon={'edit'}
+                                    heightAndWidth={'18px'}
+                                    borderColor={'lightHover'}
+                                    background={'backgroundColorDarker'}
+                                />
+                            </TooltipBox>
+                        </ActionBox>
+                    )}
                 <NoteTextBox hasHighlight={this.theme.hasHighlight}>
                     <NoteText
                         contextLocation={this.props.contextLocation}
