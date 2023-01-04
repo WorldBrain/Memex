@@ -725,8 +725,7 @@ export class AnnotationsSidebarContainer<
     }
 
     render() {
-        let playerId
-        let player = undefined
+        let playerId: string | undefined = undefined
         if (
             this.state.fullPageUrl &&
             this.props.sidebarContext === 'dashboard'
@@ -735,7 +734,6 @@ export class AnnotationsSidebarContainer<
                 this.state.fullPageUrl ?? undefined,
             )
             playerId = getBlockContentYoutubePlayerId(normalizedUrl)
-            player = this.props.youtubeService.getPlayerByElementId(playerId)
         }
 
         if (!this.state.fullPageUrl) {
@@ -833,7 +831,12 @@ export class AnnotationsSidebarContainer<
                                     unifiedListId: null,
                                 })
                             }
-                            getYoutubePlayer={() => player}
+                            getYoutubePlayer={() =>
+                                playerId &&
+                                this.props.youtubeService.getPlayerByElementId(
+                                    playerId,
+                                )
+                            }
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}
                             ref={this.sidebarRef}

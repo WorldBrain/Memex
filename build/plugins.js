@@ -78,7 +78,7 @@ export default function ({
         new IgnorePlugin(/^\.\/locale$/, /moment$/),
     ]
 
-    if (mode === 'development') {
+    if (mode === 'development' && process.env.NO_CACHE !== 'true') {
         plugins.push(
             new HardSourcePlugin({
                 environmentHash: {
