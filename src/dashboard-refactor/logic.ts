@@ -2890,6 +2890,19 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
+    dragOverFile: EventHandler<'dragOverFile'> = async ({ event }) => {
+        this.emitMutation({
+            showDropArea: { $set: event },
+        })
+        if (!event) {
+            this.options.pdfViewerBG.openPdfViewerForNextPdf()
+        }
+    }
+
+    openPDF: EventHandler<'openPDF'> = async () => {
+        this.options.pdfViewerBG.openPdfViewerForNextPdf()
+    }
+
     setListRemoteId: EventHandler<'setListRemoteId'> = async ({
         event,
         previousState,

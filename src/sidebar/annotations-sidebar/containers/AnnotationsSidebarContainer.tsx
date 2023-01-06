@@ -1159,7 +1159,7 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     top: 0px;
     z-index: ${(props) =>
         props.sidebarContext === 'dashboard'
-            ? '2147483641'
+            ? '3500'
             : '2147483646'}; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: ${(props) => props.theme.colors.backgroundColor};
     border-left: 1px solid ${(props) => props.theme.colors.lightHover};

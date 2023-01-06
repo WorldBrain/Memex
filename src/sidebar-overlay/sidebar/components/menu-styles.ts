@@ -4,14 +4,14 @@ const baseStyles = {
     bmMenuWrap: {
         top: 0,
         right: '-60px',
-        zIndex: 2147483641,
+        zIndex: 3500,
         transition: 'all 0.1s cubic-bezier(0.65, 0.05, 0.36, 1)',
     },
     bmMenu: {
         position: 'relative',
         right: '30px',
         top: '0px',
-        zIndex: 2147483646,
+        zIndex: 3600,
         overflowY: 'hidden',
         width: '450px',
         opacity: '1',

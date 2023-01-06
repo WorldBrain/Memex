@@ -46,6 +46,7 @@ export interface RootState {
     modals: DashboardModalsState
     activePageID?: string
     activeDay?: number
+    showDropArea?: boolean
 }
 
 export type Events = UIEvent<

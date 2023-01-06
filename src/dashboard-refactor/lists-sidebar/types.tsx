@@ -88,6 +88,8 @@ export type Events = UIEvent<{
     dropPageOnListItem: { listId: number; dataTransfer: DataTransfer }
     shareList: { listId: number }
     setListRemoteId: { localListId: number; remoteListId: string }
+    dragOverFile: boolean
+    openPDF: null
 
     confirmListDelete: null
     cancelListDelete: null

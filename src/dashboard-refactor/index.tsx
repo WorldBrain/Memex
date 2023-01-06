@@ -1,5 +1,5 @@
 import React from 'react'
-import styled, { css } from 'styled-components'
+import styled, { css, keyframes } from 'styled-components'
 import browser from 'webextension-polyfill'
 import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
 import { createGlobalStyle } from 'styled-components'
@@ -57,6 +57,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { createYoutubeServiceOptions } from '@worldbrain/memex-common/lib/services/youtube/library'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 export interface Props extends DashboardDependencies {}
 
@@ -614,10 +615,35 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderPdfLocator() {
         return (
-            <PdfLocator
-                title="Test title"
-                url="https://testsite.com/test.pdf"
-            />
+            <DropZoneBackground
+                onDragOver={(event) => {
+                    this.processEvent('dragOverFile', true)
+                }}
+                onDrop={(event) => {
+                    this.processEvent('openPDF', null)
+                    this.processEvent('dragOverFile', false)
+                }}
+                onClick={(event) => {
+                    console.log(event.key)
+                    if (event.key === 'Escape') {
+                        this.processEvent('dragOverFile', false)
+                    }
+                    this.processEvent('dragOverFile', false)
+                }}
+                autoFocus
+                tabIndex="0"
+            >
+                <DropZoneFrame>
+                    <DropZoneContent>
+                        <Icon
+                            icon={icons.filePDF}
+                            heightAndWidth={'40px'}
+                            hoverOff
+                        />
+                        <DropZoneTitle>Drop PDF here to open it</DropZoneTitle>
+                    </DropZoneContent>
+                </DropZoneFrame>
+            </DropZoneBackground>
         )
     }
 
@@ -1350,168 +1376,202 @@ export class DashboardContainer extends StatefulUIElement<
             ? this.state.listsSidebar.isSidebarPeeking
             : undefined
         return (
-            <Container id={'dashboardContainer'}>
-                <SidebarHeaderContainer>
-                    <SidebarToggleBox>
-                        <SidebarToggle
-                            sidebarLockedState={lockedState}
-                            hoverState={sidebarToggleHoverState}
-                        />
-                        <ActivityIndicator
-                            hasActivities={listsSidebar.hasFeedActivity}
-                        />
-                    </SidebarToggleBox>
-                </SidebarHeaderContainer>
-                <PeekTrigger
-                    onMouseEnter={(isPeeking) => {
-                        this.processEvent('setSidebarPeeking', {
-                            isPeeking,
-                        })
-                    }}
-                    onDragEnter={(isPeeking) => {
-                        this.processEvent('setSidebarPeeking', {
-                            isPeeking,
-                        })
-                    }}
-                />
-                <MainFrame>
-                    <ListSidebarContent
-                        ref={this.SidebarContainer}
-                        style={style}
-                        size={{
-                            height: listsSidebar.isSidebarPeeking
-                                ? '90vh'
-                                : '100vh',
+            <Container
+                id={'dashboardContainer'}
+                onDragOver={(event) => {
+                    this.processEvent('dragOverFile', true)
+                }}
+                onDrop={(event) => {
+                    // this.processEvent('dragOverFile', false)
+
+                    console.log(event)
+
+                    setTimeout(function () {
+                        // override prevented flag to prevent jquery from discarding event
+                        // retrigger with the exactly same event data
+                        this.trigger(event)
+                    }, 1000)
+                }}
+            >
+                {this.state.showDropArea && this.renderPdfLocator()}
+                <MainContainer>
+                    <SidebarHeaderContainer>
+                        <SidebarToggleBox>
+                            <SidebarToggle
+                                sidebarLockedState={lockedState}
+                                hoverState={sidebarToggleHoverState}
+                            />
+                            <ActivityIndicator
+                                hasActivities={listsSidebar.hasFeedActivity}
+                            />
+                        </SidebarToggleBox>
+                    </SidebarHeaderContainer>
+                    <PeekTrigger
+                        onMouseEnter={(isPeeking) => {
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking,
+                            })
                         }}
-                        peeking={
-                            listsSidebar.isSidebarPeeking
-                                ? listsSidebar.isSidebarPeeking
-                                : undefined
-                        }
-                        position={{
-                            x:
-                                listsSidebar.isSidebarLocked &&
-                                `$sizeConstants.header.heightPxpx`,
+                        onDragEnter={(isPeeking) => {
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking,
+                            })
                         }}
-                        locked={
-                            listsSidebar.isSidebarLocked
-                                ? listsSidebar.isSidebarLocked.toString()
-                                : undefined
-                        }
-                        onMouseLeave={() => {
-                            if (this.state.listsSidebar.isSidebarPeeking) {
-                                this.processEvent('setSidebarPeeking', {
-                                    isPeeking: false,
+                    />
+                    <MainFrame>
+                        <ListSidebarContent
+                            ref={this.SidebarContainer}
+                            style={style}
+                            size={{
+                                height: listsSidebar.isSidebarPeeking
+                                    ? '90vh'
+                                    : '100vh',
+                            }}
+                            peeking={
+                                listsSidebar.isSidebarPeeking
+                                    ? listsSidebar.isSidebarPeeking
+                                    : undefined
+                            }
+                            position={{
+                                x:
+                                    listsSidebar.isSidebarLocked &&
+                                    `$sizeConstants.header.heightPxpx`,
+                            }}
+                            locked={
+                                listsSidebar.isSidebarLocked
+                                    ? listsSidebar.isSidebarLocked.toString()
+                                    : undefined
+                            }
+                            onMouseLeave={() => {
+                                if (this.state.listsSidebar.isSidebarPeeking) {
+                                    this.processEvent('setSidebarPeeking', {
+                                        isPeeking: false,
+                                    })
+                                }
+                            }}
+                            // default={{ width: sizeConstants.listsSidebar.widthPx }}
+                            resizeHandleClasses={{
+                                right: 'sidebarResizeHandleSidebar',
+                            }}
+                            resizeGrid={[1, 0]}
+                            dragAxis={'none'}
+                            minWidth={sizeConstants.listsSidebar.width + 'px'}
+                            maxWidth={'500px'}
+                            disableDragging={true}
+                            enableResizing={{
+                                top: false,
+                                right: true,
+                                bottom: false,
+                                left: false,
+                                topRight: false,
+                                bottomRight: false,
+                                bottomLeft: false,
+                                topLeft: false,
+                            }}
+                            onResizeStop={(
+                                e,
+                                direction,
+                                ref,
+                                delta,
+                                position,
+                            ) => {
+                                this.processEvent('setSpaceSidebarWidth', {
+                                    width: ref.style.width,
+                                })
+                            }}
+                        >
+                            {this.renderListsSidebar()}
+                        </ListSidebarContent>
+                        <MainContent>
+                            {this.state.listsSidebar.showFeed ? (
+                                <FeedContainer>
+                                    <TitleContainer>
+                                        <SectionTitle>
+                                            Activity Feed
+                                        </SectionTitle>
+                                        <SectionDescription>
+                                            Updates from Spaces you follow or
+                                            conversation you participate in
+                                        </SectionDescription>
+                                    </TitleContainer>
+                                    <FeedFrame src={this.whichFeed()} />
+                                </FeedContainer>
+                            ) : (
+                                <>
+                                    <>
+                                        {this.renderHeader()}
+                                        {this.renderFiltersBar()}
+                                    </>
+                                    {mode === 'locate-pdf'
+                                        ? this.renderPdfLocator()
+                                        : this.renderSearchResults()}
+                                </>
+                            )}
+                        </MainContent>
+                        <NotesSidebar
+                            hasFeedActivity={listsSidebar.hasFeedActivity}
+                            clickFeedActivityIndicator={() =>
+                                this.processEvent(
+                                    'clickFeedActivityIndicator',
+                                    null,
+                                )
+                            }
+                            shouldHydrateCacheOnInit
+                            annotationsCache={this.props.annotationsCache}
+                            youtubeService={this.youtubeService}
+                            tags={this.props.tagsBG}
+                            auth={this.props.authBG}
+                            refSidebar={this.notesSidebarRef}
+                            customLists={this.props.listsBG}
+                            annotations={this.props.annotationsBG}
+                            contentSharing={this.props.contentShareBG}
+                            contentScriptsBG={this.props.contentScriptsBG}
+                            syncSettingsBG={this.props.syncSettingsBG}
+                            pageActivityIndicatorBG={
+                                this.props.pageActivityIndicatorBG
+                            }
+                            contentConversationsBG={
+                                this.props.contentConversationsBG
+                            }
+                            setLoginModalShown={(isShown) =>
+                                this.processEvent('setShowLoginModal', {
+                                    isShown,
                                 })
                             }
-                        }}
-                        // default={{ width: sizeConstants.listsSidebar.widthPx }}
-                        resizeHandleClasses={{
-                            right: 'sidebarResizeHandleSidebar',
-                        }}
-                        resizeGrid={[1, 0]}
-                        dragAxis={'none'}
-                        minWidth={sizeConstants.listsSidebar.width + 'px'}
-                        maxWidth={'500px'}
-                        disableDragging={true}
-                        enableResizing={{
-                            top: false,
-                            right: true,
-                            bottom: false,
-                            left: false,
-                            topRight: false,
-                            bottomRight: false,
-                            bottomLeft: false,
-                            topLeft: false,
-                        }}
-                        onResizeStop={(e, direction, ref, delta, position) => {
-                            this.processEvent('setSpaceSidebarWidth', {
-                                width: ref.style.width,
-                            })
-                        }}
-                    >
-                        {this.renderListsSidebar()}
-                    </ListSidebarContent>
-                    <MainContent>
-                        {this.state.listsSidebar.showFeed ? (
-                            <FeedContainer>
-                                <TitleContainer>
-                                    <SectionTitle>Activity Feed</SectionTitle>
-                                    <SectionDescription>
-                                        Updates from Spaces you follow or
-                                        conversation you participate in
-                                    </SectionDescription>
-                                </TitleContainer>
-                                <FeedFrame src={this.whichFeed()} />
-                            </FeedContainer>
-                        ) : (
-                            <>
-                                <>
-                                    {this.renderHeader()}
-                                    {this.renderFiltersBar()}
-                                </>
-                                {mode === 'locate-pdf'
-                                    ? this.renderPdfLocator()
-                                    : this.renderSearchResults()}
-                            </>
-                        )}
-                    </MainContent>
-                    <NotesSidebar
-                        hasFeedActivity={listsSidebar.hasFeedActivity}
-                        clickFeedActivityIndicator={() =>
-                            this.processEvent(
-                                'clickFeedActivityIndicator',
-                                null,
-                            )
-                        }
-                        shouldHydrateCacheOnInit
-                        annotationsCache={this.props.annotationsCache}
-                        youtubeService={this.youtubeService}
-                        tags={this.props.tagsBG}
-                        auth={this.props.authBG}
-                        refSidebar={this.notesSidebarRef}
-                        customLists={this.props.listsBG}
-                        annotations={this.props.annotationsBG}
-                        contentSharing={this.props.contentShareBG}
-                        contentScriptsBG={this.props.contentScriptsBG}
-                        syncSettingsBG={this.props.syncSettingsBG}
-                        pageActivityIndicatorBG={
-                            this.props.pageActivityIndicatorBG
-                        }
-                        contentConversationsBG={
-                            this.props.contentConversationsBG
-                        }
-                        setLoginModalShown={(isShown) =>
-                            this.processEvent('setShowLoginModal', { isShown })
-                        }
-                        setDisplayNameModalShown={(isShown) =>
-                            this.processEvent('setShowDisplayNameSetupModal', {
-                                isShown,
-                            })
-                        }
-                        showAnnotationShareModal={() =>
-                            this.processEvent(
-                                'setShowNoteShareOnboardingModal',
-                                {
-                                    isShown: true,
-                                },
-                            )
-                        }
-                        onNotesSidebarClose={() =>
-                            this.processEvent('setActivePage', {
-                                activeDay: undefined,
-                                activePageID: undefined,
-                                activePage: false,
-                            })
+                            setDisplayNameModalShown={(isShown) =>
+                                this.processEvent(
+                                    'setShowDisplayNameSetupModal',
+                                    {
+                                        isShown,
+                                    },
+                                )
+                            }
+                            showAnnotationShareModal={() =>
+                                this.processEvent(
+                                    'setShowNoteShareOnboardingModal',
+                                    {
+                                        isShown: true,
+                                    },
+                                )
+                            }
+                            onNotesSidebarClose={() =>
+                                this.processEvent('setActivePage', {
+                                    activeDay: undefined,
+                                    activePageID: undefined,
+                                    activePage: false,
+                                })
+                            }
+                        />
+                    </MainFrame>
+                    {this.renderModals()}
+                    <HelpBtn />
+                    <DragElement
+                        isHoveringOverListItem={
+                            listsSidebar.dragOverListId != null
                         }
                     />
-                </MainFrame>
-                {this.renderModals()}
-                <HelpBtn />
-                <DragElement
-                    isHoveringOverListItem={listsSidebar.dragOverListId != null}
-                />
-                {this.props.renderUpdateNotifBanner()}
+                    {this.props.renderUpdateNotifBanner()}
+                </MainContainer>
             </Container>
         )
     }
@@ -1528,6 +1588,63 @@ const GlobalStyle = createGlobalStyle`
         font-family: 'Satoshi', sans-serif;
         letter-spacing: 0.8px;
     }
+`
+
+const MainContainer = styled.div`
+    display: flex;
+    display: flex;
+    flex-direction: column;
+    height: fill-available;
+    width: fill-available;
+`
+
+const DropZoneBackground = styled.div`
+    position: absolute;
+    height: fill-available;
+    width: fill-available;
+    top: 0px;
+    left: 0px;
+    background: ${(props) => props.theme.colors.backgroundColor}60;
+    backdrop-filter: blur(20px);
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+`
+
+const DropZoneFrame = styled.div`
+    border: 1px solid ${(props) => props.theme.colors.primaryLight};
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: fill-available;
+    width: fill-available;
+`
+
+const showText = keyframes`
+ 0% { opacity: 0.3; scale: 0.95 }
+ 100% { opacity: 1; scale: 1}
+`
+
+const DropZoneContent = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 10px;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0.3;
+    scale: 0.95;
+
+    animation: ${showText} 400ms cubic-bezier(0.4, 0, 0.2, 1) 50ms forwards;
+`
+
+const DropZoneTitle = styled.div`
+    color: ${(props) => props.theme.colors.normalText};
+    font-size: 20px;
+    text-align: center;
 `
 
 const ContentArea = styled.div`
@@ -1747,7 +1864,7 @@ const SidebarHeaderContainer = styled.div`
     display: flex;
     position: sticky;
     top: 0px;
-    z-index: 10000000000000;
+    z-index: 4000;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;

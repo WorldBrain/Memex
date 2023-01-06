@@ -53,6 +53,15 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import { generateAnnotationCardInstanceId } from '../containers/utils'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import SpaceContextMenuButton from 'src/dashboard-refactor/lists-sidebar/components/space-context-menu-btn'
+import { Props as EditableItemProps } from 'src/dashboard-refactor/lists-sidebar/components/sidebar-editable-item'
+import {
+    contentSharing,
+    collections,
+} from 'src/util/remote-functions-background'
+import SpaceContextMenu, {
+    Props as SpaceContextMenuProps,
+} from 'src/custom-lists/ui/space-context-menu'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -142,6 +151,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     getYoutubePlayer?(): YoutubePlayer
     clickFeedActivityIndicator?: () => void
     hasFeedActivity?: boolean
+    editableProps: EditableItemProps
 }
 
 interface AnnotationsSidebarState {
@@ -153,6 +163,8 @@ interface AnnotationsSidebarState {
     showAllNotesShareMenu: boolean
     showPageSpacePicker: boolean
     showSortDropDown: boolean
+    showSpaceSharePopout: number
+    linkCopyState: boolean
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -167,6 +179,9 @@ export class AnnotationsSidebar extends React.Component<
     private copyButtonRef = React.createRef<HTMLDivElement>()
     private pageShareButtonRef = React.createRef<HTMLDivElement>()
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
+    private spaceShareButtonRef: {
+        [unifiedId: number]: React.RefObject<HTMLDivElement>
+    } = {}
 
     state: AnnotationsSidebarState = {
         searchText: '',
@@ -176,6 +191,8 @@ export class AnnotationsSidebar extends React.Component<
         showAllNotesShareMenu: false,
         showPageSpacePicker: false,
         showSortDropDown: false,
+        showSpaceSharePopout: undefined,
+        linkCopyState: false,
     }
 
     async componentDidMount() {
@@ -528,6 +545,9 @@ export class AnnotationsSidebar extends React.Component<
         listInstance,
         othersAnnotsCount,
     ) {
+        const ref = React.createRef<HTMLDivElement>()
+        this.spaceShareButtonRef[unifiedListId] = ref
+
         return (
             <FollowedListNotesContainer
                 bottom={listInstance.isOpen ? '0px' : '0px'}
@@ -567,6 +587,43 @@ export class AnnotationsSidebar extends React.Component<
                     </FollowedListTitleContainer>
                     <ButtonContainer>
                         <ActionButtons>
+                            <TooltipBox
+                                tooltipText="Share Space"
+                                placement="bottom"
+                            >
+                                <Icon
+                                    icon="link"
+                                    height="20px"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        this.setState({
+                                            showSpaceSharePopout: unifiedListId,
+                                        })
+                                    }}
+                                    containerRef={ref}
+                                />
+                                {/* <SpaceContextMenuButton
+                                    contentSharingBG={this.props.contentSharing}
+                                    spacesBG={collections}
+                                    spaceName={listData.name}
+                                    localListId={listData.id}
+                                    remoteListId={listData.remoteId}
+                                    toggleMenu={(e) => {
+                                        this.setState({
+                                            showSpaceSharePopout: true,
+                                        })
+                                    }}
+                                    editableProps={this.props.editableProps!}
+                                    isMenuDisplayed={
+                                        this.state.showSpaceSharePopout
+                                    }
+                                    // onDeleteSpaceIntent={
+                                    //     this.props.onDeleteClick
+                                    // }
+                                    // onSpaceShare={onSpaceShare}
+                                    // cancelSpaceNameEdit={this.props.cancelSpaceNameEdit()}
+                                /> */}
+                            </TooltipBox>
                             <TooltipBox
                                 tooltipText="Go to Space"
                                 placement="bottom"
@@ -615,8 +672,110 @@ export class AnnotationsSidebar extends React.Component<
                     </ButtonContainer>
                 </FollowedListRow>
                 {this.renderListAnnotations(unifiedListId)}
+                {this.renderShowShareSpacePopout(unifiedListId, ref)}
             </FollowedListNotesContainer>
         )
+    }
+
+    getBaseUrl() {
+        if (process.env.NODE_ENV === 'production') {
+            return `https://memex.social`
+        }
+        if (process.env.USE_FIREBASE_EMULATOR === 'true') {
+            return 'http://localhost:3000'
+        }
+        return `https://staging.memex.social`
+    }
+
+    private renderShowShareSpacePopout(unifiedListId, ref) {
+        const listData = this.props.lists.byId[unifiedListId]
+        if (
+            !this.state.showSpaceSharePopout ||
+            this.state.showSpaceSharePopout !== unifiedListId
+        ) {
+            return
+        }
+
+        if (this.spaceOwnershipStatus(listData) === 'Creator') {
+            return (
+                <PopoutBox
+                    placement="bottom"
+                    closeComponent={() => {
+                        this.setState({
+                            showSpaceSharePopout: undefined,
+                        })
+                    }}
+                    strategy={'fixed'}
+                    targetElementRef={ref.current}
+                >
+                    <SpaceContextMenu
+                        {...this.props}
+                        {...this.state}
+                        contentSharingBG={this.props.contentSharing}
+                        spacesBG={collections}
+                        spaceName={listData.name}
+                        localListId={listData.localId}
+                        remoteListId={listData.remoteId}
+                        editableProps={this.props.editableProps!}
+                        ownershipStatus={this.spaceOwnershipStatus(listData)}
+                        // isMenuDisplayed={this.state.showSpaceSharePopout}
+                        // onDeleteSpaceIntent={
+                        //     this.props.onDeleteClick
+                        // }
+                        // onSpaceShare={onSpaceShare}
+                        // cancelSpaceNameEdit={this.props.cancelSpaceNameEdit()}
+                    />
+                </PopoutBox>
+            )
+        }
+        if (
+            this.spaceOwnershipStatus(listData) === 'Follower' ||
+            this.spaceOwnershipStatus(listData) === 'Contributor'
+        ) {
+            return (
+                <PopoutBox
+                    placement="bottom"
+                    closeComponent={() => {
+                        this.setState({
+                            showSpaceSharePopout: undefined,
+                        })
+                    }}
+                    strategy={'fixed'}
+                    targetElementRef={ref.current}
+                >
+                    <CopyBox>
+                        <LinkFrame>
+                            {!this.state.linkCopyState
+                                ? (
+                                      this.getBaseUrl() +
+                                      `/c/${listData.remoteId}`
+                                  ).replace('https://', '')
+                                : 'Copied to clipboard'}
+                        </LinkFrame>
+                        <PrimaryAction
+                            type={'primary'}
+                            size={'medium'}
+                            label={'copy'}
+                            onClick={() => {
+                                this.setState({
+                                    linkCopyState: true,
+                                })
+                                setTimeout(() => {
+                                    this.setState({
+                                        linkCopyState: false,
+                                    })
+                                }, 2000)
+                                navigator.clipboard.writeText(
+                                    this.getBaseUrl() +
+                                        `/c/${listData.remoteId}`,
+                                )
+                            }}
+                            icon={!this.state.linkCopyState ? 'copy' : 'check'}
+                        />
+                    </CopyBox>
+                </PopoutBox>
+            )
+        }
     }
 
     private renderSharedNotesByList() {
@@ -1439,6 +1598,28 @@ export default AnnotationsSidebar
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
 
+const CopyBox = styled.div`
+    display: flex;
+    align-items: center;
+    height: fit-content;
+    padding: 10px;
+    grid-gap: 8px;
+`
+const LinkFrame = styled.div`
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    border: 1px solid ${(props) => props.theme.colors.darkhover};
+    height: fill-available;
+    padding: 0 10px;
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.normalText};
+    width: 190px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+`
+
 const SpaceTypeSection = styled.div`
     display: flex;
     flex-direction: column;
@@ -1543,7 +1724,10 @@ const AnnotationActions = styled.div`
 `
 
 const ActionButtons = styled.div`
-    display: none;
+    visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `
 
 const LoaderBox = styled.div`
@@ -1722,12 +1906,13 @@ const SearchInputStyled = styled(TextInputControlled)`
     padding: 5px 0px;
 `
 
-const FollowedListNotesContainer = styled(Margin)`
+const FollowedListNotesContainer = styled(Margin)<{ key: number }>`
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
     height: fill-available;
+    z-index: ${(props) => 100000 - props.key};
 `
 
 const SectionTitleContainer = styled(Margin)`
@@ -1816,9 +2001,7 @@ const FollowedListRow = styled(Margin)<{ context: string }>`
     }
 
     &:hover ${ActionButtons} {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        visibility: visible;
     }
 `
 

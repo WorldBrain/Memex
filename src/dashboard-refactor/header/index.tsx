@@ -31,7 +31,7 @@ const Container = styled.div`
     align-items: center;
     justify-content: center;
     background-color: ${(props) => props.theme.colors.backgroundColor};
-    z-index: 2147483641;
+    z-index: 3500;
     box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lightHover};
 `
 
