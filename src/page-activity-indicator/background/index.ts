@@ -305,6 +305,7 @@ export class PageActivityIndicatorBackground {
                     from: followedList.lastSync,
                 },
             )
+
             const sharedAnnotationListEntries = await contentSharing.getAnnotationListEntries(
                 {
                     listReference,

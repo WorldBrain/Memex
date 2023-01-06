@@ -7,6 +7,7 @@ import {
     MemexRequestHandledDetail,
     MEMEX_OPEN_LINK_EVENT_NAME,
     MEMEX_REQUEST_HANDLED_EVENT_NAME,
+    MEMEX_REQUEST_FOLLOWEDLISTENTRY_FETCH_EVENT_NAME,
 } from '@worldbrain/memex-common/lib/services/memex-extension'
 
 // import { setupScrollReporter } from 'src/activity-logger/content_script'
@@ -406,7 +407,7 @@ export async function main(
     }
 
     injectYoutubeContextMenu(annotationsFunctions)
-    setupWebUIActions({ contentScriptsBG })
+    setupWebUIActions({ contentScriptsBG, bgScriptBG })
 
     return inPageUI
 }
@@ -520,7 +521,10 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
 
 export function setupWebUIActions(args: {
     contentScriptsBG: ContentScriptsInterface<'caller'>
+    bgScriptBG: RemoteBGScriptInterface
 }) {
+    const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
+
     const confirmRequest = (requestId: number) => {
         const detail: MemexRequestHandledDetail = { requestId }
         const event = new CustomEvent(MEMEX_REQUEST_HANDLED_EVENT_NAME, {
@@ -528,6 +532,24 @@ export function setupWebUIActions(args: {
         })
         document.dispatchEvent(event)
     }
+
+    document.addEventListener(
+        MEMEX_REQUEST_FOLLOWEDLISTENTRY_FETCH_EVENT_NAME,
+        async (event) => {
+            const detail = event.detail as MemexRequestHandledDetail
+            let counter = 0
+
+            // this couldl be better by
+            const interval = setInterval(async () => {
+                counter = counter + 1
+                if (counter === 4) {
+                    clearInterval(interval)
+                }
+                await bgScriptBG.fetchFollowedListEntryUpdates()
+            }, 5000)
+            confirmRequest(detail.requestId)
+        },
+    )
 
     document.addEventListener(MEMEX_OPEN_LINK_EVENT_NAME, async (event) => {
         const detail = event.detail as MemexOpenLinkDetail
