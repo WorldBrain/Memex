@@ -167,69 +167,78 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             errorMessage={addListErrorMessage}
                                         />
                                     )}
-                                    {group.title === 'My Spaces' &&
-                                    group.listsArray.length === 0 ? (
-                                        !(
-                                            !group.isAddInputShown &&
-                                            searchBarProps.searchQuery.length >
-                                                0 && (
-                                                <NoCollectionsMessage
-                                                    onClick={
-                                                        group.onAddBtnClick
-                                                    }
-                                                >
-                                                    <SectionCircle>
-                                                        <Icon
-                                                            filePath={
-                                                                icons.plus
-                                                            }
-                                                            heightAndWidth="14px"
-                                                            color="purple"
-                                                            hoverOff
-                                                        />
-                                                    </SectionCircle>
-                                                    <InfoText>
-                                                        Create your
-                                                        <Link>first Space</Link>
-                                                    </InfoText>
-                                                </NoCollectionsMessage>
-                                            )
-                                        )
-                                    ) : (
-                                        <>
-                                            {group.title ===
-                                                'Followed Spaces' &&
-                                            group.listsArray.length === 0 ? (
-                                                <NoCollectionsMessage
-                                                    onClick={() =>
-                                                        window.open(
-                                                            'https://links.memex.garden/follow-first-space',
-                                                        )
-                                                    }
-                                                >
-                                                    <SectionCircle>
-                                                        <Icon
-                                                            filePath={
-                                                                icons.heartEmpty
-                                                            }
-                                                            heightAndWidth="14px"
-                                                            color="purple"
-                                                            hoverOff
-                                                        />
-                                                    </SectionCircle>
-                                                    <InfoText>
-                                                        Follow your
-                                                        <Link>first Space</Link>
-                                                    </InfoText>
-                                                </NoCollectionsMessage>
-                                            ) : (
-                                                this.renderLists(
-                                                    group.listsArray,
-                                                    true,
+                                    {group.listsArray != null ? (
+                                        group.title === 'My Spaces' &&
+                                        group.listsArray.length === 0 ? (
+                                            !(
+                                                !group.isAddInputShown &&
+                                                searchBarProps.searchQuery
+                                                    .length > 0 && (
+                                                    <NoCollectionsMessage
+                                                        onClick={
+                                                            group.onAddBtnClick
+                                                        }
+                                                    >
+                                                        <SectionCircle>
+                                                            <Icon
+                                                                filePath={
+                                                                    icons.plus
+                                                                }
+                                                                heightAndWidth="14px"
+                                                                color="purple"
+                                                                hoverOff
+                                                            />
+                                                        </SectionCircle>
+                                                        <InfoText>
+                                                            Create your
+                                                            <Link>
+                                                                first Space
+                                                            </Link>
+                                                        </InfoText>
+                                                    </NoCollectionsMessage>
                                                 )
-                                            )}
-                                        </>
-                                    )}
+                                            )
+                                        ) : (
+                                            <>
+                                                {group.title ===
+                                                    'Followed Spaces' &&
+                                                group.listsArray != null &&
+                                                group.listsArray.length ===
+                                                    0 ? (
+                                                    <NoCollectionsMessage
+                                                        onClick={() =>
+                                                            window.open(
+                                                                'https://links.memex.garden/follow-first-space',
+                                                            )
+                                                        }
+                                                    >
+                                                        <SectionCircle>
+                                                            <Icon
+                                                                filePath={
+                                                                    icons.heartEmpty
+                                                                }
+                                                                heightAndWidth="14px"
+                                                                color="purple"
+                                                                hoverOff
+                                                            />
+                                                        </SectionCircle>
+                                                        <InfoText>
+                                                            Follow your
+                                                            <Link>
+                                                                first Space
+                                                            </Link>
+                                                        </InfoText>
+                                                    </NoCollectionsMessage>
+                                                ) : (
+                                                    this.renderLists(
+                                                        group.listsArray ??
+                                                            undefined,
+                                                        true,
+                                                    )
+                                                )}
+                                            </>
+                                        )
+                                    ) : undefined}
                                 </ListsSidebarGroup>
                             </Margin>
                             <Separator />

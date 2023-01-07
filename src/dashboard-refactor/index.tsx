@@ -214,6 +214,10 @@ export class DashboardContainer extends StatefulUIElement<
     ): ListSidebarItemProps[] => {
         const { listsSidebar } = this.state
 
+        if (listIds == null) {
+            return undefined
+        }
+
         return listIds.map((listId) => ({
             source,
             listId,
@@ -558,7 +562,7 @@ export class DashboardContainer extends StatefulUIElement<
                     onInputClear: () =>
                         this.processEvent('setListQueryValue', { query: '' }),
                     localLists: this.listsStateToProps(
-                        listsSidebar.localLists.filteredListIds,
+                        listsSidebar.localLists.filteredListIds ?? undefined,
                         'local-lists',
                     ),
                 }}
@@ -566,11 +570,14 @@ export class DashboardContainer extends StatefulUIElement<
                     {
                         ...listsSidebar.localLists,
                         title: 'My Spaces',
-                        onAddBtnClick: () =>
+                        onAddBtnClick: (event) => {
+                            event.preventDefault()
+                            event.stopPropagation()
                             this.processEvent('setAddListInputShown', {
                                 isShown: !listsSidebar.localLists
                                     .isAddInputShown,
-                            }),
+                            })
+                        },
                         confirmAddNewList: (value) =>
                             this.processEvent('confirmListCreate', { value }),
                         cancelAddNewList: (shouldSave) =>
@@ -580,7 +587,8 @@ export class DashboardContainer extends StatefulUIElement<
                                 isExpanded: !listsSidebar.localLists.isExpanded,
                             }),
                         listsArray: this.listsStateToProps(
-                            listsSidebar.localLists.filteredListIds,
+                            listsSidebar.localLists.filteredListIds ??
+                                undefined,
                             'local-lists',
                         ),
                     },
@@ -593,7 +601,8 @@ export class DashboardContainer extends StatefulUIElement<
                                     .isExpanded,
                             }),
                         listsArray: this.listsStateToProps(
-                            listsSidebar.followedLists.filteredListIds,
+                            listsSidebar.followedLists.filteredListIds ??
+                                undefined,
                             'followed-lists',
                         ),
                     },
@@ -607,7 +616,8 @@ export class DashboardContainer extends StatefulUIElement<
                             })
                         },
                         listsArray: this.listsStateToProps(
-                            listsSidebar.joinedLists.filteredListIds,
+                            listsSidebar.joinedLists.filteredListIds ??
+                                undefined,
                             'joined-lists',
                         ),
                     },

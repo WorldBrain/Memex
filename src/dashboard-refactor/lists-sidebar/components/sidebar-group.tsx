@@ -53,14 +53,21 @@ const GroupTitle = styled.div`
     font-family: ${fonts.primary.name};
     line-height: 18px;
     cursor: pointer;
-
     width: fill-available;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 14px;
     font-weight: 400;
-    padding: 5px 5px 5px 5px;
+    padding: 5px 10px 5px 5px;
+    justify-content: space-between;
+    width: fill-available;
+    display: flex;
+    align-items: center;
+`
+
+const Counter = styled.div`
+    color: ${(props) => props.theme.colors.greyScale8};
 `
 
 const IconContainer = styled.div`
@@ -75,10 +82,10 @@ const IconContainer = styled.div`
 `
 
 const IconGroup = styled.div`
-    display: grid;
-    grid-auto-flow: column;
-    grid-gap: 5px;
+    display: flex;
+    grid-gap: 10px;
     align-items: center;
+    justify-content: flex-end;
 
     &:hover ${ArrowIcon} {
         background-color: unset;
@@ -153,20 +160,24 @@ export default class ListsSidebarGroup extends PureComponent<
                                 />
                             )}
                             <GroupTitle onClick={this.props.onExpandBtnClick}>
-                                {this.props.title} (
-                                {this.props.listsArray.length})
+                                {this.props.title}
+                                <IconGroup>
+                                    {this.props.onAddBtnClick && (
+                                        <Icon
+                                            heightAndWidth="16px"
+                                            filePath={icons.plus}
+                                            color={'purple'}
+                                            padding={'4px'}
+                                            onClick={this.props.onAddBtnClick}
+                                        />
+                                    )}
+                                    {this.props.listsArray != null && (
+                                        <Counter>
+                                            {this.props.listsArray.length}
+                                        </Counter>
+                                    )}
+                                </IconGroup>
                             </GroupTitle>
-                            <IconGroup>
-                                {this.props.onAddBtnClick && (
-                                    <Icon
-                                        heightAndWidth="16px"
-                                        filePath={icons.plus}
-                                        color={'purple'}
-                                        padding={'4px'}
-                                        onClick={this.props.onAddBtnClick}
-                                    />
-                                )}
-                            </IconGroup>
                         </GroupHeaderInnerDiv>
                     </GroupHeaderContainer>
                 )}

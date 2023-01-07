@@ -9,6 +9,7 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
 import { SidebarLockedState } from '../types'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 const textStyles = `
     font-family: 'Satoshi', sans-serif;
@@ -171,7 +172,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
             <CreateButton onClick={this.handleCreateNewClick}>
                 <CreateBox>
                     <TextSpan bold>Create</TextSpan>
-                    <ShortCut>Enter</ShortCut>
+                    <KeyboardShortcuts size={'small'} keys={['Enter']} />
                 </CreateBox>
                 <TextSpan>{this.props.searchQuery}</TextSpan>
             </CreateButton>

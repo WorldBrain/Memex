@@ -29,7 +29,7 @@ export interface ListGroupCommon
     extends Pick<ListsSidebarGroupProps, 'loadingState'> {
     isExpanded: boolean
     allListIds: number[]
-    filteredListIds: number[]
+    filteredListIds: number[] | null
 }
 
 export interface FollowedListGroup extends ListGroupCommon {}

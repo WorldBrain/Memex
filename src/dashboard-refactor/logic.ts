@@ -45,6 +45,7 @@ import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import ListsSidebar from './lists-sidebar'
+import { allLists } from 'src/custom-lists/selectors'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -213,20 +214,20 @@ export class DashboardLogic extends UILogic<State, Events> {
                     loadingState: 'pristine',
                     isExpanded: false,
                     allListIds: [],
-                    filteredListIds: [],
+                    filteredListIds: null,
                 },
                 joinedLists: {
                     loadingState: 'pristine',
                     isExpanded: false,
                     allListIds: [],
-                    filteredListIds: [],
+                    filteredListIds: null,
                 },
                 localLists: {
                     isAddInputShown: false,
                     loadingState: 'pristine',
                     isExpanded: true,
                     allListIds: [],
-                    filteredListIds: [],
+                    filteredListIds: null,
                 },
                 selectedListId: undefined,
                 showFeed: false,
@@ -397,7 +398,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             }),
             async () => {
-                let localLists = await listsBG.fetchAllLists({
+                let allLists = await listsBG.fetchAllLists({
                     limit: 1000,
                     skipMobileList: true,
                     includeDescriptions: true,
@@ -407,21 +408,26 @@ export class DashboardLogic extends UILogic<State, Events> {
                     limit: 1000,
                 })
 
+                // a list of all local lists that also have a remote list (could be joined or created)
                 let localToRemoteIdDict = await contentShareBG.getRemoteListIds(
-                    { localListIds: localLists.map((list) => list.id) },
+                    { localListIds: allLists.map((list) => list.id) },
                 )
 
+                // transform the localToRemoteIdDict into an array that can be filtered
                 let localToRemoteIdAsArray = [
                     ...Object.entries(localToRemoteIdDict),
                 ].map(([localListId, remoteId]) => ({ localListId, remoteId }))
 
+                // check for all local entries that also have remoteentries, and cross check them with the joined lists, keep only the ones that are not in joined lists
                 const filteredArray = localToRemoteIdAsArray.filter((item) => {
                     return !joinedLists.some(
                         (list) => list.remoteId === item.remoteId,
                     )
                 })
 
-                localLists = localLists.filter((item) => {
+                // get the locallists by filtering out all IDs that are in the filteredArray
+
+                let localLists = allLists.filter((item) => {
                     return filteredArray.some(
                         (list) => parseInt(list.localListId) === item.id,
                     )
@@ -446,11 +452,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return 0
                 })
 
-                for (const list of localLists) {
+                for (const list of allLists) {
                     const remoteId = localToRemoteIdDict[list.id]
                     if (remoteId) {
                         remoteToLocalIdDict[remoteId] = list.id
                     }
+                }
+
+                for (const list of localLists) {
+                    const remoteId = localToRemoteIdDict[list.id]
                     listIds.push(list.id)
                     listData[list.id] = {
                         remoteId,
@@ -566,6 +576,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const followedLists = await listsBG.fetchAllFollowedLists({
                     limit: 1000,
                 })
+
                 const followedListIds: number[] = []
                 const listData: { [id: number]: ListData } = {}
 
@@ -574,7 +585,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         remoteToLocalIdDict[list.remoteId] ?? list.id
 
                     // Joined lists appear in "Local lists" section, so don't include them here
-                    if (!remoteToLocalIdDict[list.remoteId]) {
+                    if (remoteToLocalIdDict[list.remoteId] == null) {
                         followedListIds.push(localId)
                     }
 
@@ -2792,9 +2803,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchQuery: { $set: event.query },
                 localLists: {
                     filteredListIds: { $set: filteredListIds.localListIds },
+                    isExpanded: { $set: true },
                 },
                 followedLists: {
                     filteredListIds: { $set: filteredListIds.followedListIds },
+                    isExpanded: { $set: true },
+                },
+                joinedLists: {
+                    filteredListIds: { $set: filteredListIds.joinedListIds },
+                    isExpanded: { $set: true },
                 },
             },
         })
