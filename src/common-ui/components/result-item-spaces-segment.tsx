@@ -1,5 +1,5 @@
 import React, { HTMLProps } from 'react'
-import styled from 'styled-components'
+import styled, { css, keyframes } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
@@ -8,7 +8,7 @@ import { padding } from 'polished'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     onEditBtnClick: React.MouseEventHandler
-    lists: Array<{ id: number; name: string; isShared: boolean }>
+    lists: Array<{ id: number; name: string | JSX.Element; isShared: boolean }>
     onListClick?: (localListId: number) => void
     renderSpacePicker?: () => JSX.Element
     filteredbyListID?: number
@@ -103,6 +103,9 @@ export default function ListsSegment({
                                               }
                                             : undefined
                                     }
+                                    isLoading={
+                                        space.name == null && space != null
+                                    }
                                 >
                                     {' '}
                                     {space.isShared && (
@@ -161,7 +164,15 @@ const ListsContainer = styled.div<{ newLineOrientation }>`
     flex-direction: ${(props) => (props.newLineOrientation ? 'column' : 'row')};
 `
 
-const ListSpaceContainer = styled.div<{ onClick: React.MouseEventHandler }>`
+const loading = keyframes`
+    0% { background-position: -315px 0, 0 0, 0px 190px, 50px 195px;}
+    100% { background-position: 315px 0, 0 0, 0 190px, 50px 195px;}
+`
+
+const ListSpaceContainer = styled.div<{
+    onClick: React.MouseEventHandler
+    isLoading: boolean
+}>`
     background-color: ${(props) => props.theme.colors.lightHover};
     color: ${(props) => props.theme.colors.greyScale9};
     padding: 2px 8px;
@@ -176,6 +187,35 @@ const ListSpaceContainer = styled.div<{ onClick: React.MouseEventHandler }>`
     align-items: center;
     white-space: nowrap;
     font-family: 'Satoshi', sans-serif;
+
+    ${(props) =>
+        props.isLoading &&
+        css`
+            width: 50px;
+            background: linear-gradient(
+                    0.25turn,
+                    transparent,
+                    ${(props) => props.theme.colors.lightHover},
+                    transparent
+                ),
+                linear-gradient(
+                    ${(props) => props.theme.colors.darkhover},
+                    ${(props) => props.theme.colors.darkhover}
+                ),
+                radial-gradient(
+                    38px circle at 19px 19px,
+                    ${(props) => props.theme.colors.darkhover}50,
+                    transparent 51%
+                ),
+                linear-gradient(
+                    ${(props) => props.theme.colors.darkhover},
+                    ${(props) => props.theme.colors.darkhover}
+                );
+            background-repeat: no-repeat;
+            background-size: 315px 250px, 315px 180px, 100px 100px, 225px 30px;
+            background-position: -315px 0, 0 0, 0px 190px, 50px 195px;
+            animation: ${loading} 1.5s infinite;
+        `};
 `
 
 const ListPillSettingButton = styled.button`

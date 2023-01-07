@@ -142,11 +142,12 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private getListDetailsById: ListDetailsGetter = (id) => ({
-        name: this.state.listsSidebar.listData[id]?.name ?? (
-            <span>
-                <LoadingIndicator size={8} />
-            </span>
-        ),
+        name: this.state.listsSidebar.listData[id]?.name ?? undefined,
+        //  (
+        //     <LoadingBox>
+        //         <LoadingIndicator size={8} />
+        //     </LoadingBox>
+        // ),
         isShared: this.state.listsSidebar.listData[id]?.remoteId != null,
     })
 
@@ -1764,6 +1765,13 @@ const ListSidebarContent = styled(Rnd)<{
 //     width: fit-content;
 //     block-size: fit-content;
 // `
+
+const LoadingBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+`
 
 const FeedContainer = styled.div`
     display: flex;

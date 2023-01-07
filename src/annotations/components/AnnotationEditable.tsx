@@ -226,7 +226,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     private get displayLists(): Array<{
         id: number
-        name: string
+        name: string | JSX.Element
         isShared: boolean
     }> {
         return this.props.lists.map((id) => ({

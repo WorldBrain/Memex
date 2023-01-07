@@ -93,7 +93,7 @@ export default class PageResultView extends PureComponent<Props> {
 
     private get displayLists(): Array<{
         id: number
-        name: string
+        name: string | JSX.Element
         isShared: boolean
     }> {
         return this.props.lists.map((id) => ({
