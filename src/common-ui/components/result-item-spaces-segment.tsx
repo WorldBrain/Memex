@@ -46,12 +46,12 @@ export class AddSpacesButton extends React.Component<
                 onClick={(e) => {
                     this.props.onEditBtnClick?.(e)
                 }}
-                height="28px"
+                height="24px"
                 width={
                     this.props.hasNoLists ||
                     this.props.newLineOrientation === true
                         ? 'fit-content'
-                        : '28px'
+                        : '24px'
                 }
                 label={
                     (this.props.hasNoLists ||

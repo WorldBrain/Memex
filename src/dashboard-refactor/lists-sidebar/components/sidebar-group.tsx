@@ -46,6 +46,10 @@ const GroupHeaderInnerDiv = styled.div`
     align-items: center;
     justify-content: space-between;
     padding: 0 5px 0 18px;
+
+    & * {
+        cursor: pointer;
+    }
 `
 
 const GroupTitle = styled.div`

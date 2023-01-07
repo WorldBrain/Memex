@@ -2803,15 +2803,30 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchQuery: { $set: event.query },
                 localLists: {
                     filteredListIds: { $set: filteredListIds.localListIds },
-                    isExpanded: { $set: true },
+                    isExpanded: {
+                        $set:
+                            filteredListIds.localListIds.length > 0
+                                ? true
+                                : false,
+                    },
                 },
                 followedLists: {
                     filteredListIds: { $set: filteredListIds.followedListIds },
-                    isExpanded: { $set: true },
+                    isExpanded: {
+                        $set:
+                            filteredListIds.followedListIds.length > 0
+                                ? true
+                                : false,
+                    },
                 },
                 joinedLists: {
                     filteredListIds: { $set: filteredListIds.joinedListIds },
-                    isExpanded: { $set: true },
+                    isExpanded: {
+                        $set:
+                            filteredListIds.joinedListIds.length > 0
+                                ? true
+                                : false,
+                    },
                 },
             },
         })
@@ -2822,7 +2837,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         this.emitMutation({
             listsSidebar: {
-                localLists: { isAddInputShown: { $set: event.isShown } },
+                localLists: {
+                    isAddInputShown: { $set: event.isShown },
+                    isExpanded: { $set: event.isShown && true },
+                },
             },
         })
     }
@@ -2906,7 +2924,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         this.emitMutation({
             listsSidebar: {
-                localLists: { isExpanded: { $set: event.isExpanded } },
+                localLists: {
+                    isExpanded: { $set: event.isExpanded },
+                    isAddInputShown: { $set: !event.isExpanded && false },
+                },
             },
         })
     }

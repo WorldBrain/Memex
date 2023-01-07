@@ -203,8 +203,9 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                 {group.title ===
                                                     'Followed Spaces' &&
                                                 group.listsArray != null &&
-                                                group.listsArray.length ===
-                                                    0 ? (
+                                                group.listsArray.length === 0 &&
+                                                searchBarProps.searchQuery
+                                                    .length === 0 ? (
                                                     <NoCollectionsMessage
                                                         onClick={() =>
                                                             window.open(
