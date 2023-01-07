@@ -246,18 +246,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         await loadInitial(this, async () => {
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
-            await Promise.all([
-                this.runSearch(nextState),
-                this.getFeedActivityStatus(),
-                this.getInboxUnreadCount(),
-            ])
+            await this.runSearch(nextState)
             const localListsResult = await this.loadLocalListsData(nextState)
             nextState = localListsResult.nextState
             await this.loadRemoteListsData(
                 nextState,
                 localListsResult.remoteToLocalIdDict,
             )
-            const joinedListsResult = await this.loadJoinedListsData(nextState)
+            await this.loadJoinedListsData(nextState)
+            await this.getFeedActivityStatus()
+            await this.getInboxUnreadCount()
         })
     }
 
