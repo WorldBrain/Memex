@@ -145,4 +145,4 @@ export type DashboardModalsEvents = UIEvent<{
     setSelectNoteSpaceConfirmArgs: DashboardModalsState['confirmSelectNoteSpaceArgs']
 }>
 
-export type ListSource = 'local-lists' | 'followed-lists'
+export type ListSource = 'local-lists' | 'followed-lists' | 'joined-lists'

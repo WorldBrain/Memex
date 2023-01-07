@@ -211,7 +211,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listData: {},
                 followedLists: {
                     loadingState: 'pristine',
-                    isExpanded: true,
+                    isExpanded: false,
+                    allListIds: [],
+                    filteredListIds: [],
+                },
+                joinedLists: {
+                    loadingState: 'pristine',
+                    isExpanded: false,
                     allListIds: [],
                     filteredListIds: [],
                 },
@@ -241,6 +247,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
             const localListsResult = await this.loadLocalListsData(nextState)
+            const joinedListsResult = await this.loadJoinedListsData(nextState)
             nextState = localListsResult.nextState
             await Promise.all([
                 this.loadRemoteListsData(
@@ -374,6 +381,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    private isMatch(value1, value2) {
+        return !value2.some((list) => list.remoteId === value1.remoteId)
+    }
+
     private async loadLocalListsData(previousState: State) {
         const { listsBG, contentShareBG } = this.options
 
@@ -394,9 +405,29 @@ export class DashboardLogic extends UILogic<State, Events> {
                     includeDescriptions: true,
                 })
 
-                const localToRemoteIdDict = await contentShareBG.getRemoteListIds(
+                let joinedLists = await listsBG.fetchCollaborativeLists({
+                    limit: 1000,
+                })
+
+                let localToRemoteIdDict = await contentShareBG.getRemoteListIds(
                     { localListIds: localLists.map((list) => list.id) },
                 )
+
+                let localToRemoteIdAsArray = [
+                    ...Object.entries(localToRemoteIdDict),
+                ].map(([localListId, remoteId]) => ({ localListId, remoteId }))
+
+                const filteredArray = localToRemoteIdAsArray.filter((item) => {
+                    return !joinedLists.some(
+                        (list) => list.remoteId === item.remoteId,
+                    )
+                })
+
+                localLists = localLists.filter((item) => {
+                    return filteredArray.some(
+                        (list) => parseInt(list.localListId) === item.id,
+                    )
+                })
 
                 const listIds: number[] = []
                 const listData: { [id: number]: ListData } = {}
@@ -435,6 +466,75 @@ export class DashboardLogic extends UILogic<State, Events> {
                 mutation.listsSidebar = {
                     listData: { $merge: listData },
                     localLists: {
+                        allListIds: { $set: listIds },
+                        filteredListIds: { $set: listIds },
+                    },
+                }
+                this.emitMutation(mutation)
+            },
+        )
+
+        return {
+            nextState: this.withMutation(previousState, mutation),
+            remoteToLocalIdDict,
+        }
+    }
+    private async loadJoinedListsData(previousState: State) {
+        const remoteToLocalIdDict: { [remoteId: string]: number } = {}
+        const mutation: UIMutation<State> = {}
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: {
+                    joinedLists: { loadingState: { $set: taskState } },
+                },
+            }),
+            async () => {
+                let joinedLists = await this.options.listsBG.fetchCollaborativeLists(
+                    {
+                        skip: 0,
+                        limit: 120,
+                    },
+                )
+
+                // const localToRemoteIdDict = await contentShareBG.getRemoteListIds(
+                //     { localListIds: joinedLists.map((list) => list.id) },
+                // )
+
+                const listIds: number[] = []
+                const listData: { [id: number]: ListData } = {}
+
+                joinedLists = joinedLists.sort((listDataA, listDataB) => {
+                    if (
+                        listDataA.name.toLowerCase() <
+                        listDataB.name.toLowerCase()
+                    ) {
+                        return -1
+                    }
+                    if (
+                        listDataA.name.toLowerCase() >
+                        listDataB.name.toLowerCase()
+                    ) {
+                        return 1
+                    }
+                    return 0
+                })
+
+                for (const list of joinedLists) {
+                    listIds.push(list.id)
+                    listData[list.id] = {
+                        remoteId: list.remoteId,
+                        id: list.id,
+                        name: list.name,
+                        isOwnedList: false,
+                        description: list.description,
+                    }
+                }
+
+                mutation.listsSidebar = {
+                    listData: { $merge: listData },
+                    joinedLists: {
                         allListIds: { $set: listIds },
                         filteredListIds: { $set: listIds },
                     },
@@ -2805,6 +2905,15 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
     }
+    setJoinedListsExpanded: EventHandler<'setJoinedListsExpanded'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                joinedLists: { isExpanded: { $set: event.isExpanded } },
+            },
+        })
+    }
 
     setSelectedListId: EventHandler<'setSelectedListId'> = async ({
         event,
@@ -3317,7 +3426,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         if (previousState.listsSidebar.hasFeedActivity) {
-            console.log('setnewactivity')
             this.emitMutation({
                 listsSidebar: {
                     hasFeedActivity: { $set: false },

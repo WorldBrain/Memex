@@ -58,6 +58,7 @@ import { PageAnnotationsCache } from 'src/annotations/cache'
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { createYoutubeServiceOptions } from '@worldbrain/memex-common/lib/services/youtube/library'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { debounce, throttle } from 'lodash'
 
 export interface Props extends DashboardDependencies {}
 
@@ -590,6 +591,20 @@ export class DashboardContainer extends StatefulUIElement<
                             'followed-lists',
                         ),
                     },
+                    {
+                        ...listsSidebar.joinedLists,
+                        title: 'Joined Spaces',
+                        onExpandBtnClick: () => {
+                            this.processEvent('setJoinedListsExpanded', {
+                                isExpanded: !listsSidebar.joinedLists
+                                    .isExpanded,
+                            })
+                        },
+                        listsArray: this.listsStateToProps(
+                            listsSidebar.joinedLists.filteredListIds,
+                            'joined-lists',
+                        ),
+                    },
                 ]}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () => {
@@ -620,18 +635,14 @@ export class DashboardContainer extends StatefulUIElement<
                     this.processEvent('dragOverFile', true)
                 }}
                 onDrop={(event) => {
-                    this.processEvent('openPDF', null)
                     this.processEvent('dragOverFile', false)
                 }}
                 onClick={(event) => {
-                    console.log(event.key)
                     if (event.key === 'Escape') {
                         this.processEvent('dragOverFile', false)
                     }
                     this.processEvent('dragOverFile', false)
                 }}
-                autoFocus
-                tabIndex="0"
             >
                 <DropZoneFrame>
                     <DropZoneContent>
@@ -1382,15 +1393,9 @@ export class DashboardContainer extends StatefulUIElement<
                     this.processEvent('dragOverFile', true)
                 }}
                 onDrop={(event) => {
-                    // this.processEvent('dragOverFile', false)
-
-                    console.log(event)
-
-                    setTimeout(function () {
-                        // override prevented flag to prevent jquery from discarding event
-                        // retrigger with the exactly same event data
-                        this.trigger(event)
-                    }, 1000)
+                    if (event.dataTransfer.files || event.target.files) {
+                        this.processEvent('dragOverFile', false)
+                    }
                 }}
             >
                 {this.state.showDropArea && this.renderPdfLocator()}

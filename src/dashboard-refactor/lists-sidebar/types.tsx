@@ -44,6 +44,7 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         listData: { [id: number]: ListData }
         followedLists: FollowedListGroup
         localLists: LocalListGroup
+        joinedLists: ListGroupCommon
         spaceSidebarWidth: number
 
         inboxUnreadCount: number
@@ -77,6 +78,7 @@ export type Events = UIEvent<{
     setFollowedLists: { lists: ListData[] }
     setLocalListsExpanded: { isExpanded: boolean }
     setFollowedListsExpanded: { isExpanded: boolean }
+    setJoinedListsExpanded: { isExpanded: boolean }
 
     changeListName: { value: string }
     confirmListEdit: { value: string }

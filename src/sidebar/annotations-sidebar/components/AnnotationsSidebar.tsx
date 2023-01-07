@@ -1,4 +1,6 @@
 import * as React from 'react'
+import { useRef } from 'react'
+
 import Waypoint from 'react-waypoint'
 import styled, { css, keyframes } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -151,7 +153,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     getYoutubePlayer?(): YoutubePlayer
     clickFeedActivityIndicator?: () => void
     hasFeedActivity?: boolean
-    editableProps: EditableItemProps
+    // editableProps: EditableItemProps
 }
 
 interface AnnotationsSidebarState {
@@ -600,29 +602,10 @@ export class AnnotationsSidebar extends React.Component<
                                             showSpaceSharePopout: unifiedListId,
                                         })
                                     }}
-                                    containerRef={ref}
-                                />
-                                {/* <SpaceContextMenuButton
-                                    contentSharingBG={this.props.contentSharing}
-                                    spacesBG={collections}
-                                    spaceName={listData.name}
-                                    localListId={listData.id}
-                                    remoteListId={listData.remoteId}
-                                    toggleMenu={(e) => {
-                                        this.setState({
-                                            showSpaceSharePopout: true,
-                                        })
-                                    }}
-                                    editableProps={this.props.editableProps!}
-                                    isMenuDisplayed={
-                                        this.state.showSpaceSharePopout
+                                    containerRef={
+                                        this.spaceShareButtonRef[unifiedListId]
                                     }
-                                    // onDeleteSpaceIntent={
-                                    //     this.props.onDeleteClick
-                                    // }
-                                    // onSpaceShare={onSpaceShare}
-                                    // cancelSpaceNameEdit={this.props.cancelSpaceNameEdit()}
-                                /> */}
+                                />
                             </TooltipBox>
                             <TooltipBox
                                 tooltipText="Go to Space"
@@ -708,7 +691,7 @@ export class AnnotationsSidebar extends React.Component<
                     strategy={'fixed'}
                     targetElementRef={ref.current}
                 >
-                    <SpaceContextMenu
+                    {/* <SpaceContextMenu
                         {...this.props}
                         {...this.state}
                         contentSharingBG={this.props.contentSharing}
@@ -717,14 +700,14 @@ export class AnnotationsSidebar extends React.Component<
                         localListId={listData.localId}
                         remoteListId={listData.remoteId}
                         editableProps={this.props.editableProps!}
-                        ownershipStatus={this.spaceOwnershipStatus(listData)}
+                        // ownershipStatus={this.spaceOwnershipStatus(listData)}
                         // isMenuDisplayed={this.state.showSpaceSharePopout}
                         // onDeleteSpaceIntent={
                         //     this.props.onDeleteClick
                         // }
                         // onSpaceShare={onSpaceShare}
                         // cancelSpaceNameEdit={this.props.cancelSpaceNameEdit()}
-                    />
+                    /> */}
                 </PopoutBox>
             )
         }

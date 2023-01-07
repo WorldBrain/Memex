@@ -553,7 +553,6 @@ export function setupWebUIActions(args: {
 
     document.addEventListener(MEMEX_OPEN_LINK_EVENT_NAME, async (event) => {
         const detail = event.detail as MemexOpenLinkDetail
-        console.log('Got request to open page link', detail)
         confirmRequest(detail.requestId)
 
         await args.contentScriptsBG.openPageWithSidebarInSelectedListMode({
