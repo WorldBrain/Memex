@@ -49,6 +49,12 @@ const testData: ListsState = {
         loadingState: 'pristine',
         isAddInputShown: true,
     },
+    joinedLists: {
+        allListIds: [0, 1, 2, 3, 6, 7],
+        filteredListIds: [0, 1, 2, 3, 6, 7],
+        isExpanded: true,
+        loadingState: 'pristine',
+    },
 }
 
 describe('dashboard list sidebar util tests', () => {

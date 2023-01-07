@@ -106,6 +106,7 @@ export default function ListsSegment({
                                     isLoading={
                                         space.name == null && space != null
                                     }
+                                    title={space.name}
                                 >
                                     {' '}
                                     {space.isShared && (
@@ -116,7 +117,7 @@ export default function ListsSegment({
                                             color="greyScale8"
                                         />
                                     )}
-                                    {space.name}
+                                    <SpaceName>{space.name}</SpaceName>
                                 </ListSpaceContainer>
                             )
                         })}
@@ -133,6 +134,11 @@ export default function ListsSegment({
         </Container>
     )
 }
+
+const SpaceName = styled.div`
+    text-overflow: ellipsis;
+    overflow: hidden;
+`
 
 const SpacesListContainer = styled.div`
     width: fill-available;
@@ -187,6 +193,8 @@ const ListSpaceContainer = styled.div<{
     align-items: center;
     white-space: nowrap;
     font-family: 'Satoshi', sans-serif;
+    text-overflow: ellipsis;
+    max-width: 200px;
 
     ${(props) =>
         props.isLoading &&
