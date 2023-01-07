@@ -59,6 +59,7 @@ import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { createYoutubeServiceOptions } from '@worldbrain/memex-common/lib/services/youtube/library'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { debounce, throttle } from 'lodash'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 export interface Props extends DashboardDependencies {}
 
@@ -141,7 +142,11 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private getListDetailsById: ListDetailsGetter = (id) => ({
-        name: this.state.listsSidebar.listData[id]?.name ?? 'Missing list',
+        name: this.state.listsSidebar.listData[id]?.name ?? (
+            <span>
+                <LoadingIndicator size={8} />
+            </span>
+        ),
         isShared: this.state.listsSidebar.listData[id]?.remoteId != null,
     })
 
