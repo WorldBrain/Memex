@@ -179,6 +179,9 @@ export class DashboardContainer extends StatefulUIElement<
                 this.processEvent('updateSelectedListDescription', {
                     description,
                 }),
+            saveTitle: (value, listId) => {
+                this.processEvent('confirmListEdit', { value, listId })
+            },
             onAddContributorsClick: listData.isOwnedList
                 ? () =>
                       this.processEvent('setShareListId', {
@@ -679,6 +682,9 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                filterByList={(listId) =>
+                    this.processEvent('setSelectedListId', { listId })
+                }
                 clearInbox={() => this.processEvent('clearInbox', null)}
                 isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 activePage={this.state.activePageID && true}

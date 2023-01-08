@@ -67,6 +67,8 @@ import SpaceContextMenu, {
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
+type Refs = { [unifiedListId: string]: React.RefObject<HTMLDivElement> }
+
 export interface AnnotationsSidebarProps extends SidebarContainerState {
     annotationsCache: PageAnnotationsCacheInterface
     currentUser?: UserReference
@@ -182,7 +184,7 @@ export class AnnotationsSidebar extends React.Component<
     private pageShareButtonRef = React.createRef<HTMLDivElement>()
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
     private spaceShareButtonRef: {
-        [unifiedId: number]: React.RefObject<HTMLDivElement>
+        [unifiedListId: string]: React.RefObject<HTMLDivElement>
     } = {}
 
     state: AnnotationsSidebarState = {
@@ -547,9 +549,6 @@ export class AnnotationsSidebar extends React.Component<
         listInstance,
         othersAnnotsCount,
     ) {
-        const ref = React.createRef<HTMLDivElement>()
-        this.spaceShareButtonRef[unifiedListId] = ref
-
         return (
             <FollowedListNotesContainer
                 bottom={listInstance.isOpen ? '0px' : '0px'}
@@ -609,7 +608,9 @@ export class AnnotationsSidebar extends React.Component<
                                             showSpaceSharePopout: unifiedListId,
                                         })
                                     }}
-                                    containerRef={ref}
+                                    containerRef={
+                                        this.spaceShareButtonRef[unifiedListId]
+                                    }
                                 />
                             </TooltipBox>
                         ) : undefined}
@@ -666,7 +667,10 @@ export class AnnotationsSidebar extends React.Component<
                     </ButtonContainer>
                 </FollowedListRow>
                 {this.renderListAnnotations(unifiedListId)}
-                {this.renderShowShareSpacePopout(unifiedListId, ref)}
+                {this.renderShowShareSpacePopout(
+                    unifiedListId,
+                    this.spaceShareButtonRef[unifiedListId],
+                )}
             </FollowedListNotesContainer>
         )
     }
@@ -702,6 +706,7 @@ export class AnnotationsSidebar extends React.Component<
                     strategy={'fixed'}
                     targetElementRef={ref.current}
                 >
+                    TEsting this
                     {/* <SpaceContextMenu
                         {...this.props}
                         {...this.state}
@@ -811,6 +816,10 @@ export class AnnotationsSidebar extends React.Component<
                                     const listData = lists.byId[item.unifiedId]
                                     const listInstance =
                                         listInstances[item.unifiedId]
+
+                                    this.spaceShareButtonRef[
+                                        item.unifiedId
+                                    ] = React.createRef<HTMLDivElement>()
 
                                     return this.renderSpacesItem(
                                         item.unifiedId,

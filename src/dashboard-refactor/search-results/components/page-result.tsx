@@ -42,6 +42,7 @@ export interface Props
         ShareMenuProps,
         'annotationsBG' | 'contentSharingBG' | 'customListsBG'
     >
+    filterbyList: (listId: number) => void
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -355,7 +356,10 @@ export default class PageResultView extends PureComponent<Props> {
                     {this.hasLists && (
                         <ListsSegment
                             lists={this.displayLists}
-                            onListClick={undefined}
+                            onListClick={(listId) => {
+                                console.log('listclickkkkk')
+                                this.props.filterbyList(listId)
+                            }}
                             onEditBtnClick={this.props.onListPickerBarBtnClick}
                             renderSpacePicker={
                                 this.props.listPickerShowStatus === 'lists-bar'

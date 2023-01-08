@@ -3134,7 +3134,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const { editingListId: listId } = previousState.listsSidebar
+        let listId
+        if (event.listId == null) {
+            const { editingListId: listId } = previousState.listsSidebar
+        } else {
+            listId = event.listId
+        }
 
         if (!listId) {
             throw new Error('No list ID is set for editing')
@@ -3186,8 +3191,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const { editingListId: listId } = previousState.listsSidebar
+        let listId
+        if (event.listId == null) {
+            const { editingListId: listId } = previousState.listsSidebar
+        } else {
+            listId = event.listId
+        }
 
+        console.log('confirm', listId)
         if (!listId) {
             throw new Error('No list ID is set for editing')
         }
@@ -3196,7 +3207,15 @@ export class DashboardLogic extends UILogic<State, Events> {
             id: listId,
         })
 
-        const newName = previousState.listsSidebar.listData[listId].newName
+        // const oldName = previousState.listsSidebar.listData[listId].name
+
+        let newName
+        if (event.value) {
+            newName = event.value
+        } else {
+            newName = previousState.listsSidebar.listData[listId].newName
+        }
+
         if (newName === oldName) {
             return
         }
@@ -3232,12 +3251,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listEditState: { $set: taskState } },
             }),
             async () => {
-                await this.options.listsBG.updateListName({
-                    id: listId,
-                    oldName,
-                    newName,
-                })
-
                 this.emitMutation({
                     listsSidebar: {
                         listData: {
@@ -3250,6 +3263,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                             $set: null,
                         },
                     },
+                })
+                await this.options.listsBG.updateListName({
+                    id: listId,
+                    oldName,
+                    newName,
                 })
             },
         )

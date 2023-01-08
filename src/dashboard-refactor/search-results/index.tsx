@@ -110,6 +110,7 @@ export type Props = RootState &
         // updateAllResultNotesShareInfo: (info: NoteShareInfo) => void
         updateAllResultNotesShareInfo: (state: AnnotationSharingStates) => void
         clearInbox: () => void
+        filterByList: (listId: number) => void
     }
 
 export interface State {
@@ -516,6 +517,10 @@ export default class SearchResultsContainer extends React.Component<
                             ? interactionProps.onTagPickerBtnClick
                             : undefined
                     }
+                    filterbyList={(listId) => {
+                        console.log('filterbyList')
+                        this.props.filterByList(listId)
+                    }}
                 />
                 {this.renderPageNotes(page, day, interactionProps)}
             </ResultBox>
