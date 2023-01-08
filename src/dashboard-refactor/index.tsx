@@ -650,11 +650,12 @@ export class DashboardContainer extends StatefulUIElement<
     private renderPdfLocator() {
         return (
             <DropZoneBackground
+                onDragStart={(event) => console.log(event)}
                 onDragOver={(event) => {
-                    this.processEvent('dragOverFile', true)
-                }}
-                onDrop={(event) => {
-                    this.processEvent('dragOverFile', false)
+                    event.preventDefault()
+                    if (!this.state.showDropArea) {
+                        this.processEvent('dragOverFile', true)
+                    }
                 }}
                 onClick={(event) => {
                     if (event.key === 'Escape') {
@@ -1412,7 +1413,12 @@ export class DashboardContainer extends StatefulUIElement<
             <Container
                 id={'dashboardContainer'}
                 onDragOver={(event) => {
-                    this.processEvent('dragOverFile', true)
+                    if (
+                        !this.state.showDropArea &&
+                        event.dataTransfer.types[0] === 'Files'
+                    ) {
+                        this.processEvent('dragOverFile', true)
+                    }
                 }}
                 onDrop={(event) => {
                     if (event.dataTransfer.files || event.target.files) {
