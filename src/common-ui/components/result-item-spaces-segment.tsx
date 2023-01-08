@@ -96,18 +96,9 @@ export default function ListsSegment({
                                 <ListSpaceContainer
                                     key={space.id}
                                     onClick={(e) => {
-                                        console.log('onlistclick')
                                         e.stopPropagation()
                                         onListClick(space.id)
                                     }}
-                                    //     onListClick
-                                    //         ? (e) => {
-                                    //               console.log('onlistclick')
-                                    //               e.stopPropagation()
-                                    //               onListClick(space.id)
-                                    //           }
-                                    //         : undefined
-                                    // }
                                     isLoading={
                                         space.name == null && space != null
                                     }
