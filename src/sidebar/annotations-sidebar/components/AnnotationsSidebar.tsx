@@ -574,21 +574,47 @@ export class AnnotationsSidebar extends React.Component<
                                 )
                             }}
                         />
-                        <FollowedListTitle>
-                            {listData.name}
-                            {listData.creator?.id ===
-                                this.props.currentUser?.id &&
-                            listData.remoteId != null ? (
-                                <Icon
-                                    filePath="peopleFine"
-                                    heightAndWidth="20px"
-                                    hoverOff
-                                />
-                            ) : undefined}
-                        </FollowedListTitle>
+                        <FollowedListTitle>{listData.name}</FollowedListTitle>
                     </FollowedListTitleContainer>
                     <ButtonContainer>
                         <ActionButtons>
+                            <TooltipBox
+                                tooltipText="Go to Space"
+                                placement="bottom"
+                            >
+                                <Icon
+                                    icon="goTo"
+                                    height="20px"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        this.props.openCollectionPage(
+                                            listData.remoteId,
+                                        )
+                                    }}
+                                />
+                            </TooltipBox>
+                        </ActionButtons>
+                        {listData.creator?.id === this.props.currentUser?.id &&
+                        listData.remoteId != null ? (
+                            <TooltipBox
+                                tooltipText="Space is Shared"
+                                placement="bottom"
+                            >
+                                <Icon
+                                    filePath="peopleFine"
+                                    heightAndWidth="20px"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        this.setState({
+                                            showSpaceSharePopout: unifiedListId,
+                                        })
+                                    }}
+                                    containerRef={ref}
+                                />
+                            </TooltipBox>
+                        ) : undefined}
+                        {listData.creator?.id === this.props.currentUser?.id &&
+                        listData.remoteId == null ? (
                             <TooltipBox
                                 tooltipText="Share Space"
                                 placement="bottom"
@@ -607,22 +633,7 @@ export class AnnotationsSidebar extends React.Component<
                                     }
                                 />
                             </TooltipBox>
-                            <TooltipBox
-                                tooltipText="Go to Space"
-                                placement="bottom"
-                            >
-                                <Icon
-                                    icon="goTo"
-                                    height="20px"
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        this.props.openCollectionPage(
-                                            unifiedListId,
-                                        )
-                                    }}
-                                />
-                            </TooltipBox>
-                        </ActionButtons>
+                        ) : undefined}
                         {listInstance.annotationRefsLoadState !== 'success' &&
                         listData.hasRemoteAnnotations ? (
                             this.renderLoader(undefined, 20)
@@ -1711,6 +1722,7 @@ const ActionButtons = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
+    grid-gap: 10px;
 `
 
 const LoaderBox = styled.div`
@@ -2061,9 +2073,13 @@ const FollowedListTitle = styled.span<{ context: string }>`
     text-overflow: ellipsis;
     overflow-x: hidden;
     color: ${(props) => props.theme.colors.normalText};
-    display: flex;
     grid-gap: 5px;
     align-items: center;
+    width: 100px;
+    flex: 1;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: block;
 `
 const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
     font-weight: bold;

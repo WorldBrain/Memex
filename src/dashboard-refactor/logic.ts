@@ -419,19 +419,30 @@ export class DashboardLogic extends UILogic<State, Events> {
                 ].map(([localListId, remoteId]) => ({ localListId, remoteId }))
 
                 // check for all local entries that also have remoteentries, and cross check them with the joined lists, keep only the ones that are not in joined lists
-                const filteredArray = localToRemoteIdAsArray.filter((item) => {
-                    return !joinedLists.some(
-                        (list) => list.remoteId === item.remoteId,
-                    )
-                })
+                const localListsWithoutJoinedStatusButMaybeShared = localToRemoteIdAsArray.filter(
+                    (item) => {
+                        return !joinedLists.some(
+                            (list) => list.remoteId === item.remoteId,
+                        )
+                    },
+                )
 
                 // get the locallists by filtering out all IDs that are in the filteredArray
-
-                let localLists = allLists.filter((item) => {
-                    return filteredArray.some(
+                let localListsNotJoinedButShared = allLists.filter((item) => {
+                    return localListsWithoutJoinedStatusButMaybeShared.some(
                         (list) => parseInt(list.localListId) === item.id,
                     )
                 })
+                let localListsNotShared = allLists.filter((item) => {
+                    return !localToRemoteIdAsArray.some(
+                        (list) => parseInt(list.localListId) === item.id,
+                    )
+                })
+
+                let localLists = [
+                    ...localListsNotShared,
+                    ...localListsNotJoinedButShared,
+                ]
 
                 const listIds: number[] = []
                 const listData: { [id: number]: ListData } = {}
