@@ -289,7 +289,25 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 cacheAnnotation,
             )
 
-            const { savePromise } = await createAnnotation({
+            await this.renderHighlight(
+                { ...cacheAnnotation, unifiedId },
+                ({ openInEdit, unifiedAnnotationId }) => {
+                    params.inPageUI.showSidebar({
+                        annotationCacheId: unifiedAnnotationId,
+                        action: openInEdit
+                            ? 'edit_annotation'
+                            : 'show_annotation',
+                    })
+                },
+            )
+
+            await this.createUndoHistoryEntry(
+                window.location.href,
+                'annotation',
+                unifiedId,
+            )
+
+            await createAnnotation({
                 annotationData: {
                     fullPageUrl,
                     localListIds,
@@ -309,25 +327,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 skipPageIndexing: false,
             })
 
-            await Promise.all([
-                savePromise,
-                this.renderHighlight(
-                    { ...cacheAnnotation, unifiedId },
-                    ({ openInEdit, unifiedAnnotationId }) => {
-                        params.inPageUI.showSidebar({
-                            annotationCacheId: unifiedAnnotationId,
-                            action: openInEdit
-                                ? 'edit_annotation'
-                                : 'show_annotation',
-                        })
-                    },
-                ),
-            ])
-            await this.createUndoHistoryEntry(
-                window.location.href,
-                'annotation',
-                unifiedId,
-            )
             return unifiedId
         } catch (err) {
             this.removeAnnotationHighlight(annotation.url)
