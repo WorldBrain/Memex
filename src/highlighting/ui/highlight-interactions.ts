@@ -17,6 +17,7 @@ import { generateAnnotationUrl } from 'src/annotations/utils'
 import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import browser from 'webextension-polyfill'
 import * as PDFjsHighlighting from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
@@ -24,6 +25,7 @@ import { throttle } from 'lodash'
 import hexToRgb from 'hex-to-rgb'
 import TurndownService from 'turndown'
 import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
+import { createAnnotation } from 'src/annotations/annotation-save-logic'
 
 const turndownService = new TurndownService({
     headingStyle: 'atx',
@@ -127,6 +129,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
     constructor(
         private deps: {
             annotationsBG: AnnotationInterface<'caller'>
+            contentSharingBG: ContentSharingInterface
         },
     ) {
         document.addEventListener('click', this.handleOutsideHighlightClick)
@@ -198,11 +201,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
         params: SaveAndRenderHighlightDeps,
     ): Promise<UnifiedAnnotation['unifiedId'] | null> {
         const selection = params.getSelection()
-        const { pageUrl, title } = await params.getUrlAndTitle()
+        const { fullPageUrl, title } = await params.getFullPageUrlAndTitle()
 
+        // TODO: simplify conditions related to timestamp + annot data. Quite difficult to work thru and reason about. i.e., bug prone
         // Enable support for any kind of HTML 5 video using annotation keyboard shortcuts to make notes without opening the sidebar and notes field first
-
-        let videoTimeStampForComment
+        let videoTimeStampForComment: string | null
         const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
 
         if (videoURLWithTime != null) {
@@ -216,28 +219,31 @@ export class HighlightRenderer implements HighlightRendererInterface {
             return null
         }
 
-        const anchor = await extractAnchorFromSelection(selection, pageUrl)
+        const anchor = await extractAnchorFromSelection(selection, fullPageUrl)
 
         const body = anchor && anchor.quote
         const hasSelectedText = anchor.quote.length
 
-        const annotationLists = []
+        const localListIds: number[] = []
         if (params.inPageUI.selectedList) {
             const selectedList =
                 params.annotationsCache.lists.byId[params.inPageUI.selectedList]
             if (selectedList.localId != null) {
-                annotationLists.push(selectedList.localId)
+                localListIds.push(selectedList.localId)
             }
         }
 
         const now = new Date()
         const annotation: Annotation &
             Required<Pick<Annotation, 'createdWhen' | 'lastEdited'>> = {
-            url: generateAnnotationUrl({ pageUrl, now: () => Date.now() }),
+            url: generateAnnotationUrl({
+                pageUrl: fullPageUrl,
+                now: () => Date.now(),
+            }),
             body: hasSelectedText ? body : undefined,
-            pageUrl,
+            pageUrl: fullPageUrl,
             tags: [],
-            lists: annotationLists,
+            lists: localListIds,
             comment: hasSelectedText
                 ? ''
                 : videoTimeStampForComment
@@ -259,11 +265,28 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 cacheAnnotation,
             )
 
+            const { savePromise } = await createAnnotation({
+                annotationData: {
+                    fullPageUrl,
+                    localListIds,
+                    pageTitle: title,
+                    body: annotation.body,
+                    selector: annotation.selector,
+                    comment: annotation.comment,
+                    localId: annotation.url,
+                    createdWhen: now,
+                },
+                shareOpts: {
+                    shouldShare: params.shouldShare,
+                    shouldCopyShareLink: params.shouldShare,
+                },
+                annotationsBG: this.deps.annotationsBG,
+                contentSharingBG: this.deps.contentSharingBG,
+                skipPageIndexing: false,
+            })
+
             await Promise.all([
-                this.deps.annotationsBG.createAnnotation({
-                    ...annotation,
-                    title: annotation.pageTitle,
-                }),
+                savePromise,
                 this.renderHighlight(
                     { ...cacheAnnotation, unifiedId },
                     ({ openInEdit, unifiedAnnotationId }) => {

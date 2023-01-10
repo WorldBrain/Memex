@@ -55,7 +55,10 @@ export interface HighlightInteractionsInterface {
 }
 
 export interface SaveAndRenderHighlightDeps {
-    getUrlAndTitle: () => Promise<{ pageUrl: string; title: string }>
+    getFullPageUrlAndTitle: () => Promise<{
+        fullPageUrl: string
+        title: string
+    }>
     getSelection: () => Selection
     annotationsCache: PageAnnotationsCacheInterface
     analyticsEvent?: AnalyticsEvent

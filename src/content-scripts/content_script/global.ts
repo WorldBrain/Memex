@@ -59,7 +59,7 @@ import { runtime } from 'webextension-polyfill'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { hydrateCache } from 'src/annotations/cache/utils'
-import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -104,6 +104,7 @@ export async function main(
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
+    const contentSharingBG = runInBackground<ContentSharingInterface>()
     const tagsBG = runInBackground<RemoteTagsInterface>()
     const contentScriptsBG = runInBackground<
         ContentScriptsInterface<'caller'>
@@ -116,7 +117,7 @@ export async function main(
     const annotationsManager = new AnnotationsManager()
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
-    const highlightRenderer = new HighlightRenderer({ annotationsBG })
+
     const sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate
@@ -144,7 +145,7 @@ export async function main(
     const currentUser: UserReference = _currentUser
         ? { type: 'user-reference', id: _currentUser.id }
         : undefined
-    const fullPageUrl = await pageInfo.getPageUrl()
+    const fullPageUrl = await pageInfo.getFullPageUrl()
     const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
     const annotationsCache = new PageAnnotationsCache({ normalizedPageUrl })
     window['__annotationsCache'] = annotationsCache
@@ -155,19 +156,23 @@ export async function main(
         cache: annotationsCache,
         bgModules: {
             annotations: annotationsBG,
-            customLists: runInBackground(),
-            contentSharing: runInBackground(),
+            customLists: collectionsBG,
+            contentSharing: contentSharingBG,
             pageActivityIndicator: pageActivityIndicatorBG,
         },
     })
 
+    const highlightRenderer = new HighlightRenderer({
+        annotationsBG: runInBackground(),
+        contentSharingBG,
+    })
     const annotationFunctionsParams = {
         inPageUI,
         annotationsCache,
         getSelection: () => document.getSelection(),
-        getUrlAndTitle: async () => ({
+        getFullPageUrlAndTitle: async () => ({
             title: pageInfo.getPageTitle(),
-            pageUrl: await pageInfo.getPageUrl(),
+            fullPageUrl: await pageInfo.getFullPageUrl(),
         }),
     }
 
@@ -184,20 +189,14 @@ export async function main(
         createAnnotation: (analyticsEvent?: AnalyticsEvent<'Annotations'>) => (
             shouldShare: boolean,
             showSpacePicker?: boolean,
-        ) => {
-            // TODO: use inPageUI.selectedList to create the annotation in the right scope
-            console.debug(
-                'Creating annotation under selected space',
-                inPageUI.selectedList,
-            )
-            return highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
+        ) =>
+            highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
                 ...annotationFunctionsParams,
                 showSpacePicker,
                 analyticsEvent,
                 currentUser,
                 shouldShare,
-            })
-        },
+            }),
     }
 
     // 4. Create a contentScriptRegistry object with functions for each content script
@@ -216,7 +215,7 @@ export async function main(
                 tags: tagsBG,
                 customLists: collectionsBG,
                 activityIndicatorBG: runInBackground(),
-                contentSharing: runInBackground(),
+                contentSharing: contentSharingBG,
                 bookmarks: runInBackground(),
                 syncSettings: createSyncSettingsStore({
                     syncSettingsBG: runInBackground(),
@@ -229,7 +228,7 @@ export async function main(
                     getState: tooltipUtils.getHighlightsState,
                     setState: tooltipUtils.setHighlightsState,
                 },
-                getPageUrl: pageInfo.getPageUrl,
+                getPageUrl: pageInfo.getFullPageUrl,
             })
             components.ribbon?.resolve()
         },
@@ -255,15 +254,15 @@ export async function main(
                 highlighter: highlightRenderer,
                 annotations: annotationsBG,
                 tags: tagsBG,
-                auth: runInBackground(),
+                auth: authBG,
                 customLists: collectionsBG,
-                contentSharing: runInBackground(),
+                contentSharing: contentSharingBG,
                 syncSettingsBG: runInBackground(),
                 pageActivityIndicatorBG: runInBackground(),
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
                 analytics,
                 copyToClipboard,
-                getFullPageUrl: pageInfo.getPageUrl,
+                getFullPageUrl: pageInfo.getFullPageUrl,
                 copyPaster,
                 subscription,
                 contentConversationsBG: runInBackground(),
@@ -480,7 +479,7 @@ class PageInfo {
         this._href = window.location.href
     }
 
-    getPageUrl = async () => {
+    getFullPageUrl = async () => {
         await this.refreshIfNeeded()
         return this._identifier.fullUrl
     }
