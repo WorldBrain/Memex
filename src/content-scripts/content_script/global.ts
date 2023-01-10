@@ -60,6 +60,7 @@ import type { AuthRemoteFunctionsInterface } from 'src/authentication/background
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { hydrateCache } from 'src/annotations/cache/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { UNDO_HISTORY } from 'src/constants'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -83,6 +84,61 @@ export async function main(
         })
     } else {
         injectMemexExtDetectionEl()
+    }
+
+    let keysPressed = []
+
+    document.addEventListener('keydown', (event) => {
+        undoAnnotationHistory(event)
+    })
+
+    document.addEventListener('keyup', (event) => {
+        keysPressed.filter((item) => item != event.key)
+    })
+
+    const undoAnnotationHistory = async (event) => {
+        if (
+            event.target.nodeName === 'INPUT' ||
+            event.target.nodeName === 'TEXTAREA'
+        ) {
+            return
+        }
+
+        if (event.key === 'Meta') {
+            keysPressed.push(event.key)
+        }
+        if (event.key === 'z') {
+            if (keysPressed.includes('Meta')) {
+                let lastActions = await globalThis['browser'].storage.local.get(
+                    `${UNDO_HISTORY}`,
+                )
+
+                lastActions = lastActions[`${UNDO_HISTORY}`]
+
+                let lastAction = lastActions[0]
+
+                if (lastAction.url !== window.location.href) {
+                    await globalThis['browser'].storage.local.remove([
+                        `${UNDO_HISTORY}`,
+                    ])
+                    return
+                } else {
+                    highlightRenderer.undoHighlight(lastAction.id)
+                    lastActions.shift()
+                    await globalThis['browser'].storage.local.set({
+                        [`${UNDO_HISTORY}`]: lastActions,
+                    })
+                }
+
+                const existing =
+                    annotationsCache.annotations.byId[lastAction.id]
+                annotationsCache.removeAnnotation({ unifiedId: lastAction.id })
+
+                if (existing?.localId != null) {
+                    await annotationsBG.deleteAnnotation(existing.localId)
+                }
+            }
+        }
     }
 
     setupRpcConnection({ sideName: 'content-script-global', role: 'content' })

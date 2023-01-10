@@ -26,6 +26,8 @@ import hexToRgb from 'hex-to-rgb'
 import TurndownService from 'turndown'
 import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
+import { UNDO_HISTORY } from 'src/constants'
+import { left } from '@popperjs/core'
 
 const turndownService = new TurndownService({
     headingStyle: 'atx',
@@ -184,6 +186,28 @@ export class HighlightRenderer implements HighlightRendererInterface {
         }
     }
 
+    createUndoHistoryEntry = async (
+        url: string,
+        type: 'annotation' | 'pagelistEntry',
+        id: string,
+    ) => {
+        let undoHistory = await browser.storage.local.get(`${UNDO_HISTORY}`)
+
+        undoHistory = undoHistory[`${UNDO_HISTORY}`]
+
+        if (undoHistory == null) {
+            undoHistory = []
+        }
+
+        const undoEntry = { url: url, type: type, id: id }
+
+        undoHistory.unshift(undoEntry)
+
+        await globalThis['browser'].storage.local.set({
+            [UNDO_HISTORY]: undoHistory,
+        })
+    }
+
     saveAndRenderHighlight: HighlightInteractionsInterface['saveAndRenderHighlight'] = async (
         params,
     ) => {
@@ -299,6 +323,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     },
                 ),
             ])
+            await this.createUndoHistoryEntry(
+                window.location.href,
+                'annotation',
+                unifiedId,
+            )
             return unifiedId
         } catch (err) {
             this.removeAnnotationHighlight(annotation.url)
