@@ -158,9 +158,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        this.textAreaHeight()
+        this.setTextAreaHeight()
 
-        let needsTruncation
+        let needsTruncation: boolean
 
         if (this.props.comment?.length || this.props.body?.length) {
             if (
@@ -371,7 +371,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         ? this.props.onHighlightClick
                         : undefined
                 }
-                hasComment={this.props.comment.length > 0}
+                hasComment={this.props.comment?.length > 0}
             >
                 <ActionBox>{actionsBox}</ActionBox>
                 <Highlightbar />
@@ -384,13 +384,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         )
     }
 
-    private textAreaHeight() {
+    private setTextAreaHeight() {
         let lines = 1
 
-        try {
+        if (this.props.comment) {
             lines = this.props.comment.split(/\r\n|\r|\n/).length
-        } catch {
-            lines = 1
         }
 
         const height = lines * 20
@@ -422,7 +420,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             )
         }
 
-        if (comment.length === 0) {
+        if (!comment?.length) {
             return
         }
 
