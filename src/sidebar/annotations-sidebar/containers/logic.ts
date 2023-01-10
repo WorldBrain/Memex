@@ -853,14 +853,14 @@ export class SidebarContainerLogic extends UILogic<
                 return
             }
 
-            const listIds = [...commentBox.lists]
+            const localListIds = [...commentBox.lists]
             const maybeAddLocalListIdForCacheList = (
                 unifiedListId?: UnifiedList['unifiedId'],
             ) => {
                 if (unifiedListId != null) {
                     const { localId } = lists.byId[unifiedListId]
                     if (localId != null) {
-                        listIds.push(localId)
+                        localListIds.push(localId)
                     }
                 }
             }
@@ -874,6 +874,7 @@ export class SidebarContainerLogic extends UILogic<
                 annotationData: {
                     comment,
                     fullPageUrl,
+                    localListIds,
                     localId: annotationId,
                     createdWhen: new Date(now),
                 },
@@ -895,18 +896,13 @@ export class SidebarContainerLogic extends UILogic<
                     isBulkShareProtected: event.isProtected,
                 }),
                 creator: this.options.currentUser,
-                localListIds: listIds,
                 createdWhen: now,
                 lastEdited: now,
+                localListIds,
                 comment,
             })
 
             await savePromise
-            // TODO: maybe move this call inside `createAnnotation` fn
-            await this.options.contentSharing.shareAnnotationToSomeLists({
-                annotationUrl: annotationId,
-                localListIds: listIds,
-            })
         })
     }
 

@@ -18,6 +18,7 @@ type AnnotationCreateData = {
     localId?: string
     createdWhen?: Date
     selector?: Anchor
+    localListIds?: number[]
 } & ({ body: string; comment?: string } | { body?: string; comment: string })
 
 interface AnnotationUpdateData {
@@ -95,6 +96,13 @@ export async function createAnnotation({
                 annotationUrl,
                 privacyLevel: shareOptsToPrivacyLvl(shareOpts),
             })
+
+            if (annotationData.localListIds?.length) {
+                await contentSharingBG.shareAnnotationToSomeLists({
+                    annotationUrl,
+                    localListIds: annotationData.localListIds,
+                })
+            }
 
             return annotationUrl
         })(),

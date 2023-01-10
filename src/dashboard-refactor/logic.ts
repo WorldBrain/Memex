@@ -1646,7 +1646,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         const { annotationsBG, contentShareBG } = this.options
-        const pageData = previousState.searchResults.pageData.byId[event.pageId]
         const formState =
             previousState.searchResults.results[event.day].pages.byId[
                 event.pageId
@@ -1666,6 +1665,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     annotationData: {
                         fullPageUrl: event.fullPageUrl,
                         comment: formState.inputValue,
+                        localListIds: formState.lists,
                     },
                     shareOpts: {
                         shouldShare: event.shouldShare,
@@ -1679,21 +1679,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
                 const newNoteId = await savePromise
 
-                if (formState.tags.length) {
-                    await annotationsBG.updateAnnotationTags({
-                        url: newNoteId,
-                        tags: formState.tags,
-                    })
-                }
-                const newNoteListIds: number[] = []
-                if (formState.lists.length) {
-                    await contentShareBG.shareAnnotationToSomeLists({
-                        annotationUrl: newNoteId,
-                        localListIds: formState.lists,
-                    })
-                    newNoteListIds.push(...formState.lists)
-                }
-
                 this.emitMutation({
                     searchResults: {
                         noteData: {
@@ -1706,7 +1691,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         displayTime: Date.now(),
                                         comment: formState.inputValue,
                                         tags: formState.tags,
-                                        lists: newNoteListIds,
+                                        lists: formState.lists ?? [],
                                         pageUrl: event.pageId,
                                         isShared: event.shouldShare,
                                         isBulkShareProtected: !!event.isProtected,
