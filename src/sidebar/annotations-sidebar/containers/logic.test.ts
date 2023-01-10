@@ -1428,6 +1428,7 @@ describe('SidebarContainerLogic', () => {
 
                 const { sidebar } = await setupLogicHelper({
                     device,
+                    skipTestData: true,
                     fullPageUrl: fullPageUrl,
                     withAuth: true,
                 })
@@ -1440,7 +1441,7 @@ describe('SidebarContainerLogic', () => {
                     DATA.COMMENT_1,
                 )
                 expect(sidebar.state.commentBox.lists).toEqual([])
-                expect(sidebar.state.annotations).toEqual([])
+                expect(sidebar.state.annotations).toEqual(initNormalizedState())
 
                 await sidebar.processEvent('saveNewPageNote', {
                     shouldShare: true,
@@ -2065,9 +2066,7 @@ describe('SidebarContainerLogic', () => {
             ).toBeNull()
         })
 
-        it('should be able to set annotations as being active', async ({
-            device,
-        }) => {
+        it('should be able to activate annotations', async ({ device }) => {
             const {
                 sidebar,
                 annotationsCache,
@@ -2164,6 +2163,91 @@ describe('SidebarContainerLogic', () => {
             })
 
             expect(emittedEvents).toEqual(expectedEvents)
+            expect(sidebar.state.activeAnnotationId).toBe(unifiedAnnotationIdB)
+            expect(sidebar.state.annotationCardInstances[cardIdB]).toEqual(
+                expect.objectContaining({
+                    cardMode: 'space-picker',
+                    isCommentEditing: false,
+                }),
+            )
+
+            await sidebar.processEvent('setActiveAnnotation', {
+                unifiedAnnotationId: null,
+            })
+            expect(sidebar.state.activeAnnotationId).toBeNull()
+        })
+
+        it('should be able to activate annotations in selected list mode', async ({
+            device,
+        }) => {
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+            })
+
+            const unifiedListId = annotationsCache.getListByLocalId(
+                DATA.LOCAL_LISTS[0].id,
+            ).unifiedId
+            const unifiedAnnotationIdA = annotationsCache.getAnnotationByLocalId(
+                DATA.LOCAL_ANNOTATIONS[0].url,
+            ).unifiedId
+            const unifiedAnnotationIdB = annotationsCache.getAnnotationByLocalId(
+                DATA.LOCAL_ANNOTATIONS[1].url,
+            ).unifiedId
+
+            // NOTE: we're getting the card instance IDs for those in the selected list view in the sidebar
+            const cardIdA = generateAnnotationCardInstanceId(
+                {
+                    unifiedId: unifiedAnnotationIdA,
+                },
+                unifiedListId,
+            )
+            const cardIdB = generateAnnotationCardInstanceId(
+                {
+                    unifiedId: unifiedAnnotationIdB,
+                },
+                unifiedListId,
+            )
+
+            await sidebar.processEvent('setSelectedList', { unifiedListId })
+
+            expect(sidebar.state.selectedListId).toEqual(unifiedListId)
+            expect(sidebar.state.activeAnnotationId).toBeNull()
+            expect(sidebar.state.annotationCardInstances[cardIdA]).toEqual(
+                expect.objectContaining({
+                    cardMode: 'none',
+                    isCommentEditing: false,
+                }),
+            )
+
+            await sidebar.processEvent('setActiveAnnotation', {
+                unifiedAnnotationId: unifiedAnnotationIdA,
+            })
+
+            expect(sidebar.state.activeAnnotationId).toBe(unifiedAnnotationIdA)
+            expect(sidebar.state.annotationCardInstances[cardIdA]).toEqual(
+                expect.objectContaining({
+                    cardMode: 'none',
+                    isCommentEditing: false,
+                }),
+            )
+
+            await sidebar.processEvent('setActiveAnnotation', {
+                unifiedAnnotationId: unifiedAnnotationIdA,
+                mode: 'edit',
+            })
+            expect(sidebar.state.activeAnnotationId).toBe(unifiedAnnotationIdA)
+            expect(sidebar.state.annotationCardInstances[cardIdA]).toEqual(
+                expect.objectContaining({
+                    cardMode: 'none',
+                    isCommentEditing: true,
+                }),
+            )
+
+            await sidebar.processEvent('setActiveAnnotation', {
+                unifiedAnnotationId: unifiedAnnotationIdB,
+                mode: 'edit_spaces',
+            })
+
             expect(sidebar.state.activeAnnotationId).toBe(unifiedAnnotationIdB)
             expect(sidebar.state.annotationCardInstances[cardIdB]).toEqual(
                 expect.objectContaining({

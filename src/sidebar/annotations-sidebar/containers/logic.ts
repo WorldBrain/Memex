@@ -1038,9 +1038,13 @@ export class SidebarContainerLogic extends UILogic<
         if (!event.mode) {
             return
         }
-        const cardId = generateAnnotationCardInstanceId({
-            unifiedId: event.unifiedAnnotationId,
-        })
+        const location = previousState.selectedListId ?? undefined
+        const cardId = generateAnnotationCardInstanceId(
+            {
+                unifiedId: event.unifiedAnnotationId,
+            },
+            location,
+        )
 
         // Likely a highlight for another user's annotation, thus non-existent in "annotations" tab
         if (previousState.annotationCardInstances[cardId] == null) {

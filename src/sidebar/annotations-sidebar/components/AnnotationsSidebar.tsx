@@ -469,7 +469,7 @@ export class AnnotationsSidebar extends React.Component<
                             unifiedListId,
                         )
                         ownAnnotationProps.initShowSpacePicker =
-                            annotationCard.cardMode === 'share-menu'
+                            annotationCard.cardMode === 'space-picker'
                                 ? 'footer'
                                 : 'hide'
                     }

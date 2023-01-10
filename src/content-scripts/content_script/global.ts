@@ -117,7 +117,10 @@ export async function main(
     const annotationsManager = new AnnotationsManager()
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
-
+    const highlightRenderer = new HighlightRenderer({
+        annotationsBG,
+        contentSharingBG,
+    })
     const sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate
@@ -162,10 +165,6 @@ export async function main(
         },
     })
 
-    const highlightRenderer = new HighlightRenderer({
-        annotationsBG: runInBackground(),
-        contentSharingBG,
-    })
     const annotationFunctionsParams = {
         inPageUI,
         annotationsCache,
