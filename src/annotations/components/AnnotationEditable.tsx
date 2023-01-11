@@ -301,7 +301,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         } = this.props
 
         const actionsBox =
-            !this.props.isEditing && this.state.hoverCard === true ? (
+            !this.props.isEditing && this.state.hoverCard ? (
                 <HighlightActionsBox>
                     {this.state.needsTruncation && (
                         <TooltipBox
@@ -427,7 +427,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         return (
             <CommentBox>
                 {!this.theme.hasHighlight &&
-                    this.state.hoverCard === true &&
+                    this.state.hoverCard &&
                     this.props.currentUserId === this.props.creatorId && (
                         <ActionBox>
                             <TooltipBox
@@ -461,28 +461,21 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 
     private isAnyModalOpen() {
-        if (
+        return (
             this.state.showCopyPaster ||
             this.state.showQuickTutorial ||
             this.state.showShareMenu ||
             this.state.showSpacePicker !== 'hide'
-        ) {
-            return true
-        } else {
-            return false
-        }
+        )
     }
 
     private calcFooterActions(): ItemBoxBottomAction[] {
         const {
             annotationFooterDependencies: footerDeps,
-            isBulkShareProtected,
             repliesLoadingState,
             appendRepliesToggle,
             onReplyBtnClick,
-            hoverState,
             hasReplies,
-            isShared,
         } = this.props
 
         const repliesToggle: ItemBoxBottomAction =
@@ -503,13 +496,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             return [repliesToggle]
         }
 
-        if (this.state.hoverCard === false) {
-            if (appendRepliesToggle) {
-                return [repliesToggle]
-            }
+        if (!this.state.hoverCard && appendRepliesToggle) {
+            return [repliesToggle]
         }
 
-        if (this.state.hoverCard === true || this.isAnyModalOpen() === true) {
+        if (this.state.hoverCard || this.isAnyModalOpen()) {
             return [
                 {
                     key: 'delete-note-btn',
@@ -763,21 +754,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     zIndex={this.props.zIndex}
                     top="5px"
                     bottom="2px"
-                    onMouseEnter={() =>
-                        this.setState({
-                            hoverCard: true,
-                        })
-                    }
-                    onMouseOver={() =>
-                        this.setState({
-                            hoverCard: true,
-                        })
-                    }
-                    onMouseLeave={() =>
-                        this.setState({
-                            hoverCard: false,
-                        })
-                    }
+                    onMouseEnter={() => this.setState({ hoverCard: true })}
+                    onMouseOver={() => this.setState({ hoverCard: true })}
+                    onMouseLeave={() => this.setState({ hoverCard: false })}
                 >
                     <ItemBox
                         firstDivProps={{

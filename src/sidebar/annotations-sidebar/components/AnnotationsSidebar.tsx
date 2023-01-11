@@ -499,7 +499,6 @@ export class AnnotationsSidebar extends React.Component<
                                     AnnotationPrivacyLevels.PROTECTED,
                                     AnnotationPrivacyLevels.SHARED_PROTECTED,
                                 ].includes(annotation.privacyLevel)
-                                ownAnnotationProps.appendRepliesToggle = true
                                 ownAnnotationProps.unifiedId =
                                     annotation.unifiedId
                                 ownAnnotationProps.lists = cacheUtils.getLocalListIdsForCacheIds(
@@ -511,7 +510,8 @@ export class AnnotationsSidebar extends React.Component<
                                     AnnotationPrivacyLevels.SHARED,
                                     AnnotationPrivacyLevels.SHARED_PROTECTED,
                                 ].includes(annotation.privacyLevel)
-                                ownAnnotationProps.appendRepliesToggle = true
+                                ownAnnotationProps.appendRepliesToggle =
+                                    listData.remoteId != null
                                 ownAnnotationProps.lastEdited =
                                     annotation.lastEdited
                                 ownAnnotationProps.isEditing =
@@ -604,18 +604,25 @@ export class AnnotationsSidebar extends React.Component<
                                             this.props.getYoutubePlayer
                                         }
                                     />
-                                    <ConversationReplies
-                                        newReplyEventHandlers={eventHandlers}
-                                        conversation={conversation}
-                                        hasReplies={hasReplies}
-                                        annotation={{
-                                            body: annotation.body,
-                                            linkId: annotation.unifiedId,
-                                            comment: annotation.comment,
-                                            createdWhen: annotation.createdWhen,
-                                            reference: sharedAnnotationRef,
-                                        }}
-                                    />
+                                    {listData.remoteId != null &&
+                                        annotation.remoteId != null && (
+                                            <ConversationReplies
+                                                newReplyEventHandlers={
+                                                    eventHandlers
+                                                }
+                                                conversation={conversation}
+                                                hasReplies={hasReplies}
+                                                annotation={{
+                                                    body: annotation.body,
+                                                    linkId:
+                                                        annotation.unifiedId,
+                                                    comment: annotation.comment,
+                                                    createdWhen:
+                                                        annotation.createdWhen,
+                                                    reference: sharedAnnotationRef,
+                                                }}
+                                            />
+                                        )}
                                 </React.Fragment>
                             )
                         })}
