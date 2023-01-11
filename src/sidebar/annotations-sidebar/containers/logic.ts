@@ -137,11 +137,11 @@ export class SidebarContainerLogic extends UILogic<
                 this as any,
                 {
                     buildConversationId,
-                    loadUserByReference: options.auth.getUserByReference,
+                    loadUserByReference: options.authBG.getUserByReference,
                     submitNewReply: options.contentConversationsBG.submitReply,
                     isAuthorizedToConverse: async () => true,
                     getCurrentUser: async () => {
-                        const user = await options.auth.getCurrentUser()
+                        const user = await options.authBG.getCurrentUser()
                         if (!user) {
                             return null
                         }
@@ -262,9 +262,9 @@ export class SidebarContainerLogic extends UILogic<
                 user: this.options.currentUser,
                 cache: this.options.annotationsCache,
                 bgModules: {
-                    customLists: this.options.customLists,
-                    annotations: this.options.annotations,
-                    contentSharing: this.options.contentSharing,
+                    customLists: this.options.customListsBG,
+                    annotations: this.options.annotationsBG,
+                    contentSharing: this.options.contentSharingBG,
                     pageActivityIndicator: this.options.pageActivityIndicatorBG,
                 },
             })
@@ -449,15 +449,15 @@ export class SidebarContainerLogic extends UILogic<
 
     private async ensureLoggedIn(): Promise<boolean> {
         const {
-            auth,
+            authBG,
             setLoginModalShown,
             setDisplayNameModalShown,
         } = this.options
 
-        const user = await auth.getCurrentUser()
+        const user = await authBG.getCurrentUser()
         if (user != null) {
             if (!user.displayName?.length) {
-                const userProfile = await auth.getUserProfile()
+                const userProfile = await authBG.getUserProfile()
                 if (!userProfile?.displayName?.length) {
                     setDisplayNameModalShown?.(true)
                     this.emitMutation({
@@ -755,8 +755,8 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         const { remoteAnnotationId, savePromise } = await updateAnnotation({
-            annotationsBG: this.options.annotations,
-            contentSharingBG: this.options.contentSharing,
+            annotationsBG: this.options.annotationsBG,
+            contentSharingBG: this.options.contentSharingBG,
             keepListsIfUnsharing: event.keepListsIfUnsharing,
             annotationData: {
                 comment: comment !== annotationData.comment ? comment : null,
@@ -875,8 +875,8 @@ export class SidebarContainerLogic extends UILogic<
                     localId: annotationId,
                     createdWhen: new Date(now),
                 },
-                annotationsBG: this.options.annotations,
-                contentSharingBG: this.options.contentSharing,
+                annotationsBG: this.options.annotationsBG,
+                contentSharingBG: this.options.contentSharingBG,
                 shareOpts: {
                     shouldShare: event.shouldShare,
                     shouldCopyShareLink: event.shouldShare,
@@ -906,10 +906,7 @@ export class SidebarContainerLogic extends UILogic<
     updateListsForAnnotation: EventHandler<
         'updateListsForAnnotation'
     > = async ({ event }) => {
-        const {
-            annotationsCache,
-            contentSharing: contentSharingBG,
-        } = this.options
+        const { annotationsCache, contentSharingBG } = this.options
         this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
         const existing =
@@ -1003,7 +1000,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     deleteAnnotation: EventHandler<'deleteAnnotation'> = async ({ event }) => {
-        const { annotationsCache, annotations: annotationsBG } = this.options
+        const { annotationsCache, annotationsBG } = this.options
         const existing =
             annotationsCache.annotations.byId[event.unifiedAnnotationId]
         annotationsCache.removeAnnotation({
@@ -1093,7 +1090,7 @@ export class SidebarContainerLogic extends UILogic<
                 ),
             }),
             async () => {
-                const annotationRefsByList = await this.options.customLists.fetchAnnotationRefsForRemoteListsOnPage(
+                const annotationRefsByList = await this.options.customListsBG.fetchAnnotationRefsForRemoteListsOnPage(
                     {
                         normalizedPageUrl: normalizeUrl(state.fullPageUrl),
                         sharedListIds: lists.map((list) => list.remoteId!),
@@ -1173,6 +1170,12 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
+        const {
+            contentConversationsBG,
+            annotationsCache,
+            annotationsBG,
+        } = this.options
+
         this.emitMutation({
             conversations: {
                 $merge: getInitialAnnotationConversationStates(
@@ -1194,7 +1197,7 @@ export class SidebarContainerLogic extends UILogic<
                 },
             }),
             async () => {
-                const sharedAnnotations = await this.options.annotations.getSharedAnnotations(
+                const sharedAnnotations = await annotationsBG.getSharedAnnotations(
                     {
                         sharedAnnotationReferences:
                             listInstance.sharedAnnotationReferences,
@@ -1211,7 +1214,7 @@ export class SidebarContainerLogic extends UILogic<
                         }
                     }
 
-                    this.options.annotationsCache.addAnnotation(
+                    annotationsCache.addAnnotation(
                         cacheUtils.reshapeSharedAnnotationForCache(annot, {
                             extraData: { unifiedListIds: [unifiedListId] },
                         }),
@@ -1246,12 +1249,10 @@ export class SidebarContainerLogic extends UILogic<
                         annotationReferences,
                         sharedListReference,
                     }) =>
-                        this.options.contentConversationsBG.getThreadsForSharedAnnotations(
-                            {
-                                sharedAnnotationReferences: annotationReferences,
-                                sharedListReference,
-                            },
-                        ),
+                        contentConversationsBG.getThreadsForSharedAnnotations({
+                            sharedAnnotationReferences: annotationReferences,
+                            sharedListReference,
+                        }),
                 })
             },
         )
@@ -1366,7 +1367,11 @@ export class SidebarContainerLogic extends UILogic<
             activeTab: { $set: 'spaces' },
         })
 
-        const { annotationsCache, customLists, fullPageUrl } = this.options
+        const {
+            annotationsCache,
+            customListsBG: customLists,
+            fullPageUrl,
+        } = this.options
 
         const cachedList = annotationsCache.getListByRemoteId(
             event.sharedListId,

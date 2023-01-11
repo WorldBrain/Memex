@@ -61,6 +61,7 @@ import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/t
 import { hydrateCache } from 'src/annotations/cache/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { UNDO_HISTORY } from 'src/constants'
+import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -165,6 +166,7 @@ export async function main(
     const contentScriptsBG = runInBackground<
         ContentScriptsInterface<'caller'>
     >()
+    const syncSettingsBG = runInBackground<RemoteSyncSettingsInterface>()
     const collectionsBG = runInBackground<RemoteCollectionsInterface>()
     const pageActivityIndicatorBG = runInBackground<
         RemotePageActivityIndicatorInterface
@@ -272,9 +274,7 @@ export async function main(
                 activityIndicatorBG: runInBackground(),
                 contentSharing: contentSharingBG,
                 bookmarks: runInBackground(),
-                syncSettings: createSyncSettingsStore({
-                    syncSettingsBG: runInBackground(),
-                }),
+                syncSettings: createSyncSettingsStore({ syncSettingsBG }),
                 tooltip: {
                     getState: tooltipUtils.getTooltipState,
                     setState: tooltipUtils.setTooltipState,
@@ -307,13 +307,12 @@ export async function main(
                 currentUser,
                 annotationsCache,
                 highlighter: highlightRenderer,
-                annotations: annotationsBG,
-                tags: tagsBG,
-                auth: authBG,
-                customLists: collectionsBG,
-                contentSharing: contentSharingBG,
-                syncSettingsBG: runInBackground(),
-                pageActivityIndicatorBG: runInBackground(),
+                authBG,
+                annotationsBG,
+                syncSettingsBG,
+                contentSharingBG,
+                pageActivityIndicatorBG,
+                customListsBG: collectionsBG,
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
                 analytics,
                 copyToClipboard,
@@ -342,8 +341,8 @@ export async function main(
         },
         async registerSearchInjectionScript(execute): Promise<void> {
             await execute({
+                syncSettingsBG,
                 requestSearcher: remoteFunction('search'),
-                syncSettingsBG: runInBackground(),
             })
         },
     }

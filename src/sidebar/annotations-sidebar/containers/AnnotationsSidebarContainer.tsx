@@ -104,7 +104,7 @@ export class AnnotationsSidebarContainer<
     }
 
     private createNewList = async (name: string) => {
-        const listId = await this.props.customLists.createCustomList({
+        const listId = await this.props.customListsBG.createCustomList({
             name,
         })
         this.props.annotationsCache.addList({
@@ -302,7 +302,7 @@ export class AnnotationsSidebarContainer<
     }
 
     protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
-        const { tags, customLists, contentSharing } = this.props
+        const { customListsBG, contentSharingBG } = this.props
         return {
             onCommentChange: (comment) =>
                 this.processEvent('setNewPageNoteText', { comment }),
@@ -313,7 +313,6 @@ export class AnnotationsSidebarContainer<
                     isProtected,
                     listInstanceId,
                 }),
-            tagQueryEntries: (query) => tags.searchForTagSuggestions({ query }),
             addPageToList: (listId) =>
                 this.processEvent('setNewPageNoteLists', {
                     lists: [...this.state.commentBox.lists, listId],
@@ -326,9 +325,8 @@ export class AnnotationsSidebarContainer<
                 }),
             getListDetailsById: this.getListDetailsById,
             createNewList: this.createNewList,
-            contentSharingBG: contentSharing,
-            spacesBG: customLists,
-            loadDefaultTagSuggestions: tags.fetchInitialTagSuggestions,
+            contentSharingBG,
+            spacesBG: customListsBG,
             comment: this.state.commentBox.commentText,
             lists: this.state.commentBox.lists,
             hoverState: null,
@@ -348,7 +346,11 @@ export class AnnotationsSidebarContainer<
         instanceLocation: AnnotationCardInstanceLocation
         showExternalConfirmations?: boolean
     }): SpacePickerDependencies => {
-        const { annotationsCache, customLists, contentSharing } = this.props
+        const {
+            annotationsCache,
+            customListsBG: customLists,
+            contentSharingBG: contentSharing,
+        } = this.props
         const cardId = generateAnnotationCardInstanceId(
             params.annotation,
             params.instanceLocation,
@@ -465,8 +467,8 @@ export class AnnotationsSidebarContainer<
                     AnnotationPrivacyLevels.SHARED_PROTECTED,
                 ].includes(annotation.privacyLevel)}
                 shareImmediately={this.state.immediatelyShareNotes}
-                contentSharingBG={this.props.contentSharing}
-                annotationsBG={this.props.annotations}
+                contentSharingBG={this.props.contentSharingBG}
+                annotationsBG={this.props.annotationsBG}
                 copyLink={(link) => this.processEvent('copyNoteLink', { link })}
                 annotationUrl={annotation.localId}
                 postShareHook={(state, opts) =>
@@ -863,8 +865,8 @@ export class AnnotationsSidebarContainer<
                                 this.state.fullPageUrl,
                             )}
                             copyPaster={this.props.copyPaster}
-                            contentSharing={this.props.contentSharing}
-                            annotationsShareAll={this.props.annotations}
+                            contentSharing={this.props.contentSharingBG}
+                            annotationsShareAll={this.props.annotationsBG}
                             copyPageLink={(link) => {
                                 this.processEvent('copyNoteLink', { link })
                             }}

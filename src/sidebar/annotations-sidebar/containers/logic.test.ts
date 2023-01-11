@@ -105,12 +105,11 @@ const setupLogicHelper = async ({
         fullPageUrl,
         sidebarContext: 'dashboard',
         shouldHydrateCacheOnInit: true,
-        auth: backgroundModules.auth.remoteFunctions,
-        tags: backgroundModules.tags.remoteFunctions,
+        authBG: backgroundModules.auth.remoteFunctions,
         subscription: backgroundModules.auth.subscriptionService,
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
-        customLists: backgroundModules.customLists.remoteFunctions,
-        contentSharing: backgroundModules.contentSharing.remoteFunctions,
+        customListsBG: backgroundModules.customLists.remoteFunctions,
+        contentSharingBG: backgroundModules.contentSharing.remoteFunctions,
         pageActivityIndicatorBG:
             backgroundModules.pageActivityIndicator.remoteFunctions,
         contentScriptsBG: (backgroundModules.contentScripts
@@ -119,7 +118,7 @@ const setupLogicHelper = async ({
             backgroundModules.contentConversations.remoteFunctions,
         syncSettingsBG: backgroundModules.syncSettings,
         currentUser: withAuth ? DATA.CREATOR_1 : undefined,
-        annotations: annotationsBG,
+        annotationsBG: annotationsBG,
         events: fakeEmitter as any,
         annotationsCache,
         analytics,
@@ -620,7 +619,7 @@ describe('SidebarContainerLogic', () => {
             let wasBGMethodCalled = false
             sidebarLogic[
                 'options'
-            ].customLists.fetchAnnotationRefsForRemoteListsOnPage = (() => {
+            ].customListsBG.fetchAnnotationRefsForRemoteListsOnPage = (() => {
                 wasBGMethodCalled = true
             }) as any
 
@@ -918,7 +917,9 @@ describe('SidebarContainerLogic', () => {
 
             expect(emittedEvents).toEqual(expectedEvents)
             let wasBGMethodCalled = false
-            sidebarLogic['options'].annotations.getSharedAnnotations = (() => {
+            sidebarLogic[
+                'options'
+            ].annotationsBG.getSharedAnnotations = (() => {
                 wasBGMethodCalled = true
             }) as any
 

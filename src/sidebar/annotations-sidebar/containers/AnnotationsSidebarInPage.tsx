@@ -289,7 +289,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                     <LoginModal
                         routeToLoginBtn
                         ignoreReactPortal
-                        contentSharingBG={this.props.contentSharing}
+                        contentSharingBG={this.props.contentSharingBG}
                         contentScriptBG={this.props.contentScriptsBG}
                         onClose={() =>
                             this.processEvent('setLoginModalShown', {
@@ -301,7 +301,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 {this.state.showDisplayNameSetupModal && (
                     <DisplayNameModal
                         ignoreReactPortal
-                        authBG={this.props.auth}
+                        authBG={this.props.authBG}
                         onClose={() =>
                             this.processEvent('setDisplayNameSetupModalShown', {
                                 shown: false,

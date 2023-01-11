@@ -1552,12 +1552,11 @@ export class DashboardContainer extends StatefulUIElement<
                             shouldHydrateCacheOnInit
                             annotationsCache={this.props.annotationsCache}
                             youtubeService={this.youtubeService}
-                            tags={this.props.tagsBG}
-                            auth={this.props.authBG}
+                            authBG={this.props.authBG}
                             refSidebar={this.notesSidebarRef}
-                            customLists={this.props.listsBG}
-                            annotations={this.props.annotationsBG}
-                            contentSharing={this.props.contentShareBG}
+                            customListsBG={this.props.listsBG}
+                            annotationsBG={this.props.annotationsBG}
+                            contentSharingBG={this.props.contentShareBG}
                             contentScriptsBG={this.props.contentScriptsBG}
                             syncSettingsBG={this.props.syncSettingsBG}
                             pageActivityIndicatorBG={

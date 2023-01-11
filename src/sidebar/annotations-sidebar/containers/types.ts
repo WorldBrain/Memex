@@ -50,15 +50,14 @@ export interface SidebarContainerDependencies {
     shouldHydrateCacheOnInit?: boolean
     annotationsCache: PageAnnotationsCacheInterface
 
-    tags: RemoteTagsInterface
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
-    annotations: AnnotationInterface<'caller'>
-    customLists: RemoteCollectionsInterface
-    contentSharing: ContentSharingInterface
+    annotationsBG: AnnotationInterface<'caller'>
+    customListsBG: RemoteCollectionsInterface
+    contentSharingBG: ContentSharingInterface
     contentConversationsBG: ContentConversationsInterface
     syncSettingsBG: RemoteSyncSettingsInterface
     contentScriptsBG: ContentScriptsInterface<'caller'>
-    auth: AuthRemoteFunctionsInterface
+    authBG: AuthRemoteFunctionsInterface
     subscription: SubscriptionsService
     theme?: MemexTheme & Partial<SidebarTheme>
 
