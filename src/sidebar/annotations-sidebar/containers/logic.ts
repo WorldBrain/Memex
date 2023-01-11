@@ -80,14 +80,6 @@ type EventHandler<
     EventName extends keyof SidebarContainerEvents
 > = UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
 
-const buildConversationId: ConversationIdBuilder = (
-    baseId,
-    sharedListReference,
-) =>
-    sharedListReference == null
-        ? baseId.toString()
-        : `${sharedListReference.id}:${baseId}`
-
 export const INIT_FORM_STATE: EditForm = {
     isBookmarked: false,
     commentText: '',
@@ -136,7 +128,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationConversationEventHandlers<SidebarContainerState>(
                 this as any,
                 {
-                    buildConversationId,
+                    buildConversationId: this.buildConversationId,
                     loadUserByReference: options.authBG.getUserByReference,
                     submitNewReply: options.contentConversationsBG.submitReply,
                     isAuthorizedToConverse: async () => true,
@@ -250,6 +242,24 @@ export class SidebarContainerLogic extends UILogic<
             immediatelyShareNotes: false,
             pageHasNetworkAnnotations: false,
         }
+    }
+
+    private buildConversationId: ConversationIdBuilder = (
+        remoteAnnotId,
+        { id: remoteListId },
+    ) => {
+        const { annotationsCache } = this.options
+        const cachedAnnotation = annotationsCache.getAnnotationByRemoteId(
+            remoteAnnotId.toString(),
+        )
+        const cachedList = annotationsCache.getListByRemoteId(
+            remoteListId.toString(),
+        )
+
+        return generateAnnotationCardInstanceId(
+            cachedAnnotation,
+            cachedList.unifiedId,
+        )
     }
 
     private async hydrateAnnotationsCache(
@@ -1176,17 +1186,6 @@ export class SidebarContainerLogic extends UILogic<
             annotationsBG,
         } = this.options
 
-        this.emitMutation({
-            conversations: {
-                $merge: getInitialAnnotationConversationStates(
-                    listInstance.sharedAnnotationReferences.map(({ id }) => ({
-                        linkId: id.toString(),
-                    })),
-                    (annotationId) => `${list.remoteId}:${annotationId}`,
-                ),
-            },
-        })
-
         await executeUITask(
             this,
             (taskState) => ({
@@ -1223,6 +1222,20 @@ export class SidebarContainerLogic extends UILogic<
 
                 this.emitMutation({
                     users: { $merge: usersData },
+                    conversations: {
+                        $merge: getInitialAnnotationConversationStates(
+                            listInstance.sharedAnnotationReferences.map(
+                                ({ id }) => ({
+                                    linkId: id.toString(),
+                                }),
+                            ),
+                            (remoteAnnotId) =>
+                                this.buildConversationId(remoteAnnotId, {
+                                    type: 'shared-list-reference',
+                                    id: list.remoteId,
+                                }),
+                        ),
+                    },
                 })
             },
         )
@@ -1238,7 +1251,7 @@ export class SidebarContainerLogic extends UILogic<
             }),
             async () => {
                 await detectAnnotationConversationThreads(this as any, {
-                    buildConversationId,
+                    buildConversationId: this.buildConversationId,
                     annotationReferences:
                         listInstance.sharedAnnotationReferences,
                     sharedListReference: {
