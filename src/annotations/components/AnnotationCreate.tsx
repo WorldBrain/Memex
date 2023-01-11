@@ -242,27 +242,6 @@ export class AnnotationCreate extends React.Component<Props, State>
         )
     }
 
-    private renderMarkdownHelpButton() {
-        if (!this.state.toggleShowTutorial) {
-            return
-        }
-
-        return (
-            <PopoutBox
-                targetElementRef={this.markdownbuttonRef.current}
-                placement={'bottom-start'}
-                offsetX={10}
-                closeComponent={() => this.toggleShowTutorial()}
-                width={'440px'}
-            >
-                <QuickTutorial
-                    markdownHelpOnTop={true}
-                    getKeyboardShortcutsState={getKeyboardShortcutsState}
-                />
-            </PopoutBox>
-        )
-    }
-
     private renderActionButtons() {
         // const shareIconData = getShareButtonData(
         //     isShared,
@@ -273,17 +252,6 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <DefaultFooterStyled>
                 <BtnContainerStyled>
-                    <MarkdownButtonContainer
-                        onClick={() => this.toggleShowTutorial()}
-                        ref={this.markdownbuttonRef}
-                    >
-                        Formatting
-                        <Icon
-                            filePath={icons.helpIcon}
-                            heightAndWidth={'20px'}
-                            hoverOff
-                        />
-                    </MarkdownButtonContainer>
                     <SaveCancelArea>
                         <TooltipBox
                             tooltipText="Cancel Edit (esc)"
@@ -303,7 +271,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                         />
                     </SaveCancelArea>
                 </BtnContainerStyled>
-                {this.renderMarkdownHelpButton()}
             </DefaultFooterStyled>
         )
     }

@@ -88,25 +88,6 @@ export default class ListDetails extends PureComponent<Props, State> {
         }
     }
 
-    private renderMarkdownHelpButton() {
-        return (
-            <PrimaryAction
-                innerRef={this.formattingHelpBtn}
-                onClick={() =>
-                    this.setState({
-                        showQuickTutorial: !this.state.showQuickTutorial,
-                    })
-                }
-                type={'tertiary'}
-                icon={'helpIcon'}
-                iconPosition={'right'}
-                size={'small'}
-                active={this.state.showQuickTutorial}
-                label={'Formatting Help'}
-            />
-        )
-    }
-
     private renderDescription() {
         if (this.state.isEditingDescription) {
             return (
