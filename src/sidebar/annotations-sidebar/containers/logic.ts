@@ -348,10 +348,7 @@ export class SidebarContainerLogic extends UILogic<
                 showState: { $set: initialState ?? 'hidden' },
             })
 
-            if (
-                // shouldHydrateCacheOnInit &&
-                fullPageUrl != null
-            ) {
+            if (shouldHydrateCacheOnInit && fullPageUrl != null) {
                 await this.hydrateAnnotationsCache(fullPageUrl, {
                     renderHighlights: true,
                 })
