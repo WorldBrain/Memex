@@ -845,7 +845,7 @@ export default class Ribbon extends Component<Props, State> {
                                         onClick={() =>
                                             this.props.toggleShowExtraButtons()
                                         }
-                                        color={'greyScale2'}
+                                        color={'greyScale4'}
                                         heightAndWidth="22px"
                                         filePath={icons.settings}
                                         containerRef={this.settingsButtonRef}
@@ -868,7 +868,7 @@ export default class Ribbon extends Component<Props, State> {
                                             onClick={() =>
                                                 this.props.toggleShowTutorial()
                                             }
-                                            color={'greyScale2'}
+                                            color={'greyScale4'}
                                             heightAndWidth="22px"
                                             filePath={icons.helpIcon}
                                             containerRef={
@@ -902,7 +902,7 @@ export default class Ribbon extends Component<Props, State> {
                                                         this.props.handleRemoveRibbon()
                                                     }
                                                 }}
-                                                color={'greyScale2'}
+                                                color={'greyScale4'}
                                                 heightAndWidth="22px"
                                                 filePath={icons.removeX}
                                             />
@@ -926,7 +926,7 @@ export default class Ribbon extends Component<Props, State> {
 const ColorPickerCircle = styled.div<{ backgroundColor: string }>`
     height: 18px;
     width: 18px;
-    background-color: ${(props) => props.black};
+    background-color: ${(props) => props.backgroundColor};
     border-radius: 50px;
     margin: 5px;
 `

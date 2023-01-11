@@ -285,7 +285,6 @@ color9 from colors;
     height: 7px;
     position: relative;
 
-    background-image: url('../../../img/times-solid.svg');
     background-repeat: no-repeat;
     border-color: transparent;
     background-color: #83c9f4;
@@ -300,7 +299,6 @@ color9 from colors;
     height: 7px;
     position: relative;
 
-    background-image: url('../../../img/times-solid.svg');
     background-repeat: no-repeat;
     border-color: transparent;
     background-color: #fff;

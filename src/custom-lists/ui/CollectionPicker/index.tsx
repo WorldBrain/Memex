@@ -417,9 +417,9 @@ const PrimaryActionBox = styled.div`
 const EntryListHeader = styled.div`
     padding: 5px 5px;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale4};
     font-weight: 400;
-    margin-bottom: -2px;
+    margin-bottom: 5px;
 `
 
 const EntryList = styled.div`

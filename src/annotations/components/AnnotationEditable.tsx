@@ -991,7 +991,7 @@ const CommentBox = styled.div`
 const DefaultFooterStyled = styled.div`
     display: flex;
     align-items: center;
-    padding-left: 5px;
+    padding-left: 10px;
     justify-content: space-between;
     border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
 `
