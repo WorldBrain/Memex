@@ -845,7 +845,7 @@ export default class Ribbon extends Component<Props, State> {
                                         onClick={() =>
                                             this.props.toggleShowExtraButtons()
                                         }
-                                        color={'darkText'}
+                                        color={'greyScale2'}
                                         heightAndWidth="22px"
                                         filePath={icons.settings}
                                         containerRef={this.settingsButtonRef}
@@ -868,7 +868,7 @@ export default class Ribbon extends Component<Props, State> {
                                             onClick={() =>
                                                 this.props.toggleShowTutorial()
                                             }
-                                            color={'darkText'}
+                                            color={'greyScale2'}
                                             heightAndWidth="22px"
                                             filePath={icons.helpIcon}
                                             containerRef={
@@ -902,7 +902,7 @@ export default class Ribbon extends Component<Props, State> {
                                                         this.props.handleRemoveRibbon()
                                                     }
                                                 }}
-                                                color={'darkText'}
+                                                color={'greyScale2'}
                                                 heightAndWidth="22px"
                                                 filePath={icons.removeX}
                                             />

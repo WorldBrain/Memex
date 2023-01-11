@@ -129,7 +129,7 @@ export class SidebarContainerLogic extends UILogic<
                 this as any,
                 {
                     buildConversationId: this.buildConversationId,
-                    loadUserByReference: options.authBG.getUserByReference,
+                    loadUserByReference: options.authBG?.getUserByReference,
                     submitNewReply: options.contentConversationsBG.submitReply,
                     isAuthorizedToConverse: async () => true,
                     getCurrentUser: async () => {
