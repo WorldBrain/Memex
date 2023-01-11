@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react'
 import styled, { css } from 'styled-components'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
-import colors from 'src/dashboard-refactor/colors'
 import { SidebarLockedState, SidebarPeekState } from './types'
 import ListsSidebarGroup, {
     ListsSidebarGroupProps,
@@ -14,15 +13,10 @@ import Margin from '../components/Margin'
 import ListsSidebarItem, {
     Props as ListsSidebarItemProps,
 } from './components/sidebar-item-with-menu'
-import { sizeConstants } from '../constants'
 import { DropReceivingState } from '../types'
 import ListsSidebarEditableItem from './components/sidebar-editable-item'
-import { Rnd } from 'react-rnd'
 import { createGlobalStyle } from 'styled-components'
-import { UIElementServices } from '@worldbrain/memex-common/lib/services/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import * as icons from 'src/common-ui/components/design-library/icons'
-import blacklist from 'src/options/blacklist'
 export interface ListsSidebarProps {
     openFeedUrl: () => void
     switchToFeed: () => void

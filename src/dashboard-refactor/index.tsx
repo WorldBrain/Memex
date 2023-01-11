@@ -1756,9 +1756,10 @@ const ListSidebarContent = styled(Rnd)<{
             height: 90vh;
             top: 20px;
             left: 0px;
-            border-radius: 8px;
+            border-radius: 10px;
             animation: slide-in ease-in-out;
             animation-duration: 0.15s;
+            border: 1px solid ${(props) => props.theme.colors.greyScale2};
         `}
     ${(props) =>
         !props.peeking &&

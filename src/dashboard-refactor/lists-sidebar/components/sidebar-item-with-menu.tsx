@@ -372,7 +372,7 @@ const TitleBox = styled.div<Props>`
 
 const SidebarItem = styled.div<Props>`
     height: 40px;
-    margin: 5px 15px;
+    margin: 5px 12px;
     border-radius: 5px;
     display: flex;
     flex-direction: row;
