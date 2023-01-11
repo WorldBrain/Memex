@@ -83,7 +83,7 @@ class Import extends React.PureComponent<Props> {
         }
 
         if (this.props.shouldRenderEsts) {
-            return 'bookmarkRibbon'
+            return 'heartEmpty'
         }
     }
 

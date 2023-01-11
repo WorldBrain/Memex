@@ -158,9 +158,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                 >
                                                     <SectionCircle>
                                                         <Icon
-                                                            filePath={
-                                                                icons.plus
-                                                            }
+                                                            filePath={'plus'}
                                                             heightAndWidth="14px"
                                                             color="prime1"
                                                             hoverOff
@@ -191,7 +189,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                     <SectionCircle>
                                                         <Icon
                                                             filePath={
-                                                                icons.heartEmpty
+                                                                'heartEmpty'
                                                             }
                                                             heightAndWidth="14px"
                                                             color="prime1"
