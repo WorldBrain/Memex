@@ -112,7 +112,7 @@ export default class ListsSidebarItemWithMenu extends React.Component<
             return (
                 <Icon
                     heightAndWidth="20px"
-                    color="purple"
+                    color="prime1"
                     filePath={icons.check}
                 />
             )
@@ -125,7 +125,7 @@ export default class ListsSidebarItemWithMenu extends React.Component<
             return (
                 <Icon
                     heightAndWidth="20px"
-                    color="purple"
+                    color="prime1"
                     filePath={icons.plus}
                 />
             )
@@ -160,7 +160,7 @@ export default class ListsSidebarItemWithMenu extends React.Component<
                         hoverOff
                         color={
                             this.props.selectedState.isSelected
-                                ? 'purple'
+                                ? 'prime1'
                                 : null
                         }
                     />
@@ -176,7 +176,7 @@ export default class ListsSidebarItemWithMenu extends React.Component<
                         hoverOff
                         color={
                             this.props.selectedState.isSelected
-                                ? 'purple'
+                                ? 'prime1'
                                 : null
                         }
                     />
@@ -192,7 +192,7 @@ export default class ListsSidebarItemWithMenu extends React.Component<
                         hoverOff
                         color={
                             this.props.selectedState.isSelected
-                                ? 'purple'
+                                ? 'prime1'
                                 : null
                         }
                     />
@@ -318,7 +318,7 @@ const Name = styled.div`
     display: block;
     overflow-x: hidden;
     text-overflow: ellipsis;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale6};
 `
 
 const IconBox = styled.div<{
@@ -365,14 +365,14 @@ const TitleBox = styled.div<Props>`
     flex: 0 1 100%;
     width: 91%;
     height: 100%;
-    padding-left: 15px;
+    padding-left: 10px;
     align-items: center;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale5};
 `
 
 const SidebarItem = styled.div<Props>`
     height: 40px;
-    margin: 5px 10px;
+    margin: 5px 15px;
     border-radius: 5px;
     display: flex;
     flex-direction: row;
@@ -380,7 +380,7 @@ const SidebarItem = styled.div<Props>`
     align-items: center;
     background-color: ${(props) =>
         props.dropReceivingState?.isDraggedOver
-            ? props.theme.colors.backgroundColorDarker
+            ? props.theme.colors.greyScale1
             : 'transparent'};
 
 
@@ -392,7 +392,7 @@ const SidebarItem = styled.div<Props>`
         selectedState?.isSelected &&
         css`
             color: ${(props) => props.theme.colors.darkText};
-            background: ${(props) => props.theme.colors.darkhover};
+            background: ${(props) => props.theme.colors.greyScale2};
         `}
 
 
@@ -404,19 +404,19 @@ const SidebarItem = styled.div<Props>`
             : `not-allowed`};
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
 
         ${({ selectedState }: Props) =>
             selectedState?.isSelected &&
             css`
-                background: ${(props) => props.theme.colors.darkhover};
+                background: ${(props) => props.theme.colors.greyScale2};
             `}
     }
 
     ${(props) =>
         props.dropReceivingState?.isDraggedOver &&
         css`
-            outline: 1px solid ${(props) => props.theme.colors.lightHover};
+            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         `}`
 
 const ListTitle = styled.span<Props>`
@@ -451,14 +451,14 @@ const ActivityBeaconEmpty = styled.div`
     height: 14px;
     width: 14px;
     border-radius: 20px;
-    border: 1.5px solid ${(props) => props.theme.colors.iconColor};
+    border: 1.5px solid ${(props) => props.theme.colorsgreyScale6};
 `
 
 const ActivityBeacon = styled.div`
     width: 14px;
     height: 14px;
     border-radius: 20px;
-    background-color: ${(props) => props.theme.colors.purple};
+    background-color: ${(props) => props.theme.colors.prime1};
 `
 
 const NewItemsCount = styled.div`
@@ -469,7 +469,7 @@ const NewItemsCount = styled.div`
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    background-color: ${(props) => props.theme.colors.purple};
+    background-color: ${(props) => props.theme.colors.prime1};
     padding: 2px 4px;
     color: ${(props) => props.theme.colors.black};
     text-align: center;

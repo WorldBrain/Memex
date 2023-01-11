@@ -31,7 +31,7 @@ const IconContainer = styled.div<IconProps>`
 
     &:hover {
         background-color: ${(props) =>
-            props.hoverOff ? 'none' : props.theme.colors.darkhover};
+            props.hoverOff ? 'none' : props.theme.colors.greyScale2};
     }
 `
 
@@ -51,7 +51,7 @@ const IconInner = styled.div<IconProps>`
                 background-color: ${
                     props.color
                         ? props.theme.colors[props.color]
-                        : props.theme.colors['iconColor']
+                        : props.theme.colors['greyScale4']
                 };
                 `}
             `}
@@ -128,9 +128,7 @@ export const LoadingIndicator = styled.div<{ backgroundColor: string }>`
     &::after {
         ${(props) =>
             css`
-                background: ${props.backgroundColor
-                    ? props.backgroundColor
-                    : '#fff'};
+                background: ${props.black ? props.black : '#fff'};
             `};
         width: 65%;
         height: 65%;

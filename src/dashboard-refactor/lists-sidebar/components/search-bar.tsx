@@ -16,13 +16,13 @@ const textStyles = `
     font-weight: ${fonts.primary.weight.normal};
     font-size: 14px;
     line-height: 15px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     cursor: text;
 `
 
 const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
     height: min-content;
-    background-color: ${(props) => props.theme.colors.darkhover};
+    background-color: ${(props) => props.theme.colors.greyScale2};
     border-radius: 5px;
     display: flex;
     flex-direction: column;
@@ -55,7 +55,7 @@ const Input = styled.input`
     width: 100%;
     height: 100%;
     border: none;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     background: inherit;
     &::placeholder {
         color: ${(props) => props.theme.colors.greyScale8};
@@ -76,7 +76,7 @@ const TextSpan = styled.span<{ bold: boolean }>`
         props.bold &&
         css`
             font-weight: 700;
-            color: ${(props) => props.theme.colors.normalText};
+            color: ${(props) => props.theme.colors.white};
             white-space: nowrap;
             margin-right: 5px;
         `};
@@ -118,7 +118,7 @@ const CreateButton = styled.div`
     grid-gap: 5px;
 
     &:hover {
-        background-color: ${(props) => props.theme.colors.darkhover};
+        background-color: ${(props) => props.theme.colors.greyScale2};
     }
 `
 
@@ -131,7 +131,7 @@ const ShortCut = styled.div`
     border-radius: 5px;
     width: 30px;
     font-size: 10px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     border: 1px solid ${(props) => props.theme.colors.darkerText};
 `
 const CreateBox = styled.div`

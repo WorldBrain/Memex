@@ -683,7 +683,7 @@ export class AnnotationsSidebarContainer<
                         filePath="highlight"
                         heightAndWidth="20px"
                         hoverOff
-                        color="purple"
+                        color="prime1"
                     />
                 </IconContainer>
                 <IsolatedPillContent>
@@ -1040,9 +1040,9 @@ const IsolatedViewPill = styled.div<{ pillVisibility: string }>`
     bottom: 20px;
     right: 20px;
     cursor: pointer;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.black};
     border-radius: 10px;
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     ${(props) =>
         props.pillVisibility === 'hover' &&
@@ -1127,7 +1127,7 @@ const TogglePillHoverSmallText = styled.div<{ pillVisibility: string }>`
 const TogglePillMainText = styled.div`
     font-size: 16px;
     font-weight: 500;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1163,8 +1163,8 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
         props.sidebarContext === 'dashboard'
             ? '3500'
             : '2147483646'}; /* This is to combat pages setting high values on certain elements under the sidebar */
-    background: ${(props) => props.theme.colors.backgroundColor};
-    border-left: 1px solid ${(props) => props.theme.colors.lightHover};
+    background: ${(props) => props.theme.colors.black};
+    border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
     box-sizing: content-box;
     right: 40px;
@@ -1220,11 +1220,11 @@ const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`
 `
 
 const IconBoundary = styled.div`
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
     border-radius: 5px;
     height: fit-content;
     width: fit-content;
-    background: ${(props) => props.theme.colors.backgroundColor};
+    background: ${(props) => props.theme.colors.black};
 `
 
 const BottomArea = styled.div`

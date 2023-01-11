@@ -110,7 +110,7 @@ class DomainPicker extends StatefulUIElement<
                         <Icon
                             filePath={icons.globe}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -126,7 +126,7 @@ class DomainPicker extends StatefulUIElement<
                     <Icon
                         filePath={icons.globe}
                         heightAndWidth="16px"
-                        color="purple"
+                        color="prime1"
                         hoverOff
                     />
                 </SectionCircle>
@@ -188,7 +188,7 @@ class DomainPicker extends StatefulUIElement<
 }
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
     border: 1px solid ${(props) => props.theme.colors.greyScale6};
     border-radius: 8px;
     height: 30px;
@@ -199,7 +199,7 @@ const SectionCircle = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     margin-top: 10px;
     font-size: 14px;
     font-weight: bold;
@@ -237,7 +237,7 @@ const EmptyDomainsView = styled.div`
 const DomainResultItem = styled.div`
     display: flex;
     border-radius: 4px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     padding: 0px;
     margin: 2px 4px 2px 0;
     font-weight: 400;

@@ -84,14 +84,14 @@ class TooltipButton extends PureComponent<Props, State> {
 const ShortCutContainer = styled.div`
     display: flex;
     align-items: center;
-    color: ${(props) => props.theme.colors.greyScale9};
+    color: ${(props) => props.theme.colors.greyScale6};
     grid-gap: 3px;
 `
 
 const ShortCutText = styled.div`
     display: block;
     font-weight: 400;
-    color: ${(props) => props.theme.colors.greyScale9};
+    color: ${(props) => props.theme.colors.greyScale6};
     letter-spacing: 1px;
     margin-right: -1px;
 
@@ -103,7 +103,7 @@ const ShortCutText = styled.div`
 const ShortCutBlock = styled.div`
     border-radius: 5px;
     border: 1px solid ${(props) => props.theme.colors.greyScale10};
-    color: ${(props) => props.theme.colors.greyScale9};
+    color: ${(props) => props.theme.colors.greyScale6};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -142,7 +142,7 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
     &:hover {
-        background: ${(props) => props.theme.colors.lightHover};
+        background: ${(props) => props.theme.colors.greyScale3};
     }
 
     & * {
@@ -159,7 +159,7 @@ const ButtonInnerContent = styled.div`
     font-size: 14px;
     font-weight: 500;
     width: 100%;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 `
 
 const SubTitle = styled.div`

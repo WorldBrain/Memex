@@ -185,7 +185,7 @@ class Container extends React.Component<Props, State> {
                         <Icon
                             filePath={search}
                             heightAndWidth="20px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </IconBox>
@@ -401,7 +401,7 @@ class Container extends React.Component<Props, State> {
 const SearchLink = styled.span`
     padding-left: 2px;
     cursor: pointer;
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
 `
 
 const NoResultsSection = styled.div`

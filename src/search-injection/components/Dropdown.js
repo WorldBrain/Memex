@@ -54,14 +54,14 @@ const DropDownContainer = styled.div`
     top: 50px;
     background: white;
     z-index: 1000000;
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    background: ${(props) => props.theme.colors.greyScale1};
     border-radius: 10px;
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 const DropDownItem = styled.div`
     height: 40px;
     padding: 0 10px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     display: flex;
     grid-gap: 10px;
     align-items: center;
@@ -74,7 +74,7 @@ const DropDownItem = styled.div`
     }
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 `
 

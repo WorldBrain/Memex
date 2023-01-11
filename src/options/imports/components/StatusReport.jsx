@@ -61,7 +61,7 @@ StatusReport.propTypes = {
 }
 
 const ViewFailedItems = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 16px;
     display: grid;
     grid-gap: 10px;

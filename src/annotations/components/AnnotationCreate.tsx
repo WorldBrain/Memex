@@ -260,7 +260,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             <Icon
                                 onClick={this.handleCancel}
                                 icon={icons.removeX}
-                                color={'normalText'}
+                                color={'white'}
                                 heightAndWidth="20px"
                             />
                         </TooltipBox>
@@ -300,7 +300,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     this.props.autoFocus ||
                                     this.state.onEditClick
                                 }
-                                placeholder={`Add a private note. Save with ${AnnotationCreate.MOD_KEY} + Enter, + Shift to share.`}
+                                placeholder={`Add a private note.`}
                                 isRibbonCommentBox={
                                     this.props.isRibbonCommentBox
                                 }
@@ -315,17 +315,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     })
                                 }
                             >
-                                Add private note. Save with{' '}
-                                <KeyboardShortcuts
-                                    keys={[AnnotationCreate.MOD_KEY, 'Enter']}
-                                    size="small"
-                                />
-                                +{' '}
-                                <KeyboardShortcuts
-                                    optional="Shift"
-                                    size="small"
-                                />{' '}
-                                to share.
+                                Add a private note.
                             </EditorDummy>
                         )}
                     </EditorContainer>
@@ -361,11 +351,11 @@ const EditorContainer = styled(Margin)`
     border-radius: 5px;
 
     &:focus-within {
-        background-color: ${(props) => props.theme.colors.darkhover};
+        background-color: ${(props) => props.theme.colors.greyScale2};
         outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     }
     &:hover {
-        background-color: ${(props) => props.theme.colors.darkhover};
+        background-color: ${(props) => props.theme.colors.greyScale2};
         outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     }
 `
@@ -378,7 +368,7 @@ const EditorDummy = styled.div`
     min-height: 20px;
     white-space: pre-wrap;
     overflow: hidden;
-    background-color: ${(props) => props.theme.colors.darkhover};
+    background-color: ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
     cursor: text;
     float: left;
@@ -407,7 +397,7 @@ const ShareBtn = styled.div`
     justify-content: center;
     align-items: center;
     height: 24px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 12px;
     cursor: pointer;
     grid-gap: 4px;
@@ -469,7 +459,7 @@ const MarkdownButtonContainer = styled.div`
     }
 
     &:hover {
-        background-color: ${(props) => props.theme.colors.lightHover};
+        background-color: ${(props) => props.theme.colors.greyScale3};
     }
 `
 

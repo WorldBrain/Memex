@@ -36,7 +36,7 @@ class ConfirmModal extends PureComponent<Props> {
                                 <Icon
                                     filePath={this.props.icon}
                                     heightAndWidth={'24px'}
-                                    color={'normalText'}
+                                    color={'white'}
                                     hoverOff
                                 />
                             </IconContainer>
@@ -67,12 +67,12 @@ const IconContainer = styled.div`
     height: 48px;
     width: 48px;
     border-radius: 8px;
-    background: ${(props) => props.theme.colors.darkHover};
+    background: ${(props) => props.theme.colors.greyScale2};
     border: 1px solid
         ${(props) =>
             props.type === 'alert'
                 ? props.theme.colors.warning
-                : props.theme.colors.purple};
+                : props.theme.colors.prime1};
     display: flex;
     justify-content: center;
     align-items: center;
@@ -112,7 +112,7 @@ const MessageContainer = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 20px;
     font-weight: 700;
 `

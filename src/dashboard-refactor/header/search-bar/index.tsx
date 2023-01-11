@@ -133,7 +133,7 @@ const textStyles = `
     font-family: ${fonts.primary.name};
     font-style: normal;
     font-weight: ${fonts.primary.weight.bold};
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 `
 
 const SearchBarContainer = styled.div<{ isClosed: boolean }>`
@@ -143,7 +143,7 @@ const SearchBarContainer = styled.div<{ isClosed: boolean }>`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: ${(props) => props.theme.colors.darkhover};
+    background-color: ${(props) => props.theme.colors.greyScale2};
     border-radius: 5px;
     padding: 0px 15px;
     flex: 1;
@@ -164,7 +164,7 @@ const Input = styled.input`
     border: none;
     background-color: transparent;
     height: 44px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 400;
 
     &::placeholder {
@@ -176,7 +176,7 @@ const Input = styled.input`
     }
 
     &:focus ${SearchBarContainer} {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 `
 

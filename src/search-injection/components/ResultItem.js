@@ -35,7 +35,7 @@ const Root = styled.a`
     padding: 20px 20px;
     text-decoration: none !important;
     display: flex;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     &:last-child {
         border-bottom: none;
@@ -45,15 +45,15 @@ const Root = styled.a`
 const RootContainer = styled.div`
     height: fit-content;
     width: fill-available;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
-    background: ${(props) => props.theme.colors.backgroundColor};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
+    background: ${(props) => props.theme.colors.black};
 
     &:last-child {
         border-bottom: none;
     }
 
     &:hover ${Root} {
-        background: ${(props) => props.theme.colors.lightHover};
+        background: ${(props) => props.theme.colors.greyScale3};
     }
 `
 
@@ -69,7 +69,7 @@ const InfoContainer = styled.div`
 const TagItem = styled.div`
     padding: 2px 8px;
     border-radius: 3px;
-    background-color: ${(props) => props.theme.colors.purple};
+    background-color: ${(props) => props.theme.colors.prime1};
     color: white;
     display: flex;
     align-items: center;
@@ -87,13 +87,13 @@ const TagBox = styled.div`
 
 const Title = styled.div`
     font-size: 15px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: bold;
     text-decoration: none;
 `
 
 const Url = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     text-decoration: none;
     font-weight: 200;

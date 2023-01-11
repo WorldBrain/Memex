@@ -59,7 +59,7 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
                         heightAndWidth="20px"
                         icon={this.props.icon}
                         hoverOff
-                        color={this.props.isSelected ? 'purple' : null}
+                        color={this.props.isSelected ? 'prime1' : null}
                     />
                     <PrivacyOptionBox>
                         <PrivacyOptionTitleBox>
@@ -69,7 +69,7 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
                                     <Icon
                                         heightAndWidth="14px"
                                         filePath={icons.check}
-                                        color={'purple'}
+                                        color={'prime1'}
                                         hoverOff
                                     />
                                 )}
@@ -104,7 +104,7 @@ const PrivacyOptionItem = styled(Margin)`
         props.isSelected &&
         css`
             outline: none;
-            background-color: ${(props) => props.theme.colors.darkhover};
+            background-color: ${(props) => props.theme.colors.greyScale2};
         `}
 
     &:hover {
@@ -143,7 +143,7 @@ const PrivacyOptionTitle = styled.div`
     font-size: 12px;
     height: 20px;
     font-weight: bold;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -154,8 +154,8 @@ const PrivacyOptionShortcut = styled.div`
     font-size: 10px;
     font-weight: 400;
     padding: 2px 4px;
-    color: ${(props) => props.theme.colors.normalText};
-    border: 1px solid ${(props) => props.theme.colors.greyScale9};
+    color: ${(props) => props.theme.colors.white};
+    border: 1px solid ${(props) => props.theme.colors.greyScale6};
     border-radius: 4px;
 `
 

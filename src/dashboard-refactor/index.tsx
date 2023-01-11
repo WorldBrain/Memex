@@ -1636,7 +1636,7 @@ const DropZoneBackground = styled.div`
     width: fill-available;
     top: 0px;
     left: 0px;
-    background: ${(props) => props.theme.colors.backgroundColor}60;
+    background: ${(props) => props.theme.colors.black}60;
     backdrop-filter: blur(20px);
     padding: 40px;
     display: flex;
@@ -1646,7 +1646,7 @@ const DropZoneBackground = styled.div`
 `
 
 const DropZoneFrame = styled.div`
-    border: 1px solid ${(props) => props.theme.colors.primaryLight};
+    border: 1px solid ${(props) => props.theme.colors.prime1}60;
     border-radius: 20px;
     display: flex;
     justify-content: center;
@@ -1674,7 +1674,7 @@ const DropZoneContent = styled.div`
 `
 
 const DropZoneTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 20px;
     text-align: center;
 `
@@ -1697,9 +1697,9 @@ const HeaderBar = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.black};
     z-index: 30;
-    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lightHover};
+    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.greyScale3};
 `
 
 const MainContent = styled.div<{ responsiveWidth: string }>`
@@ -1739,9 +1739,8 @@ const ListSidebarContent = styled(Rnd)<{
         props.locked &&
         css`
             height: 100vh;
-            background-color: ${(props) =>
-                props.theme.colors.backgroundColorDarker};
-            border-right: solid 1px ${(props) => props.theme.colors.lightHover};
+            background-color: ${(props) => props.theme.colors.greyScale1};
+            border-right: solid 1px ${(props) => props.theme.colors.greyScale2};
             padding-top: ${sizeConstants.header.heightPx}px;
         `}
     ${(props) =>
@@ -1749,8 +1748,7 @@ const ListSidebarContent = styled(Rnd)<{
         css`
             position: absolute
             height: max-content;
-            background-color: ${(props) =>
-                props.theme.colors.backgroundColorDarker};
+            background-color: ${(props) => props.theme.colors.greyScale1};
             //box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
             margin-top: 50px;
             margin-bottom: 9px;
@@ -1824,7 +1822,7 @@ const TitleContainer = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 24px;
     font-weight: bold;
 `
@@ -1852,7 +1850,7 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     width: fill-available;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.black};
     min-height: 100vh;
     height: 100vh;
     /* min-width: fit-content; */
@@ -1893,8 +1891,8 @@ const ActivityIndicator = styled.div<{ hasActivities }>`
     width: 10px;
     margin-left: -24px;
     border: ${(props) =>
-        props.hasActivities && '2px solid' + props.theme.colors.purple};
-    background: ${(props) => props.hasActivities && props.theme.colors.purple};
+        props.hasActivities && '2px solid' + props.theme.colors.prime1};
+    background: ${(props) => props.hasActivities && props.theme.colors.prime1};
 `
 
 const SidebarHeaderContainer = styled.div`
@@ -1925,8 +1923,7 @@ const SettingsSection = styled(Margin)`
     border-radius: 3px;
 
     &:hover {
-        background-color: ${(props) =>
-            props.theme.colors.backgroundColorDarker};
+        background-color: ${(props) => props.theme.colors.greyScale1};
     }
 `
 
@@ -1956,8 +1953,7 @@ const SyncStatusHeaderBox = styled.div`
     }
 
     &:hover {
-        background-color: ${(props) =>
-            props.theme.colors.backgroundColorDarker};
+        background-color: ${(props) => props.theme.colors.greyScale1};
     }
 
     @media screen and (max-width: 900px) {
@@ -1972,7 +1968,7 @@ const SyncStatusHeaderText = styled.span<{
 }>`
     font-family: 'Satoshi', sans-serif;
     font-weight: 500;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     white-space: nowrap;
     overflow: hidden;

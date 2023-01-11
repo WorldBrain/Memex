@@ -96,7 +96,7 @@ const LabelContentBox = styled.div`
     margin-left: 10px;
 `
 const LabelTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 300;
     font-size: 14px;
     white-space: nowrap;
@@ -157,12 +157,12 @@ const LabelCheck = styled.span<{ isChecked; mode; size }>`
     border: 2px solid
         ${(props) =>
             props.isChecked
-                ? props.theme.colors.normalText
-                : props.theme.colors.darkhover};
+                ? props.theme.colors.white
+                : props.theme.colors.greyScale2};
     background: ${(props) =>
         props.isChecked
-            ? props.theme.colors.normalText
-            : props.theme.colors.darkhover};
+            ? props.theme.colors.white
+            : props.theme.colors.greyScale2};
     vertical-align: middle;
     width: ${(props) => (props.size ? props.size + 'px' : '24px')};
     height: ${(props) => (props.size ? props.size + 'px' : '24px')};

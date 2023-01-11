@@ -181,7 +181,7 @@ class SpacePicker extends StatefulUIElement<
                         <Icon
                             filePath={icons.collectionsEmpty}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -200,7 +200,7 @@ class SpacePicker extends StatefulUIElement<
                         <Icon
                             filePath={icons.collectionsEmpty}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -216,7 +216,7 @@ class SpacePicker extends StatefulUIElement<
                         <Icon
                             filePath={icons.collectionsEmpty}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -411,7 +411,7 @@ const SearchContainer = styled.div`
 const PrimaryActionBox = styled.div`
     padding: 2px 0px 5px 0px;
     margin-bottom: 5px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 const EntryListHeader = styled.div`
@@ -436,7 +436,7 @@ const EntryList = styled.div`
 `
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
     border: 1px solid ${(props) => props.theme.colors.greyScale6};
     border-radius: 8px;
     height: 30px;

@@ -395,7 +395,7 @@ export default class Ribbon extends Component<Props, State> {
                                         }
                                         filePath={'settings'}
                                         heightAndWidth={'18px'}
-                                        color={'purple'}
+                                        color={'prime1'}
                                     />
                                 </TooltipBox>
                             </BlockListTitleArea>
@@ -419,7 +419,7 @@ export default class Ribbon extends Component<Props, State> {
                                     <Icon
                                         heightAndWidth="22px"
                                         filePath="plus"
-                                        color="purple"
+                                        color="prime1"
                                         onClick={async () => {
                                             this.setState({
                                                 blockListValue:
@@ -658,7 +658,7 @@ export default class Ribbon extends Component<Props, State> {
                                                     <Icon
                                                         filePath="removeX"
                                                         heightAndWidth="20px"
-                                                        color="greyScale9"
+                                                        color="greyScale6"
                                                         onClick={() =>
                                                             this.props.sidebar.closeSidebar()
                                                         }
@@ -678,7 +678,7 @@ export default class Ribbon extends Component<Props, State> {
                                                                 }
                                                                 heightAndWidth="20px"
                                                                 color={
-                                                                    'greyScale9'
+                                                                    'greyScale6'
                                                                 }
                                                                 onClick={() =>
                                                                     this.props.sidebar.toggleReadingView()
@@ -696,7 +696,7 @@ export default class Ribbon extends Component<Props, State> {
                                                                 }
                                                                 heightAndWidth="20px"
                                                                 color={
-                                                                    'greyScale9'
+                                                                    'greyScale6'
                                                                 }
                                                                 onClick={() =>
                                                                     this.props.sidebar.toggleReadingView()
@@ -730,8 +730,8 @@ export default class Ribbon extends Component<Props, State> {
                                                 color={
                                                     this.props.bookmark
                                                         .isBookmarked
-                                                        ? 'purple'
-                                                        : 'greyScale9'
+                                                        ? 'prime1'
+                                                        : 'greyScale6'
                                                 }
                                                 heightAndWidth="20px"
                                                 filePath={
@@ -762,8 +762,8 @@ export default class Ribbon extends Component<Props, State> {
                                                 color={
                                                     this.props.lists.pageListIds
                                                         .length > 0
-                                                        ? 'purple'
-                                                        : 'greyScale9'
+                                                        ? 'prime1'
+                                                        : 'greyScale6'
                                                 }
                                                 heightAndWidth="20px"
                                                 filePath={
@@ -795,7 +795,7 @@ export default class Ribbon extends Component<Props, State> {
                                                             e,
                                                         )
                                                     }
-                                                    color={'greyScale9'}
+                                                    color={'greyScale6'}
                                                     heightAndWidth="20px"
                                                     filePath={
                                                         this.props.commentBox
@@ -822,7 +822,7 @@ export default class Ribbon extends Component<Props, State> {
                                                 onClick={() =>
                                                     this.openOverviewTabRPC()
                                                 }
-                                                color={'greyScale9'}
+                                                color={'greyScale6'}
                                                 heightAndWidth="20px"
                                                 filePath={icons.searchIcon}
                                             />
@@ -926,7 +926,7 @@ export default class Ribbon extends Component<Props, State> {
 const ColorPickerCircle = styled.div<{ backgroundColor: string }>`
     height: 18px;
     width: 18px;
-    background-color: ${(props) => props.backgroundColor};
+    background-color: ${(props) => props.black};
     border-radius: 50px;
     margin: 5px;
 `
@@ -949,7 +949,7 @@ const PickerButtonTopBar = styled.div`
     align-items: center;
     width: fill-available;
 
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     padding: 0 0 10px 0;
 `
 
@@ -983,7 +983,7 @@ const TooltipContent = styled.div`
 `
 
 const BlockListArea = styled.div`
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     display: flex;
     flex-direction: column;
     grid-gap: 5px;
@@ -1076,7 +1076,7 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
             align-items: flex-start;
             padding: 0 7px 0 5px;
             right: 0px;
-            background: ${(props) => props.theme.colors.backgroundColor};
+            background: ${(props) => props.theme.colors.black};
 
             & .removeSidebar {
                 visibility: hidden;
@@ -1094,8 +1094,8 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
     justify-content: center;
     padding: 5px 0;
     display: none;
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    background: ${(props) => props.theme.colors.greyScale1};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     ${(props) =>
         props.isPeeking &&
@@ -1103,7 +1103,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
             border-radius: 8px;
             display: flex;
             box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
-            background: ${(props) => props.theme.colors.backgroundColorDarker};
+            background: ${(props) => props.theme.colors.greyScale1};
         }
     `}
 
@@ -1120,7 +1120,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
             background: transparent;
             border: none;
             align-items: center;
-            background: ${(props) => props.theme.colors.backgroundColor};
+            background: ${(props) => props.theme.colors.black};
         `}
 `
 
@@ -1136,7 +1136,7 @@ const ExtraButtonRow = styled.div`
     position: relative;
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 `
 
@@ -1144,7 +1144,7 @@ const HorizontalLine = styled.div<{ sidebaropen: boolean }>`
     width: 100%;
     margin: 5px 0;
     height: 1px;
-    background-color: ${(props) => props.theme.colors.lightHover};
+    background-color: ${(props) => props.theme.colors.greyScale3};
 `
 
 const PageAction = styled.div`
@@ -1167,7 +1167,7 @@ const FeedIndicatorBox = styled.div<{ isSidebarOpen: boolean }>`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     font-weight: 400;
 `
@@ -1189,7 +1189,7 @@ const FeedContainer = styled.div`
     flex-direction: column;
     padding-top: 20px;
     max-width: 800px;
-    background: ${(props) => props.theme.colors.backgroundColor};
+    background: ${(props) => props.theme.colors.black};
     border-radius: 10px;
 `
 
@@ -1201,7 +1201,7 @@ const TitleContainer = styled.div`
     grid-gap: 15px;
     width: fill-available;
     padding: 0 20px 20px 20px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 const TitleContent = styled.div`
     display: flex;
@@ -1213,7 +1213,7 @@ const TitleContent = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 18px;
     font-weight: bold;
 `

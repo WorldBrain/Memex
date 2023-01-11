@@ -180,8 +180,8 @@ const HoverArea = styled.div`
     height: 420px;
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
-    border: 1px solid ${(props) => props.theme.colors.purple};
-    background: ${(props) => props.theme.colors.purple}60;
+    border: 1px solid ${(props) => props.theme.colors.prime1};
+    background: ${(props) => props.theme.colors.prime1}60;
 
     opacity: 0;
     animation: 3s ease-in-out 0.5s MouseAreaAppear infinite;
@@ -202,7 +202,7 @@ const HoverArea = styled.div`
 `
 
 const BottomArea = styled.div`
-    border-top: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
     width: 100%;
 `
 

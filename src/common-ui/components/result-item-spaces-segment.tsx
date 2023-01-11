@@ -42,7 +42,7 @@ export class AddSpacesButton extends React.Component<
                 type="tertiary"
                 size="small"
                 icon="plus"
-                iconColor={'purple'}
+                iconColor={'prime1'}
                 onClick={(e) => {
                     this.props.onEditBtnClick?.(e)
                 }}
@@ -175,8 +175,8 @@ const ListSpaceContainer = styled.div<{
     onClick: React.MouseEventHandler
     isLoading: boolean
 }>`
-    background-color: ${(props) => props.theme.colors.lightHover};
-    color: ${(props) => props.theme.colors.greyScale9};
+    background-color: ${(props) => props.theme.colors.greyScale3};
+    color: ${(props) => props.theme.colors.greyScale6};
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 12px;
@@ -199,21 +199,21 @@ const ListSpaceContainer = styled.div<{
             background: linear-gradient(
                     0.25turn,
                     transparent,
-                    ${(props) => props.theme.colors.lightHover},
+                    ${(props) => props.theme.colors.greyScale3},
                     transparent
                 ),
                 linear-gradient(
-                    ${(props) => props.theme.colors.darkhover},
-                    ${(props) => props.theme.colors.darkhover}
+                    ${(props) => props.theme.colors.greyScale2},
+                    ${(props) => props.theme.colors.greyScale2}
                 ),
                 radial-gradient(
                     38px circle at 19px 19px,
-                    ${(props) => props.theme.colors.darkhover}50,
+                    ${(props) => props.theme.colors.greyScale2}50,
                     transparent 51%
                 ),
                 linear-gradient(
-                    ${(props) => props.theme.colors.darkhover},
-                    ${(props) => props.theme.colors.darkhover}
+                    ${(props) => props.theme.colors.greyScale2},
+                    ${(props) => props.theme.colors.greyScale2}
                 );
             background-repeat: no-repeat;
             background-size: 315px 250px, 315px 180px, 100px 100px, 225px 30px;

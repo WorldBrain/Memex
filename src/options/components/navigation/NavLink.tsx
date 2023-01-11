@@ -37,7 +37,7 @@ class NavLink extends PureComponent<Props> {
                                 filePath={this.props.icon}
                                 heightAndWidth="22px"
                                 hoverOff
-                                color={this.props.isActive ? 'purple' : null}
+                                color={this.props.isActive ? 'prime1' : null}
                             />
                             <RouteTitle isActive={this.props.isActive}>
                                 {this.props.name}
@@ -64,7 +64,7 @@ const Container = styled.div`
 `
 
 const RouteTitle = styled.div<{ name: string; isActive: boolean }>`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     font-weight: 400;
     text-align: left;
@@ -104,10 +104,10 @@ const RouteItem = styled.li<{ name: string; isActive: boolean }>`
         props.isActive &&
         css`
             overflow: scroll;
-            background-color: ${(props) => props.theme.colors.darkhover};
+            background-color: ${(props) => props.theme.colors.greyScale2};
 
             &:hover {
-                outline: 1px solid ${(props) => props.theme.colors.lightHover};
+                outline: 1px solid ${(props) => props.theme.colors.greyScale3};
                 cursor: default;
             }
         `}
@@ -118,7 +118,7 @@ const RouteItem = styled.li<{ name: string; isActive: boolean }>`
     }
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         cursor: pointer;
     }
 

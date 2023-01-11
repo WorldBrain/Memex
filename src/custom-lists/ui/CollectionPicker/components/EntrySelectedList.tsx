@@ -40,7 +40,7 @@ const StyledActiveEntry = styled(ActiveList)`
     min-height: 18px;
     padding: 2px 8px;
     &:hover {
-        background: ${(props) => props.theme.colors.darkhover};
+        background: ${(props) => props.theme.colors.greyScale2};
     }
 `
 
@@ -51,5 +51,5 @@ const Entry = styled.div`
     overflow-x: hidden;
     text-overflow: ellipsis;
     font-size: 14px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 `

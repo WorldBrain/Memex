@@ -30,9 +30,9 @@ const Container = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.black};
     z-index: 3500;
-    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lightHover};
+    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.greyScale2};
 `
 
 const SearchSection = styled(Margin)<{ sidebarWidth: string }>`
@@ -92,10 +92,10 @@ function getSyncStatusIcon(status): IconKeys {
 
 function getSyncIconColor(status): ColorThemeKeys {
     if (status === 'green') {
-        return 'purple'
+        return 'prime1'
     }
     if (status === 'yellow') {
-        return 'normalText'
+        return 'white'
     }
 
     if (status === 'red') {

@@ -34,8 +34,8 @@ export const AddNew = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    color: ${(props) => props.theme.colors.backgroundColor};
-    background: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.black};
+    background: ${(props) => props.theme.colors.white};
     font-size: ${fontSizeSmall}px;
     font-weight: 500;
     min-height: 20px;
@@ -57,11 +57,11 @@ const ContentBox = styled.div`
     grid-gap: 10px;
     font-size: 14px;
     align-items: center;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 `
 
 const Title = styled.span`
-    color: ${(props) => props.theme.colors.backgroundColor};
+    color: ${(props) => props.theme.colors.black};
     font-size: 14px;
     display: flex;
     flex: 1;

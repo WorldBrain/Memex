@@ -455,7 +455,7 @@ export class AnnotationsSidebar extends React.Component<
                             <Icon
                                 filePath={icons.commentEmpty}
                                 heightAndWidth="20px"
-                                color="purple"
+                                color="prime1"
                                 hoverOff
                             />
                         </SectionCircle>
@@ -968,7 +968,7 @@ export class AnnotationsSidebar extends React.Component<
                         <Icon
                             filePath={icons.collectionsEmpty}
                             heightAndWidth="20px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -1296,7 +1296,7 @@ export class AnnotationsSidebar extends React.Component<
                                     <Icon
                                         filePath={icons.commentEmpty}
                                         heightAndWidth="20px"
-                                        color="purple"
+                                        color="prime1"
                                         hoverOff
                                     />
                                 </SectionCircle>
@@ -1397,7 +1397,7 @@ export class AnnotationsSidebar extends React.Component<
                         type="tertiary"
                         size="small"
                         label="All Spaces"
-                        fontColor="iconColor"
+                        fontColor="greyScale6"
                         onClick={() => this.props.onResetSpaceSelect()}
                     />
                     {this.renderPermissionStatusButton()}
@@ -1712,11 +1712,11 @@ const LinkFrame = styled.div`
     display: flex;
     align-items: center;
     border-radius: 8px;
-    border: 1px solid ${(props) => props.theme.colors.darkhover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale2};
     height: fill-available;
     padding: 0 10px;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     width: 190px;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -1728,7 +1728,7 @@ const SpaceTypeSection = styled.div`
     flex-direction: column;
     width: fill-available;
 
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     &:first-child {
         margin-top: -10px;
     }
@@ -1740,7 +1740,7 @@ const SpaceTypeSection = styled.div`
 
 const SpaceTypeSectionHeader = styled.div`
     display: flex;
-    color: ${(props) => props.theme.colors.iconColor};
+    color: ${(props) => props.theme.colorsgreyScale6};
     font-weight: 300;
     font-size: 14px;
     padding: 30px 20px 30px 15px;
@@ -1790,7 +1790,7 @@ const PermissionInfoButton = styled.div`
     grid-gap: 5px;
     font-size: 12px;
     color: ${(props) => props.theme.colors.greyScale8};
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
     border-radius: 5px;
     padding: 2px 8px;
 `
@@ -1799,7 +1799,7 @@ const SpaceTitle = styled.div`
     font-size: 22px;
     font-weight: 500;
     width: fill-available;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     letter-spacing: 1px;
 `
 
@@ -1843,7 +1843,7 @@ const LoaderBox = styled.div`
 `
 
 const Link = styled.span`
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     padding-left: 4px;
     cursor: pointer;
 `
@@ -1862,7 +1862,7 @@ const LoadingBox = styled.div`
 const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
     font-weight: bold;
     border-radius: 30px;
-    background-color: ${(props) => props.theme.colors.purple};
+    background-color: ${(props) => props.theme.colors.prime1};
     width: 12px;
     height: 12px;
     font-size: 12px;
@@ -1877,17 +1877,17 @@ const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
 
 const TopBar = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: ${(props) =>
         props.sidebarContext === 'dashboard' ? '40px' : '32px'};
 
-    background: ${(props) => props.theme.colors.backgroundColor};
+    background: ${(props) => props.theme.colors.black};
     z-index: 11300;
     padding: 10px 10px 10px 10px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.darkhover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
 `
 
 const IsolatedViewHeaderContainer = styled.div`
@@ -1946,7 +1946,7 @@ const AnnotationBox = styled.div<{
 `
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
     border: 1px solid ${(props) => props.theme.colors.greyScale6};
     border-radius: 8px;
     height: 40px;
@@ -2065,7 +2065,7 @@ const FollowedListsMsgContainer = styled.div`
 const FollowedListsMsgHead = styled.span`
     font-weight: bold;
     text-align: center;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     padding-top: 10px;
     padding-bottom: 5px;
     font-size: 14px;
@@ -2117,7 +2117,7 @@ const ButtonContainer = styled.div`
 
 const FollowedListSectionTitle = styled(Margin)<{ active: boolean }>`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     justify-content: center;
     width: max-content;
     font-weight: 400;
@@ -2131,11 +2131,11 @@ const FollowedListSectionTitle = styled(Margin)<{ active: boolean }>`
     ${(props) =>
         props.active &&
         css`
-            background: ${(props) => props.theme.colors.lightHover};
+            background: ${(props) => props.theme.colors.greyScale3};
             cursor: default;
 
             &:hover {
-                background: ${(props) => props.theme.colors.lightHover};
+                background: ${(props) => props.theme.colors.greyScale3};
             }
         `}
 
@@ -2143,7 +2143,7 @@ const FollowedListSectionTitle = styled(Margin)<{ active: boolean }>`
         !props.active &&
         css`
             &:hover {
-                background: ${(props) => props.theme.colors.lightHover};
+                background: ${(props) => props.theme.colors.greyScale3};
             }
         `}
 
@@ -2181,7 +2181,7 @@ const FollowedListTitle = styled.span<{ context: string }>`
     max-width: 295px;
     text-overflow: ellipsis;
     overflow-x: hidden;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     grid-gap: 5px;
     align-items: center;
     width: 100px;
@@ -2194,7 +2194,7 @@ const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
     font-weight: bold;
     font-size: 16px;
     display: flex;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     grid-gap: 4px;
     align-items: center;
 `
@@ -2228,7 +2228,7 @@ const CloseButtonStyled = styled.button`
 const TopBarStyled = styled.div`
     position: static;
     top: 0;
-    background: ${(props) => props.theme.colors.backgroundColor};
+    background: ${(props) => props.theme.colors.black};
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -2258,7 +2258,7 @@ const LoadingIndicatorStyled = styled(LoadingIndicator)`
 const NewAnnotationSection = styled.section`
     font-family: 'Satoshi', sans-serif;
     height: auto;
-    background: ${(props) => props.theme.colors.backgroundColor};
+    background: ${(props) => props.theme.colors.black};
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -2270,8 +2270,8 @@ const NewAnnotationSection = styled.section`
 
 const AnnotationsSectionStyled = styled.div`
     font-family: 'Satoshi', sans-serif;
-    background: ${(props) => props.theme.colors.backgroundColor};
-    color: ${(props) => props.theme.colors.normalText};
+    background: ${(props) => props.theme.colors.black};
+    color: ${(props) => props.theme.colors.white};
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -2323,12 +2323,13 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
         display: none;
     }
 
-    border-right: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-right: 1px solid ${(props) => props.theme.colors.greyScale2};
     scrollbar-width: none;
 
     ${(props) =>
         props.sidebarContext === 'dashboard' &&
         css`
+            border-right: 'unset';
             border-left: 'unset';
         `};
 `

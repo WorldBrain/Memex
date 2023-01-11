@@ -166,7 +166,7 @@ class TagPicker extends StatefulUIElement<
                         <Icon
                             filePath={icons.backup}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -183,7 +183,7 @@ class TagPicker extends StatefulUIElement<
                         <Icon
                             filePath={icons.backup}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -199,7 +199,7 @@ class TagPicker extends StatefulUIElement<
                     <Icon
                         filePath={icons.backup}
                         heightAndWidth="16px"
-                        color="purple"
+                        color="prime1"
                         hoverOff
                     />
                 </SectionCircle>

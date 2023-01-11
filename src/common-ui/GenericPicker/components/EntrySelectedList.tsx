@@ -69,6 +69,6 @@ const Entry = styled.div`
     color: ${(props) => props.theme.colors.darkerText};
 
     &:hover {
-        background: ${(props) => props.theme.colors.darkhover};
+        background: ${(props) => props.theme.colors.greyScale2};
     }
 `

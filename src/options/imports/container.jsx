@@ -122,7 +122,7 @@ class ImportContainer extends Component {
                     <Icon
                         filePath={icons.stop}
                         heightAndWidth="14px"
-                        color="purple"
+                        color="prime1"
                         hoverOff
                     />
                     {this.state.waitingOnCancelConfirm

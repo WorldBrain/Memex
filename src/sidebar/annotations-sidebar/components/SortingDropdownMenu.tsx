@@ -63,7 +63,7 @@ const SortingContainer = styled.div`
 `
 
 const SortingTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 700;
     padding-left: 10px;
     margin-top: 5px;

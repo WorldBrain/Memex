@@ -26,7 +26,7 @@ const MemexTooltip = styled.div`
     animation-duration: 0.1s;
     /* transition: all 1s ease-in-out; */
     width: fit-content;
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
     background: ${(props) => props.theme.colors.greyScale1};
 `
 

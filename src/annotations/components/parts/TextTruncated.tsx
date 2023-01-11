@@ -72,7 +72,7 @@ const TruncatedContainer = styled.div`
 const TruncatedContent = styled(Markdown)`
     display: flex;
     flex-direction: column;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     font-weight: 300;
     letter-spacing: 1px;
@@ -131,11 +131,11 @@ const ToggleMoreButtonStyled = styled.div<{ isHighlight: boolean }>`
     display: flex;
     grid-gap: 5px;
     align-items: center;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.greyScale1};
     height: 24px;
 
     &:hover {
-        background-color: ${(props) => props.theme.colors.lightHover};
+        background-color: ${(props) => props.theme.colors.greyScale3};
     }
 
     & * {

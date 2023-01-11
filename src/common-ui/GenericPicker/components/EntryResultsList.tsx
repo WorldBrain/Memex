@@ -60,7 +60,7 @@ const StyledContainer = styled.div`
 
 const FilterHelp = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     padding: 6px 2px;
     ${StyledIconBase} {
         stroke-width: 2px;

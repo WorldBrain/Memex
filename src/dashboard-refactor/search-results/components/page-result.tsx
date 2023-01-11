@@ -243,7 +243,7 @@ export default class PageResultView extends PureComponent<Props> {
                         this.props.noteIds[
                             this.props.notesType
                         ].length.toString(),
-                    imageColor: 'purple',
+                    imageColor: 'prime1',
                     onClick: this.props.onNotesBtnClick,
                     tooltipText: (
                         <span>
@@ -281,7 +281,7 @@ export default class PageResultView extends PureComponent<Props> {
                 {
                     key: 'add-spaces-btn',
                     image: 'plus',
-                    imageColor: 'purple',
+                    imageColor: 'prime1',
                     ButtonText: 'Spaces',
                     iconSize: '14px',
                     onClick: this.props.onListPickerFooterBtnClick,
@@ -296,7 +296,7 @@ export default class PageResultView extends PureComponent<Props> {
                         this.props.noteIds[
                             this.props.notesType
                         ].length.toString(),
-                    imageColor: 'purple',
+                    imageColor: 'prime1',
                     onClick: this.props.onNotesBtnClick,
                     tooltipText: (
                         <span>

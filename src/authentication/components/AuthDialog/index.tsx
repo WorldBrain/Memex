@@ -364,7 +364,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         label={'Send Reset Email'}
                                         fontSize={'16px'}
                                         fontColor={'black'}
-                                        backgroundColor={'purple'}
+                                        backgroundColor={'prime1'}
                                         icon={'longArrowRight'}
                                         iconSize={'22px'}
                                         iconPosition={'right'}
@@ -398,7 +398,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                 //             <Icon
                 //                 filePath={icons.mail}
                 //                 heightAndWidth="34px"
-                //                 color="purple"
+                //                 color="prime1"
                 //                 hoverOff
                 //             />
                 //         </SectionCircle>
@@ -534,7 +534,7 @@ const SectionTitle = styled.div`
 `
 
 const InfoTextBig = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     font-weight: 400;
     text-align: center;
@@ -542,7 +542,7 @@ const InfoTextBig = styled.div`
 
 const ForgotPassword = styled.div`
     white-space: nowrap;
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     cursor: pointer;
     font-weight: 500;
 `
@@ -583,7 +583,7 @@ const TextInputContainer = styled.div`
     grid-gap: 10px;
     align-items: center;
     justify-content: flex-start;
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
     height: 44px;
     border-radius: 8px;
     width: 350px;
@@ -597,7 +597,7 @@ const TextInput = styled(SimpleTextInput)`
     outline: none;
     height: fill-available;
     width: fill-available;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     font-weight: 300;
     border: none;
@@ -612,7 +612,7 @@ const WelcomeContainer = styled.div`
     display: flex;
     justify-content: space-between;
     overflow: hidden;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.black};
 `
 
 const LeftSide = styled.div`
@@ -621,7 +621,7 @@ const LeftSide = styled.div`
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.black};
 
     @media (max-width: 1000px) {
         width: 100%;
@@ -649,7 +649,7 @@ const Title = styled.div`
 `
 
 const DescriptionText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 18px;
     font-weight: normal;
     margin-bottom: 30px;
@@ -731,7 +731,7 @@ const Footer = styled.div`
 const ModeSwitch = styled.span`
     cursor: pointer;
     font-weight: bold;
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     font-weight: 14px;
 `
 

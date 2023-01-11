@@ -102,11 +102,11 @@ const EditableListTitle = styled.input`
     border: none;
     width: fill-available;
     color: ${(props) => props.theme.colors.darkerText};
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
 
     &:focus {
         outline: 1px solid ${(props) => props.theme.colors.lineGrey};
-        color: ${(props) => props.theme.colors.normalText};
+        color: ${(props) => props.theme.colors.white};
     }
 `
 

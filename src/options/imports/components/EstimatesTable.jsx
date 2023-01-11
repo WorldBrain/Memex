@@ -147,7 +147,7 @@ const ImportRemaining = styled.span`
     font-size: 22px;
     font-weight: bold;
     padding-right: 10px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 `
 
 const ImportRemainingInfo = styled.span`

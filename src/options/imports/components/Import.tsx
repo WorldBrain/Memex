@@ -175,5 +175,5 @@ const LoadingBlocker = styled.div`
     width: 101%;
     text-align: center;
     z-index: 25000000;
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    background: ${(props) => props.theme.colors.greyScale1};
 `

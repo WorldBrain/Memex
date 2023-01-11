@@ -332,5 +332,5 @@ const SectionTitle = styled.div`
     margin-top: 10px;
     margin-bottom: 5px;
     padding: 0 20px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 `

@@ -429,7 +429,7 @@ const QuickSettingsContainer = styled.div`
 `
 
 const SpacerLine = styled.hr`
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
     width: 100%;
 `
 
@@ -439,12 +439,12 @@ const Footer = styled.div`
     padding: 0 15px 0 20px;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 const PopupContainerContainer = styled.div`
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    background: ${(props) => props.theme.colors.greyScale1};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 const ButtonContainer = styled.div`
@@ -460,7 +460,7 @@ const FeedActivitySectionInnerContainer = styled.div`
     font-size: 14px;
     justify-content: flex-start;
     cursor: pointer;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 500;
     flex: 1;
     width: fill-available;
@@ -468,7 +468,7 @@ const FeedActivitySectionInnerContainer = styled.div`
 
 const NoticeTitle = styled.div`
     font-size: 16px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: bold;
     text-align: center;
     margin-bottom: 20px;
@@ -479,7 +479,7 @@ const LoadingBox = styled.div`
     height: 200px;
     justify-content: center;
     align-items: center;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.greyScale1};
 `
 
 const NoticeSubTitle = styled.div`
@@ -534,14 +534,14 @@ const FeedActivitySection = styled.div`
     }
 
     // &:hover {
-    //     background-color: ${(props) => props.theme.colors.backgroundColor};
+    //     background-color: ${(props) => props.theme.colors.black};
     // }
 `
 
 const SpacePickerContainer = styled.div`
     display: flex;
     flex-direction: column;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.greyScale1};
     min-height: 500px;
 `
 

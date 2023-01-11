@@ -120,7 +120,7 @@ class ResultsContainer extends React.Component<Props, State> {
                         <Icon
                             filePath={icons.heartEmpty}
                             heightAndWidth="24px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -250,7 +250,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
 })
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundColor};
+    background: ${(props) => props.theme.colors.black};
     border-radius: 100px;
     height: 60px;
     width: 60px;
@@ -261,7 +261,7 @@ const SectionCircle = styled.div`
 `
 
 const ImportInfo = styled.div`
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     font-size: 14px;
     margin-bottom: 40px;
     font-weight: 500;

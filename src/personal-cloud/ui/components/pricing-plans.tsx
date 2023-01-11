@@ -59,7 +59,7 @@ export default class CloudPricingPlans extends React.PureComponent<Props> {
                                     <Icon
                                         icon="checkRound"
                                         height="17px"
-                                        color="purple"
+                                        color="prime1"
                                     />{' '}
                                     You're on this plan
                                 </BtnLabelWrapper>

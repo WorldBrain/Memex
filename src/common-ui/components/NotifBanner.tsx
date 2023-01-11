@@ -42,7 +42,7 @@ export class NotifBanner extends React.PureComponent<Props> {
                             filePath={MemexLogo}
                             heightAndWidth="30px"
                             hoverOff
-                            color="purple"
+                            color="prime1"
                         />
                         <MainText>{this.props.mainText}</MainText>
                         <ButtonBox location={this.props.location}>
@@ -81,7 +81,7 @@ const Banner = styled.div<{
 }>`
     display: flex;
     flex-direction: row;
-    background: ${(props) => props.theme.colors.backgroundColor}70;
+    background: ${(props) => props.theme.colors.black}70;
     height: 60px;
     width: fit-content;
     position: ${({ theme }) => theme.position};
@@ -91,7 +91,7 @@ const Banner = styled.div<{
     z-index: 2147483647;
     justify-content: center;
     align-items: center;
-    border: 1px solid ${(props) => props.theme.colors.purple};
+    border: 1px solid ${(props) => props.theme.colors.prime1};
     margin: 0 10px 10px 10px;
     border-radius: 8px;
     backdrop-filter: blur(4px);
@@ -153,6 +153,6 @@ const MainText = styled.span`
     font-size: 16px;
     font-weight: bold;
     margin-right: 20px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     white-space: nowrap;
 `

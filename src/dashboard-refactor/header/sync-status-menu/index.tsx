@@ -102,7 +102,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             return (
                 <RowContainer>
                     <TopBox>
-                        <TextBlock color={'normalText'}>
+                        <TextBlock color={'white'}>
                             You're not logged in
                         </TextBlock>
                         <TextBlockSmall>
@@ -110,7 +110,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         </TextBlockSmall>
                         <ActionButton>
                             <PrimaryAction
-                                backgroundColor={'purple'}
+                                backgroundColor={'prime1'}
                                 label="Login"
                                 onClick={onLoginClick}
                                 size={'medium'}
@@ -164,7 +164,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             return (
                 <RowContainer>
                     <TopBox>
-                        <TextBlock color={'purple'}>
+                        <TextBlock color={'prime1'}>
                             {this.renderTitleText()}
                         </TextBlock>
                         {new Date(this.props.lastSuccessfulSyncDate).getTime() >
@@ -259,7 +259,7 @@ const LoadingBox = styled.div`
 `
 
 const ExternalLink = styled.a`
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     text-decoration: none;
 `
 
@@ -268,7 +268,7 @@ const Container = styled.div`
 `
 
 const Separator = styled.div`
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
 `
 
 const TopBox = styled(Margin)`
@@ -334,7 +334,7 @@ const textStyles = `
 `
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.lightHover};
+    background: ${(props) => props.theme.colors.greyScale3};
     border-radius: 6px;
     height: 20px;
     width: fit-content;
@@ -343,7 +343,7 @@ const SectionCircle = styled.div`
     padding: 0 8px;
     justify-content: center;
     align-items: center;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 `
 
 const TextBlock = styled.div<{
@@ -355,14 +355,14 @@ const TextBlock = styled.div<{
     display: flex;
     align-items: center;
     text-align: center;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: bold;
     color: ${(props) => props.theme.colors[props.color]};
     width: 100%;
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     height: 20px;
     font-weight: 300;
@@ -391,7 +391,7 @@ const HelpTextBlockLink = styled.a<{
     display: flex;
     align-items: center;
     padding-left: 5px;
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
 `
 
 const TextBlockSmall = styled.div`

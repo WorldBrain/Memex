@@ -92,7 +92,7 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
     &:hover {
-        background: ${(props) => props.theme.colors.lightHover};
+        background: ${(props) => props.theme.colors.greyScale3};
     }
 
     & * {
@@ -108,7 +108,7 @@ const ButtonInnerContent = styled.div`
     align-items: flex-start;
     font-size: 14px;
     font-weight: 500;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 `
 
 export default CopyPDFLinkButton

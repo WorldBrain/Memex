@@ -29,7 +29,7 @@ class Layout extends Component {
 }
 
 const RootContainer = styled.div`
-    background-color: ${(props) => props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.black};
     display: flex;
     flex-direction: row;
     min-width: fit-content;

@@ -26,7 +26,7 @@ const Container = styled.tr`
     cursor: pointer;
 
     &:nth-child(2n + 2) {
-        background: ${(props) => props.theme.colors.backgroundColor};
+        background: ${(props) => props.theme.colors.black};
     }
 `
 

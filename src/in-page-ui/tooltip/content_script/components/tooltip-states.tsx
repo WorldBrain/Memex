@@ -86,7 +86,7 @@ export const InitialComponent = ({
                 <Icon
                     filePath={'highlight'}
                     heightAndWidth="18px"
-                    color={'greyScale9'}
+                    color={'greyScale6'}
                 />
             </TooltipBox>
         </ButtonDiv>
@@ -115,7 +115,7 @@ export const InitialComponent = ({
                 <Icon
                     filePath={'commentAdd'}
                     heightAndWidth="18px"
-                    color={'greyScale9'}
+                    color={'greyScale6'}
                 />
             </TooltipBox>
         </ButtonDiv>
@@ -148,7 +148,7 @@ export const InitialComponent = ({
                 <Icon
                     filePath={icons.collectionsEmpty}
                     heightAndWidth="18px"
-                    color={'greyScale9'}
+                    color={'greyScale6'}
                 />
             </TooltipBox>
         </ButtonDiv>

@@ -73,9 +73,9 @@ export class PickerSearchInput extends React.Component<Props, State> {
 
 const SearchBox = styled.div<{ isFocused: boolean }>`
     align-items: center;
-    background-color: ${(props) => props.theme.colors.darkhover};
+    background-color: ${(props) => props.theme.colors.greyScale2};
     border-radius: 3px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     display: flex;
     flex-wrap: wrap;
     font-size: 1rem;
@@ -102,7 +102,7 @@ const SearchInput = styled(TextField)`
     box-shadow: none;
     display: flex;
     flex: 1;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-family: 'Satoshi', sans-serif;
     font-size: 14px;
     height: fill-available;

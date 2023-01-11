@@ -35,7 +35,7 @@ const FinishContainer = styled.div`
 const ShortCutContainer = styled.div`
     display: flex;
     align-items: center;
-    color: ${(props) => props.theme.colors.greyScale9};
+    color: ${(props) => props.theme.colors.greyScale6};
     grid-gap: 3px;
     font-weight: 400;
 `
@@ -43,7 +43,7 @@ const ShortCutContainer = styled.div`
 const ShortCutText = styled.div`
     display: block;
     font-weight: 400;
-    color: ${(props) => props.theme.colors.greyScale9};
+    color: ${(props) => props.theme.colors.greyScale6};
     letter-spacing: 1px;
     margin-right: -1px;
 
@@ -55,7 +55,7 @@ const ShortCutText = styled.div`
 const ShortCutBlock = styled.div`
     border-radius: 5px;
     border: 1px solid ${(props) => props.theme.colors.greyScale10};
-    color: ${(props) => props.theme.colors.greyScale9};
+    color: ${(props) => props.theme.colors.greyScale6};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -86,7 +86,7 @@ const FirstCardContainer = styled.div`
 
 const IconBlock = styled.div`
     border: 1px solid ${(props) => props.theme.colors.greyScale6};
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
     border-radius: 8px;
     display: flex;
     justify-content: center;
@@ -104,7 +104,7 @@ const ContentArea = styled.div`
 `
 
 const Title = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 18px;
     font-weight: 600;
 `
@@ -135,7 +135,7 @@ const ActionCard = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: ${(props) => props.theme.colors.darkhover};
+    background-color: ${(props) => props.theme.colors.greyScale2};
     flex-direction: column;
     border-radius: 8px;
     grid-gap: 10px;
@@ -152,7 +152,7 @@ const ActionCard = styled.div`
 `
 
 const ActionText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 400;
     font-size: 14px;
 `
@@ -167,7 +167,7 @@ const TutorialTitleSection = styled.div`
 `
 
 const TutorialTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 700;
     font-size: 16px;
 `
@@ -188,7 +188,7 @@ const ViewAllButton = styled.div`
     }
 
     &:hover {
-        background-color: ${(props) => props.theme.colors.lightHover};
+        background-color: ${(props) => props.theme.colors.greyScale3};
     }
 `
 
@@ -207,7 +207,7 @@ const TutorialOption = styled.div`
     justify-content: flex-start;
     padding: 10px;
     grid-gap: 15px;
-    background-color: ${(props) => props.theme.colors.darkhover};
+    background-color: ${(props) => props.theme.colors.greyScale2};
     border-radius: 8px;
 
     cursor: pointer;
@@ -222,7 +222,7 @@ const TutorialOption = styled.div`
 `
 
 const TutorialOptionText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 400;
     font-size: 14px;
 `
@@ -239,7 +239,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             filePath={icons.stars}
                             heightAndWidth="28px"
                             hoverOff
-                            color={'purple'}
+                            color={'prime1'}
                         />
                     </IconBlock>
                     <ContentArea>
@@ -271,7 +271,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             filePath={icons.heartEmpty}
                             heightAndWidth="28px"
                             hoverOff
-                            color={'purple'}
+                            color={'prime1'}
                         />
                     </IconBlock>
                     <ContentArea>
@@ -305,7 +305,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             filePath={icons.collectionsEmpty}
                             heightAndWidth="28px"
                             hoverOff
-                            color={'purple'}
+                            color={'prime1'}
                         />
                     </IconBlock>
                     <ContentArea>
@@ -339,7 +339,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             filePath={icons.highlight}
                             heightAndWidth="28px"
                             hoverOff
-                            color={'purple'}
+                            color={'prime1'}
                         />
                     </IconBlock>
                     <ContentArea>
@@ -373,7 +373,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             filePath={icons.commentEmpty}
                             heightAndWidth="28px"
                             hoverOff
-                            color={'purple'}
+                            color={'prime1'}
                         />
                     </IconBlock>
                     <ContentArea>
@@ -408,7 +408,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             filePath={icons.searchIcon}
                             heightAndWidth="28px"
                             hoverOff
-                            color={'purple'}
+                            color={'prime1'}
                         />
                     </IconBlock>
                     <ContentArea>
@@ -444,7 +444,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             filePath={icons.pin}
                             heightAndWidth="28px"
                             hoverOff
-                            color={'purple'}
+                            color={'prime1'}
                         />
                     </IconBlock>
                     <ContentArea>
@@ -475,7 +475,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             filePath={icons.searchIcon}
                             heightAndWidth="28px"
                             hoverOff
-                            color={'purple'}
+                            color={'prime1'}
                         />
                     </IconBlock>
                     <ContentArea>
@@ -502,7 +502,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                                 filePath={icons.phone}
                                 heightAndWidth="28px"
                                 hoverOff
-                                color={'backgroundHighlight'}
+                                color={'greyScale1'}
                             />
                             <ActionText>
                                 Personalised Onboarding Call
@@ -517,7 +517,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                                 filePath={icons.searchIcon}
                                 heightAndWidth="28px"
                                 hoverOff
-                                color={'backgroundHighlight'}
+                                color={'greyScale1'}
                             />
                             <ActionText>Community FAQs</ActionText>
                         </ActionCard>

@@ -118,7 +118,7 @@ export const InnerDiv = styled.div`
     border-radius: 3px;
     overflow: hidden;
     overflow-y: scroll;
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    background: ${(props) => props.theme.colors.greyScale1};
     border: 1px solid ${(props) => props.theme.colors.lineGrey};
     min-width: 500px;
     min-height: 200px;

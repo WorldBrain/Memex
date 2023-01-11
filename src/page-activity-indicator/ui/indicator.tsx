@@ -72,7 +72,7 @@ export default class PageActivityIndicator extends React.PureComponent<
                     <Icon
                         filePath={logoNoText}
                         heightAndWidth="30px"
-                        color="primaryLight"
+                        color="prime2"
                     />
                 </MiniContainer>
             </Container>
@@ -98,7 +98,7 @@ const Container = styled.div<{ isExpanded }>`
     border-radius: 6px;
     padding: 10px;
     border: 1px solid ${(props) => props.theme.colors.greyScale4};
-    background-color: ${(props) => props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.black};
     box-shadow: 0px 4px 16px rgba(14, 15, 21, 0.3),
         0px 12px 24px rgba(14, 15, 21, 0.15);
     display: flex;
@@ -169,7 +169,7 @@ const TextMain = styled.span`
     font-size: 14px;
     font-weight: bold;
     white-space: nowrap;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 `
 const TextSecondary = styled.span`
     font-size: 12px;

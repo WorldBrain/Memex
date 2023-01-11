@@ -424,7 +424,7 @@ export default class SearchResultsContainer extends React.Component<
                                     }
                                     height="16px"
                                     width="16px"
-                                    background="backgroundColor"
+                                    background="black"
                                     containerRef={this.sortButtonRef}
                                 />
                             </TooltipBox>
@@ -664,7 +664,7 @@ export default class SearchResultsContainer extends React.Component<
                                 <TutorialPlayButton>
                                     <Icon
                                         hoverOff
-                                        color={'normalText'}
+                                        color={'white'}
                                         filePath={'play'}
                                         heightAndWidth={'20px'}
                                     />
@@ -696,7 +696,7 @@ export default class SearchResultsContainer extends React.Component<
                         <Icon
                             filePath={icons.searchIcon}
                             heightAndWidth="18px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </IconBox>
@@ -720,7 +720,7 @@ export default class SearchResultsContainer extends React.Component<
                             <Icon
                                 filePath={icons.phone}
                                 heightAndWidth="18px"
-                                color="purple"
+                                color="prime1"
                                 hoverOff
                             />
                         </IconBox>
@@ -736,7 +736,7 @@ export default class SearchResultsContainer extends React.Component<
                             <Icon
                                 filePath={icons.heartEmpty}
                                 heightAndWidth="18px"
-                                color="purple"
+                                color="prime1"
                                 hoverOff
                             />
                         </IconBox>
@@ -880,7 +880,7 @@ export default class SearchResultsContainer extends React.Component<
                                 <Icon
                                     hoverOff
                                     heightAndWidth="12px"
-                                    color={'iconColor'}
+                                    color={'greyScale6'}
                                     icon={'warning'}
                                 />
                                 <InfoText>
@@ -1000,7 +1000,7 @@ const IconContainerRight = styled.div`
     top: 4px;
     border-radius: 5px;
 
-    background: ${(props) => props.theme.colors.backgroundColor}70;
+    background: ${(props) => props.theme.colors.black}70;
     z-index: 20;
     backdrop-filter: blur(4px);
 `
@@ -1010,7 +1010,7 @@ const IconContainerLeft = styled.div`
     top: 4px;
     border-radius: 5px;
 
-    background: ${(props) => props.theme.colors.backgroundColor}70;
+    background: ${(props) => props.theme.colors.black}70;
     z-index: 20;
     backdrop-filter: blur(4px);
 `
@@ -1048,7 +1048,7 @@ const TutorialContainer = styled.div<{ showTutorialVideo: boolean }>`
     justify-content: space-between;
     grid-gap: 40px;
     padding: 26px 34px;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.greyScale1};
     border-radius: 8px;
     margin-top: 20px;
     margin-bottom: 40px;
@@ -1081,7 +1081,7 @@ const TutorialContent = styled.div<{ showTutorialVideo: boolean }>`
 const TutorialTitle = styled.div`
     font-size: 18px;
     font-weight: 500;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     line-height: 30px;
 `
 
@@ -1150,8 +1150,8 @@ const TutorialPlayButton = styled.div`
     height: 40px;
     width: fit-content;
     padding: 0 15px;
-    background-color: ${(props) => props.theme.colors.lightHover};
-    color: ${(props) => props.theme.colors.normalText};
+    background-color: ${(props) => props.theme.colors.greyScale3};
+    color: ${(props) => props.theme.colors.white};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1223,7 +1223,7 @@ const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     z-index: 3000;
     position: sticky;
     top: ${(props) => (props.isDisplayed === true ? '110px' : '0px')};
-    background: ${(props) => props.theme.colors.backgroundColor};
+    background: ${(props) => props.theme.colors.black};
     width: fill-available;
 `
 
@@ -1269,7 +1269,7 @@ const PageNotesBox = styled(Margin)`
     width: fill-available;
     padding-left: 10px;
     padding-top: 5px;
-    border-left: 4px solid ${(props) => props.theme.colors.lightHover};
+    border-left: 4px solid ${(props) => props.theme.colors.greyScale3};
     z-index: 4;
     position: relative;
     align-items: flex-start;
@@ -1277,7 +1277,7 @@ const PageNotesBox = styled(Margin)`
 
 const Separator = styled.div`
     width: 100%;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     margin-bottom: -2px;
 `
 
@@ -1358,7 +1358,7 @@ const IconImg = styled.img`
     width: 18px;
 `
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
     border: 1px solid ${(props) => props.theme.colors.greyScale6};
     border-radius: 8px;
     height: 60px;
@@ -1369,7 +1369,7 @@ const SectionCircle = styled.div`
 `
 
 const ImportInfo = styled.span`
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     margin-bottom: 40px;
     font-weight: 500;
     cursor: pointer;

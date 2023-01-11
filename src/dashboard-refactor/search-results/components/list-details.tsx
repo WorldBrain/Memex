@@ -192,7 +192,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                         <Icon
                                             heightAndWidth="22px"
                                             icon={icons.removeX}
-                                            color={'normalText'}
+                                            color={'white'}
                                             onClick={() =>
                                                 this.setState({
                                                     isEditingDescription: false,
@@ -207,7 +207,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                         <Icon
                                             heightAndWidth="22px"
                                             icon={icons.check}
-                                            color={'purple'}
+                                            color={'prime1'}
                                             onClick={() =>
                                                 this.finishEdit({
                                                     shouldSave:
@@ -417,7 +417,7 @@ const TitleContainer = styled.div`
 `
 
 const EditDescriptionButton = styled.div`
-    color: ${(props) => props.theme.colors.primaryLight};
+    color: ${(props) => props.theme.colors.prime2};
     font-size: 14px;
     border: none;
     background: none;
@@ -472,7 +472,7 @@ const MarkdownButtonContainer = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 24px;
     font-weight: bold;
 `

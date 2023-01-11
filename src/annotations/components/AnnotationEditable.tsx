@@ -322,8 +322,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                         : 'compress'
                                 }
                                 heightAndWidth={'18px'}
-                                borderColor={'lightHover'}
-                                background={'backgroundColorDarker'}
+                                borderColor={'greyScale5'}
+                                background={'greyScale1'}
                             />
                         </TooltipBox>
                     )}
@@ -336,8 +336,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 onClick={onGoToAnnotation}
                                 filePath={'goTo'}
                                 heightAndWidth={'18px'}
-                                borderColor={'lightHover'}
-                                background={'backgroundColorDarker'}
+                                borderColor={'greyScale5'}
+                                background={'greyScale1'}
                             />
                         </TooltipBox>
                     )}
@@ -357,8 +357,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 onClick={footerDeps.onEditIconClick}
                                 icon={'edit'}
                                 heightAndWidth={'18px'}
-                                borderColor={'lightHover'}
-                                background={'backgroundColorDarker'}
+                                borderColor={'greyScale5'}
+                                background={'greyScale1'}
                             />
                         </TooltipBox>
                     ) : undefined}
@@ -440,8 +440,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     }
                                     icon={'edit'}
                                     heightAndWidth={'18px'}
-                                    borderColor={'lightHover'}
-                                    background={'backgroundColorDarker'}
+                                    borderColor={'greyScale3'}
+                                    background={'greyScale1'}
                                 />
                             </TooltipBox>
                         </ActionBox>
@@ -491,7 +491,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                       key: 'replies-btn',
                       onClick: onReplyBtnClick,
                       tooltipText: 'Show replies',
-                      imageColor: 'purple',
+                      imageColor: 'prime1',
                       image: hasReplies ? 'commentFull' : 'commentEmpty',
                   }
                 : {
@@ -528,7 +528,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 {
                     key: 'add-spaces-btn',
                     image: 'plus',
-                    imageColor: 'purple',
+                    imageColor: 'prime1',
                     tooltipText: 'Add Note to Spaces',
                     onClick: () => this.updateSpacePickerState('footer'),
                     buttonRef: this.props.spacePickerButtonRef,
@@ -548,7 +548,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             {
                 key: 'add-spaces-btn',
                 image: 'plus',
-                imageColor: 'purple',
+                imageColor: 'prime1',
                 // onClick: () => this.updateSpacePickerState('footer'),
                 // buttonRef: this.props.spacePickerButtonRef,
                 // active: this.state.showSpacePicker === 'footer',
@@ -615,7 +615,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     Delete
                     <Icon
                         filePath={icons.check}
-                        color={'purple'}
+                        color={'prime1'}
                         heightAndWidth={'20px'}
                         hoverOff
                     />
@@ -664,7 +664,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             <Icon
                                 onClick={cancelBtnHandler}
                                 icon={icons.removeX}
-                                color={'normalText'}
+                                color={'white'}
                                 heightAndWidth="18px"
                             />
                             {confirmBtn}
@@ -860,7 +860,7 @@ const HighlightContent = styled.div`
 `
 
 const Highlightbar = styled.div`
-    background-color: ${(props) => props.theme.colors.purple};
+    background-color: ${(props) => props.theme.colors.prime1};
     margin-right: 10px;
     border-radius: 2px;
     width: 4px;
@@ -959,7 +959,7 @@ const HighlightStyled = styled.div<{ hasComment: boolean }>`
 `
 
 const CommentBox = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     font-weight: 300;
     overflow: hidden;
@@ -993,7 +993,7 @@ const DefaultFooterStyled = styled.div`
     align-items: center;
     padding-left: 5px;
     justify-content: space-between;
-    border-top: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
 `
 
 const AnnotationStyled = styled.div`
@@ -1018,7 +1018,7 @@ const AnnotationStyled = styled.div`
     ${({ theme }) =>
         theme.isActive &&
         `
-        outline: 1px solid ${theme.colors.primaryLight}70;
+        outline: 1px solid ${theme.colors.prime1}60;
     `};
 `
 
@@ -1040,7 +1040,7 @@ const DeleteConfirmStyled = styled.span`
     box-sizing: border-box;
     font-weight: 800;
     font-size: 14px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     margin-right: 10px;
     text-align: right;
 `
@@ -1065,7 +1065,7 @@ const ActionBtnStyled = styled.button`
     border-radius: 3px;
     font-weight: 400;
     border: 1px solid ${(props) => props.theme.colors.lineGrey};
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     display: flex;
     justify-content: center;
     align-items: center;

@@ -109,7 +109,7 @@ const MemexContainer = styled.div`
     margin-bottom: 20px;
     border-radius: 8px;
     margin-right: ${(props) => (props.position === 'above' ? '0px' : '30px')};
-    background: ${(props) => props.theme.colors.backgroundColor};
+    background: ${(props) => props.theme.colors.black};
     font-family: ${(props) => props.theme.fonts.primary};
     border-radius: 12px;
     overflow: hidden;
@@ -123,7 +123,7 @@ const TopBarArea = styled.div<{ hideResults }>`
     border-bottom: ${(props) =>
         props.hideResults
             ? 'none'
-            : '1px solid' + props.theme.colors.lightHover};
+            : '1px solid' + props.theme.colors.greyScale3};
     height: 50px;
     align-items: center;
     display: flex;
@@ -140,7 +140,7 @@ const ResultsBox = styled.div`
 `
 
 const TotalCount = styled.div`
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     font-weight: bold;
     font-size: 16px;
 `

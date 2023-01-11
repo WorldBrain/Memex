@@ -339,11 +339,11 @@ const DateRangeDiv = styled.div`
     border-radius: 12px;
 
     .react-datepicker {
-        background: ${(props) => props.theme.colors.lightHover};
+        background: ${(props) => props.theme.colors.greyScale3};
     }
 
     .react-datepicker__current-month {
-        color: ${(props) => props.theme.colors.normalText};
+        color: ${(props) => props.theme.colors.white};
         font-weight: bold;
     }
 
@@ -360,19 +360,19 @@ const DateRangeDiv = styled.div`
     }
 
     .react-datepicker__day--selected {
-        background: ${(props) => props.theme.colors.purple} !important;
+        background: ${(props) => props.theme.colors.prime1} !important;
         border-radius: 3px;
         color: ${(props) => props.theme.colors.black} !important;
     }
 
     .react-datepicker__day {
-        color: ${(props) => props.theme.colors.normalText};
+        color: ${(props) => props.theme.colors.white};
         font-weight: bold;
 
         &:hover {
             border-radius: 3px;
-            color: ${(props) => props.theme.colors.normalText};
-            background: ${(props) => props.theme.colors.darkhover};
+            color: ${(props) => props.theme.colors.white};
+            background: ${(props) => props.theme.colors.greyScale2};
         }
     }
 
@@ -382,7 +382,7 @@ const DateRangeDiv = styled.div`
         transform: rotate(0deg);
         mask-size: 18px !important;
         mask-position: center !important;
-        background: ${(props) => props.theme.colors.iconColor};
+        background: ${(props) => props.theme.colorsgreyScale6};
         height: 20px !important;
         width: 20px !important;
     }
@@ -393,14 +393,14 @@ const DateRangeDiv = styled.div`
         mask-size: 18px !important;
         transform: rotate(0deg);
         mask-position: center !important;
-        background: ${(props) => props.theme.colors.iconColor};
+        background: ${(props) => props.theme.colorsgreyScale6};
         height: 20px !important;
         width: 20px !important;
     }
 `
 
 const DateTitle = styled.span`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     font-weight: 600;
 `

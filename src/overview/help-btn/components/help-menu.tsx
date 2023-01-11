@@ -27,7 +27,7 @@ export class HelpMenu extends React.PureComponent<Props> {
                         filePath={icon}
                         heightAndWidth="22px"
                         hoverOff
-                        color={top ? 'backgroundColor' : null}
+                        color={top ? 'black' : null}
                     />
                 )}
                 {text}
@@ -80,7 +80,7 @@ const MenuItem = styled.div<{ order: number }>`
     border-radius: 5px;
     border: none;
     list-style: none;
-    background-color: ${(props) => props.top && props.theme.colors.purple};
+    background-color: ${(props) => props.top && props.theme.colors.prime1};
 
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.lineGrey};
@@ -89,9 +89,7 @@ const MenuItem = styled.div<{ order: number }>`
 
 const Link = styled.a<{ top }>`
     color: ${(props) =>
-        props.top
-            ? props.theme.colors.backgroundColor
-            : props.theme.colors.normalText};
+        props.top ? props.theme.colors.black : props.theme.colors.white};
     font-weight: ${(props) => (props.top ? '600' : '400')};
     height: 40px;
     padding: 0 10px;

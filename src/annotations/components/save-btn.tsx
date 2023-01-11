@@ -201,7 +201,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                         <Icon
                             heightAndWidth="20px"
                             icon={icons.check}
-                            color={'purple'}
+                            color={'prime1'}
                             onClick={() =>
                                 this.props.onSave(
                                     !!this.props.isShared,
@@ -229,14 +229,14 @@ const SaveBtnArrow = styled.div`
     display: flex;
     padding: 0 10px 0 5px;
     font-weight: 400;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     grid-gap: 5px;
     font-size: 12px;
     align-items: center;
     height: 26px;
 
     &:hover {
-        background: ${(props) => props.theme.colors.lightHover};
+        background: ${(props) => props.theme.colors.greyScale3};
     }
 
     & * {
@@ -255,7 +255,7 @@ const SaveBtn = styled.div`
     background: transparent;
     border-radius: 5px;
     font-weight: 700;
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
     display: flex;
     flex: 1;
 `
@@ -265,7 +265,7 @@ const PrivacyOptionsTitle = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 600;
     font-size: 14px;
     margin-bottom: 10px;

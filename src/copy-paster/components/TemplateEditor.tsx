@@ -76,7 +76,7 @@ const Header = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     font-weight: bold;
 `
@@ -88,11 +88,11 @@ const TextInput = styled.input`
     color: ${(props) => props.theme.colors.darkerText};
     font-size: 14px;
     border: none;
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
 
     &:focus-within {
         outline: 1px solid ${(props) => props.theme.colors.greyScale4};
-        color: ${(props) => props.theme.colors.normalText};
+        color: ${(props) => props.theme.colors.white};
     }
 
     &::placeholder {
@@ -107,12 +107,12 @@ const TextArea = styled.textarea`
     color: ${(props) => props.theme.colors.darkerText};
     font-size: 14px;
     border: none;
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
     margin: 0;
 
     &:focus-within {
         outline: 1px solid ${(props) => props.theme.colors.greyScale4};
-        color: ${(props) => props.theme.colors.normalText};
+        color: ${(props) => props.theme.colors.white};
     }
 
     &::placeholder {
@@ -122,7 +122,7 @@ const TextArea = styled.textarea`
 
 const HowtoBox = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 400;
     display: flex;
     grid-gap: 5px;
@@ -178,7 +178,7 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
 
                         <Icon
                             filePath={icons.check}
-                            color="purple"
+                            color="prime1"
                             heightAndWidth="20px"
                             onClick={this.props.onClickSave}
                         />

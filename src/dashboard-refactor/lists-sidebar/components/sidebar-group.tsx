@@ -16,6 +16,12 @@ const Container = styled.div`
     width: 100%;
     position: relative;
     padding: 10px 0px;
+    user-select: none;
+    cursor: pointer;
+
+    & * {
+        cursor: pointer;
+    }
 `
 
 const ArrowIcon = styled(Icon)``
@@ -28,14 +34,15 @@ const LoadingContainer = styled.div`
 `
 
 const GroupHeaderContainer = styled.div`
-    height: 27px;
+    height: 50px;
     width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: start;
+    cursor: pointer;
 
     &:hover ${ArrowIcon} {
-        background-color: ${(props) => props.theme.colors.lightHover};
+        background-color: ${(props) => props.theme.colors.greyScale3};
     }
 `
 
@@ -45,7 +52,7 @@ const GroupHeaderInnerDiv = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 0 5px 0 18px;
+    padding: 0 7px 0 25px;
 
     & * {
         cursor: pointer;
@@ -53,7 +60,7 @@ const GroupHeaderInnerDiv = styled.div`
 `
 
 const GroupTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale4};
     font-family: ${fonts.primary.name};
     line-height: 18px;
     cursor: pointer;
@@ -63,15 +70,16 @@ const GroupTitle = styled.div`
     text-overflow: ellipsis;
     font-size: 14px;
     font-weight: 400;
-    padding: 5px 10px 5px 5px;
+    padding: 5px 10px 5px 0px;
     justify-content: space-between;
     width: fill-available;
     display: flex;
     align-items: center;
+    user-select: none;
 `
 
 const Counter = styled.div`
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
 `
 
 const IconContainer = styled.div`
@@ -149,28 +157,28 @@ export default class ListsSidebarGroup extends PureComponent<
 
     render() {
         return (
-            <Container>
+            <Container onClick={this.props.onExpandBtnClick}>
                 {this.props.title && (
                     <GroupHeaderContainer>
                         <GroupHeaderInnerDiv className="inner">
-                            {this.props.onExpandBtnClick && (
+                            {/* {this.props.onExpandBtnClick && (
                                 <ArrowIcon
                                     rotation={this.props.isExpanded ? 0 : -90}
                                     heightAndWidth="16px"
                                     filePath={icons.triangle}
-                                    color={'iconColor'}
+                                    color={'greyScale4'}
                                     onClick={this.props.onExpandBtnClick}
                                     hoverOff
                                 />
-                            )}
-                            <GroupTitle onClick={this.props.onExpandBtnClick}>
+                            )} */}
+                            <GroupTitle>
                                 {this.props.title}
                                 <IconGroup>
                                     {this.props.onAddBtnClick && (
                                         <Icon
                                             heightAndWidth="16px"
                                             filePath={icons.plus}
-                                            color={'purple'}
+                                            color={'prime1'}
                                             padding={'4px'}
                                             onClick={this.props.onAddBtnClick}
                                         />

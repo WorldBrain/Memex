@@ -107,7 +107,7 @@ export default class SetupLocation extends React.Component {
                         }
                         filePath="winLogo"
                         heightAndWidth="30px"
-                        color={'normalText'}
+                        color={'white'}
                         padding={'10px'}
                         defaultBackground
                     />
@@ -118,7 +118,7 @@ export default class SetupLocation extends React.Component {
                         }
                         filePath="macLogo"
                         heightAndWidth="30px"
-                        color={'normalText'}
+                        color={'white'}
                         padding={'10px'}
                         defaultBackground
                     />
@@ -128,7 +128,7 @@ export default class SetupLocation extends React.Component {
                         }
                         filePath="linuxLogo"
                         heightAndWidth="30px"
-                        color={'normalText'}
+                        color={'white'}
                         padding={'10px'}
                         defaultBackground
                     />

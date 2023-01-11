@@ -276,19 +276,19 @@ const DateHelp = styled.div`
 `
 
 const DateText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 `
 
 const Container = styled.div<{ hidden: boolean }>`
     height: fit-content;
     width: fill-available;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     justify-content: center;
     position: sticky;
     top: 60px;
-    background: ${(props) => props.theme.colors.backgroundColor};
+    background: ${(props) => props.theme.colors.black};
     z-index: 29;
-    border-top: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     ${(props) =>
         css`
@@ -342,16 +342,16 @@ const FilterSelectButton = styled.div<{ filterActive: boolean }>`
     white-space: nowrap;
     max-width: fit-content;
     font-size: 13px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 
     &:hover {
-        background: ${(props) => props.theme.colors.lightHover};
+        background: ${(props) => props.theme.colors.greyScale3};
     }
 
     ${(props) =>
         props.filterActive &&
         css`
-            background: ${(props) => props.theme.colors.lightHover};
+            background: ${(props) => props.theme.colors.greyScale3};
         `}
 
     scrollbar-width: none;
@@ -371,7 +371,7 @@ const TextSpan = styled.span`
 `
 
 const CounterPill = styled.div`
-    background: ${(props) => props.theme.colors.purple};
+    background: ${(props) => props.theme.colors.prime1};
     color: ${(props) => props.theme.colors.black};
     border-radius: 3px;
     height: 20px;
@@ -388,7 +388,7 @@ const TagPill = styled.div`
     display: flex;
     justify-content: center;
     padding: 2px 6px;
-    background: ${(props) => props.theme.colors.purple};
+    background: ${(props) => props.theme.colors.prime1};
     color: white;
     border-radius: 3px;
 `
@@ -397,6 +397,6 @@ const DomainPill = styled.div`
     display: flex;
     justify-content: center;
     padding: 2px 6px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     border-radius: 3px;
 `

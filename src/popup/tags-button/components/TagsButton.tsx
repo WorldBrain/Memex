@@ -107,7 +107,7 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
     &:hover {
-        background: ${(props) => props.theme.colors.backgroundColorDarker};
+        background: ${(props) => props.theme.colors.greyScale1};
     }
 
     & * {

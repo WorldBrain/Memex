@@ -78,7 +78,7 @@ const SettingsListItem = styled.div`
     cursor: pointer;
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 `
 

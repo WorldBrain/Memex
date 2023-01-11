@@ -242,7 +242,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         {this.state.showSaveButton && (
                             <Icon
                                 filePath="check"
-                                color="purple"
+                                color="prime1"
                                 heightAndWidth="24px"
                                 onClick={() => {
                                     this.setState({
@@ -317,7 +317,7 @@ const PermissionArea = styled.div`
 `
 
 const EditArea = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     width: fill-available;
     margin-bottom: 3px;
 `
@@ -358,7 +358,7 @@ const ModalRoot = styled.div<{ fixedPosition: boolean }>`
             : `
     border-radius: 12px;
 `}
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.greyScale1};
     ${(props) =>
         props.x || props.y
             ? ''
@@ -389,7 +389,7 @@ const TitleBox = styled.div`
     height: 100%;
     align-items: center;
     font-weight: bold;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     justify-content: center;
     font-size: 16px;
 `
@@ -423,7 +423,7 @@ const LinkAndRoleBox = styled.div<{
             grid-gap: 5px;
             grid-auto-flow: row;
             border-radius: 6px;
-            outline: 1px solid ${(props) => props.theme.colors.lightHover};
+            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         }
 
 `
@@ -436,9 +436,9 @@ const LinkBox = styled(Margin)`
     text-align: left;
     height: 30px;
     cursor: pointer;
-    color: ${(props) => props.theme.colors.normalText};
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
-    background: ${(props) => props.theme.colors.darkhover};
+    color: ${(props) => props.theme.colors.white};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    background: ${(props) => props.theme.colors.greyScale2};
 `
 
 const Link = styled.span`
@@ -476,7 +476,7 @@ const DetailsText = styled.span`
 const PermissionText = styled.span<{
     viewportBreakpoint: string
 }>`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     opacity: 0.8;
     display: flex;
     flex-direction: row;

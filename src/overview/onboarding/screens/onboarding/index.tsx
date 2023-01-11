@@ -295,7 +295,7 @@ const WelcomeContainer = styled.div`
     display: flex;
     justify-content: space-between;
     overflow: hidden;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.black};
 `
 
 const LeftSide = styled.div`
@@ -304,7 +304,7 @@ const LeftSide = styled.div`
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.black};
 
     @media (max-width: 1000px) {
         width: 100%;
@@ -324,7 +324,7 @@ const ContentBox = styled.div`
 `
 
 const Title = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 26px;
     font-weight: 800;
     margin-bottom: 10px;
@@ -428,13 +428,13 @@ const Footer = styled.div`
 const ModeSwitch = styled.span`
     cursor: pointer;
     font-weight: bold;
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     font-weight: 14px;
 `
 
 const GoToDashboard = styled.span`
     cursor: pointer;
     font-weight: bold;
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     font-size: 15px;
 `

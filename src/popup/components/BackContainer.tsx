@@ -36,7 +36,7 @@ const IconBox = styled.div`
 `
 
 const Header = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 700;
     font-size: 14px;
 `
@@ -46,7 +46,7 @@ const Container = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     padding: 0 20px;
 `
 

@@ -25,7 +25,7 @@ const ButtonBox = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     font-weight: bold;
     flex: 1;
@@ -38,7 +38,7 @@ const NoResultsBox = styled.div`
     font-style: normal;
     font-size: 12px;
     padding: 15px 10px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     display: flex;
     justify-content: center;
     align-items: center;
@@ -68,7 +68,7 @@ const ContentBlock = styled.div`
 `
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
     border: 1px solid ${(props) => props.theme.colors.greyScale6};
     border-radius: 8px;
     height: 30px;
@@ -85,7 +85,7 @@ const InfoText = styled.div`
     text-align: center;
 `
 const InfoTextTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 16px;
     font-weight: 600;
     text-align: center;
@@ -112,7 +112,7 @@ class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
                         <Icon
                             filePath={icons.copy}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -182,7 +182,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                         />
                         <Icon
                             filePath={icons.plus}
-                            color="purple"
+                            color="prime1"
                             padding={'5px'}
                             heightAndWidth="16px"
                             onClick={this.props.onClickNew}

@@ -150,7 +150,7 @@ const UserIdField = styled.div`
     grid-gap: 10px;
     align-items: center;
     justify-content: flex-start;
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
     color: ${(props) => props.theme.colors.greyScale8};
     background: transparent;
     height: 50px;

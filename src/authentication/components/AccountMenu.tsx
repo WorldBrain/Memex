@@ -47,7 +47,7 @@ const AccountMenu = (
 }
 
 const Title = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     font-weight: 500;
     text-align: left;
@@ -75,7 +75,7 @@ const BottomLeft = styled.div`
     }
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 `
 
