@@ -865,88 +865,94 @@ export default class SearchResultsContainer extends React.Component<
     render() {
         return (
             <ResultsContainer bottom="100px">
-                {this.props.selectedListId != null && (
-                    <ListDetails
-                        {...this.props.listDetailsProps}
-                        listId={this.props.selectedListId}
-                        clearInbox={this.props.clearInbox}
-                    />
-                )}
-                <ReferencesContainer>
-                    {this.props.listData[this.props.selectedListId]?.remoteId !=
-                        null && (
-                        <>
-                            <Icon
-                                hoverOff
-                                heightAndWidth="12px"
-                                color={'iconColor'}
-                                icon={'warning'}
-                            />
-                            <InfoText>
-                                Only your own contributions to this space are
-                                visible locally.
-                            </InfoText>
-                        </>
-                    )}
-                </ReferencesContainer>
-                <PageTopBarBox isDisplayed={this.props.isDisplayed}>
-                    <TopBar
-                        leftSide={
-                            <ContentTypeSwitchContainer id="ContentTypeSwitchContainer">
-                                <SearchTypeSwitchContainer>
-                                    {this.state.showHorizontalScrollSwitch ===
-                                        'left' ||
-                                    this.state.showHorizontalScrollSwitch ===
-                                        'both' ? (
-                                        <IconContainerLeft>
-                                            <Icon
-                                                filePath="arrowLeft"
-                                                heightAndWidth="22px"
-                                                onClick={() =>
-                                                    document
-                                                        .getElementById(
-                                                            'SearchTypeSwitchContainer',
-                                                        )
-                                                        .scrollBy({
-                                                            left: -200,
-                                                            top: 0,
-                                                            behavior: 'smooth',
-                                                        })
-                                                }
-                                            />
-                                        </IconContainerLeft>
-                                    ) : undefined}
-                                    <SearchTypeSwitch {...this.props} />
-                                    {this.state.showHorizontalScrollSwitch ===
-                                        'right' ||
-                                    this.state.showHorizontalScrollSwitch ===
-                                        'both' ? (
-                                        <IconContainerRight>
-                                            <Icon
-                                                filePath="arrowRight"
-                                                heightAndWidth="22px"
-                                                onClick={() =>
-                                                    document
-                                                        .getElementById(
-                                                            'SearchTypeSwitchContainer',
-                                                        )
-                                                        .scrollBy({
-                                                            left: 200,
-                                                            top: 0,
-                                                            behavior: 'smooth',
-                                                        })
-                                                }
-                                            />
-                                        </IconContainerRight>
-                                    ) : undefined}
-                                </SearchTypeSwitchContainer>
-                            </ContentTypeSwitchContainer>
-                        }
-                        rightSide={undefined}
-                    />
-                </PageTopBarBox>
-                {this.renderOnboardingTutorials()}
                 <ResultsBox>
+                    {this.props.selectedListId != null && (
+                        <ListDetails
+                            {...this.props.listDetailsProps}
+                            listId={this.props.selectedListId}
+                            clearInbox={this.props.clearInbox}
+                        />
+                    )}
+                    <ReferencesContainer>
+                        {this.props.listData[this.props.selectedListId]
+                            ?.remoteId != null && (
+                            <>
+                                <Icon
+                                    hoverOff
+                                    heightAndWidth="12px"
+                                    color={'iconColor'}
+                                    icon={'warning'}
+                                />
+                                <InfoText>
+                                    Only your own contributions to this space
+                                    are visible locally.
+                                </InfoText>
+                            </>
+                        )}
+                    </ReferencesContainer>
+                    <PageTopBarBox isDisplayed={this.props.isDisplayed}>
+                        <TopBar
+                            leftSide={
+                                <ContentTypeSwitchContainer id="ContentTypeSwitchContainer">
+                                    <SearchTypeSwitchContainer>
+                                        {this.state
+                                            .showHorizontalScrollSwitch ===
+                                            'left' ||
+                                        this.state
+                                            .showHorizontalScrollSwitch ===
+                                            'both' ? (
+                                            <IconContainerLeft>
+                                                <Icon
+                                                    filePath="arrowLeft"
+                                                    heightAndWidth="22px"
+                                                    onClick={() =>
+                                                        document
+                                                            .getElementById(
+                                                                'SearchTypeSwitchContainer',
+                                                            )
+                                                            .scrollBy({
+                                                                left: -200,
+                                                                top: 0,
+                                                                behavior:
+                                                                    'smooth',
+                                                            })
+                                                    }
+                                                />
+                                            </IconContainerLeft>
+                                        ) : undefined}
+                                        <SearchTypeSwitch {...this.props} />
+                                        {this.state
+                                            .showHorizontalScrollSwitch ===
+                                            'right' ||
+                                        this.state
+                                            .showHorizontalScrollSwitch ===
+                                            'both' ? (
+                                            <IconContainerRight>
+                                                <Icon
+                                                    filePath="arrowRight"
+                                                    heightAndWidth="22px"
+                                                    onClick={() =>
+                                                        document
+                                                            .getElementById(
+                                                                'SearchTypeSwitchContainer',
+                                                            )
+                                                            .scrollBy({
+                                                                left: 200,
+                                                                top: 0,
+                                                                behavior:
+                                                                    'smooth',
+                                                            })
+                                                    }
+                                                />
+                                            </IconContainerRight>
+                                        ) : undefined}
+                                    </SearchTypeSwitchContainer>
+                                </ContentTypeSwitchContainer>
+                            }
+                            rightSide={undefined}
+                        />
+                    </PageTopBarBox>
+                    {this.renderOnboardingTutorials()}
                     {this.renderResultsByDay()}
                     {this.props.areResultsExhausted &&
                         this.props.searchState === 'success' &&
@@ -1214,9 +1220,9 @@ const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     /* padding: 0px 15px; */
     height: fit-content;
     max-width: calc(${sizeConstants.searchResults.widthPx}px);
-    z-index: 30;
+    z-index: 3000;
     position: sticky;
-    top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
+    top: ${(props) => (props.isDisplayed === true ? '110px' : '0px')};
     background: ${(props) => props.theme.colors.backgroundColor};
     width: fill-available;
 `
