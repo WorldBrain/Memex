@@ -1259,8 +1259,7 @@ export class AnnotationsSidebar extends React.Component<
                             <LoadingBox>
                                 <LoadingIndicator size={10} />{' '}
                             </LoadingBox>
-                        ) : Object.keys(this.props.listInstances).length > 0 &&
-                          this.props.pageHasNetworkAnnotations ? (
+                        ) : this.props.pageHasNetworkAnnotations ? (
                             <LoadingBox>
                                 <PageActivityIndicator active />
                             </LoadingBox>

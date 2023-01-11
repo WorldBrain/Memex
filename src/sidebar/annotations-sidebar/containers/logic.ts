@@ -273,16 +273,6 @@ export class SidebarContainerLogic extends UILogic<
         if (opts.renderHighlights) {
             this.renderOwnHighlights(this.options.annotationsCache)
         }
-
-        const hasNetworkActivity = await this.options.pageActivityIndicatorBG.getPageActivityStatus(
-            fullPageUrl,
-        )
-
-        this.emitMutation({
-            pageHasNetworkAnnotations: {
-                $set: hasNetworkActivity != 'no-activity',
-            },
-        })
     }
 
     private renderOwnHighlights = ({
@@ -336,6 +326,16 @@ export class SidebarContainerLogic extends UILogic<
             'newListsState',
             this.cacheListsSubscription,
         )
+
+        const hasNetworkActivity = await this.options.pageActivityIndicatorBG.getPageActivityStatus(
+            fullPageUrl,
+        )
+
+        this.emitMutation({
+            pageHasNetworkAnnotations: {
+                $set: hasNetworkActivity != 'no-activity',
+            },
+        })
 
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.cacheAnnotationsSubscription(annotationsCache.annotations)
