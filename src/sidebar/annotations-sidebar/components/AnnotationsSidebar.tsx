@@ -169,6 +169,7 @@ interface AnnotationsSidebarState {
     showSortDropDown: boolean
     showSpaceSharePopout: number
     linkCopyState: boolean
+    othersOrOwnAnnotationsState: string
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -197,6 +198,7 @@ export class AnnotationsSidebar extends React.Component<
         showSortDropDown: false,
         showSpaceSharePopout: undefined,
         linkCopyState: false,
+        othersOrOwnAnnotationsState: 'othersAnnotations',
     }
 
     async componentDidMount() {
@@ -363,28 +365,34 @@ export class AnnotationsSidebar extends React.Component<
             )
         }
 
-        const annotationsData = listData.unifiedAnnotationIds
+        let annotationsData = listData.unifiedAnnotationIds
             .map(
                 (unifiedAnnotId) => this.props.annotations.byId[unifiedAnnotId],
             )
             .filter((a) => !!a)
 
-        if (!annotationsData.length) {
-            return (
-                <EmptyMessageContainer>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.commentEmpty}
-                            heightAndWidth="20px"
-                            color="purple"
-                            hoverOff
-                        />
-                    </SectionCircle>
-                    <InfoText>
-                        No notes exist in this Space for this page.
-                    </InfoText>
-                </EmptyMessageContainer>
-            )
+        let othersCounter = annotationsData.filter((annotation) => {
+            return annotation.creator.id !== this.props.currentUser?.id
+        }).length
+        let ownCounter = annotationsData.filter((annotation) => {
+            return annotation.creator.id === this.props.currentUser?.id
+        }).length
+
+        if (this.state.othersOrOwnAnnotationsState === 'othersAnnotations') {
+            console.log('others')
+            annotationsData = annotationsData.filter((annotation) => {
+                return annotation.creator.id !== this.props.currentUser?.id
+            })
+            console.log(annotationsData)
+        }
+
+        if (this.state.othersOrOwnAnnotationsState === 'ownAnnotations') {
+            console.log('own')
+            annotationsData = annotationsData.filter((annotation) => {
+                return annotation.creator.id === this.props.currentUser?.id
+            })
+
+            console.log(annotationsData)
         }
 
         return (
@@ -397,148 +405,222 @@ export class AnnotationsSidebar extends React.Component<
                         )}
                     </NewAnnotationBoxMyAnnotations>
                 )}
-                {annotationsData.map((annotation) => {
-                    // TODO: Handle when list has no remoteID (should not afford conversation logic)
-                    const conversationId = `${listData.remoteId}:${annotation.unifiedId}`
-                    const conversation = this.props.conversations[
-                        conversationId
-                    ]
-                    const annotationCardId = generateAnnotationCardInstanceId(
-                        annotation,
-                        listData.unifiedId,
-                    )
-                    const annotationCard = this.props.annotationCardInstances[
-                        annotationCardId
-                    ]
-                    const sharedAnnotationRef: SharedAnnotationReference = {
-                        id: annotation.remoteId,
-                        type: 'shared-annotation-reference',
-                    }
-                    const eventHandlers = this.props.bindSharedAnnotationEventHandlers(
-                        sharedAnnotationRef,
-                        {
-                            type: 'shared-list-reference',
-                            id: listData.remoteId,
-                        },
-                    )
-                    const hasReplies =
-                        conversation?.thread != null ||
-                        conversation?.replies.length > 0
+                <RemoteOrLocalSwitcherContainer>
+                    <PrimaryAction
+                        size={'small'}
+                        active={
+                            this.state.othersOrOwnAnnotationsState ===
+                            'othersAnnotations'
+                        }
+                        label={
+                            <SwitcherButtonContent>
+                                Others
+                                <SwitcherCounter>
+                                    {othersCounter}
+                                </SwitcherCounter>
+                            </SwitcherButtonContent>
+                        }
+                        type={'tertiary'}
+                        onClick={() => {
+                            this.setState({
+                                othersOrOwnAnnotationsState:
+                                    'othersAnnotations',
+                            })
+                        }}
+                    />
+                    <PrimaryAction
+                        size={'small'}
+                        active={
+                            this.state.othersOrOwnAnnotationsState ===
+                            'ownAnnotations'
+                        }
+                        label={
+                            <SwitcherButtonContent>
+                                Yours
+                                <SwitcherCounter>{ownCounter}</SwitcherCounter>
+                            </SwitcherButtonContent>
+                        }
+                        type={'tertiary'}
+                        onClick={() => {
+                            this.setState({
+                                othersOrOwnAnnotationsState: 'ownAnnotations',
+                            })
+                        }}
+                    />
+                </RemoteOrLocalSwitcherContainer>
 
-                    // If annot is owned by the current user (locally available), we allow a whole bunch of other functionality
-                    const ownAnnotationProps: Partial<AnnotationEditableProps> = {}
-                    if (annotation.localId != null) {
-                        ownAnnotationProps.isBulkShareProtected = [
-                            AnnotationPrivacyLevels.PROTECTED,
-                            AnnotationPrivacyLevels.SHARED_PROTECTED,
-                        ].includes(annotation.privacyLevel)
-                        ownAnnotationProps.appendRepliesToggle = true
-                        ownAnnotationProps.unifiedId = annotation.unifiedId
-                        ownAnnotationProps.lists = cacheUtils.getLocalListIdsForCacheIds(
-                            this.props.annotationsCache,
-                            annotation.unifiedListIds,
-                        )
-                        ownAnnotationProps.comment = annotation.comment
-                        ownAnnotationProps.isShared = [
-                            AnnotationPrivacyLevels.SHARED,
-                            AnnotationPrivacyLevels.SHARED_PROTECTED,
-                        ].includes(annotation.privacyLevel)
-                        ownAnnotationProps.appendRepliesToggle = true
-                        ownAnnotationProps.lastEdited = annotation.lastEdited
-                        ownAnnotationProps.isEditing =
-                            annotationCard.isCommentEditing
-                        ownAnnotationProps.isDeleting =
-                            annotationCard.cardMode === 'delete-confirm'
-                        const editDeps = this.props.bindAnnotationEditProps(
-                            annotation,
-                            unifiedListId,
-                        )
-                        const footerDeps = this.props.bindAnnotationFooterEventProps(
-                            annotation,
-                            unifiedListId,
-                        )
-                        ownAnnotationProps.annotationEditDependencies = editDeps
-                        ownAnnotationProps.annotationFooterDependencies = footerDeps
-                        ownAnnotationProps.renderListsPickerForAnnotation = this.props.renderListsPickerForAnnotation(
-                            unifiedListId,
-                        )
-                        ownAnnotationProps.renderCopyPasterForAnnotation = this.props.renderCopyPasterForAnnotation(
-                            unifiedListId,
-                        )
-                        ownAnnotationProps.renderShareMenuForAnnotation = this.props.renderShareMenuForAnnotation(
-                            unifiedListId,
-                        )
-                        ownAnnotationProps.initShowSpacePicker =
-                            annotationCard.cardMode === 'space-picker'
-                                ? 'footer'
-                                : 'hide'
-                    }
-                    return (
-                        <React.Fragment key={annotation.unifiedId}>
-                            <AnnotationEditable
-                                creatorId={annotation.creator?.id}
-                                currentUserId={this.props.currentUser?.id}
-                                pageUrl={this.props.normalizedPageUrl}
-                                isShared
-                                isBulkShareProtected
-                                unifiedId={annotation.unifiedId}
-                                body={annotation.body}
-                                comment={annotation.comment}
-                                lastEdited={annotation.lastEdited}
-                                createdWhen={annotation.createdWhen}
-                                creatorDependencies={
-                                    annotation.localId != null ||
-                                    annotation.creator == null
-                                        ? null
-                                        : this.props.users[
-                                              annotation.creator.id
-                                          ]
-                                }
-                                isActive={
-                                    this.props.activeAnnotationId ===
+                {!annotationsData.length ? (
+                    <EmptyMessageContainer>
+                        <SectionCircle>
+                            <Icon
+                                filePath={icons.commentEmpty}
+                                heightAndWidth="20px"
+                                color="purple"
+                                hoverOff
+                            />
+                        </SectionCircle>
+                        <InfoText>
+                            No notes exist in this Space for this page.
+                        </InfoText>
+                    </EmptyMessageContainer>
+                ) : (
+                    <>
+                        {annotationsData.map((annotation) => {
+                            // TODO: Handle when list has no remoteID (should not afford conversation logic)
+                            const conversationId = `${listData.remoteId}:${annotation.unifiedId}`
+                            const conversation = this.props.conversations[
+                                conversationId
+                            ]
+                            const annotationCardId = generateAnnotationCardInstanceId(
+                                annotation,
+                                listData.unifiedId,
+                            )
+                            const annotationCard = this.props
+                                .annotationCardInstances[annotationCardId]
+                            const sharedAnnotationRef: SharedAnnotationReference = {
+                                id: annotation.remoteId,
+                                type: 'shared-annotation-reference',
+                            }
+                            const eventHandlers = this.props.bindSharedAnnotationEventHandlers(
+                                sharedAnnotationRef,
+                                {
+                                    type: 'shared-list-reference',
+                                    id: listData.remoteId,
+                                },
+                            )
+                            const hasReplies =
+                                conversation?.thread != null ||
+                                conversation?.replies.length > 0
+
+                            // If annot is owned by the current user (locally available), we allow a whole bunch of other functionality
+                            const ownAnnotationProps: Partial<AnnotationEditableProps> = {}
+                            if (annotation.localId != null) {
+                                ownAnnotationProps.isBulkShareProtected = [
+                                    AnnotationPrivacyLevels.PROTECTED,
+                                    AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                ].includes(annotation.privacyLevel)
+                                ownAnnotationProps.appendRepliesToggle = true
+                                ownAnnotationProps.unifiedId =
                                     annotation.unifiedId
-                                }
-                                activeShareMenuNoteId={
-                                    this.props.activeShareMenuNoteId
-                                }
-                                onReplyBtnClick={eventHandlers.onReplyBtnClick}
-                                onHighlightClick={this.props.setActiveAnnotation(
-                                    annotation.unifiedId,
-                                )}
-                                onListClick={this.props.onLocalListSelect}
-                                isClickable={
-                                    this.props.theme.canClickAnnotations &&
-                                    annotation.body?.length > 0
-                                }
-                                repliesLoadingState={
-                                    listInstance.conversationsLoadState
-                                }
-                                hasReplies={hasReplies}
-                                getListDetailsById={
-                                    this.props.getListDetailsById
-                                }
-                                {...ownAnnotationProps}
-                                shareButtonRef={this.props.shareButtonRef}
-                                spacePickerButtonRef={
-                                    this.props.spacePickerButtonRef
-                                }
-                                getYoutubePlayer={this.props.getYoutubePlayer}
-                            />
-                            <ConversationReplies
-                                newReplyEventHandlers={eventHandlers}
-                                conversation={conversation}
-                                hasReplies={hasReplies}
-                                annotation={{
-                                    body: annotation.body,
-                                    linkId: annotation.unifiedId,
-                                    comment: annotation.comment,
-                                    createdWhen: annotation.createdWhen,
-                                    reference: sharedAnnotationRef,
-                                }}
-                            />
-                        </React.Fragment>
-                    )
-                })}
+                                ownAnnotationProps.lists = cacheUtils.getLocalListIdsForCacheIds(
+                                    this.props.annotationsCache,
+                                    annotation.unifiedListIds,
+                                )
+                                ownAnnotationProps.comment = annotation.comment
+                                ownAnnotationProps.isShared = [
+                                    AnnotationPrivacyLevels.SHARED,
+                                    AnnotationPrivacyLevels.SHARED_PROTECTED,
+                                ].includes(annotation.privacyLevel)
+                                ownAnnotationProps.appendRepliesToggle = true
+                                ownAnnotationProps.lastEdited =
+                                    annotation.lastEdited
+                                ownAnnotationProps.isEditing =
+                                    annotationCard.isCommentEditing
+                                ownAnnotationProps.isDeleting =
+                                    annotationCard.cardMode === 'delete-confirm'
+                                const editDeps = this.props.bindAnnotationEditProps(
+                                    annotation,
+                                    unifiedListId,
+                                )
+                                const footerDeps = this.props.bindAnnotationFooterEventProps(
+                                    annotation,
+                                    unifiedListId,
+                                )
+                                ownAnnotationProps.annotationEditDependencies = editDeps
+                                ownAnnotationProps.annotationFooterDependencies = footerDeps
+                                ownAnnotationProps.renderListsPickerForAnnotation = this.props.renderListsPickerForAnnotation(
+                                    unifiedListId,
+                                )
+                                ownAnnotationProps.renderCopyPasterForAnnotation = this.props.renderCopyPasterForAnnotation(
+                                    unifiedListId,
+                                )
+                                ownAnnotationProps.renderShareMenuForAnnotation = this.props.renderShareMenuForAnnotation(
+                                    unifiedListId,
+                                )
+                                ownAnnotationProps.initShowSpacePicker =
+                                    annotationCard.cardMode === 'space-picker'
+                                        ? 'footer'
+                                        : 'hide'
+                            }
+                            return (
+                                <React.Fragment key={annotation.unifiedId}>
+                                    <AnnotationEditable
+                                        creatorId={annotation.creator?.id}
+                                        currentUserId={
+                                            this.props.currentUser?.id
+                                        }
+                                        pageUrl={this.props.normalizedPageUrl}
+                                        isShared
+                                        isBulkShareProtected
+                                        unifiedId={annotation.unifiedId}
+                                        body={annotation.body}
+                                        comment={annotation.comment}
+                                        lastEdited={annotation.lastEdited}
+                                        createdWhen={annotation.createdWhen}
+                                        creatorDependencies={
+                                            annotation.localId != null ||
+                                            annotation.creator == null
+                                                ? null
+                                                : this.props.users[
+                                                      annotation.creator.id
+                                                  ]
+                                        }
+                                        isActive={
+                                            this.props.activeAnnotationId ===
+                                            annotation.unifiedId
+                                        }
+                                        activeShareMenuNoteId={
+                                            this.props.activeShareMenuNoteId
+                                        }
+                                        onReplyBtnClick={
+                                            eventHandlers.onReplyBtnClick
+                                        }
+                                        onHighlightClick={this.props.setActiveAnnotation(
+                                            annotation.unifiedId,
+                                        )}
+                                        onListClick={
+                                            this.props.onLocalListSelect
+                                        }
+                                        isClickable={
+                                            this.props.theme
+                                                .canClickAnnotations &&
+                                            annotation.body?.length > 0
+                                        }
+                                        repliesLoadingState={
+                                            listInstance.conversationsLoadState
+                                        }
+                                        hasReplies={hasReplies}
+                                        getListDetailsById={
+                                            this.props.getListDetailsById
+                                        }
+                                        {...ownAnnotationProps}
+                                        shareButtonRef={
+                                            this.props.shareButtonRef
+                                        }
+                                        spacePickerButtonRef={
+                                            this.props.spacePickerButtonRef
+                                        }
+                                        getYoutubePlayer={
+                                            this.props.getYoutubePlayer
+                                        }
+                                    />
+                                    <ConversationReplies
+                                        newReplyEventHandlers={eventHandlers}
+                                        conversation={conversation}
+                                        hasReplies={hasReplies}
+                                        annotation={{
+                                            body: annotation.body,
+                                            linkId: annotation.unifiedId,
+                                            comment: annotation.comment,
+                                            createdWhen: annotation.createdWhen,
+                                            reference: sharedAnnotationRef,
+                                        }}
+                                    />
+                                </React.Fragment>
+                            )
+                        })}
+                    </>
+                )}
             </FollowedNotesContainer>
         )
     }
@@ -1599,6 +1681,25 @@ export class AnnotationsSidebar extends React.Component<
 export default AnnotationsSidebar
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
+
+const SwitcherButtonContent = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 5px;
+    justify-content: space-between;
+    font-size: 12px;
+`
+
+const SwitcherCounter = styled.div`
+    color: ${(props) => props.theme.colors.greyScale8};
+`
+
+const RemoteOrLocalSwitcherContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    grid-gap: 2px;
+`
 
 const CopyBox = styled.div`
     display: flex;

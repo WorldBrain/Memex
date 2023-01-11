@@ -374,7 +374,7 @@ const EditorDummy = styled.div`
     outline: none;
     padding: 10px 10px;
     width: fill-available;
-    border-radius: 3px;
+    border-radius: 6px;
     min-height: 20px;
     white-space: pre-wrap;
     overflow: hidden;
