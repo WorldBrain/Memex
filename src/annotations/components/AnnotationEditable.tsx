@@ -322,7 +322,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                         : 'compress'
                                 }
                                 heightAndWidth={'18px'}
-                                borderColor={'greyScale5'}
+                                borderColor={'greyScale3'}
                                 background={'greyScale1'}
                             />
                         </TooltipBox>
@@ -336,7 +336,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 onClick={onGoToAnnotation}
                                 filePath={'goTo'}
                                 heightAndWidth={'18px'}
-                                borderColor={'greyScale5'}
+                                borderColor={'greyScale3'}
                                 background={'greyScale1'}
                             />
                         </TooltipBox>
@@ -357,7 +357,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 onClick={footerDeps.onEditIconClick}
                                 icon={'edit'}
                                 heightAndWidth={'18px'}
-                                borderColor={'greyScale5'}
+                                borderColor={'greyScale3'}
                                 background={'greyScale1'}
                             />
                         </TooltipBox>
