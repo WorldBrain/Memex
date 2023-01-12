@@ -31,7 +31,7 @@ export default class DismissibleResultsMessage extends React.PureComponent<
             <Container>
                 <DismissButton>
                     <Icon
-                        filePath={icons.close}
+                        filePath={icons.removeX}
                         heightAndWidth="16px"
                         onClick={this.handleDismiss}
                     />

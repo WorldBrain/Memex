@@ -370,7 +370,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                 <CardContainer>
                     <IconBlock>
                         <Icon
-                            filePath={icons.commentEmpty}
+                            filePath={icons.commentAdd}
                             heightAndWidth="28px"
                             hoverOff
                             color={'prime1'}

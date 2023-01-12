@@ -233,7 +233,7 @@ const EditIcon = styled.button`
     height: 20px;
     opacity: 0.6;
     background-color: ${(props) => props.theme.colors.primary};
-    mask-image: url(${icons.commentEditFull});
+    mask-image: url(${icons.commentAdd});
     mask-position: center;
     mask-repeat: no-repeat;
     mask-size: 16px;

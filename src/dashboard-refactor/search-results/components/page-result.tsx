@@ -237,7 +237,7 @@ export default class PageResultView extends PureComponent<Props> {
             return [
                 {
                     key: 'expand-notes-btn',
-                    image: this.hasNotes ? 'commentFull' : 'commentEmpty',
+                    image: this.hasNotes ? 'commentFull' : 'commentAdd',
                     ButtonText:
                         this.props.noteIds[this.props.notesType].length > 0 &&
                         this.props.noteIds[
@@ -290,7 +290,7 @@ export default class PageResultView extends PureComponent<Props> {
                 },
                 {
                     key: 'expand-notes-btn',
-                    image: this.hasNotes ? 'commentFull' : 'commentEmpty',
+                    image: this.hasNotes ? 'commentFull' : 'commentAdd',
                     ButtonText:
                         this.props.noteIds[this.props.notesType].length > 0 &&
                         this.props.noteIds[

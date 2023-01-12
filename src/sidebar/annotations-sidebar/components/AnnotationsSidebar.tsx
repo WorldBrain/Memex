@@ -396,7 +396,7 @@ export class AnnotationsSidebar extends React.Component<
                 <EmptyMessageContainer>
                     <IconBox heightAndWidth="40px">
                         <Icon
-                            filePath={icons.commentEmpty}
+                            filePath={icons.commentAdd}
                             heightAndWidth="20px"
                             color="prime1"
                             hoverOff
@@ -1299,7 +1299,7 @@ export class AnnotationsSidebar extends React.Component<
                             <EmptyMessageContainer>
                                 <IconBox heightAndWidth="40px">
                                     <Icon
-                                        filePath={icons.commentEmpty}
+                                        filePath={icons.commentAdd}
                                         heightAndWidth="20px"
                                         color="prime1"
                                         hoverOff
@@ -2174,7 +2174,7 @@ const CloseIconStyled = styled.div<{ background: string }>`
     mask-size: 100%;
     background-color: ${(props) =>
         props.background ? props.background : props.theme.colors.primary};
-    mask-image: url(${icons.close});
+    mask-image: url(${icons.removeX});
     background-size: 12px;
     display: block;
     cursor: pointer;

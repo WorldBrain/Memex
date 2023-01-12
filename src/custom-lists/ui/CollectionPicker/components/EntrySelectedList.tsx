@@ -26,7 +26,10 @@ export class EntrySelectedList extends React.PureComponent<Props> {
                         onClick={this.handleSelectedTabPress(entry.localId)}
                     >
                         <Entry>{entry.name}</Entry>
-                        <Icon heightAndWidth={'10px'} filePath={icons.close} />
+                        <Icon
+                            heightAndWidth={'10px'}
+                            filePath={icons.removeX}
+                        />
                     </StyledActiveEntry>
                 ))}
             </React.Fragment>

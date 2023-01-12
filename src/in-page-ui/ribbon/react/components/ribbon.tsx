@@ -803,7 +803,7 @@ export default class Ribbon extends Component<Props, State> {
                                                             ? icons.saveIcon
                                                             : // : this.props.hasAnnotations
                                                               // ? icons.commentFull
-                                                              icons.commentEmpty
+                                                              icons.commentAdd
                                                     }
                                                     containerRef={
                                                         this.sidebarButtonRef

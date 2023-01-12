@@ -196,14 +196,14 @@ export default class ListShareMenu extends React.Component<Props, State> {
                         shortcut: `shift+${ListShareMenu.MOD_KEY}+enter`,
                         description:
                             'Auto-added to Spaces the page is shared to',
-                        icon: 'webLogo',
+                        icon: 'globe',
                         onClick: this.handleSetShared,
                     },
                     {
                         title: 'Private',
                         shortcut: `${ListShareMenu.MOD_KEY}+enter`,
                         description: 'Private to you, until made public',
-                        icon: 'person',
+                        icon: 'personFine',
                         onClick: this.handleSetPrivate,
                     },
                 ]}
