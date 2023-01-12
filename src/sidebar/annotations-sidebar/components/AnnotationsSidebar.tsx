@@ -379,20 +379,15 @@ export class AnnotationsSidebar extends React.Component<
         }).length
 
         if (this.state.othersOrOwnAnnotationsState === 'othersAnnotations') {
-            console.log('others')
             annotationsData = annotationsData.filter((annotation) => {
                 return annotation.creator.id !== this.props.currentUser?.id
             })
-            console.log(annotationsData)
         }
 
         if (this.state.othersOrOwnAnnotationsState === 'ownAnnotations') {
-            console.log('own')
             annotationsData = annotationsData.filter((annotation) => {
                 return annotation.creator.id === this.props.currentUser?.id
             })
-
-            console.log(annotationsData)
         }
 
         return (
@@ -466,15 +461,17 @@ export class AnnotationsSidebar extends React.Component<
                 ) : (
                     <>
                         {annotationsData.map((annotation) => {
-                            // TODO: Handle when list has no remoteID (should not afford conversation logic)
-                            const conversationId = `${listData.remoteId}:${annotation.unifiedId}`
-                            const conversation = this.props.conversations[
-                                conversationId
-                            ]
                             const annotationCardId = generateAnnotationCardInstanceId(
                                 annotation,
                                 listData.unifiedId,
                             )
+
+                            // Only afford conversation logic if list is shared
+                            const conversation =
+                                listData.remoteId != null
+                                    ? this.props.conversations[annotationCardId]
+                                    : null
+
                             const annotationCard = this.props
                                 .annotationCardInstances[annotationCardId]
                             const sharedAnnotationRef: SharedAnnotationReference = {

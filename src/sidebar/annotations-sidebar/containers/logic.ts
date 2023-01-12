@@ -38,7 +38,10 @@ import {
 } from 'src/sync-settings/util'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
-import { getInitialAnnotationConversationStates } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
+import {
+    getInitialAnnotationConversationState,
+    getInitialAnnotationConversationStates,
+} from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { resolvablePromise } from 'src/util/promises'
 import { toInteger } from 'lodash'
@@ -1166,6 +1169,11 @@ export class SidebarContainerLogic extends UILogic<
         state: SidebarContainerState,
         unifiedListId: UnifiedList['unifiedId'],
     ) {
+        const {
+            contentConversationsBG,
+            annotationsCache,
+            annotationsBG,
+        } = this.options
         const list = state.lists.byId[unifiedListId]
         const listInstance = state.listInstances[unifiedListId]
 
@@ -1173,72 +1181,102 @@ export class SidebarContainerLogic extends UILogic<
             !list ||
             !listInstance ||
             list.remoteId == null ||
-            listInstance.sharedAnnotationReferences == null ||
-            listInstance.annotationsLoadState !== 'pristine' ||
-            !list.hasRemoteAnnotations
+            listInstance.annotationsLoadState !== 'pristine' // Means already loaded previously
         ) {
             return
         }
 
-        const {
-            contentConversationsBG,
-            annotationsCache,
-            annotationsBG,
-        } = this.options
+        let sharedAnnotationReferences: SharedAnnotationReference[]
 
-        await executeUITask(
-            this,
-            (taskState) => ({
-                listInstances: {
-                    [unifiedListId]: {
-                        annotationsLoadState: { $set: taskState },
-                    },
+        // This first clause covers the case of setting up conversations states for own shared lists, without entries from others
+        if (
+            !list.hasRemoteAnnotations ||
+            listInstance.sharedAnnotationReferences == null
+        ) {
+            const sharedAnnotationUnifiedIds = list.unifiedAnnotationIds.filter(
+                (unifiedId) =>
+                    annotationsCache.annotations.byId[unifiedId]?.remoteId !=
+                    null,
+            )
+
+            sharedAnnotationReferences = sharedAnnotationUnifiedIds.map(
+                (unifiedId) => ({
+                    type: 'shared-annotation-reference',
+                    id: annotationsCache.annotations.byId[unifiedId].remoteId,
+                }),
+            )
+
+            this.emitMutation({
+                conversations: {
+                    $merge: fromPairs(
+                        sharedAnnotationUnifiedIds.map((unifiedId) => [
+                            generateAnnotationCardInstanceId(
+                                { unifiedId },
+                                list.unifiedId,
+                            ),
+                            getInitialAnnotationConversationState(),
+                        ]),
+                    ),
                 },
-            }),
-            async () => {
-                const sharedAnnotations = await annotationsBG.getSharedAnnotations(
-                    {
-                        sharedAnnotationReferences:
-                            listInstance.sharedAnnotationReferences,
-                        withCreatorData: true,
-                    },
-                )
+            })
+        } else {
+            // This clause covers the other cases of setting up convo states for followed and joined lists
+            sharedAnnotationReferences = listInstance.sharedAnnotationReferences
 
-                const usersData: SidebarContainerState['users'] = {}
-                for (const annot of sharedAnnotations) {
-                    if (annot.creator?.user.displayName != null) {
-                        usersData[annot.creatorReference.id] = {
-                            name: annot.creator.user.displayName,
-                            profileImgSrc: annot.creator.profile?.avatarURL,
+            await executeUITask(
+                this,
+                (taskState) => ({
+                    listInstances: {
+                        [unifiedListId]: {
+                            annotationsLoadState: { $set: taskState },
+                        },
+                    },
+                }),
+                async () => {
+                    const sharedAnnotations = await annotationsBG.getSharedAnnotations(
+                        {
+                            sharedAnnotationReferences:
+                                listInstance.sharedAnnotationReferences,
+                            withCreatorData: true,
+                        },
+                    )
+
+                    const usersData: SidebarContainerState['users'] = {}
+                    for (const annot of sharedAnnotations) {
+                        if (annot.creator?.user.displayName != null) {
+                            usersData[annot.creatorReference.id] = {
+                                name: annot.creator.user.displayName,
+                                profileImgSrc: annot.creator.profile?.avatarURL,
+                            }
                         }
+
+                        annotationsCache.addAnnotation(
+                            cacheUtils.reshapeSharedAnnotationForCache(annot, {
+                                extraData: { unifiedListIds: [unifiedListId] },
+                            }),
+                        )
                     }
 
-                    annotationsCache.addAnnotation(
-                        cacheUtils.reshapeSharedAnnotationForCache(annot, {
-                            extraData: { unifiedListIds: [unifiedListId] },
-                        }),
-                    )
-                }
-
-                this.emitMutation({
-                    users: { $merge: usersData },
-                    conversations: {
-                        $merge: getInitialAnnotationConversationStates(
-                            listInstance.sharedAnnotationReferences.map(
-                                ({ id }) => ({
-                                    linkId: id.toString(),
-                                }),
+                    this.emitMutation({
+                        users: { $merge: usersData },
+                        conversations: {
+                            $merge: getInitialAnnotationConversationStates(
+                                listInstance.sharedAnnotationReferences.map(
+                                    ({ id }) => ({
+                                        linkId: id.toString(),
+                                    }),
+                                ),
+                                (remoteAnnotId) =>
+                                    this.buildConversationId(remoteAnnotId, {
+                                        type: 'shared-list-reference',
+                                        id: list.remoteId,
+                                    }),
                             ),
-                            (remoteAnnotId) =>
-                                this.buildConversationId(remoteAnnotId, {
-                                    type: 'shared-list-reference',
-                                    id: list.remoteId,
-                                }),
-                        ),
-                    },
-                })
-            },
-        )
+                        },
+                    })
+                },
+            )
+        }
 
         await executeUITask(
             this,
@@ -1252,8 +1290,7 @@ export class SidebarContainerLogic extends UILogic<
             async () => {
                 await detectAnnotationConversationThreads(this as any, {
                     buildConversationId: this.buildConversationId,
-                    annotationReferences:
-                        listInstance.sharedAnnotationReferences,
+                    annotationReferences: sharedAnnotationReferences,
                     sharedListReference: {
                         type: 'shared-list-reference',
                         id: list.remoteId,
