@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import styles from 'src/dashboard-refactor/styles'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { ThemeProvider } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
@@ -15,7 +15,6 @@ const { fonts } = styles
 const Container = styled.div`
     width: 100%;
     position: relative;
-    padding: 10px 0px;
     user-select: none;
     cursor: pointer;
 
@@ -34,7 +33,7 @@ const LoadingContainer = styled.div`
 `
 
 const GroupHeaderContainer = styled.div`
-    height: 50px;
+    height: 70px;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -108,9 +107,18 @@ const ErrorMsg = styled.div`
     padding: 0 10px;
 `
 
+const GroupContentSection = styled.div<{ isExpanded: boolean }>`
+    ${(props) =>
+        props.isExpanded &&
+        css`
+            margin-top: -20px;
+            margin-bottom: 10px;
+        `}
+`
+
 export interface ListsSidebarGroupProps {
     title?: string
-    isExpanded: boolean
+    isExpanded?: boolean
     isAddInputShown?: boolean
     loadingState: TaskState
     confirmAddNewList?: (name: string) => void
@@ -157,9 +165,9 @@ export default class ListsSidebarGroup extends PureComponent<
 
     render() {
         return (
-            <Container onClick={this.props.onExpandBtnClick}>
+            <Container>
                 {this.props.title && (
-                    <GroupHeaderContainer>
+                    <GroupHeaderContainer onClick={this.props.onExpandBtnClick}>
                         <GroupHeaderInnerDiv className="inner">
                             {/* {this.props.onExpandBtnClick && (
                                 <ArrowIcon
@@ -193,7 +201,9 @@ export default class ListsSidebarGroup extends PureComponent<
                         </GroupHeaderInnerDiv>
                     </GroupHeaderContainer>
                 )}
-                {this.renderGroupContent()}
+                <GroupContentSection isExpanded={this.props.isExpanded}>
+                    {this.renderGroupContent()}
+                </GroupContentSection>
             </Container>
         )
     }

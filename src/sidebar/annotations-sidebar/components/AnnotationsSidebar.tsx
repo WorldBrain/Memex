@@ -56,6 +56,7 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import { generateAnnotationCardInstanceId } from '../containers/utils'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -385,14 +386,14 @@ export class AnnotationsSidebar extends React.Component<
         if (!annotationsData.length) {
             listAnnotations = (
                 <EmptyMessageContainer>
-                    <SectionCircle>
+                    <IconBox heightAndWidth="40px">
                         <Icon
                             filePath={icons.commentEmpty}
                             heightAndWidth="20px"
                             color="prime1"
                             hoverOff
                         />
-                    </SectionCircle>
+                    </IconBox>
                     <InfoText>
                         No notes exist in this Space for this page.
                     </InfoText>
@@ -950,14 +951,14 @@ export class AnnotationsSidebar extends React.Component<
         } else {
             return (
                 <EmptyMessageContainer>
-                    <SectionCircle>
+                    <IconBox heightAndWidth="40px">
                         <Icon
                             filePath={icons.collectionsEmpty}
                             heightAndWidth="20px"
                             color="prime1"
                             hoverOff
                         />
-                    </SectionCircle>
+                    </IconBox>
                     <InfoText>
                         This page is not yet in a Space <br /> you created,
                         follow or collaborate in.
@@ -1278,14 +1279,14 @@ export class AnnotationsSidebar extends React.Component<
                             <AnnotationContainer>{annots}</AnnotationContainer>
                         ) : (
                             <EmptyMessageContainer>
-                                <SectionCircle>
+                                <IconBox heightAndWidth="40px">
                                     <Icon
                                         filePath={icons.commentEmpty}
                                         heightAndWidth="20px"
                                         color="prime1"
                                         hoverOff
                                     />
-                                </SectionCircle>
+                                </IconBox>
                                 <InfoText>
                                     Add a note or highlight sections of the page
                                 </InfoText>
@@ -1685,6 +1686,7 @@ const RemoteOrLocalSwitcherContainer = styled.div`
     align-items: center;
     justify-content: flex-start;
     grid-gap: 2px;
+    margin-top: 10px;
 `
 
 const CopyBox = styled.div`
@@ -1937,19 +1939,8 @@ const AnnotationBox = styled.div<{
     position: relative;
 `
 
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.greyScale2};
-    border: 1px solid ${(props) => props.theme.colors.greyScale6};
-    border-radius: 8px;
-    height: 40px;
-    width: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     font-weight: 400;
     text-align: center;
@@ -1976,32 +1967,6 @@ const SearchIcon = styled.span`
     background-color: transparent;
 `
 
-const SearchInputStyled = styled(TextInputControlled)`
-    color: ${(props) => props.theme.colors.primary};
-    border-radius: 3px;
-    font-size: 14px;
-    font-weight: 400;
-    text-align: left;
-    width: 100%;
-    height: 30px;
-    border: none;
-    outline: none;
-    background-color: transparent;
-
-    &::placeholder {
-        color: ${(props) => props.theme.colors.primary};
-        font-weight: 500;
-        opacity: 0.7;
-    }
-
-    &:focus {
-        outline: none;
-        border: none;
-        box-shadow: none;
-    }
-    padding: 5px 0px;
-`
-
 const FollowedListNotesContainer = styled(Margin)<{ key: number }>`
     display: flex;
     flex-direction: column;
@@ -2009,13 +1974,6 @@ const FollowedListNotesContainer = styled(Margin)<{ key: number }>`
     align-items: flex-start;
     height: fill-available;
     z-index: ${(props) => 1000 - props.key};
-`
-
-const SectionTitleContainer = styled(Margin)`
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
 `
 
 const AnnotationContainer = styled(Margin)`

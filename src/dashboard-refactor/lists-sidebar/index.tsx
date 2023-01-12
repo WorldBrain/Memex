@@ -47,6 +47,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                     ...this.props.initDropReceivingState(listObj.listId),
                     canReceiveDroppedItems,
                 }}
+                selectedListId={this.props.selectedListId}
                 {...listObj}
             />
         ))
@@ -75,8 +76,8 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                 spaceSidebarWidth={this.props.spaceSidebarWidth}
             >
                 <GlobalStyle />
-                <BottomGroup>
-                    <ListsSidebarGroup isExpanded loadingState="success">
+                <SidebarInnerContent>
+                    <TopGroup>
                         {this.renderLists(
                             [
                                 {
@@ -100,7 +101,8 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     listId: -1,
                                     selectedState: {
                                         isSelected:
-                                            this.props.selectedListId === null,
+                                            this.props.selectedListId == null ||
+                                            this.props.selectedListId === -1,
                                         onSelection: this.props
                                             .onAllSavedSelection,
                                     },
@@ -129,7 +131,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             ],
                             false,
                         )}
-                    </ListsSidebarGroup>
+                    </TopGroup>
                     <Separator />
                     <Margin top="10px">
                         <ListsSidebarSearchBar {...searchBarProps} />
@@ -215,7 +217,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             <Separator />
                         </>
                     ))}
-                </BottomGroup>
+                </SidebarInnerContent>
             </Container>
         )
     }
@@ -245,7 +247,7 @@ const Separator = styled.div`
     }
 `
 
-const BottomGroup = styled.div`
+const SidebarInnerContent = styled.div`
     overflow-y: scroll;
     overflow-x: visible;
     height: fill-available;
@@ -320,4 +322,10 @@ const InfoText = styled.div`
 const Link = styled.span`
     color: ${(props) => props.theme.colors.prime1};
     padding-left: 3px;
+`
+
+const TopGroup = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0px;
 `

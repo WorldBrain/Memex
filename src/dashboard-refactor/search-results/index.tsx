@@ -518,7 +518,6 @@ export default class SearchResultsContainer extends React.Component<
                             : undefined
                     }
                     filterbyList={(listId) => {
-                        console.log('filterbyList')
                         this.props.filterByList(listId)
                     }}
                 />
@@ -1222,7 +1221,7 @@ const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     max-width: calc(${sizeConstants.searchResults.widthPx}px);
     z-index: 3000;
     position: sticky;
-    top: ${(props) => (props.isDisplayed === true ? '110px' : '0px')};
+    top: 0px;
     background: ${(props) => props.theme.colors.black};
     width: fill-available;
 `
@@ -1231,7 +1230,7 @@ const ReferencesContainer = styled.div`
     width: 100%;
     font-weight: lighter;
     font-size: 16px;
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale4};
     display: flex;
     flex-direction: row;
     align-items: center;

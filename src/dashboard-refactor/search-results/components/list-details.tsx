@@ -268,46 +268,34 @@ export default class ListDetails extends PureComponent<Props, State> {
                                             />
                                         </TooltipBox>
                                     ) : undefined}
-                                    <SpaceButtonRow>
-                                        {this.props.isOwnedList ? (
-                                            <>
-                                                <ActionButtons>
-                                                    {this.renderEditButton()}
-                                                    <TooltipBox
-                                                        placement={'bottom'}
-                                                        tooltipText="Open in web view"
-                                                    >
-                                                        <Icon
-                                                            height="22px"
-                                                            padding={'5px'}
-                                                            filePath={
-                                                                icons.goTo
-                                                            }
-                                                            onClick={() =>
-                                                                window.open(
-                                                                    this.props
-                                                                        .remoteLink,
-                                                                )
-                                                            }
-                                                        />
-                                                    </TooltipBox>
-                                                </ActionButtons>
-                                                {this.props.remoteLink ? (
-                                                    <PrimaryAction
-                                                        onClick={
-                                                            this.props
-                                                                .onAddContributorsClick
-                                                        }
-                                                        size={'medium'}
-                                                        type={'primary'}
-                                                        label={'Share Space'}
-                                                        icon={'invite'}
-                                                    />
-                                                ) : (
-                                                    <TooltipBox
-                                                        tooltipText="Invite people to this Space"
-                                                        placement="bottom"
-                                                    >
+                                    {this.props.listId !== 20201014 &&
+                                    this.props.listId !== 20201015 ? (
+                                        <SpaceButtonRow>
+                                            {this.props.isOwnedList ? (
+                                                <>
+                                                    <ActionButtons>
+                                                        {this.renderEditButton()}
+                                                        <TooltipBox
+                                                            placement={'bottom'}
+                                                            tooltipText="Open in web view"
+                                                        >
+                                                            <Icon
+                                                                height="22px"
+                                                                padding={'5px'}
+                                                                filePath={
+                                                                    icons.goTo
+                                                                }
+                                                                onClick={() =>
+                                                                    window.open(
+                                                                        this
+                                                                            .props
+                                                                            .remoteLink,
+                                                                    )
+                                                                }
+                                                            />
+                                                        </TooltipBox>
+                                                    </ActionButtons>
+                                                    {this.props.remoteLink ? (
                                                         <PrimaryAction
                                                             onClick={
                                                                 this.props
@@ -320,23 +308,42 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                             }
                                                             icon={'invite'}
                                                         />
-                                                    </TooltipBox>
-                                                )}
-                                            </>
-                                        ) : (
-                                            <PrimaryAction
-                                                onClick={() =>
-                                                    window.open(
-                                                        this.props.remoteLink,
-                                                    )
-                                                }
-                                                size={'medium'}
-                                                type={'primary'}
-                                                label={'Open in web view'}
-                                                icon={'goTo'}
-                                            />
-                                        )}
-                                    </SpaceButtonRow>
+                                                    ) : (
+                                                        <TooltipBox
+                                                            tooltipText="Invite people to this Space"
+                                                            placement="bottom"
+                                                        >
+                                                            <PrimaryAction
+                                                                onClick={
+                                                                    this.props
+                                                                        .onAddContributorsClick
+                                                                }
+                                                                size={'medium'}
+                                                                type={'primary'}
+                                                                label={
+                                                                    'Share Space'
+                                                                }
+                                                                icon={'invite'}
+                                                            />
+                                                        </TooltipBox>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <PrimaryAction
+                                                    onClick={() =>
+                                                        window.open(
+                                                            this.props
+                                                                .remoteLink,
+                                                        )
+                                                    }
+                                                    size={'medium'}
+                                                    type={'primary'}
+                                                    label={'Open in web view'}
+                                                    icon={'goTo'}
+                                                />
+                                            )}
+                                        </SpaceButtonRow>
+                                    ) : undefined}
                                 </BtnsContainer>
                             </TitleContainer>
                         )}
@@ -454,7 +461,7 @@ const BtnContainerStyled = styled.div`
 `
 
 const TopBarContainer = styled(Margin)`
-    z-index: 50;
+    z-index: 3010;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -527,6 +534,7 @@ const BtnsContainer = styled.div`
     align-items: center;
     z-index: 100;
     align-self: flex-start;
+    grid-gap: 5px;
 `
 
 const DescriptionContainer = styled.div`

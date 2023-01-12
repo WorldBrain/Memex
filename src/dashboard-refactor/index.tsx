@@ -650,7 +650,6 @@ export class DashboardContainer extends StatefulUIElement<
     private renderPdfLocator() {
         return (
             <DropZoneBackground
-                onDragStart={(event) => console.log(event)}
                 onDragOver={(event) => {
                     event.preventDefault()
                     if (!this.state.showDropArea) {

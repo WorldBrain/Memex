@@ -357,7 +357,6 @@ export default class PageResultView extends PureComponent<Props> {
                         <ListsSegment
                             lists={this.displayLists}
                             onListClick={(listId) => {
-                                console.log('listclickkkkk')
                                 this.props.filterbyList(listId)
                             }}
                             onEditBtnClick={this.props.onListPickerBarBtnClick}

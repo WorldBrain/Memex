@@ -36,6 +36,7 @@ export interface Props {
     changeListName?: (value: string) => void
     onMoreActionClick?: React.MouseEventHandler
     shareList?: () => Promise<void>
+    selectedListId?: number
 }
 
 export interface State {
@@ -46,8 +47,11 @@ export default class ListsSidebarItemWithMenu extends React.Component<
     Props,
     State
 > {
-    private handleSelection: React.MouseEventHandler = (e) =>
-        this.props.selectedState.onSelection(this.props.listId)
+    private handleSelection: React.MouseEventHandler = (e) => {
+        if (this.props.listId !== this.props.selectedListId) {
+            this.props.selectedState.onSelection(this.props.listId)
+        }
+    }
 
     state = {
         hoverOverListItem: false,
@@ -266,6 +270,7 @@ export default class ListsSidebarItemWithMenu extends React.Component<
             hasActivity,
             listId,
         } = this.props
+
         return (
             <Container>
                 <SidebarItem
@@ -365,7 +370,7 @@ const TitleBox = styled.div<Props>`
     flex: 0 1 100%;
     width: 91%;
     height: 100%;
-    padding-left: 10px;
+    padding-left: 14px;
     align-items: center;
     color: ${(props) => props.theme.colors.greyScale5};
 `
@@ -465,7 +470,7 @@ const NewItemsCount = styled.div`
     width: fit-content;
     min-width: 20px;
     height: 14px;
-    border-radius: 3px;
+    border-radius: 30px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
