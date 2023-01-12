@@ -96,7 +96,7 @@ const LabelContentBox = styled.div`
     margin-left: 10px;
 `
 const LabelTitle = styled.div`
-    color: ${(props) => props.theme.colors.white};
+    color: ${(props) => props.theme.colors.greyScale6};
     font-weight: 300;
     font-size: 14px;
     white-space: nowrap;

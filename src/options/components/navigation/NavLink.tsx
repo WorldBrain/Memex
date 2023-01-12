@@ -64,7 +64,7 @@ const Container = styled.div`
 `
 
 const RouteTitle = styled.div<{ name: string; isActive: boolean }>`
-    color: ${(props) => props.theme.colors.white};
+    color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
     font-weight: 400;
     text-align: left;

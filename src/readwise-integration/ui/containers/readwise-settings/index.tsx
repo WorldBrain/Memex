@@ -144,21 +144,23 @@ class ReadwiseSettings extends StatefulUIElement<
                     </>
                 )}
                 <MainBox>
-                    <TextField
-                        placeholder="ReadWise API key"
-                        disabled={!this.state.apiKeyEditable}
-                        value={
-                            selectors.showKeySaving(this.state)
-                                ? 'Saving API key...'
-                                : this.state.apiKey || ''
-                        }
-                        onChange={(e) =>
-                            this.processEvent('setAPIKey', {
-                                key: (e.target as HTMLInputElement).value,
-                            })
-                        }
-                        type="text"
-                    />
+                    {this.state.apiKey || this.state.apiKeyEditable ? (
+                        <TextField
+                            placeholder="ReadWise API key"
+                            disabled={!this.state.apiKeyEditable}
+                            value={
+                                selectors.showKeySaving(this.state)
+                                    ? 'Saving API key...'
+                                    : this.state.apiKey || ''
+                            }
+                            onChange={(e) =>
+                                this.processEvent('setAPIKey', {
+                                    key: (e.target as HTMLInputElement).value,
+                                })
+                            }
+                            type="text"
+                        />
+                    ) : undefined}
                     {selectors.showKeySaveButton(this.state) && (
                         <div>
                             <PrimaryAction
