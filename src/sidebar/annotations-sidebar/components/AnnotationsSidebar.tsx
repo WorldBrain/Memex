@@ -363,21 +363,21 @@ export class AnnotationsSidebar extends React.Component<
             .filter((a) => !!a)
 
         let othersCounter = annotationsData.filter((annotation) => {
-            return annotation.creator.id !== this.props.currentUser?.id
+            return annotation.creator?.id !== this.props.currentUser?.id
         }).length
         let ownCounter = annotationsData.filter((annotation) => {
-            return annotation.creator.id === this.props.currentUser?.id
+            return annotation.creator?.id === this.props.currentUser?.id
         }).length
 
         if (this.state.othersOrOwnAnnotationsState === 'othersAnnotations') {
             annotationsData = annotationsData.filter((annotation) => {
-                return annotation.creator.id !== this.props.currentUser?.id
+                return annotation.creator?.id !== this.props.currentUser?.id
             })
         }
 
         if (this.state.othersOrOwnAnnotationsState === 'ownAnnotations') {
             annotationsData = annotationsData.filter((annotation) => {
-                return annotation.creator.id === this.props.currentUser?.id
+                return annotation.creator?.id === this.props.currentUser?.id
             })
         }
 
@@ -537,6 +537,9 @@ export class AnnotationsSidebar extends React.Component<
                                         createdWhen: annotation.createdWhen,
                                         reference: sharedAnnotationRef,
                                     }}
+                                    getYoutubePlayer={
+                                        this.props.getYoutubePlayer
+                                    }
                                 />
                             )}
                     </React.Fragment>
@@ -873,7 +876,8 @@ export class AnnotationsSidebar extends React.Component<
                 <>
                     <SpaceTypeSection>
                         <SpaceTypeSectionHeader>
-                            My Spaces ({mySpaces.length})
+                            My Spaces{' '}
+                            <SpacesCounter>{mySpaces.length}</SpacesCounter>
                         </SpaceTypeSectionHeader>
                         {mySpaces.length > 0 ? (
                             <SpaceTypeSectionContainer>
@@ -898,7 +902,10 @@ export class AnnotationsSidebar extends React.Component<
 
                     <SpaceTypeSection>
                         <SpaceTypeSectionHeader>
-                            Followed Spaces ({followedSpaces.length})
+                            Followed Spaces{' '}
+                            <SpacesCounter>
+                                {followedSpaces.length}
+                            </SpacesCounter>
                         </SpaceTypeSectionHeader>
                         {followedSpaces.length > 0 ? (
                             <SpaceTypeSectionContainer>
@@ -919,7 +926,8 @@ export class AnnotationsSidebar extends React.Component<
 
                     <SpaceTypeSection>
                         <SpaceTypeSectionHeader>
-                            Joined Spaces ({joinedSpaces.length})
+                            Joined Spaces{' '}
+                            <SpacesCounter>{joinedSpaces.length}</SpacesCounter>
                         </SpaceTypeSectionHeader>
                         {joinedSpaces.length > 0 ? (
                             <SpaceTypeSectionContainer>
@@ -1706,7 +1714,7 @@ const SpaceTypeSection = styled.div`
     flex-direction: column;
     width: fill-available;
 
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     &:first-child {
         margin-top: -10px;
     }
@@ -1718,12 +1726,18 @@ const SpaceTypeSection = styled.div`
 
 const SpaceTypeSectionHeader = styled.div`
     display: flex;
-    color: ${(props) => props.theme.colorsgreyScale6};
+    color: ${(props) => props.theme.colors.greyScale4};
     font-weight: 300;
     font-size: 14px;
     padding: 30px 20px 30px 15px;
     flex-direction: row;
     letter-spacing: 1px;
+`
+
+const SpacesCounter = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 14px;
+    margin-left: 20px;
 `
 
 const SpaceTypeSectionContainer = styled.div<{ SpaceTypeSectionOpen: boolean }>`
@@ -1994,7 +2008,7 @@ const FollowedListNotesContainer = styled(Margin)<{ key: number }>`
     justify-content: flex-start;
     align-items: flex-start;
     height: fill-available;
-    z-index: ${(props) => 100000 - props.key};
+    z-index: ${(props) => 1000 - props.key};
 `
 
 const SectionTitleContainer = styled(Margin)`
@@ -2029,6 +2043,7 @@ const FollowedNotesContainer = styled.div`
     flex-direction: column;
     width: 100%;
     padding-bottom: 60px;
+    z-index: 30;
 `
 
 const FollowedListsMsgContainer = styled.div`
@@ -2061,7 +2076,7 @@ const FollowedListsMsg = styled.span`
     line-height: 17px;
 `
 
-const FollowedListRow = styled(Margin)<{ context: string }>`
+const FollowedListRow = styled(Margin)<{ key: number; context: string }>`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -2072,7 +2087,7 @@ const FollowedListRow = styled(Margin)<{ context: string }>`
     border-radius: 8px;
     height: 40px;
     padding: 5px 15px 5px 10px;
-    z-index: 20;
+    z-index: 40;
 
     &:first-child {
         margin-top: 5px;

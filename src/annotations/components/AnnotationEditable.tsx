@@ -753,7 +753,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 <AnnotationBox
                     zIndex={this.props.zIndex}
                     top="5px"
-                    bottom="2px"
                     onMouseEnter={() => this.setState({ hoverCard: true })}
                     onMouseOver={() => this.setState({ hoverCard: true })}
                     onMouseLeave={() => this.setState({ hoverCard: false })}
@@ -970,7 +969,7 @@ const CommentBox = styled.div`
 const DefaultFooterStyled = styled.div`
     display: flex;
     align-items: center;
-    padding-left: 10px;
+    padding-left: 5px;
     justify-content: space-between;
     border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
 `
