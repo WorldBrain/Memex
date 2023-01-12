@@ -90,6 +90,7 @@ class EntryRow extends React.Component<Props> {
                 isFocused={focused}
                 id={id}
                 title={resultItem['props'].children}
+                zIndex={10000 - this.props.index}
             >
                 <NameWrapper>
                     {resultItem}
@@ -101,7 +102,7 @@ class EntryRow extends React.Component<Props> {
                             <Icon
                                 heightAndWidth="14px"
                                 // padding="6px"
-                                icon={'people'}
+                                icon={'peopleFine'}
                                 hoverOff
                                 color="greyScale5"
                             />
@@ -206,7 +207,7 @@ export const IconStyleWrapper = styled.div`
     justify-content: flex-end;
 `
 
-const Row = styled.div<{ isFocused }>`
+const Row = styled.div<{ isFocused; zIndex }>`
     align-items: center;
     display: flex;
     justify-content: space-between;
@@ -219,7 +220,7 @@ const Row = styled.div<{ isFocused }>`
     margin: 0 -5px;
     overflow: visible;
     color: ${(props) => props.isFocused && props.theme.colors.greyScale6};
-
+    z-index: ${(props) => props.zIndex};
     &:last-child {
         border-bottom: none;
     }
