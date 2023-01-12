@@ -105,7 +105,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                 link={this.state.link}
                 onCopyLinkClick={this.handleLinkCopy}
                 linkTitleCopy="Link to page and its public annotations"
-                privacyOptionsTitleCopy="Set privacy for all annotations on this page"
+                privacyOptionsTitleCopy="Set privacy for all notes on this page"
                 isLoading={
                     this.state.shareState === 'running' ||
                     this.state.loadState === 'running'

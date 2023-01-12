@@ -25,6 +25,7 @@ import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 
 class SpacePicker extends StatefulUIElement<
     SpacePickerDependencies,
@@ -177,14 +178,14 @@ class SpacePicker extends StatefulUIElement<
         if (this.state.newEntryName.length > 0 && !this.props.filterMode) {
             return (
                 <EmptyListsView>
-                    <SectionCircle>
+                    <IconBox heightAndWidth="30px">
                         <Icon
                             filePath={icons.collectionsEmpty}
                             heightAndWidth="16px"
                             color="prime1"
                             hoverOff
                         />
-                    </SectionCircle>
+                    </IconBox>
                     <SectionTitle>No Space found</SectionTitle>
                 </EmptyListsView>
             )
@@ -196,14 +197,14 @@ class SpacePicker extends StatefulUIElement<
         ) {
             return (
                 <EmptyListsView>
-                    <SectionCircle>
+                    <IconBox heightAndWidth="30px">
                         <Icon
                             filePath={icons.collectionsEmpty}
                             heightAndWidth="16px"
                             color="prime1"
                             hoverOff
                         />
-                    </SectionCircle>
+                    </IconBox>
                     <SectionTitle>No Space found</SectionTitle>
                 </EmptyListsView>
             )
@@ -447,16 +448,16 @@ const SectionCircle = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 300;
     text-align: center;
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 400;
     margin-top: 10px;
 `
 

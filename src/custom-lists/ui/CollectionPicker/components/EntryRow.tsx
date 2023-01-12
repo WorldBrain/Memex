@@ -218,7 +218,7 @@ const Row = styled.div<{ isFocused }>`
     padding: 0 9px;
     margin: 0 -5px;
     overflow: visible;
-    color: ${(props) => props.isFocused && props.theme.colors.white};
+    color: ${(props) => props.isFocused && props.theme.colors.greyScale6};
 
     &:last-child {
         border-bottom: none;

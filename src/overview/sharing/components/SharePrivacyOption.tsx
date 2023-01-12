@@ -108,7 +108,7 @@ const PrivacyOptionItem = styled(Margin)`
         `}
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 
     &:last-child {

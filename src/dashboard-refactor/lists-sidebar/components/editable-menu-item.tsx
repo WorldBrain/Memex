@@ -105,7 +105,7 @@ const EditableListTitle = styled.input`
     background: ${(props) => props.theme.colors.greyScale2};
 
     &:focus {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         color: ${(props) => props.theme.colors.white};
     }
 `

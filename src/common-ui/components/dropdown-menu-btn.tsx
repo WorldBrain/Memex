@@ -163,7 +163,7 @@ const MenuItem = styled.div<{ isSelected }>`
             cursor: pointer;
 
             &:hover {
-                outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+                outline: 1px solid ${(props) => props.theme.colors.greyScale3};
             }
 
             & * {

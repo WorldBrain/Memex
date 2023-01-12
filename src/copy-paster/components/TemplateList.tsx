@@ -11,10 +11,9 @@ const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 10px 15px 10px 20px;
+    padding: 10px 15px 0px 18px;
     height: 30px;
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const ButtonBox = styled.div`
@@ -25,9 +24,9 @@ const ButtonBox = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.white};
+    color: ${(props) => props.theme.colors.greyScale4};
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 400;
     flex: 1;
     white-space: nowrap;
 `

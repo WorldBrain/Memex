@@ -947,7 +947,7 @@ const CommentBox = styled.div`
     padding: 10px 20px 10px;
     line-height: 1.4;
     text-align: left;
-    //border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    //border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
     overflow: visible;
     flex-direction: row;
     display: flex;
@@ -1042,7 +1042,7 @@ const ActionBtnStyled = styled.button`
     background: transparent;
     border-radius: 3px;
     font-weight: 400;
-    border: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
     color: ${(props) => props.theme.colors.white};
     display: flex;
     justify-content: center;

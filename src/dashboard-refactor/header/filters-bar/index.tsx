@@ -78,6 +78,8 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                     isFiltered,
                     label,
                 )}
+                fontColor={'greyScale6'}
+                iconColor={'greyScale6'}
             />
         </Margin>
     )

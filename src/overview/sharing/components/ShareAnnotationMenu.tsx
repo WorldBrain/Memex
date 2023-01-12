@@ -305,8 +305,9 @@ const PrivacyTitle = styled.div`
     font-size: 14px;
     font-weight: 400;
     margin-bottom: 10px;
-    color: ${(props) => props.theme.colors.greyScale5};
+    color: ${(props) => props.theme.colors.greyScale4};
     white-space: nowrap;
+    padding-left: 5px;
 `
 
 const PrivacyOptionContainer = styled(Margin)`

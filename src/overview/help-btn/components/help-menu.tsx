@@ -83,7 +83,7 @@ const MenuItem = styled.div<{ order: number }>`
     background-color: ${(props) => props.top && props.theme.colors.prime1};
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 `
 

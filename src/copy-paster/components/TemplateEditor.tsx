@@ -69,23 +69,22 @@ const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 10px 20px 10px 20px;
+    padding: 10px 15px 0px 15px;
     height: 30px;
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.white};
+    color: ${(props) => props.theme.colors.greyScale4};
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 400;
 `
 
 const TextInput = styled.input`
     outline: none;
     height: fill-available;
     width: fill-available;
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
     border: none;
     background: ${(props) => props.theme.colors.greyScale2};
@@ -104,7 +103,7 @@ const TextArea = styled.textarea`
     outline: none;
     height: fill-available;
     width: fill-available;
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
     border: none;
     background: ${(props) => props.theme.colors.greyScale2};
@@ -122,7 +121,7 @@ const TextArea = styled.textarea`
 
 const HowtoBox = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.white};
+    color: ${(props) => props.theme.colors.greyScale6};
     font-weight: 400;
     display: flex;
     grid-gap: 5px;
@@ -166,7 +165,9 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
             <>
                 <Header>
                     <SectionTitle>
-                        {this.props.isNew ? 'Add New' : 'Edit'}
+                        {this.props.isNew
+                            ? 'Add New Template'
+                            : 'Edit Template'}
                     </SectionTitle>
                     <ButtonBox>
                         <Icon

@@ -252,7 +252,7 @@ const TutorialCardContainer = styled.div<{
 
     font-family: 'Satoshi', sans-serif;
     box-shadow: 0px 4px 15px 5px rgb(0 0 0 / 5%);
-    border: 2px solid ${(props) => props.theme.colors.lineGrey};
+    border: 2px solid ${(props) => props.theme.colors.greyScale3};
     animation: 0.3s ease-out 0s 1 slideInFromLeft;
 
     @keyframes slideInFromLeft {

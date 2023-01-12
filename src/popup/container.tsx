@@ -523,7 +523,7 @@ const FeedActivitySection = styled.div`
     display: flex;
     justify-content: space-between;
     height: 50px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     align-items: center;
     padding: 0px 20px 0px 20px;
     grid-auto-flow: column;

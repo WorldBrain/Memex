@@ -153,7 +153,7 @@ const Container = styled.div<{ padding: string }>`
     min-height: 24px;
     height: fit-content;
     grid-auto-flow: column;
-    //border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    //border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
     pointer-events: auto;
     z-index: 1000;
     width: fill-available;

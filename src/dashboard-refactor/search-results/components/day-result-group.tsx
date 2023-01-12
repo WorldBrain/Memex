@@ -28,8 +28,10 @@ const DayContainer = styled.div<{ zIndex: number }>`
     max-width: ${sizeConstants.searchResults.widthPx}px;
 `
 
-const DayWhenText = styled.h1`
-    color: ${(props) => props.theme.colors.darkerText};
+const DayWhenText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale6};
     font-size: 20px;
-    font-weight: bold;
+    font-weight: 300;
+    margin-bottom: 10px;
+    margin-top: 30px;
 `

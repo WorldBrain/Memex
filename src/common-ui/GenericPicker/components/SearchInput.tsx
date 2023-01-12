@@ -88,7 +88,7 @@ const SearchBox = styled.div`
     ${(props) =>
         props.isFocused &&
         css`
-            outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         `}
 `
 

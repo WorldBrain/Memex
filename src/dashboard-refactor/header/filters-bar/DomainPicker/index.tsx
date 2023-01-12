@@ -16,6 +16,7 @@ import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 
 class DomainPicker extends StatefulUIElement<
     DomainPickerDependencies,
@@ -106,14 +107,14 @@ class DomainPicker extends StatefulUIElement<
         if (this.state.query === '') {
             return (
                 <EmptyDomainsView>
-                    <SectionCircle>
+                    <IconBox heightAndWidth="30px">
                         <Icon
                             filePath={icons.globe}
                             heightAndWidth="16px"
                             color="prime1"
                             hoverOff
                         />
-                    </SectionCircle>
+                    </IconBox>
                     <SectionTitle>No Domains to filter</SectionTitle>
                     <InfoText>Save a first page or annotation</InfoText>
                 </EmptyDomainsView>
@@ -122,14 +123,14 @@ class DomainPicker extends StatefulUIElement<
 
         return (
             <EmptyDomainsView>
-                <SectionCircle>
+                <IconBox heightAndWidth="30px">
                     <Icon
                         filePath={icons.globe}
                         heightAndWidth="16px"
                         color="prime1"
                         hoverOff
                     />
-                </SectionCircle>
+                </IconBox>
                 <SectionTitle>No domains found for query</SectionTitle>
             </EmptyDomainsView>
         )
@@ -148,12 +149,12 @@ class DomainPicker extends StatefulUIElement<
             <>
                 <PickerSearchInput
                     searchInputPlaceholder={this.searchInputPlaceholder}
-                    showPlaceholder={this.state.selectedEntries.length === 0}
+                    showPlaceholder={this.state?.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}
                     onKeyPress={this.handleKeyPress}
-                    value={this.state.query}
-                    loading={this.state.loadingQueryResults}
+                    value={this.state?.query}
+                    loading={this.state?.loadingQueryResults}
                     // before={
                     //     <EntrySelectedList
                     //         dataAttributeName="domain-name"
@@ -163,7 +164,7 @@ class DomainPicker extends StatefulUIElement<
                     // }
                 />
                 <EntryResultsList
-                    entries={this.state.displayEntries}
+                    entries={this.state?.displayEntries}
                     renderEntryRow={this.renderDomainRow}
                     emptyView={this.renderEmptyDomain()}
                     id="domainResults"
@@ -199,16 +200,16 @@ const SectionCircle = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.white};
+    color: ${(props) => props.theme.colors.greyScale6};
     margin-top: 10px;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 400;
 `
 
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 300;
 `
 
 const LoadingBox = styled.div`
@@ -237,7 +238,7 @@ const EmptyDomainsView = styled.div`
 const DomainResultItem = styled.div`
     display: flex;
     border-radius: 4px;
-    color: ${(props) => props.theme.colors.white};
+    color: ${(props) => props.theme.colors.greyScale6};
     padding: 0px;
     margin: 2px 4px 2px 0;
     font-weight: 400;
