@@ -107,9 +107,10 @@ const ErrorMsg = styled.div`
     padding: 0 10px;
 `
 
-const GroupContentSection = styled.div<{ isExpanded: boolean }>`
+const GroupContentSection = styled.div<{ isExpanded: boolean; listsArray }>`
     ${(props) =>
         props.isExpanded &&
+        props.listsArray.length > 0 &&
         css`
             margin-top: -20px;
             margin-bottom: 10px;
@@ -201,7 +202,12 @@ export default class ListsSidebarGroup extends PureComponent<
                         </GroupHeaderInnerDiv>
                     </GroupHeaderContainer>
                 )}
-                <GroupContentSection isExpanded={this.props.isExpanded}>
+                <GroupContentSection
+                    isExpanded={this.props.isExpanded}
+                    listsArray={
+                        this.props.listsArray ? this.props.listsArray : []
+                    }
+                >
                     {this.renderGroupContent()}
                 </GroupContentSection>
             </Container>
