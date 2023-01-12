@@ -491,10 +491,10 @@ export default class Ribbon extends Component<Props, State> {
                             <Icon
                                 filePath={
                                     this.props.tooltip.isTooltipEnabled
-                                        ? icons.tooltipOn
-                                        : icons.tooltipOff
+                                        ? icons.tooltipOff
+                                        : icons.tooltipOn
                                 }
-                                heightAndWidth="22px"
+                                heightAndWidth="24px"
                                 hoverOff
                             />
                             {this.props.isRibbonEnabled ? (
@@ -1167,7 +1167,7 @@ const FeedIndicatorBox = styled.div<{ isSidebarOpen: boolean }>`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.white};
+    color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
     font-weight: 400;
 `

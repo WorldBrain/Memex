@@ -607,6 +607,18 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
 
+        const hasNetworkActivity = await this.options.pageActivityIndicatorBG.getPageActivityStatus(
+            event.fullPageUrl,
+        )
+
+        console.log('getlink')
+
+        this.emitMutation({
+            pageHasNetworkAnnotations: {
+                $set: hasNetworkActivity != 'no-activity',
+            },
+        })
+
         if (previousState.fullPageUrl === event.fullPageUrl) {
             return
         }
@@ -619,6 +631,24 @@ export class SidebarContainerLogic extends UILogic<
         await this.hydrateAnnotationsCache(event.fullPageUrl, {
             renderHighlights: event.rerenderHighlights,
         })
+
+        if (previousState.activeTab === 'spaces') {
+            const listsWithRemoteAnnots = normalizedStateToArray(
+                this.options.annotationsCache.lists,
+            ).filter(
+                (list) =>
+                    list.hasRemoteAnnotations &&
+                    list.remoteId != null &&
+                    previousState.listInstances[list.unifiedId]
+                        ?.annotationRefsLoadState === 'pristine', // Ensure it hasn't already been loaded
+            )
+
+            const nextState = await this.loadRemoteAnnotationReferencesForLists(
+                previousState,
+                listsWithRemoteAnnots,
+            )
+            this.renderOpenSpaceInstanceHighlights(nextState)
+        }
     }
 
     setAllNotesShareMenuShown: EventHandler<

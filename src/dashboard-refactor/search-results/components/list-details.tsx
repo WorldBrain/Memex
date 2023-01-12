@@ -106,19 +106,19 @@ export default class ListDetails extends PureComponent<Props, State> {
 
         if (this.props.listId === 20201015) {
             return (
-                <DescriptionText>
+                <SubtitleText>
                     {'Things you saved from your mobile devices'}
-                </DescriptionText>
+                </SubtitleText>
             )
         }
 
         if (this.props.listId === 20201014) {
             return (
-                <DescriptionText>
+                <SubtitleText>
                     {
                         'Everything you save, annotate or organise appears here so you have a chance to go through it again.'
                     }
-                </DescriptionText>
+                </SubtitleText>
             )
         }
 
@@ -394,6 +394,13 @@ export default class ListDetails extends PureComponent<Props, State> {
     }
 }
 
+const SubtitleText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    display: flex;
+    text-align: left;
+    font-size: 14px;
+`
+
 const TooltipTextContent = styled.div`
     display: block;
     line-height: 23px;
@@ -541,11 +548,11 @@ const DescriptionContainer = styled.div`
     width: 100%;
     margin-top: 10px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
 
     &:hover ${DescriptionEditContainer} {
         display: flex;
-        justify-self: flex-end;
+        justify-self: flex-start;
         align-self: flex-start;
         position: absolute;
     }

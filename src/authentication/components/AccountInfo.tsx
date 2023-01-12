@@ -85,7 +85,17 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                 </InfoText>
 
                                 {this.state.passwordResetSent ? (
-                                    <></>
+                                    <ConfirmationMessage>
+                                        <Icon
+                                            icon="mail"
+                                            heightAndWidth="22px"
+                                            color="prime1"
+                                        />
+                                        Check your email inbox:{' '}
+                                        <strong>
+                                            {this.state.currentUser.email}
+                                        </strong>
+                                    </ConfirmationMessage>
                                 ) : (
                                     <PrimaryAction
                                         label={'Reset Password'}
@@ -116,6 +126,13 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
         )
     }
 }
+
+const ConfirmationMessage = styled.div`
+    display: flex;
+    align-items: center;
+    color: ${(props) => props.theme.greyScale5};
+    font-size: 14px;
+`
 
 const LoadingIndicatorBox = styled.div`
     padding: 100px 50px;

@@ -433,7 +433,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                     </>
                 )}
                 {this.state.mode === 'signup' && (
-                    <>
+                    <InfoText>
                         Already have an account?{' '}
                         <ModeSwitch
                             onClick={() =>
@@ -444,7 +444,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                         >
                             Log in
                         </ModeSwitch>
-                    </>
+                    </InfoText>
                 )}
             </Footer>
         )
@@ -556,7 +556,7 @@ const DisplayNameContainer = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 12px;
     text-align: center;
 `

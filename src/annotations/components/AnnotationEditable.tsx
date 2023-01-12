@@ -615,18 +615,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         } else {
             cancelBtnHandler = editDeps.onEditCancel
             confirmBtn = (
-                <TooltipBox
-                    tooltipText={`${AnnotationEditable.MOD_KEY} + Enter`}
-                    placement="bottom"
-                >
-                    <SaveBtn
-                        onSave={editDeps.onEditConfirm(false)}
-                        hasSharedLists={this.hasSharedLists}
-                        isProtected={isBulkShareProtected}
-                        isShared={isShared}
-                        tabIndex={0}
-                    />
-                </TooltipBox>
+                <SaveBtn
+                    onSave={editDeps.onEditConfirm(false)}
+                    hasSharedLists={this.hasSharedLists}
+                    isProtected={isBulkShareProtected}
+                    isShared={isShared}
+                    tabIndex={0}
+                    shortcutText={`${AnnotationEditable.MOD_KEY} + Enter`}
+                />
             )
         }
 
