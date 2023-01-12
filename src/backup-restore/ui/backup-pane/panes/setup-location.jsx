@@ -143,6 +143,8 @@ export default class SetupLocation extends React.Component {
                         this._proceedIfServerIsRunning()
                     }}
                     label={"I'm ready"}
+                    type="primary"
+                    size="medium"
                 />
             </SettingSection>
         ) : (
@@ -194,6 +196,8 @@ export default class SetupLocation extends React.Component {
                         })
                     }}
                     label={'Continue'}
+                    type="primary"
+                    size="medium"
                 />
             </SettingSection>
         )

@@ -130,8 +130,9 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
 const ConfirmationMessage = styled.div`
     display: flex;
     align-items: center;
-    color: ${(props) => props.theme.greyScale5};
+    color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
+    grid-gap: 5px;
 `
 
 const LoadingIndicatorBox = styled.div`
@@ -179,6 +180,6 @@ const UserIdField = styled.div`
     height: 44px;
     border-radius: 5px;
     width: fill-available;
-    padding: 0 15px;
+    padding: 0 9px;
     font-size: 14px;
 `

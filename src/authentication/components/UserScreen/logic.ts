@@ -87,12 +87,8 @@ export default class Logic extends UILogic<State, Event> {
         event,
     }) => {
         this.emitMutation({ passwordResetSent: { $set: true } })
-        // this.dependencies.authBG.sendPasswordResetEmailProcess(
-        //     previousState.currentUser.email,
-        // )
-
-        setTimeout(() => {
-            this.emitMutation({ passwordResetSent: { $set: false } })
-        }, 2000)
+        this.dependencies.authBG.sendPasswordResetEmailProcess(
+            previousState.currentUser.email,
+        )
     }
 }

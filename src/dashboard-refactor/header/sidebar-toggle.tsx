@@ -21,7 +21,7 @@ export const Container = styled.div`
     align-items: center;
     cursor: pointer;
     z-index: 1;
-    padding-left: 12px;
+    padding-left: 10px;
 `
 
 export const BtnBackground = styled.div`
