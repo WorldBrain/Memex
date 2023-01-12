@@ -25,7 +25,7 @@ const Title = styled.div`
 `
 
 const Subtitle = styled.div`
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     font-weight: 300;
     display: flex;

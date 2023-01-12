@@ -138,7 +138,7 @@ const ButtonInnerContent = styled.div`
 
 const SubTitle = styled.div`
     font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 400;
 `
 

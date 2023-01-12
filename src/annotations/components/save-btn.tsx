@@ -187,8 +187,8 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                         }
                     >
                         <Icon
-                            heightAndWidth="12px"
-                            filePath={icons.triangle}
+                            heightAndWidth="20px"
+                            filePath={icons.arrowDown}
                             hoverOff
                             containerRef={this.privacySelectionButtonRef}
                         />

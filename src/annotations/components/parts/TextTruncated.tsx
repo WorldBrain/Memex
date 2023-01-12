@@ -127,7 +127,7 @@ const ToggleMoreButtonStyled = styled.div<{ isHighlight: boolean }>`
     font-size: 12px;
     color: grey;
     line-height: 18px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     display: flex;
     grid-gap: 5px;
     align-items: center;

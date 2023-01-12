@@ -36,6 +36,7 @@ export default class Logic extends UILogic<State, Event> {
         passwordMatch: false,
         passwordConfirm: '',
         currentUser: null,
+        passwordResetSent: false,
     })
 
     async init() {
@@ -79,5 +80,19 @@ export default class Logic extends UILogic<State, Event> {
 
     setAuthDialogMode: EventHandler<'setAuthDialogMode'> = ({ event }) => {
         return { authDialogMode: { $set: event.mode } }
+    }
+
+    sendPasswordReset: EventHandler<'sendPasswordReset'> = ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({ passwordResetSent: { $set: true } })
+        // this.dependencies.authBG.sendPasswordResetEmailProcess(
+        //     previousState.currentUser.email,
+        // )
+
+        setTimeout(() => {
+            this.emitMutation({ passwordResetSent: { $set: false } })
+        }, 2000)
     }
 }

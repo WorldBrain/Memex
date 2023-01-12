@@ -110,7 +110,7 @@ const Title = styled.div`
 `
 
 const Description = styled.div`
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 16px;
     font-weight: 300;
 `
@@ -173,7 +173,7 @@ const TutorialTitle = styled.div`
 `
 
 const ViewAllButton = styled.div`
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 400;
     font-size: 16px;
     display: flex;
@@ -536,7 +536,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             <Icon
                                 filePath={icons.arrowRight}
                                 heightAndWidth="22px"
-                                color={'greyScale8'}
+                                color={'greyScale5'}
                                 hoverOff
                             />
                         </ViewAllButton>

@@ -79,7 +79,7 @@ const SectionCircle = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     font-weight: 300;
     text-align: center;

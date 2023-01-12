@@ -168,7 +168,7 @@ const Input = styled.input`
     font-weight: 400;
 
     &::placeholder {
-        color: ${(props) => props.theme.colors.greyScale8};
+        color: ${(props) => props.theme.colors.greyScale5};
     }
 
     &:focus {

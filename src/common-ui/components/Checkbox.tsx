@@ -103,14 +103,14 @@ const LabelTitle = styled.div`
 `
 
 const SubLabel = styled.div`
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 300;
     font-size: 14px;
     white-space: nowrap;
 `
 
 const ChildrenBox = styled.span<{ mode }>`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale1};
     border-radius: ${(props) => (props.mode === 'radio' ? '20px' : '3px')};
     display: flex;
     justify-content: space-between;

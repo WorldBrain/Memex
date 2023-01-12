@@ -1,6 +1,12 @@
 .tableContainer {
     overflow-y: scroll;
     clear: both;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none; /* stylelint-disable-line*/
 }
 
 .table {
@@ -8,6 +14,12 @@
     width: fill-available;
     font-size: 14px;
     display: flex;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none; /* stylelint-disable-line*/
 
     & tbody {
         width: fill-available;

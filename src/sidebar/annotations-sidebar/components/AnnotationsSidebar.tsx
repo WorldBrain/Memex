@@ -162,7 +162,9 @@ interface AnnotationsSidebarState {
     showSortDropDown: boolean
     showSpaceSharePopout?: UnifiedList['unifiedId']
     linkCopyState: boolean
-    othersOrOwnAnnotationsState: 'othersAnnotations' | 'ownAnnotations'
+    othersOrOwnAnnotationsState: {
+        [unifiedId: string]: 'othersAnnotations' | 'ownAnnotations'
+    }
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -190,7 +192,7 @@ export class AnnotationsSidebar extends React.Component<
         showPageSpacePicker: false,
         showSortDropDown: false,
         linkCopyState: false,
-        othersOrOwnAnnotationsState: 'othersAnnotations',
+        othersOrOwnAnnotationsState: {},
     }
 
     async componentDidMount() {
@@ -370,13 +372,19 @@ export class AnnotationsSidebar extends React.Component<
             return annotation.creator?.id === this.props.currentUser?.id
         }).length
 
-        if (this.state.othersOrOwnAnnotationsState === 'othersAnnotations') {
+        if (
+            (this.state.othersOrOwnAnnotationsState[unifiedListId] ??
+                'othersAnnotations') === 'othersAnnotations'
+        ) {
             annotationsData = annotationsData.filter((annotation) => {
                 return annotation.creator?.id !== this.props.currentUser?.id
             })
         }
 
-        if (this.state.othersOrOwnAnnotationsState === 'ownAnnotations') {
+        if (
+            this.state.othersOrOwnAnnotationsState[unifiedListId] ===
+            'ownAnnotations'
+        ) {
             annotationsData = annotationsData.filter((annotation) => {
                 return annotation.creator?.id === this.props.currentUser?.id
             })
@@ -562,8 +570,12 @@ export class AnnotationsSidebar extends React.Component<
                     <PrimaryAction
                         size={'small'}
                         active={
-                            this.state.othersOrOwnAnnotationsState ===
-                            'othersAnnotations'
+                            this.state.othersOrOwnAnnotationsState[
+                                unifiedListId
+                            ] === 'othersAnnotations' ||
+                            this.state.othersOrOwnAnnotationsState[
+                                unifiedListId
+                            ] == null
                         }
                         label={
                             <SwitcherButtonContent>
@@ -576,16 +588,19 @@ export class AnnotationsSidebar extends React.Component<
                         type={'tertiary'}
                         onClick={() => {
                             this.setState({
-                                othersOrOwnAnnotationsState:
-                                    'othersAnnotations',
+                                othersOrOwnAnnotationsState: {
+                                    ...this.state.othersOrOwnAnnotationsState,
+                                    [unifiedListId]: 'othersAnnotations',
+                                },
                             })
                         }}
                     />
                     <PrimaryAction
                         size={'small'}
                         active={
-                            this.state.othersOrOwnAnnotationsState ===
-                            'ownAnnotations'
+                            this.state.othersOrOwnAnnotationsState[
+                                unifiedListId
+                            ] === 'ownAnnotations'
                         }
                         label={
                             <SwitcherButtonContent>
@@ -596,7 +611,10 @@ export class AnnotationsSidebar extends React.Component<
                         type={'tertiary'}
                         onClick={() => {
                             this.setState({
-                                othersOrOwnAnnotationsState: 'ownAnnotations',
+                                othersOrOwnAnnotationsState: {
+                                    ...this.state.othersOrOwnAnnotationsState,
+                                    [unifiedListId]: 'ownAnnotations',
+                                },
                             })
                         }}
                     />
@@ -1439,7 +1457,7 @@ export class AnnotationsSidebar extends React.Component<
                 >
                     <Icon
                         filePath="plusIcon"
-                        color="greyScale8"
+                        color="greyScale5"
                         heightAndWidth="20px"
                         hoverOff
                     />
@@ -1457,7 +1475,7 @@ export class AnnotationsSidebar extends React.Component<
                         icon="link"
                         label={'Share Space'}
                         onClick={null}
-                        fontColor={'greyScale8'}
+                        fontColor={'greyScale5'}
                     />
                 )
             } else {
@@ -1469,7 +1487,7 @@ export class AnnotationsSidebar extends React.Component<
                             icon="link"
                             label={'Share Space'}
                             onClick={null}
-                            fontColor={'greyScale8'}
+                            fontColor={'greyScale5'}
                         />
                         <PrimaryAction
                             type="forth"
@@ -1477,7 +1495,7 @@ export class AnnotationsSidebar extends React.Component<
                             icon="personFine"
                             label={'Creator'}
                             onClick={null}
-                            fontColor={'greyScale8'}
+                            fontColor={'greyScale5'}
                         />
                     </CreatorActionButtons>
                 )
@@ -1502,7 +1520,7 @@ export class AnnotationsSidebar extends React.Component<
                     >
                         <Icon
                             filePath="peopleFine"
-                            color="greyScale8"
+                            color="greyScale5"
                             heightAndWidth="20px"
                             hoverOff
                         />
@@ -1678,7 +1696,7 @@ const SwitcherButtonContent = styled.div`
 `
 
 const SwitcherCounter = styled.div`
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
 `
 
 const RemoteOrLocalSwitcherContainer = styled.div`
@@ -1772,7 +1790,7 @@ const NewAnnotationBoxMyAnnotations = styled.div`
 const OthersAnnotationCounter = styled.div``
 const TotalAnnotationsCounter = styled.div`
     font-size: 16px;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     letter-spacing: 4px;
     display: flex;
     align-items: center;
@@ -1783,7 +1801,7 @@ const PermissionInfoButton = styled.div`
     align-items: center;
     grid-gap: 5px;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     border: 1px solid ${(props) => props.theme.colors.greyScale3};
     border-radius: 5px;
     padding: 2px 8px;
@@ -1801,7 +1819,7 @@ const SpaceDescription = styled(Markdown)`
     font-size: 14px;
     font-weight: 300;
     width: fill-available;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     letter-spacing: 1px;
 `
 
@@ -1815,7 +1833,7 @@ const AnnotationActions = styled.div`
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding: 5 10px;
+    padding: 5px 10px 0px 10px;
     width: fill-available;
     height: 20px;
 `
@@ -2028,7 +2046,7 @@ const FollowedListsMsgHead = styled.span`
     grid-gap: 5px;
 `
 const FollowedListsMsg = styled.span`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     text-align: center;
     font-size: 14px;
     line-height: 17px;
@@ -2052,7 +2070,7 @@ const FollowedListRow = styled(Margin)<{ key: number; context: string }>`
     }
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale2};
     }
 
     &:hover ${ActionButtons} {

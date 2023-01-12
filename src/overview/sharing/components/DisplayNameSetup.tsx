@@ -24,7 +24,7 @@ const Container = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     opacity: 0.7;
     padding-left: 10px;
@@ -93,6 +93,7 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
             await this.props.authBG.updateUserProfile({ displayName })
             this.setState({ saveState: 'success' })
             this.props.onSaveComplete?.(e)
+            setTimeout(() => this.setState({ saveState: 'pristine' }), 2000)
         } catch (err) {
             this.setState({ saveState: 'error' })
             throw err
@@ -101,7 +102,7 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
 
     private renderBtnLabel() {
         if (this.state.saveState === 'running') {
-            return <LoadingIndicator />
+            return <LoadingIndicator size={20} />
         }
         if (this.state.saveState === 'success') {
             return 'Saved!'
@@ -130,6 +131,10 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
                         <PrimaryAction
                             label={this.renderBtnLabel()}
                             onClick={this.confirmSave}
+                            type={'primary'}
+                            size={'medium'}
+                            height={'44px'}
+                            width={'80px'}
                         />
                     )}
                 </InputBox>

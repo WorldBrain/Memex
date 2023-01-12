@@ -66,7 +66,7 @@ const TitleText = styled.div`
 
 const SubTitleText = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     text-align: center;
     font-weight: 300;
     line-height: 26px;

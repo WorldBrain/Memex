@@ -53,6 +53,6 @@ const Container = styled.div`
 const AutoSaveNote = styled.div`
     font-weight: 400;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     width: 60px;
 `

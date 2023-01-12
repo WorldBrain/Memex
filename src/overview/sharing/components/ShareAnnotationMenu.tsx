@@ -305,7 +305,7 @@ const PrivacyTitle = styled.div`
     font-size: 14px;
     font-weight: 400;
     margin-bottom: 10px;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     white-space: nowrap;
 `
 

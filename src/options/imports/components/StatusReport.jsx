@@ -26,7 +26,7 @@ const StatusReport = ({
             <ViewFailedItems onClick={changeShowDetails}>
                 View Failed Items
                 <Icon
-                    filePath={icons.triangle}
+                    filePath={icons.arrowDown}
                     rotation={!showDownloadDetails ? '-90' : '0'}
                     heightAndWidth={'16px'}
                 />
@@ -104,7 +104,7 @@ const Number = styled.div`
 `
 
 const SubTitle = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 16px;
     font-weight: normal;
 `

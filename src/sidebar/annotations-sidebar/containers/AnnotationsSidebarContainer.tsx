@@ -1106,7 +1106,7 @@ const TogglePillHoverSmallText = styled.div<{ pillVisibility: string }>`
     font-size: 14px;
     position: absolute;
     font-weight: 300;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

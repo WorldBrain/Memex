@@ -83,19 +83,25 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                 <InfoText>
                                     Your internal user ID for support requests
                                 </InfoText>
-                                <PrimaryAction
-                                    label="Reset Password"
-                                    onClick={() => {
-                                        this.props.setAuthMode(
-                                            'ConfirmResetPassword',
-                                        )
-                                        this.props.authBG.sendPasswordResetEmailProcess(
-                                            this.state.currentUser.email,
-                                        )
-                                    }}
-                                    size={'medium'}
-                                    type={'secondary'}
-                                />
+
+                                {this.state.passwordResetSent ? (
+                                    <></>
+                                ) : (
+                                    <PrimaryAction
+                                        label={'Reset Password'}
+                                        onClick={() => {
+                                            this.processEvent(
+                                                'sendPasswordReset',
+                                                null,
+                                            )
+                                            this.props.setAuthMode(
+                                                'ConfirmResetPassword',
+                                            )
+                                        }}
+                                        size={'medium'}
+                                        type={'secondary'}
+                                    />
+                                )}
                             </FieldsContainer>
                         </SettingSection>
                     </>
@@ -136,7 +142,7 @@ const Section = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     opacity: 0.7;
     padding-left: 10px;
@@ -151,10 +157,10 @@ const UserIdField = styled.div`
     align-items: center;
     justify-content: flex-start;
     border: 1px solid ${(props) => props.theme.colors.greyScale3};
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale6};
     background: transparent;
-    height: 50px;
-    border-radius: 8px;
+    height: 44px;
+    border-radius: 5px;
     width: fill-available;
     padding: 0 15px;
     font-size: 14px;

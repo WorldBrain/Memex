@@ -129,7 +129,7 @@ export const doubleArrow = browser.runtime.getURL('/img/doubleArrow.svg')
 
 export const webLogo = browser.runtime.getURL('/img/web-logo.svg')
 export const mediumLogo = browser.runtime.getURL('/img/medium-logo.svg')
-export const twitterLogo = browser.runtime.getURL('/img/twitter-logo.svg')
+export const twitterLogo = browser.runtime.getURL('/img/twitter.svg')
 export const substackLogo = browser.runtime.getURL('/img/substack-logo.svg')
 export const webMonetizationLogo = browser.runtime.getURL(
     '/img/web-monetization-logo.svg',
@@ -142,7 +142,7 @@ export const threadIcon = null
 export const newFeed = null
 export const checkedRound = null
 export const bell = null
-export const arrowDown = null
+export const arrowDown = browser.runtime.getURL('/img/arrowDown.svg')
 export const youtubeLogo = browser.runtime.getURL('/img/youtube-logo.svg')
 export const spotifyLogo = browser.runtime.getURL('/img/spotify-logo.svg')
 export const macLogo = browser.runtime.getURL('/img/apple_logo.svg')

@@ -26,13 +26,13 @@ const Concurrency = ({ concurrency, onConcurrencyChange }) => (
 )
 
 const KeyboardInput = styled.input`
-    background: ${(props) => props.theme.colors.black};
+    background: ${(props) => props.theme.colors.greyScale2};
     height: 40px;
     width: 30px;
     padding: 0 3px;
     align-items: center;
     justify-content: center;
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale5};
     border: 1px solid ${(props) => props.theme.colors.greyScale3};
     outline: none;
     text-align: center;
@@ -54,7 +54,7 @@ const LabelMain = styled.div`
 `
 
 const SubLabel = styled.div`
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     font-weight: 300;
 `

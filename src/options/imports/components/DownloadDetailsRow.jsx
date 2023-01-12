@@ -37,7 +37,7 @@ const UrlCol = styled.span`
 `
 
 const ErrorCol = styled.span`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
 `
 

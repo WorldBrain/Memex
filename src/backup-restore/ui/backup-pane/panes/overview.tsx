@@ -363,7 +363,7 @@ const Number = styled.div`
 `
 
 const SubTitle = styled.div`
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 16px;
     font-weight: normal;
     font-weight: 300;

@@ -14,7 +14,7 @@ const RemovedText = (props) => {
 
 const RemoveContainer = styled.div`
     box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.1);
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     padding: 20px;
     grid-gap: 15px;
     font-size: 14px;

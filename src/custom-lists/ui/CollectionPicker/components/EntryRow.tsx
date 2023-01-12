@@ -103,7 +103,7 @@ class EntryRow extends React.Component<Props> {
                                 // padding="6px"
                                 icon={'people'}
                                 hoverOff
-                                color="lighterText"
+                                color="greyScale5"
                             />
                         </TooltipBox>
                     )}

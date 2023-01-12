@@ -307,7 +307,7 @@ const SectionTitle = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     font-weight: 400;
 `

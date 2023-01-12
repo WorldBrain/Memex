@@ -110,7 +110,7 @@ export default function ListsSegment({
                                             heightAndWidth="16px"
                                             hoverOff
                                             icon="peopleFine"
-                                            color="greyScale8"
+                                            color="greyScale5"
                                         />
                                     )}
                                     <SpaceName>{space.name}</SpaceName>

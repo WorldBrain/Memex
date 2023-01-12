@@ -96,7 +96,7 @@ const TextInput = styled.input`
     }
 
     &::placeholder {
-        color: ${(props) => props.theme.colors.lighterText};
+        color: ${(props) => props.theme.colors.greyScale5};
     }
 `
 
@@ -116,7 +116,7 @@ const TextArea = styled.textarea`
     }
 
     &::placeholder {
-        color: ${(props) => props.theme.colors.greyScale8};
+        color: ${(props) => props.theme.colors.greyScale5};
     }
 `
 

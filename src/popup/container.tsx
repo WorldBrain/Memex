@@ -484,7 +484,7 @@ const LoadingBox = styled.div`
 
 const NoticeSubTitle = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 300;
     padding-bottom: 15px;
     text-align: center;

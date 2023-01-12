@@ -604,7 +604,7 @@ const TextInput = styled(SimpleTextInput)`
     background: transparent;
 
     &::placeholder {
-        color: ${(props) => props.theme.colors.greyScale8};
+        color: ${(props) => props.theme.colors.greyScale5};
     }
 `
 

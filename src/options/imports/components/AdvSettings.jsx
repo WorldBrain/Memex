@@ -59,7 +59,7 @@ AdvSettings.propTypes = {
 
 const Container = styled.div`
     margin-top: 24px;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
     padding-top: 20px;
 `
 
@@ -83,7 +83,7 @@ const SettingsListItem = styled.div`
 `
 
 const SectionTitleSmall = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale6};
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 10px;

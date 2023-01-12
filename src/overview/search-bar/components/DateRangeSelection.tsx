@@ -348,7 +348,7 @@ const DateRangeDiv = styled.div`
     }
 
     .react-datepicker__header .react-datepicker__day-name {
-        color: ${(props) => props.theme.colors.greyScale8};
+        color: ${(props) => props.theme.colors.greyScale5};
     }
 
     .react-datepicker__day--outside-month {

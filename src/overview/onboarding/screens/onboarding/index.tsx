@@ -243,7 +243,7 @@ const DisplayNameContainer = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 12px;
     opacity: 0.7;
     padding-left: 10px;
@@ -281,13 +281,13 @@ const TextInput = styled.input`
     outline: none;
     height: fill-available;
     width: fill-available;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     border: none;
     background: transparent;
 
     &::placeholder {
-        color: ${(props) => props.theme.colors.lighterText};
+        color: ${(props) => props.theme.colors.greyScale5};
     }
 `
 
@@ -333,7 +333,7 @@ const Title = styled.div`
 `
 
 const DescriptionText = styled.div`
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 18px;
     font-weight: 300;
     margin-bottom: 34px;

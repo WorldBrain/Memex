@@ -58,7 +58,7 @@ const Input = styled.input`
     color: ${(props) => props.theme.colors.white};
     background: inherit;
     &::placeholder {
-        color: ${(props) => props.theme.colors.greyScale8};
+        color: ${(props) => props.theme.colors.greyScale5};
     }
 
     &:focus {
@@ -110,7 +110,7 @@ const CreateButton = styled.div`
     display: flex;
     padding: 5px 10px;
     align-items: flex-start;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     cursor: pointer;
     border-radius: 5px;

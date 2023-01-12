@@ -173,7 +173,7 @@ const TextMain = styled.span`
 `
 const TextSecondary = styled.span`
     font-size: 12px;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     white-space: nowrap;
 `
 const CancelBtn = styled.button``

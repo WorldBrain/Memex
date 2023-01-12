@@ -295,7 +295,7 @@ const ContextMenuContainer = styled.div`
 
 const SectionTitle = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 400;
     width: 100%;
     display: flex;
@@ -467,7 +467,7 @@ const DetailsText = styled.span`
     opacity: 0.8;
     font-size: 14px;
     font-family: 'Satoshi', sans-serif;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     margin-bottom: 5px;
     margin-top: -5px;
     text-align: center;

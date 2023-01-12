@@ -300,7 +300,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     this.props.autoFocus ||
                                     this.state.onEditClick
                                 }
-                                placeholder={`Add a private note.`}
+                                placeholder={`Write a note...`}
                                 isRibbonCommentBox={
                                     this.props.isRibbonCommentBox
                                 }
@@ -315,7 +315,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     })
                                 }
                             >
-                                Add a private note.
+                                Write a note...
                             </EditorDummy>
                         )}
                     </EditorContainer>
@@ -372,7 +372,8 @@ const EditorDummy = styled.div`
     font-family: 'Satoshi', sans-serif;
     cursor: text;
     float: left;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-style: italic;
     display: flex;
     align-items: center;
 `
@@ -447,7 +448,7 @@ const SaveActionBar = styled.div`
 const MarkdownButtonContainer = styled.div`
     display: flex;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     align-items: center;
     cursor: pointer;
     margin-right: 15px;

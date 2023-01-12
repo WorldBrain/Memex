@@ -378,7 +378,7 @@ const HelpTextBlock = styled.span<{
     line-height: 15px;
     display: flex;
     align-items: center;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     text-decoration: none;
     white-space: nowrap;
 `
@@ -396,7 +396,7 @@ const HelpTextBlockLink = styled.a<{
 
 const TextBlockSmall = styled.div`
     font-weight: 300;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     text-align: left;
     white-space: pre-wrap;

@@ -473,7 +473,7 @@ const TopBarContainer = styled(Margin)`
 const MarkdownButtonContainer = styled.div`
     display: flex;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     align-items: center;
     cursor: pointer;
 `
@@ -552,5 +552,5 @@ const DescriptionContainer = styled.div`
 `
 
 const DescriptionText = styled(Markdown)`
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
 `

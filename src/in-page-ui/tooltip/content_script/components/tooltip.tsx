@@ -69,7 +69,7 @@ export function _renderButtons({ closeTooltip, state }) {
             <Icon
                 filePath={'removeX'}
                 heightAndWidth="20px"
-                color={'darkerIconColor'}
+                color={'greyScale3'}
             />
         </TooltipBox>
     )

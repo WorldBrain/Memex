@@ -239,6 +239,6 @@ const SuccessMessage = styled.div`
     border: none;
     font-weight: 300;
     justify-content: flex-start;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     flex-direction: column;
 `

@@ -238,7 +238,7 @@ const SubText = styled.span`
 
 const CheckBoxContainer = styled.div`
     margin-top: 30px;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
     padding-top: 10px;
     cursor: pointer;
 `

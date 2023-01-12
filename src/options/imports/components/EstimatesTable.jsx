@@ -152,7 +152,7 @@ const ImportRemaining = styled.span`
 
 const ImportRemainingInfo = styled.span`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale5};
     vertical-align: bottom;
 `
 
