@@ -239,7 +239,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         label={'Delete Space'}
                     />
                     <>
-                        {this.state.showSaveButton && (
+                        {this.state?.showSaveButton && (
                             <Icon
                                 filePath="check"
                                 color="prime1"
@@ -295,7 +295,7 @@ const ContextMenuContainer = styled.div`
 
 const SectionTitle = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.greyScale5};
+    color: ${(props) => props.theme.colors.greyScale4};
     font-weight: 400;
     width: 100%;
     display: flex;

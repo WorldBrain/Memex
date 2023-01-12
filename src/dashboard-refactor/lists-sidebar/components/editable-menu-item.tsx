@@ -1,3 +1,4 @@
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import React from 'react'
 import styled from 'styled-components'
 
@@ -87,11 +88,10 @@ export default class EditableMenuItem extends React.Component<Props, State> {
     }
 }
 
-const EditableListTitle = styled.input`
+const EditableListTitle = styled(TextField)`
     padding: 2px 10px;
     border-radius: 5px;
     outline: none;
-    background: white;
     flex: 2;
     display: flex;
     min-width: 50px;
@@ -101,13 +101,6 @@ const EditableListTitle = styled.input`
     outline: none;
     border: none;
     width: fill-available;
-    color: ${(props) => props.theme.colors.darkerText};
-    background: ${(props) => props.theme.colors.greyScale2};
-
-    &:focus {
-        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-        color: ${(props) => props.theme.colors.white};
-    }
 `
 
 const ErrMsg = styled.div`
