@@ -1,5 +1,5 @@
 import React from 'react'
-import styled, { ThemeProvider } from 'styled-components'
+import styled, { ThemeProvider, css } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import ListPickerLogic, {
@@ -397,6 +397,7 @@ class SpacePicker extends StatefulUIElement<
                 <OuterSearchBox
                     onClick={this.handleOuterSearchBoxClick}
                     width={this.props.width}
+                    context={this.props.context}
                 >
                     {this.renderMainContent()}
                 </OuterSearchBox>
@@ -474,6 +475,12 @@ const OuterSearchBox = styled.div`
     width: ${(props) => (props.width ? props.width : '300px')};
     padding: 0 5px;
     padding-top: 5px;
+
+    ${(props) =>
+        props.context === 'popup' &&
+        css`
+            width: fill-available;
+        `};
 `
 const PickerContainer = styled.div`
     border-radius: 12px;

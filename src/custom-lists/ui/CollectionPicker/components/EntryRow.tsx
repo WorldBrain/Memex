@@ -203,7 +203,6 @@ export const IconStyleWrapper = styled.div`
     display: flex;
     grid-gap: 10px;
     align-items: center;
-    flex: 1;
     justify-content: flex-end;
 `
 
@@ -250,6 +249,8 @@ const NameWrapper = styled.div`
     max-width: 80%;
     font-size: 14px;
     width: 100%;
+    min-width: 50px;
+    flex: 1;
 `
 
 export default EntryRow

@@ -38,7 +38,7 @@ export default [
         name: 'Backup',
         pathname: '/backup',
         component: BackupSettingsContainer,
-        icon: 'imports',
+        icon: 'folder',
     },
     {
         name: 'My Account',

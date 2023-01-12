@@ -300,6 +300,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <BackContainer
                         onClick={this.props.toggleShowCollectionsPicker}
                         header={'Add Page to Spaces'}
+                        showAutoSaved={this.state.showAutoSaved}
                     />
                     <CollectionPicker
                         selectEntry={(listId) =>
@@ -320,6 +321,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         }}
                         initialSelectedListIds={() => this.state.pageListIds}
                         actOnAllTabs={this.handleListAllTabs}
+                        context={'popup'}
                     />
                 </SpacePickerContainer>
             )
@@ -422,14 +424,14 @@ const MemexLogo = styled.div`
 const QuickSettingsContainer = styled.div`
     display: flex;
     grid-gap: 10px;
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale4};
     white-space: nowrap;
     align-items: center;
     padding-left: 20px;
 `
 
-const SpacerLine = styled.hr`
-    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+const SpacerLine = styled.div`
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     width: 100%;
 `
 

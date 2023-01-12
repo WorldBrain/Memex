@@ -611,8 +611,6 @@ export class SidebarContainerLogic extends UILogic<
             event.fullPageUrl,
         )
 
-        console.log('getlink')
-
         this.emitMutation({
             pageHasNetworkAnnotations: {
                 $set: hasNetworkActivity != 'no-activity',

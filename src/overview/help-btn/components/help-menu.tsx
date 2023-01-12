@@ -20,7 +20,7 @@ export class HelpMenu extends React.PureComponent<Props> {
         { text, link, small, icon, top }: MenuOption,
         i: number,
     ) => (
-        <MenuItem key={i} order={i} top={top}>
+        <MenuItem key={i} order={10 - i} top={top}>
             <Link target="_blank" href={link} top={top}>
                 {icon && (
                     <Icon
@@ -54,7 +54,7 @@ export class HelpMenu extends React.PureComponent<Props> {
 }
 
 const openAnimation = keyframes`
- 0% { padding-bottom: 10px; opacity: 0 }
+ 0% { padding-bottom: 5px; opacity: 0 }
  100% { padding-bottom: 0px; opacity: 1 }
 `
 
@@ -63,12 +63,13 @@ const Container = styled.div`
     position: relative;
     width: 250px;
     height: 420px;
+    overflow: hidden;
 `
 
 const MenuItem = styled.div<{ order: number }>`
     animation-name: ${openAnimation};
-    animation-delay: ${(props) => props.order * 40}ms;
-    animation-duration: 0.2s;
+    animation-delay: ${(props) => props.order * 15}ms;
+    animation-duration: 0.1s;
     animation-timing-function: ease-in-out;
     animation-fill-mode: backwards;
     overflow: hidden;

@@ -36,6 +36,7 @@ export interface SpacePickerDependencies {
     contentSharingBG: ContentSharingInterface
     width?: string
     autoFocus?: boolean
+    context?: string
 }
 
 // TODO: This needs cleanup - so inconsistent
