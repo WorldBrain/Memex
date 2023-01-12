@@ -33,16 +33,18 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     private annotationIdCounter = 0
     private listIdCounter = 0
 
-    /**
-     * Reverse index to make local list -> cached ID lookups easy
-     * Main case: annotations are given to cache for caching but only have references to local list IDs
+    /*
+     * Reverse indices to make local/remote list/annot -> cached ID lookups easy
      */
     private localListIdsToCacheIds = new Map<number, UnifiedList['unifiedId']>()
-
-    /**
-     * Reverse index to make remote annotation -> cached ID lookups easy
-     * Main case: de-duping downloaded shared annotations that already exist locally and thus are already cached.
-     */
+    private remoteListIdsToCacheIds = new Map<
+        string,
+        UnifiedList['unifiedId']
+    >()
+    private localAnnotIdsToCacheIds = new Map<
+        string,
+        UnifiedAnnotation['unifiedId']
+    >()
     private remoteAnnotIdsToCacheIds = new Map<
         string,
         UnifiedAnnotation['unifiedId']
@@ -81,10 +83,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     getAnnotationByLocalId: PageAnnotationsCacheInterface['getAnnotationByLocalId'] = (
         localId,
     ) => {
-        const matchingAnnotation = Object.values(this.annotations.byId).find(
-            (annot) => annot.localId != null && annot.localId === localId,
-        )
-        return matchingAnnotation ?? null
+        const unifiedAnnotId = this.localAnnotIdsToCacheIds.get(localId)
+        if (unifiedAnnotId == null) {
+            return null
+        }
+        return this.annotations.byId[unifiedAnnotId] ?? null
     }
 
     getAnnotationByRemoteId: PageAnnotationsCacheInterface['getAnnotationByRemoteId'] = (
@@ -110,10 +113,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     getListByRemoteId: PageAnnotationsCacheInterface['getListByRemoteId'] = (
         remoteId,
     ) => {
-        const matchingList = Object.values(this.lists.byId).find(
-            (list) => list.remoteId != null && list.remoteId === remoteId,
-        )
-        return matchingList ?? null
+        const unifiedListId = this.remoteListIdsToCacheIds.get(remoteId)
+        if (unifiedListId == null) {
+            return null
+        }
+        return this.lists.byId[unifiedListId] ?? null
     }
 
     private prepareListForCaching = (
@@ -122,6 +126,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         const unifiedId = this.generateListId()
         if (list.localId != null) {
             this.localListIdsToCacheIds.set(list.localId, unifiedId)
+        }
+        if (list.remoteId != null) {
+            this.remoteListIdsToCacheIds.set(list.remoteId, unifiedId)
         }
         return { ...list, unifiedId }
     }
@@ -134,6 +141,12 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         if (annotation.remoteId != null) {
             this.remoteAnnotIdsToCacheIds.set(
                 annotation.remoteId,
+                unifiedAnnotationId,
+            )
+        }
+        if (annotation.localId != null) {
+            this.localAnnotIdsToCacheIds.set(
+                annotation.localId,
                 unifiedAnnotationId,
             )
         }
@@ -199,6 +212,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         { now = Date.now() } = { now: Date.now() },
     ) => {
         this.annotationIdCounter = 0
+        this.localAnnotIdsToCacheIds.clear()
         this.remoteAnnotIdsToCacheIds.clear()
 
         const seedData = [...annotations]
@@ -216,6 +230,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     setLists: PageAnnotationsCacheInterface['setLists'] = (lists) => {
         this.listIdCounter = 0
         this.localListIdsToCacheIds.clear()
+        this.remoteListIdsToCacheIds.clear()
 
         const seedData = [...lists].map(this.prepareListForCaching)
         this.lists = initNormalizedState({
