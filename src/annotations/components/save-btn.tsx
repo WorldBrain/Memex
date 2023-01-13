@@ -180,21 +180,27 @@ export default class AnnotationSaveBtn extends React.PureComponent<
             <>
                 <SaveBtn tabIndex={this.props.tabIndex}>
                     {this.renderShareMenu()}
-                    <SaveBtnArrow
-                        onClick={() =>
-                            this.setState({
-                                isShareMenuShown: !this.state.isShareMenuShown,
-                            })
-                        }
-                        ref={this.privacySelectionButtonRef}
+                    <TooltipBox
+                        placement="bottom"
+                        tooltipText={'Change Note Privacy'}
                     >
-                        <Icon
-                            heightAndWidth="20px"
-                            filePath={icons.arrowDown}
-                            hoverOff
-                        />
-                        {this.props.isShared ? 'Public' : 'Private'}
-                    </SaveBtnArrow>
+                        <SaveBtnArrow
+                            onClick={() =>
+                                this.setState({
+                                    isShareMenuShown: !this.state
+                                        .isShareMenuShown,
+                                })
+                            }
+                            ref={this.privacySelectionButtonRef}
+                        >
+                            <Icon
+                                heightAndWidth="20px"
+                                filePath={icons.arrowDown}
+                                hoverOff
+                            />
+                            {this.props.isShared ? 'Public' : 'Private'}
+                        </SaveBtnArrow>
+                    </TooltipBox>
                     <TooltipBox
                         tooltipText={
                             <SaveButtonTooltipContainer>

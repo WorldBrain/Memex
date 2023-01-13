@@ -9,6 +9,7 @@ interface Props {
     children?: ReactNode | ReactNode[]
     resultItem: ReactNode
     resultsCount: number
+    commandKey: string
 }
 
 export default (props: Props) => {
@@ -18,6 +19,12 @@ export default (props: Props) => {
                 <Title>Create "{props.resultItem}"</Title>
                 {props.resultsCount === 0 && (
                     <KeyboardShortcuts size={'small'} keys={['Enter']} />
+                )}
+                {props.resultsCount > 0 && (
+                    <KeyboardShortcuts
+                        size={'small'}
+                        keys={[props.commandKey, 'Enter']}
+                    />
                 )}
             </ContentBox>
             {props.children}

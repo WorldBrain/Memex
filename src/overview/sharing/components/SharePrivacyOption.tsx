@@ -145,7 +145,7 @@ const PrivacyOptionTitle = styled.div`
     font-weight: bold;
     color: ${(props) => props.theme.colors.white};
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     width: fill-available;
 `

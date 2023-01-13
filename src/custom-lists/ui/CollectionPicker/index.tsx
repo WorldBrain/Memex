@@ -26,6 +26,7 @@ import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 
 class SpacePicker extends StatefulUIElement<
     SpacePickerDependencies,
@@ -43,6 +44,8 @@ class SpacePicker extends StatefulUIElement<
                 name,
             }),
     }
+
+    static MOD_KEY = getKeyName({ key: 'mod' })
 
     private displayListRef = React.createRef<HTMLDivElement>()
     private contextMenuRef = React.createRef<SpaceContextMenu>()
@@ -120,6 +123,9 @@ class SpacePicker extends StatefulUIElement<
 
     handleKeyPress = (event: KeyboardEvent) => {
         this.processEvent('keyPress', { event })
+    }
+    handleKeyUp = (event: KeyboardEvent) => {
+        this.processEvent('onKeyUp', { event })
     }
 
     renderListRow = (entry: SpaceDisplayEntry, index: number) => (
@@ -349,7 +355,8 @@ class SpacePicker extends StatefulUIElement<
                                 }
                                 searchInputRef={this.handleSetSearchInputRef}
                                 onChange={this.handleSearchInputChanged}
-                                onKeyPress={this.handleKeyPress}
+                                onKeyDown={this.handleKeyPress}
+                                onKeyUp={this.handleKeyUp}
                                 value={this.state.query}
                                 loading={
                                     this.state.loadingQueryResults === 'running'
@@ -383,6 +390,7 @@ class SpacePicker extends StatefulUIElement<
                                 resultItem={this.state.newEntryName}
                                 onPress={this.handleNewListPress}
                                 resultsCount={this.state.displayEntries.length}
+                                commandKey={SpacePicker.MOD_KEY}
                             />
                         )}
                     </PickerContainer>

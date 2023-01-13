@@ -12,7 +12,8 @@ const search = browser.runtime.getURL('/img/search.svg')
 
 interface Props {
     onChange: (value: string) => void
-    onKeyPress: (e: KeyboardEvent) => void
+    onKeyDown: (e: KeyboardEvent) => void
+    onKeyUp: (e: KeyboardEvent) => void
     searchInputPlaceholder: string
     value: string
     before: JSX.Element
@@ -56,7 +57,11 @@ export class PickerSearchInput extends React.Component<Props, State> {
                 value={this.props.value}
                 onChange={this.onChange}
                 onKeyDown={(e) => {
-                    this.props.onKeyPress(e)
+                    this.props.onKeyDown(e)
+                    e.stopPropagation()
+                }}
+                onKeyUp={(e) => {
+                    this.props.onKeyUp(e)
                     e.stopPropagation()
                 }}
                 type={'input'}
@@ -89,7 +94,7 @@ const SearchBox = styled.div<{ isFocused: boolean }>`
     ${(props) =>
         props.isFocused &&
         css`
-            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+            outline: 1px solid ${(props) => props.theme.colors.lineGrey};
         `}
 `
 
@@ -121,6 +126,6 @@ const SearchInput = styled(TextField)`
     }
 
     &:focus ${SearchBox} {
-        border: 1px solid ${(props) => props.theme.colors.greyScale3};
+        border: 1px solid ${(props) => props.theme.colors.lineGrey};
     }
 `

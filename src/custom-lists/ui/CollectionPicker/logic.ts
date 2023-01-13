@@ -56,6 +56,7 @@ export type SpacePickerEvent = UIEvent<{
     deleteList: { listId: number }
     newEntryPress: { entry: string }
     keyPress: { event: KeyboardEvent }
+    onKeyUp: { event: KeyboardEvent }
     focusInput: {}
 }>
 
@@ -94,6 +95,7 @@ export default class SpacePickerLogic extends UILogic<
 > {
     private searchInputRef?: HTMLInputElement
     private newTabKeys: KeyEvent[] = ['Enter', ',', 'Tab']
+    currentKeysPressed: KeyEvent[] = []
 
     constructor(protected dependencies: SpacePickerDependencies) {
         super()
@@ -188,15 +190,44 @@ export default class SpacePickerLogic extends UILogic<
         this.searchInputRef?.focus()
     }
 
+    onKeyUp: EventHandler<'onKeyUp'> = async ({ event: { event } }) => {
+        let currentKeys = this.currentKeysPressed
+        if (currentKeys.includes('Meta')) {
+            this.currentKeysPressed = []
+            return
+        }
+        currentKeys = currentKeys.filter((key) => key !== event.key)
+        this.currentKeysPressed = currentKeys
+    }
+
     keyPress: EventHandler<'keyPress'> = async ({
         event: { event },
         previousState,
     }) => {
-        if (
-            event.key === 'Enter' &&
-            event.metaKey &&
-            this.dependencies.onSubmit
-        ) {
+        let currentKeys: KeyEvent[] = this.currentKeysPressed
+        let keyPressed: any = event.key
+        currentKeys.push(keyPressed)
+
+        this.currentKeysPressed = currentKeys
+
+        if (currentKeys.includes('Enter') && currentKeys.includes('Meta')) {
+            if (previousState.newEntryName !== '') {
+                await this.newEntryPress({
+                    previousState,
+                    event: { entry: previousState.newEntryName },
+                })
+                this._updateFocus(
+                    (this.focusIndex = 0),
+                    previousState.displayEntries,
+                )
+                return
+            }
+            currentKeys = currentKeys.filter((key) => key !== event.key)
+            this.currentKeysPressed = []
+            return
+        }
+
+        if (event.key === 'Enter' && this.dependencies.onSubmit) {
             await this.dependencies.onSubmit()
             return
         }
@@ -207,6 +238,10 @@ export default class SpacePickerLogic extends UILogic<
                     previousState,
                     event: { entry: previousState.newEntryName },
                 })
+                this._updateFocus(
+                    (this.focusIndex = 0),
+                    previousState.displayEntries,
+                )
                 return
             }
 
@@ -217,6 +252,10 @@ export default class SpacePickerLogic extends UILogic<
                     },
                     previousState,
                 })
+                this._updateFocus(
+                    (this.focusIndex = 0),
+                    previousState.displayEntries,
+                )
                 return
             }
         }
