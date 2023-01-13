@@ -64,6 +64,7 @@ export type Props = RootState &
         | 'onVideosSearchSwitch'
         | 'onTwitterSearchSwitch'
         | 'onPDFSearchSwitch'
+        | 'onEventSearchSwitch'
     > & {
         isSpacesSidebarLocked?: boolean
         searchFilters?: any

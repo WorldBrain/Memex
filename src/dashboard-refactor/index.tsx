@@ -770,6 +770,9 @@ export class DashboardContainer extends StatefulUIElement<
                 onPDFSearchSwitch={() => {
                     this.processEvent('setSearchType', { searchType: 'pdf' })
                 }}
+                onEventSearchSwitch={() => {
+                    this.processEvent('setSearchType', { searchType: 'events' })
+                }}
                 onPageLinkCopy={(link) =>
                     this.processEvent('copyShareLink', {
                         link,

@@ -1799,7 +1799,7 @@ const PermissionInfoButton = styled.div`
 `
 
 const SpaceTitle = styled.div`
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 500;
     width: fill-available;
     color: ${(props) => props.theme.colors.white};

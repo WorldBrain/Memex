@@ -46,6 +46,7 @@ import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/cons
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import ListsSidebar from './lists-sidebar'
 import { allLists } from 'src/custom-lists/selectors'
+import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -702,6 +703,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     } =
                         previousState.searchResults.searchType === 'pages' ||
                         previousState.searchResults.searchType === 'videos' ||
+                        previousState.searchResults.searchType === 'events' ||
                         previousState.searchResults.searchType === 'twitter'
                             ? await this.searchPages(searchState)
                             : previousState.searchResults.searchType === 'notes'
@@ -786,6 +788,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         const result = await this.options.searchBG.searchPages(
             stateToSearchParams(state),
         )
+
+        if (state.searchResults.searchType === 'events') {
+            result.docs = result.docs.filter((item) => {
+                return eventProviderUrls.some((items) =>
+                    item.fullUrl.includes(items),
+                )
+            })
+        }
 
         return {
             ...utils.pageSearchResultToState(result),
