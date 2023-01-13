@@ -163,7 +163,7 @@ interface AnnotationsSidebarState {
     showSpaceSharePopout?: UnifiedList['unifiedId']
     linkCopyState: boolean
     othersOrOwnAnnotationsState: {
-        [unifiedId: string]: 'othersAnnotations' | 'ownAnnotations'
+        [unifiedId: string]: 'othersAnnotations' | 'ownAnnotations' | 'all'
     }
 }
 
@@ -372,6 +372,8 @@ export class AnnotationsSidebar extends React.Component<
             return annotation.creator?.id === this.props.currentUser?.id
         }).length
 
+        let allCounter = othersCounter + ownCounter
+
         if (
             (this.state.othersOrOwnAnnotationsState[unifiedListId] ??
                 'othersAnnotations') === 'othersAnnotations'
@@ -388,6 +390,9 @@ export class AnnotationsSidebar extends React.Component<
             annotationsData = annotationsData.filter((annotation) => {
                 return annotation.creator?.id === this.props.currentUser?.id
             })
+        }
+        if (this.state.othersOrOwnAnnotationsState[unifiedListId] === 'all') {
+            annotationsData = annotationsData
         }
 
         let listAnnotations: JSX.Element | JSX.Element[]
@@ -489,6 +494,11 @@ export class AnnotationsSidebar extends React.Component<
                 return (
                     <React.Fragment key={annotation.unifiedId}>
                         <AnnotationEditable
+                            selectedListId={
+                                this.props.annotationsCache.lists.byId[
+                                    this.props.selectedListId
+                                ]?.localId
+                            }
                             creatorId={annotation.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             pageUrl={this.props.normalizedPageUrl}
@@ -561,65 +571,98 @@ export class AnnotationsSidebar extends React.Component<
             <FollowedNotesContainer>
                 {(this.spaceOwnershipStatus(listData) === 'Contributor' ||
                     this.spaceOwnershipStatus(listData) === 'Creator') && (
-                    <NewAnnotationBoxMyAnnotations>
-                        {this.renderNewAnnotation(
-                            !selectedListMode ? unifiedListId : undefined,
-                        )}
-                    </NewAnnotationBoxMyAnnotations>
+                    <>
+                        <NewAnnotationBoxMyAnnotations>
+                            {this.renderNewAnnotation(
+                                !selectedListMode ? unifiedListId : undefined,
+                            )}
+                        </NewAnnotationBoxMyAnnotations>
+                        <RemoteOrLocalSwitcherContainer>
+                            <PrimaryAction
+                                size={'small'}
+                                active={
+                                    this.state.othersOrOwnAnnotationsState[
+                                        unifiedListId
+                                    ] === 'othersAnnotations' ||
+                                    this.state.othersOrOwnAnnotationsState[
+                                        unifiedListId
+                                    ] == null
+                                }
+                                label={
+                                    <SwitcherButtonContent>
+                                        Others
+                                        <SwitcherCounter>
+                                            {othersCounter}
+                                        </SwitcherCounter>
+                                    </SwitcherButtonContent>
+                                }
+                                type={'tertiary'}
+                                onClick={() => {
+                                    this.setState({
+                                        othersOrOwnAnnotationsState: {
+                                            ...this.state
+                                                .othersOrOwnAnnotationsState,
+                                            [unifiedListId]:
+                                                'othersAnnotations',
+                                        },
+                                    })
+                                }}
+                            />
+                            <PrimaryAction
+                                size={'small'}
+                                active={
+                                    this.state.othersOrOwnAnnotationsState[
+                                        unifiedListId
+                                    ] === 'ownAnnotations'
+                                }
+                                label={
+                                    <SwitcherButtonContent>
+                                        Yours
+                                        <SwitcherCounter>
+                                            {ownCounter}
+                                        </SwitcherCounter>
+                                    </SwitcherButtonContent>
+                                }
+                                type={'tertiary'}
+                                onClick={() => {
+                                    this.setState({
+                                        othersOrOwnAnnotationsState: {
+                                            ...this.state
+                                                .othersOrOwnAnnotationsState,
+                                            [unifiedListId]: 'ownAnnotations',
+                                        },
+                                    })
+                                }}
+                            />
+                            <PrimaryAction
+                                size={'small'}
+                                active={
+                                    this.state.othersOrOwnAnnotationsState[
+                                        unifiedListId
+                                    ] === 'all'
+                                }
+                                label={
+                                    <SwitcherButtonContent>
+                                        All
+                                        <SwitcherCounter>
+                                            {allCounter}
+                                        </SwitcherCounter>
+                                    </SwitcherButtonContent>
+                                }
+                                type={'tertiary'}
+                                onClick={() => {
+                                    this.setState({
+                                        othersOrOwnAnnotationsState: {
+                                            ...this.state
+                                                .othersOrOwnAnnotationsState,
+                                            [unifiedListId]: 'all',
+                                        },
+                                    })
+                                }}
+                            />
+                        </RemoteOrLocalSwitcherContainer>
+                    </>
                 )}
-                <RemoteOrLocalSwitcherContainer>
-                    <PrimaryAction
-                        size={'small'}
-                        active={
-                            this.state.othersOrOwnAnnotationsState[
-                                unifiedListId
-                            ] === 'othersAnnotations' ||
-                            this.state.othersOrOwnAnnotationsState[
-                                unifiedListId
-                            ] == null
-                        }
-                        label={
-                            <SwitcherButtonContent>
-                                Others
-                                <SwitcherCounter>
-                                    {othersCounter}
-                                </SwitcherCounter>
-                            </SwitcherButtonContent>
-                        }
-                        type={'tertiary'}
-                        onClick={() => {
-                            this.setState({
-                                othersOrOwnAnnotationsState: {
-                                    ...this.state.othersOrOwnAnnotationsState,
-                                    [unifiedListId]: 'othersAnnotations',
-                                },
-                            })
-                        }}
-                    />
-                    <PrimaryAction
-                        size={'small'}
-                        active={
-                            this.state.othersOrOwnAnnotationsState[
-                                unifiedListId
-                            ] === 'ownAnnotations'
-                        }
-                        label={
-                            <SwitcherButtonContent>
-                                Yours
-                                <SwitcherCounter>{ownCounter}</SwitcherCounter>
-                            </SwitcherButtonContent>
-                        }
-                        type={'tertiary'}
-                        onClick={() => {
-                            this.setState({
-                                othersOrOwnAnnotationsState: {
-                                    ...this.state.othersOrOwnAnnotationsState,
-                                    [unifiedListId]: 'ownAnnotations',
-                                },
-                            })
-                        }}
-                    />
-                </RemoteOrLocalSwitcherContainer>
                 {listAnnotations}
             </FollowedNotesContainer>
         )
@@ -1091,64 +1134,6 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    // private renderCopyPasterManager(annotationUrls) {
-    //     return (
-    //         <HoverBox>
-    //             <PageNotesCopyPaster
-    //                 copyPaster={this.props.copyPaster}
-    //                 annotationUrls={annotationUrls}
-    //                 normalizedPageUrls={this.props.normalizedPageUrls}
-    //                 onClickOutside={() =>
-    //                     this.setState({ showAllNotesCopyPaster: false })
-    //                 }
-    //             />
-    //         </HoverBox>
-    //     )
-    // }
-
-    // private renderAllNotesCopyPaster() {
-    //     if (!this.state.showAllNotesCopyPaster) {
-    //         return null
-    //     }
-
-    //     const annotUrls = this.props.annotationUrls()
-    //     return (
-    //         <CopyPasterWrapperTopBar>
-    //             {this.renderCopyPasterManager(annotUrls)}
-    //         </CopyPasterWrapperTopBar>
-    //     )
-    // }
-
-    // private renderAllNotesShareMenu() {
-    //     if (!this.state.showAllNotesShareMenu) {
-    //         return null
-    //     }
-
-    //     return (
-    //         <ShareMenuWrapperTopBar>
-    //             <ClickAway
-    //                 onClickAway={() =>
-    //                     this.setState({ showAllNotesShareMenu: false })
-    //                 }
-    //             >
-    //                 <HoverBox width="340px">
-    //                     <AllNotesShareMenu
-    //                         contentSharingBG={this.props.contentSharing}
-    //                         annotationsBG={this.props.annotationsShareAll}
-    //                         normalizedPageUrl={this.props.normalizedPageUrl}
-    //                         copyLink={async (link) => {
-    //                             this.props.copyPageLink(link)
-    //                         }}
-    //                         postBulkShareHook={(shareInfo) =>
-    //                             this.props.postBulkShareHook(shareInfo)
-    //                         }
-    //                     />
-    //                 </HoverBox>
-    //             </ClickAway>
-    //         </ShareMenuWrapperTopBar>
-    //     )
-    // }
-
     private renderAnnotationsEditable(annotations: UnifiedAnnotation[]) {
         const annots: JSX.Element[] = []
 
@@ -1198,6 +1183,11 @@ export class AnnotationsSidebar extends React.Component<
                         <AnnotationEditable
                             {...annot}
                             {...this.props}
+                            selectedListId={
+                                this.props.annotationsCache.lists.byId[
+                                    this.props.selectedListId
+                                ]?.localId
+                            }
                             creatorId={annot.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             lists={cacheUtils.getLocalListIdsForCacheIds(

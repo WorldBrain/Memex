@@ -229,10 +229,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         name: string | JSX.Element
         isShared: boolean
     }> {
-        return this.props.lists.map((id) => ({
-            id,
-            ...this.props.getListDetailsById(id),
-        }))
+        return this.props.lists
+            .filter((list) => list !== this.props.selectedListId)
+            .map((id) => ({
+                id,
+                ...this.props.getListDetailsById(id),
+            }))
     }
 
     private get hasSharedLists(): boolean {
@@ -780,7 +782,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
                             </ContentContainer>
-                            {(this.props.lists.length > 0 ||
+                            {((this.props.lists.length > 0 &&
+                                this.displayLists.length > 0) ||
                                 this.props.isEditing) && (
                                 <ListsSegment
                                     tabIndex={0}
