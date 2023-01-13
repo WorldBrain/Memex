@@ -8,9 +8,6 @@ import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
-import AnnotationEditable from 'src/annotations/components/AnnotationEditable'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import { PageNotesCopyPaster } from 'src/copy-paster'
 import {
     contentSharing,
     auth,

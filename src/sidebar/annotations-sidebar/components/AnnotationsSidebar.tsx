@@ -532,6 +532,7 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.spacePickerButtonRef
                             }
                             getYoutubePlayer={this.props.getYoutubePlayer}
+                            contextLocation={this.props.sidebarContext}
                         />
                         {listData.remoteId != null &&
                             annotation.remoteId != null && (
@@ -1203,6 +1204,7 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.annotationsCache,
                                 annot.unifiedListIds,
                             )}
+                            contextLocation={this.props.sidebarContext}
                             pageUrl={this.props.normalizedPageUrl}
                             body={annot.body}
                             comment={annot.comment}
@@ -1234,7 +1236,6 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.theme.canClickAnnotations &&
                                 annot.body?.length > 0
                             }
-                            contextLocation={this.props.sidebarContext}
                             passDownRef={ref}
                             shareButtonRef={this.props.shareButtonRef}
                             initShowSpacePicker={
