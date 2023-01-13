@@ -96,6 +96,7 @@ export interface AnnotationProps {
     pageUrl?: string
     creatorId?: string | number
     currentUserId?: string | number
+    selectedListId?: number
 }
 
 export interface AnnotationEditableEventProps {
