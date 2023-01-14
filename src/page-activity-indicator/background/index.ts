@@ -185,6 +185,15 @@ export class PageActivityIndicatorBackground {
             : 'no-annotations'
     }
 
+    private async getCurrentUser(): Promise<UserReference | null> {
+        const userId = await this.deps.getCurrentUserId()
+        if (userId == null) {
+            return null
+        }
+
+        return { type: 'user-reference', id: userId }
+    }
+
     createFollowedList: PageActivityIndicatorStorage['createFollowedList'] = (
         data,
     ) => this.storage.createFollowedList(data)
@@ -243,14 +252,13 @@ export class PageActivityIndicatorBackground {
     }
 
     async syncFollowedLists(): Promise<void> {
-        const userId = await this.deps.getCurrentUserId()
-        if (userId == null) {
+        const user = await this.getCurrentUser()
+        if (user == null) {
             return
         }
-        const sharedLists = await this.getAllUserFollowedSharedListsFromServer({
-            id: userId,
-            type: 'user-reference',
-        })
+        const sharedLists = await this.getAllUserFollowedSharedListsFromServer(
+            user,
+        )
         const existingFollowedListsLookup = await this.storage.findAllFollowedLists()
 
         // Remove any local followedLists that don't have an associated remote sharedList (carry over from old implementation, b)
@@ -278,8 +286,8 @@ export class PageActivityIndicatorBackground {
         /** If defined, will constrain the sync to only these followedLists. Else will sync all. */
         forFollowedLists?: FollowedList[]
     }): Promise<void> {
-        const userId = await this.deps.getCurrentUserId()
-        if (userId == null) {
+        const currentUser = await this.getCurrentUser()
+        if (currentUser == null) {
             return
         }
         const now = opts?.now ?? Date.now()
@@ -309,6 +317,7 @@ export class PageActivityIndicatorBackground {
             const sharedAnnotationListEntries = await contentSharing.getAnnotationListEntries(
                 {
                     listReference,
+                    ignoreFromUser: currentUser,
                     // NOTE: We have to always get all the annotation entries as there's way to determine the true->false case for `followedListEntry.hasAnnotations` if you only have partial results
                     // from: localFollowedList?.lastSync,
                 },
