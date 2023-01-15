@@ -188,6 +188,7 @@ export class DashboardContainer extends StatefulUIElement<
                           listId: listData.id,
                       })
                 : undefined,
+            allLists: this.state.listsSidebar.listData,
         }
     }
 

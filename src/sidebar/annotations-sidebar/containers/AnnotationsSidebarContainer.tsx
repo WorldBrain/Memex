@@ -298,6 +298,18 @@ export class AnnotationsSidebarContainer<
                     unifiedAnnotationId,
                     isEditing: false,
                 }),
+
+            addPageToList: (listId) => {
+                let annotationUnifiedID = annotation.unifiedId
+                this.processEvent('updateListsForAnnotation', {
+                    added: listId,
+                    deleted: undefined,
+                    unifiedAnnotationId: annotationUnifiedID,
+                })
+                // this.processEvent('setNewPageNoteLists', {
+                //     lists: [...this.state.commentBox.lists, listId],
+                // })
+            },
         }
     }
 

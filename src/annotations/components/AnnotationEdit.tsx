@@ -29,6 +29,7 @@ export interface AnnotationEditEventProps {
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
     onListsBarPickerBtnClick: React.MouseEventHandler
+    addPageToList?: any
 }
 
 export interface AnnotationEditGeneralProps {
@@ -138,6 +139,9 @@ class AnnotationEdit extends React.Component<Props> {
                     autoFocus
                     youtubeShortcut={this.state.youtubeShortcut}
                     spaceSuggestions={this.props.allLists}
+                    addNoteToSpace={(listId) => {
+                        this.props.addPageToList(listId)
+                    }}
                 />
             </EditorContainer>
         )
