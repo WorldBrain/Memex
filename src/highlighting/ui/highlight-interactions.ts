@@ -51,7 +51,7 @@ function getSelectionHtml(selection, pageUrl) {
     }
 
     let htmlImproved = specialHTMLhandling(html, pageUrl)
-    return turndownService.turndown(htmlImproved)
+    return htmlImproved
 }
 
 function specialHTMLhandling(html, pageUrl) {
@@ -233,7 +233,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
 
         if (videoURLWithTime != null) {
-            videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`
+            videoTimeStampForComment = `<a href="${videoURLWithTime}" target="_blank">[${humanTimestamp}]</a>`
         }
 
         if (
