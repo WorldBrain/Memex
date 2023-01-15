@@ -310,6 +310,7 @@ export class AnnotationsSidebar extends React.Component<
                     }
                     ref={this.annotationCreateRef as any}
                     getYoutubePlayer={this.props.getYoutubePlayer}
+                    allLists={this.props.annotationsCache.lists.byId}
                 />
             </NewAnnotationSection>
         )
@@ -499,6 +500,7 @@ export class AnnotationsSidebar extends React.Component<
                                     this.props.selectedListId
                                 ]?.localId
                             }
+                            allLists={this.props.annotationsCache.lists.byId}
                             creatorId={annotation.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             pageUrl={this.props.normalizedPageUrl}
@@ -1188,6 +1190,7 @@ export class AnnotationsSidebar extends React.Component<
                                     this.props.selectedListId
                                 ]?.localId
                             }
+                            allLists={this.props.annotationsCache.lists.byId}
                             creatorId={annot.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             lists={cacheUtils.getLocalListIdsForCacheIds(

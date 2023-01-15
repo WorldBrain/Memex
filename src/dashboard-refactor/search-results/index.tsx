@@ -52,6 +52,7 @@ import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { UnifiedList } from 'src/annotations/cache/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -270,6 +271,7 @@ export default class SearchResultsContainer extends React.Component<
 
         return (
             <AnnotationEditable
+                allLists={this.props.listData}
                 zIndex={zIndex}
                 key={noteId}
                 unifiedId={noteId}
@@ -410,6 +412,7 @@ export default class SearchResultsContainer extends React.Component<
                     getListDetailsById={this.props.getListDetailsById}
                     {...boundAnnotCreateProps}
                     contextLocation={'dashboard'}
+                    allLists={this.props.listData}
                 />
                 <NoteResultContainer>
                     {noteIds[notesType].length > 0 && (
@@ -871,6 +874,7 @@ export default class SearchResultsContainer extends React.Component<
                             {...this.props.listDetailsProps}
                             listId={this.props.selectedListId}
                             clearInbox={this.props.clearInbox}
+                            allLists={this.props.listData}
                         />
                     )}
                     <ReferencesContainer>

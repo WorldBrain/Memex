@@ -30,11 +30,12 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
-import type { UnifiedAnnotation } from '../cache/types'
+import type { UnifiedAnnotation, UnifiedList } from '../cache/types'
 import type { AnnotationCardInstanceLocation } from 'src/sidebar/annotations-sidebar/types'
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { truncateText } from 'src/annotations/utils'
+import { ListData } from 'src/dashboard-refactor/lists-sidebar/types'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -97,6 +98,7 @@ export interface AnnotationProps {
     creatorId?: string | number
     currentUserId?: string | number
     selectedListId?: number
+    allLists: { [id: string]: UnifiedList } | { [id: string]: ListData }
 }
 
 export interface AnnotationEditableEventProps {
@@ -418,6 +420,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         isShared={this.props.isShared}
                         isBulkShareProtected={this.props.isBulkShareProtected}
                         getYoutubePlayer={this.props.getYoutubePlayer}
+                        allLists={this.props.allLists}
                     />
                 </AnnotationEditContainer>
             )

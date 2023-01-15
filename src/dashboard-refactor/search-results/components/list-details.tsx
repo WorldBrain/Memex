@@ -14,6 +14,8 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { sizeConstants } from '../../constants'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import { UnifiedList } from 'src/annotations/cache/types'
+import { ListData } from 'src/dashboard-refactor/lists-sidebar/types'
 
 export interface Props {
     listName: string
@@ -27,6 +29,7 @@ export interface Props {
     onAddContributorsClick?: React.MouseEventHandler
     listId?: number
     clearInbox?: () => void
+    allLists: { [id: string]: UnifiedList } | { [id: string]: ListData }
 }
 
 interface State {
@@ -99,6 +102,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                         onContentUpdate={(description) =>
                             this.setState({ description })
                         }
+                        spaceSuggestions={this.props.allLists}
                     />
                 </DescriptionEditorContainer>
             )

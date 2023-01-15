@@ -7,6 +7,8 @@ import MemexEditor, {
 } from '@worldbrain/memex-common/lib/editor'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { UnifiedList } from '../cache/types'
+import { ListData } from 'src/dashboard-refactor/lists-sidebar/types'
 
 interface State {
     editorHeight: string
@@ -36,6 +38,7 @@ export interface AnnotationEditGeneralProps {
     isBulkShareProtected?: boolean
     getYoutubePlayer?(): YoutubePlayer
     contextLocation?: string
+    allLists?: { [id: string]: UnifiedList } | { [id: string]: ListData }
 }
 
 export interface Props
@@ -134,6 +137,7 @@ class AnnotationEdit extends React.Component<Props> {
                     setEditorInstanceRef={(ref) => (this.editorRef = ref)}
                     autoFocus
                     youtubeShortcut={this.state.youtubeShortcut}
+                    spaceSuggestions={this.props.allLists}
                 />
             </EditorContainer>
         )
