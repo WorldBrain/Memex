@@ -96,6 +96,7 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
             ...Object.values(externalTsModules).map((mod) =>
                 path.resolve(context, `./external/${mod}`),
             ),
+            path.join(context, 'node_modules/zeed-dom'),
         ],
         use: [babelLoader, tsLoader],
     }
