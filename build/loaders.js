@@ -89,8 +89,10 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
     //  later as style-loader is nicer for dev.
     const styleLoader = injectStyles ? injectStylesLoader : extractStylesLoader
 
+    console.log(path.join(context, 'node_modules/zeed-dom'))
+
     const main = {
-        test: /\.(j|t)sx?$/,
+        test: /\.c?(j|t)sx?$/,
         include: [
             path.resolve(context, './src'),
             ...Object.values(externalTsModules).map((mod) =>

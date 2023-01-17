@@ -40,13 +40,13 @@ export class AddSpacesButton extends React.Component<
             <PrimaryAction
                 innerRef={this.props.spacePickerButtonRef}
                 type="tertiary"
-                size="small"
+                size="medium"
                 icon="plus"
                 iconColor={'prime1'}
                 onClick={(e) => {
                     this.props.onEditBtnClick?.(e)
                 }}
-                height="24px"
+                height={this.props.newLineOrientation ? '28px' : '24px'}
                 width={
                     this.props.hasNoLists ||
                     this.props.newLineOrientation === true
@@ -82,65 +82,94 @@ export default function ListsSegment({
     return (
         <Container padding={padding} {...props}>
             <ListsContainer newLineOrientation={newLineOrientation === true}>
-                <SpacesListContainer>
-                    {lists
-                        .filter(
-                            (l) =>
-                                !Object.values(SPECIAL_LIST_IDS).includes(
-                                    l.id,
-                                ) && l.id !== filteredbyListID,
-                        )
-                        .slice(0)
-                        .map((space) => {
-                            return (
-                                <ListSpaceContainer
-                                    key={space.id}
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        onListClick(space.id)
-                                    }}
-                                    isLoading={
-                                        space.name == null && space != null
-                                    }
-                                    title={space.name}
-                                >
-                                    {' '}
-                                    {space.isShared && (
-                                        <Icon
-                                            heightAndWidth="16px"
-                                            hoverOff
-                                            icon="peopleFine"
-                                            color="greyScale5"
-                                        />
-                                    )}
-                                    <SpaceName>{space.name}</SpaceName>
-                                </ListSpaceContainer>
+                <SpacesListContainer newLineOrientation={newLineOrientation}>
+                    <SpacePillList>
+                        {lists
+                            .filter(
+                                (l) =>
+                                    !Object.values(SPECIAL_LIST_IDS).includes(
+                                        l.id,
+                                    ) && l.id !== filteredbyListID,
                             )
-                        })}
-                    <AddSpacesButton
-                        hasNoLists={lists.length === 0}
-                        onEditBtnClick={onEditBtnClick}
-                        renderSpacePicker={renderSpacePicker}
-                        tabIndex={tabIndex}
-                        newLineOrientation={newLineOrientation}
-                        spacePickerButtonRef={spacePickerButtonRef}
-                    />
+                            .slice(0)
+                            .map((space) => {
+                                return (
+                                    <ListSpaceContainer
+                                        key={space.id}
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            onListClick(space.id)
+                                        }}
+                                        isLoading={
+                                            space.name == null && space != null
+                                        }
+                                        title={space.name}
+                                    >
+                                        {' '}
+                                        {space.isShared && (
+                                            <Icon
+                                                heightAndWidth="16px"
+                                                hoverOff
+                                                icon="peopleFine"
+                                                color="greyScale5"
+                                            />
+                                        )}
+                                        <SpaceName>{space.name}</SpaceName>
+                                    </ListSpaceContainer>
+                                )
+                            })}
+                        {newLineOrientation ? undefined : (
+                            <AddSpacesButton
+                                hasNoLists={lists.length === 0}
+                                onEditBtnClick={onEditBtnClick}
+                                renderSpacePicker={renderSpacePicker}
+                                tabIndex={tabIndex}
+                                newLineOrientation={newLineOrientation}
+                                spacePickerButtonRef={spacePickerButtonRef}
+                            />
+                        )}
+                    </SpacePillList>
+                    {!newLineOrientation ? undefined : (
+                        <AddSpacesButton
+                            hasNoLists={lists.length === 0}
+                            onEditBtnClick={onEditBtnClick}
+                            renderSpacePicker={renderSpacePicker}
+                            tabIndex={tabIndex}
+                            newLineOrientation={newLineOrientation}
+                            spacePickerButtonRef={spacePickerButtonRef}
+                        />
+                    )}
                 </SpacesListContainer>
             </ListsContainer>
         </Container>
     )
 }
 
+const SpacePillList = styled.div`
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+`
+
 const SpaceName = styled.div`
     text-overflow: ellipsis;
     overflow: hidden;
 `
 
-const SpacesListContainer = styled.div`
+const SpacesListContainer = styled.div<{ newLineOrientation: boolean }>`
     width: fill-available;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+
+    ${(props) =>
+        props.newLineOrientation &&
+        css`
+            flex-direction: column-reverse;
+            align-items: flex-start;
+            grid-gap: 5px;
+            flex-wrap: wrap;
+        `};
 `
 
 const Container = styled.div<{ padding: string }>`

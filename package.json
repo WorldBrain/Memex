@@ -47,6 +47,7 @@
             "pre-commit": "pretty-quick --staged"
         }
     },
+    "resolutions": { "prosemirror-model": "1.8.2" },
     "dependencies": {
         "@josephg/resolvable": "^1.0.0",
         "@popperjs/core": "^2.11.6",
@@ -62,6 +63,7 @@
         "@tiptap/extension-mention": "^2.0.0-beta.55",
         "@tiptap/extension-placeholder": "^2.0.0-beta.43",
         "@tiptap/extension-typography": "^2.0.0-beta.19",
+        "@tiptap/html": "^2.0.0-beta.55",
         "@tiptap/react": "^2.0.0-beta.115",
         "@tiptap/starter-kit": "^2.0.0-beta.115",
         "@tiptap/suggestion": "^2.0.0-beta.55",

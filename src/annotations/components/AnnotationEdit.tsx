@@ -30,6 +30,7 @@ export interface AnnotationEditEventProps {
     onCommentChange: (comment: string) => void
     onListsBarPickerBtnClick: React.MouseEventHandler
     addPageToList?: any
+    removeNoteFromSpace?: any
 }
 
 export interface AnnotationEditGeneralProps {
@@ -141,6 +142,9 @@ class AnnotationEdit extends React.Component<Props> {
                     spaceSuggestions={this.props.allLists}
                     addNoteToSpace={(listId) => {
                         this.props.addPageToList(listId)
+                    }}
+                    removeNoteFromSpace={(listId) => {
+                        this.props.removeNoteFromSpace(listId)
                     }}
                 />
             </EditorContainer>

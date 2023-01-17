@@ -306,9 +306,14 @@ export class AnnotationsSidebarContainer<
                     deleted: undefined,
                     unifiedAnnotationId: annotationUnifiedID,
                 })
-                // this.processEvent('setNewPageNoteLists', {
-                //     lists: [...this.state.commentBox.lists, listId],
-                // })
+            },
+            removeNoteFromSpace: (listId) => {
+                let annotationUnifiedID = annotation.unifiedId
+                this.processEvent('updateListsForAnnotation', {
+                    added: undefined,
+                    deleted: listId,
+                    unifiedAnnotationId: annotationUnifiedID,
+                })
             },
         }
     }
