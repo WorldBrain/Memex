@@ -407,30 +407,48 @@ export class SidebarContainerLogic extends UILogic<
             noteCreateState: { $set: 'success' },
             annotations: { $set: nextAnnotations },
             annotationCardInstances: {
-                $set: fromPairs(
-                    normalizedStateToArray(nextAnnotations)
-                        .map((annot) => [
-                            ...annot.unifiedListIds
-                                // Don't create annot card instances for foreign lists (won't show up in spaces tab)
-                                .filter(
-                                    (unifiedListId) =>
-                                        !this.options.annotationsCache.lists
-                                            .byId[unifiedListId]?.isForeignList,
+                $apply: (
+                    prev: SidebarContainerState['annotationCardInstances'],
+                ) =>
+                    fromPairs(
+                        normalizedStateToArray(nextAnnotations)
+                            .map((annot) => {
+                                const cardIdForMyAnnotsTab = generateAnnotationCardInstanceId(
+                                    annot,
                                 )
-                                .map((unifiedListId) => [
-                                    generateAnnotationCardInstanceId(
-                                        annot,
-                                        unifiedListId,
-                                    ),
-                                    initAnnotationCardInstance(annot),
-                                ]),
-                            [
-                                generateAnnotationCardInstanceId(annot),
-                                initAnnotationCardInstance(annot),
-                            ],
-                        ])
-                        .flat(),
-                ),
+
+                                return [
+                                    ...annot.unifiedListIds
+                                        // Don't create annot card instances for foreign lists (won't show up in spaces tab)
+                                        .filter(
+                                            (unifiedListId) =>
+                                                !this.options.annotationsCache
+                                                    .lists.byId[unifiedListId]
+                                                    ?.isForeignList,
+                                        )
+                                        .map((unifiedListId) => {
+                                            const cardIdForListInstance = generateAnnotationCardInstanceId(
+                                                annot,
+                                                unifiedListId,
+                                            )
+
+                                            return [
+                                                cardIdForListInstance,
+                                                prev[cardIdForListInstance] ??
+                                                    initAnnotationCardInstance(
+                                                        annot,
+                                                    ),
+                                            ]
+                                        }),
+                                    [
+                                        cardIdForMyAnnotsTab,
+                                        prev[cardIdForMyAnnotsTab] ??
+                                            initAnnotationCardInstance(annot),
+                                    ],
+                                ]
+                            })
+                            .flat(),
+                    ),
             },
         })
     }
