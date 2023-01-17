@@ -296,6 +296,10 @@ describe('SidebarContainerLogic', () => {
                 },
             ])
         })
+
+        it('should not reset annotation card instance states when annotations state changes', async () => {
+            expect(1).toBe(2)
+        })
     })
 
     describe('spaces tab', () => {
