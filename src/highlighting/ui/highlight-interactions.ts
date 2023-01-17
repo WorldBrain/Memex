@@ -233,7 +233,22 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
 
         if (videoURLWithTime != null) {
-            videoTimeStampForComment = `<a href="${videoURLWithTime}" target="_blank">[${humanTimestamp}]</a>`
+            // videoTimeStampForComment= {
+            //     type: 'text',
+            //     marks: [
+            //         {
+            //             type: 'link',
+            //             attrs: {
+            //                 class: 'youtubeTimestamp',
+            //                 href: `${videoURLWithTime}`,
+            //                 target: '_blank',
+            //             },
+            //         },
+            //     ],
+            //     text: `${humanTimestamp}`,
+            // }
+            // videoTimeStampForComment = JSON.stringify(videoTimeStampForComment)
+            ;`<a class="youtubeTimestap" href="${videoURLWithTime}" target="_blank">[${humanTimestamp}]</a>`
         }
 
         if (
