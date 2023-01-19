@@ -14,5 +14,4 @@ export interface RemoteBGScriptInterface {
     ) => Promise<void>
     openLearnMoreTab: (params?: OpenTabParams) => Promise<void>
     confirmBackgroundScriptLoaded: () => Promise<void>
-    fetchFollowedListEntryUpdates: () => Promise<void>
 }

@@ -66,7 +66,6 @@ class BackgroundScript {
             openOptionsTab: this.openOptionsPage,
             openOverviewTab: this.openDashboardPage,
             openLearnMoreTab: this.openLearnMorePage,
-            fetchFollowedListEntryUpdates: this.fetchFollowedListEntryUpdates,
             confirmBackgroundScriptLoaded: async () => {},
         }
 
@@ -335,10 +334,6 @@ class BackgroundScript {
         await this.chooseTabOpenFn(params)({
             url: LEARN_MORE_URL,
         })
-    }
-    private fetchFollowedListEntryUpdates: RemoteBGScriptInterface['fetchFollowedListEntryUpdates'] = async () => {
-        await this.deps.bgModules.pageActivityIndicator.syncFollowedListEntries()
-        await this.deps.bgModules.pageActivityIndicator.syncFollowedLists()
     }
 }
 

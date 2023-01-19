@@ -326,10 +326,11 @@ export class SidebarContainerLogic extends UILogic<
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         const {
-            fullPageUrl,
             shouldHydrateCacheOnInit,
+            pageActivityIndicatorBG,
             annotationsCache,
             initialState,
+            fullPageUrl,
         } = this.options
         annotationsCache.events.addListener(
             'newAnnotationsState',
@@ -339,16 +340,6 @@ export class SidebarContainerLogic extends UILogic<
             'newListsState',
             this.cacheListsSubscription,
         )
-
-        const hasNetworkActivity = await this.options.pageActivityIndicatorBG.getPageActivityStatus(
-            fullPageUrl,
-        )
-
-        this.emitMutation({
-            pageHasNetworkAnnotations: {
-                $set: hasNetworkActivity != 'no-activity',
-            },
-        })
 
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.cacheAnnotationsSubscription(annotationsCache.annotations)
@@ -361,14 +352,21 @@ export class SidebarContainerLogic extends UILogic<
                 showState: { $set: initialState ?? 'hidden' },
             })
 
+            const hasNetworkActivity = await pageActivityIndicatorBG.getPageActivityStatus(
+                fullPageUrl,
+            )
+
+            this.emitMutation({
+                pageHasNetworkAnnotations: {
+                    $set: hasNetworkActivity !== 'no-activity',
+                },
+            })
+
             if (shouldHydrateCacheOnInit && fullPageUrl != null) {
                 await this.hydrateAnnotationsCache(fullPageUrl, {
                     renderHighlights: true,
                 })
             }
-        })
-        this.emitMutation({
-            cacheLoadState: { $set: 'success' },
         })
         this.annotationsLoadComplete.resolve()
     }
@@ -649,21 +647,9 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         if (previousState.activeTab === 'spaces') {
-            const listsWithRemoteAnnots = normalizedStateToArray(
-                this.options.annotationsCache.lists,
-            ).filter(
-                (list) =>
-                    list.hasRemoteAnnotations &&
-                    list.remoteId != null &&
-                    previousState.listInstances[list.unifiedId]
-                        ?.annotationRefsLoadState === 'pristine', // Ensure it hasn't already been loaded
-            )
-
-            const nextState = await this.loadRemoteAnnotationReferencesForLists(
+            await this.loadRemoteAnnototationReferencesForCachedLists(
                 previousState,
-                listsWithRemoteAnnots,
             )
-            this.renderOpenSpaceInstanceHighlights(nextState)
         }
     }
 
@@ -1129,7 +1115,27 @@ export class SidebarContainerLogic extends UILogic<
         incoming,
     ) => {}
 
-    private async loadRemoteAnnotationReferencesForLists(
+    private async loadRemoteAnnototationReferencesForCachedLists(
+        state: SidebarContainerState,
+    ): Promise<void> {
+        const listsWithRemoteAnnots = normalizedStateToArray(
+            this.options.annotationsCache.lists,
+        ).filter(
+            (list) =>
+                list.hasRemoteAnnotationsToLoad &&
+                list.remoteId != null &&
+                state.listInstances[list.unifiedId]?.annotationRefsLoadState ===
+                    'pristine', // Ensure it hasn't already been loaded
+        )
+
+        const nextState = await this.loadRemoteAnnotationReferencesForSpecificLists(
+            state,
+            listsWithRemoteAnnots,
+        )
+        this.renderOpenSpaceInstanceHighlights(nextState)
+    }
+
+    private async loadRemoteAnnotationReferencesForSpecificLists(
         state: SidebarContainerState,
         lists: UnifiedList[],
     ): Promise<SidebarContainerState> {
@@ -1193,21 +1199,9 @@ export class SidebarContainerLogic extends UILogic<
         if (event.tab === 'annotations') {
             this.renderOwnHighlights(previousState)
         } else if (event.tab === 'spaces') {
-            const listsWithRemoteAnnots = normalizedStateToArray(
-                this.options.annotationsCache.lists,
-            ).filter(
-                (list) =>
-                    list.hasRemoteAnnotations &&
-                    list.remoteId != null &&
-                    previousState.listInstances[list.unifiedId]
-                        ?.annotationRefsLoadState === 'pristine', // Ensure it hasn't already been loaded
-            )
-
-            const nextState = await this.loadRemoteAnnotationReferencesForLists(
+            await this.loadRemoteAnnototationReferencesForCachedLists(
                 previousState,
-                listsWithRemoteAnnots,
             )
-            this.renderOpenSpaceInstanceHighlights(nextState)
         }
     }
 
@@ -1416,7 +1410,7 @@ export class SidebarContainerLogic extends UILogic<
         if (list.remoteId != null) {
             let nextState = state
             if (listInstance.annotationRefsLoadState === 'pristine') {
-                nextState = await this.loadRemoteAnnotationReferencesForLists(
+                nextState = await this.loadRemoteAnnotationReferencesForSpecificLists(
                     state,
                     [list],
                 )
@@ -1465,7 +1459,8 @@ export class SidebarContainerLogic extends UILogic<
 
         const {
             annotationsCache,
-            customListsBG: customLists,
+            customListsBG,
+            authBG,
             fullPageUrl,
         } = this.options
 
@@ -1490,7 +1485,7 @@ export class SidebarContainerLogic extends UILogic<
 
         // Else we're dealing with a foreign list which we need to load remotely
         await executeUITask(this, 'foreignSelectedListLoadState', async () => {
-            const sharedList = await customLists.fetchSharedListDataWithPageAnnotations(
+            const sharedList = await customListsBG.fetchSharedListDataWithPageAnnotations(
                 {
                     remoteListId: event.sharedListId,
                     normalizedPageUrl: normalizeUrl(fullPageUrl),

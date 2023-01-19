@@ -460,7 +460,7 @@ export async function main(
     }
 
     injectYoutubeContextMenu(annotationsFunctions)
-    setupWebUIActions({ contentScriptsBG, bgScriptBG })
+    setupWebUIActions({ contentScriptsBG, bgScriptBG, pageActivityIndicatorBG })
 
     return inPageUI
 }
@@ -574,10 +574,9 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
 
 export function setupWebUIActions(args: {
     contentScriptsBG: ContentScriptsInterface<'caller'>
+    pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     bgScriptBG: RemoteBGScriptInterface
 }) {
-    const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
-
     const confirmRequest = (requestId: number) => {
         const detail: MemexRequestHandledDetail = { requestId }
         const event = new CustomEvent(MEMEX_REQUEST_HANDLED_EVENT_NAME, {
@@ -598,7 +597,7 @@ export function setupWebUIActions(args: {
                 if (counter === 4) {
                     clearInterval(interval)
                 }
-                await bgScriptBG.fetchFollowedListEntryUpdates()
+                await args.pageActivityIndicatorBG.fetchFollowedListEntryUpdates()
             }, 5000)
             confirmRequest(detail.requestId)
         },
