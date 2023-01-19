@@ -111,7 +111,7 @@ export class AnnotationsSidebarContainer<
             name,
             localId: listId,
             unifiedAnnotationIds: [],
-            hasRemoteAnnotations: false,
+            hasRemoteAnnotationsToLoad: false,
             creator: this.props.currentUser,
         })
         return listId

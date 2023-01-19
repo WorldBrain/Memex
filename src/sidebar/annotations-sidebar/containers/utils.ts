@@ -23,10 +23,12 @@ export const initAnnotationCardInstance = (
 export const initListInstance = (
     list: Pick<
         UnifiedList,
-        'unifiedId' | 'unifiedAnnotationIds' | 'hasRemoteAnnotations'
+        'unifiedId' | 'unifiedAnnotationIds' | 'hasRemoteAnnotationsToLoad'
     >,
 ): ListInstance => ({
-    sharedAnnotationReferences: list.hasRemoteAnnotations ? [] : undefined,
+    sharedAnnotationReferences: list.hasRemoteAnnotationsToLoad
+        ? []
+        : undefined,
     annotationRefsLoadState: 'pristine',
     conversationsLoadState: 'pristine',
     annotationsLoadState: 'pristine',

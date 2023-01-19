@@ -11,7 +11,7 @@ export interface FollowedListEntry {
     creator: AutoPk
     entryTitle: string
     followedList: AutoPk
-    hasAnnotations: boolean
+    hasAnnotationsFromOthers: boolean
     normalizedPageUrl: string
     createdWhen: number
     updatedWhen: number
@@ -31,7 +31,7 @@ export interface RemotePageActivityIndicatorInterface {
             FollowedList,
             'sharedList' | 'creator' | 'name'
         > &
-            Pick<FollowedListEntry, 'hasAnnotations'>
+            Pick<FollowedListEntry, 'hasAnnotationsFromOthers'>
     }>
     getPageActivityStatus: (
         fullPageUrl: string,

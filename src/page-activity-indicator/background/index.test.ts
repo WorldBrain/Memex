@@ -35,7 +35,7 @@ const calcExpectedListEntries = (
                           },
                           {
                               id: expect.any(Number),
-                              hasAnnotations: DATA.annotationListEntries[
+                              hasAnnotationsFromOthers: DATA.annotationListEntries[
                                   sharedList
                               ]?.reduce(
                                   (acc, curr) =>
@@ -56,11 +56,11 @@ const calcExpectedListEntries = (
 const createExpectedListEntry = (
     entry: any,
     sharedList: AutoPk,
-    hasAnnotations: boolean,
+    hasAnnotationsFromOthers: boolean,
 ) =>
     sharedListEntryToFollowedListEntry(
         { ...entry, sharedList },
-        { hasAnnotations, id: expect.any(Number) },
+        { hasAnnotationsFromOthers, id: expect.any(Number) },
     )
 
 async function setupTest(opts: {
@@ -1404,7 +1404,7 @@ describe('Page activity indicator background module tests', () => {
                     extraEntries: [
                         sharedListEntryToFollowedListEntry(newSharedListEntry, {
                             id: expect.any(Number),
-                            hasAnnotations: false,
+                            hasAnnotationsFromOthers: false,
                         }),
                     ],
                 }),
@@ -1454,7 +1454,7 @@ describe('Page activity indicator background module tests', () => {
                             { ...newSharedListEntry, updatedWhen: 5 },
                             {
                                 id: expect.any(Number),
-                                hasAnnotations: true,
+                                hasAnnotationsFromOthers: true,
                             },
                         ),
                     ],

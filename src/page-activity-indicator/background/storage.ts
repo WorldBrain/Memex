@@ -35,7 +35,7 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                         entryTitle: { type: 'text' },
                         followedList: { type: 'string' },
                         normalizedPageUrl: { type: 'string' },
-                        hasAnnotations: { type: 'boolean' },
+                        hasAnnotationsFromOthers: { type: 'boolean' },
                         createdWhen: { type: 'timestamp' },
                         updatedWhen: { type: 'timestamp' },
                     },
@@ -93,7 +93,8 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                             normalizedPageUrl: '$normalizedPageUrl:string',
                         },
                         {
-                            hasAnnotations: '$hasAnnotations:boolean',
+                            hasAnnotationsFromOthers:
+                                '$hasAnnotationsFromOthers:boolean',
                             updatedWhen: '$updatedWhen:number',
                         },
                     ],
@@ -147,12 +148,12 @@ export default class PageActivityIndicatorStorage extends StorageModule {
     async createFollowedListEntry(
         data: Omit<
             FollowedListEntry,
-            'updatedWhen' | 'createdWhen' | 'hasAnnotations'
+            'updatedWhen' | 'createdWhen' | 'hasAnnotationsFromOthers'
         > &
             Partial<
                 Pick<
                     FollowedListEntry,
-                    'updatedWhen' | 'createdWhen' | 'hasAnnotations'
+                    'updatedWhen' | 'createdWhen' | 'hasAnnotationsFromOthers'
                 >
             >,
     ): Promise<AutoPk> {
@@ -160,7 +161,7 @@ export default class PageActivityIndicatorStorage extends StorageModule {
             creator: data.creator,
             entryTitle: data.entryTitle,
             followedList: data.followedList,
-            hasAnnotations: data.hasAnnotations ?? false,
+            hasAnnotationsFromOthers: data.hasAnnotationsFromOthers ?? false,
             normalizedPageUrl: data.normalizedPageUrl,
             createdWhen: data.createdWhen ?? Date.now(),
             updatedWhen: data.updatedWhen ?? Date.now(),
@@ -224,14 +225,14 @@ export default class PageActivityIndicatorStorage extends StorageModule {
     async updateFollowedListEntryHasAnnotations(
         data: Pick<
             FollowedListEntry,
-            'followedList' | 'normalizedPageUrl' | 'hasAnnotations'
+            'followedList' | 'normalizedPageUrl' | 'hasAnnotationsFromOthers'
         > &
             Partial<Pick<FollowedListEntry, 'updatedWhen'>>,
     ): Promise<void> {
         await this.operation('updateFollowedListEntryHasAnnotations', {
             followedList: data.followedList,
             normalizedPageUrl: data.normalizedPageUrl,
-            hasAnnotations: data.hasAnnotations,
+            hasAnnotationsFromOthers: data.hasAnnotationsFromOthers,
             updatedWhen: data.updatedWhen ?? Date.now(),
         })
     }

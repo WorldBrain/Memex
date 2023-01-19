@@ -331,7 +331,7 @@ export class AnnotationsSidebar extends React.Component<
         // TODO: Simplify this confusing condition
         if (
             !(listInstance.isOpen || selectedListMode) ||
-            (listData.hasRemoteAnnotations &&
+            (listData.hasRemoteAnnotationsToLoad &&
                 listInstance.annotationsLoadState === 'pristine')
         ) {
             return null
@@ -766,7 +766,7 @@ export class AnnotationsSidebar extends React.Component<
                             </TooltipBox>
                         ) : undefined}
                         {listInstance.annotationRefsLoadState !== 'success' &&
-                        listData.hasRemoteAnnotations ? (
+                        listData.hasRemoteAnnotationsToLoad ? (
                             this.renderLoader(undefined, 20)
                         ) : (
                             <FollowedListNoteCount active left="5px">
@@ -784,7 +784,7 @@ export class AnnotationsSidebar extends React.Component<
                                 >
                                     <TotalAnnotationsCounter>
                                         /
-                                        {listData.hasRemoteAnnotations
+                                        {listData.hasRemoteAnnotationsToLoad
                                             ? listInstance
                                                   .sharedAnnotationReferences
                                                   ?.length ?? 0
@@ -916,7 +916,7 @@ export class AnnotationsSidebar extends React.Component<
         lists.allIds.forEach((unifiedListId) => {
             if (
                 lists.byId[unifiedListId].unifiedAnnotationIds.length > 0 ||
-                lists.byId[unifiedListId].hasRemoteAnnotations
+                lists.byId[unifiedListId].hasRemoteAnnotationsToLoad
             ) {
                 allLists.push(lists.byId[unifiedListId])
             }

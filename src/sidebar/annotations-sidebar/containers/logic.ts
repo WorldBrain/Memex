@@ -1236,7 +1236,7 @@ export class SidebarContainerLogic extends UILogic<
 
         // This first clause covers the case of setting up conversations states for own shared lists, without entries from others
         if (
-            !list.hasRemoteAnnotations ||
+            !list.hasRemoteAnnotationsToLoad ||
             listInstance.sharedAnnotationReferences == null
         ) {
             const sharedAnnotationUnifiedIds = list.unifiedAnnotationIds.filter(
@@ -1507,7 +1507,7 @@ export class SidebarContainerLogic extends UILogic<
                 creator: sharedList.creator,
                 description: sharedList.description,
                 isForeignList: true,
-                hasRemoteAnnotations: true,
+                hasRemoteAnnotationsToLoad: true,
                 unifiedAnnotationIds: [], // Will be populated soon when annots get cached
             })
 

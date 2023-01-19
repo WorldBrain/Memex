@@ -382,7 +382,7 @@ export const FOLLOWED_LISTS: FollowedList[] = [
 
 export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
     {
-        hasAnnotations: false,
+        hasAnnotationsFromOthers: false,
         creator: CREATOR_1.id,
         entryTitle: TAB_TITLE_1,
         followedList: SHARED_LIST_IDS[0],
@@ -391,7 +391,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2022-12-22').getTime(),
     },
     {
-        hasAnnotations: true,
+        hasAnnotationsFromOthers: true,
         creator: CREATOR_2.id,
         entryTitle: TAB_TITLE_2,
         followedList: SHARED_LIST_IDS[0],
@@ -400,7 +400,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2022-12-22').getTime(),
     },
     {
-        hasAnnotations: true,
+        hasAnnotationsFromOthers: true,
         creator: CREATOR_2.id,
         entryTitle: TAB_TITLE_1,
         followedList: SHARED_LIST_IDS[1],
@@ -409,7 +409,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2022-12-22').getTime(),
     },
     {
-        hasAnnotations: false,
+        hasAnnotationsFromOthers: false,
         creator: CREATOR_1.id,
         entryTitle: TAB_TITLE_2,
         followedList: SHARED_LIST_IDS[2],
@@ -418,7 +418,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2022-12-22').getTime(),
     },
     {
-        hasAnnotations: true,
+        hasAnnotationsFromOthers: true,
         creator: CREATOR_1.id,
         entryTitle: TAB_TITLE_1,
         followedList: SHARED_LIST_IDS[3],

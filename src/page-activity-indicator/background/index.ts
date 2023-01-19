@@ -146,7 +146,7 @@ export class PageActivityIndicatorBackground {
         const followedListHasAnnotsById = new Map(
             followedListEntries.map((entry) => [
                 entry.followedList,
-                entry.hasAnnotations,
+                entry.hasAnnotationsFromOthers,
             ]),
         )
         const followedLists = await this.storage.findFollowedListsByIds([
@@ -157,7 +157,7 @@ export class PageActivityIndicatorBackground {
             [...followedLists.values()].map((list) => [
                 list.sharedList,
                 {
-                    hasAnnotations:
+                    hasAnnotationsFromOthers:
                         followedListHasAnnotsById.get(list.sharedList) ?? false,
                     sharedList: list.sharedList,
                     creator: list.creator,
@@ -178,7 +178,7 @@ export class PageActivityIndicatorBackground {
             return 'no-activity'
         }
         return followedListEntries.reduce(
-            (acc, curr) => acc || curr.hasAnnotations,
+            (acc, curr) => acc || curr.hasAnnotationsFromOthers,
             false,
         )
             ? 'has-annotations'
@@ -318,13 +318,13 @@ export class PageActivityIndicatorBackground {
                 {
                     listReference,
                     ignoreFromUser: currentUser,
-                    // NOTE: We have to always get all the annotation entries as there's way to determine the true->false case for `followedListEntry.hasAnnotations` if you only have partial results
+                    // NOTE: We have to always get all the annotation entries as there's way to determine the true->false case for `followedListEntry.hasAnnotationsFromOthers` if you only have partial results
                     // from: localFollowedList?.lastSync,
                 },
             )
 
             for (const entry of sharedListEntries) {
-                const hasAnnotations = !!sharedAnnotationListEntries[
+                const hasAnnotationsFromOthers = !!sharedAnnotationListEntries[
                     entry.normalizedUrl
                 ]?.length
                 const localFollowedListEntry = existingFollowedListEntryLookup.get(
@@ -342,17 +342,18 @@ export class PageActivityIndicatorBackground {
                                 creator: entry.creator.id,
                                 sharedList: entry.sharedList.id,
                             },
-                            { hasAnnotations },
+                            { hasAnnotationsFromOthers },
                         ),
                     )
                 } else if (
-                    localFollowedListEntry.hasAnnotations !== hasAnnotations
+                    localFollowedListEntry.hasAnnotationsFromOthers !==
+                    hasAnnotationsFromOthers
                 ) {
                     await this.storage.updateFollowedListEntryHasAnnotations({
                         normalizedPageUrl: entry.normalizedUrl,
                         followedList: entry.sharedList.id,
+                        hasAnnotationsFromOthers,
                         updatedWhen: now,
-                        hasAnnotations,
                     })
                 }
             }
@@ -377,7 +378,7 @@ export class PageActivityIndicatorBackground {
                         sharedList: entry.sharedList.id,
                     }),
                 )
-                if (localFollowedListEntry?.hasAnnotations) {
+                if (localFollowedListEntry?.hasAnnotationsFromOthers) {
                     continue
                 }
 
@@ -385,14 +386,14 @@ export class PageActivityIndicatorBackground {
                     normalizedPageUrl: entry.normalizedPageUrl,
                     followedList: entry.sharedList.id,
                     updatedWhen: now,
-                    hasAnnotations: true,
+                    hasAnnotationsFromOthers: true,
                 })
             }
 
             // This handles the case where the last annotation for an entry was deleted
             for (const localEntry of existingFollowedListEntryLookup.values()) {
                 if (
-                    localEntry.hasAnnotations &&
+                    localEntry.hasAnnotationsFromOthers &&
                     !sharedAnnotationListEntries[localEntry.normalizedPageUrl]
                         ?.length
                 ) {
@@ -400,7 +401,7 @@ export class PageActivityIndicatorBackground {
                         normalizedPageUrl: localEntry.normalizedPageUrl,
                         followedList: localEntry.followedList,
                         updatedWhen: now,
-                        hasAnnotations: false,
+                        hasAnnotationsFromOthers: false,
                     })
                 }
             }

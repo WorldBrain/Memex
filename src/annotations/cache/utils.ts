@@ -123,7 +123,7 @@ export const reshapeLocalListForCache = (
     creator: opts.extraData?.creator,
     description: list.description,
     unifiedAnnotationIds: [],
-    hasRemoteAnnotations: !!opts.hasRemoteAnnotations,
+    hasRemoteAnnotationsToLoad: !!opts.hasRemoteAnnotations,
     ...(opts.extraData ?? {}),
 })
 
@@ -140,7 +140,7 @@ export const reshapeFollowedListForCache = (
     creator: { type: 'user-reference', id: list.creator },
     description: undefined,
     unifiedAnnotationIds: [],
-    hasRemoteAnnotations: !!opts.hasRemoteAnnotations,
+    hasRemoteAnnotationsToLoad: !!opts.hasRemoteAnnotations,
     ...(opts.extraData ?? {}),
 })
 
@@ -211,12 +211,13 @@ export async function hydrateCache({
     const seenFollowedLists = new Set<AutoPk>()
 
     const listsToCache = localListsData.map((list) => {
-        let creator: UserReference = args.user
+        let creator = args.user
         let hasRemoteAnnotations = false
         const remoteId = remoteListIds[list.id]
         if (remoteId != null && followedListsData[remoteId]) {
             seenFollowedLists.add(followedListsData[remoteId].sharedList)
-            hasRemoteAnnotations = followedListsData[remoteId].hasAnnotations
+            hasRemoteAnnotations =
+                followedListsData[remoteId].hasAnnotationsFromOthers
             creator = {
                 type: 'user-reference',
                 id: followedListsData[remoteId].creator,
@@ -237,7 +238,7 @@ export async function hydrateCache({
         .forEach((list) =>
             listsToCache.push(
                 reshapeFollowedListForCache(list, {
-                    hasRemoteAnnotations: list.hasAnnotations,
+                    hasRemoteAnnotations: list.hasAnnotationsFromOthers,
                 }),
             ),
         )

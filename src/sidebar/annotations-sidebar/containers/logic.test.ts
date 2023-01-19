@@ -539,7 +539,7 @@ describe('SidebarContainerLogic', () => {
             const [unifiedListIdA, unifiedListIdB] = normalizedStateToArray(
                 annotationsCache.lists,
             )
-                .filter((list) => list.hasRemoteAnnotations)
+                .filter((list) => list.hasRemoteAnnotationsToLoad)
                 .map((list) => list.unifiedId)
 
             expect(emittedEvents).toEqual(expectedEvents)
@@ -680,7 +680,7 @@ describe('SidebarContainerLogic', () => {
             const [unifiedListIdA, unifiedListIdB] = normalizedStateToArray(
                 annotationsCache.lists,
             )
-                .filter((list) => list.hasRemoteAnnotations)
+                .filter((list) => list.hasRemoteAnnotationsToLoad)
                 .map((list) => list.unifiedId)
 
             expect(sidebar.state.listInstances).toEqual({
@@ -952,7 +952,7 @@ describe('SidebarContainerLogic', () => {
             // Open a list without remote annots to assert no download is attempted
             const unifiedListIdC = normalizedStateToArray(
                 annotationsCache.lists,
-            ).find((list) => !list.hasRemoteAnnotations).unifiedId
+            ).find((list) => !list.hasRemoteAnnotationsToLoad).unifiedId
 
             expect(sidebar.state.listInstances[unifiedListIdC].isOpen).toBe(
                 false,
@@ -2783,7 +2783,7 @@ describe('SidebarContainerLogic', () => {
                 name: sharedListId,
                 description: sharedListId,
                 creator: DATA.CREATOR_2,
-                hasRemoteAnnotations: true,
+                hasRemoteAnnotationsToLoad: true,
                 isForeignList: true,
                 unifiedAnnotationIds: [expect.any(String), expect.any(String)],
             })
