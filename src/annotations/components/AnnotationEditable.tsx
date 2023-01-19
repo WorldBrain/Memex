@@ -962,7 +962,7 @@ const CommentBox = styled.div`
     ${({ theme }: { theme: SidebarAnnotationTheme }) =>
         !theme.hasHighlight &&
         `
-        padding: 10px 20px 10px;
+        padding: 5px 20px 5px;
         border-top: none;
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;
