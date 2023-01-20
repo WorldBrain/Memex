@@ -1,7 +1,7 @@
 export const SELECT_SPACE_ANNOT_SUBTITLE =
-    'You are editing the Spaces of a public annotation. You may not want to change this selection in a bulk edit action.'
+    'You are editing the Spaces of a public annotation. Annotations with selectively added Spaces are by default protected from bulk changes to their privacy status. '
 export const SELECT_SPACE_ANNOT_MSG =
-    'Do you want to protect the privacy status of this annotation?'
+    'Do you want to change the privacy status of this annotation?'
 export const SELECT_SPACE_AFFIRM_LABEL = 'Protect selection'
 export const SELECT_SPACE_NEGATIVE_LABEL = 'Keep public status'
 

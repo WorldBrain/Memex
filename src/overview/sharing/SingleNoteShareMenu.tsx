@@ -15,6 +15,9 @@ import {
     PRIVATIZE_ANNOT_MSG,
     PRIVATIZE_ANNOT_AFFIRM_LABEL,
     PRIVATIZE_ANNOT_NEGATIVE_LABEL,
+    SELECT_SPACE_ANNOT_SUBTITLE,
+    SELECT_SPACE_AFFIRM_LABEL,
+    SELECT_SPACE_NEGATIVE_LABEL,
 } from './constants'
 import type { AnnotationSharingState } from 'src/content-sharing/background/types'
 
@@ -210,13 +213,15 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             confirmationMode.type === 'public-select-space'
                 ? SELECT_SPACE_ANNOT_MSG
                 : PRIVATIZE_ANNOT_MSG
+        const subTitleText = SELECT_SPACE_ANNOT_SUBTITLE
+
         const affirmativeLabel =
             confirmationMode.type === 'public-select-space'
-                ? undefined
+                ? SELECT_SPACE_AFFIRM_LABEL
                 : PRIVATIZE_ANNOT_AFFIRM_LABEL
         const negativeLabel =
             confirmationMode.type === 'public-select-space'
-                ? undefined
+                ? SELECT_SPACE_NEGATIVE_LABEL
                 : PRIVATIZE_ANNOT_NEGATIVE_LABEL
 
         const handleConfirmation = (affirmative: boolean) => () => {
@@ -242,6 +247,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         return (
             <ConfirmDialog
                 titleText={text}
+                subTitleText={subTitleText}
                 negativeLabel={negativeLabel}
                 affirmativeLabel={affirmativeLabel}
                 handleConfirmation={handleConfirmation}

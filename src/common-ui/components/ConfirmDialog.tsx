@@ -29,18 +29,18 @@ export default class ConfirmDialog extends React.PureComponent<Props> {
                 </TextContainer>
                 <ConfirmBtnRow>
                     <PrimaryAction
-                        label={affirmativeLabel ?? 'Yes'}
-                        onClick={handleConfirmation(true)}
-                        type={'primary'}
-                        size={'medium'}
-                        width={'181px'}
-                    />
-                    <PrimaryAction
                         label={negativeLabel ?? 'No'}
                         onClick={handleConfirmation(false)}
-                        type={'tertiary'}
+                        type={'primary'}
                         size={'medium'}
-                        width={'181px'}
+                        width={'210px'}
+                    />
+                    <PrimaryAction
+                        label={affirmativeLabel ?? 'Yes'}
+                        onClick={handleConfirmation(true)}
+                        type={'forth'}
+                        size={'medium'}
+                        width={'210px'}
                     />
                 </ConfirmBtnRow>
             </Container>
@@ -57,19 +57,19 @@ const TextContainer = styled.div`
 `
 
 const TitleText = styled.div`
-    font-size: 16px;
-    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 20px;
+    color: ${(props) => props.theme.colors.greyScale6};
     text-align: center;
-    font-weight: 800;
-    line-height: 24px;
+    font-weight: 500;
+    line-height: 30px;
 `
 
 const SubTitleText = styled.div`
-    font-size: 14px;
+    font-size: 16px;
     color: ${(props) => props.theme.colors.greyScale5};
     text-align: center;
     font-weight: 300;
-    line-height: 26px;
+    line-height: 24px;
     white-space: break-spaces;
     text-align: center;
 `
@@ -88,5 +88,5 @@ const Container = styled.div`
     justify-content: center;
     padding: 30px 30px;
     grid-gap: 20px;
-    max-width: 310px;
+    max-width: 400px;
 `
