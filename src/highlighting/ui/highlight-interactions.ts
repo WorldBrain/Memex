@@ -13,7 +13,10 @@ import { descriptorToRange } from './anchoring/index'
 import * as Raven from 'src/util/raven'
 import type { Annotation } from 'src/annotations/types'
 import * as anchoring from 'src/highlighting/ui/anchoring'
-import { generateAnnotationUrl } from 'src/annotations/utils'
+import {
+    generateAnnotationUrl,
+    shareOptsToPrivacyLvl,
+} from 'src/annotations/utils'
 import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
@@ -27,7 +30,6 @@ import TurndownService from 'turndown'
 import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import { UNDO_HISTORY } from 'src/constants'
-import { left } from '@popperjs/core'
 
 const turndownService = new TurndownService({
     headingStyle: 'atx',
@@ -283,7 +285,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
         try {
             const cacheAnnotation = reshapeAnnotationForCache(annotation, {
-                extraData: { creator: params.currentUser },
+                extraData: {
+                    creator: params.currentUser,
+                    privacyLevel: shareOptsToPrivacyLvl({
+                        shouldShare: params.shouldShare,
+                    }),
+                },
             })
             const { unifiedId } = params.annotationsCache.addAnnotation(
                 cacheAnnotation,
