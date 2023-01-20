@@ -36,7 +36,7 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
             <PopoutBox
                 targetElementRef={this.spaceContextMenuButton.current}
                 placement={'right-start'}
-                offsetX={10}
+                offsetX={15}
                 offsetY={-10}
                 closeComponent={(e) => {
                     this.toggleMenu(e)

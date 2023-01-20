@@ -375,12 +375,10 @@ export class AnnotationsSidebar extends React.Component<
         let allCounter = othersCounter + ownCounter
 
         if (
-            (this.state.othersOrOwnAnnotationsState[unifiedListId] ??
-                'othersAnnotations') === 'othersAnnotations'
+            !this.state.othersOrOwnAnnotationsState[unifiedListId] ||
+            this.state.othersOrOwnAnnotationsState[unifiedListId] === 'all'
         ) {
-            annotationsData = annotationsData.filter((annotation) => {
-                return annotation.creator?.id !== this.props.currentUser?.id
-            })
+            annotationsData = annotationsData
         }
 
         if (
@@ -391,8 +389,13 @@ export class AnnotationsSidebar extends React.Component<
                 return annotation.creator?.id === this.props.currentUser?.id
             })
         }
-        if (this.state.othersOrOwnAnnotationsState[unifiedListId] === 'all') {
-            annotationsData = annotationsData
+        if (
+            this.state.othersOrOwnAnnotationsState[unifiedListId] ===
+            'othersAnnotations'
+        ) {
+            annotationsData = annotationsData.filter((annotation) => {
+                return annotation.creator?.id !== this.props.currentUser?.id
+            })
         }
 
         let listAnnotations: JSX.Element | JSX.Element[]
@@ -583,10 +586,36 @@ export class AnnotationsSidebar extends React.Component<
                                 active={
                                     this.state.othersOrOwnAnnotationsState[
                                         unifiedListId
-                                    ] === 'othersAnnotations' ||
+                                    ] === 'all' ||
+                                    !this.state.othersOrOwnAnnotationsState[
+                                        unifiedListId
+                                    ]
+                                }
+                                label={
+                                    <SwitcherButtonContent>
+                                        All
+                                        <SwitcherCounter>
+                                            {allCounter}
+                                        </SwitcherCounter>
+                                    </SwitcherButtonContent>
+                                }
+                                type={'tertiary'}
+                                onClick={() => {
+                                    this.setState({
+                                        othersOrOwnAnnotationsState: {
+                                            ...this.state
+                                                .othersOrOwnAnnotationsState,
+                                            [unifiedListId]: 'all',
+                                        },
+                                    })
+                                }}
+                            />
+                            <PrimaryAction
+                                size={'small'}
+                                active={
                                     this.state.othersOrOwnAnnotationsState[
                                         unifiedListId
-                                    ] == null
+                                    ] === 'othersAnnotations'
                                 }
                                 label={
                                     <SwitcherButtonContent>
@@ -630,32 +659,6 @@ export class AnnotationsSidebar extends React.Component<
                                             ...this.state
                                                 .othersOrOwnAnnotationsState,
                                             [unifiedListId]: 'ownAnnotations',
-                                        },
-                                    })
-                                }}
-                            />
-                            <PrimaryAction
-                                size={'small'}
-                                active={
-                                    this.state.othersOrOwnAnnotationsState[
-                                        unifiedListId
-                                    ] === 'all'
-                                }
-                                label={
-                                    <SwitcherButtonContent>
-                                        All
-                                        <SwitcherCounter>
-                                            {allCounter}
-                                        </SwitcherCounter>
-                                    </SwitcherButtonContent>
-                                }
-                                type={'tertiary'}
-                                onClick={() => {
-                                    this.setState({
-                                        othersOrOwnAnnotationsState: {
-                                            ...this.state
-                                                .othersOrOwnAnnotationsState,
-                                            [unifiedListId]: 'all',
                                         },
                                     })
                                 }}
