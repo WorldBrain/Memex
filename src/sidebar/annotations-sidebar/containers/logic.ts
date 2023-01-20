@@ -187,8 +187,10 @@ export class SidebarContainerLogic extends UILogic<
 
             activeTab: 'annotations',
 
+            cacheLoadState: this.options.shouldHydrateCacheOnInit
+                ? 'pristine'
+                : 'success',
             loadState: 'pristine',
-            cacheLoadState: 'pristine',
             noteCreateState: 'pristine',
             secondarySearchState: 'pristine',
             remoteAnnotationsLoadState: 'pristine',
