@@ -274,8 +274,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                     shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
                                     description: (
                                         <>
-                                            Private to you <br /> until shared
-                                            (in bulk)
+                                            Private to you <br /> unless shared
+                                            in specific Spaces
                                         </>
                                     ),
                                 },
