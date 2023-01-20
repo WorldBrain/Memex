@@ -166,7 +166,7 @@ export const InitialComponent = ({
                     filePath={'removeX'}
                     heightAndWidth="16px"
                     onClick={closeTooltip}
-                    color={'greyScale3'}
+                    color={'greyScale4'}
                 />
             </TooltipBox>
         </ButtonDiv>

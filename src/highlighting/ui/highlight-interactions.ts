@@ -306,6 +306,8 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 cacheAnnotation,
             )
 
+            window.getSelection().empty()
+
             await this.renderHighlight(
                 { ...cacheAnnotation, unifiedId },
                 ({ openInEdit, unifiedAnnotationId }) => {
