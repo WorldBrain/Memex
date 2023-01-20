@@ -440,8 +440,9 @@ export default class CustomListBackground {
 
         const missingEntries = new Map<string, number>()
         for (const name of missing) {
-            const id = await this.createCustomList({ name })
+            const id = Date.now()
             missingEntries.set(name, id)
+            await this.createCustomList({ name, id })
         }
 
         const listIds = new Map([...existingLists, ...missingEntries])

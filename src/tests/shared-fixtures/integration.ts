@@ -43,6 +43,7 @@ export async function insertIntegrationTestData(
     if (includeLists) {
         listId = await backgroundModules.customLists.createCustomList({
             name: 'My list',
+            id: Date.now(),
         })
         if (includeCollection('pageListEntries')) {
             await backgroundModules.customLists.insertPageToList({

@@ -53,6 +53,7 @@ export class SharingTestHelper {
         const localId = await setup.backgroundModules.customLists.createCustomList(
             {
                 name,
+                id: Date.now(),
             },
         )
         this.lists[options.id] = { localId, name }

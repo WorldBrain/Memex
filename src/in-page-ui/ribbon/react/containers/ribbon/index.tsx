@@ -226,9 +226,8 @@ export default class RibbonContainer extends StatefulUIElement<
                             value: { added: null, deleted: id, selected: [] },
                         }),
                     createNewEntry: async (name) => {
-                        const listId = await this.props.customLists.createCustomList(
-                            { name },
-                        )
+                        const listId = Date.now()
+
                         this.props.annotationsCache.addList({
                             name,
                             localId: listId,
@@ -244,6 +243,10 @@ export default class RibbonContainer extends StatefulUIElement<
                                 deleted: null,
                                 selected: [],
                             },
+                        })
+                        await this.props.customLists.createCustomList({
+                            name: name,
+                            id: listId,
                         })
                         return listId
                     },

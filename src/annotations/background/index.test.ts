@@ -691,6 +691,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             )
                             listId = await customLists(setup).createCustomList({
                                 name: 'test',
+                                id: Date.now(),
                             })
                             // await directLinking(setup).insertAnnotToList(
                             //     {},
@@ -937,6 +938,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                         execute: async ({ setup }) => {
                             listId = await customLists(setup).createCustomList({
                                 name: 'test',
+                                id: Date.now(),
                             })
                             await customLists(setup).insertPageToList({
                                 id: listId,

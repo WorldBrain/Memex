@@ -30,11 +30,12 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
-import type { UnifiedAnnotation } from '../cache/types'
+import type { UnifiedAnnotation, UnifiedList } from '../cache/types'
 import type { AnnotationCardInstanceLocation } from 'src/sidebar/annotations-sidebar/types'
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { truncateText } from 'src/annotations/utils'
+import { ListData } from 'src/dashboard-refactor/lists-sidebar/types'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -454,9 +455,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         contextLocation={this.props.contextLocation}
                         getYoutubePlayer={this.props.getYoutubePlayer}
                     >
-                        {this.state.isTruncatedNote
+                        {comment}
+                        {/* {this.state.isTruncatedNote
                             ? this.state.truncatedTextComment
-                            : comment}
+                            : comment} */}
                     </NoteText>
                 </NoteTextBox>
             </CommentBox>
@@ -959,7 +961,7 @@ const CommentBox = styled.div`
     ${({ theme }: { theme: SidebarAnnotationTheme }) =>
         !theme.hasHighlight &&
         `
-        padding: 10px 20px 10px;
+        padding: 5px 20px 5px;
         border-top: none;
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;

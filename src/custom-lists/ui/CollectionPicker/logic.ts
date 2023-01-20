@@ -17,7 +17,7 @@ export interface SpaceDisplayEntry {
 }
 
 export interface SpacePickerDependencies {
-    createNewEntry: (name: string) => Promise<number>
+    createNewEntry: (name: string, id?: number) => Promise<number>
     selectEntry: (
         listId: number,
         options?: { protectAnnotation?: boolean },
@@ -694,7 +694,7 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     private async createAndDisplayNewList(name: string): Promise<number> {
-        const newId = await this.dependencies.createNewEntry(name)
+        const newId = Date.now()
         const newEntry: SpaceDisplayEntry = {
             name,
             localId: newId,
@@ -711,6 +711,7 @@ export default class SpacePickerLogic extends UILogic<
                 $set: [...this.defaultEntries],
             },
         } as UIMutation<SpacePickerState>)
+        await this.dependencies.createNewEntry(name, newId)
         return newId
     }
 

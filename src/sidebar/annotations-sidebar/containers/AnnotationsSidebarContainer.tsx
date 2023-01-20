@@ -104,15 +104,18 @@ export class AnnotationsSidebarContainer<
     }
 
     private createNewList = async (name: string) => {
-        const listId = await this.props.customListsBG.createCustomList({
-            name,
-        })
+        const listId = Date.now()
+
         this.props.annotationsCache.addList({
             name,
             localId: listId,
             unifiedAnnotationIds: [],
             hasRemoteAnnotationsToLoad: false,
             creator: this.props.currentUser,
+        })
+        await this.props.customListsBG.createCustomList({
+            name: name,
+            id: listId,
         })
         return listId
     }

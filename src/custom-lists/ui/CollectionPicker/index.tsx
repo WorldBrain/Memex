@@ -39,9 +39,10 @@ class SpacePicker extends StatefulUIElement<
     > = {
         spacesBG: collections,
         contentSharingBG: contentSharing,
-        createNewEntry: async (name) =>
+        createNewEntry: async (name, id?) =>
             collections.createCustomList({
                 name,
+                id,
             }),
     }
 
@@ -216,7 +217,7 @@ class SpacePicker extends StatefulUIElement<
             )
         }
 
-        if (this.state.query === '') {
+        if (this.state.query === '' && this.state.displayEntries.length === 0) {
             return (
                 <EmptyListsView>
                     <SectionCircle>

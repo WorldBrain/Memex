@@ -193,7 +193,8 @@ export class DashboardContainer extends StatefulUIElement<
 
     // TODO: move this to logic class - main reason it exists separately is that it needs to return the created list ID
     private async createNewListViaPicker(name: string): Promise<number> {
-        const listId = await this.props.listsBG.createCustomList({ name })
+        const listId = Date.now()
+
         this.processMutation({
             listsSidebar: {
                 listData: {
@@ -208,6 +209,8 @@ export class DashboardContainer extends StatefulUIElement<
                 },
             },
         })
+        await this.props.listsBG.createCustomList({ name: name, id: listId })
+
         return listId
     }
 

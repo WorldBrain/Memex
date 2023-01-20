@@ -317,7 +317,10 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         }
                         createNewEntry={async (name) => {
                             this.props.onCollectionAdd(name)
-                            return collections.createCustomList({ name })
+                            return collections.createCustomList({
+                                name: name,
+                                id: Date.now(),
+                            })
                         }}
                         initialSelectedListIds={() => this.state.pageListIds}
                         actOnAllTabs={this.handleListAllTabs}

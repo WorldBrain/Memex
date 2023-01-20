@@ -2895,9 +2895,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listCreateState: { $set: taskState } },
             }),
             async () => {
-                const listId = await this.options.listsBG.createCustomList({
-                    name: newListName,
-                })
+                const listId = Date.now()
 
                 this.emitMutation({
                     listsSidebar: {
@@ -2920,6 +2918,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                             $set: null,
                         },
                     },
+                })
+                await this.options.listsBG.createCustomList({
+                    name: newListName,
+                    id: listId,
                 })
             },
         )
