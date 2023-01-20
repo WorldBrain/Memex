@@ -651,81 +651,6 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderSelectedListPill() {
-        if (
-            // !this.state.selectedList?.remoteId ||
-            this.state.pillVisibility === 'hide'
-        ) {
-            return null
-        }
-        return (
-            <IsolatedViewPill
-                onClick={() => {
-                    this.processEvent('setPillVisibility', {
-                        value: 'unhover',
-                    })
-                    this.showSidebar()
-                }}
-                onMouseOver={() =>
-                    this.processEvent('setPillVisibility', {
-                        value: 'hover',
-                    })
-                }
-                onMouseLeave={() =>
-                    this.processEvent('setPillVisibility', {
-                        value: 'unhover',
-                    })
-                }
-                pillVisibility={this.state.pillVisibility}
-            >
-                <IconContainer pillVisibility={this.state.pillVisibility}>
-                    <Icon
-                        filePath="highlight"
-                        heightAndWidth="20px"
-                        hoverOff
-                        color="prime1"
-                    />
-                </IconContainer>
-                <IsolatedPillContent>
-                    <TogglePillHoverSmallText
-                        pillVisibility={this.state.pillVisibility}
-                    >
-                        All annotations added to Space
-                    </TogglePillHoverSmallText>
-                    <TogglePillMainText>
-                        {
-                            this.props.annotationsCache.lists.byId[
-                                this.state.selectedListId
-                            ].name
-                        }
-                    </TogglePillMainText>
-                </IsolatedPillContent>
-                <CloseContainer pillVisibility={this.state.pillVisibility}>
-                    <CloseBox>
-                        <TooltipBox
-                            tooltipText={'Exit focus mode for this Space'}
-                            placement={'left-start'}
-                        >
-                            <Icon
-                                filePath="removeX"
-                                heightAndWidth="22px"
-                                onClick={(event) => {
-                                    event.stopPropagation()
-                                    this.processEvent('setPillVisibility', {
-                                        value: 'hide',
-                                    })
-                                    this.processEvent('setSelectedList', {
-                                        unifiedListId: null,
-                                    })
-                                }}
-                            />
-                        </TooltipBox>
-                    </CloseBox>
-                </CloseContainer>
-            </IsolatedViewPill>
-        )
-    }
-
     render() {
         let playerId: string | undefined = undefined
         if (
@@ -741,16 +666,7 @@ export class AnnotationsSidebarContainer<
         if (!this.state.fullPageUrl) {
             return null
         }
-        const selectedList = this.state.selectedListId ?? undefined
 
-        if (selectedList) {
-            if (
-                this.state.showState === 'hidden' &&
-                this.props.sidebarContext === 'in-page'
-            ) {
-                return this.renderSelectedListPill()
-            }
-        }
         const style = {
             height: '100%',
             position: 'relative',
@@ -1023,116 +939,6 @@ const GlobalStyle = createGlobalStyle<{
     #outerContainer {
         width: ${(props) => props.sidebarWidth};
     }
-`
-
-const IsolatedViewPill = styled.div<{ pillVisibility: string }>`
-    display: flex;
-    position: relative;
-    padding: 10px 20px 10px 15px;
-    justify-content: flex-start;
-    align-items: flex-end;
-    max-height: 26px;
-    max-width: 300px;
-    min-width: 50px;
-    grid-gap: 10px;
-    position: fixed;
-    width: fit-content;
-    bottom: 20px;
-    right: 20px;
-    cursor: pointer;
-    background-color: ${(props) => props.theme.colors.black};
-    border-radius: 10px;
-    border: 1px solid ${(props) => props.theme.colors.greyScale3};
-
-    ${(props) =>
-        props.pillVisibility === 'hover' &&
-        css`
-            align-items: flex-end;
-            max-height: 60px;
-            max-width: 400px;
-            min-width: 280px;
-        `}
-
-    transition: max-width 0.2s ease-in-out, max-height 0.15s ease-in-out;
-`
-
-const IconContainer = styled.div<{ pillVisibility: string }>`
-    display: flex;
-    height: fill-available;
-    align-items: flex-start;
-    height: 26px;
-    transition: height 0.15s ease-in-out;
-
-    ${(props) =>
-        props.pillVisibility === 'hover' &&
-        css`
-            height: 45px;
-        `}
-`
-
-const CloseBox = styled.div`
-    position: relative;
-`
-
-const CloseContainer = styled.div<{ pillVisibility: string }>`
-    display: flex;
-    height: fill-available;
-    align-items: flex-start;
-    justify-content: flex-end;
-    height: 45px;
-    width: 50px;
-    opacity: 0;
-    transition: opacity 0.1s ease-in-out;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    visibility: hidden;
-
-    ${(props) =>
-        props.pillVisibility === 'hover' &&
-        css`
-            opacity: 1;
-            visibility: visible;
-        `}
-`
-
-const IsolatedPillContent = styled.div`
-    display: flex;
-    flex-direction: column;
-    grid-gap: 5px;
-`
-
-const TogglePillHoverSmallText = styled.div<{ pillVisibility: string }>`
-    font-size: 14px;
-    position: absolute;
-    font-weight: 300;
-    color: ${(props) => props.theme.colors.greyScale5};
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    visibility: hidden;
-    opacity: 0;
-    top: 20px;
-    transition: top 0.05s ease-in-out, opacity 0.05s ease-in-out;
-
-    ${(props) =>
-        props.pillVisibility === 'hover' &&
-        css`
-            opacity: 1;
-            top: 10px;
-            visibility: visible;
-        `};
-`
-
-const TogglePillMainText = styled.div`
-    font-size: 16px;
-    font-weight: 500;
-    color: ${(props) => props.theme.colors.white};
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-    padding-bottom: 2px;
 `
 
 const TooltipContent = styled.div`
