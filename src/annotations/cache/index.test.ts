@@ -218,6 +218,65 @@ describe('Page annotations cache tests', () => {
         expect(emittedEvents).toEqual(expectedEvents)
     })
 
+    it('should set public annotations to inherit the lists of their parent page upon adding', () => {
+        const { cache } = setupTest({
+            normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
+        })
+        const testAnnotations = TEST_DATA.ANNOTATIONS()
+        const testLists = TEST_DATA.LISTS()
+
+        cache.setLists(testLists)
+
+        const pageListIdsA = [testLists[0].unifiedId, testLists[1].unifiedId]
+        cache.setPageData(TEST_DATA.NORMALIZED_PAGE_URL_1, pageListIdsA)
+
+        expect(cache.annotations.byId).toEqual({})
+
+        const annotToCacheA = reshapeUnifiedAnnotForCaching(
+            {
+                ...testAnnotations[0],
+                unifiedListIds: [],
+                privacyLevel: AnnotationPrivacyLevels.SHARED,
+            },
+            testLists,
+        )
+        expect(annotToCacheA.unifiedListIds).toEqual([])
+
+        const { unifiedId: unifiedIdA } = cache.addAnnotation(annotToCacheA)
+        expect(cache.annotations.byId).toEqual({
+            [unifiedIdA]: expect.objectContaining({
+                unifiedId: unifiedIdA,
+                unifiedListIds: pageListIdsA,
+            }),
+        })
+
+        // Change the page lists data and try again
+        const pageListIdsB = [testLists[1].unifiedId]
+        cache.setPageData(TEST_DATA.NORMALIZED_PAGE_URL_1, pageListIdsB)
+
+        const annotToCacheB = reshapeUnifiedAnnotForCaching(
+            {
+                ...testAnnotations[1],
+                unifiedListIds: [],
+                privacyLevel: AnnotationPrivacyLevels.SHARED,
+            },
+            testLists,
+        )
+        expect(annotToCacheB.unifiedListIds).toEqual([])
+
+        const { unifiedId: unifiedIdB } = cache.addAnnotation(annotToCacheB)
+        expect(cache.annotations.byId).toEqual({
+            [unifiedIdA]: expect.objectContaining({
+                unifiedId: unifiedIdA,
+                unifiedListIds: pageListIdsA,
+            }),
+            [unifiedIdB]: expect.objectContaining({
+                unifiedId: unifiedIdB,
+                unifiedListIds: pageListIdsB,
+            }),
+        })
+    })
+
     it('updating annotation privacy levels should change lists', () => {
         // TODO: This functionality currently tested in sidebar logic tests. Should move to here (see: 'privacy level state changes')
         expect(true).toBe(true)

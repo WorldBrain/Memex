@@ -203,8 +203,12 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         if (this.deps.normalizedPageUrl !== normalizedPageUrl) {
             this.deps.normalizedPageUrl = normalizedPageUrl
         }
-        this.pageRemoteListIds = remoteListIds
-        this.events.emit('updatedPageData', normalizedPageUrl, remoteListIds)
+        this.pageRemoteListIds = [...remoteListIds]
+        this.events.emit(
+            'updatedPageData',
+            normalizedPageUrl,
+            this.pageRemoteListIds,
+        )
     }
 
     setAnnotations: PageAnnotationsCacheInterface['setAnnotations'] = (
@@ -277,6 +281,10 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         const nextAnnotation = this.prepareAnnotationForCaching(annotation, {
             now,
         })
+
+        if (nextAnnotation.privacyLevel >= AnnotationPrivacyLevels.SHARED) {
+            nextAnnotation.unifiedListIds = [...this.pageRemoteListIds]
+        }
 
         this.annotations.allIds = [
             nextAnnotation.unifiedId,
