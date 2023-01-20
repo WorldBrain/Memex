@@ -63,9 +63,9 @@ function getSelectionHtml(selection, pageUrl) {
             html = container.innerHTML
         }
     }
+    console.log(html)
 
-    let htmlImproved = specialHTMLhandling(html, pageUrl)
-    return turndownService.turndown(htmlImproved)
+    return specialHTMLhandling(html, pageUrl)
 }
 
 function specialHTMLhandling(html, pageUrl) {
