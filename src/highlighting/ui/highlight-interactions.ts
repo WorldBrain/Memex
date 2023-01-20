@@ -46,7 +46,19 @@ function getSelectionHtml(selection, pageUrl) {
         if (sel.rangeCount) {
             var container = document.createElement('div')
             for (var i = 0, len = sel.rangeCount; i < len; ++i) {
-                container.appendChild(sel.getRangeAt(i).cloneContents())
+                console.log(sel.getRangeAt(i).cloneContents())
+                if (sel.getRangeAt(i).nodeName !== 'STYLE') {
+                    let content = sel.getRangeAt(i).cloneContents()
+
+                    content.querySelectorAll('style').forEach((element) => {
+                        element.parentNode.removeChild(element)
+                    })
+                    content.querySelectorAll('script').forEach((element) => {
+                        element.parentNode.removeChild(element)
+                    })
+
+                    container.appendChild(content)
+                }
             }
             html = container.innerHTML
         }
@@ -58,10 +70,8 @@ function getSelectionHtml(selection, pageUrl) {
 
 function specialHTMLhandling(html, pageUrl) {
     if (pageUrl.includes === '.wikipedia.org') {
-        html.replace('href="/', 'href="https://en.wikipedia.org/')
-        html.replace('src="//', 'src="https://')
-
-        return html
+        html.replaceAll('href="/', 'href="https://en.wikipedia.org/')
+        html.replaceAll('src="//', 'src="https://')
     }
 
     return html
