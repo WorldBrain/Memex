@@ -57,7 +57,10 @@ class SpacePicker extends StatefulUIElement<
     }
 
     private get shouldShowAddNewEntry(): boolean {
-        if (this.props.filterMode) {
+        if (
+            this.props.filterMode ||
+            this.state.loadingSuggestions === 'running'
+        ) {
             return false
         }
 
