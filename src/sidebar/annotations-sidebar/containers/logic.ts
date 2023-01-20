@@ -994,19 +994,39 @@ export class SidebarContainerLogic extends UILogic<
             })
         }
 
-        annotationsCache.updateAnnotation({
-            comment: existing.comment,
-            remoteId: existing.remoteId,
-            unifiedListIds: [...unifiedListIds],
-            unifiedId: event.unifiedAnnotationId,
-            privacyLevel: event.options?.protectAnnotation
-                ? AnnotationPrivacyLevels.PROTECTED
-                : existing.privacyLevel,
-        })
+        annotationsCache.updateAnnotation(
+            {
+                comment: existing.comment,
+                remoteId: existing.remoteId,
+                unifiedListIds: [...unifiedListIds],
+                unifiedId: event.unifiedAnnotationId,
+                privacyLevel: event.options?.protectAnnotation
+                    ? AnnotationPrivacyLevels.PROTECTED
+                    : existing.privacyLevel,
+            },
+            { keepListsIfUnsharing: event.options?.protectAnnotation },
+        )
 
-        // TODO: update state again with result here
-        // TODO: ensure private->public inherits page shared lists
         const { sharingState } = await bgPromise
+
+        // Update again with the calculated lists and privacy lvl from the BG ops (TODO: there's gotta be a nicer way to handle this optimistically in the UI)
+        annotationsCache.updateAnnotation(
+            {
+                unifiedId: event.unifiedAnnotationId,
+                privacyLevel: sharingState.privacyLevel,
+                unifiedListIds: [
+                    ...sharingState.privateListIds,
+                    ...sharingState.sharedListIds,
+                ]
+                    .map(
+                        (localListId) =>
+                            annotationsCache.getListByLocalId(localListId)
+                                ?.unifiedId,
+                    )
+                    .filter((id) => !!id),
+            },
+            { keepListsIfUnsharing: true },
+        )
     }
 
     setNewPageNoteLists: EventHandler<'setNewPageNoteLists'> = async ({

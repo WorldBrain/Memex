@@ -323,7 +323,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             previous.privacyLevel !== AnnotationPrivacyLevels.PRIVATE &&
             updates.privacyLevel <= AnnotationPrivacyLevels.PRIVATE
         ) {
-            if (opts.keepListsIfUnsharing) {
+            if (opts?.keepListsIfUnsharing) {
                 // Keep all lists, but need to change level to 'protected'
                 privacyLevel = AnnotationPrivacyLevels.PROTECTED
             } else {
