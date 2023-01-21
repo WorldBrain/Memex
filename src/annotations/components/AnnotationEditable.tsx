@@ -379,7 +379,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             >
                 <ActionBox>{actionsBox}</ActionBox>
                 <Highlightbar />
-                <Markdown pageUrl={this.props.pageUrl}>
+                <Markdown isHighlight pageUrl={this.props.pageUrl}>
                     {this.state.isTruncatedHighlight
                         ? this.state.truncatedTextHighlight
                         : this.props.body}

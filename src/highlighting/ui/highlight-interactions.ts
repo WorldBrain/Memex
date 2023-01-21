@@ -44,26 +44,55 @@ function getSelectionHtml(selection, pageUrl) {
     if (typeof selection != 'undefined') {
         var sel = selection
         if (sel.rangeCount) {
-            var container = document.createElement('div')
-            for (var i = 0, len = sel.rangeCount; i < len; ++i) {
-                console.log(sel.getRangeAt(i).cloneContents())
-                if (sel.getRangeAt(i).nodeName !== 'STYLE') {
-                    let content = sel.getRangeAt(i).cloneContents()
+            let container = document.createElement('div')
 
-                    content.querySelectorAll('style').forEach((element) => {
-                        element.parentNode.removeChild(element)
-                    })
-                    content.querySelectorAll('script').forEach((element) => {
-                        element.parentNode.removeChild(element)
-                    })
+            if (
+                sel.getRangeAt(0).cloneContents().firstChild.nodeName === 'LI'
+            ) {
+                var list = document.createElement('ul')
 
-                    container.appendChild(content)
+                for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                    if (sel.getRangeAt(i).nodeName !== 'STYLE') {
+                        let content = sel.getRangeAt(i).cloneContents()
+
+                        content.querySelectorAll('style').forEach((element) => {
+                            element.parentNode.removeChild(element)
+                        })
+                        content
+                            .querySelectorAll('script')
+                            .forEach((element) => {
+                                element.parentNode.removeChild(element)
+                            })
+
+                        list.appendChild(content)
+                    }
+                }
+                container.appendChild(list)
+            } else {
+                for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                    if (sel.getRangeAt(i).nodeName !== 'STYLE') {
+                        let content = sel.getRangeAt(i).cloneContents()
+
+                        content.querySelectorAll('style').forEach((element) => {
+                            element.parentNode.removeChild(element)
+                        })
+                        content
+                            .querySelectorAll('script')
+                            .forEach((element) => {
+                                element.parentNode.removeChild(element)
+                            })
+
+                        container.appendChild(content)
+                    }
                 }
             }
+
             html = container.innerHTML
         }
     }
-    console.log(html)
+
+    console.log('html', html)
+    // console.log(specialHTMLhandling(html, pageUrl))
 
     return specialHTMLhandling(html, pageUrl)
 }

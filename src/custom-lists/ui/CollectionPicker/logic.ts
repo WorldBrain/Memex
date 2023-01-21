@@ -245,7 +245,6 @@ export default class SpacePickerLogic extends UILogic<
             }
 
             if (previousState.displayEntries[this.focusIndex]) {
-                console.log('shouldenter')
                 await this.resultEntryPress({
                     event: {
                         entry: previousState.displayEntries[this.focusIndex],
