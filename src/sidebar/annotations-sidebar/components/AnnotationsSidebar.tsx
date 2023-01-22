@@ -57,6 +57,7 @@ import { generateAnnotationCardInstanceId } from '../containers/utils'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
+import DiscordNotification from '@worldbrain/memex-common/lib/common-ui/components/discord-notification-banner'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -1276,6 +1277,7 @@ export class AnnotationsSidebar extends React.Component<
                 {(this.props.activeTab === 'annotations' ||
                     this.props.selectedListId) && (
                     <>
+                        <DiscordNotification />
                         <TopAreaContainer>
                             <NewAnnotationBoxMyAnnotations>
                                 {this.renderNewAnnotation()}
@@ -1308,11 +1310,6 @@ export class AnnotationsSidebar extends React.Component<
                 )}
             </FollowedListNotesContainer>
         )
-    }
-
-    private onFeedClick() {
-        this.props.clickFeedActivityIndicator()
-        this.props.setActiveTab('feed')
     }
 
     private renderTopBarSwitcher() {

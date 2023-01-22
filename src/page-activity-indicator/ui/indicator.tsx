@@ -164,6 +164,7 @@ const TextBox = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
+    grid-gap: 5px;
 `
 const TextMain = styled.span`
     font-size: 14px;
