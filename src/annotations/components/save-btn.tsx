@@ -218,7 +218,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                 </BottomText>
                             </SaveButtonTooltipContainer>
                         }
-                        placement="bottom"
+                        placement="bottom-end"
                     >
                         <IconContainer>
                             <Icon
@@ -305,7 +305,7 @@ const SaveBtn = styled.div`
     outline: none;
     background: transparent;
     border-radius: 5px;
-    font-weight: 700;
+    font-weight: 400;
     display: flex;
     flex: 1;
     border: 1px solid ${(props) => props.theme.colors.greyScale3};

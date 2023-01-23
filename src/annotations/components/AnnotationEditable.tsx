@@ -576,19 +576,38 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             return (
                 <DefaultFooterStyled>
                     {footerDeps != null && (
-                        <PrimaryAction
-                            onClick={() =>
-                                this.setState({
-                                    showShareMenu: true,
-                                })
+                        <TooltipBox
+                            tooltipText={
+                                shareIconData.label === 'Private' ? (
+                                    <span>
+                                        Private to you <br /> unless shared in
+                                        Spaces
+                                    </span>
+                                ) : shareIconData.label === 'Shared' ? (
+                                    <span>Shared in some Spaces</span>
+                                ) : (
+                                    <span>
+                                        Shared in all Spaces <br /> you put the
+                                        page into
+                                    </span>
+                                )
                             }
-                            label={shareIconData.label}
-                            icon={shareIconData.icon}
-                            size={'small'}
-                            type={'tertiary'}
-                            innerRef={this.shareButtonRef}
-                            active={this.state.showShareMenu}
-                        />
+                            placement="bottom-start"
+                        >
+                            <PrimaryAction
+                                onClick={() =>
+                                    this.setState({
+                                        showShareMenu: true,
+                                    })
+                                }
+                                label={shareIconData.label}
+                                icon={shareIconData.icon}
+                                size={'small'}
+                                type={'tertiary'}
+                                innerRef={this.shareButtonRef}
+                                active={this.state.showShareMenu}
+                            />
+                        </TooltipBox>
                     )}
                     <ItemBoxBottom
                         borderTop={false}
