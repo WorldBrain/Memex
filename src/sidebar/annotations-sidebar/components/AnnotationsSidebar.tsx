@@ -775,25 +775,13 @@ export class AnnotationsSidebar extends React.Component<
                         ) : (
                             <FollowedListNoteCount active left="5px">
                                 <TooltipBox
-                                    tooltipText={'Annotations by Others'}
-                                    placement={'bottom-end'}
-                                >
-                                    <OthersAnnotationCounter>
-                                        {othersAnnotsCount}
-                                    </OthersAnnotationCounter>
-                                </TooltipBox>
-                                <TooltipBox
-                                    tooltipText={'Total Annotations'}
+                                    tooltipText={'Has annotations by others'}
                                     placement={'bottom-end'}
                                 >
                                     <TotalAnnotationsCounter>
-                                        /
-                                        {listData.hasRemoteAnnotationsToLoad
-                                            ? listInstance
-                                                  .sharedAnnotationReferences
-                                                  ?.length ?? 0
-                                            : listData.unifiedAnnotationIds
-                                                  .length}
+                                        {listData.hasRemoteAnnotationsToLoad ? (
+                                            <PageActivityIndicator active />
+                                        ) : undefined}
                                     </TotalAnnotationsCounter>
                                 </TooltipBox>
                             </FollowedListNoteCount>
@@ -1338,9 +1326,14 @@ export class AnnotationsSidebar extends React.Component<
                                 <LoadingIndicator size={10} />{' '}
                             </LoadingBox>
                         ) : this.props.pageHasNetworkAnnotations ? (
-                            <LoadingBox>
-                                <PageActivityIndicator active />
-                            </LoadingBox>
+                            <TooltipBox
+                                tooltipText={'Has annotations by others'}
+                                placement={'bottom'}
+                            >
+                                <LoadingBox hasToolTip>
+                                    <PageActivityIndicator active />
+                                </LoadingBox>
+                            </TooltipBox>
                         ) : (
                             <LoadingBox>
                                 <PageActivityIndicator active={false} />
@@ -1361,11 +1354,14 @@ export class AnnotationsSidebar extends React.Component<
                     padding={'0px 6px'}
                     icon={
                         this.props.hasFeedActivity ? (
-                            <>
-                                <LoadingBox>
+                            <TooltipBox
+                                tooltipText={'Has new feed updates'}
+                                placement={'bottom'}
+                            >
+                                <LoadingBox hasToolTip>
                                     <PageActivityIndicator active />
                                 </LoadingBox>
-                            </>
+                            </TooltipBox>
                         ) : (
                             <LoadingBox>
                                 <PageActivityIndicator active={false} />
@@ -1851,7 +1847,7 @@ const Link = styled.span`
     cursor: pointer;
 `
 
-const LoadingBox = styled.div`
+const LoadingBox = styled.div<{ hasToolTip }>`
     display: flex;
     justify-content: center;
     position: absolute;
@@ -1859,7 +1855,7 @@ const LoadingBox = styled.div`
     width: 12px;
     align-items: center;
     right: 0px;
-    margin-top: -20px;
+    margin-top: ${(props) => (props.hasToolTip ? '-15px' : '-20px')};
 `
 
 const PageActivityIndicator = styled(Margin)<{ active: boolean }>`

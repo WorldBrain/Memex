@@ -360,7 +360,7 @@ export class SidebarContainerLogic extends UILogic<
 
             this.emitMutation({
                 pageHasNetworkAnnotations: {
-                    $set: hasNetworkActivity !== 'no-activity',
+                    $set: hasNetworkActivity !== 'no-annotations',
                 },
             })
 
@@ -631,7 +631,7 @@ export class SidebarContainerLogic extends UILogic<
 
         this.emitMutation({
             pageHasNetworkAnnotations: {
-                $set: hasNetworkActivity != 'no-activity',
+                $set: hasNetworkActivity != 'no-annotations',
             },
         })
 
