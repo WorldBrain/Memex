@@ -26,7 +26,8 @@ export interface PageAnnotationCacheDeps {
 }
 
 export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
-    pageRemoteListIds: PageAnnotationsCacheInterface['pageRemoteListIds'] = []
+    pageLocalListIds: PageAnnotationsCacheInterface['pageLocalListIds'] = []
+    pageSharedListIds: PageAnnotationsCacheInterface['pageSharedListIds'] = []
     annotations: PageAnnotationsCacheInterface['annotations'] = initNormalizedState()
     lists: PageAnnotationsCacheInterface['lists'] = initNormalizedState()
 
@@ -198,16 +199,29 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     setPageData: PageAnnotationsCacheInterface['setPageData'] = (
         normalizedPageUrl,
-        remoteListIds,
+        pageListIds,
     ) => {
         if (this.deps.normalizedPageUrl !== normalizedPageUrl) {
             this.deps.normalizedPageUrl = normalizedPageUrl
         }
-        this.pageRemoteListIds = [...remoteListIds]
+        this.pageSharedListIds = []
+        this.pageLocalListIds = []
+        for (const listId of pageListIds) {
+            const listData = this.lists.byId[listId]
+            if (!listData) {
+                continue
+            }
+            if (listData.remoteId != null) {
+                this.pageSharedListIds.push(listData.unifiedId)
+            } else {
+                this.pageLocalListIds.push(listData.unifiedId)
+            }
+        }
         this.events.emit(
             'updatedPageData',
             normalizedPageUrl,
-            this.pageRemoteListIds,
+            this.pageSharedListIds,
+            this.pageLocalListIds,
         )
     }
 
@@ -283,7 +297,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         })
 
         if (nextAnnotation.privacyLevel >= AnnotationPrivacyLevels.SHARED) {
-            nextAnnotation.unifiedListIds = [...this.pageRemoteListIds]
+            nextAnnotation.unifiedListIds = [...this.pageSharedListIds]
         }
 
         this.annotations.allIds = [
@@ -346,7 +360,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         ) {
             // Need to inherit parent page's shared lists if sharing
             unifiedListIds = Array.from(
-                new Set([...unifiedListIds, ...this.pageRemoteListIds]),
+                new Set([...unifiedListIds, ...this.pageSharedListIds]),
             )
         }
 

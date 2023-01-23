@@ -227,7 +227,7 @@ describe('Page annotations cache tests', () => {
 
         cache.setLists(testLists)
 
-        const pageListIdsA = [testLists[0].unifiedId, testLists[1].unifiedId]
+        const pageListIdsA = [testLists[2].unifiedId, testLists[1].unifiedId]
         cache.setPageData(TEST_DATA.NORMALIZED_PAGE_URL_1, pageListIdsA)
 
         expect(cache.annotations.byId).toEqual({})

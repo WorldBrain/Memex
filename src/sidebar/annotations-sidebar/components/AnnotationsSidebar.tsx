@@ -58,6 +58,7 @@ import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import DiscordNotification from '@worldbrain/memex-common/lib/common-ui/components/discord-notification-banner'
+import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -902,28 +903,27 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderSharedNotesByList() {
-        const { lists, listInstances } = this.props
-        let allLists: UnifiedList[] = []
-
-        lists.allIds.forEach((unifiedListId) => {
-            if (
-                lists.byId[unifiedListId].unifiedAnnotationIds.length > 0 ||
-                lists.byId[unifiedListId].hasRemoteAnnotationsToLoad
-            ) {
-                allLists.push(lists.byId[unifiedListId])
-            }
-        })
+        const { lists, listInstances, annotationsCache } = this.props
+        const allLists = normalizedStateToArray(lists).filter(
+            (listData) =>
+                listData.unifiedAnnotationIds.length > 0 ||
+                listData.hasRemoteAnnotationsToLoad ||
+                annotationsCache.pageSharedListIds.includes(
+                    listData.unifiedId,
+                ) ||
+                annotationsCache.pageLocalListIds.includes(listData.unifiedId),
+        )
 
         if (allLists.length > 0) {
-            let mySpaces = allLists.filter(
+            let myLists = allLists.filter(
                 (list) => this.spaceOwnershipStatus(list) === 'Creator',
             )
 
-            let followedSpaces = allLists.filter(
+            let followedLists = allLists.filter(
                 (list) => this.spaceOwnershipStatus(list) === 'Follower',
             )
 
-            let joinedSpaces = allLists.filter(
+            let joinedLists = allLists.filter(
                 (list) => this.spaceOwnershipStatus(list) === 'Contributor',
             )
 
@@ -932,11 +932,11 @@ export class AnnotationsSidebar extends React.Component<
                     <SpaceTypeSection>
                         <SpaceTypeSectionHeader>
                             My Spaces{' '}
-                            <SpacesCounter>{mySpaces.length}</SpacesCounter>
+                            <SpacesCounter>{myLists.length}</SpacesCounter>
                         </SpaceTypeSectionHeader>
-                        {mySpaces.length > 0 ? (
+                        {myLists.length > 0 ? (
                             <SpaceTypeSectionContainer>
-                                {mySpaces.map((listData) => {
+                                {myLists.map((listData) => {
                                     let othersAnnotsCount = 0
                                     const listInstance =
                                         listInstances[listData.unifiedId]
@@ -959,12 +959,12 @@ export class AnnotationsSidebar extends React.Component<
                         <SpaceTypeSectionHeader>
                             Followed Spaces{' '}
                             <SpacesCounter>
-                                {followedSpaces.length}
+                                {followedLists.length}
                             </SpacesCounter>
                         </SpaceTypeSectionHeader>
-                        {followedSpaces.length > 0 ? (
+                        {followedLists.length > 0 ? (
                             <SpaceTypeSectionContainer>
-                                {followedSpaces.map((listData) => {
+                                {followedLists.map((listData) => {
                                     let othersAnnotsCount = 0
                                     const listInstance =
                                         listInstances[listData.unifiedId]
@@ -982,11 +982,11 @@ export class AnnotationsSidebar extends React.Component<
                     <SpaceTypeSection>
                         <SpaceTypeSectionHeader>
                             Joined Spaces{' '}
-                            <SpacesCounter>{joinedSpaces.length}</SpacesCounter>
+                            <SpacesCounter>{joinedLists.length}</SpacesCounter>
                         </SpaceTypeSectionHeader>
-                        {joinedSpaces.length > 0 ? (
+                        {joinedLists.length > 0 ? (
                             <SpaceTypeSectionContainer>
-                                {joinedSpaces.map((listData) => {
+                                {joinedLists.map((listData) => {
                                     let othersAnnotsCount = 0
                                     const listInstance =
                                         listInstances[listData.unifiedId]
@@ -1402,7 +1402,9 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private spaceOwnershipStatus(listData) {
+    private spaceOwnershipStatus(
+        listData: UnifiedList,
+    ): 'Creator' | 'Follower' | 'Contributor' {
         if (listData.remoteId != null && listData.localId == null) {
             return 'Follower'
         }

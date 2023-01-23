@@ -323,7 +323,8 @@ describe('SidebarContainerLogic', () => {
             const expectedEvents = []
 
             expect(emittedEvents).toEqual(expectedEvents)
-            expect(annotationsCache.pageRemoteListIds).toEqual([])
+            expect(annotationsCache.pageSharedListIds).toEqual([])
+            expect(annotationsCache.pageLocalListIds).toEqual([])
             expect(annotationsCache.lists).toEqual(initNormalizedState())
             expect(annotationsCache.annotations).toEqual(initNormalizedState())
             expect(sidebar.state.listInstances).toEqual({})
@@ -341,9 +342,15 @@ describe('SidebarContainerLogic', () => {
             })
 
             expect(emittedEvents).toEqual(expectedEvents)
-            expect(annotationsCache.pageRemoteListIds).toEqual(
+            expect(annotationsCache.pageSharedListIds).toEqual(
                 mapLocalListIdsToUnified(
                     [DATA.LOCAL_LISTS[0].id],
+                    annotationsCache,
+                ),
+            )
+            expect(annotationsCache.pageLocalListIds).toEqual(
+                mapLocalListIdsToUnified(
+                    [DATA.LOCAL_LISTS[3].id],
                     annotationsCache,
                 ),
             )

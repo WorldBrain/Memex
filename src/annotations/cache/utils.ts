@@ -296,9 +296,9 @@ export async function hydrateCache({
 
     args.cache.setPageData(
         normalizeUrl(args.fullPageUrl),
-        pageLocalListIds
-            .map((localListId) => args.cache.getListByLocalId(localListId))
-            .filter((unifiedList) => unifiedList?.remoteId != null)
-            .map((unifiedList) => unifiedList.unifiedId),
+        pageLocalListIds.map(
+            (localListId) =>
+                args.cache.getListByLocalId(localListId)?.unifiedId,
+        ),
     )
 }
