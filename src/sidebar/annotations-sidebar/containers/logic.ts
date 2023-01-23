@@ -1014,6 +1014,10 @@ export class SidebarContainerLogic extends UILogic<
         // Update again with the calculated lists and privacy lvl from the BG ops (TODO: there's gotta be a nicer way to handle this optimistically in the UI)
         annotationsCache.updateAnnotation(
             {
+                comment: existing.comment,
+                remoteId: sharingState.remoteId
+                    ? sharingState.remoteId.toString()
+                    : existing.remoteId,
                 unifiedId: event.unifiedAnnotationId,
                 privacyLevel: sharingState.privacyLevel,
                 unifiedListIds: [
