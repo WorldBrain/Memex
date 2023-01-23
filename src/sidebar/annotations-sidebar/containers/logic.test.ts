@@ -29,6 +29,10 @@ import {
 } from './utils'
 import { generateAnnotationUrl } from 'src/annotations/utils'
 import type { AnnotationCardMode } from './types'
+import type {
+    AnnotationSharingState,
+    AnnotationSharingStates,
+} from 'src/content-sharing/background/types'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -990,6 +994,94 @@ describe('SidebarContainerLogic', () => {
     })
 
     describe('annotations tab', () => {
+        it('should be able to change privacy level for all notes', async ({
+            device,
+        }) => {
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+            })
+
+            const annots = DATA.ANNOT_PRIVACY_LVLS.slice(0, -1)
+
+            expect(normalizedStateToArray(sidebar.state.annotations)).toEqual(
+                annots.map((data) =>
+                    expect.objectContaining({
+                        localId: data.annotation,
+                        privacyLevel: data.privacyLevel,
+                    }),
+                ),
+            )
+
+            const createSharingStates = (
+                sharingState: AnnotationSharingState,
+            ): AnnotationSharingStates =>
+                normalizedStateToArray(sidebar.state.annotations).reduce(
+                    (acc, curr) =>
+                        !curr.localId
+                            ? acc
+                            : {
+                                  ...acc,
+                                  [curr.localId]: { ...sharingState },
+                              },
+                    {},
+                )
+
+            await sidebar.processEvent(
+                'updateAllAnnotationsShareInfo',
+                createSharingStates({
+                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                    hasLink: false,
+                    privateListIds: [DATA.LOCAL_LISTS[0].id],
+                    sharedListIds: [
+                        DATA.LOCAL_LISTS[1].id,
+                        DATA.LOCAL_LISTS[2].id,
+                    ],
+                }),
+            )
+
+            expect(normalizedStateToArray(sidebar.state.annotations)).toEqual(
+                annots.map((data) =>
+                    expect.objectContaining({
+                        localId: data.annotation,
+                        privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                        // unifiedListIds: mapLocalListIdsToUnified(
+                        //     [
+                        //         DATA.LOCAL_LISTS[0].id,
+                        //         DATA.LOCAL_LISTS[1].id,
+                        //         DATA.LOCAL_LISTS[2].id,
+                        //     ],
+                        //     annotationsCache,
+                        // ),
+                    }),
+                ),
+            )
+
+            await sidebar.processEvent(
+                'updateAllAnnotationsShareInfo',
+                createSharingStates({
+                    privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    hasLink: true,
+                    remoteId: 'test-remote-id',
+                    privateListIds: [DATA.LOCAL_LISTS[0].id],
+                    sharedListIds: [DATA.LOCAL_LISTS[2].id],
+                }),
+            )
+
+            expect(normalizedStateToArray(sidebar.state.annotations)).toEqual(
+                annots.map((data) =>
+                    expect.objectContaining({
+                        localId: data.annotation,
+                        privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
+                        // unifiedListIds: mapLocalListIdsToUnified(
+                        //     [DATA.LOCAL_LISTS[0].id, DATA.LOCAL_LISTS[2].id],
+                        //     annotationsCache,
+                        // ),
+                        remoteId: 'test-remote-id',
+                    }),
+                ),
+            )
+        })
+
         describe('new page note box', () => {
             it('should be able to cancel writing a new comment', async ({
                 device,

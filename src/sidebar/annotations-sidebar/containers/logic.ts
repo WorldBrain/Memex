@@ -1632,26 +1632,35 @@ export class SidebarContainerLogic extends UILogic<
         'updateAllAnnotationsShareInfo'
     > = ({ event }) => {
         const { annotationsCache } = this.options
-        throw new Error('updated all share info not yet implemented')
 
-        // const nextAnnotations = annotationsCache.annotations.map(
-        //     (annotation) => {
-        //         const privacyState = getAnnotationPrivacyState(
-        //             event[annotation.url].privacyLevel,
-        //         )
-        //         const nextAnnotation =
-        //             event[annotation.url] == null
-        //                 ? annotation
-        //                 : {
-        //                       ...annotation,
-        //                       isShared: privacyState.public,
-        //                       isBulkShareProtected: privacyState.protected,
-        //                   }
-        //         return nextAnnotation
-        //     },
-        // )
+        for (const annotation of normalizedStateToArray(
+            annotationsCache.annotations,
+        )) {
+            const sharingState = event[annotation?.localId]
+            if (!sharingState) {
+                continue
+            }
 
-        // annotationsCache.setAnnotations(nextAnnotations)
+            const unifiedListIds = [
+                ...sharingState.privateListIds,
+                ...sharingState.sharedListIds,
+            ]
+                .map(
+                    (localListId) =>
+                        annotationsCache.getListByLocalId(localListId)
+                            ?.unifiedId,
+                )
+                .filter((id) => !!id)
+
+            annotationsCache.updateAnnotation({
+                remoteId: sharingState.remoteId
+                    ? sharingState.remoteId.toString()
+                    : undefined,
+                unifiedId: annotation.unifiedId,
+                privacyLevel: sharingState.privacyLevel,
+                unifiedListIds,
+            })
+        }
     }
 
     updateAnnotationShareInfo: EventHandler<
