@@ -206,6 +206,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
         this.pageSharedListIds = []
         this.pageLocalListIds = []
+
         for (const listId of pageListIds) {
             const listData = this.lists.byId[listId]
             if (!listData) {

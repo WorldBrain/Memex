@@ -451,11 +451,11 @@ export async function main(
 
     if (
         (isSidebarEnabled && !isPageBlacklisted) ||
-        pageActivityStatus === 'has-annotations'
+        pageActivityStatus !== 'no-activity'
     ) {
         await inPageUI.loadComponent('ribbon', {
             keepRibbonHidden: !isSidebarEnabled,
-            showPageActivityIndicator: pageActivityStatus === 'has-annotations',
+            showPageActivityIndicator: pageActivityStatus !== 'no-activity',
         })
     }
 
