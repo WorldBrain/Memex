@@ -216,10 +216,6 @@ export default class SpacePickerLogic extends UILogic<
                     previousState,
                     event: { entry: previousState.newEntryName },
                 })
-                this._updateFocus(
-                    (this.focusIndex = 0),
-                    previousState.displayEntries,
-                )
                 return
             }
             currentKeys = currentKeys.filter((key) => key !== event.key)
@@ -237,10 +233,6 @@ export default class SpacePickerLogic extends UILogic<
                     previousState,
                     event: { entry: previousState.newEntryName },
                 })
-                this._updateFocus(
-                    (this.focusIndex = 0),
-                    previousState.displayEntries,
-                )
                 return
             }
 
@@ -251,10 +243,6 @@ export default class SpacePickerLogic extends UILogic<
                     },
                     previousState,
                 })
-                this._updateFocus(
-                    (this.focusIndex = 0),
-                    previousState.displayEntries,
-                )
                 return
             }
         }
@@ -275,6 +263,7 @@ export default class SpacePickerLogic extends UILogic<
                     ++this.focusIndex,
                     previousState.displayEntries,
                 )
+
                 return
             }
         }
@@ -544,7 +533,7 @@ export default class SpacePickerLogic extends UILogic<
 
     private _updateFocus = (
         focusIndex: number | undefined,
-        displayEntries: SpaceDisplayEntry[],
+        displayEntries?: SpaceDisplayEntry[],
         emit = true,
     ) => {
         this.focusIndex = focusIndex ?? -1
@@ -702,6 +691,8 @@ export default class SpacePickerLogic extends UILogic<
             createdAt: Date.now(),
         }
         this.defaultEntries.unshift(newEntry)
+
+        let newEntries = this.defaultEntries
         this.emitMutation({
             query: { $set: '' },
             newEntryName: { $set: '' },
@@ -710,6 +701,7 @@ export default class SpacePickerLogic extends UILogic<
                 $set: [...this.defaultEntries],
             },
         } as UIMutation<SpacePickerState>)
+        this._updateFocus((this.focusIndex = 0), newEntries)
         await this.dependencies.createNewEntry(name, newId)
         return newId
     }

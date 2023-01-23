@@ -413,7 +413,7 @@ export class AnnotationsSidebar extends React.Component<
                         />
                     </IconBox>
                     <InfoText>
-                        No notes exist in this Space for this page.
+                        This page is added to this Space, but has no notes yet.
                     </InfoText>
                 </EmptyMessageContainer>
             )
