@@ -29,6 +29,7 @@ export default class BookmarksBackground {
             addPageBookmark: this.addPageBookmark,
             delPageBookmark: this.delPageBookmark,
             pageHasBookmark: this.storage.pageHasBookmark,
+            getBookmarkTime: this.storage.getBookmarkTime,
         }
     }
     get ROOT_BM() {

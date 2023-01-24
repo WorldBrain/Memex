@@ -143,6 +143,7 @@ export class RibbonContainerLogic extends UILogic<
             commentBox: INITIAL_RIBBON_COMMENT_BOX_STATE,
             bookmark: {
                 isBookmarked: false,
+                lastBookmarkTimestamp: undefined,
             },
             tagging: {
                 tags: [],
@@ -188,6 +189,17 @@ export class RibbonContainerLogic extends UILogic<
         this.sidebar = document
             .getElementById('memex-sidebar-container')
             .shadowRoot.getElementById('annotationSidebarContainer')
+        const url = await getPageUrl()
+        const lastBookmarkTimestamp =
+            (await this.dependencies.bookmarks.getBookmarkTime(url))['time'] ??
+            undefined
+        if (lastBookmarkTimestamp) {
+            this.emitMutation({
+                bookmark: {
+                    lastBookmarkTimestamp: { $set: lastBookmarkTimestamp },
+                },
+            })
+        }
     }
 
     async initReadingViewListeners() {
@@ -209,6 +221,10 @@ export class RibbonContainerLogic extends UILogic<
             url,
         })
 
+        const lastBookmarkTimestamp =
+            (await this.dependencies.bookmarks.getBookmarkTime(url))['time'] ??
+            undefined
+
         this.emitMutation({
             pageUrl: { $set: url },
             pausing: {
@@ -221,6 +237,9 @@ export class RibbonContainerLogic extends UILogic<
                     $set: await this.dependencies.bookmarks.pageHasBookmark(
                         url,
                     ),
+                },
+                lastBookmarkTimestamp: {
+                    $set: lastBookmarkTimestamp ?? undefined,
                 },
             },
             isRibbonEnabled: {
@@ -432,7 +451,10 @@ export class RibbonContainerLogic extends UILogic<
 
         const updateState = (isBookmarked) =>
             this.emitMutation({
-                bookmark: { isBookmarked: { $set: isBookmarked } },
+                bookmark: {
+                    isBookmarked: { $set: isBookmarked },
+                    lastBookmarkTimestamp: { $set: Date.now() },
+                },
             })
 
         const shouldBeBookmarked = !postInitState.bookmark.isBookmarked

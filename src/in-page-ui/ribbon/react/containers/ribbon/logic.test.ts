@@ -807,6 +807,7 @@ describe('Ribbon logic', () => {
 
         device.backgroundModules.bookmarks.remoteFunctions = {
             pageHasBookmark: async (url) => pageBookmarksMockDB[url] ?? false,
+            getBookmarkTime: async (url) => pageBookmarksMockDB[url] ?? false,
             addPageBookmark: async (args) => {
                 pageBookmarksMockDB[args.url] = true
             },

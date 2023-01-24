@@ -58,6 +58,7 @@ export interface RibbonCommentBoxProps {
 export interface RibbonBookmarkProps {
     isBookmarked: boolean
     toggleBookmark: () => void
+    lastBookmarkTimestamp: number
 }
 
 export interface RibbonTaggingProps {

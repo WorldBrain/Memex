@@ -82,6 +82,12 @@ export default class BookmarksStorage extends StorageModule {
             url: normalizedUrl,
         }))
     }
+    getBookmarkTime = async (url: string): Promise<Object> => {
+        const normalizedUrl = normalizeUrl(url)
+        return await this.operation('findBookmarkByUrl', {
+            url: normalizedUrl,
+        })
+    }
 
     async findTabBookmarks(normalizedPageUrls: string[]): Promise<Bookmark[]> {
         return this.operation('findTabBookmarks', { normalizedPageUrls })

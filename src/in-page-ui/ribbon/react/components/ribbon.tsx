@@ -3,6 +3,7 @@ import qs from 'query-string'
 import styled, { createGlobalStyle, css, keyframes } from 'styled-components'
 import browser from 'webextension-polyfill'
 
+import moment from 'moment'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import {
     shortcuts,
@@ -196,7 +197,12 @@ export default class Ribbon extends Component<Props, State> {
         return short.shortcut && short.enabled ? (
             <TooltipContent>
                 {source}
-                {<KeyboardShortcuts keys={short.shortcut.split('+')} />}
+                {
+                    <KeyboardShortcuts
+                        size={'small'}
+                        keys={short.shortcut.split('+')}
+                    />
+                }
             </TooltipContent>
         ) : (
             source
@@ -398,7 +404,7 @@ export default class Ribbon extends Component<Props, State> {
                                 <BlockListTitleContent>
                                     <Icon
                                         filePath={'block'}
-                                        heightAndWidth="16px"
+                                        heightAndWidth="22px"
                                         hoverOff
                                     />
                                     <InfoText>
@@ -608,6 +614,13 @@ export default class Ribbon extends Component<Props, State> {
             return false
         }
 
+        let bookmarkDate
+        if (this.props.bookmark.isBookmarked != null) {
+            bookmarkDate = moment(
+                new Date(this.props.bookmark.lastBookmarkTimestamp),
+            ).format('LLL')
+        }
+
         return (
             <>
                 <OuterRibbon
@@ -671,6 +684,7 @@ export default class Ribbon extends Component<Props, State> {
                                                             Close{' '}
                                                             <KeyboardShortcuts
                                                                 keys={['Esc']}
+                                                                size="small"
                                                             />
                                                         </TooltipContent>
                                                     }
@@ -739,9 +753,21 @@ export default class Ribbon extends Component<Props, State> {
                                             targetElementRef={
                                                 this.spacePickerRef.current
                                             }
-                                            tooltipText={this.getTooltipText(
-                                                'createBookmark',
-                                            )}
+                                            tooltipText={
+                                                this.props.bookmark
+                                                    .isBookmarked ? (
+                                                    <span>
+                                                        Bookmarked on{' '}
+                                                        <DateText>
+                                                            {bookmarkDate}
+                                                        </DateText>
+                                                    </span>
+                                                ) : (
+                                                    this.getTooltipText(
+                                                        'createBookmark',
+                                                    )
+                                                )
+                                            }
                                             placement={'left'}
                                             offsetX={10}
                                         >
@@ -867,7 +893,7 @@ export default class Ribbon extends Component<Props, State> {
                                         onClick={() =>
                                             this.props.toggleShowExtraButtons()
                                         }
-                                        color={'greyScale4'}
+                                        color={'greyScale5'}
                                         heightAndWidth="22px"
                                         filePath={icons.settings}
                                         containerRef={this.settingsButtonRef}
@@ -890,7 +916,7 @@ export default class Ribbon extends Component<Props, State> {
                                             onClick={() =>
                                                 this.props.toggleShowTutorial()
                                             }
-                                            color={'greyScale4'}
+                                            color={'greyScale5'}
                                             heightAndWidth="22px"
                                             filePath={icons.helpIcon}
                                             containerRef={
@@ -924,7 +950,7 @@ export default class Ribbon extends Component<Props, State> {
                                                         this.props.handleRemoveRibbon()
                                                     }
                                                 }}
-                                                color={'greyScale4'}
+                                                color={'greyScale5'}
                                                 heightAndWidth="22px"
                                                 filePath={icons.removeX}
                                             />
@@ -944,6 +970,10 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 }
+
+const DateText = styled.span`
+    color: ${(props) => props.theme.colors.white};
+`
 
 const ColorPickerCircle = styled.div<{ backgroundColor: string }>`
     height: 18px;
@@ -1018,7 +1048,7 @@ const BlockListTitleArea = styled.div`
     display: flex;
     align-items: center;
     grid-gap: 10px;
-    padding: 0px 0px 5px 10px;
+    padding: 0px 0px 5px 15px;
     justify-content: space-between;
     width: fill-available;
     z-index: 1;
