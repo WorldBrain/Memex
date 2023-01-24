@@ -138,7 +138,7 @@ export class RibbonContainerLogic extends UILogic<
                 areHighlightsEnabled: false,
             },
             tooltip: {
-                isTooltipEnabled: false,
+                isTooltipEnabled: undefined,
             },
             commentBox: INITIAL_RIBBON_COMMENT_BOX_STATE,
             bookmark: {
@@ -448,6 +448,11 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
     }) => {
         const postInitState = await this.waitForPostInitState(previousState)
+
+        await this.dependencies.bookmarks.setBookmarkStatusInBrowserIcon(
+            true,
+            postInitState.pageUrl,
+        )
 
         const updateState = (isBookmarked) =>
             this.emitMutation({

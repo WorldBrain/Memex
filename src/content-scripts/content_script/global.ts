@@ -47,7 +47,11 @@ import { main as searchInjectionMain } from 'src/content-scripts/content_script/
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUnderlyingResourceUrl, isFullUrlPDF } from 'src/util/uri-utils'
-import { copyPaster, subscription } from 'src/util/remote-functions-background'
+import {
+    bookmarks,
+    copyPaster,
+    subscription,
+} from 'src/util/remote-functions-background'
 import { ContentLocatorFormat } from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import { setupPdfViewerListeners } from './pdf-detection'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
@@ -62,6 +66,7 @@ import { hydrateCache } from 'src/annotations/cache/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { UNDO_HISTORY } from 'src/constants'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import browser from 'webextension-polyfill'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -210,6 +215,15 @@ export async function main(
     const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
     const annotationsCache = new PageAnnotationsCache({ normalizedPageUrl })
     window['__annotationsCache'] = annotationsCache
+
+    const pageHasBookMark =
+        (await bookmarks.pageHasBookmark(fullPageUrl)) ?? undefined
+
+    if (pageHasBookMark) {
+        await bookmarks.setBookmarkStatusInBrowserIcon(true, fullPageUrl)
+    } else {
+        await bookmarks.setBookmarkStatusInBrowserIcon(false, fullPageUrl)
+    }
 
     const loadCacheDataPromise = hydrateCache({
         fullPageUrl,
@@ -461,7 +475,6 @@ export async function main(
 
     injectYoutubeContextMenu(annotationsFunctions)
     setupWebUIActions({ contentScriptsBG, bgScriptBG, pageActivityIndicatorBG })
-
     return inPageUI
 }
 

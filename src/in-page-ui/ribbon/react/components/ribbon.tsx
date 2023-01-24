@@ -408,7 +408,7 @@ export default class Ribbon extends Component<Props, State> {
                                         hoverOff
                                     />
                                     <InfoText>
-                                        Disable Ribbon on this site
+                                        Block List for Action Sidebar
                                     </InfoText>
                                 </BlockListTitleContent>
                                 <TooltipBox
@@ -476,9 +476,13 @@ export default class Ribbon extends Component<Props, State> {
                                 hoverOff
                             />
                             {this.props.isRibbonEnabled ? (
-                                <InfoText>Disable Ribbon</InfoText>
+                                <InfoText>
+                                    Disable Action Sidebar on all pages
+                                </InfoText>
                             ) : (
-                                <InfoText>Enable Ribbon</InfoText>
+                                <InfoText>
+                                    Enable Action Sidebar on all pages
+                                </InfoText>
                             )}
                         </ExtraButtonRow>
                         <ExtraButtonRow
@@ -494,7 +498,7 @@ export default class Ribbon extends Component<Props, State> {
                             />
                             <InfoText>Change Highlight Color</InfoText>
                         </ExtraButtonRow>
-                        <ExtraButtonRow
+                        {/* <ExtraButtonRow
                             onClick={
                                 this.props.highlights.handleHighlightsToggle
                             }
@@ -503,13 +507,17 @@ export default class Ribbon extends Component<Props, State> {
                                 filePath={'highlight'}
                                 heightAndWidth="22px"
                                 hoverOff
+                                color={
+                                    this.props.highlights
+                                        .areHighlightsEnabled && 'prime1'
+                                }
                             />
                             {this.props.highlights.areHighlightsEnabled ? (
                                 <InfoText>Hide Highlights</InfoText>
                             ) : (
                                 <InfoText>Show Highlights</InfoText>
                             )}
-                        </ExtraButtonRow>
+                        </ExtraButtonRow> */}
 
                         <ExtraButtonRow
                             onClick={this.props.tooltip.handleTooltipToggle}
@@ -520,10 +528,10 @@ export default class Ribbon extends Component<Props, State> {
                                         ? icons.tooltipOff
                                         : icons.tooltipOn
                                 }
-                                heightAndWidth="24px"
+                                heightAndWidth="22px"
                                 hoverOff
                             />
-                            {this.props.isRibbonEnabled ? (
+                            {this.props.tooltip.isTooltipEnabled ? (
                                 <InfoText>Hide Highlighter Tooltip</InfoText>
                             ) : (
                                 <InfoText>Show Highlighter Tooltip</InfoText>
@@ -1000,9 +1008,7 @@ const PickerButtonTopBar = styled.div`
     justify-content: space-between;
     align-items: center;
     width: fill-available;
-
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
-    padding: 0 0 10px 0;
+    margin-left: -7px;
 `
 
 const ExtraButtonContainer = styled.div`

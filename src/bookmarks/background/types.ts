@@ -9,4 +9,5 @@ export interface BookmarksInterface {
     delPageBookmark(args: { url: string }): Promise<any>
     pageHasBookmark(url: string): Promise<boolean>
     getBookmarkTime(url: string): Promise<Object>
+    setBookmarkStatusInBrowserIcon(value: boolean, PageUrl: string): void
 }
