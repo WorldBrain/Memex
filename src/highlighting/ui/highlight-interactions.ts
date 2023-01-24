@@ -26,17 +26,9 @@ import browser from 'webextension-polyfill'
 import * as PDFjsHighlighting from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
 import { throttle } from 'lodash'
 import hexToRgb from 'hex-to-rgb'
-import TurndownService from 'turndown'
 import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import { UNDO_HISTORY } from 'src/constants'
-
-const turndownService = new TurndownService({
-    headingStyle: 'atx',
-    hr: '---',
-    codeBlockStyle: 'fenced',
-})
-
 const styles = require('src/highlighting/ui/styles.css')
 
 function getSelectionHtml(selection, pageUrl) {
@@ -47,6 +39,7 @@ function getSelectionHtml(selection, pageUrl) {
             let container = document.createElement('div')
 
             if (
+                sel.getRangeAt(0).cloneContents().firstChild != null &&
                 sel.getRangeAt(0).cloneContents().firstChild.nodeName === 'LI'
             ) {
                 var list = document.createElement('ul')
@@ -90,9 +83,6 @@ function getSelectionHtml(selection, pageUrl) {
             html = container.innerHTML
         }
     }
-
-    console.log('html', html)
-    // console.log(specialHTMLhandling(html, pageUrl))
 
     return specialHTMLhandling(html, pageUrl)
 }
@@ -274,7 +264,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
 
         if (videoURLWithTime != null) {
-            videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`
+            videoTimeStampForComment = `<a class="youtubeTimestamp" href="${videoURLWithTime}">${humanTimestamp}</a>`
         }
 
         if (
@@ -284,10 +274,13 @@ export class HighlightRenderer implements HighlightRendererInterface {
             return null
         }
 
-        const anchor = await extractAnchorFromSelection(selection, fullPageUrl)
+        let anchor
+        if (selection) {
+            anchor = await extractAnchorFromSelection(selection, fullPageUrl)
+        }
 
         const body = anchor && anchor.quote
-        const hasSelectedText = anchor.quote.length
+        const hasSelectedText = anchor.quote ? anchor.quote.length : false
 
         const localListIds: number[] = []
         if (params.inPageUI.selectedList) {
