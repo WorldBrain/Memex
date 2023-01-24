@@ -1029,17 +1029,13 @@ const MobileAdContainer = styled.div`
 `
 
 const TutorialVideo = styled.iframe<{ showTutorialVideo: boolean }>`
-    height: 170px;
-    width: auto;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
     border: none;
     border-radius: 5px;
-
-    ${(props) =>
-        props.showTutorialVideo &&
-        css`
-            height: 500px;
-            width: fill-available;
-        `}
 `
 
 const TutorialContainer = styled.div<{ showTutorialVideo: boolean }>`
@@ -1104,8 +1100,10 @@ const TutorialVideoContainer = styled.div<{ showTutorialVideo: boolean }>`
     ${(props) =>
         props.showTutorialVideo &&
         css`
-            height: 500px;
+            height: 0px;
+            padding-top: 56.25%;
             width: fill-available;
+            max-width: fill-available;
         `}
 `
 
