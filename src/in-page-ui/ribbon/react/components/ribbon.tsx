@@ -35,6 +35,7 @@ import {
     DEFAULT_HIGHLIGHT_COLOR,
     HIGHLIGHT_COLOR_KEY,
 } from 'src/highlighting/constants'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
@@ -59,6 +60,7 @@ interface State {
     shortcutsReady: boolean
     blockListValue: string
     showColorPicker: boolean
+    renderFeedback: boolean
     pickerColor: string
     showPickerSave: boolean
 }
@@ -88,6 +90,7 @@ export default class Ribbon extends Component<Props, State> {
         blockListValue: this.getDomain(window.location.href),
         showColorPicker: false,
         showPickerSave: false,
+        renderFeedback: false,
         pickerColor: DEFAULT_HIGHLIGHT_COLOR,
     }
 
@@ -366,11 +369,28 @@ export default class Ribbon extends Component<Props, State> {
                 }
                 offsetX={10}
                 width={!this.state.showColorPicker ? '360px' : '500px'}
-                closeComponent={() => this.props.toggleShowExtraButtons()}
+                closeComponent={() => {
+                    this.setState({
+                        showColorPicker: false,
+                        renderFeedback: false,
+                    })
+                    this.props.toggleShowExtraButtons()
+                }}
             >
                 <GlobalStyle />
                 {this.state.showColorPicker ? (
                     this.renderColorPicker()
+                ) : this.state.renderFeedback ? (
+                    <FeedbackContainer>
+                        <LoadingIndicator size={30} />
+                        <FeedFrame
+                            src="https://airtable.com/embed/shrfgVfdHxwggbju8?backgroundColor=red"
+                            frameborder="0"
+                            onmousewheel=""
+                            width="100%"
+                            height="533"
+                        />
+                    </FeedbackContainer>
                 ) : (
                     <ExtraButtonContainer>
                         <BlockListArea>
@@ -527,7 +547,9 @@ export default class Ribbon extends Component<Props, State> {
                         </ExtraButtonRow>
                         <ExtraButtonRow
                             onClick={() =>
-                                window.open('https://worldbrain.io/feedback')
+                                this.setState({
+                                    renderFeedback: true,
+                                })
                             }
                         >
                             <Icon
@@ -1178,6 +1200,24 @@ const FeedFrame = styled.iframe`
     border: none;
     border-radius: 10px;
     width: 500px;
+`
+
+const FeedbackContainer = styled.div`
+    width: fill-available;
+    height: 600px;
+    border: none;
+    border-radius: 10px;
+    width: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    & > iframe {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+    }
 `
 
 const FeedContainer = styled.div`
