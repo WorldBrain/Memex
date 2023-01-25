@@ -1868,7 +1868,6 @@ const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
     height: 12px;
     font-size: 12px;
     display: flex;
-
     ${(props) =>
         !props.active &&
         css`
@@ -1884,8 +1883,6 @@ const TopBar = styled.div`
     align-items: center;
     height: ${(props) =>
         props.sidebarContext === 'dashboard' ? '40px' : '32px'};
-
-    background: ${(props) => props.theme.colors.black};
     z-index: 11300;
     padding: 10px 10px 10px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
@@ -1925,27 +1922,6 @@ const EmptyMessageContainer = styled.div`
     width: fill-available;
 `
 
-const openAnimation = keyframes`
- 0% { padding-bottom: 100px; opacity: 0 }
- 100% { padding-bottom: 0px; opacity: 1 }
-`
-
-const AnnotationBox = styled.div<{
-    isActive: boolean
-    zIndex: number
-    order: number
-}>`
-    width: 99%;
-    z-index: ${(props) => props.zIndex};
-
-    animation-name: ${openAnimation};
-    animation-delay: ${(props) => props.order * 30}ms;
-    animation-duration: 0.1s;
-    animation-timing-function: ease-in-out;
-    animation-fill-mode: backwards;
-    position: relative;
-`
-
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
@@ -1983,6 +1959,11 @@ const FollowedListNotesContainer = styled(Margin)<{ key: number }>`
     z-index: ${(props) => 1000 - props.key};
 `
 
+const sidebarContentOpen = keyframes`
+ 0% { margin-top: 20px}
+ 100% { margin-top: 0px}
+`
+
 const AnnotationContainer = styled(Margin)`
     display: flex;
     flex-direction: column;
@@ -2001,6 +1982,32 @@ const AnnotationContainer = styled(Margin)`
     &::-webkit-scrollbar {
         display: none;
     }
+
+    animation-name: ${sidebarContentOpen};
+    animation-duration: 800ms;
+    animation-timing-function: cubic-bezier(0.3, 0.35, 0.14, 0.8);
+    animation-fill-mode: both;
+`
+
+const openAnimation = keyframes`
+ 0% { opacity: 0; margin-top: 20px;}
+ 100% { opacity: 1; margin-top: 0px;}
+`
+
+const AnnotationBox = styled.div<{
+    isActive: boolean
+    zIndex: number
+    order: number
+}>`
+    width: 99%;
+    z-index: ${(props) => props.zIndex};
+
+    animation-name: ${openAnimation};
+    animation-duration: 600ms;
+    animation-delay: ${(props) => props.order * 20}ms;
+    animation-timing-function: cubic-bezier(0.3, 0.35, 0.14, 0.8);
+    animation-fill-mode: both;
+    position: relative;
 `
 
 const FollowedNotesContainer = styled.div`
@@ -2216,7 +2223,6 @@ const LoadingIndicatorStyled = styled(LoadingIndicator)`
 const NewAnnotationSection = styled.section`
     font-family: 'Satoshi', sans-serif;
     height: auto;
-    background: ${(props) => props.theme.colors.black};
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -2228,7 +2234,6 @@ const NewAnnotationSection = styled.section`
 
 const AnnotationsSectionStyled = styled.div`
     font-family: 'Satoshi', sans-serif;
-    background: ${(props) => props.theme.colors.black};
     color: ${(props) => props.theme.colors.white};
     display: flex;
     flex-direction: column;

@@ -1003,7 +1003,6 @@ const AnnotationStyled = styled.div`
     flex-direction: column;
     font-size: 14px;
     cursor: pointer;
-    animation: onload 0.3s cubic-bezier(0.65, 0.05, 0.36, 1);
     border-radius: inherit;
 
     cursor: ${({ theme }) => theme.cursor}

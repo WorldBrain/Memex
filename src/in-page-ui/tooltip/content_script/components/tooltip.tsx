@@ -6,8 +6,12 @@ import styled, { keyframes, css } from 'styled-components'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const openAnimation = keyframes`
- 0% { padding-bottom: 10px; opacity: 0 }
- 100% { padding-bottom: 0px; opacity: 1 }
+ 0% { zoom: 0.8; opacity: 0 }
+ 80% { zoom: 1.05; opacity: 0.8 }
+ 100% { zoom: 1; opacity: 1 }
+
+/* 0% { padding-bottom: 10px; opacity: 0 }
+ 100% { padding-bottom: 0px; opacity: 1 } */
 `
 
 const MemexTooltip = styled.div`

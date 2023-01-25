@@ -468,7 +468,12 @@ export default class SearchResultsContainer extends React.Component<
         )
     }
 
-    private renderPageResult = (pageId: string, day: number, index: number) => {
+    private renderPageResult = (
+        pageId: string,
+        day: number,
+        index: number,
+        order: number,
+    ) => {
         const page = {
             ...this.props.pageData.byId[pageId],
             ...this.props.results[day].pages.byId[pageId],
@@ -495,6 +500,7 @@ export default class SearchResultsContainer extends React.Component<
                 }
                 bottom="10px"
                 key={day.toString() + pageId}
+                order={order}
             >
                 <PageResult
                     activePage={this.props.activePage}
@@ -779,6 +785,7 @@ export default class SearchResultsContainer extends React.Component<
                             id,
                             day,
                             pages.allIds.length - index,
+                            index,
                         ),
                     )}
                 </DayResultGroup>,
@@ -1244,20 +1251,20 @@ const NoteTopBarBox = styled(TopBar)`
 `
 
 const openAnimation = keyframes`
- 0% { padding-bottom: 20px; opacity: 0 }
- 100% { padding-bottom: 0px; opacity: 1 }
+ 0% { margin-top: 30px; opacity: 0 }
+ 100% { margin-top: 0px; opacity: 1 }
 `
 
-const ResultBox = styled(Margin)<{ zIndex: number }>`
+const ResultBox = styled(Margin)<{ zIndex: number; order }>`
     flex-direction: column;
     justify-content: space-between;
     width: 100%;
     z-index: ${(props) => props.zIndex};
 
     animation-name: ${openAnimation};
-    animation-delay: ${(props) => props.order * 50}ms;
-    animation-duration: 0.2s;
-    animation-timing-function: ease-in-out;
+    animation-delay: ${(props) => props.order * 30}ms;
+    animation-duration: 0.4s;
+    animation-timing-function: cubic-bezier(0.16, 0.67, 0.41, 0.83);
     animation-fill-mode: backwards;
 `
 
