@@ -724,7 +724,7 @@ const AuthBox = styled(Margin)`
 const Footer = styled.div`
     text-align: center;
     user-select: none;
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     opacity: 0.8;
 `

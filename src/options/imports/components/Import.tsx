@@ -12,6 +12,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import styled from 'styled-components'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./Import.css')
@@ -41,6 +42,10 @@ class Import extends React.PureComponent<Props> {
     //     return <AdvSettings />
     // }
 
+    state = {
+        showDiscordDemo: false,
+    }
+
     private renderReadwise() {
         if (!this.props.shouldRenderEsts) {
             return
@@ -68,6 +73,61 @@ class Import extends React.PureComponent<Props> {
                     }
                 >
                     <ReadwiseSettings />
+                </SettingSection>
+            </div>
+        )
+    }
+    private renderDiscord() {
+        return (
+            <div>
+                <SettingSection
+                    icon={'discord'}
+                    title={'Discord Hive Sync'}
+                    description={
+                        'Sync all links/videos/events posted in a discord channel to a Memex Space.'
+                    }
+                >
+                    <WatchVideoButton>
+                        <PrimaryAction
+                            type="primary"
+                            size="medium"
+                            onClick={() => {
+                                this.setState({
+                                    showDiscordDemo: true,
+                                })
+                            }}
+                            label="Watch Demo"
+                        />
+                    </WatchVideoButton>
+                    {this.state.showDiscordDemo && (
+                        <DiscordDemoVideoContainer>
+                            <DiscordDemoVideo src="https://share.descript.com/embed/ks1YdGjS5XS" />
+                        </DiscordDemoVideoContainer>
+                    )}
+                    <InstructionsSection>
+                        <InstructionsEntry>
+                            <InstructionsPill>Step 1</InstructionsPill>
+                            <InstructionsText>
+                                Install Bot in Server (needs Admin permissions)
+                            </InstructionsText>
+                            <PrimaryAction
+                                type="secondary"
+                                size="small"
+                                onClick={() => {
+                                    window.open('')
+                                }}
+                                label="Install Bot"
+                            />
+                        </InstructionsEntry>
+                        <InstructionsEntry>
+                            <InstructionsPill>Step 2</InstructionsPill>
+                            <InstructionsText>
+                                Type{' '}
+                                <MemexSyncCommand>/memex-sync</MemexSyncCommand>{' '}
+                                into text field of channel you want to sync
+                            </InstructionsText>
+                        </InstructionsEntry>
+                    </InstructionsSection>
                 </SettingSection>
             </div>
         )
@@ -138,6 +198,7 @@ class Import extends React.PureComponent<Props> {
 
         return (
             <div>
+                {this.renderDiscord()}
                 <SettingSection
                     title={this.renderSectionTitle()}
                     description={this.renderSectionDescription()}
@@ -162,6 +223,67 @@ class Import extends React.PureComponent<Props> {
 }
 
 export default Import
+
+const WatchVideoButton = styled.div`
+    display: flex;
+    position: absolute;
+    top: 30px;
+    right: 30px;
+`
+
+const DiscordDemoVideoContainer = styled.div`
+    height: 0px;
+    width: 100%;
+    padding-top: 56.25%;
+    position: relative;
+    margin-bottom: 20px;
+`
+
+const DiscordDemoVideo = styled.iframe`
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 10px;
+`
+
+const InstructionsSection = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 20px;
+`
+
+const InstructionsEntry = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    grid-gap: 20px;
+`
+
+const InstructionsPill = styled.div`
+    background: ${(props) => props.theme.colors.greyScale2};
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 400;
+    width: 80px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    color: ${(props) => props.theme.colors.greyScale6};
+`
+
+const InstructionsText = styled.div`
+    font-size: 14px;
+    font-weight: 300;
+    color: ${(props) => props.theme.colors.greyScale6};
+`
+
+const MemexSyncCommand = styled.span`
+    color: ${(props) => props.theme.colors.prime1};
+`
 
 const LoadingBlocker = styled.div`
     position: absolute;
