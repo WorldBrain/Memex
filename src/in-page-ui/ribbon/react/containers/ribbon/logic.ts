@@ -190,13 +190,11 @@ export class RibbonContainerLogic extends UILogic<
             .getElementById('memex-sidebar-container')
             .shadowRoot.getElementById('annotationSidebarContainer')
         const url = await getPageUrl()
-        const lastBookmarkTimestamp =
-            (await this.dependencies.bookmarks.getBookmarkTime(url))['time'] ??
-            undefined
-        if (lastBookmarkTimestamp) {
+        const bookmark = await this.dependencies.bookmarks.findBookmark(url)
+        if (bookmark?.time) {
             this.emitMutation({
                 bookmark: {
-                    lastBookmarkTimestamp: { $set: lastBookmarkTimestamp },
+                    lastBookmarkTimestamp: { $set: bookmark.time },
                 },
             })
         }
@@ -221,26 +219,18 @@ export class RibbonContainerLogic extends UILogic<
             url,
         })
 
-        const lastBookmarkTimestamp =
-            (await this.dependencies.bookmarks.getBookmarkTime(url))['time'] ??
-            undefined
+        const bookmark = await this.dependencies.bookmarks.findBookmark(url)
 
         this.emitMutation({
             pageUrl: { $set: url },
             pausing: {
                 isPaused: {
-                    $set: await true,
+                    $set: true,
                 },
             },
             bookmark: {
-                isBookmarked: {
-                    $set: await this.dependencies.bookmarks.pageHasBookmark(
-                        url,
-                    ),
-                },
-                lastBookmarkTimestamp: {
-                    $set: lastBookmarkTimestamp ?? undefined,
-                },
+                isBookmarked: { $set: !!bookmark },
+                lastBookmarkTimestamp: { $set: bookmark?.time },
             },
             isRibbonEnabled: {
                 $set: await this.dependencies.getSidebarEnabled(),

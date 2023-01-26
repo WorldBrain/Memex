@@ -809,7 +809,7 @@ describe('Ribbon logic', () => {
             pageHasBookmark: async (url) => pageBookmarksMockDB[url] ?? false,
             setBookmarkStatusInBrowserIcon: async (value, url) =>
                 pageBookmarksMockDB[url] ?? false,
-            getBookmarkTime: async (url) => pageBookmarksMockDB[url] ?? false,
+            findBookmark: async (url) => pageBookmarksMockDB[url] ?? false,
             addPageBookmark: async (args) => {
                 pageBookmarksMockDB[args.url] = true
             },

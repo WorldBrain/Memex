@@ -30,7 +30,7 @@ export default class BookmarksBackground {
             addPageBookmark: this.addPageBookmark,
             delPageBookmark: this.delPageBookmark,
             pageHasBookmark: this.storage.pageHasBookmark,
-            getBookmarkTime: this.storage.getBookmarkTime,
+            findBookmark: this.storage.findBookmark,
             setBookmarkStatusInBrowserIcon: this.setBookmarkStatusInBrowserIcon,
         }
     }
@@ -171,24 +171,29 @@ export default class BookmarksBackground {
         })
     }
 
-    setBookmarkStatusInBrowserIcon = async (value, PageUrl) => {
+    setBookmarkStatusInBrowserIcon: BookmarksInterface['setBookmarkStatusInBrowserIcon'] = async (
+        value,
+        pageUrl,
+    ) => {
         let tabId: number
         const [activeTab] = await this.options.browserAPIs.tabs.query({
             active: true,
         })
 
-        if (activeTab != null && activeTab.url === PageUrl) {
+        if (activeTab != null && activeTab.url === pageUrl) {
             tabId = activeTab.id
         }
 
         if (value) {
-            browser.browserAction.setBadgeText({
+            await browser.browserAction.setBadgeText({
                 text: '❤️',
                 tabId: activeTab.id,
             })
-            browser.browserAction.setBadgeBackgroundColor({ color: 'white' })
+            await browser.browserAction.setBadgeBackgroundColor({
+                color: 'white',
+            })
         } else {
-            browser.browserAction.setBadgeText({ text: '' })
+            await browser.browserAction.setBadgeText({ text: '' })
         }
     }
 }
