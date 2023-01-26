@@ -292,7 +292,7 @@ export class PageActivityIndicatorBackground {
     async syncFollowedListEntries(opts?: {
         now?: number
         /** If defined, will constrain the sync to only these followedLists. Else will sync all. */
-        forFollowedLists?: FollowedList[]
+        forFollowedLists?: Array<Pick<FollowedList, 'sharedList' | 'lastSync'>>
     }): Promise<void> {
         const currentUser = await this.getCurrentUser()
         if (currentUser == null) {

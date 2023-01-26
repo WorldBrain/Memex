@@ -518,6 +518,18 @@ export function createBackgroundModules(options: {
                 },
             })
 
+            // For any new incoming followedList, manually pull followedListEntries
+            if (
+                params.collection === 'followedList' &&
+                params.updates.sharedList != null
+            ) {
+                await pageActivityIndicator.syncFollowedListEntries({
+                    forFollowedLists: [
+                        { sharedList: params.updates.sharedList },
+                    ],
+                })
+            }
+
             if (params.collection === 'docContent') {
                 const { normalizedUrl, storedContentType } = params.where ?? {}
                 const { content } = params.updates
