@@ -1877,6 +1877,7 @@ const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
 
 const TopBar = styled.div`
     font-size: 14px;
+    background: #12131b;
     color: ${(props) => props.theme.colors.white};
     display: flex;
     justify-content: space-between;
