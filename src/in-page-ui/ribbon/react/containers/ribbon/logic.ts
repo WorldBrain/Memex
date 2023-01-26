@@ -188,7 +188,7 @@ export class RibbonContainerLogic extends UILogic<
 
         this.sidebar = document
             .getElementById('memex-sidebar-container')
-            .shadowRoot.getElementById('annotationSidebarContainer')
+            ?.shadowRoot.getElementById('annotationSidebarContainer')
         const url = await getPageUrl()
         const bookmark = await this.dependencies.bookmarks.findBookmark(url)
         if (bookmark?.time) {
@@ -261,7 +261,7 @@ export class RibbonContainerLogic extends UILogic<
     }) => {
         this.sidebar = document
             .getElementById('memex-sidebar-container')
-            .shadowRoot.getElementById('annotationSidebarContainer')
+            ?.shadowRoot.getElementById('annotationSidebarContainer')
         if (previousState.isWidthLocked) {
             this.resetReadingWidth()
         } else {
@@ -325,7 +325,7 @@ export class RibbonContainerLogic extends UILogic<
         if (this.readingView === true) {
             let currentsidebarWidth = document
                 .getElementById('memex-sidebar-container')
-                .shadowRoot.getElementById('annotationSidebarContainer')
+                ?.shadowRoot.getElementById('annotationSidebarContainer')
                 .offsetWidth
             let currentWindowWidth = window.innerWidth
             let readingWidth =

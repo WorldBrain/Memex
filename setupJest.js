@@ -21,3 +21,8 @@ global.DataTransfer = function () {
 
 global.document = global.document ?? {}
 global.document.execCommand = () => true
+
+global.ResizeObserver = class ResizeObserver {
+    observe() {}
+    disconnect() {}
+}

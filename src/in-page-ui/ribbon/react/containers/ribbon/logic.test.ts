@@ -803,20 +803,19 @@ describe('Ribbon logic', () => {
     })
 
     it('should rehydrate state on URL change', async ({ device }) => {
-        const pageBookmarksMockDB: { [url: string]: boolean } = {}
+        // const pageBookmarksMockDB: { [url: string]: boolean } = {}
 
-        device.backgroundModules.bookmarks.remoteFunctions = {
-            pageHasBookmark: async (url) => pageBookmarksMockDB[url] ?? false,
-            setBookmarkStatusInBrowserIcon: async (value, url) =>
-                pageBookmarksMockDB[url] ?? false,
-            findBookmark: async (url) => pageBookmarksMockDB[url] ?? false,
-            addPageBookmark: async (args) => {
-                pageBookmarksMockDB[args.url] = true
-            },
-            delPageBookmark: async (args) => {
-                pageBookmarksMockDB[args.url] = false
-            },
-        }
+        // device.backgroundModules.bookmarks.remoteFunctions = {
+        //     pageHasBookmark: async (url) => pageBookmarksMockDB[url] ?? false,
+        //     setBookmarkStatusInBrowserIcon: async (value, url) => pageBookmarksMockDB[url],
+        //     findBookmark: async (url) => pageBookmarksMockDB[url] ?? false,
+        //     addPageBookmark: async (args) => {
+        //         pageBookmarksMockDB[args.url] = true
+        //     },
+        //     delPageBookmark: async (args) => {
+        //         pageBookmarksMockDB[args.url] = false
+        //     },
+        // }
 
         const newURL = 'https://www.newurl.com'
 
