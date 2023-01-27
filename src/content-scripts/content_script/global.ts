@@ -7,7 +7,6 @@ import {
     MemexRequestHandledDetail,
     MEMEX_OPEN_LINK_EVENT_NAME,
     MEMEX_REQUEST_HANDLED_EVENT_NAME,
-    MEMEX_REQUEST_FOLLOWEDLISTENTRY_FETCH_EVENT_NAME,
 } from '@worldbrain/memex-common/lib/services/memex-extension'
 
 // import { setupScrollReporter } from 'src/activity-logger/content_script'
@@ -66,7 +65,6 @@ import { hydrateCache } from 'src/annotations/cache/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { UNDO_HISTORY } from 'src/constants'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import browser from 'webextension-polyfill'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -597,24 +595,6 @@ export function setupWebUIActions(args: {
         })
         document.dispatchEvent(event)
     }
-
-    document.addEventListener(
-        MEMEX_REQUEST_FOLLOWEDLISTENTRY_FETCH_EVENT_NAME,
-        async (event) => {
-            const detail = event.detail as MemexRequestHandledDetail
-            let counter = 0
-
-            // this couldl be better by
-            const interval = setInterval(async () => {
-                counter = counter + 1
-                if (counter === 4) {
-                    clearInterval(interval)
-                }
-                await args.pageActivityIndicatorBG.fetchFollowedListEntryUpdates()
-            }, 5000)
-            confirmRequest(detail.requestId)
-        },
-    )
 
     document.addEventListener(MEMEX_OPEN_LINK_EVENT_NAME, async (event) => {
         const detail = event.detail as MemexOpenLinkDetail

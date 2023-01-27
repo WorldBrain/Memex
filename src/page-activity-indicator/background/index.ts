@@ -51,7 +51,6 @@ export class PageActivityIndicatorBackground {
         this.remoteFunctions = {
             getPageFollowedLists: this.getPageFollowedLists,
             getPageActivityStatus: this.getPageActivityStatus,
-            fetchFollowedListEntryUpdates: this.fetchFollowedListEntryUpdates,
         }
     }
 
@@ -61,13 +60,6 @@ export class PageActivityIndicatorBackground {
             periodInMinutes: 15,
             job: this.syncFollowedListEntriesWithNewActivity,
         })
-    }
-
-    private fetchFollowedListEntryUpdates: RemotePageActivityIndicatorInterface['fetchFollowedListEntryUpdates'] = async () => {
-        // TODO: Ensure we actually want to call this method instead of the "WithNewActivity" version (lots of extra reads)
-        await this.syncFollowedListEntries()
-        // TODO: Ensure this doesn't conflict with the sync
-        await this.syncFollowedLists()
     }
 
     private syncFollowedListEntriesWithNewActivity = async (opts?: {

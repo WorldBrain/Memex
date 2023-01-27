@@ -36,5 +36,4 @@ export interface RemotePageActivityIndicatorInterface {
     getPageActivityStatus: (
         fullPageUrl: string,
     ) => Promise<PageActivityStatus | false>
-    fetchFollowedListEntryUpdates: () => Promise<void>
 }
