@@ -1,4 +1,8 @@
 require('core-js')
+const util = require('util')
+
+global.TextEncoder = util.TextEncoder
+global.TextDecoder = util.TextDecoder
 
 global.browser = global.browser ?? {}
 global.browser.runtime = global.browser.runtime ?? {}
