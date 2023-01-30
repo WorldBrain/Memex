@@ -79,6 +79,8 @@ export interface DashboardDependencies {
     pdfViewerBG: PDFRemoteInterface
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']
+    runtimeAPI: Browser['runtime']
+    tabsAPI: Browser['tabs']
     openFeed: () => void
     openCollectionPage: (remoteCollectionId: string) => void
     renderUpdateNotifBanner: () => JSX.Element

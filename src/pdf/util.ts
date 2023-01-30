@@ -10,7 +10,10 @@ import { PDF_RAW_TEXT_SIZE_LIMIT, PDF_VIEWER_HTML } from './constants'
 export const constructPDFViewerUrl = (
     urlToPdf: string,
     args: { runtimeAPI: Pick<Runtime.Static, 'getURL'> },
-): string => args.runtimeAPI.getURL(PDF_VIEWER_HTML) + '?file=' + urlToPdf
+): string =>
+    args.runtimeAPI.getURL(PDF_VIEWER_HTML) +
+    '?file=' +
+    encodeURIComponent(urlToPdf)
 
 export const isUrlPDFViewerUrl = (
     url: string,

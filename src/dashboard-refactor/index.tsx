@@ -81,6 +81,8 @@ export class DashboardContainer extends StatefulUIElement<
         | 'copyToClipboard'
         | 'document'
         | 'location'
+        | 'tabsAPI'
+        | 'runtimeAPI'
         | 'localStorage'
         | 'annotationsCache'
         | 'contentScriptsBG'
@@ -103,6 +105,8 @@ export class DashboardContainer extends StatefulUIElement<
         copyToClipboard,
         document: window.document,
         location: window.location,
+        tabsAPI: browser.tabs,
+        runtimeAPI: browser.runtime,
         localStorage: browser.storage.local,
         pageActivityIndicatorBG: runInBackground(),
         contentConversationsBG: runInBackground(),
@@ -653,18 +657,11 @@ export class DashboardContainer extends StatefulUIElement<
     private renderPdfLocator() {
         return (
             <DropZoneBackground
-                onDragOver={(event) => {
-                    event.preventDefault()
-                    if (!this.state.showDropArea) {
-                        this.processEvent('dragOverFile', true)
-                    }
-                }}
-                onClick={(event) => {
-                    if (event.key === 'Escape') {
-                        this.processEvent('dragOverFile', false)
-                    }
-                    this.processEvent('dragOverFile', false)
-                }}
+                onDragOver={(event) => event.preventDefault()}
+                onDragEnter={(event) => event.preventDefault()}
+                onDrop={(event) => this.processEvent('dropPdfFile', event)}
+                // This exists as a way for the user to click it away if gets "stuck" (TODO: make it not get stuck)
+                onClick={(event) => this.processEvent('dragFile', null)}
             >
                 <DropZoneFrame>
                     <DropZoneContent>
@@ -1416,20 +1413,7 @@ export class DashboardContainer extends StatefulUIElement<
             : undefined
         return (
             <Container
-                id={'dashboardContainer'}
-                onDragOver={(event) => {
-                    if (
-                        !this.state.showDropArea &&
-                        event.dataTransfer.types[0] === 'Files'
-                    ) {
-                        this.processEvent('dragOverFile', true)
-                    }
-                }}
-                onDrop={(event) => {
-                    if (event.dataTransfer.files || event.target.files) {
-                        this.processEvent('dragOverFile', false)
-                    }
-                }}
+                onDragEnter={(event) => this.processEvent('dragFile', event)}
             >
                 {this.state.showDropArea && this.renderPdfLocator()}
                 <MainContainer>
@@ -1645,6 +1629,7 @@ const DropZoneBackground = styled.div`
     backdrop-filter: blur(20px);
     padding: 40px;
     display: flex;
+    cursor: pointer;
     justify-content: center;
     align-items: center;
     z-index: 10000;

@@ -47,6 +47,7 @@ import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name
 import ListsSidebar from './lists-sidebar'
 import { allLists } from 'src/custom-lists/selectors'
 import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
+import { constructPDFViewerUrl } from 'src/pdf/util'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -3043,17 +3044,34 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
-    dragOverFile: EventHandler<'dragOverFile'> = async ({ event }) => {
-        this.emitMutation({
-            showDropArea: { $set: event },
-        })
-        if (!event) {
-            this.options.pdfViewerBG.openPdfViewerForNextPdf()
+    dropPdfFile: EventHandler<'dropPdfFile'> = async ({ event }) => {
+        event.preventDefault()
+        this.emitMutation({ showDropArea: { $set: false } })
+        const firstItem = event.dataTransfer?.items?.[0]
+        if (!firstItem) {
+            return
         }
+        try {
+            const file = firstItem.getAsFile()
+            const pdfObjectUrl = URL.createObjectURL(file)
+
+            await this.options.tabsAPI.create({
+                url: constructPDFViewerUrl(pdfObjectUrl, {
+                    runtimeAPI: this.options.runtimeAPI,
+                }),
+            })
+        } catch (err) {}
     }
 
-    openPDF: EventHandler<'openPDF'> = async () => {
-        this.options.pdfViewerBG.openPdfViewerForNextPdf()
+    dragFile: EventHandler<'dragFile'> = async ({ event }) => {
+        const firstItem = event?.dataTransfer?.items?.[0]
+        this.emitMutation({
+            showDropArea: {
+                $set:
+                    firstItem?.kind === 'file' &&
+                    firstItem?.type === 'application/pdf',
+            },
+        })
     }
 
     setListRemoteId: EventHandler<'setListRemoteId'> = async ({
