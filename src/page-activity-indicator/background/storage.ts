@@ -1,10 +1,10 @@
-import { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import {
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
-import { FollowedList, FollowedListEntry } from './types'
+import type { FollowedList, FollowedListEntry } from './types'
 import { getFollowedListEntryIdentifier } from './utils'
 
 export default class PageActivityIndicatorStorage extends StorageModule {
@@ -17,6 +17,7 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                         name: { type: 'string' },
                         creator: { type: 'string' },
                         sharedList: { type: 'string' },
+                        platform: { type: 'string', optional: true },
                         lastSync: { type: 'timestamp', optional: true },
                     },
                     indices: [
@@ -140,6 +141,7 @@ export default class PageActivityIndicatorStorage extends StorageModule {
             name: data.name,
             creator: data.creator,
             lastSync: data.lastSync,
+            platform: data.platform,
             sharedList: data.sharedList,
         })
         return object.id

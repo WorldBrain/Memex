@@ -3,6 +3,7 @@ import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 export interface FollowedList {
     name: string
     creator: AutoPk
+    platform?: string
     lastSync?: number
     sharedList: AutoPk
 }

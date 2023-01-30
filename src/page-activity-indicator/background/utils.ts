@@ -12,6 +12,7 @@ export const sharedListToFollowedList = (
     name: sharedList.title,
     sharedList: sharedList.id,
     creator: sharedList.creator,
+    platform: sharedList.platform,
     lastSync: extra?.lastSync,
 })
 
