@@ -63,11 +63,15 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         })
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         super.componentDidMount()
         document.addEventListener('keydown', this.listenToEsc)
         document.addEventListener('mousedown', this.listenToOutsideClick)
         this.setupEventForwarding()
+
+        if (window.location.href.includes('/pdfjs/viewer.html?file=')) {
+            await this.props.inPageUI.showSidebar()
+        }
     }
 
     componentWillUnmount() {

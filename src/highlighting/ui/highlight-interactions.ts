@@ -57,6 +57,9 @@ function getSelectionHtml(selection, pageUrl) {
                                 element.parentNode.removeChild(element)
                             })
 
+                        content.querySelectorAll('*').forEach((element) => {
+                            element.removeAttribute('style')
+                        })
                         list.appendChild(content)
                     }
                 }
@@ -74,6 +77,9 @@ function getSelectionHtml(selection, pageUrl) {
                             .forEach((element) => {
                                 element.parentNode.removeChild(element)
                             })
+                        content.querySelectorAll('*').forEach((element) => {
+                            element.removeAttribute('style')
+                        })
 
                         container.appendChild(content)
                     }

@@ -371,6 +371,21 @@ export class SidebarContainerLogic extends UILogic<
             }
         })
         this.annotationsLoadComplete.resolve()
+
+        if (window.location.href.includes('/pdfjs/viewer.html?file=')) {
+            const width = SIDEBAR_WIDTH_STORAGE_KEY
+
+            this.emitMutation({
+                showState: { $set: 'visible' },
+                sidebarWidth: { $set: width },
+            })
+
+            setTimeout(async () => {
+                await browser.storage.local.set({
+                    '@Sidebar-reading_view': true,
+                })
+            }, 1000)
+        }
     }
 
     cleanup = () => {

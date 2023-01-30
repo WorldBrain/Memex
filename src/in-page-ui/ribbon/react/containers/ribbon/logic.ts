@@ -167,9 +167,6 @@ export class RibbonContainerLogic extends UILogic<
 
     init: EventHandler<'init'> = async (incoming) => {
         const { getPageUrl, syncSettings } = this.dependencies
-
-        this.initReadingViewListeners()
-
         await loadInitial<RibbonContainerState>(this, async () => {
             const [url, areTagsMigrated] = await Promise.all([
                 getPageUrl(),
@@ -189,6 +186,7 @@ export class RibbonContainerLogic extends UILogic<
         this.sidebar = document
             .getElementById('memex-sidebar-container')
             ?.shadowRoot.getElementById('annotationSidebarContainer')
+        this.initReadingViewListeners()
         const url = await getPageUrl()
         const bookmark = await this.dependencies.bookmarks.findBookmark(url)
         if (bookmark?.time) {
