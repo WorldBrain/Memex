@@ -56,7 +56,7 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
                 )
                 let sidebarContainerWidth = sidebarContainer.offsetWidth
                 document.body.style.width =
-                    windowWidth - sidebarContainerWidth + 'px'
+                    windowWidth - sidebarContainerWidth - 50 + 'px'
 
                 window.addEventListener('resize', () =>
                     listenToWindowWidthChanges(sidebarContainer),

@@ -70,6 +70,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         this.setupEventForwarding()
 
         if (window.location.href.includes('/pdfjs/viewer.html?file=')) {
+            await this.props.inPageUI.showRibbon()
             await this.props.inPageUI.showSidebar()
         }
     }
