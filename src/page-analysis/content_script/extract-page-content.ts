@@ -1,8 +1,10 @@
 import { getMetadata } from 'page-metadata-parser'
+import { runtime } from 'webextension-polyfill'
 
 import PAGE_METADATA_RULES from '../page-metadata-rules'
 import { ExtractRawPageContent, RawPageContent } from '../types'
-import { getUnderlyingResourceUrl, isFullUrlPDF } from 'src/util/uri-utils'
+import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
+import { isUrlPDFViewerUrl } from 'src/pdf/util'
 
 export const DEF_LANG = 'en'
 
@@ -21,7 +23,7 @@ const extractRawPageContent: ExtractRawPageContent = async (
     if (url === null) {
         url = getUnderlyingResourceUrl(location.href)
     }
-    if (isFullUrlPDF(url)) {
+    if (isUrlPDFViewerUrl(url, { runtimeAPI: runtime })) {
         const rawContent: RawPageContent = {
             type: 'pdf',
             title: document.title || undefined,

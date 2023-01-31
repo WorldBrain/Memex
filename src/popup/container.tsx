@@ -38,7 +38,6 @@ const styles = require('./components/Popup.css')
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 import { createSyncSettingsStore } from 'src/sync-settings/util'
-import { isFullUrlPDF } from 'src/util/uri-utils'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import checkBrowser from 'src/util/check-browser'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
@@ -181,7 +180,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 
     private get isCurrentPagePDF(): boolean {
-        return isFullUrlPDF(this.props.url)
+        return this.props.url?.endsWith('.pdf')
     }
 
     getPDFMode = () => {

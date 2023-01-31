@@ -45,7 +45,7 @@ import { main as highlightMain } from 'src/content-scripts/content_script/highli
 import { main as searchInjectionMain } from 'src/content-scripts/content_script/search-injection'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
-import { getUnderlyingResourceUrl, isFullUrlPDF } from 'src/util/uri-utils'
+import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import {
     bookmarks,
     copyPaster,
@@ -65,6 +65,7 @@ import { hydrateCache } from 'src/annotations/cache/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { UNDO_HISTORY } from 'src/constants'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import { isUrlPDFViewerUrl } from 'src/pdf/util'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -523,8 +524,10 @@ class PageInfo {
         if (window.location.href === this._href) {
             return
         }
+        this.isPdf = isUrlPDFViewerUrl(window.location.href, {
+            runtimeAPI: runtime,
+        })
         const fullUrl = getUnderlyingResourceUrl(window.location.href)
-        this.isPdf = isFullUrlPDF(fullUrl)
         this._identifier = await runInBackground<
             PageIndexingInterface<'caller'>
         >().initContentIdentifier({
