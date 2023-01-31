@@ -49,8 +49,6 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
             const sidebarState = event?.changes?.sidebar
             let windowWidth = window.innerWidth
 
-            console.log('sidebarState', sidebarState)
-
             if (sidebarState === true) {
                 let sidebar = document.getElementById('memex-sidebar-container')
                 let sidebarContainer = sidebar.shadowRoot.getElementById(
