@@ -332,15 +332,13 @@ export default class PageResultView extends PureComponent<Props> {
                         //         ? this.listPickerBtnClickHandler
                         //         : undefined
                         // }
-                        href={this.fullUrl}
-                        target="_blank"
                         tabIndex={-1}
                         hasSpaces={this.hasLists}
                     >
                         <BlockContent
                             type={this.props.type}
                             normalizedUrl={this.props.normalizedUrl}
-                            originalUrl={this.props.fullUrl}
+                            originalUrl={this.fullUrl}
                             fullTitle={this.props.fullTitle}
                             pdfUrl={this.props.fullPdfUrl}
                             favIcon={this.props.favIconURI}
@@ -393,7 +391,7 @@ const StyledPageResult = styled.div`
     border-radius: 12px;
 `
 
-const PageContentBox = styled.a<{ hasSpaces: boolean }>`
+const PageContentBox = styled.div<{ hasSpaces: boolean }>`
     display: flex;
     flex-direction: column;
     cursor: pointer;
