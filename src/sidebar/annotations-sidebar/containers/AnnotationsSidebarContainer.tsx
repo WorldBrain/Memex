@@ -96,10 +96,6 @@ export class AnnotationsSidebarContainer<
             }),
         )
 
-        if (window.location.href.includes('/pdfjs/viewer.html?file=')) {
-            this.showSidebar()
-        }
-
         this.listenToWindowChanges()
     }
 

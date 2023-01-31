@@ -44,7 +44,7 @@ const getContentFingerprints: GetContentFingerprints = async () => {
 }
 
 Global.main({ loadRemotely: false, getContentFingerprints }).then(
-    (inPageUI) => {
+    async (inPageUI) => {
         inPageUI.events.on('stateChanged', (event) => {
             const sidebarState = event?.changes?.sidebar
             let windowWidth = window.innerWidth
@@ -86,6 +86,7 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
                 return extractDataFromPDFDocument(pdf, document.title)
             },
         })
+        await inPageUI.showSidebar()
     },
 )
 

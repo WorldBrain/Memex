@@ -62,6 +62,7 @@ import type { AnnotationSharingState } from 'src/content-sharing/background/type
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { Storage } from 'webextension-polyfill'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -332,6 +333,7 @@ export class SidebarContainerLogic extends UILogic<
             initialState,
             fullPageUrl,
             storageAPI,
+            runtimeAPI,
         } = this.options
         annotationsCache.events.addListener(
             'newAnnotationsState',
@@ -371,7 +373,7 @@ export class SidebarContainerLogic extends UILogic<
         })
         this.annotationsLoadComplete.resolve()
 
-        if (window.location.href.includes('/pdfjs/viewer.html?file=')) {
+        if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
             const width = SIDEBAR_WIDTH_STORAGE_KEY
 
             this.emitMutation({
