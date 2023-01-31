@@ -38,8 +38,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 > {
     static defaultProps: Pick<
         Props,
-        'isLockable' | 'theme' | 'sidebarContext'
+        'isLockable' | 'theme' | 'sidebarContext' | 'runtimeAPI' | 'storageAPI'
     > = {
+        runtimeAPI: browser.runtime,
+        storageAPI: browser.storage,
         sidebarContext: 'in-page',
         isLockable: true,
         theme: {

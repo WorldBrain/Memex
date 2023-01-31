@@ -1,4 +1,5 @@
 import * as React from 'react'
+import browser from 'webextension-polyfill'
 import styled, { ThemeProvider, css } from 'styled-components'
 import { createGlobalStyle } from 'styled-components'
 
@@ -68,6 +69,11 @@ export class AnnotationsSidebarContainer<
     private sidebarRef = React.createRef<AnnotationsSidebarComponent>()
     private shareButtonRef = React.createRef<HTMLDivElement>()
     private spacePickerButtonRef = React.createRef<HTMLDivElement>()
+
+    static defaultProps: Pick<Props, 'runtimeAPI' | 'storageAPI'> = {
+        runtimeAPI: browser.runtime,
+        storageAPI: browser.storage,
+    }
 
     constructor(props: P) {
         super(

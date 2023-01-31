@@ -36,7 +36,6 @@ import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
-import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
 import {
     getInitialAnnotationConversationState,
@@ -44,7 +43,6 @@ import {
 } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { resolvablePromise } from 'src/util/promises'
-import { toInteger } from 'lodash'
 import type {
     PageAnnotationsCacheInterface,
     UnifiedAnnotation,
@@ -60,11 +58,11 @@ import {
     initAnnotationCardInstance,
     initListInstance,
 } from './utils'
-import { browser, Storage } from 'webextension-polyfill-ts'
 import type { AnnotationSharingState } from 'src/content-sharing/background/types'
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { Storage } from 'webextension-polyfill'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -333,6 +331,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationsCache,
             initialState,
             fullPageUrl,
+            storageAPI,
         } = this.options
         annotationsCache.events.addListener(
             'newAnnotationsState',
@@ -346,7 +345,7 @@ export class SidebarContainerLogic extends UILogic<
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.cacheAnnotationsSubscription(annotationsCache.annotations)
         this.cacheListsSubscription(annotationsCache.lists)
-        await browser.storage.local.set({ '@Sidebar-reading_view': false })
+        await storageAPI.local.set({ '@Sidebar-reading_view': false })
         this.readingViewStorageListener(true)
 
         await loadInitial<SidebarContainerState>(this, async () => {
@@ -381,7 +380,7 @@ export class SidebarContainerLogic extends UILogic<
             })
 
             setTimeout(async () => {
-                await browser.storage.local.set({
+                await storageAPI.local.set({
                     '@Sidebar-reading_view': true,
                 })
             }, 1000)
@@ -468,18 +467,17 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    readingViewStorageListener = async (enable) => {
+    private readingViewStorageListener = async (enable: boolean) => {
+        const { storageAPI } = this.options
         if (enable) {
-            await browser.storage.onChanged.addListener(this.toggleReadingView)
+            storageAPI.onChanged.addListener(this.toggleReadingView)
         } else {
-            await browser.storage.local.set({ '@Sidebar-reading_view': false })
-            await browser.storage.onChanged.removeListener(
-                this.toggleReadingView,
-            )
+            await storageAPI.local.set({ '@Sidebar-reading_view': false })
+            storageAPI.onChanged.removeListener(this.toggleReadingView)
         }
     }
 
-    toggleReadingView = (changes: Storage.StorageChange) => {
+    private toggleReadingView = (changes: Storage.StorageChange) => {
         for (let key of Object.entries(changes)) {
             if (key[0] === '@Sidebar-reading_view') {
                 this.emitMutation({

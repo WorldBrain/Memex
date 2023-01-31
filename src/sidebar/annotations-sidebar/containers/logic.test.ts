@@ -75,7 +75,7 @@ const setupLogicHelper = async ({
     focusCreateForm?: () => void
     copyToClipboard?: (text: string) => Promise<boolean>
 }) => {
-    const { backgroundModules } = device
+    const { backgroundModules, browserAPIs } = device
 
     const annotationsBG = insertBackgroundFunctionTab(
         device.backgroundModules.directLinking.remoteFunctions,
@@ -124,6 +124,8 @@ const setupLogicHelper = async ({
         currentUser: withAuth ? DATA.CREATOR_1 : undefined,
         annotationsBG: annotationsBG,
         events: fakeEmitter as any,
+        runtimeAPI: browserAPIs.runtime,
+        storageAPI: browserAPIs.storage,
         annotationsCache,
         analytics,
         initialState: 'hidden',

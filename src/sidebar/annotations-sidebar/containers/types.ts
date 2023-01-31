@@ -4,7 +4,6 @@ import type {
     AnnotationConversationEvent,
     AnnotationConversationsState,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/types'
-import type { RemoteTagsInterface } from 'src/tags/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { AnnotationCardInstanceLocation, SidebarTheme } from '../types'
@@ -31,8 +30,9 @@ import type {
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
-import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import type { Storage, Runtime } from 'webextension-polyfill'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -43,10 +43,12 @@ export interface SidebarContainerDependencies {
     searchResultLimit?: number
     showGoToAnnotationBtn?: boolean
     initialState?: 'visible' | 'hidden'
+    sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
     onClickOutside?: React.MouseEventHandler
     showAnnotationShareModal?: () => void
-    sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
 
+    storageAPI: Storage.Static
+    runtimeAPI: Runtime.Static
     shouldHydrateCacheOnInit?: boolean
     annotationsCache: PageAnnotationsCacheInterface
 
@@ -65,12 +67,12 @@ export interface SidebarContainerDependencies {
     // search: SearchInterface
     // bookmarks: BookmarksInterface
     analytics: Analytics
-    copyToClipboard: (text: string) => Promise<boolean>
     copyPaster: RemoteCopyPasterInterface
     youtubePlayer?: YoutubePlayer
     youtubeService?: YoutubeService
     hasFeedActivity?: boolean
     clickFeedActivityIndicator?: () => void
+    copyToClipboard: (text: string) => Promise<boolean>
 }
 
 export interface EditForm {

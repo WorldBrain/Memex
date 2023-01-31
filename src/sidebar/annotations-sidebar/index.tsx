@@ -11,7 +11,10 @@ import { InPageUIRootMount } from 'src/in-page-ui/types'
 
 export function setupInPageSidebarUI(
     mount: InPageUIRootMount,
-    dependencies: Omit<AnnotationsSidebarDependencies, 'sidebarContext'>,
+    dependencies: Omit<
+        AnnotationsSidebarDependencies,
+        'sidebarContext' | 'storageAPI' | 'runtimeAPI'
+    >,
 ) {
     ReactDOM.render(
         <StyleSheetManager target={mount.shadowRoot as any}>
