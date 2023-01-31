@@ -21,25 +21,30 @@ const extractRawPageContent: ExtractRawPageContent = async (
     url = null,
 ) => {
     if (url === null) {
-        url = getUnderlyingResourceUrl(location.href)
+        url = location.href
     }
+    const underlyingResourceUrl = getUnderlyingResourceUrl(url)
+    let rawContent: RawPageContent
     if (isUrlPDFViewerUrl(url, { runtimeAPI: runtime })) {
-        const rawContent: RawPageContent = {
+        rawContent = {
             type: 'pdf',
             title: document.title || undefined,
-            url,
+            url: underlyingResourceUrl,
         }
-        return rawContent
     } else {
-        const rawContent: RawPageContent = {
+        rawContent = {
             type: 'html',
-            url,
+            url: underlyingResourceUrl,
             body: doc.body.innerHTML,
             lang: doc.documentElement.lang || DEF_LANG,
-            metadata: getMetadata(doc, url, PAGE_METADATA_RULES),
+            metadata: getMetadata(
+                doc,
+                underlyingResourceUrl,
+                PAGE_METADATA_RULES,
+            ),
         }
-        return rawContent
     }
+    return rawContent
 }
 
 export default extractRawPageContent
