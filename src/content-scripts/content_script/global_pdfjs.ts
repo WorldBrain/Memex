@@ -49,12 +49,21 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
             const sidebarState = event?.changes?.sidebar
             let windowWidth = window.innerWidth
 
+            console.log('sidebarState', sidebarState)
+
             if (sidebarState === true) {
                 let sidebar = document.getElementById('memex-sidebar-container')
                 let sidebarContainer = sidebar.shadowRoot.getElementById(
                     'annotationSidebarContainer',
                 )
-                let sidebarContainerWidth = sidebarContainer.offsetWidth
+
+                let sidebarContainerWidth = parseFloat(
+                    SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
+                )
+
+                if (sidebarContainer) {
+                    sidebarContainerWidth = sidebarContainer?.offsetWidth
+                }
                 document.body.style.width =
                     windowWidth - sidebarContainerWidth - 50 + 'px'
 
