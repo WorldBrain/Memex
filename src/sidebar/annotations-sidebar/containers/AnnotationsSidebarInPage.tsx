@@ -157,6 +157,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                         annotationCacheId: unifiedAnnotationId,
                         action: 'show_annotation',
                     }),
+                { removeExisting: true },
             )
         })
         sidebarEvents.on('setSelectedList', async (selectedList) => {

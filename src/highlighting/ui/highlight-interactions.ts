@@ -431,15 +431,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     }
                 }
 
-                this.attachEventListenersToNewHighlights(highlight, onClick)
-                this.highlightedElsByUnifiedAnnotId[
-                    highlight.unifiedId
-                ] = highlightedElements
-
-                for (let highlights of highlightedElements) {
-                    if (highlights.parentNode.nodeName === 'A') {
-                        highlights.style['color'] = '#0b0080'
-                    }
+                if (highlightedElements.length) {
+                    this.attachEventListenersToNewHighlights(highlight, onClick)
+                    this.highlightedElsByUnifiedAnnotId[
+                        highlight.unifiedId
+                    ] = highlightedElements
                 }
             })
 
@@ -461,7 +457,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
     renderHighlights: HighlightInteractionsInterface['renderHighlights'] = async (
         highlights,
         onClick,
-        temp,
+        opts,
     ) => {
         const {
             [HIGHLIGHT_COLOR_KEY]: highlightsColor,
@@ -469,14 +465,18 @@ export class HighlightRenderer implements HighlightRendererInterface {
             [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
         })
         this.highlightColor = hexToRgb(highlightsColor).toString()
-        this.removeAllHighlights()
+
+        if (opts?.removeExisting) {
+            this.removeAllHighlights()
+        }
+
         if (!highlights.length) {
             return
         }
 
         await Promise.all(
             highlights.map(async (highlight) => {
-                await this.renderHighlight(highlight, onClick, temp)
+                await this.renderHighlight(highlight, onClick, opts?.temp)
             }),
         )
         this.watchForReanchors(highlights, onClick)
@@ -492,7 +492,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
             if (pdfViewer) {
                 this.observer = new MutationObserver(
-                    throttle(() => this.reanchorer(highlights, onClick), 1000),
+                    throttle(() => this.reanchorer(highlights, onClick), 1000, {
+                        leading: true,
+                    }),
                 )
                 this.observer.observe(pdfViewer.viewer, {
                     attributes: true,
@@ -504,20 +506,18 @@ export class HighlightRenderer implements HighlightRendererInterface {
         }
     }
 
-    private reanchorer = (
+    private reanchorer = async (
         highlights: UnifiedAnnotation[],
         onClick: AnnotationClickHandler,
     ) => {
         const reanchors = highlights.filter(
-            (h) =>
-                !document.body.contains(
-                    this.highlightedElsByUnifiedAnnotId[h.unifiedId]?.pop() ??
-                        null,
-                ),
+            (h) => !this.highlightedElsByUnifiedAnnotId[h.unifiedId]?.length,
         )
 
         if (reanchors.length > 0) {
-            this.renderHighlights(reanchors, onClick)
+            await this.renderHighlights(reanchors, onClick, {
+                removeExisting: false,
+            })
         }
 
         // for (let item of reanchors) {

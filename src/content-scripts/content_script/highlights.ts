@@ -36,7 +36,7 @@ const showHighlights = async (options: HighlightDependencies) => {
                 action: openInEdit ? 'edit_annotation' : 'show_annotation',
                 annotationCacheId: unifiedAnnotationId,
             }),
-        false,
+        { removeExisting: true },
     )
 }
 
