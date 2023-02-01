@@ -223,7 +223,7 @@ function getPageOffset(pageIndex) {
  * @param {number} offset
  * @return {Promise<PageOffset>}
  */
-function findPage(offset) {
+export function findPage(offset) {
     let index = 0
     let total = 0
 
@@ -283,7 +283,7 @@ function findPage(offset) {
  * @param {number} end - Character offset within the page's text
  * @return {Promise<Range>}
  */
-async function anchorByPosition(pageIndex, start, end, onDemand) {
+async function anchorByPosition(pageIndex, start, end) {
     const page = await getPageView(pageIndex)
     if (
         page.renderingState === 3 &&
@@ -295,11 +295,6 @@ async function anchorByPosition(pageIndex, start, end, onDemand) {
         const startPos = new TextPosition(root, start)
         const endPos = new TextPosition(root, end)
 
-        if (onDemand) {
-            if (PDFViewerApplication.page !== pageIndex + 1) {
-                PDFViewerApplication.page = pageIndex + 1
-            }
-        }
         return new TextRange(startPos, endPos).toRange()
     }
 
@@ -316,12 +311,6 @@ async function anchorByPosition(pageIndex, start, end, onDemand) {
     const range = document.createRange()
     range.setStartBefore(placeholder)
     range.setEndAfter(placeholder)
-
-    if (onDemand) {
-        if (PDFViewerApplication.page !== pageIndex + 1) {
-            PDFViewerApplication.page = pageIndex + 1
-        }
-    }
 
     return range
 }
@@ -435,7 +424,7 @@ function prioritizePages(position) {
  * @param {Selector[]} selectors - Selector objects to anchor
  * @return {Promise<Range>}
  */
-export function anchor(root, selectors, onDemand) {
+export function anchor(root, selectors) {
     const position = /** @type {TextPositionSelector|undefined} */ (selectors.find(
         (s) => s.type === 'TextPositionSelector',
     ))
@@ -462,7 +451,7 @@ export function anchor(root, selectors, onDemand) {
                     const length = end - start
 
                     checkQuote(textContent.substr(start, length))
-                    return anchorByPosition(index, start, end, onDemand)
+                    return anchorByPosition(index, start, end)
                 },
             )
         })
@@ -479,12 +468,7 @@ export function anchor(root, selectors, onDemand) {
                     position.start
                 ]
 
-                return anchorByPosition(
-                    pageIndex,
-                    anchor.start,
-                    anchor.end,
-                    onDemand,
-                )
+                return anchorByPosition(pageIndex, anchor.start, anchor.end)
             }
 
             return prioritizePages(position?.start ?? 0).then((pageIndices) => {

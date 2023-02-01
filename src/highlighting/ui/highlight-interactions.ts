@@ -23,7 +23,7 @@ import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import browser from 'webextension-polyfill'
-import * as PDFjsHighlighting from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
+import { findPage as findPdfPage } from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
 import { throttle } from 'lodash'
 import hexToRgb from 'hex-to-rgb'
 import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
@@ -538,12 +538,10 @@ export class HighlightRenderer implements HighlightRendererInterface {
         // }
     }
 
-    /**
-     * Scrolls to the highlight of the given annotation on the current page.
-     */
-    scrollToHighlight: HighlightInteractionsInterface['scrollToHighlight'] = ({
+    private scrollToHighlight = async ({
         unifiedId,
-    }) => {
+        selector,
+    }: UnifiedAnnotation) => {
         const baseClass = styles['memex-highlight']
         const $highlight = document.querySelector(
             `.${baseClass}[data-annotation="${unifiedId}"]`,
@@ -554,7 +552,24 @@ export class HighlightRenderer implements HighlightRendererInterface {
         } else {
             console.error('MEMEX: Oops, no highlight found to scroll to')
         }
+
+        const pdfViewer = globalThis.PDFViewerApplication
+        if (!pdfViewer) {
+            return
+        }
+        const position = selector?.descriptor.content.find(
+            (s) => s.type === 'TextPositionSelector',
+        )
+        if (position?.start == null) {
+            return
+        }
+
+        const { index: pageIndex } = await findPdfPage(position.start)
+        if (pageIndex != null && pdfViewer.page !== pageIndex + 1) {
+            pdfViewer.page = pageIndex + 1
+        }
     }
+
     /**
      * Scrolls the annotation card into ivew of the given annotation on the current page.
      */
@@ -578,7 +593,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
      * Given an annotation object, highlights that text and removes other highlights
      * from the page.
      */
-    highlightAndScroll: HighlightInteractionsInterface['highlightAndScroll'] = (
+    highlightAndScroll: HighlightInteractionsInterface['highlightAndScroll'] = async (
         annotation,
     ) => {
         this.removeSelectedHighlights(annotation)
@@ -587,7 +602,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
             this.removeSelectedHighlights(this.currentActiveHighlight)
         }
         this.selectHighlight(annotation)
-        this.scrollToHighlight(annotation)
+        await this.scrollToHighlight(annotation)
     }
 
     /**
@@ -736,15 +751,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const highlights = document.querySelectorAll(
             `[data-annotation="${annotation.unifiedId}"]`,
         )
-        const pdfViewer = globalThis.PDFViewerApplication?.pdfViewer
-
-        if (pdfViewer) {
-            PDFjsHighlighting.anchor(
-                document.body,
-                annotation?.selector.descriptor.content,
-                true,
-            )
-        }
 
         highlights.forEach((highlight: HTMLElement) => {
             highlight.classList.add(styles['selectedHighlight'])

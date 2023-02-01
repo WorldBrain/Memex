@@ -392,7 +392,7 @@ export async function main(
                 )
                 return
             }
-            highlightRenderer.highlightAndScroll(unifiedAnnotation)
+            await highlightRenderer.highlightAndScroll(unifiedAnnotation)
         },
         createHighlight: annotationsFunctions.createHighlight({
             category: 'Highlights',

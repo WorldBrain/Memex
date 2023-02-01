@@ -30,8 +30,7 @@ export interface HighlightInteractionsInterface {
         onClick: AnnotationClickHandler,
         temp?: boolean,
     ) => Promise<void>
-    scrollToHighlight: (highlight: _UnifiedAnnotation) => void
-    highlightAndScroll: (annotation: _UnifiedAnnotation) => void
+    highlightAndScroll: (annotation: _UnifiedAnnotation) => Promise<void>
     attachEventListenersToNewHighlights: (
         highlight: _UnifiedAnnotation,
         openSidebar: AnnotationClickHandler,
