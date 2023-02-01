@@ -4,6 +4,7 @@ import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_scr
 import { Tabs, WebNavigation, Runtime, Browser } from 'webextension-polyfill'
 import { getSidebarState } from 'src/sidebar-overlay/utils'
 import delay from 'src/util/delay'
+import { openPDFInViewer } from 'src/pdf/util'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider'>
@@ -11,10 +12,10 @@ export class ContentScriptsBackground {
     constructor(
         private options: {
             injectScriptInTab: (tabId: number, file: string) => Promise<void>
-            getTab: Tabs.Static['get']
-            getURL: Runtime.Static['getURL']
-            webNavigation: WebNavigation.Static
-            browserAPIs: Pick<Browser, 'tabs' | 'storage' | 'webRequest'>
+            browserAPIs: Pick<
+                Browser,
+                'tabs' | 'storage' | 'webRequest' | 'runtime' | 'webNavigation'
+            >
         },
     ) {
         this.remoteFunctions = {
@@ -22,17 +23,22 @@ export class ContentScriptsBackground {
                 .goToAnnotationFromDashboardSidebar,
             openPageWithSidebarInSelectedListMode: this
                 .openPageWithSidebarInSelectedListMode,
+            openPdfInViewer: this.openPdfInViewer,
             injectContentScriptComponent: this.injectContentScriptComponent,
             getCurrentTab: async ({ tab }) => ({
                 id: tab.id,
-                url: (await options.getTab(tab.id)).url,
+                url: (await options.browserAPIs.tabs.get(tab.id)).url,
             }),
             openBetaFeatureSettings: async () => {
-                const optionsPageUrl = this.options.getURL('options.html')
+                const optionsPageUrl = this.options.browserAPIs.runtime.getURL(
+                    'options.html',
+                )
                 window.open(optionsPageUrl + '#/features')
             },
             openAuthSettings: async () => {
-                const optionsPageUrl = this.options.getURL('options.html')
+                const optionsPageUrl = this.options.browserAPIs.runtime.getURL(
+                    'options.html',
+                )
                 await this.options.browserAPIs.tabs.create({
                     active: true,
                     url: optionsPageUrl + '#/account',
@@ -40,7 +46,7 @@ export class ContentScriptsBackground {
             },
         }
 
-        this.options.webNavigation.onHistoryStateUpdated.addListener(
+        this.options.browserAPIs.webNavigation.onHistoryStateUpdated.addListener(
             this.handleHistoryStateUpdate,
         )
     }
@@ -109,6 +115,15 @@ export class ContentScriptsBackground {
         }
 
         browserAPIs.tabs.onUpdated.addListener(listener)
+    }
+
+    openPdfInViewer: ContentScriptsInterface<
+        'provider'
+    >['openPdfInViewer'] = async ({ tab }, { fullPdfUrl }) => {
+        await openPDFInViewer(fullPdfUrl, {
+            tabsAPI: this.options.browserAPIs.tabs,
+            runtimeAPI: this.options.browserAPIs.runtime,
+        })
     }
 
     openPageWithSidebarInSelectedListMode: ContentScriptsInterface<

@@ -10,6 +10,7 @@ export interface ContentScriptsInterface<Role extends 'provider' | 'caller'> {
     getCurrentTab: RemoteFunction<Role, void, { id: number; url: string }>
     openBetaFeatureSettings: RemoteFunction<Role, void>
     openAuthSettings: RemoteFunction<Role, void>
+    openPdfInViewer: RemoteFunction<Role, { fullPdfUrl: string }>
     openPageWithSidebarInSelectedListMode: RemoteFunction<
         Role,
         { fullPageUrl: string; sharedListId: string }

@@ -1,10 +1,10 @@
 import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
+import type { Tabs, Runtime } from 'webextension-polyfill'
 import type { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import type {
     ExtractedPDFData,
     MemexPDFMetadata,
 } from 'src/page-analysis/background/content-extraction/types'
-import type { Runtime } from 'webextension-polyfill'
 import { PDF_RAW_TEXT_SIZE_LIMIT, PDF_VIEWER_HTML } from './constants'
 
 export const constructPDFViewerUrl = (
@@ -73,4 +73,17 @@ export const extractDataFromPDFDocument = async (
         title: metadata.info['Title'] || defaultTitle,
         keywords: metadata.info['Keywords'],
     }
+}
+
+export async function openPDFInViewer(
+    fullPdfUrl: string,
+    args: {
+        tabsAPI: Tabs.Static
+        runtimeAPI: Runtime.Static
+    },
+): Promise<void> {
+    const url = constructPDFViewerUrl(fullPdfUrl, {
+        runtimeAPI: args.runtimeAPI,
+    })
+    await args.tabsAPI.create({ url })
 }

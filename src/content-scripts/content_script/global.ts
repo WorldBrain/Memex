@@ -66,6 +66,7 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import { UNDO_HISTORY } from 'src/constants'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
+import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -602,6 +603,21 @@ export function setupWebUIActions(args: {
     document.addEventListener(MEMEX_OPEN_LINK_EVENT_NAME, async (event) => {
         const detail = event.detail as MemexOpenLinkDetail
         confirmRequest(detail.requestId)
+
+        // Handle local PDFs first (memex.cloud URLs)
+        if (isPagePdf({ url: detail.originalPageUrl })) {
+            await args.bgScriptBG.openOverviewTab({ missingPdf: true })
+            return
+        }
+
+        // TODO: more robust way of checking this?
+        // Handle remote PDFs next (non-memex.cloud URLs with .pdf ext)
+        if (detail.originalPageUrl.endsWith('.pdf')) {
+            await args.contentScriptsBG.openPdfInViewer({
+                fullPdfUrl: detail.originalPageUrl,
+            })
+            return
+        }
 
         await args.contentScriptsBG.openPageWithSidebarInSelectedListMode({
             fullPageUrl: detail.originalPageUrl,

@@ -44,7 +44,7 @@ import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
-import { constructPDFViewerUrl } from 'src/pdf/util'
+import { openPDFInViewer } from 'src/pdf/util'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -3036,13 +3036,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
-    private async openPdfViewerInNewTab(urlToPdf: string): Promise<void> {
-        const url = constructPDFViewerUrl(urlToPdf, {
-            runtimeAPI: this.options.runtimeAPI,
-        })
-        await this.options.tabsAPI.create({ url })
-    }
-
     clickPageResult: EventHandler<'clickPageResult'> = async ({
         event,
         previousState,
@@ -3058,7 +3051,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             // Show dropzone for local-only PDFs
             this.emitMutation({ showDropArea: { $set: true } })
         } else {
-            await this.openPdfViewerInNewTab(pageData.fullPdfUrl!)
+            await openPDFInViewer(pageData.fullPdfUrl!, {
+                tabsAPI: this.options.tabsAPI,
+                runtimeAPI: this.options.runtimeAPI,
+            })
         }
     }
 
@@ -3073,7 +3069,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             const file = firstItem.getAsFile()
             const pdfObjectUrl = URL.createObjectURL(file)
 
-            await this.openPdfViewerInNewTab(pdfObjectUrl)
+            await openPDFInViewer(pdfObjectUrl, {
+                tabsAPI: this.options.tabsAPI,
+                runtimeAPI: this.options.runtimeAPI,
+            })
         } catch (err) {}
     }
 

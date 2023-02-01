@@ -702,9 +702,6 @@ export function createBackgroundModules(options: {
         bgScript,
         contentScripts: new ContentScriptsBackground({
             browserAPIs: options.browserAPIs,
-            webNavigation: options.browserAPIs.webNavigation,
-            getTab: bindMethod(options.browserAPIs.tabs, 'get'),
-            getURL: bindMethod(options.browserAPIs.runtime, 'getURL'),
             injectScriptInTab: async (tabId, file) => {
                 if (options.manifestVersion === '3') {
                     await options.browserAPIs.scripting.executeScript({
