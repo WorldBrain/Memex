@@ -1,53 +1,16 @@
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { COLLECTION_DEFINITIONS } from '@worldbrain/memex-common/lib/storage/modules/followed-lists/constants'
 import {
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
-import { STORAGE_VERSIONS } from 'src/storage/constants'
 import type { FollowedList, FollowedListEntry } from './types'
 import { getFollowedListEntryIdentifier } from './utils'
 
 export default class PageActivityIndicatorStorage extends StorageModule {
     getConfig(): StorageModuleConfig {
         return {
-            collections: {
-                followedList: {
-                    version: STORAGE_VERSIONS[27].version,
-                    fields: {
-                        name: { type: 'string' },
-                        creator: { type: 'string' },
-                        sharedList: { type: 'string' },
-                        platform: { type: 'string', optional: true },
-                        lastSync: { type: 'timestamp', optional: true },
-                    },
-                    indices: [
-                        {
-                            pk: true,
-                            field: 'sharedList',
-                        },
-                    ],
-                    backup: false,
-                    watch: false,
-                },
-                followedListEntry: {
-                    version: STORAGE_VERSIONS[27].version,
-                    fields: {
-                        creator: { type: 'string' },
-                        entryTitle: { type: 'text' },
-                        followedList: { type: 'string' },
-                        normalizedPageUrl: { type: 'string' },
-                        hasAnnotationsFromOthers: { type: 'boolean' },
-                        createdWhen: { type: 'timestamp' },
-                        updatedWhen: { type: 'timestamp' },
-                    },
-                    indices: [
-                        { field: 'normalizedPageUrl' },
-                        { field: 'followedList' },
-                    ],
-                    watch: false,
-                    backup: false,
-                },
-            },
+            collections: COLLECTION_DEFINITIONS,
             operations: {
                 createFollowedList: {
                     collection: 'followedList',
