@@ -339,6 +339,7 @@ export default class PageResultView extends PureComponent<Props> {
                             type={this.props.type}
                             normalizedUrl={this.props.normalizedUrl}
                             originalUrl={this.fullUrl}
+                            onClick={this.props.onClick}
                             fullTitle={this.props.fullTitle}
                             pdfUrl={this.props.fullPdfUrl}
                             favIcon={this.props.favIconURI}

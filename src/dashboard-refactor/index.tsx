@@ -655,6 +655,9 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderPdfLocator() {
+        if (!this.state.showDropArea) {
+            return
+        }
         return (
             <DropZoneBackground
                 onDragOver={(event) => event.preventDefault()}
@@ -792,6 +795,12 @@ export class DashboardContainer extends StatefulUIElement<
                     })
                 }
                 pageInteractionProps={{
+                    onClick: (day, pageId) => async (event) =>
+                        this.processEvent('clickPageResult', {
+                            day,
+                            pageId,
+                            synthEvent: event,
+                        }),
                     onNotesBtnClick: (day, pageId) => (e) => {
                         const pageData = searchResults.pageData.byId[pageId]
                         if (e.shiftKey) {
@@ -1415,7 +1424,7 @@ export class DashboardContainer extends StatefulUIElement<
             <Container
                 onDragEnter={(event) => this.processEvent('dragFile', event)}
             >
-                {this.state.showDropArea && this.renderPdfLocator()}
+                {this.renderPdfLocator()}
                 <MainContainer>
                     <SidebarHeaderContainer>
                         <SidebarToggleBox>
@@ -1520,13 +1529,9 @@ export class DashboardContainer extends StatefulUIElement<
                                 </FeedContainer>
                             ) : (
                                 <>
-                                    <>
-                                        {this.renderHeader()}
-                                        {this.renderFiltersBar()}
-                                    </>
-                                    {mode === 'locate-pdf'
-                                        ? this.renderPdfLocator()
-                                        : this.renderSearchResults()}
+                                    {this.renderHeader()}
+                                    {this.renderFiltersBar()}
+                                    {this.renderSearchResults()}
                                 </>
                             )}
                         </MainContent>

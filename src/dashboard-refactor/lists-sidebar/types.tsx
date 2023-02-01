@@ -90,8 +90,6 @@ export type Events = UIEvent<{
     dropPageOnListItem: { listId: number; dataTransfer: DataTransfer }
     shareList: { listId: number }
     setListRemoteId: { localListId: number; remoteListId: string }
-    dragFile: React.DragEvent | null
-    dropPdfFile: React.DragEvent
 
     confirmListDelete: null
     cancelListDelete: null

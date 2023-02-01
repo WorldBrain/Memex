@@ -1,6 +1,5 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
-import throttle from 'lodash/throttle'
 import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import * as utils from './search-results/util'
@@ -44,8 +43,6 @@ import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
-import ListsSidebar from './lists-sidebar'
-import { allLists } from 'src/custom-lists/selectors'
 import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
 import { constructPDFViewerUrl } from 'src/pdf/util'
 
@@ -126,20 +123,15 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     getInitialState(): State {
-        let mode: State['mode'] = 'search'
-        if (isDuringInstall(this.options.location)) {
-            mode = 'onboarding'
-        } else if (
-            this.options.location.href.includes(MISSING_PDF_QUERY_PARAM)
-        ) {
-            mode = 'locate-pdf'
-            this.options.pdfViewerBG.openPdfViewerForNextPdf()
-        }
-
         return {
-            mode,
-            loadState: 'pristine',
             currentUser: null,
+            loadState: 'pristine',
+            mode: isDuringInstall(this.options.location)
+                ? 'onboarding'
+                : 'search',
+            showDropArea: this.options.location.href.includes(
+                MISSING_PDF_QUERY_PARAM,
+            ),
 
             modals: {
                 showLogin: false,
@@ -3044,6 +3036,32 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
+    private async openPdfViewerInNewTab(urlToPdf: string): Promise<void> {
+        const url = constructPDFViewerUrl(urlToPdf, {
+            runtimeAPI: this.options.runtimeAPI,
+        })
+        await this.options.tabsAPI.create({ url })
+    }
+
+    clickPageResult: EventHandler<'clickPageResult'> = async ({
+        event,
+        previousState,
+    }) => {
+        const pageData = previousState.searchResults.pageData.byId[event.pageId]
+        if (!pageData || pageData.fullPdfUrl == null) {
+            return
+        }
+
+        event.synthEvent.preventDefault()
+
+        if (pageData.fullPdfUrl!.startsWith('blob:')) {
+            // Show dropzone for local-only PDFs
+            this.emitMutation({ showDropArea: { $set: true } })
+        } else {
+            await this.openPdfViewerInNewTab(pageData.fullPdfUrl!)
+        }
+    }
+
     dropPdfFile: EventHandler<'dropPdfFile'> = async ({ event }) => {
         event.preventDefault()
         this.emitMutation({ showDropArea: { $set: false } })
@@ -3055,11 +3073,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             const file = firstItem.getAsFile()
             const pdfObjectUrl = URL.createObjectURL(file)
 
-            await this.options.tabsAPI.create({
-                url: constructPDFViewerUrl(pdfObjectUrl, {
-                    runtimeAPI: this.options.runtimeAPI,
-                }),
-            })
+            await this.openPdfViewerInNewTab(pdfObjectUrl)
         } catch (err) {}
     }
 

@@ -43,6 +43,7 @@ export type PageInteractionProps = Omit<
     onTagsHover: React.MouseEventHandler
     onListsHover: React.MouseEventHandler
     onUnhover: React.MouseEventHandler
+    onClick: React.MouseEventHandler
 }
 
 // NOTE: Derived type - edit the original
@@ -291,6 +292,7 @@ export type Events = UIEvent<{
     cancelPageDelete: null
 
     // Page result state mutations (*specific to each* occurrence of the page in different days)
+    clickPageResult: PageEventArgs & { synthEvent: React.MouseEvent }
     setPageCopyPasterShown: PageEventArgs & { isShown: boolean }
     setPageListPickerShown: PageEventArgs & { show: ListPickerShowState }
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }

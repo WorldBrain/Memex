@@ -38,15 +38,15 @@ import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 export interface RootState {
     loadState: TaskState
     currentUser: AuthenticatedUser | null
-    mode: 'search' | 'locate-pdf' | 'onboarding'
+    mode: 'search' | 'onboarding'
     syncMenu: SyncModalState
     searchResults: SearchResultsState
     searchFilters: SearchFiltersState
     listsSidebar: ListsSidebarState
     modals: DashboardModalsState
+    showDropArea: boolean
     activePageID?: string
     activeDay?: number
-    showDropArea?: boolean
 }
 
 export type Events = UIEvent<
@@ -56,6 +56,8 @@ export type Events = UIEvent<
         ListsSidebarEvents &
         SyncModalEvents & {
             search: { paginate?: boolean; searchID?: number }
+            dragFile: React.DragEvent | null
+            dropPdfFile: React.DragEvent
         }
 >
 
