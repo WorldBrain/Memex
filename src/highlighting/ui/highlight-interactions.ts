@@ -24,7 +24,7 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import browser from 'webextension-polyfill'
 import { findPage as findPdfPage } from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
-import { throttle } from 'lodash'
+import throttle from 'lodash/throttle'
 import hexToRgb from 'hex-to-rgb'
 import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'

@@ -1,3 +1,3 @@
-import { flatten } from 'lodash'
+import flatten from 'lodash/flatten'
 
 export default flatten
