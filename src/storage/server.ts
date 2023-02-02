@@ -21,6 +21,7 @@ import ContentConversationStorage from '@worldbrain/memex-common/lib/content-con
 import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
 import ActivityFollowsStorage from '@worldbrain/memex-common/lib/activity-follows/storage'
 import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
+import { RetroSyncStorage as DiscordRetroSyncStorage } from '@worldbrain/memex-common/lib/discord/queue'
 import DiscordStorage from '@worldbrain/memex-common/lib/discord/storage'
 import {
     ChangeWatchMiddleware,
@@ -113,6 +114,10 @@ export function createLazyServerStorage(
                 storageManager,
                 operationExecuter: operationExecuter('discord'),
             })
+            const discordRetroSync = new DiscordRetroSyncStorage({
+                storageManager,
+                operationExecuter: operationExecuter('discordRetroSync'),
+            })
             const serverStorage: ServerStorage = {
                 manager: storageManager,
                 modules: {
@@ -123,6 +128,7 @@ export function createLazyServerStorage(
                     activityFollows,
                     contentConversations,
                     personalCloud,
+                    discordRetroSync,
                     discord,
                 },
             }
