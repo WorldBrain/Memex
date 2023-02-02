@@ -35,6 +35,11 @@ import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import { UNDO_HISTORY } from 'src/constants'
 const styles = require('src/highlighting/ui/styles.css')
 
+const createHighlightClass = ({
+    unifiedId,
+}: Pick<UnifiedAnnotation, 'unifiedId'>): string =>
+    `memex-cache-highlight-${unifiedId}`
+
 function checkAllowedNodeType(nodeName: string) {
     return ALLOWED_HTML_TAGS.some((tag) => tag === nodeName)
 }
@@ -196,9 +201,6 @@ export type HighlightRendererInterface = HighlightInteractionsInterface & {
 export interface HighlightRendererDependencies {}
 export class HighlightRenderer implements HighlightRendererInterface {
     private observer: MutationObserver
-    private highlightedElsByUnifiedAnnotId: {
-        [unifiedId: string]: HTMLElement[]
-    } = {}
     private highlightColor = DEFAULT_HIGHLIGHT_COLOR
     private currentActiveHighlight: UnifiedAnnotation
 
@@ -457,22 +459,20 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 )
                 // markRange({ range, cssClass: baseClass })
 
-                for (let highlights of highlightedElements) {
-                    highlights.style.setProperty(
+                for (let highlightEl of highlightedElements) {
+                    highlightEl.classList.add(createHighlightClass(highlight))
+                    highlightEl.style.setProperty(
                         '--defaultHighlightColorCSS',
                         this.highlightColor,
                     )
 
-                    if (highlights.parentNode.nodeName === 'A') {
-                        highlights.style['color'] = '#0b0080'
+                    if (highlightEl.parentNode.nodeName === 'A') {
+                        highlightEl.style['color'] = '#0b0080'
                     }
                 }
 
                 if (highlightedElements.length) {
                     this.attachEventListenersToNewHighlights(highlight, onClick)
-                    this.highlightedElsByUnifiedAnnotId[
-                        highlight.unifiedId
-                    ] = highlightedElements
                 }
             })
 
@@ -516,63 +516,46 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 await this.renderHighlight(highlight, onClick, opts?.temp)
             }),
         )
-        this.watchForReanchors(highlights, onClick)
+
+        this.watchForRerenders(highlights, onClick)
     }
 
-    private watchForReanchors = (
+    // PDFjs viewer un/loads pages as you scroll through larger docs, thus highlights need to be checked and re-rendered
+    private watchForRerenders = (
         highlights: UnifiedAnnotation[],
         onClick: AnnotationClickHandler,
     ) => {
-        if (!this.observer) {
-            // @ts-ignore
-            const pdfViewer = globalThis.PDFViewerApplication?.pdfViewer
+        const pdfViewer = globalThis.PDFViewerApplication?.pdfViewer
+        if (this.observer != null || !pdfViewer) {
+            return
+        }
 
-            if (pdfViewer) {
-                this.observer = new MutationObserver(
-                    throttle(() => this.reanchorer(highlights, onClick), 1000, {
-                        leading: true,
-                    }),
-                )
-                this.observer.observe(pdfViewer.viewer, {
-                    attributes: true,
-                    attributeFilter: ['data-loaded'],
-                    childList: true,
-                    subtree: true,
+        const rerenderMissingHighlights = async () => {
+            const highlightsToRerender = highlights.filter(
+                (highlight) =>
+                    document.querySelector(
+                        `.${createHighlightClass(highlight)}`,
+                    ) == null,
+            )
+
+            if (highlightsToRerender.length > 0) {
+                await this.renderHighlights(highlightsToRerender, onClick, {
+                    removeExisting: false,
                 })
             }
         }
-    }
 
-    private reanchorer = async (
-        highlights: UnifiedAnnotation[],
-        onClick: AnnotationClickHandler,
-    ) => {
-        const reanchors = highlights.filter(
-            (h) => !this.highlightedElsByUnifiedAnnotId[h.unifiedId]?.length,
+        this.observer = new MutationObserver(
+            throttle(rerenderMissingHighlights, 1000, { leading: true }),
         )
 
-        if (reanchors.length > 0) {
-            await this.renderHighlights(reanchors, onClick, {
-                removeExisting: false,
-            })
-        }
-
-        // for (let item of reanchors) {
-        //     let currentPageIndex = globalThis.PDFViewerApplication?.page
-        //     PDFs.findPage(item.selector.descriptor.content[1].start).then(
-        //         ({ index, offset, textContent }) => {
-        //             console.log('test',)
-        //             if (index !== currentPageIndex) {
-        //                 return
-        //             } else {
-        //                 if (reanchors.length > 0) {
-        //                     console.log('attempt at reanchoring')
-        //                     this.renderHighlights(reanchors, onClick)
-        //                 }
-        //             }
-        //         },
-        //     )
-        // }
+        // TODO: can we limit the scope of what's being observed here?
+        this.observer.observe(pdfViewer.viewer, {
+            attributeFilter: ['data-loaded'],
+            attributes: true,
+            childList: true,
+            subtree: true,
+        })
     }
 
     private scrollToHighlight = async ({
