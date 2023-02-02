@@ -546,7 +546,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         }
 
         this.observer = new MutationObserver(
-            throttle(rerenderMissingHighlights, 1000, { leading: true }),
+            throttle(rerenderMissingHighlights, 300, { leading: true }),
         )
 
         // TODO: can we limit the scope of what's being observed here?
