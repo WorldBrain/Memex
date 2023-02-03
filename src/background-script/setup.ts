@@ -84,6 +84,7 @@ import {
     PersonalCloudBackend,
     PersonalCloudService,
     PersonalCloudClientStorageType,
+    SyncTriggerSetup,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { LocalPersonalCloudSettings } from 'src/personal-cloud/background/types'
@@ -169,11 +170,7 @@ export function createBackgroundModules(options: {
     ): RemoteEventEmitter<ModuleName>
     getFCMRegistrationToken?: () => Promise<string>
     // NOTE: Currently only used in MV2 builds, allowing us to trigger sync on Firestore changes
-    setupSyncTriggerListener?: (
-        lastProcessedTime: number,
-        deviceId: string | number,
-        onChanges: (changeCount: number) => void,
-    ) => { unsubscribe: () => void }
+    setupSyncTriggerListener?: SyncTriggerSetup
     userAgentString?: string
 }): BackgroundModules {
     const createRemoteEventEmitter =
