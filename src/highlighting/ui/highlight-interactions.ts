@@ -26,11 +26,7 @@ import browser from 'webextension-polyfill'
 import { findPage as findPdfPage } from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
 import throttle from 'lodash/throttle'
 import hexToRgb from 'hex-to-rgb'
-import {
-    DEFAULT_HIGHLIGHT_COLOR,
-    HIGHLIGHT_COLOR_KEY,
-    ALLOWED_HTML_TAGS,
-} from '../constants'
+import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import { UNDO_HISTORY } from 'src/constants'
 import { getSelectionHtml } from '@worldbrain/memex-common/lib/annotations/utils'
@@ -40,10 +36,6 @@ const createHighlightClass = ({
     unifiedId,
 }: Pick<UnifiedAnnotation, 'unifiedId'>): string =>
     `memex-cache-highlight-${unifiedId}`
-
-function checkAllowedNodeType(nodeName: string) {
-    return ALLOWED_HTML_TAGS.some((tag) => tag === nodeName)
-}
 
 export const extractAnchorFromSelection = async (
     selection: Selection,
