@@ -33,6 +33,7 @@ import {
 } from '../constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import { UNDO_HISTORY } from 'src/constants'
+import { getSelectionHtml } from '@worldbrain/memex-common/lib/annotations/utils'
 const styles = require('src/highlighting/ui/styles.css')
 
 const createHighlightClass = ({
@@ -42,106 +43,6 @@ const createHighlightClass = ({
 
 function checkAllowedNodeType(nodeName: string) {
     return ALLOWED_HTML_TAGS.some((tag) => tag === nodeName)
-}
-
-function getSelectionHtml(selection, pageUrl) {
-    var html = ''
-    if (typeof selection != 'undefined') {
-        var sel = selection
-        if (sel.rangeCount) {
-            let topMostContainer = document.createElement('div')
-            let container
-            if (
-                sel.getRangeAt(0).cloneContents().firstChild != null &&
-                sel.getRangeAt(0).cloneContents().firstChild.nodeName === 'LI'
-            ) {
-                container = document.createElement('ul')
-            } else {
-                container = document.createElement('div')
-            }
-
-            for (var i = 0, len = sel.rangeCount; i < len; ++i) {
-                let content = sel.getRangeAt(i).cloneContents()
-
-                content.querySelectorAll('*').forEach((element) => {
-                    let currentNodeValue =
-                        element.childNodes[0]?.nodeValue ?? undefined
-
-                    let newNodeValue
-                    if (currentNodeValue != null) {
-                        if (!currentNodeValue.trim().length) {
-                            element.childNodes[0].nodeValue = ''
-                        }
-                    }
-                    if (
-                        element.getAttribute('hidden') ||
-                        element.getAttribute('hidden') === '' ||
-                        element.textContent.length === 0
-                    ) {
-                        element.parentNode.removeChild(element)
-                    }
-                })
-
-                content.querySelectorAll('*').forEach((element) => {
-                    if (!checkAllowedNodeType(element.nodeName)) {
-                        if (
-                            element.childNodes != null &&
-                            element.childNodes.length > 0
-                        ) {
-                            let newNode = document.createElement('span')
-
-                            element.childNodes.forEach((child) => {
-                                newNode.appendChild(child)
-                            })
-                            element.parentNode.replaceChild(newNode, element)
-                        } else {
-                            element.parentNode.removeChild(element)
-                        }
-                    }
-                })
-
-                content.querySelectorAll('*').forEach((element) => {
-                    let currentNodeValue =
-                        element.childNodes[0]?.nodeValue ?? undefined
-
-                    if (currentNodeValue != null) {
-                        if (!currentNodeValue.trim().length) {
-                            element.childNodes[0].nodeValue = ''
-                        }
-                    }
-
-                    if (element.textContent.length === 0) {
-                        element.parentNode.removeChild(element)
-                    }
-                })
-
-                content.querySelectorAll('*').forEach((element) => {
-                    element.removeAttribute('style')
-                    element.removeAttribute('class')
-                    element.removeAttribute('id')
-                })
-
-                container.appendChild(content)
-            }
-
-            topMostContainer.appendChild(container)
-            html = topMostContainer.innerHTML
-        }
-    }
-
-    let cleanedHTML = html.replace(/[\t\n\r]+ /g, '')
-    cleanedHTML = cleanedHTML.replace(/([> ]) +/g, '>')
-
-    return specialHTMLhandling(html, pageUrl)
-}
-
-function specialHTMLhandling(html, pageUrl) {
-    if (pageUrl.includes === '.wikipedia.org') {
-        html.replaceAll('href="/', 'href="https://en.wikipedia.org/')
-        html.replaceAll('src="//', 'src="https://')
-    }
-
-    return html
 }
 
 export const extractAnchorFromSelection = async (
