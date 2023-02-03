@@ -210,7 +210,10 @@ export default class SpacePickerLogic extends UILogic<
 
         this.currentKeysPressed = currentKeys
 
-        if (currentKeys.includes('Enter') && currentKeys.includes('Meta')) {
+        if (
+            (currentKeys.includes('Enter') && currentKeys.includes('Meta')) ||
+            (event.key === 'Enter' && previousState.displayEntries.length === 0)
+        ) {
             if (previousState.newEntryName !== '') {
                 await this.newEntryPress({
                     previousState,

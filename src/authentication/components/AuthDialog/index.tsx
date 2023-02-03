@@ -235,7 +235,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                 <TextInputContainer>
                                     <>
                                         <Icon
-                                            filePath={icons.lockFine}
+                                            filePath={icons.lock}
                                             heightAndWidth="20px"
                                             hoverOff
                                         />

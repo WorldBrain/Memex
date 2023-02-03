@@ -80,6 +80,8 @@ export default class Ribbon extends Component<Props, State> {
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
 
     private spacePickerRef = createRef<HTMLDivElement>()
+    private bookmarkButtonRef = createRef<HTMLDivElement>()
+
     private tutorialButtonRef = createRef<HTMLDivElement>()
     private feedButtonRef = createRef<HTMLDivElement>()
     private sidebarButtonRef = createRef<HTMLDivElement>()
@@ -758,9 +760,6 @@ export default class Ribbon extends Component<Props, State> {
                                             </UpperArea>
                                         )}
                                         <TooltipBox
-                                            targetElementRef={
-                                                this.spacePickerRef.current
-                                            }
                                             tooltipText={
                                                 this.props.bookmark
                                                     .isBookmarked ? (
@@ -799,9 +798,6 @@ export default class Ribbon extends Component<Props, State> {
                                             />
                                         </TooltipBox>
                                         <TooltipBox
-                                            targetElementRef={
-                                                this.spacePickerRef.current
-                                            }
                                             tooltipText={this.getTooltipText(
                                                 'addToCollection',
                                             )}
@@ -907,9 +903,6 @@ export default class Ribbon extends Component<Props, State> {
                                         containerRef={this.settingsButtonRef}
                                     />
                                     <TooltipBox
-                                        targetElementRef={
-                                            this.spacePickerRef.current
-                                        }
                                         tooltipText={
                                             <span>
                                                 Keyboard Shortcuts
