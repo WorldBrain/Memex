@@ -355,17 +355,15 @@ export class SidebarContainerLogic extends UILogic<
                 showState: { $set: initialState ?? 'hidden' },
             })
 
-            const hasNetworkActivity = await pageActivityIndicatorBG.getPageActivityStatus(
-                fullPageUrl,
-            )
-
-            this.emitMutation({
-                pageHasNetworkAnnotations: {
-                    $set: hasNetworkActivity !== 'no-activity',
-                },
-            })
-
             if (shouldHydrateCacheOnInit && fullPageUrl != null) {
+                const hasNetworkActivity = await pageActivityIndicatorBG.getPageActivityStatus(
+                    fullPageUrl,
+                )
+                this.emitMutation({
+                    pageHasNetworkAnnotations: {
+                        $set: hasNetworkActivity !== 'no-activity',
+                    },
+                })
                 await this.hydrateAnnotationsCache(fullPageUrl, {
                     renderHighlights: true,
                 })
