@@ -42,7 +42,7 @@ export const extractAnchorFromSelection = async (
     pageUrl: string,
 ): Promise<Anchor> => {
     const quote2 = selection.toString()
-    const quote = getSelectionHtml(selection, pageUrl)
+    const quote = getSelectionHtml(selection)
     const descriptor = await anchoring.selectionToDescriptor({ selection })
     return {
         quote,

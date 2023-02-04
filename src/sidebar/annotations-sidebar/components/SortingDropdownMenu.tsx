@@ -23,11 +23,11 @@ export const defaultSortingMenuItems: SortingMenuItemProps[] = [
         sortingFn: sortByPagePosition,
     },
     {
-        name: 'Creation time (9-1)',
+        name: 'Creation time (new → old)',
         sortingFn: (a, b) => sortByCreatedTime(b, a),
     },
     {
-        name: 'Creation time (1-9)',
+        name: 'Creation time (old → new)',
         sortingFn: (a, b) => sortByCreatedTime(a, b),
     },
 ]

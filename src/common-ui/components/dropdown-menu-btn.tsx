@@ -147,7 +147,7 @@ const MenuItem = styled.div<{ isSelected }>`
     border-radius: 6px;
     margin: 0 10px;
     cursor: ${(props) => !props.isSelected && 'pointer'};
-    width: 160px;
+    width: 210px;
 
     &:first-child {
         margin-top: 10px;
