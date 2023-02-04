@@ -16,16 +16,16 @@ import {
     PersonalCloudClientStorageType,
     PersonalCloudUpdate,
     PersonalCloudOverwriteUpdate,
+    PersonalCloudDeviceId,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
-import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import {
     PersonalCloudAction,
     PersonalCloudActionType,
     LocalPersonalCloudSettings,
-    PersonalCloudDeviceID,
     PersonalCloudRemoteInterface,
     PersonalCloudStats,
+    AuthChanges,
 } from './types'
 import {
     PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
@@ -55,10 +55,9 @@ export interface PersonalCloudBackgroundOptions {
     persistentStorageManager: StorageManager
     remoteEventEmitter: RemoteEventEmitter<'personalCloud'>
     getUserId(): Promise<string | number | null>
-    userIdChanges(): AsyncIterableIterator<AuthenticatedUser>
+    authChanges(): AsyncIterableIterator<AuthChanges>
     settingStore: SettingStore<LocalPersonalCloudSettings>
     localExtSettingStore: SettingStore<LocalExtensionSettings>
-    createDeviceId(userId: number | string): Promise<PersonalCloudDeviceID>
     writeIncomingData(params: {
         storageType: PersonalCloudClientStorageType
         collection: string
@@ -77,7 +76,7 @@ export class PersonalCloudBackground {
     changesIntegrating: Promise<void>
     pushMutex = new AsyncMutex()
     pullMutex = new AsyncMutex()
-    deviceId?: string | number
+    deviceId: PersonalCloudDeviceId | null = null
     reportExecutingAction?: (action: PersonalCloudAction) => void
     remoteFunctions: PersonalCloudRemoteInterface
     emitEvents = true
@@ -199,23 +198,24 @@ export class PersonalCloudBackground {
         await this.actionQueue.setup({ paused: true })
         this._modifyStats({
             pendingUploads: this.actionQueue.pendingActionCount,
-            // countingUploads: false,
         })
-
-        const userId = await this.options.getUserId()
-        if (userId) {
-            await this.createOrLoadDeviceId(userId)
-        }
 
         await this.startSync()
     }
 
-    async observeAuthChanges() {
-        for await (const nextUser of this.options.userIdChanges()) {
-            await this.handleAuthChange(nextUser?.id)
+    private async observeAuthChanges() {
+        for await (const { nextUser, deviceId } of this.options.authChanges()) {
+            this.deviceId = deviceId
 
-            if (nextUser) {
+            if (nextUser != null) {
+                this.actionQueue.unpause()
                 await this.startSync()
+            } else {
+                this.actionQueue.pause()
+                this._modifyStats({
+                    pendingDownloads: 0,
+                    pendingUploads: 0,
+                })
             }
         }
     }
@@ -231,7 +231,11 @@ export class PersonalCloudBackground {
 
     async startSync() {
         const userId = await this.options.getUserId()
-        await this.handleAuthChange(userId)
+        if (userId != null) {
+            this.actionQueue.unpause()
+        } else {
+            this.actionQueue.pause()
+        }
 
         if (!this.pendingActionsExecuting) {
             this.pendingActionsExecuting = this.actionQueue.executePendingActions()
@@ -242,36 +246,6 @@ export class PersonalCloudBackground {
         }
         if (!this.changesIntegrating) {
             this.changesIntegrating = this.integrateContinuously()
-        }
-    }
-
-    private async createOrLoadDeviceId(userId: string | number) {
-        const { settingStore, createDeviceId } = this.options
-
-        this.deviceId = await settingStore.get('deviceId')
-        if (!this.deviceId) {
-            this.deviceId = await createDeviceId(userId)
-            await settingStore.set('deviceId', this.deviceId!)
-        }
-    }
-
-    async handleAuthChange(userId: string | number | null) {
-        if (userId) {
-            await this.createOrLoadDeviceId(userId)
-            this.actionQueue.unpause()
-        } else {
-            this.actionQueue.pause()
-            delete this.deviceId
-        }
-
-        const isAuthenticated = !!this.deviceId
-        if (!isAuthenticated) {
-            this._modifyStats({
-                // countingDownloads: false,
-                pendingDownloads: 0,
-                pendingUploads: 0,
-            })
-            return
         }
     }
 

@@ -85,9 +85,13 @@ import {
     PersonalCloudService,
     PersonalCloudClientStorageType,
     SyncTriggerSetup,
+    PersonalCloudDeviceId,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { BrowserSettingsStore } from 'src/util/settings'
-import { LocalPersonalCloudSettings } from 'src/personal-cloud/background/types'
+import type {
+    AuthChanges,
+    LocalPersonalCloudSettings,
+} from 'src/personal-cloud/background/types'
 import { authChanges } from '@worldbrain/memex-common/lib/authentication/utils'
 import FirebasePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firebase'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
@@ -421,6 +425,35 @@ export function createBackgroundModules(options: {
         jobScheduler: jobScheduler.scheduler,
     })
 
+    // TODO: Maybe move this somewhere more appropriate (personal-cloud module)
+    async function createDeviceId(
+        userId: string,
+    ): Promise<PersonalCloudDeviceId> {
+        const uaParser = new UAParser(options.userAgentString)
+        const serverStorage = await options.getServerStorage()
+        const device = await serverStorage.modules.personalCloud.createDeviceInfo(
+            {
+                userId,
+                device: {
+                    type: PersonalDeviceType.DesktopBrowser,
+                    product: PersonalDeviceProduct.Extension,
+                    browser: kebabCase(uaParser.getBrowser().name),
+                    os: kebabCase(uaParser.getOS().name),
+                },
+            },
+        )
+        return device.id
+    }
+
+    async function* authChangeGenerator(): AsyncIterableIterator<AuthChanges> {
+        for await (const nextUser of authChanges(auth.authService)) {
+            const deviceId =
+                nextUser != null ? await createDeviceId(nextUser.id) : null
+
+            yield { nextUser, deviceId }
+        }
+    }
+
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
         storageManager,
         syncSettingsStore,
@@ -446,7 +479,7 @@ export function createBackgroundModules(options: {
                 ),
                 getCurrentSchemaVersion: () =>
                     getCurrentSchemaVersion(options.storageManager),
-                userChanges: () => authChanges(auth.authService),
+                authChanges: authChangeGenerator,
                 getLastUpdateProcessedTime: () =>
                     personalCloudSettingStore.get('lastSeen'),
                 // NOTE: this is for retrospective collection sync, which is currently unused in the extension
@@ -456,30 +489,11 @@ export function createBackgroundModules(options: {
                 setupSyncTriggerListener: options.setupSyncTriggerListener,
             }),
         remoteEventEmitter: createRemoteEventEmitter('personalCloud'),
-        createDeviceId: async (userId) => {
-            const uaParser = new UAParser(options.userAgentString)
-            const serverStorage = await options.getServerStorage()
-            const device = await serverStorage.modules.personalCloud.createDeviceInfo(
-                {
-                    device: {
-                        type: PersonalDeviceType.DesktopBrowser,
-                        os: kebabCase(uaParser.getOS().name),
-                        browser: kebabCase(uaParser.getBrowser().name),
-                        product: PersonalDeviceProduct.Extension,
-                    },
-                    userId,
-                },
-            )
-            return device.id
-        },
         settingStore: personalCloudSettingStore,
         localExtSettingStore,
         getUserId: getCurrentUserId,
-        async *userIdChanges() {
-            for await (const nextUser of authChanges(auth.authService)) {
-                yield nextUser
-            }
-        },
+        authChanges: authChangeGenerator,
+        // TODO: Move this somewhere more appropriate (personal-cloud module)
         writeIncomingData: async (params) => {
             const incomingStorageManager =
                 params.storageType === PersonalCloudClientStorageType.Persistent
