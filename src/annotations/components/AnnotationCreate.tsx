@@ -25,6 +25,8 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import { UnifiedList } from '../cache/types'
+import { ListData } from 'src/dashboard-refactor/lists-sidebar/types'
 
 interface State {
     isTagPickerShown: boolean
@@ -63,6 +65,7 @@ export interface AnnotationCreateGeneralProps {
     spacesBG?: RemoteCollectionsInterface
     contentSharingBG?: ContentSharingInterface
     getYoutubePlayer?(): YoutubePlayer
+    allLists: { [id: string]: UnifiedList } | { [id: string]: ListData }
 }
 
 export interface Props
@@ -108,7 +111,7 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     private get displayLists(): Array<{
         id: number
-        name: string | JSX.Element
+        name: string
         isShared: boolean
     }> {
         return this.props.lists.map((id) => ({
@@ -292,7 +295,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 onContentUpdate={(content) =>
                                     this.props.onCommentChange(content)
                                 }
-                                markdownContent={this.props.comment}
                                 setEditorInstanceRef={(editor) =>
                                     (this.editor = editor)
                                 }
@@ -306,6 +308,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 }
                                 youtubeShortcut={this.state.youtubeShortcut}
                                 getYoutubePlayer={this.props.getYoutubePlayer}
+                                spaceSuggestions={this.props.allLists}
                             />
                         ) : (
                             <EditorDummy

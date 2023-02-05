@@ -98,6 +98,7 @@ export interface AnnotationProps {
     creatorId?: string | number
     currentUserId?: string | number
     selectedListId?: number
+    allLists: { [id: string]: UnifiedList } | { [id: string]: ListData }
 }
 
 export interface AnnotationEditableEventProps {
@@ -419,6 +420,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         isShared={this.props.isShared}
                         isBulkShareProtected={this.props.isBulkShareProtected}
                         getYoutubePlayer={this.props.getYoutubePlayer}
+                        allLists={this.props.allLists}
                     />
                 </AnnotationEditContainer>
             )

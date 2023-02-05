@@ -613,6 +613,7 @@ export default class Ribbon extends Component<Props, State> {
                         spacesBG={this.props.spacesBG}
                         contentSharingBG={this.props.contentSharingBG}
                         autoFocus
+                        allLists={null}
                     />
                 </CommentBoxContainer>
             </PopoutBox>

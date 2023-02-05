@@ -340,6 +340,7 @@ export class AnnotationsSidebarContainer<
             comment: this.state.commentBox.commentText,
             lists: this.state.commentBox.lists,
             hoverState: null,
+            allLists: this.props.annotationsCache.lists.byId,
         }
     }
 
