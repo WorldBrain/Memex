@@ -202,7 +202,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
 
         if (videoURLWithTime != null) {
-            videoTimeStampForComment = `<a class="youtubeTimestamp" href="${videoURLWithTime}">${humanTimestamp}</a>`
+            videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`
         }
 
         if (

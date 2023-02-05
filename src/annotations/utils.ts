@@ -22,25 +22,25 @@ export const truncateText: TextTruncator = (
     },
 ) => {
     if (text) {
-        if (text.length > maxLength) {
-            let checkedLength = maxLength
+        // if (text.length > maxLength) {
+        //     let checkedLength = maxLength
 
-            // Find the next space to cut off at
-            while (
-                text.charAt(checkedLength) !== ' ' &&
-                checkedLength < text.length
-            ) {
-                checkedLength++
-            }
+        //     // Find the next space to cut off at
+        //     while (
+        //         text.charAt(checkedLength) !== ' ' &&
+        //         checkedLength < text.length
+        //     ) {
+        //         checkedLength++
+        //     }
 
-            return {
-                isTooLong: true,
-                text: text.slice(0, checkedLength) + '…',
-            }
-        }
+        //     return {
+        //         isTooLong: true,
+        //         text: text.slice(0, checkedLength) + '…',
+        //     }
+        // }
 
         for (let i = 0, newlineCount = 0; i < text.length; ++i) {
-            if (text[i] === '\n') {
+            if (text[i].startsWith('<p>')) {
                 newlineCount++
                 if (newlineCount > maxLineBreaks) {
                     return {
