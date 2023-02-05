@@ -315,6 +315,9 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 removeNoteFromSpace={(listId) => {
                                     this.props.removePageFromList(listId)
                                 }}
+                                createNewSpaceAndAddNote={(listName) => {
+                                    this.props.createNewList(listName)
+                                }}
                             />
                         ) : (
                             <EditorDummy
