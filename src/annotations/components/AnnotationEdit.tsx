@@ -143,9 +143,6 @@ class AnnotationEdit extends React.Component<Props> {
                     addNoteToSpace={(listId) => {
                         this.props.addPageToList(listId)
                     }}
-                    removeNoteFromSpace={(listId) => {
-                        this.props.removeNoteFromSpace(listId)
-                    }}
                 />
             </EditorContainer>
         )

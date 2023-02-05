@@ -113,6 +113,8 @@ export class AnnotationsSidebarContainer<
     private createNewList = async (name: string) => {
         const listId = Date.now()
 
+        console.log('executed3')
+
         this.props.annotationsCache.addList({
             name,
             localId: listId,

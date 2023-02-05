@@ -302,6 +302,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     this.props.autoFocus ||
                                     this.state.onEditClick
                                 }
+                                markdownContent={this.props.comment}
                                 placeholder={`Write a note...`}
                                 isRibbonCommentBox={
                                     this.props.isRibbonCommentBox
@@ -312,11 +313,12 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 addNoteToSpace={(listId) => {
                                     this.props.addPageToList(listId)
                                 }}
-                                removeNoteFromSpace={(listId) => {
-                                    this.props.removePageFromList(listId)
-                                }}
-                                createNewSpaceAndAddNote={(listName) => {
-                                    this.props.createNewList(listName)
+                                createNewSpaceAndAddNote={async (listName) => {
+                                    console.log('executed2')
+                                    let newListID = await this.props.createNewList(
+                                        listName,
+                                    )
+                                    this.props.addPageToList(newListID)
                                 }}
                             />
                         ) : (
