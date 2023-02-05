@@ -309,6 +309,9 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 youtubeShortcut={this.state.youtubeShortcut}
                                 getYoutubePlayer={this.props.getYoutubePlayer}
                                 spaceSuggestions={this.props.allLists}
+                                addNoteToSpace={(listId) => {
+                                    this.props.addPageToList(listId)
+                                }}
                             />
                         ) : (
                             <EditorDummy
