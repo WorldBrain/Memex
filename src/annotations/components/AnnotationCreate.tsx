@@ -310,8 +310,10 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 getYoutubePlayer={this.props.getYoutubePlayer}
                                 spaceSuggestions={this.props.allLists}
                                 addNoteToSpace={(listId) => {
-                                    console.log('works')
                                     this.props.addPageToList(listId)
+                                }}
+                                removeNoteFromSpace={(listId) => {
+                                    this.props.removePageFromList(listId)
                                 }}
                             />
                         ) : (
@@ -450,6 +452,9 @@ const SaveActionBar = styled.div`
 
     z-index: 1001;
     grid-gap: 10px;
+    position: absolute;
+    flex: 1;
+    right: 12px;
 `
 
 const MarkdownButtonContainer = styled.div`
