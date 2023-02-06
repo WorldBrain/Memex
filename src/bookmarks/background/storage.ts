@@ -7,7 +7,7 @@ import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
 } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import type { Bookmark } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/overview/types'
 
 export default class BookmarksStorage extends StorageModule {

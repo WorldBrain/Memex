@@ -1,4 +1,4 @@
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { TextTruncator } from './types'
 import type { AnnotationShareOpts } from './annotation-save-logic'

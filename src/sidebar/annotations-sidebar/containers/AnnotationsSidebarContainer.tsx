@@ -22,7 +22,7 @@ import {
 import * as icons from 'src/common-ui/components/design-library/icons'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import { PageNotesCopyPaster } from 'src/copy-paster'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import analytics from 'src/analytics'
 import { getListShareUrl } from 'src/content-sharing/utils'

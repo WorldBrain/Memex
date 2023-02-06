@@ -15,7 +15,7 @@ import type {
     UnifiedListForCache,
 } from './types'
 import { shareOptsToPrivacyLvl } from '../utils'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { AnnotationInterface } from '../background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'

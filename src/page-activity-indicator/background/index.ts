@@ -12,7 +12,7 @@ import type {
     SharedList,
     SharedListReference,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import PageActivityIndicatorStorage from './storage'
 import {
     getFollowedListEntryIdentifier,

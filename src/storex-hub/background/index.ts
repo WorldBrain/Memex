@@ -7,7 +7,7 @@ import {
     StorexHubCallbacks_v0,
     HandleRemoteCallResult_v0,
 } from '@worldbrain/storex-hub/lib/public-api'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
     FetchPageProcessor,
     PageContent,

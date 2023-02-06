@@ -1,4 +1,4 @@
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'

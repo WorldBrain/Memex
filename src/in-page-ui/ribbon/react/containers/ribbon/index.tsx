@@ -9,7 +9,7 @@ import { StatefulUIElement } from 'src/util/ui-logic'
 import Ribbon from '../../components/ribbon'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
 import analytics from 'src/analytics'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'

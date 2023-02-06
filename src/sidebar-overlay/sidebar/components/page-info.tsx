@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { Page } from '../types'
 import browser from 'webextension-polyfill'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
