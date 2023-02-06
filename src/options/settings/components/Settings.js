@@ -33,9 +33,9 @@ const InformationBlock = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    color: ${(props) => props.theme.colors.normalText};
-    background: ${(props) => props.theme.colors.backgroundColor};
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    color: ${(props) => props.theme.colors.white};
+    background: ${(props) => props.theme.colors.black};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
     border-radius: 3px;
     height: 50px;
     margin-bottom: 20px;

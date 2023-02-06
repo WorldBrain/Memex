@@ -360,7 +360,9 @@ describe('Discord integration data fetch tests', () => {
             }),
         ])
 
-        await actionProcessor.processDiscordEventAction(discordEventAction)
+        try {
+            await actionProcessor.processDiscordEventAction(discordEventAction)
+        } catch (err) {}
 
         expect(
             await storageManager

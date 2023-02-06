@@ -74,7 +74,8 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
                             filePath={icons.check}
                             heightAndWidth="16px"
                             onClick={this.handleConfirm}
-                            color={'purple'}
+                            color={'prime1'}
+                            padding={'4px'}
                         />
                     </ActionButtonBox>
                 </Container>
@@ -94,13 +95,15 @@ const EditableListTitle = styled.input`
     flex: 0 1 100%;
     display: flex;
     width: 70%;
-    margin: 5px 0 5px 10px;
+    margin: 5px 0 5px 5px;
     font-size: 14px;
     height: 30px;
     outline: none;
     border: none;
-    color: ${(props) => props.theme.colors.normalText};
-    background-color: ${(props) => props.theme.colors.darkhover};
+    color: ${(props) => props.theme.colors.white};
+    background-color: ${(props) => props.theme.colors.greyScale2};
+    flex: 1;
+    width: -webkit-fill-available;
 
     &:focus-within {
         outline: 1px solid ${(props) => props.theme.colors.greyScale4};
@@ -124,9 +127,9 @@ const ErrMsg = styled.div`
 const Container = styled.div<Props>`
     width: fill-available;
     display: flex;
-    grid-gap: 15px;
+    grid-gap: 20px;
     justify-content: space-between;
     align-items: center;
     background-color: transparent;
-    padding: 5px 10px;
+    padding: 5px 15px 5px 15px;
 `

@@ -40,7 +40,7 @@ const TR = styled.tr`
     padding: 15px 0;
     height: 50px;
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     grid-gap: 20px;
     width: fill-available;
 
@@ -50,7 +50,7 @@ const TR = styled.tr`
 `
 
 const Expression = styled.span`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 300;
     text-overflow: ellipsis;
     display: block;

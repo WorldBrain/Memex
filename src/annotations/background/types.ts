@@ -1,17 +1,13 @@
-import {
+import type {
     RemoteFunctionRole,
     RemotePositionalFunction,
     RemoteFunction,
 } from 'src/util/webextensionRPC'
-import { Annotation } from 'src/annotations/types'
-import { AnnotSearchParams } from 'src/search/background/types'
-import { Anchor } from 'src/highlighting/types'
-import {
-    SharedAnnotationReference,
-    SharedAnnotation,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
-import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
+import type { Annotation } from 'src/annotations/types'
+import type { AnnotSearchParams } from 'src/search/background/types'
+import type { Anchor } from 'src/highlighting/types'
+import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { SharedAnnotationWithRefs } from '../types'
 
 export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     getAllAnnotationsByUrl: RemotePositionalFunction<
@@ -27,7 +23,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
             withLists?: boolean
             withBookmarks?: boolean
         },
-        Annotation[]
+        Array<Annotation & { createdWhen?: number; lastEdited?: number }>
     >
     createAnnotation: RemotePositionalFunction<
         Role,
@@ -67,7 +63,11 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     getAnnotationTags: RemotePositionalFunction<Role, any[], any>
     addAnnotationTag: RemotePositionalFunction<Role, any[], any>
     delAnnotationTag: RemotePositionalFunction<Role, any[], any>
-    toggleSidebarOverlay: RemoteFunction<Role, { activeUrl: string }, any>
+    toggleSidebarOverlay: RemoteFunction<
+        Role,
+        { unifiedAnnotationId: string },
+        any
+    >
     toggleAnnotBookmark: RemotePositionalFunction<Role, any[], any>
     getAnnotBookmark: RemotePositionalFunction<Role, any[], any>
     getListIdsForAnnotation: RemotePositionalFunction<
@@ -83,29 +83,14 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
                 withCreatorData?: boolean
             },
         ],
-        Array<
-            SharedAnnotation & {
-                reference: SharedAnnotationReference
-                creatorReference: UserReference
-                creator?: UserPublicDetails
-                selector?: Anchor
-            }
-        >
-    >
-    goToAnnotationFromSidebar: RemoteFunction<
-        Role,
-        {
-            url: string
-            annotation: Annotation
-        },
-        void
+        Array<SharedAnnotationWithRefs>
     >
 }
 
 export interface CreateAnnotationParams {
     url?: string
     pageUrl: string
-    title: string
+    title?: string
     comment?: string
     body?: string
     selector?: Anchor

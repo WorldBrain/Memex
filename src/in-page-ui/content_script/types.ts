@@ -3,8 +3,8 @@ import type {
     SidebarActionOptions,
 } from '../shared-state/types'
 import type { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
-import type { Annotation } from 'src/annotations/types'
 import type { ExtractedPDFData } from 'src/page-analysis/background/content-extraction/types'
+import type { UnifiedAnnotation } from 'src/annotations/cache/types'
 
 export interface InPageUIContentScriptRemoteInterface
     extends AnnotationFunctions {
@@ -26,8 +26,7 @@ export interface InPageUIContentScriptRemoteInterface
 
     // Highlights
     goToHighlight(
-        annotation: Annotation,
-        pageAnnotations: Annotation[],
+        annotationCacheId: UnifiedAnnotation['unifiedId'],
     ): Promise<void>
     removeHighlights(): Promise<void>
 

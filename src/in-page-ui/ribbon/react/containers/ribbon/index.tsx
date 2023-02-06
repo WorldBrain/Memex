@@ -109,13 +109,12 @@ export default class RibbonContainer extends StatefulUIElement<
                 ref={this.ribbonRef}
                 setRef={this.props.setRef}
                 getListDetailsById={(id) => {
-                    const { annotationsCache } = this.props
+                    const listDetails = this.props.annotationsCache.getListByLocalId(
+                        id,
+                    )
                     return {
-                        name:
-                            annotationsCache.listData[id]?.name ??
-                            'Missing list',
-                        isShared:
-                            annotationsCache.listData[id]?.remoteId != null,
+                        name: listDetails?.name ?? 'Missing list',
+                        isShared: listDetails?.remoteId != null,
                     }
                 }}
                 toggleShowExtraButtons={() => {
@@ -227,13 +226,16 @@ export default class RibbonContainer extends StatefulUIElement<
                             value: { added: null, deleted: id, selected: [] },
                         }),
                     createNewEntry: async (name) => {
-                        const listId = await this.props.customLists.createCustomList(
-                            { name },
-                        )
-                        this.props.annotationsCache.addNewListData({
+                        const listId = Date.now()
+
+                        this.props.annotationsCache.addList({
                             name,
-                            id: listId,
+                            localId: listId,
                             remoteId: null,
+                            description: null,
+                            unifiedAnnotationIds: [],
+                            hasRemoteAnnotationsToLoad: false,
+                            creator: this.props.currentUser,
                         })
                         await this.processEvent('updateLists', {
                             value: {
@@ -241,6 +243,10 @@ export default class RibbonContainer extends StatefulUIElement<
                                 deleted: null,
                                 selected: [],
                             },
+                        })
+                        await this.props.customLists.createCustomList({
+                            name: name,
+                            id: listId,
                         })
                         return listId
                     },

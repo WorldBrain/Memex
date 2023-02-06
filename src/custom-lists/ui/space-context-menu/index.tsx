@@ -170,21 +170,23 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                     <DetailsText>
                         This does NOT delete the pages in it
                     </DetailsText>
-                    <PrimaryAction
-                        onClick={wrapClick(this.props.onDeleteSpaceConfirm)}
-                        label={'Delete'}
-                        icon={'trash'}
-                        type={'secondary'}
-                        size={'medium'}
-                    />
-                    <PrimaryAction
-                        onClick={wrapClick(() =>
-                            this.processEvent('cancelDeleteSpace', null),
-                        )}
-                        label={'Cancel'}
-                        type={'tertiary'}
-                        size={'medium'}
-                    />
+                    <ButtonRow>
+                        <PrimaryAction
+                            onClick={wrapClick(this.props.onDeleteSpaceConfirm)}
+                            label={'Delete'}
+                            icon={'trash'}
+                            type={'secondary'}
+                            size={'medium'}
+                        />
+                        <PrimaryAction
+                            onClick={wrapClick(() =>
+                                this.processEvent('cancelDeleteSpace', null),
+                            )}
+                            label={'Cancel'}
+                            type={'tertiary'}
+                            size={'medium'}
+                        />
+                    </ButtonRow>
                 </DeleteBox>
             )
         }
@@ -237,10 +239,10 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         label={'Delete Space'}
                     />
                     <>
-                        {this.state.showSaveButton && (
+                        {this.state?.showSaveButton && (
                             <Icon
                                 filePath="check"
-                                color="purple"
+                                color="prime1"
                                 heightAndWidth="24px"
                                 onClick={() => {
                                     this.setState({
@@ -268,6 +270,14 @@ const ButtonBox = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
+    grid-gap: 5px;
+`
+const ButtonRow = styled.div`
+    width: fill-available;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 5px;
 `
 
 const ContextMenuContainer = styled.div`
@@ -275,7 +285,7 @@ const ContextMenuContainer = styled.div`
     grid-gap: 5px;
     flex-direction: column;
     width: fill-available;
-    padding: 15px 17px 10px 17px;
+    padding: 10px 10px 10px 10px;
     min-height: fit-content;
     height: fit-content;
     justify-content: center;
@@ -285,8 +295,8 @@ const ContextMenuContainer = styled.div`
 
 const SectionTitle = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.normalText};
-    font-weight: 600;
+    color: ${(props) => props.theme.colors.greyScale4};
+    font-weight: 400;
     width: 100%;
     display: flex;
     justify-content: flex-start;
@@ -298,6 +308,7 @@ const DeleteBox = styled.div`
     justify-content: center;
     flex-direction: column;
     width: fill-available;
+    padding: 15px;
 `
 
 const PermissionArea = styled.div`
@@ -306,7 +317,7 @@ const PermissionArea = styled.div`
 `
 
 const EditArea = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     width: fill-available;
     margin-bottom: 3px;
 `
@@ -347,7 +358,7 @@ const ModalRoot = styled.div<{ fixedPosition: boolean }>`
             : `
     border-radius: 12px;
 `}
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.greyScale1};
     ${(props) =>
         props.x || props.y
             ? ''
@@ -378,35 +389,9 @@ const TitleBox = styled.div`
     height: 100%;
     align-items: center;
     font-weight: bold;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     justify-content: center;
-`
-
-const MenuButton = styled.div`
-    height: 36px;
-    font-family: 'Satoshi', sans-serif;
-    font-weight: ${fonts.primary.weight.normal};
-    color: ${(props) => props.theme.colors.normalText};
-    font-size: 14px;
-    line-height: 18px;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    cursor: pointer;
-    padding: 0px 5px;
-    border-radius: 5px;
-
-    &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
-    }
-
-    & * {
-        cursor: pointer;
-    }
-    & > div {
-        width: auto;
-    }
+    font-size: 16px;
 `
 
 const LinkAndRoleBox = styled.div<{
@@ -438,7 +423,7 @@ const LinkAndRoleBox = styled.div<{
             grid-gap: 5px;
             grid-auto-flow: row;
             border-radius: 6px;
-            outline: 1px solid ${(props) => props.theme.colors.lightHover};
+            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         }
 
 `
@@ -451,9 +436,9 @@ const LinkBox = styled(Margin)`
     text-align: left;
     height: 30px;
     cursor: pointer;
-    color: ${(props) => props.theme.colors.normalText};
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
-    background: ${(props) => props.theme.colors.darkhover};
+    color: ${(props) => props.theme.colors.white};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    background: ${(props) => props.theme.colors.greyScale2};
 `
 
 const Link = styled.span`
@@ -482,16 +467,16 @@ const DetailsText = styled.span`
     opacity: 0.8;
     font-size: 14px;
     font-family: 'Satoshi', sans-serif;
-    font-weight: ${fonts.primary.weight.normal};
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale5};
     margin-bottom: 5px;
     margin-top: -5px;
+    text-align: center;
 `
 
 const PermissionText = styled.span<{
     viewportBreakpoint: string
 }>`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     opacity: 0.8;
     display: flex;
     flex-direction: row;

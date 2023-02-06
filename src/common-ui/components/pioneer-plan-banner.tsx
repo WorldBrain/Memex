@@ -112,7 +112,7 @@ const SectionTitle = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     font-weight: 500;
     margin-bottom: 20px;

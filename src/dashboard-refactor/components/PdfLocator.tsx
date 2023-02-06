@@ -89,7 +89,7 @@ const LocatorText = styled.div`
 
 const LocatorDropContainerInner = styled.div`
     border-radius: 5px;
-    border: 2px dashed ${(props) => props.theme.colors.purple};
+    border: 2px dashed ${(props) => props.theme.colors.prime1};
     box-sizing: border-box;
     height: fill-available;
     width: fill-available;
@@ -111,11 +111,11 @@ const DropImage = styled.img`
     border-radius: 100px;
     padding: 20px;
     margin-bottom: 40px;
-    border: 3px solid ${(props) => props.theme.colors.purple};
+    border: 3px solid ${(props) => props.theme.colors.prime1};
 `
 
 const LocatorDropText = styled.div`
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     text-align: center;
     pointer-events: none;
     font-size: 1.5rem;

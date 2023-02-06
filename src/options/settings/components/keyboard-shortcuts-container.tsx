@@ -209,7 +209,7 @@ const RightBox = styled.div`
     position: relative;
     height: 40px;
     padding-right: 130px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 `
 
 const KeyBoardShortCutBehind = styled.div`
@@ -222,7 +222,7 @@ const KeyBoardShortCutBehind = styled.div`
     top: 0px;
     right: 0px;
     border-radius: 8px;
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
 `
 
 const Title = styled.span`
@@ -232,13 +232,13 @@ const Title = styled.span`
 `
 
 const SubText = styled.span`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     padding-left: 5px;
 `
 
 const CheckBoxContainer = styled.div`
     margin-top: 30px;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
     padding-top: 10px;
     cursor: pointer;
 `
@@ -256,7 +256,7 @@ const CheckBoxRow = styled.div<{
     z-index: ${(props) => props.zIndex};
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         z-index: ${(props) => props.zIndex};
     }
 `
@@ -279,7 +279,7 @@ const KeyboardInput = styled.input`
     caret-color: transparent;
 
     &:focus {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 `
 

@@ -4,11 +4,14 @@ import * as componentTypes from '../../components/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { loadInitial } from 'src/util/ui-logic'
-import { generateAnnotationUrl } from 'src/annotations/utils'
+import {
+    generateAnnotationUrl,
+    shareOptsToPrivacyLvl,
+} from 'src/annotations/utils'
 import { resolvablePromise } from 'src/util/resolvable'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { Analytics } from 'src/analytics'
-import { setLocalStorage } from 'src/util/storage'
+import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import browser from 'webextension-polyfill'
 import { Storage } from 'webextension-polyfill-ts'
 
@@ -115,6 +118,8 @@ export class RibbonContainerLogic extends UILogic<
 
     commentSavedTimeout = 2000
     readingView = false
+    sidebar
+    resizeObserver
 
     constructor(private dependencies: RibbonLogicOptions) {
         super()
@@ -133,11 +138,12 @@ export class RibbonContainerLogic extends UILogic<
                 areHighlightsEnabled: false,
             },
             tooltip: {
-                isTooltipEnabled: false,
+                isTooltipEnabled: undefined,
             },
             commentBox: INITIAL_RIBBON_COMMENT_BOX_STATE,
             bookmark: {
                 isBookmarked: false,
+                lastBookmarkTimestamp: undefined,
             },
             tagging: {
                 tags: [],
@@ -161,9 +167,6 @@ export class RibbonContainerLogic extends UILogic<
 
     init: EventHandler<'init'> = async (incoming) => {
         const { getPageUrl, syncSettings } = this.dependencies
-
-        this.initReadingViewListeners()
-
         await loadInitial<RibbonContainerState>(this, async () => {
             const [url, areTagsMigrated] = await Promise.all([
                 getPageUrl(),
@@ -179,16 +182,31 @@ export class RibbonContainerLogic extends UILogic<
             await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
         this.initLogicResolvable.resolve()
+
+        this.sidebar = document
+            .getElementById('memex-sidebar-container')
+            ?.shadowRoot.getElementById('annotationSidebarContainer')
+        this.initReadingViewListeners()
+        const url = await getPageUrl()
+        const bookmark = await this.dependencies.bookmarks.findBookmark(url)
+        if (bookmark?.time) {
+            this.emitMutation({
+                bookmark: {
+                    lastBookmarkTimestamp: { $set: bookmark.time },
+                },
+            })
+        }
     }
 
     async initReadingViewListeners() {
         // make sure to reset readingviewValue on sidebar open on new page
         await browser.storage.local.set({ '@Sidebar-reading_view': false })
-
         // init listeners to local storage flag for reading view
         await browser.storage.onChanged.addListener((changes) => {
-            this.setReadingView(changes)
+            this.setReadingWidthOnListener(changes)
         })
+
+        this.resizeObserver = new ResizeObserver(this.resizeReadingWidth)
     }
 
     hydrateStateFromDB: EventHandler<'hydrateStateFromDB'> = async ({
@@ -199,19 +217,18 @@ export class RibbonContainerLogic extends UILogic<
             url,
         })
 
+        const bookmark = await this.dependencies.bookmarks.findBookmark(url)
+
         this.emitMutation({
             pageUrl: { $set: url },
             pausing: {
                 isPaused: {
-                    $set: await true,
+                    $set: true,
                 },
             },
             bookmark: {
-                isBookmarked: {
-                    $set: await this.dependencies.bookmarks.pageHasBookmark(
-                        url,
-                    ),
-                },
+                isBookmarked: { $set: !!bookmark },
+                lastBookmarkTimestamp: { $set: bookmark?.time },
             },
             isRibbonEnabled: {
                 $set: await this.dependencies.getSidebarEnabled(),
@@ -240,72 +257,65 @@ export class RibbonContainerLogic extends UILogic<
     toggleReadingView: EventHandler<'toggleReadingView'> = async ({
         previousState,
     }) => {
-        // init dom elements and observers
-        let sidebar = document
+        this.sidebar = document
             .getElementById('memex-sidebar-container')
-            .shadowRoot.getElementById('annotationSidebarContainer')
-
-        if (sidebar == null) {
-            return
-        }
-
-        const resizeObserver = new ResizeObserver(this.resizeReadingWidth)
-
+            ?.shadowRoot.getElementById('annotationSidebarContainer')
         if (previousState.isWidthLocked) {
-            // set member variable for internal logic use
-            this.readingView = false
-
-            // set mutation for UI changes
-            this.emitMutation({
-                isWidthLocked: { $set: false },
-            })
-
-            // reset window width
-            document.body.style.width = 'initial'
-
-            // IS NOT WORKING
-            resizeObserver.unobserve(sidebar)
-
-            // remove listeners and values
-            this.tearDownListeners(resizeObserver, sidebar)
-            await browser.storage.local.set({ '@Sidebar-reading_view': false })
+            this.resetReadingWidth()
         } else {
-            // set member variable for internal logic use
-            this.readingView = true
-
-            // set mutation for UI changes
-            this.emitMutation({
-                isWidthLocked: { $set: true },
-            })
-
-            // force resize calc
-            this.resizeReadingWidth()
-
-            // init window resize event listener
-            window.addEventListener('resize', this.resizeReadingWidth)
-
-            // observe size changes of sidebar and adjust reading view
-            resizeObserver.observe(sidebar)
-
-            // set corret storage values
-            await browser.storage.local.set({ '@Sidebar-reading_view': true })
+            this.setReadingWidth()
         }
     }
 
-    setReadingView = (changes: Storage.StorageChange) => {
+    setReadingWidth = async () => {
+        // set member variable for internal logic use
+        this.readingView = true
+
+        // force resize calc
+        this.resizeReadingWidth()
+
+        // set mutation for UI changes
+        this.emitMutation({
+            isWidthLocked: { $set: true },
+        })
+
+        // init window resize event listener
+        window.addEventListener('resize', this.resizeReadingWidth)
+        this.resizeObserver.observe(this.sidebar)
+        await browser.storage.local.set({ '@Sidebar-reading_view': true })
+    }
+    resetReadingWidth = async () => {
+        // set member variable for internal logic use
+        this.readingView = false
+
+        // set mutation for UI changes
+        this.emitMutation({
+            isWidthLocked: { $set: false },
+        })
+
+        // reset window width
+        document.body.style.width = 'initial'
+
+        // remove listeners and values
+        this.tearDownListeners()
+        await browser.storage.local.set({ '@Sidebar-reading_view': false })
+    }
+
+    setReadingWidthOnListener = (changes: Storage.StorageChange) => {
         if (Object.entries(changes)[0][0] === '@Sidebar-reading_view') {
             this.emitMutation({
                 isWidthLocked: { $set: Object.entries(changes)[0][1].newValue },
             })
             this.readingView = Object.entries(changes)[0][1].newValue
-        }
-    }
 
-    tearDownListeners(resizeObserver?, sidebar?) {
-        window.removeEventListener('resize', this.resizeReadingWidth)
-        browser.storage.onChanged.removeListener((changes) => {
-            this.setReadingView(changes)
-        })
+            if (Object.entries(changes)[0][1].newValue) {
+                this.setReadingWidth()
+            }
+
+            if (!Object.entries(changes)[0][1].newValue) {
+                this.resetReadingWidth()
+            }
+        }
     }
 
     resizeReadingWidth = () => {
@@ -313,13 +323,21 @@ export class RibbonContainerLogic extends UILogic<
         if (this.readingView === true) {
             let currentsidebarWidth = document
                 .getElementById('memex-sidebar-container')
-                .shadowRoot.getElementById('annotationSidebarContainer')
+                ?.shadowRoot.getElementById('annotationSidebarContainer')
                 .offsetWidth
             let currentWindowWidth = window.innerWidth
             let readingWidth =
-                currentWindowWidth - currentsidebarWidth - 10 + 'px'
+                currentWindowWidth - currentsidebarWidth - 50 + 'px'
             document.body.style.width = readingWidth
         }
+    }
+
+    tearDownListeners() {
+        window.removeEventListener('resize', this.resizeReadingWidth)
+        browser.storage.onChanged.removeListener((changes) => {
+            this.setReadingWidthOnListener(changes)
+        })
+        this.resizeObserver.disconnect()
     }
 
     /**
@@ -419,9 +437,17 @@ export class RibbonContainerLogic extends UILogic<
     }) => {
         const postInitState = await this.waitForPostInitState(previousState)
 
+        await this.dependencies.bookmarks.setBookmarkStatusInBrowserIcon(
+            true,
+            postInitState.pageUrl,
+        )
+
         const updateState = (isBookmarked) =>
             this.emitMutation({
-                bookmark: { isBookmarked: { $set: isBookmarked } },
+                bookmark: {
+                    isBookmarked: { $set: isBookmarked },
+                    lastBookmarkTimestamp: { $set: Date.now() },
+                },
             })
 
         const shouldBeBookmarked = !postInitState.bookmark.isBookmarked
@@ -482,7 +508,7 @@ export class RibbonContainerLogic extends UILogic<
 
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
-        const annotationUrl = generateAnnotationUrl({
+        const localAnnotationId = generateAnnotationUrl({
             pageUrl,
             now: () => Date.now(),
         })
@@ -495,27 +521,41 @@ export class RibbonContainerLogic extends UILogic<
                 },
             },
         })
+        const now = Date.now()
 
-        await this.dependencies.annotationsCache.create(
-            {
-                pageUrl,
+        const { remoteAnnotationId, savePromise } = await createAnnotation({
+            annotationsBG: this.dependencies.annotations,
+            contentSharingBG: this.dependencies.contentSharing,
+            annotationData: {
                 comment,
-                url: annotationUrl,
-                tags: commentBox.tags,
-                lists: commentBox.lists,
+                fullPageUrl: pageUrl,
+                localId: localAnnotationId,
+                createdWhen: new Date(now),
             },
-            {
+        })
+        this.dependencies.annotationsCache.addAnnotation({
+            localId: localAnnotationId,
+            remoteId: remoteAnnotationId ?? undefined,
+            comment,
+            normalizedPageUrl: pageUrl,
+            unifiedListIds: [],
+            lastEdited: now,
+            createdWhen: now,
+            localListIds: commentBox.lists,
+            creator: this.dependencies.currentUser,
+            privacyLevel: shareOptsToPrivacyLvl({
                 shouldShare,
-                shouldCopyShareLink: shouldShare,
                 isBulkShareProtected: isProtected,
-            },
-        )
-
+            }),
+        })
         this.dependencies.setRibbonShouldAutoHide(true)
 
-        await new Promise((resolve) =>
-            setTimeout(resolve, this.commentSavedTimeout),
-        )
+        await Promise.all([
+            new Promise((resolve) =>
+                setTimeout(resolve, this.commentSavedTimeout),
+            ),
+            savePromise,
+        ])
         this.emitMutation({ commentBox: { isCommentSaved: { $set: false } } })
     }
 
@@ -645,10 +685,11 @@ export class RibbonContainerLogic extends UILogic<
             lists: { pageListIds: { $set: [...pageListsSet] } },
         })
 
-        await this.dependencies.annotationsCache.updatePublicAnnotationLists({
-            added: event.value.added,
-            deleted: event.value.deleted,
-        })
+        // TODO: cache implement
+        // await this.dependencies.annotationsCache.updatePublicAnnotationLists({
+        //     added: event.value.added,
+        //     deleted: event.value.deleted,
+        // })
         return this.dependencies.customLists.updateListForPage({
             added: event.value.added,
             deleted: event.value.deleted,

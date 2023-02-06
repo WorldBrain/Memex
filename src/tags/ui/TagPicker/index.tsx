@@ -166,7 +166,7 @@ class TagPicker extends StatefulUIElement<
                         <Icon
                             filePath={icons.backup}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -183,7 +183,7 @@ class TagPicker extends StatefulUIElement<
                         <Icon
                             filePath={icons.backup}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -199,7 +199,7 @@ class TagPicker extends StatefulUIElement<
                     <Icon
                         filePath={icons.backup}
                         heightAndWidth="16px"
-                        color="purple"
+                        color="prime1"
                         hoverOff
                     />
                 </SectionCircle>
@@ -307,7 +307,7 @@ const SectionTitle = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     font-weight: 400;
 `

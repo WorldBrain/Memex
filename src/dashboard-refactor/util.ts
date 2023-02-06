@@ -5,6 +5,7 @@ import {
     initNormalizedState,
     NormalizedState,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { eventProviderDomains } from '@worldbrain/memex-common/lib/constants'
 
 export const updatePickerValues = <T extends string | number>(event: {
     added?: T
@@ -42,6 +43,10 @@ function getDomainsFilterIncludeSearchType(searchType) {
     if (searchType === 'twitter') {
         return ['mobile.twitter.com', 'twitter.com']
     }
+
+    if (searchType === 'events') {
+        return eventProviderDomains
+    }
 }
 export const stateToSearchParams = ({
     searchFilters,
@@ -70,6 +75,8 @@ export const stateToSearchParams = ({
         } else {
             domainsFilterIncluded = domainsFilterIncludeSearchType
         }
+    } else {
+        domainsFilterIncluded = searchFilters.domainsIncluded
     }
 
     // Probably Temporary: Add an additional query word for PDFs

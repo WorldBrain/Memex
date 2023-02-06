@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import Mousetrap from 'mousetrap'
 import { TaskState } from 'ui-logic-core/lib/types'
 
@@ -38,6 +38,7 @@ interface State {
 
 class ShareAnnotationMenu extends PureComponent<Props, State> {
     copyTimeout?: ReturnType<typeof setTimeout>
+    menuRef: React.RefObject<HTMLDivElement>
     state: State = { copyState: 'pristine' }
 
     componentDidMount() {
@@ -99,7 +100,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
     private renderMain() {
         return (
-            <Menu>
+            <Menu ref={this.menuRef} context={this.props.context}>
                 {this.props.isLoading ? (
                     <LoadingBox>
                         <LoadingIndicator size={30} />
@@ -111,11 +112,16 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                 <PrivacyContainer
                                     isLinkShown={this.props.showLink}
                                 >
-                                    <TopArea>
-                                        <PrivacyTitle>
-                                            {this.props.privacyOptionsTitleCopy}
-                                        </PrivacyTitle>
-                                        <PrivacyOptionContainer top="5px">
+                                    <TopArea context={this.props.context}>
+                                        {this.props.privacyOptionsTitleCopy ? (
+                                            <PrivacyTitle>
+                                                {
+                                                    this.props
+                                                        .privacyOptionsTitleCopy
+                                                }
+                                            </PrivacyTitle>
+                                        ) : undefined}
+                                        <PrivacyOptionContainer>
                                             {this.props.privacyOptions.map(
                                                 (props, i) => (
                                                     <SharePrivacyOption
@@ -127,74 +133,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                         </PrivacyOptionContainer>
                                     </TopArea>
                                 </PrivacyContainer>
-                                {/* {this.props.showLink && this.props.link ? (
-                                    <>
-                                        <TopArea>
-                                            <PrivacyTitle>
-                                                {this.props.linkTitleCopy}
-                                            </PrivacyTitle>
-                                            {this.props.onPlusBtnClick && (
-                                    <Icon
-                                        icon="plus"
-                                        height="18px"
-                                        onClick={this.props.onPlusBtnClick}
-                                    />
-                                )}
-                                            <LinkCopierBox>
-                                                <LinkCopier
-                                                    state={this.state.copyState}
-                                                    onClick={
-                                                        this.handleLinkCopy
-                                                    }
-                                                >
-                                                    {this.renderLinkContent()}
-                                                </LinkCopier>
-                                            </LinkCopierBox>
-                                        </TopArea>
-                                        <PrivacyContainer
-                                            isLinkShown={this.props.showLink}
-                                        >
-                                            <TopArea>
-                                                <PrivacyTitle>
-                                                    {
-                                                        this.props
-                                                            .privacyOptionsTitleCopy
-                                                    }
-                                                </PrivacyTitle>
-                                                <PrivacyOptionContainer top="5px">
-                                                    {this.props.privacyOptions.map(
-                                                        (props, i) => (
-                                                            <SharePrivacyOption
-                                                                key={i}
-                                                                {...props}
-                                                            />
-                                                        ),
-                                                    )}
-                                                </PrivacyOptionContainer>
-                                            </TopArea>
-                                        </PrivacyContainer>
-                                    </>
-                                ) : (
-                                    <>
-                                        <NoResultsSection>
-                                            <SectionCircle>
-                                                <Icon
-                                                    filePath={icons.heartEmpty}
-                                                    heightAndWidth="20px"
-                                                    color="purple"
-                                                    hoverOff
-                                                />
-                                            </SectionCircle>
-                                            <SectionTitle>
-                                                No Link available yet
-                                            </SectionTitle>
-                                            <InfoText>
-                                                First Bookmark or annotate this
-                                                page
-                                            </InfoText>
-                                        </NoResultsSection>
-                                    </>
-                                )} */}
                             </>
                         ) : (
                             <>
@@ -203,13 +141,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                         <PrivacyTitle>
                                             {this.props.linkTitleCopy}
                                         </PrivacyTitle>
-                                        {/* {this.props.onPlusBtnClick && (
-                                    <Icon
-                                        icon="plus"
-                                        height="18px"
-                                        onClick={this.props.onPlusBtnClick}
-                                    />
-                                )} */}
                                         <LinkCopierBox>
                                             <LinkCopier
                                                 state={this.state.copyState}
@@ -224,10 +155,15 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                     isLinkShown={this.props.showLink}
                                 >
                                     <TopArea>
-                                        <PrivacyTitle>
-                                            {this.props.privacyOptionsTitleCopy}
-                                        </PrivacyTitle>
-                                        <PrivacyOptionContainer top="5px">
+                                        {this.props.privacyOptionsTitleCopy ? (
+                                            <PrivacyTitle>
+                                                {
+                                                    this.props
+                                                        .privacyOptionsTitleCopy
+                                                }
+                                            </PrivacyTitle>
+                                        ) : undefined}
+                                        <PrivacyOptionContainer>
                                             {this.props.privacyOptions.map(
                                                 (props, i) => (
                                                     <SharePrivacyOption
@@ -248,30 +184,58 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     }
 
     render() {
+        if (this.menuRef) {
+            this.menuRef.current.focus()
+        }
+
         return this.renderMain()
     }
 }
 
 export default ShareAnnotationMenu
 
-const Menu = styled.div`
+const Menu = styled.div<{ context: string }>`
     padding: 5px 0px;
-    width: 400px;
+    width: 370px;
+    z-index: 10;
+    position: relative;
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
     }
+    &:first-child {
+        padding: 15px 0px 0px 0px;
+    }
+
+    ${(props) =>
+        props.context === 'AllNotesShare' &&
+        css`
+            height: fit-content;
+            width: 350px;
+
+            &:first-child {
+                padding: 15px 15px 15px 15px;
+            }
+        `};
 `
 
-const TopArea = styled.div`
+const TopArea = styled.div<{ context: string }>`
     padding: 10px 15px 10px 15px;
-`
+    height: 80px;
 
-const TitleContainer = styled.div`
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-    justify-content: space-between;
+    &:first-child {
+        padding: 0px 15px 0px 15px;
+    }
+
+    ${(props) =>
+        props.context === 'AllNotesShare' &&
+        css`
+            height: fit-content;
+
+            &:first-child {
+                padding: unset;
+            }
+        `};
 `
 
 const LinkCopierBox = styled.div`
@@ -280,14 +244,14 @@ const LinkCopierBox = styled.div`
     align-items: center;
     cursor: pointer;
     margin: 5px 0;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker}70;
+    background-color: ${(props) => props.theme.colors.greyScale1}70;
     border-radius: 5px;
 `
 
 const LoadingBox = styled.div`
     width: 100%;
     display: flex;
-    height: 100px;
+    height: 80px;
     align-items: center;
     justify-content: center;
 `
@@ -300,7 +264,7 @@ const LinkCopier = styled.button`
     border: 0;
     border-radius: 6px;
     height: 40px;
-    background-color: ${(props) => props.theme.colors.darkhover};
+    background-color: ${(props) => props.theme.colors.greyScale2};
     padding: 0 10px;
     outline: none;
     cursor: pointer;
@@ -315,14 +279,14 @@ const LinkCopier = styled.button`
 `
 
 const LinkBox = styled.div`
-    background: ${(props) => props.theme.colors.darkHover};
+    background: ${(props) => props.theme.colors.greyScale2};
     display: flex;
     width: 100%;
     align-items: center;
 `
 
 const LinkContent = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     width: -webkit-fill-available;
     text-overflow: ellipsis;
@@ -331,20 +295,26 @@ const LinkContent = styled.div`
 
 const PrivacyContainer = styled.div<{ isLinkShown: boolean }>`
     width: 100%;
+
+    & * {
+        cursor: pointer;
+    }
 `
 
 const PrivacyTitle = styled.div`
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 400;
     margin-bottom: 10px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale4};
     white-space: nowrap;
+    padding-left: 5px;
 `
 
 const PrivacyOptionContainer = styled(Margin)`
-    min-height: 100px;
     display: flex;
-    justify-content: center;
-    flex-direction: column;
+    justify-content: space-between;
+    width: fill-available;
+    flex-direction: row;
     align-items: center;
+    grid-gap: 4px;
 `

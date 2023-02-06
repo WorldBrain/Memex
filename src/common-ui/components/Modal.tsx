@@ -2,7 +2,6 @@ import React, { PureComponent, MouseEventHandler } from 'react'
 import styled from 'styled-components'
 
 import Overlay, { Props as OverlayProps } from './Overlay'
-import { close as closeIcon } from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 

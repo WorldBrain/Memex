@@ -41,11 +41,10 @@ export const HoverBoxContainer = styled.div<Props>`
 `
 
 export const HoverBoxDiv = styled.div<Props>`
-    box-shadow: 0px 24px 48px 0px ${(props) =>
-        props.theme.colors.backgroundColor};
+    box-shadow: 0px 24px 48px 0px ${(props) => props.theme.colors.black};
     border-radius: 12px;
-    border: 1px solid ${(props) => props.theme.colors.lineGrey};
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    background: ${(props) => props.theme.colors.greyScale1};
     overflow: ${(props) => (props.overflow ? props.overflow : 'visible')};
     position: ${(props) => (props.position ? props.position : 'absolute')};
     width: ${(props) => (props.width ? props.width : '300px')};
@@ -70,7 +69,7 @@ export const HoverBoxDashboard = styled.div`
     position: absolute;
     width: 300px;
     z-index: 1;
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    background: ${(props) => props.theme.colors.greyScale1};
     border-radius: 12px;
     right: 20px;
     padding: 10px 0px;

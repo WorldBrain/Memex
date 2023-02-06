@@ -1,3 +1,3 @@
-import { intersection } from 'lodash'
+import intersection from 'lodash/intersection'
 
 export default intersection

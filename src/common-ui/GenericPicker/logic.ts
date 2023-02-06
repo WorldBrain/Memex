@@ -241,6 +241,9 @@ export default abstract class GenericPickerLogic<
             }),
         })
         this._setCreateEntryDisplay(results, displayEntries, term)
+        if (displayEntries.length > 0) {
+            this._updateFocus(0, displayEntries)
+        }
     }
 
     _query = debounce(this._queryBoth, 150, { leading: true })

@@ -30,14 +30,15 @@ const Container = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
-    z-index: 2147483641;
-    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.lightHover};
+    background-color: ${(props) => props.theme.colors.black};
+    z-index: 3500;
+    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.greyScale2};
 `
 
 const SearchSection = styled(Margin)<{ sidebarWidth: string }>`
     justify-content: flex-start !important;
     max-width: 825px !important;
+    height: 60px;
 
     & > div {
         justify-content: flex-start !important;
@@ -91,10 +92,10 @@ function getSyncStatusIcon(status): IconKeys {
 
 function getSyncIconColor(status): ColorThemeKeys {
     if (status === 'green') {
-        return 'purple'
+        return 'prime1'
     }
     if (status === 'yellow') {
-        return 'normalText'
+        return 'white'
     }
 
     if (status === 'red') {

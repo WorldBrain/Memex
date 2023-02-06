@@ -51,6 +51,7 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -63,6 +64,7 @@ export type Props = RootState &
         | 'onVideosSearchSwitch'
         | 'onTwitterSearchSwitch'
         | 'onPDFSearchSwitch'
+        | 'onEventSearchSwitch'
     > & {
         isSpacesSidebarLocked?: boolean
         searchFilters?: any
@@ -109,6 +111,7 @@ export type Props = RootState &
         // updateAllResultNotesShareInfo: (info: NoteShareInfo) => void
         updateAllResultNotesShareInfo: (state: AnnotationSharingStates) => void
         clearInbox: () => void
+        filterByList: (listId: number) => void
     }
 
 export interface State {
@@ -230,6 +233,7 @@ export default class SearchResultsContainer extends React.Component<
     }
 
     spaceBtnBarDashboardRef = React.createRef<HTMLDivElement>()
+    sortButtonRef = React.createRef<HTMLDivElement>()
 
     state = {
         showTutorialVideo: false,
@@ -268,7 +272,7 @@ export default class SearchResultsContainer extends React.Component<
             <AnnotationEditable
                 zIndex={zIndex}
                 key={noteId}
-                url={noteId}
+                unifiedId={noteId}
                 tags={noteData.tags}
                 lists={listsToDisplay}
                 body={noteData.highlight}
@@ -284,7 +288,8 @@ export default class SearchResultsContainer extends React.Component<
                         ? new Date(noteData.displayTime)
                         : undefined
                 }
-                mode={noteData.isEditing ? 'edit' : 'default'}
+                isEditing={noteData.isEditing}
+                isDeleting={false}
                 renderCopyPasterForAnnotation={() => (
                     <PageNotesCopyPaster
                         annotationUrls={[noteId]}
@@ -320,7 +325,9 @@ export default class SearchResultsContainer extends React.Component<
                 )}
                 renderShareMenuForAnnotation={() => (
                     <SingleNoteShareMenu
-                        listData={this.props.listData}
+                        getRemoteListIdForLocalId={(localListId) =>
+                            this.props.listData[localListId]?.remoteId ?? null
+                        }
                         isShared={noteData.isShared}
                         shareImmediately={
                             noteData.shareMenuShowStatus === 'show-n-share'
@@ -362,7 +369,6 @@ export default class SearchResultsContainer extends React.Component<
                 annotationFooterDependencies={{
                     onDeleteCancel: () => undefined,
                     onDeleteConfirm: () => undefined,
-                    onTagIconClick: interactionProps.onTagPickerBtnClick,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
                     onEditIconClick: interactionProps.onEditBtnClick,
@@ -405,42 +411,36 @@ export default class SearchResultsContainer extends React.Component<
                     {...boundAnnotCreateProps}
                     contextLocation={'dashboard'}
                 />
-                {noteIds[notesType].length > 0 && (
-                    <>
-                        <Margin top="-12px" />
-                        <NoteTopBarBox
-                            leftSide={
-                                <TopBarRightSideWrapper>
-                                    <TooltipBox
-                                        tooltipText="Sort Annotations"
-                                        placement="bottom"
-                                    >
-                                        <Icon
-                                            filePath={icons.sort}
-                                            onClick={() =>
-                                                this.props.toggleSortMenuShown()
-                                            }
-                                            height="18px"
-                                            width="20px"
-                                        />
-                                    </TooltipBox>
-                                    {this.renderSortingMenuDropDown(
-                                        normalizedUrl,
-                                        day,
-                                    )}
-                                </TopBarRightSideWrapper>
-                            }
-                        />
-                    </>
-                )}
-                {noteIds[notesType].map((noteId, index) => {
-                    const zIndex = noteIds[notesType].length - index
-                    return this.renderNoteResult(
-                        day,
-                        normalizedUrl,
-                        zIndex,
-                    )(noteId)
-                })}
+                <NoteResultContainer>
+                    {noteIds[notesType].length > 0 && (
+                        <SortButtonContainer>
+                            <TooltipBox
+                                tooltipText="Sort Annotations"
+                                placement="bottom"
+                            >
+                                <Icon
+                                    filePath={icons.sort}
+                                    onClick={() =>
+                                        this.props.toggleSortMenuShown()
+                                    }
+                                    height="16px"
+                                    width="16px"
+                                    background="black"
+                                    containerRef={this.sortButtonRef}
+                                />
+                            </TooltipBox>
+                            {this.renderSortingMenuDropDown(normalizedUrl, day)}
+                        </SortButtonContainer>
+                    )}
+                    {noteIds[notesType].map((noteId, index) => {
+                        const zIndex = noteIds[notesType].length - index
+                        return this.renderNoteResult(
+                            day,
+                            normalizedUrl,
+                            zIndex,
+                        )(noteId)
+                    })}
+                </NoteResultContainer>
             </PageNotesBox>
         )
     }
@@ -451,12 +451,10 @@ export default class SearchResultsContainer extends React.Component<
         }
 
         return (
-            <HoverBox
-                withRelativeContainer
-                left={'-30px'}
-                padding={'10px'}
-                top={'30px'}
-                width={'150px'}
+            <PopoutBox
+                closeComponent={() => this.props.toggleSortMenuShown()}
+                placement="right-start"
+                targetElementRef={this.sortButtonRef.current}
             >
                 <SortingDropdownMenuBtn
                     onMenuItemClick={({ sortingFn }) =>
@@ -465,13 +463,17 @@ export default class SearchResultsContainer extends React.Component<
                             normalizedUrl,
                         )(sortingFn)
                     }
-                    onClickOutSide={() => this.props.toggleSortMenuShown()}
                 />
-            </HoverBox>
+            </PopoutBox>
         )
     }
 
-    private renderPageResult = (pageId: string, day: number, index: number) => {
+    private renderPageResult = (
+        pageId: string,
+        day: number,
+        index: number,
+        order: number,
+    ) => {
         const page = {
             ...this.props.pageData.byId[pageId],
             ...this.props.results[day].pages.byId[pageId],
@@ -498,6 +500,7 @@ export default class SearchResultsContainer extends React.Component<
                 }
                 bottom="10px"
                 key={day.toString() + pageId}
+                order={order}
             >
                 <PageResult
                     activePage={this.props.activePage}
@@ -521,6 +524,9 @@ export default class SearchResultsContainer extends React.Component<
                             ? interactionProps.onTagPickerBtnClick
                             : undefined
                     }
+                    filterbyList={(listId) => {
+                        this.props.filterByList(listId)
+                    }}
                 />
                 {this.renderPageNotes(page, day, interactionProps)}
             </ResultBox>
@@ -664,7 +670,7 @@ export default class SearchResultsContainer extends React.Component<
                                 <TutorialPlayButton>
                                     <Icon
                                         hoverOff
-                                        color={'normalText'}
+                                        color={'white'}
                                         filePath={'play'}
                                         heightAndWidth={'20px'}
                                     />
@@ -696,7 +702,7 @@ export default class SearchResultsContainer extends React.Component<
                         <Icon
                             filePath={icons.searchIcon}
                             heightAndWidth="18px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </IconBox>
@@ -720,7 +726,7 @@ export default class SearchResultsContainer extends React.Component<
                             <Icon
                                 filePath={icons.phone}
                                 heightAndWidth="18px"
-                                color="purple"
+                                color="prime1"
                                 hoverOff
                             />
                         </IconBox>
@@ -736,7 +742,7 @@ export default class SearchResultsContainer extends React.Component<
                             <Icon
                                 filePath={icons.heartEmpty}
                                 heightAndWidth="18px"
-                                color="purple"
+                                color="prime1"
                                 hoverOff
                             />
                         </IconBox>
@@ -779,6 +785,7 @@ export default class SearchResultsContainer extends React.Component<
                             id,
                             day,
                             pages.allIds.length - index,
+                            index,
                         ),
                     )}
                 </DayResultGroup>,
@@ -786,7 +793,11 @@ export default class SearchResultsContainer extends React.Component<
         }
 
         if (this.props.searchPaginationState === 'running') {
-            days.push(this.renderLoader({ key: 'pagination-loader' }))
+            days.push(
+                <PaginationLoaderBox>
+                    {this.renderLoader({ key: 'pagination-loader' })}
+                </PaginationLoaderBox>,
+            )
         } else if (
             !this.props.areResultsExhausted &&
             this.props.searchState !== 'pristine'
@@ -861,112 +872,134 @@ export default class SearchResultsContainer extends React.Component<
     render() {
         return (
             <ResultsContainer bottom="100px">
-                {/* {this.props.isSubscriptionBannerShown && (
-                    <PioneerPlanBanner
-                        onHideClick={this.props.onDismissSubscriptionBanner}
-                        width="fill-available"
-                    />
-                )} */}
-                {this.props.selectedListId != null && (
-                    <ListDetails
-                        {...this.props.listDetailsProps}
-                        listId={this.props.selectedListId}
-                        clearInbox={this.props.clearInbox}
-                    />
-                )}
-                <ReferencesContainer>
-                    {this.props.listData[this.props.selectedListId]?.remoteId !=
-                        null && (
-                        <>
-                            <Icon
-                                hoverOff
-                                heightAndWidth="12px"
-                                color={'iconColor'}
-                                icon={'warning'}
-                            />
-                            <InfoText>
-                                Only your own contributions to this space are
-                                visible locally.
-                            </InfoText>
-                        </>
+                <ResultsBox>
+                    {this.props.selectedListId != null && (
+                        <ListDetails
+                            {...this.props.listDetailsProps}
+                            listId={this.props.selectedListId}
+                            clearInbox={this.props.clearInbox}
+                        />
                     )}
-                </ReferencesContainer>
-                <PageTopBarBox isDisplayed={this.props.isDisplayed}>
-                    <TopBar
-                        leftSide={
-                            <ContentTypeSwitchContainer id="ContentTypeSwitchContainer">
-                                <SearchTypeSwitchContainer>
-                                    {this.state.showHorizontalScrollSwitch ===
-                                        'left' ||
-                                    this.state.showHorizontalScrollSwitch ===
-                                        'both' ? (
-                                        <IconContainerLeft>
-                                            <Icon
-                                                filePath="arrowLeft"
-                                                heightAndWidth="22px"
-                                                onClick={() =>
-                                                    document
-                                                        .getElementById(
-                                                            'SearchTypeSwitchContainer',
-                                                        )
-                                                        .scrollBy({
-                                                            left: -200,
-                                                            top: 0,
-                                                            behavior: 'smooth',
-                                                        })
-                                                }
-                                            />
-                                        </IconContainerLeft>
-                                    ) : undefined}
-                                    <SearchTypeSwitch {...this.props} />
-                                    {this.state.showHorizontalScrollSwitch ===
-                                        'right' ||
-                                    this.state.showHorizontalScrollSwitch ===
-                                        'both' ? (
-                                        <IconContainerRight>
-                                            <Icon
-                                                filePath="arrowRight"
-                                                heightAndWidth="22px"
-                                                onClick={() =>
-                                                    document
-                                                        .getElementById(
-                                                            'SearchTypeSwitchContainer',
-                                                        )
-                                                        .scrollBy({
-                                                            left: 200,
-                                                            top: 0,
-                                                            behavior: 'smooth',
-                                                        })
-                                                }
-                                            />
-                                        </IconContainerRight>
-                                    ) : undefined}
-                                </SearchTypeSwitchContainer>
-                            </ContentTypeSwitchContainer>
-                        }
-                        rightSide={undefined}
-                    />
-                </PageTopBarBox>
-                {this.renderOnboardingTutorials()}
-                {this.renderResultsByDay()}
-                {this.props.areResultsExhausted &&
-                    this.props.searchState === 'success' &&
-                    this.props.clearInboxLoadState !== 'running' &&
-                    this.props.searchResults.allIds.length > 0 && (
-                        <ResultsExhaustedMessage>
-                            <Icon
-                                filePath="checkRound"
-                                heightAndWidth="22px"
-                                hoverOff
-                                color={'greyScale4'}
-                            />
-                            End of results
-                        </ResultsExhaustedMessage>
-                    )}
+                    <ReferencesContainer>
+                        {this.props.listData[this.props.selectedListId]
+                            ?.remoteId != null && (
+                            <>
+                                <Icon
+                                    hoverOff
+                                    heightAndWidth="12px"
+                                    color={'greyScale6'}
+                                    icon={'warning'}
+                                />
+                                <InfoText>
+                                    Only your own contributions to this space
+                                    are visible locally.
+                                </InfoText>
+                            </>
+                        )}
+                    </ReferencesContainer>
+                    <PageTopBarBox isDisplayed={this.props.isDisplayed}>
+                        <TopBar
+                            leftSide={
+                                <ContentTypeSwitchContainer id="ContentTypeSwitchContainer">
+                                    <SearchTypeSwitchContainer>
+                                        {this.state
+                                            .showHorizontalScrollSwitch ===
+                                            'left' ||
+                                        this.state
+                                            .showHorizontalScrollSwitch ===
+                                            'both' ? (
+                                            <IconContainerLeft>
+                                                <Icon
+                                                    filePath="arrowLeft"
+                                                    heightAndWidth="22px"
+                                                    onClick={() =>
+                                                        document
+                                                            .getElementById(
+                                                                'SearchTypeSwitchContainer',
+                                                            )
+                                                            .scrollBy({
+                                                                left: -200,
+                                                                top: 0,
+                                                                behavior:
+                                                                    'smooth',
+                                                            })
+                                                    }
+                                                />
+                                            </IconContainerLeft>
+                                        ) : undefined}
+                                        <SearchTypeSwitch {...this.props} />
+                                        {this.state
+                                            .showHorizontalScrollSwitch ===
+                                            'right' ||
+                                        this.state
+                                            .showHorizontalScrollSwitch ===
+                                            'both' ? (
+                                            <IconContainerRight>
+                                                <Icon
+                                                    filePath="arrowRight"
+                                                    heightAndWidth="22px"
+                                                    onClick={() =>
+                                                        document
+                                                            .getElementById(
+                                                                'SearchTypeSwitchContainer',
+                                                            )
+                                                            .scrollBy({
+                                                                left: 200,
+                                                                top: 0,
+                                                                behavior:
+                                                                    'smooth',
+                                                            })
+                                                    }
+                                                />
+                                            </IconContainerRight>
+                                        ) : undefined}
+                                    </SearchTypeSwitchContainer>
+                                </ContentTypeSwitchContainer>
+                            }
+                            rightSide={undefined}
+                        />
+                    </PageTopBarBox>
+                    {this.renderOnboardingTutorials()}
+                    {this.renderResultsByDay()}
+                    {this.props.areResultsExhausted &&
+                        this.props.searchState === 'success' &&
+                        this.props.clearInboxLoadState !== 'running' &&
+                        this.props.searchResults.allIds.length > 0 && (
+                            <ResultsExhaustedMessage>
+                                <Icon
+                                    filePath="checkRound"
+                                    heightAndWidth="22px"
+                                    hoverOff
+                                    color={'greyScale4'}
+                                />
+                                End of results
+                            </ResultsExhaustedMessage>
+                        )}
+                </ResultsBox>
             </ResultsContainer>
         )
     }
 }
+
+const NoteResultContainer = styled.div`
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: fill-available;
+`
+
+const SortButtonContainer = styled.div`
+    position: absolute;
+    top: 6px;
+    left: -23px;
+    z-index: 100;
+`
+
+const PaginationLoaderBox = styled.div`
+    margin-top: -30px;
+`
 
 const IconContainerRight = styled.div`
     position: absolute;
@@ -974,7 +1007,7 @@ const IconContainerRight = styled.div`
     top: 4px;
     border-radius: 5px;
 
-    background: ${(props) => props.theme.colors.backgroundColor}70;
+    background: ${(props) => props.theme.colors.black}70;
     z-index: 20;
     backdrop-filter: blur(4px);
 `
@@ -984,7 +1017,7 @@ const IconContainerLeft = styled.div`
     top: 4px;
     border-radius: 5px;
 
-    background: ${(props) => props.theme.colors.backgroundColor}70;
+    background: ${(props) => props.theme.colors.black}70;
     z-index: 20;
     backdrop-filter: blur(4px);
 `
@@ -1003,17 +1036,13 @@ const MobileAdContainer = styled.div`
 `
 
 const TutorialVideo = styled.iframe<{ showTutorialVideo: boolean }>`
-    height: 170px;
-    width: auto;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
     border: none;
     border-radius: 5px;
-
-    ${(props) =>
-        props.showTutorialVideo &&
-        css`
-            height: 500px;
-            width: fill-available;
-        `}
 `
 
 const TutorialContainer = styled.div<{ showTutorialVideo: boolean }>`
@@ -1022,11 +1051,12 @@ const TutorialContainer = styled.div<{ showTutorialVideo: boolean }>`
     justify-content: space-between;
     grid-gap: 40px;
     padding: 26px 34px;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.greyScale1};
     border-radius: 8px;
     margin-top: 20px;
     margin-bottom: 40px;
     width: fill-available;
+    max-width: calc(${sizeConstants.searchResults.widthPx}px - 70px);
 
     ${(props) =>
         props.showTutorialVideo &&
@@ -1054,7 +1084,7 @@ const TutorialContent = styled.div<{ showTutorialVideo: boolean }>`
 const TutorialTitle = styled.div`
     font-size: 18px;
     font-weight: 500;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     line-height: 30px;
 `
 
@@ -1066,7 +1096,9 @@ const TutorialButtons = styled.div`
 const TutorialVideoContainer = styled.div<{ showTutorialVideo: boolean }>`
     position: relative;
     height: 170px;
-    width: 300px;
+    max-width: 300px;
+    width: 100%;
+    min-width: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1075,15 +1107,18 @@ const TutorialVideoContainer = styled.div<{ showTutorialVideo: boolean }>`
     ${(props) =>
         props.showTutorialVideo &&
         css`
-            height: 500px;
+            height: 0px;
+            padding-top: 56.25%;
             width: fill-available;
+            max-width: fill-available;
         `}
 `
 
 const TutorialVideoBox = styled.div<{ showTutorialVideo: boolean }>`
     position: relative;
     height: 170px;
-    width: 300px;
+    max-width: 300px;
+    width: fill-available;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1111,7 +1146,8 @@ const TutorialBlurPicture = styled.div`
     background-position: center center;
     border-radius: 5px;
     height: 170px;
-    width: 300px;
+    max-width: 300px;
+    width: fill-available;
     background-size: cover;
 `
 
@@ -1119,8 +1155,8 @@ const TutorialPlayButton = styled.div`
     height: 40px;
     width: fit-content;
     padding: 0 15px;
-    background-color: ${(props) => props.theme.colors.lightHover};
-    color: ${(props) => props.theme.colors.normalText};
+    background-color: ${(props) => props.theme.colors.greyScale3};
+    color: ${(props) => props.theme.colors.white};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1140,6 +1176,7 @@ const ResultsExhaustedMessage = styled.div`
     justify-content: center;
     font-size: 16px;
     align-items: center;
+    max-width: ${sizeConstants.searchResults.widthPx}px;
 `
 const NoResultsMessage = styled.div`
     display: flex;
@@ -1187,11 +1224,11 @@ const InfoText = styled.div`
 const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     /* padding: 0px 15px; */
     height: fit-content;
-    max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
-    z-index: 2147483639;
+    max-width: calc(${sizeConstants.searchResults.widthPx}px);
+    z-index: 3000;
     position: sticky;
-    top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
-    background: ${(props) => props.theme.colors.backgroundColor};
+    top: 0px;
+    background: ${(props) => props.theme.colors.black};
     width: fill-available;
 `
 
@@ -1199,12 +1236,13 @@ const ReferencesContainer = styled.div`
     width: 100%;
     font-weight: lighter;
     font-size: 16px;
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale4};
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
     grid-gap: 5px;
+    max-width: ${sizeConstants.searchResults.widthPx}px;
 `
 
 const NoteTopBarBox = styled(TopBar)`
@@ -1213,20 +1251,20 @@ const NoteTopBarBox = styled(TopBar)`
 `
 
 const openAnimation = keyframes`
- 0% { padding-bottom: 20px; opacity: 0 }
- 100% { padding-bottom: 0px; opacity: 1 }
+ 0% { margin-top: 30px; opacity: 0 }
+ 100% { margin-top: 0px; opacity: 1 }
 `
 
-const ResultBox = styled(Margin)<{ zIndex: number }>`
+const ResultBox = styled(Margin)<{ zIndex: number; order }>`
     flex-direction: column;
     justify-content: space-between;
     width: 100%;
     z-index: ${(props) => props.zIndex};
 
     animation-name: ${openAnimation};
-    animation-delay: ${(props) => props.order * 50}ms;
-    animation-duration: 0.2s;
-    animation-timing-function: ease-in-out;
+    animation-delay: ${(props) => props.order * 30}ms;
+    animation-duration: 0.4s;
+    animation-timing-function: cubic-bezier(0.16, 0.67, 0.41, 0.83);
     animation-fill-mode: backwards;
 `
 
@@ -1236,13 +1274,15 @@ const PageNotesBox = styled(Margin)`
     width: fill-available;
     padding-left: 10px;
     padding-top: 5px;
-    border-left: 4px solid ${(props) => props.theme.colors.lightHover};
+    border-left: 4px solid ${(props) => props.theme.colors.greyScale3};
     z-index: 4;
+    position: relative;
+    align-items: flex-start;
 `
 
 const Separator = styled.div`
     width: 100%;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     margin-bottom: -2px;
 `
 
@@ -1254,15 +1294,41 @@ const Loader = styled.div`
     height: 300px;
 `
 
+const ResultsBox = styled.div<{ zIndex: number }>`
+    display: flex;
+    margin-top: 2px;
+    flex-direction: column;
+    width: fill-available;
+    height: fill-available;
+    overflow: scroll;
+    padding-bottom: 100px;
+    align-items: center;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+`
+
 const ResultsContainer = styled(Margin)`
     display: flex;
     flex-direction: column;
     align-self: center;
-    max-width: ${sizeConstants.searchResults.widthPx}px;
-    margin-bottom: 100px;
+    width: fill-available;
+    margin-bottom: ${sizeConstants.header.heightPx}px;
     width: fill-available;
     padding: 0 24px;
     z-index: 27;
+    height: fill-available;
+
+    width: fill-available;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const TopBarRightSideWrapper = styled.div`
@@ -1297,7 +1363,7 @@ const IconImg = styled.img`
     width: 18px;
 `
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
     border: 1px solid ${(props) => props.theme.colors.greyScale6};
     border-radius: 8px;
     height: 60px;
@@ -1308,7 +1374,7 @@ const SectionCircle = styled.div`
 `
 
 const ImportInfo = styled.span`
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     margin-bottom: 40px;
     font-weight: 500;
     cursor: pointer;

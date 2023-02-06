@@ -18,6 +18,7 @@ import {
 
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 export interface Props {
     isShared?: boolean
@@ -128,44 +129,44 @@ export default class AnnotationSaveBtn extends React.PureComponent<
         return (
             <PopoutBox
                 targetElementRef={this.privacySelectionButtonRef.current}
-                placement={'bottom'}
-                offsetX={15}
+                placement={'bottom-end'}
+                offsetX={5}
                 closeComponent={() =>
                     this.setState({
                         confirmationMode: null,
                         isShareMenuShown: false,
                     })
                 }
-                // strategy={'fixed'}
-                // bigClosingScreen
             >
                 {this.state.confirmationMode == null ? (
                     <PrivacyOptionsContainer>
                         <PrivacyOptionsTitle>
                             Save with privacy settings
                         </PrivacyOptionsTitle>
-                        <SharePrivacyOption
-                            hasProtectedOption
-                            icon="webLogo"
-                            title="Public"
-                            shortcut={`shift+${getKeyName({
-                                key: 'mod',
-                            })}+enter`}
-                            description="Auto-added to Spaces this page is shared to"
-                            onClick={this.saveWithShareIntent(true)}
-                            isSelected={this.props.isShared}
-                        />
-                        <SharePrivacyOption
-                            hasProtectedOption
-                            icon="person"
-                            title="Private"
-                            shortcut={`${getKeyName({
-                                key: 'mod',
-                            })}+enter`}
-                            description="Private to you, until shared (in bulk)"
-                            onClick={this.handleSetPrivate}
-                            isSelected={!this.props.isShared}
-                        />
+                        <PrivacyOptionsBox>
+                            <SharePrivacyOption
+                                hasProtectedOption
+                                icon="personFine"
+                                title="Private"
+                                shortcut={`${getKeyName({
+                                    key: 'mod',
+                                })}+enter`}
+                                description="Private to you, until shared (in bulk)"
+                                onClick={this.handleSetPrivate}
+                                isSelected={!this.props.isShared}
+                            />
+                            <SharePrivacyOption
+                                hasProtectedOption
+                                icon="globe"
+                                title="Public"
+                                shortcut={`shift+${getKeyName({
+                                    key: 'mod',
+                                })}+enter`}
+                                description="Auto-added to Spaces this page is shared to"
+                                onClick={this.saveWithShareIntent(true)}
+                                isSelected={this.props.isShared}
+                            />
+                        </PrivacyOptionsBox>
                     </PrivacyOptionsContainer>
                 ) : (
                     this.renderConfirmationMode()
@@ -179,38 +180,62 @@ export default class AnnotationSaveBtn extends React.PureComponent<
             <>
                 <SaveBtn tabIndex={this.props.tabIndex}>
                     {this.renderShareMenu()}
-                    <SaveBtnArrow
-                        onClick={() =>
-                            this.setState({
-                                isShareMenuShown: !this.state.isShareMenuShown,
-                            })
-                        }
-                    >
-                        <Icon
-                            heightAndWidth="12px"
-                            filePath={icons.triangle}
-                            hoverOff
-                            containerRef={this.privacySelectionButtonRef}
-                        />
-                        {this.props.isShared ? 'Public' : 'Private'}
-                    </SaveBtnArrow>
                     <TooltipBox
-                        tooltipText={this.props.shortcutText}
                         placement="bottom"
+                        tooltipText={'Change Note Privacy'}
                     >
-                        <Icon
-                            heightAndWidth="20px"
-                            icon={icons.check}
-                            color={'purple'}
+                        <SaveBtnArrow
                             onClick={() =>
-                                this.props.onSave(
-                                    !!this.props.isShared,
-                                    !!this.props.isProtected,
-                                    { mainBtnPressed: true },
-                                )
+                                this.setState({
+                                    isShareMenuShown: !this.state
+                                        .isShareMenuShown,
+                                })
                             }
-                            padding={'3px 8px'}
-                        />
+                            ref={this.privacySelectionButtonRef}
+                        >
+                            <Icon
+                                heightAndWidth="20px"
+                                filePath={icons.arrowDown}
+                                hoverOff
+                            />
+                            {this.props.isShared ? 'Public' : 'Private'}
+                        </SaveBtnArrow>
+                    </TooltipBox>
+                    <TooltipBox
+                        tooltipText={
+                            <SaveButtonTooltipContainer>
+                                <KeyboardShortcuts
+                                    keys={this.props.shortcutText.split('+')}
+                                    size={'small'}
+                                />
+                                <BottomText>
+                                    +{' '}
+                                    <KeyboardShortcuts
+                                        optional={'shift'}
+                                        size={'small'}
+                                    />
+                                    to make public
+                                </BottomText>
+                            </SaveButtonTooltipContainer>
+                        }
+                        placement="bottom-end"
+                    >
+                        <IconContainer>
+                            <Icon
+                                heightAndWidth="20px"
+                                icon={icons.check}
+                                color={'prime1'}
+                                onClick={() =>
+                                    this.props.onSave(
+                                        !!this.props.isShared,
+                                        !!this.props.isProtected,
+                                        { mainBtnPressed: true },
+                                    )
+                                }
+                                darkBackground
+                                padding={'3px 8px'}
+                            />
+                        </IconContainer>
                     </TooltipBox>
                 </SaveBtn>
             </>
@@ -218,25 +243,51 @@ export default class AnnotationSaveBtn extends React.PureComponent<
     }
 }
 
+const PrivacyOptionsBox = styled.div`
+    display: flex;
+    grid-gap: 2px;
+`
+
+const IconContainer = styled.div`
+    > div {
+        border-radius: 0px 5px 5px 0px;
+    }
+`
+
+const SaveButtonTooltipContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 10px;
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-weight: 400;
+`
+const BottomText = styled.div`
+    display: flex;
+    grid-gap: 3px;
+`
+
 const PrivacyOptionsContainer = styled.div`
     padding: 10px;
 `
 
 const SaveBtnArrow = styled.div`
     width: fit-content;
-    border-radius: 3px;
+    border-radius: 5px 0px 0px 5px;
     z-index: 10;
     display: flex;
     padding: 0 10px 0 5px;
     font-weight: 400;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     grid-gap: 5px;
     font-size: 12px;
     align-items: center;
     height: 26px;
+    border-right: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     &:hover {
-        background: ${(props) => props.theme.colors.lightHover};
+        background: ${(props) => props.theme.colors.greyScale3};
     }
 
     & * {
@@ -254,10 +305,10 @@ const SaveBtn = styled.div`
     outline: none;
     background: transparent;
     border-radius: 5px;
-    font-weight: 700;
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    font-weight: 400;
     display: flex;
     flex: 1;
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 const PrivacyOptionsTitle = styled.div`
@@ -265,8 +316,8 @@ const PrivacyOptionsTitle = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
-    color: ${(props) => props.theme.colors.normalText};
-    font-weight: 600;
+    color: ${(props) => props.theme.colors.greyScale4};
+    font-weight: 400;
     font-size: 14px;
     margin-bottom: 10px;
     padding-left: 5px;

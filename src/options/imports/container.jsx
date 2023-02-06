@@ -122,7 +122,7 @@ class ImportContainer extends Component {
                     <Icon
                         filePath={icons.stop}
                         heightAndWidth="14px"
-                        color="purple"
+                        color="prime1"
                         hoverOff
                     />
                     {this.state.waitingOnCancelConfirm
@@ -425,7 +425,7 @@ const SectionTitleSmall = styled.div`
     margin-bottom: 10px;
     margin-top: 10px;
     padding-top: 10px;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 export default connect(mapStateToProps, mapDispatchToProps)(ImportContainer)

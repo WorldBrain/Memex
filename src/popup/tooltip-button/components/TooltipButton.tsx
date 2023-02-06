@@ -39,14 +39,12 @@ class InPageSwitches extends PureComponent<Props> {
             <ButtonItem onClick={this.props.handleChange}>
                 <ButtonInnerContainer>
                     <Icon
-                        filePath={icons.highlight}
+                        filePath={icons.tooltipOn}
                         heightAndWidth="22px"
                         hoverOff
                     />
                     <ButtonInnerContent>
-                        {this.props.isEnabled
-                            ? 'Disable Highlighter Tooltip'
-                            : 'Enable Highlighter Tooltip'}
+                        Enable Highlighter Tooltip
                         <SubTitle>when selecting text</SubTitle>
                     </ButtonInnerContent>
                 </ButtonInnerContainer>
@@ -87,9 +85,10 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     border-radius: 8px;
     height: 50px;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+    border: 1px solid transparent;
 
     &:hover {
-        background: ${(props) => props.theme.colors.lightHover};
+        border: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 
     & * {
@@ -105,12 +104,12 @@ const ButtonInnerContent = styled.div`
     align-items: flex-start;
     font-size: 14px;
     font-weight: 500;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale6};
 `
 
 const SubTitle = styled.div`
-    font-size: 12px;
-    color: ${(props) => props.theme.colors.greyScale8};
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 400;
 `
 

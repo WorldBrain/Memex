@@ -25,7 +25,7 @@ export default class NotesTypeDropdownMenu extends PureComponent<Props> {
                         <ButtonText>
                             {notesTypeToString(this.props.notesTypeSelection)}
                         </ButtonText>
-                        <IconImg src={icons.triangle} />
+                        <IconImg src={icons.arrowDown} />
                     </>
                 }
                 menuItems={[

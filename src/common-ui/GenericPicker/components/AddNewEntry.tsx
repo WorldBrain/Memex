@@ -44,7 +44,7 @@ const ContentBox = styled.div`
     grid-gap: 10px;
     fonts-size: 14px;
     align-items: center;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 `
 
 const Title = styled.span`

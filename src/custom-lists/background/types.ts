@@ -1,5 +1,10 @@
-import { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { SpaceDisplayEntry } from '../ui/CollectionPicker/logic'
+import type {
+    SharedAnnotation,
+    SharedAnnotationReference,
+    SharedList,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { SpaceDisplayEntry } from '../ui/CollectionPicker/logic'
 
 export interface PageList {
     id: number
@@ -21,6 +26,16 @@ export interface PageListEntry {
     fullUrl: string
 }
 
+export type SharedListWithAnnotations = SharedList & {
+    creator: UserReference
+    sharedAnnotations: Array<
+        SharedAnnotation & {
+            creator: UserReference
+            reference: SharedAnnotationReference
+        }
+    >
+}
+
 export interface ListDescription {
     listId: number
     description: string
@@ -29,6 +44,7 @@ export interface ListDescription {
 export interface SharedAnnotationList {
     id: string
     name: string
+    creatorReference: UserReference
     sharedAnnotationReferences: SharedAnnotationReference[]
 }
 
@@ -53,7 +69,7 @@ export interface CollectionsCacheInterface {
 export interface RemoteCollectionsInterface {
     createCustomList(args: {
         name: string
-        id?: number
+        id: number
         type?: 'page-link'
         createdAt?: Date
     }): Promise<number>
@@ -69,6 +85,9 @@ export interface RemoteCollectionsInterface {
         oldName: string
         newName: string
     }): Promise<void>
+    fetchListDescriptions(args: {
+        listIds: number[]
+    }): Promise<{ [listId: number]: string | null }>
     updateListDescription(args: {
         listId: number
         description: string
@@ -82,10 +101,20 @@ export interface RemoteCollectionsInterface {
     fetchSharedListDataWithOwnership(args: {
         remoteListId: string
     }): Promise<PageList | null>
+    fetchSharedListDataWithPageAnnotations(args: {
+        remoteListId: string
+        normalizedPageUrl: string
+    }): Promise<SharedListWithAnnotations | null>
     fetchCollaborativeLists(args: {
         skip?: number
         limit?: number
     }): Promise<PageList[]>
+    fetchAnnotationRefsForRemoteListsOnPage(args: {
+        sharedListIds: string[]
+        normalizedPageUrl: string
+    }): Promise<{
+        [sharedListId: string]: SharedAnnotationReference[]
+    }>
     fetchFollowedListsWithAnnotations(args: {
         normalizedPageUrl: string
     }): Promise<SharedAnnotationList[]>

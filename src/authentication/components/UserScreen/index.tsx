@@ -155,14 +155,14 @@ const SectionCircle = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 10px;
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 16px;
     font-weight: 300;
 `

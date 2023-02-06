@@ -54,7 +54,10 @@ async function init() {
     // If we can't get the tab data, then can't init action button states
     if (
         !currentTab?.url ||
-        !isUrlSupported({ url: currentTab.originalUrl, allowFileUrls: true })
+        !isUrlSupported({
+            fullUrl: currentTab.originalUrl,
+            allowFileUrls: true,
+        })
     ) {
         return { currentTab: null, fullUrl: null }
     }

@@ -66,7 +66,7 @@ class EntryRow extends React.Component<Props> {
                                 <Icon
                                     icon={icons.check}
                                     heightAndWidth="16px"
-                                    color="backgroundColor"
+                                    color="black"
                                 />
                             </SelectionBox>
                         </ButtonContainer>
@@ -103,8 +103,8 @@ const SelectionBox = styled.div<{ selected }>`
     border-radius: 5px;
     background: ${(props) =>
         props.selected
-            ? props.theme.colors.normalText
-            : props.theme.colors.lightHover};
+            ? props.theme.colors.white
+            : props.theme.colors.greyScale3};
 `
 
 export const IconStyleWrapper = styled.div`
@@ -125,26 +125,26 @@ const Row = styled.div<{ isFocused }>`
     cursor: pointer;
     border-radius: 5px;
     padding: 0 10px;
-    color: ${(props) => props.isFocused && props.theme.colors.normalText};
+    color: ${(props) => props.isFocused && props.theme.colors.greyScale6};
 
     &:last-child {
         border-bottom: none;
     }
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         background: transparent;
     }
 
     ${(props) =>
         props.isFocused &&
         css`
-            outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
             background: transparent;
         `}
 
     &:focus {
-        outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         background: transparent;
     }
 `
@@ -159,7 +159,7 @@ const EmptyCircle = styled.div`
     height: 18px;
     width: 18px;
     border-radius: 18px;
-    border: 2px solid ${(props) => props.theme.colors.lineGrey};
+    border: 2px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 const NameWrapper = styled.div`

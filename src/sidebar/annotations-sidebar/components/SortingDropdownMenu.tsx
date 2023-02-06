@@ -23,12 +23,12 @@ export const defaultSortingMenuItems: SortingMenuItemProps[] = [
         sortingFn: sortByPagePosition,
     },
     {
-        name: 'Creation time (1-9)',
-        sortingFn: (a, b) => sortByCreatedTime(a, b),
+        name: 'Creation time (new → old)',
+        sortingFn: (a, b) => sortByCreatedTime(b, a),
     },
     {
-        name: 'Creation time (9-1)',
-        sortingFn: (a, b) => sortByCreatedTime(b, a),
+        name: 'Creation time (old → new)',
+        sortingFn: (a, b) => sortByCreatedTime(a, b),
     },
 ]
 
@@ -44,7 +44,7 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
     render() {
         return (
             <SortingContainer>
-                <SortingTitle>Sort Notes</SortingTitle>
+                {/* <SortingTitle>Sort Notes</SortingTitle> */}
                 <DropdownMenuBtn
                     onMenuItemClick={this.props.onMenuItemClick}
                     menuItems={this.props.menuItems}
@@ -63,7 +63,7 @@ const SortingContainer = styled.div`
 `
 
 const SortingTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 700;
     padding-left: 10px;
     margin-top: 5px;

@@ -35,6 +35,7 @@ export interface AnnotationEditGeneralProps {
     isShared?: boolean
     isBulkShareProtected?: boolean
     getYoutubePlayer?(): YoutubePlayer
+    contextLocation?: string
 }
 
 export interface Props
@@ -145,7 +146,7 @@ const EditorContainer = styled.div`
     height: fit-content;
     padding: 0 10px;
     // transition: height 1s ease-in-out;
-    // border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    // border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     &:first-child {
         border-top: none;

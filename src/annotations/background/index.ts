@@ -13,7 +13,6 @@ import {
 } from 'src/util/webextensionRPC'
 import AnnotationStorage from './storage'
 import { AnnotSearchParams } from 'src/search/background/types'
-import { OpenSidebarArgs } from 'src/sidebar-overlay/types'
 import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
 import SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
@@ -77,9 +76,6 @@ export default class DirectLinkingBackground {
             toggleSidebarOverlay: this.toggleSidebarOverlay.bind(this),
             toggleAnnotBookmark: this.toggleAnnotBookmark.bind(this),
             getAnnotBookmark: this.getAnnotBookmark.bind(this),
-            goToAnnotationFromSidebar: this.goToAnnotationFromDashboardSidebar.bind(
-                this,
-            ),
             getSharedAnnotations: this.getSharedAnnotations,
             getListIdsForAnnotation: this.getListIdsForAnnotation,
         }
@@ -98,79 +94,22 @@ export default class DirectLinkingBackground {
         await remoteFunction(functionName, { tabId: currentTab.id })(...args)
     }
 
-    async goToAnnotationFromDashboardSidebar(
-        { tab }: TabArg,
-        {
-            url,
-            annotation,
-        }: {
-            url: string
-            annotation: Annotation
-        },
-    ) {
-        url = url.startsWith('http') ? url : `https://${url}`
-
-        const activeTab = await this.options.browserAPIs.tabs.create({
-            active: true,
-            url,
-        })
-
-        const pageAnnotations = await this.getAllAnnotationsByUrl(
-            { tab },
-            { url },
-        )
-        const highlightables = pageAnnotations.filter((annot) => annot.selector)
-
-        const listener = async (tabId, changeInfo) => {
-            // Necessary to insert the ribbon/sidebar in case the user has turned  it off.
-            if (tabId === activeTab.id && changeInfo.status === 'complete') {
-                try {
-                    // TODO: This wait is a hack to mitigate trying to use the remote function `showSidebar` before it's ready
-                    // it should be registered in the tab setup, but is not available immediately on this tab onUpdate handler
-                    // since it is fired on the page complete, not on our content script setup complete.
-                    await new Promise((resolve) => setTimeout(resolve, 500))
-
-                    await runInTab<InPageUIContentScriptRemoteInterface>(
-                        tabId,
-                    ).showSidebar({
-                        annotationUrl: annotation.url,
-                        action: 'show_annotation',
-                    })
-                    await runInTab<InPageUIContentScriptRemoteInterface>(
-                        tabId,
-                    ).goToHighlight(annotation, highlightables)
-                } catch (err) {
-                    throw err
-                } finally {
-                    this.options.browserAPIs.tabs.onUpdated.removeListener(
-                        listener,
-                    )
-                }
-            }
-        }
-        this.options.browserAPIs.tabs.onUpdated.addListener(listener)
-    }
-
     async toggleSidebarOverlay(
         { tab },
         {
             anchor,
             override,
-            activeUrl,
             openSidebar,
             openToTags,
             openToComment,
             openToBookmark,
             openToCollections,
-        }: OpenSidebarArgs &
-            Partial<KeyboardActions> & {
-                anchor?: any
-                override?: boolean
-                openSidebar?: boolean
-            } = {
-            anchor: null,
-            override: false,
-            activeUrl: undefined,
+            unifiedAnnotationId,
+        }: Partial<KeyboardActions> & {
+            anchor?: any
+            override?: boolean
+            openSidebar?: boolean
+            unifiedAnnotationId: string
         },
     ) {
         const [currentTab] = await this.options.browserAPIs.tabs.query({
@@ -183,13 +122,10 @@ export default class DirectLinkingBackground {
         if (openSidebar) {
             await runInTab<InPageUIContentScriptRemoteInterface>(
                 tabId,
-            ).showSidebar(
-                activeUrl && {
-                    anchor,
-                    annotationUrl: activeUrl,
-                    action: 'show_annotation',
-                },
-            )
+            ).showSidebar({
+                action: 'show_annotation',
+                annotationLocalId: unifiedAnnotationId,
+            })
         } else {
             const actions: { [Action in InPageUIRibbonAction]: boolean } = {
                 tag: openToTags,
@@ -231,10 +167,18 @@ export default class DirectLinkingBackground {
             ...args
         }: { pageUrl: string; withTags?: boolean; withBookmarks?: boolean },
     ) => {
-        return this.annotationStorage.listAnnotationsByPageUrl({
-            pageUrl,
-            ...args,
-        })
+        const annotations = await this.annotationStorage.listAnnotationsByPageUrl(
+            {
+                pageUrl,
+                ...args,
+            },
+        )
+
+        return annotations.map((annot) => ({
+            ...annot,
+            createdWhen: annot.createdWhen?.getTime(),
+            lastEdited: (annot.lastEdited ?? annot.createdWhen)?.getTime(),
+        }))
     }
 
     getAllAnnotationsByUrl = async (

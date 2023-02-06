@@ -42,6 +42,7 @@ export interface Props
         ShareMenuProps,
         'annotationsBG' | 'contentSharingBG' | 'customListsBG'
     >
+    filterbyList: (listId: number) => void
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -93,7 +94,7 @@ export default class PageResultView extends PureComponent<Props> {
 
     private get displayLists(): Array<{
         id: number
-        name: string
+        name: string | JSX.Element
         isShared: boolean
     }> {
         return this.props.lists.map((id) => ({
@@ -236,13 +237,13 @@ export default class PageResultView extends PureComponent<Props> {
             return [
                 {
                     key: 'expand-notes-btn',
-                    image: this.hasNotes ? 'commentFull' : 'commentEmpty',
+                    image: this.hasNotes ? 'commentFull' : 'commentAdd',
                     ButtonText:
                         this.props.noteIds[this.props.notesType].length > 0 &&
                         this.props.noteIds[
                             this.props.notesType
                         ].length.toString(),
-                    imageColor: 'purple',
+                    imageColor: 'prime1',
                     onClick: this.props.onNotesBtnClick,
                     tooltipText: (
                         <span>
@@ -280,7 +281,7 @@ export default class PageResultView extends PureComponent<Props> {
                 {
                     key: 'add-spaces-btn',
                     image: 'plus',
-                    imageColor: 'purple',
+                    imageColor: 'prime1',
                     ButtonText: 'Spaces',
                     iconSize: '14px',
                     onClick: this.props.onListPickerFooterBtnClick,
@@ -289,13 +290,13 @@ export default class PageResultView extends PureComponent<Props> {
                 },
                 {
                     key: 'expand-notes-btn',
-                    image: this.hasNotes ? 'commentFull' : 'commentEmpty',
+                    image: this.hasNotes ? 'commentFull' : 'commentAdd',
                     ButtonText:
                         this.props.noteIds[this.props.notesType].length > 0 &&
                         this.props.noteIds[
                             this.props.notesType
                         ].length.toString(),
-                    imageColor: 'purple',
+                    imageColor: 'prime1',
                     onClick: this.props.onNotesBtnClick,
                     tooltipText: (
                         <span>
@@ -331,15 +332,14 @@ export default class PageResultView extends PureComponent<Props> {
                         //         ? this.listPickerBtnClickHandler
                         //         : undefined
                         // }
-                        href={this.fullUrl}
-                        target="_blank"
                         tabIndex={-1}
                         hasSpaces={this.hasLists}
                     >
                         <BlockContent
                             type={this.props.type}
                             normalizedUrl={this.props.normalizedUrl}
-                            originalUrl={this.props.fullUrl}
+                            originalUrl={this.fullUrl}
+                            onClick={this.props.onClick}
                             fullTitle={this.props.fullTitle}
                             pdfUrl={this.props.fullPdfUrl}
                             favIcon={this.props.favIconURI}
@@ -355,7 +355,9 @@ export default class PageResultView extends PureComponent<Props> {
                     {this.hasLists && (
                         <ListsSegment
                             lists={this.displayLists}
-                            onListClick={undefined}
+                            onListClick={(listId) => {
+                                this.props.filterbyList(listId)
+                            }}
                             onEditBtnClick={this.props.onListPickerBarBtnClick}
                             renderSpacePicker={
                                 this.props.listPickerShowStatus === 'lists-bar'
@@ -390,7 +392,7 @@ const StyledPageResult = styled.div`
     border-radius: 12px;
 `
 
-const PageContentBox = styled.a<{ hasSpaces: boolean }>`
+const PageContentBox = styled.div<{ hasSpaces: boolean }>`
     display: flex;
     flex-direction: column;
     cursor: pointer;

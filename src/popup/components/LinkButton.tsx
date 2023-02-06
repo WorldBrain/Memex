@@ -64,42 +64,8 @@ class LinkButton extends PureComponent<Props> {
 const ShortCutContainer = styled.div`
     display: flex;
     align-items: center;
-    color: ${(props) => props.theme.colors.greyScale9};
+    color: ${(props) => props.theme.colors.greyScale6};
     grid-gap: 3px;
-`
-
-const ShortCutText = styled.div`
-    display: block;
-    font-weight: 400;
-    color: ${(props) => props.theme.colors.greyScale9};
-    letter-spacing: 1px;
-    margin-right: -1px;
-
-    &:first-letter {
-        text-transform: capitalize;
-    }
-`
-
-const ShortCutBlock = styled.div`
-    border-radius: 5px;
-    border: 1px solid ${(props) => props.theme.colors.greyScale10};
-    color: ${(props) => props.theme.colors.greyScale9};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 18px;
-    padding: 0px 6px;
-    font-size: 10px;
-`
-
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight}80;
-    border-radius: 100px;
-    height: 32px;
-    width: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 `
 
 const ButtonItem = styled.div<{ disabled: boolean }>`
@@ -114,9 +80,10 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     padding: 0px 10px;
     margin: 10px 10px 0 10px;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+    border: 1px solid transparent;
 
     &:hover {
-        background: ${(props) => props.theme.colors.lightHover};
+        border: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 
     & * {
@@ -133,12 +100,12 @@ const ButtonInnerContent = styled.div`
     font-size: 14px;
     font-weight: 500;
     width: 100%;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale6};
 `
 
 const SubTitle = styled.div`
     font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 400;
 `
 

@@ -107,7 +107,7 @@ export default class SetupLocation extends React.Component {
                         }
                         filePath="winLogo"
                         heightAndWidth="30px"
-                        color={'normalText'}
+                        color={'white'}
                         padding={'10px'}
                         defaultBackground
                     />
@@ -118,7 +118,7 @@ export default class SetupLocation extends React.Component {
                         }
                         filePath="macLogo"
                         heightAndWidth="30px"
-                        color={'normalText'}
+                        color={'white'}
                         padding={'10px'}
                         defaultBackground
                     />
@@ -128,7 +128,7 @@ export default class SetupLocation extends React.Component {
                         }
                         filePath="linuxLogo"
                         heightAndWidth="30px"
-                        color={'normalText'}
+                        color={'white'}
                         padding={'10px'}
                         defaultBackground
                     />
@@ -143,6 +143,8 @@ export default class SetupLocation extends React.Component {
                         this._proceedIfServerIsRunning()
                     }}
                     label={"I'm ready"}
+                    type="primary"
+                    size="medium"
                 />
             </SettingSection>
         ) : (
@@ -194,6 +196,8 @@ export default class SetupLocation extends React.Component {
                         })
                     }}
                     label={'Continue'}
+                    type="primary"
+                    size="medium"
                 />
             </SettingSection>
         )

@@ -182,7 +182,10 @@ describe('Custom List Integrations', () => {
 
             const listName = 'ok the/at/test list'
 
-            await customLists.createCustomList({ name: listName })
+            await customLists.createCustomList({
+                name: listName,
+                id: Date.now(),
+            })
 
             expect(
                 await storageManager
@@ -224,6 +227,7 @@ describe('Custom List Integrations', () => {
 
             const listId = await customLists.createCustomList({
                 name: listName,
+                id: Date.now(),
             })
             await customLists.updateListDescription({ listId, description })
 

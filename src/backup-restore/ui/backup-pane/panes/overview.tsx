@@ -331,7 +331,7 @@ const SelectFolderArea = styled.div`
 `
 
 const PathString = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 400;
     font-size: 14px;
 `
@@ -357,13 +357,13 @@ const InfoBlock = styled.div`
 `
 
 const Number = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 18px;
     font-weight: bold;
 `
 
 const SubTitle = styled.div`
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 16px;
     font-weight: normal;
     font-weight: 300;

@@ -8,6 +8,7 @@ import { PageIndexingBackground } from 'src/page-indexing/background'
 import pick from 'lodash/pick'
 import { Analytics } from 'src/analytics/types'
 import checkBrowser from '../../util/check-browser'
+import browser from 'webextension-polyfill'
 
 export default class BookmarksBackground {
     storage: BookmarksStorage
@@ -29,6 +30,8 @@ export default class BookmarksBackground {
             addPageBookmark: this.addPageBookmark,
             delPageBookmark: this.delPageBookmark,
             pageHasBookmark: this.storage.pageHasBookmark,
+            findBookmark: this.storage.findBookmark,
+            setBookmarkStatusInBrowserIcon: this.setBookmarkStatusInBrowserIcon,
         }
     }
     get ROOT_BM() {
@@ -166,5 +169,31 @@ export default class BookmarksBackground {
             fullUrl: node.url,
             tabId,
         })
+    }
+
+    setBookmarkStatusInBrowserIcon: BookmarksInterface['setBookmarkStatusInBrowserIcon'] = async (
+        value,
+        pageUrl,
+    ) => {
+        let tabId: number
+        const [activeTab] = await this.options.browserAPIs.tabs.query({
+            active: true,
+        })
+
+        if (activeTab != null && activeTab.url === pageUrl) {
+            tabId = activeTab.id
+        }
+
+        if (value) {
+            await browser.browserAction.setBadgeText({
+                text: '❤️',
+                tabId: activeTab.id,
+            })
+            await browser.browserAction.setBadgeBackgroundColor({
+                color: 'white',
+            })
+        } else {
+            await browser.browserAction.setBadgeText({ text: '' })
+        }
     }
 }

@@ -43,6 +43,7 @@ export type PageInteractionProps = Omit<
     onTagsHover: React.MouseEventHandler
     onListsHover: React.MouseEventHandler
     onUnhover: React.MouseEventHandler
+    onClick: React.MouseEventHandler
 }
 
 // NOTE: Derived type - edit the original
@@ -104,7 +105,13 @@ export type SearchResultToState = (
     extraPageResultState?: Pick<PageResult, 'areNotesShown'>,
 ) => Pick<RootState, 'results' | 'noteData' | 'pageData'>
 
-export type SearchType = 'pages' | 'notes' | 'videos' | 'twitter' | 'pdf'
+export type SearchType =
+    | 'pages'
+    | 'notes'
+    | 'videos'
+    | 'twitter'
+    | 'pdf'
+    | 'events'
 export type NotesType = 'search' | 'user' | 'followed'
 
 export interface NoteFormState {
@@ -285,6 +292,7 @@ export type Events = UIEvent<{
     cancelPageDelete: null
 
     // Page result state mutations (*specific to each* occurrence of the page in different days)
+    clickPageResult: PageEventArgs & { synthEvent: React.MouseEvent }
     setPageCopyPasterShown: PageEventArgs & { isShown: boolean }
     setPageListPickerShown: PageEventArgs & { show: ListPickerShowState }
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }

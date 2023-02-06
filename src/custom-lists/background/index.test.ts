@@ -65,6 +65,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 setup,
                             ).remoteFunctions.createCustomList({
                                 name: testList,
+                                id: Date.now(),
                             })
 
                             await customLists(
@@ -160,6 +161,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 setup,
                             ).remoteFunctions.createCustomList({
                                 name: testList,
+                                id: Date.now(),
                             })
 
                             await customLists(
@@ -248,7 +250,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 listId = await customLists(
                                     setup,
-                                ).createCustomList({ name: TEST_LIST_1 })
+                                ).createCustomList({
+                                    name: TEST_LIST_1,
+                                    id: Date.now(),
+                                })
                             },
                             expectedStorageChanges: {
                                 customLists: (): StorageCollectionDiff => ({
@@ -466,6 +471,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     setup,
                                 ).createCustomList({
                                     name: TEST_LIST_1,
+                                    id: Date.now(),
                                 })
                             },
                         },
@@ -567,6 +573,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     setup,
                                 ).createCustomList({
                                     name: 'My Custom List',
+                                    id: Date.now(),
                                 })
                             },
                         },
@@ -648,6 +655,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     setup,
                                 ).createCustomList({
                                     name: 'My Custom List',
+                                    id: Date.now(),
                                 })
                             },
                         },

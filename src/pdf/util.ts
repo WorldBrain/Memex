@@ -1,16 +1,19 @@
 import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
+import type { Tabs, Runtime } from 'webextension-polyfill'
 import type { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import type {
     ExtractedPDFData,
     MemexPDFMetadata,
 } from 'src/page-analysis/background/content-extraction/types'
-import type { Runtime } from 'webextension-polyfill'
 import { PDF_RAW_TEXT_SIZE_LIMIT, PDF_VIEWER_HTML } from './constants'
 
 export const constructPDFViewerUrl = (
     urlToPdf: string,
     args: { runtimeAPI: Pick<Runtime.Static, 'getURL'> },
-): string => args.runtimeAPI.getURL(PDF_VIEWER_HTML) + '?file=' + urlToPdf
+): string =>
+    args.runtimeAPI.getURL(PDF_VIEWER_HTML) +
+    '?file=' +
+    encodeURIComponent(urlToPdf)
 
 export const isUrlPDFViewerUrl = (
     url: string,
@@ -29,26 +32,46 @@ export const extractDataFromPDFDocument = async (
     let textSize = 0
     let truncated = false
     let pageIndex = 0
-    for (pageIndex = 0; pageIndex < pdf.numPages; ++pageIndex) {
+
+    const metadata = await pdf.getMetadata()
+    const downloadInfo = await pdf.getDownloadInfo()
+
+    let pdfTitle
+
+    if (metadata?.metadata?.getAll().Title == null) {
+        const page = await pdf.getPage(1)
+        const pageContent = await (await page.getTextContent()).items
+        let currentMaxFontSize = 0
+
+        for (const item of pageContent) {
+            if (item.transform.some((value) => value < 0)) {
+                continue
+            } else {
+                if (item.height > currentMaxFontSize) {
+                    pdfTitle = item.str
+                    currentMaxFontSize = item.height
+                } else if (item.height === currentMaxFontSize) {
+                    pdfTitle = pdfTitle + ' ' + item.str
+                }
+            }
+        }
+    }
+
+    for (pageIndex = 0; pageIndex < 1; ++pageIndex) {
         const page = await pdf.getPage(pageIndex + 1) // starts at page number 1, not 0
         // wait for object containing items array with text pieces
         const pageItems = await page.getTextContent()
         const pageText = pageItems.items.map((item) => item.str).join(' ')
-
         textSize += pageText.length
         if (textSize > PDF_RAW_TEXT_SIZE_LIMIT) {
             truncated = true
             break
         }
-
         pageTexts.push(pageText)
     }
 
     // Run the joined texts through our pipeline
     const { text: processedText } = transformPageText(pageTexts.join(' '), {})
-
-    const metadata = await pdf.getMetadata()
-    const downloadInfo = await pdf.getDownloadInfo()
 
     const pdfMetadata: MemexPDFMetadata = {
         memexTotalPages: pdf.numPages,
@@ -67,7 +90,20 @@ export const extractDataFromPDFDocument = async (
         pdfPageTexts: pageTexts,
         fullText: processedText,
         author: metadata.info['Author'],
-        title: metadata.info['Title'] || defaultTitle,
+        title: metadata.info['Title'] || pdfTitle,
         keywords: metadata.info['Keywords'],
     }
+}
+
+export async function openPDFInViewer(
+    fullPdfUrl: string,
+    args: {
+        tabsAPI: Tabs.Static
+        runtimeAPI: Runtime.Static
+    },
+): Promise<void> {
+    const url = constructPDFViewerUrl(fullPdfUrl, {
+        runtimeAPI: args.runtimeAPI,
+    })
+    await args.tabsAPI.create({ url })
 }

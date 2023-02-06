@@ -3,6 +3,7 @@ import qs from 'query-string'
 import styled, { createGlobalStyle, css, keyframes } from 'styled-components'
 import browser from 'webextension-polyfill'
 
+import moment from 'moment'
 import extractQueryFilters from 'src/util/nlp-time-filter'
 import {
     shortcuts,
@@ -31,6 +32,11 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { HexColorPicker } from 'react-colorful'
+import {
+    DEFAULT_HIGHLIGHT_COLOR,
+    HIGHLIGHT_COLOR_KEY,
+} from 'src/highlighting/constants'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
@@ -55,7 +61,9 @@ interface State {
     shortcutsReady: boolean
     blockListValue: string
     showColorPicker: boolean
+    renderFeedback: boolean
     pickerColor: string
+    showPickerSave: boolean
 }
 
 export default class Ribbon extends Component<Props, State> {
@@ -72,6 +80,8 @@ export default class Ribbon extends Component<Props, State> {
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
 
     private spacePickerRef = createRef<HTMLDivElement>()
+    private bookmarkButtonRef = createRef<HTMLDivElement>()
+
     private tutorialButtonRef = createRef<HTMLDivElement>()
     private feedButtonRef = createRef<HTMLDivElement>()
     private sidebarButtonRef = createRef<HTMLDivElement>()
@@ -82,7 +92,9 @@ export default class Ribbon extends Component<Props, State> {
         shortcutsReady: false,
         blockListValue: this.getDomain(window.location.href),
         showColorPicker: false,
-        pickerColor: '',
+        showPickerSave: false,
+        renderFeedback: false,
+        pickerColor: DEFAULT_HIGHLIGHT_COLOR,
     }
 
     constructor(props: Props) {
@@ -105,24 +117,22 @@ export default class Ribbon extends Component<Props, State> {
     async componentDidMount() {
         this.keyboardShortcuts = await getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
-        this.initialiseHighlightColor()
+        await this.initialiseHighlightColor()
     }
 
     async initialiseHighlightColor() {
-        const highlightColor = await browser.storage.local.get(
-            '@highlight-colors',
-        )
-
-        let highlightColorNew = highlightColor['@highlight-colors']
-
-        this.setState({
-            pickerColor: highlightColorNew,
+        const {
+            [HIGHLIGHT_COLOR_KEY]: highlightsColor,
+        } = await browser.storage.local.get({
+            [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
         })
+        this.setState({ pickerColor: highlightsColor })
     }
 
     updatePickerColor(value) {
         this.setState({
             pickerColor: value,
+            showPickerSave: true,
         })
 
         let highlights: HTMLCollection = document.getElementsByTagName(
@@ -135,8 +145,11 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     async saveHighlightColor() {
+        this.setState({
+            showPickerSave: false,
+        })
         await browser.storage.local.set({
-            '@highlight-colors': this.state.pickerColor,
+            [HIGHLIGHT_COLOR_KEY]: this.state.pickerColor,
         })
     }
 
@@ -186,7 +199,12 @@ export default class Ribbon extends Component<Props, State> {
         return short.shortcut && short.enabled ? (
             <TooltipContent>
                 {source}
-                {<KeyboardShortcuts keys={short.shortcut.split('+')} />}
+                {
+                    <KeyboardShortcuts
+                        size={'small'}
+                        keys={short.shortcut.split('+')}
+                    />
+                }
             </TooltipContent>
         ) : (
             source
@@ -264,12 +282,14 @@ export default class Ribbon extends Component<Props, State> {
                             })
                         }
                     />
-                    <PrimaryAction
-                        size={'small'}
-                        label={'Save Color'}
-                        type={'primary'}
-                        onClick={() => this.saveHighlightColor()}
-                    />
+                    {this.state.showPickerSave ? (
+                        <PrimaryAction
+                            size={'small'}
+                            label={'Save Color'}
+                            type={'primary'}
+                            onClick={() => this.saveHighlightColor()}
+                        />
+                    ) : undefined}
                 </PickerButtonTopBar>
                 <TextField
                     value={this.state.pickerColor}
@@ -357,11 +377,28 @@ export default class Ribbon extends Component<Props, State> {
                 }
                 offsetX={10}
                 width={!this.state.showColorPicker ? '360px' : '500px'}
-                closeComponent={() => this.props.toggleShowExtraButtons()}
+                closeComponent={() => {
+                    this.setState({
+                        showColorPicker: false,
+                        renderFeedback: false,
+                    })
+                    this.props.toggleShowExtraButtons()
+                }}
             >
                 <GlobalStyle />
                 {this.state.showColorPicker ? (
                     this.renderColorPicker()
+                ) : this.state.renderFeedback ? (
+                    <FeedbackContainer>
+                        <LoadingIndicator size={30} />
+                        <FeedFrame
+                            src="https://airtable.com/embed/shrfgVfdHxwggbju8?backgroundColor=red"
+                            frameborder="0"
+                            onmousewheel=""
+                            width="100%"
+                            height="533"
+                        />
+                    </FeedbackContainer>
                 ) : (
                     <ExtraButtonContainer>
                         <BlockListArea>
@@ -369,11 +406,11 @@ export default class Ribbon extends Component<Props, State> {
                                 <BlockListTitleContent>
                                     <Icon
                                         filePath={'block'}
-                                        heightAndWidth="16px"
+                                        heightAndWidth="22px"
                                         hoverOff
                                     />
                                     <InfoText>
-                                        Disable Ribbon on this site
+                                        Block List for Action Sidebar
                                     </InfoText>
                                 </BlockListTitleContent>
                                 <TooltipBox
@@ -386,7 +423,7 @@ export default class Ribbon extends Component<Props, State> {
                                         }
                                         filePath={'settings'}
                                         heightAndWidth={'18px'}
-                                        color={'purple'}
+                                        color={'prime1'}
                                     />
                                 </TooltipBox>
                             </BlockListTitleArea>
@@ -410,7 +447,7 @@ export default class Ribbon extends Component<Props, State> {
                                     <Icon
                                         heightAndWidth="22px"
                                         filePath="plus"
-                                        color="purple"
+                                        color="prime1"
                                         onClick={async () => {
                                             this.setState({
                                                 blockListValue:
@@ -441,12 +478,29 @@ export default class Ribbon extends Component<Props, State> {
                                 hoverOff
                             />
                             {this.props.isRibbonEnabled ? (
-                                <InfoText>Disable Ribbon</InfoText>
+                                <InfoText>
+                                    Disable Action Sidebar on all pages
+                                </InfoText>
                             ) : (
-                                <InfoText>Enable Ribbon</InfoText>
+                                <InfoText>
+                                    Enable Action Sidebar on all pages
+                                </InfoText>
                             )}
                         </ExtraButtonRow>
                         <ExtraButtonRow
+                            onClick={(event) => {
+                                this.setState({
+                                    showColorPicker: true,
+                                })
+                                event.stopPropagation()
+                            }}
+                        >
+                            <ColorPickerCircle
+                                backgroundColor={this.state.pickerColor}
+                            />
+                            <InfoText>Change Highlight Color</InfoText>
+                        </ExtraButtonRow>
+                        {/* <ExtraButtonRow
                             onClick={
                                 this.props.highlights.handleHighlightsToggle
                             }
@@ -455,27 +509,17 @@ export default class Ribbon extends Component<Props, State> {
                                 filePath={'highlight'}
                                 heightAndWidth="22px"
                                 hoverOff
+                                color={
+                                    this.props.highlights
+                                        .areHighlightsEnabled && 'prime1'
+                                }
                             />
                             {this.props.highlights.areHighlightsEnabled ? (
                                 <InfoText>Hide Highlights</InfoText>
                             ) : (
                                 <InfoText>Show Highlights</InfoText>
                             )}
-                            <ButtonPositioning>
-                                <PrimaryAction
-                                    label={'Change Color'}
-                                    size={'small'}
-                                    type={'primary'}
-                                    onClick={(event) => {
-                                        this.setState({
-                                            showColorPicker: true,
-                                        })
-                                        event.stopPropagation()
-                                    }}
-                                    innerRef={this.changeColorRef}
-                                />
-                            </ButtonPositioning>
-                        </ExtraButtonRow>
+                        </ExtraButtonRow> */}
 
                         <ExtraButtonRow
                             onClick={this.props.tooltip.handleTooltipToggle}
@@ -483,13 +527,13 @@ export default class Ribbon extends Component<Props, State> {
                             <Icon
                                 filePath={
                                     this.props.tooltip.isTooltipEnabled
-                                        ? icons.tooltipOn
-                                        : icons.tooltipOff
+                                        ? icons.tooltipOff
+                                        : icons.tooltipOn
                                 }
                                 heightAndWidth="22px"
                                 hoverOff
                             />
-                            {this.props.isRibbonEnabled ? (
+                            {this.props.tooltip.isTooltipEnabled ? (
                                 <InfoText>Hide Highlighter Tooltip</InfoText>
                             ) : (
                                 <InfoText>Show Highlighter Tooltip</InfoText>
@@ -519,7 +563,9 @@ export default class Ribbon extends Component<Props, State> {
                         </ExtraButtonRow>
                         <ExtraButtonRow
                             onClick={() =>
-                                window.open('https://worldbrain.io/feedback')
+                                this.setState({
+                                    renderFeedback: true,
+                                })
                             }
                         >
                             <Icon
@@ -576,6 +622,13 @@ export default class Ribbon extends Component<Props, State> {
     render() {
         if (!this.state.shortcutsReady) {
             return false
+        }
+
+        let bookmarkDate
+        if (this.props.bookmark.isBookmarked != null) {
+            bookmarkDate = moment(
+                new Date(this.props.bookmark.lastBookmarkTimestamp),
+            ).format('LLL')
         }
 
         return (
@@ -641,6 +694,7 @@ export default class Ribbon extends Component<Props, State> {
                                                             Close{' '}
                                                             <KeyboardShortcuts
                                                                 keys={['Esc']}
+                                                                size="small"
                                                             />
                                                         </TooltipContent>
                                                     }
@@ -650,7 +704,7 @@ export default class Ribbon extends Component<Props, State> {
                                                     <Icon
                                                         filePath="removeX"
                                                         heightAndWidth="20px"
-                                                        color="greyScale9"
+                                                        color="greyScale6"
                                                         onClick={() =>
                                                             this.props.sidebar.closeSidebar()
                                                         }
@@ -670,7 +724,7 @@ export default class Ribbon extends Component<Props, State> {
                                                                 }
                                                                 heightAndWidth="20px"
                                                                 color={
-                                                                    'greyScale9'
+                                                                    'greyScale6'
                                                                 }
                                                                 onClick={() =>
                                                                     this.props.sidebar.toggleReadingView()
@@ -688,7 +742,7 @@ export default class Ribbon extends Component<Props, State> {
                                                                 }
                                                                 heightAndWidth="20px"
                                                                 color={
-                                                                    'greyScale9'
+                                                                    'greyScale6'
                                                                 }
                                                                 onClick={() =>
                                                                     this.props.sidebar.toggleReadingView()
@@ -706,12 +760,21 @@ export default class Ribbon extends Component<Props, State> {
                                             </UpperArea>
                                         )}
                                         <TooltipBox
-                                            targetElementRef={
-                                                this.spacePickerRef.current
+                                            tooltipText={
+                                                this.props.bookmark
+                                                    .isBookmarked ? (
+                                                    <span>
+                                                        Bookmarked on{' '}
+                                                        <DateText>
+                                                            {bookmarkDate}
+                                                        </DateText>
+                                                    </span>
+                                                ) : (
+                                                    this.getTooltipText(
+                                                        'createBookmark',
+                                                    )
+                                                )
                                             }
-                                            tooltipText={this.getTooltipText(
-                                                'createBookmark',
-                                            )}
                                             placement={'left'}
                                             offsetX={10}
                                         >
@@ -722,8 +785,8 @@ export default class Ribbon extends Component<Props, State> {
                                                 color={
                                                     this.props.bookmark
                                                         .isBookmarked
-                                                        ? 'purple'
-                                                        : 'greyScale9'
+                                                        ? 'prime1'
+                                                        : 'greyScale6'
                                                 }
                                                 heightAndWidth="20px"
                                                 filePath={
@@ -735,9 +798,6 @@ export default class Ribbon extends Component<Props, State> {
                                             />
                                         </TooltipBox>
                                         <TooltipBox
-                                            targetElementRef={
-                                                this.spacePickerRef.current
-                                            }
                                             tooltipText={this.getTooltipText(
                                                 'addToCollection',
                                             )}
@@ -754,8 +814,8 @@ export default class Ribbon extends Component<Props, State> {
                                                 color={
                                                     this.props.lists.pageListIds
                                                         .length > 0
-                                                        ? 'purple'
-                                                        : 'greyScale9'
+                                                        ? 'prime1'
+                                                        : 'greyScale6'
                                                 }
                                                 heightAndWidth="20px"
                                                 filePath={
@@ -787,7 +847,7 @@ export default class Ribbon extends Component<Props, State> {
                                                             e,
                                                         )
                                                     }
-                                                    color={'greyScale9'}
+                                                    color={'greyScale6'}
                                                     heightAndWidth="20px"
                                                     filePath={
                                                         this.props.commentBox
@@ -795,7 +855,7 @@ export default class Ribbon extends Component<Props, State> {
                                                             ? icons.saveIcon
                                                             : // : this.props.hasAnnotations
                                                               // ? icons.commentFull
-                                                              icons.commentEmpty
+                                                              icons.commentAdd
                                                     }
                                                     containerRef={
                                                         this.sidebarButtonRef
@@ -814,7 +874,7 @@ export default class Ribbon extends Component<Props, State> {
                                                 onClick={() =>
                                                     this.openOverviewTabRPC()
                                                 }
-                                                color={'greyScale9'}
+                                                color={'greyScale6'}
                                                 heightAndWidth="20px"
                                                 filePath={icons.searchIcon}
                                             />
@@ -837,15 +897,12 @@ export default class Ribbon extends Component<Props, State> {
                                         onClick={() =>
                                             this.props.toggleShowExtraButtons()
                                         }
-                                        color={'darkText'}
+                                        color={'greyScale5'}
                                         heightAndWidth="22px"
                                         filePath={icons.settings}
                                         containerRef={this.settingsButtonRef}
                                     />
                                     <TooltipBox
-                                        targetElementRef={
-                                            this.spacePickerRef.current
-                                        }
                                         tooltipText={
                                             <span>
                                                 Keyboard Shortcuts
@@ -860,7 +917,7 @@ export default class Ribbon extends Component<Props, State> {
                                             onClick={() =>
                                                 this.props.toggleShowTutorial()
                                             }
-                                            color={'darkText'}
+                                            color={'greyScale5'}
                                             heightAndWidth="22px"
                                             filePath={icons.helpIcon}
                                             containerRef={
@@ -894,7 +951,7 @@ export default class Ribbon extends Component<Props, State> {
                                                         this.props.handleRemoveRibbon()
                                                     }
                                                 }}
-                                                color={'darkText'}
+                                                color={'greyScale5'}
                                                 heightAndWidth="22px"
                                                 filePath={icons.removeX}
                                             />
@@ -915,6 +972,18 @@ export default class Ribbon extends Component<Props, State> {
     }
 }
 
+const DateText = styled.span`
+    color: ${(props) => props.theme.colors.white};
+`
+
+const ColorPickerCircle = styled.div<{ backgroundColor: string }>`
+    height: 18px;
+    width: 18px;
+    background-color: ${(props) => props.backgroundColor};
+    border-radius: 50px;
+    margin: 5px;
+`
+
 const UpperArea = styled.div`
     display: flex;
     flex-direction: column;
@@ -932,6 +1001,7 @@ const PickerButtonTopBar = styled.div`
     justify-content: space-between;
     align-items: center;
     width: fill-available;
+    margin-left: -7px;
 `
 
 const ExtraButtonContainer = styled.div`
@@ -942,8 +1012,8 @@ const ColorPickerContainer = styled.div`
     display: flex;
     flex-direction: column;
     grid-gap: 10px;
-    padding: 15px;
-    width: 250px;
+    padding: 10px 15px 15px 15px;
+    width: 200px;
 `
 
 const HexPickerContainer = styled.div`
@@ -964,7 +1034,7 @@ const TooltipContent = styled.div`
 `
 
 const BlockListArea = styled.div`
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     display: flex;
     flex-direction: column;
     grid-gap: 5px;
@@ -977,7 +1047,7 @@ const BlockListTitleArea = styled.div`
     display: flex;
     align-items: center;
     grid-gap: 10px;
-    padding: 0px 0px 5px 10px;
+    padding: 0px 0px 5px 15px;
     justify-content: space-between;
     width: fill-available;
     z-index: 1;
@@ -1024,6 +1094,7 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
     width: 24px;
     height: 400px;
     right: -40px;
+    position: sticky;
     display: flex;
     /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
@@ -1056,7 +1127,7 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
             align-items: flex-start;
             padding: 0 7px 0 5px;
             right: 0px;
-            background: ${(props) => props.theme.colors.backgroundColor};
+            background: ${(props) => props.theme.colors.black};
 
             & .removeSidebar {
                 visibility: hidden;
@@ -1074,8 +1145,8 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
     justify-content: center;
     padding: 5px 0;
     display: none;
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    background: ${(props) => props.theme.colors.greyScale1};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     ${(props) =>
         props.isPeeking &&
@@ -1083,7 +1154,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
             border-radius: 8px;
             display: flex;
             box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
-            background: ${(props) => props.theme.colors.backgroundColorDarker};
+            background: ${(props) => props.theme.colors.greyScale1};
         }
     `}
 
@@ -1100,7 +1171,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
             background: transparent;
             border: none;
             align-items: center;
-            background: ${(props) => props.theme.colors.backgroundColor};
+            background: ${(props) => props.theme.colors.black};
         `}
 `
 
@@ -1116,7 +1187,7 @@ const ExtraButtonRow = styled.div`
     position: relative;
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 `
 
@@ -1124,7 +1195,7 @@ const HorizontalLine = styled.div<{ sidebaropen: boolean }>`
     width: 100%;
     margin: 5px 0;
     height: 1px;
-    background-color: ${(props) => props.theme.colors.lightHover};
+    background-color: ${(props) => props.theme.colors.greyScale3};
 `
 
 const PageAction = styled.div`
@@ -1147,7 +1218,7 @@ const FeedIndicatorBox = styled.div<{ isSidebarOpen: boolean }>`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
     font-weight: 400;
 `
@@ -1160,6 +1231,24 @@ const FeedFrame = styled.iframe`
     width: 500px;
 `
 
+const FeedbackContainer = styled.div`
+    width: fill-available;
+    height: 600px;
+    border: none;
+    border-radius: 10px;
+    width: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    & > iframe {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+    }
+`
+
 const FeedContainer = styled.div`
     display: flex;
     width: fill-available;
@@ -1169,7 +1258,7 @@ const FeedContainer = styled.div`
     flex-direction: column;
     padding-top: 20px;
     max-width: 800px;
-    background: ${(props) => props.theme.colors.backgroundColor};
+    background: ${(props) => props.theme.colors.black};
     border-radius: 10px;
 `
 
@@ -1181,7 +1270,7 @@ const TitleContainer = styled.div`
     grid-gap: 15px;
     width: fill-available;
     padding: 0 20px 20px 20px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 const TitleContent = styled.div`
     display: flex;
@@ -1193,12 +1282,12 @@ const TitleContent = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 18px;
     font-weight: bold;
 `
 const SectionDescription = styled.div`
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     font-weight: 300;
 `
@@ -1226,7 +1315,7 @@ export const GlobalStyle = createGlobalStyle`
     user-select: none;
     cursor: default;
   }
-  
+
   .react-colorful__saturation {
     position: relative;
     flex-grow: 1;
@@ -1236,7 +1325,7 @@ export const GlobalStyle = createGlobalStyle`
     background-image: linear-gradient(to top, #000, rgba(0, 0, 0, 0)),
       linear-gradient(to right, #fff, rgba(255, 255, 255, 0));
   }
-  
+
   .react-colorful__pointer-fill,
   .react-colorful__alpha-gradient {
     content: "";
@@ -1248,19 +1337,19 @@ export const GlobalStyle = createGlobalStyle`
     pointer-events: none;
     border-radius: inherit;
   }
-  
+
   /* Improve elements rendering on light backgrounds */
   .react-colorful__alpha-gradient,
   .react-colorful__saturation {
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
   }
-  
+
   .react-colorful__hue,
   .react-colorful__alpha {
     position: relative;
     height: 24px;
   }
-  
+
   .react-colorful__hue {
     background: linear-gradient(
       to right,
@@ -1273,11 +1362,11 @@ export const GlobalStyle = createGlobalStyle`
       #f00 100%
     );
   }
-  
+
   .react-colorful__last-control {
     border-radius: 0 0 8px 8px;
   }
-  
+
   .react-colorful__interactive {
     position: absolute;
     left: 0;
@@ -1289,7 +1378,7 @@ export const GlobalStyle = createGlobalStyle`
     /* Don't trigger the default scrolling behavior when the event is originating from this element */
     touch-action: none;
   }
-  
+
   .react-colorful__pointer {
     position: absolute;
     z-index: 1;
@@ -1302,26 +1391,26 @@ export const GlobalStyle = createGlobalStyle`
     border-radius: 50%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
-  
+
   .react-colorful__interactive:focus .react-colorful__pointer {
     transform: translate(-50%, -50%) scale(1.1);
   }
-  
+
   /* Chessboard-like pattern for alpha related elements */
   .react-colorful__alpha,
   .react-colorful__alpha-pointer {
     background-color: #fff;
     background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill-opacity=".05"><rect x="8" width="8" height="8"/><rect y="8" width="8" height="8"/></svg>');
   }
-  
+
   /* Display the saturation pointer over the hue one */
   .react-colorful__saturation-pointer {
     z-index: 3;
   }
-  
+
   /* Display the hue pointer over the alpha one */
   .react-colorful__hue-pointer {
     z-index: 2;
   }
-  
+
 `

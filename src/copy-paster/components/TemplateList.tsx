@@ -11,10 +11,9 @@ const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 10px 20px 10px 20px;
+    padding: 10px 15px 0px 18px;
     height: 30px;
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
 `
 
 const ButtonBox = styled.div`
@@ -25,48 +24,21 @@ const ButtonBox = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale4};
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 400;
     flex: 1;
     white-space: nowrap;
 `
 
-const HeaderplaceHolder = styled.div`
-    width: 24px;
-`
-
-const CreateNewButton = styled.button`
-    font-family: ${(props) => props.theme.fonts.primary};
-    font-style: normal;
-    font-weight: normal;
-    font-size: 14px;
-    color: ${(props) => props.theme.colors.primary};
-    cursor: pointer;
-    padding: 0px;
-
-    outline: none;
-    border: none;
-    background: transparent;
-`
-
-const NoResults = styled.p`
-    text-align: center
-    font-family: ${(props) => props.theme.fonts.primary};
-    font-style: normal;
-    font-size: 12px;
-    padding: 0 15px;
-    color: ${(props) => props.theme.colors.primary};
-`
-
 const NoResultsBox = styled.div`
-    text-align: center
-    font-family: 'Satoshi',
+    text-align: center;
+    font-family: 'Satoshi';
     font-style: normal;
     font-size: 12px;
     padding: 15px 10px;
-    color: ${(props) => props.theme.colors.normalText};
-    display:flex;
+    color: ${(props) => props.theme.colors.white};
+    display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
@@ -79,7 +51,7 @@ const Center = styled.div`
     height: 200px;
     align-items: center;
     flex-direction: column;
-    grid-gap: 30px;
+    grid-gap: 10px;
 `
 
 const ContentBlock = styled.div`
@@ -95,7 +67,7 @@ const ContentBlock = styled.div`
 `
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
     border: 1px solid ${(props) => props.theme.colors.greyScale6};
     border-radius: 8px;
     height: 30px;
@@ -106,10 +78,17 @@ const SectionCircle = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 300;
     text-align: center;
+`
+const InfoTextTitle = styled.div`
+    color: ${(props) => props.theme.colors.white};
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    margin-top: 20px;
 `
 
 interface InternalTemplateListProps {
@@ -132,7 +111,7 @@ class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
                         <Icon
                             filePath={icons.copy}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -179,7 +158,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
             return (
                 <Center>
                     <LoadingIndicator size={25} />
-                    <InfoText>Copying Content</InfoText>
+                    <InfoTextTitle>Copying Content</InfoTextTitle>
                     <InfoText small>Don't close this modal</InfoText>
                 </Center>
             )
@@ -202,7 +181,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                         />
                         <Icon
                             filePath={icons.plus}
-                            color="purple"
+                            color="prime1"
                             padding={'5px'}
                             heightAndWidth="16px"
                             onClick={this.props.onClickNew}

@@ -5,7 +5,7 @@ const styles = require('./next-step-button.css')
 
 export interface Props {
     onClick: () => void
-    color: 'green' | 'mint' | 'blue' | 'purple'
+    color: 'green' | 'mint' | 'blue' | 'prime1'
 }
 
 export default class OnboardingStep extends React.PureComponent<Props> {

@@ -28,6 +28,7 @@ export interface State {
     displayName: string
     passwordMatch: boolean
     currentUser: AuthenticatedUser
+    passwordResetSent: boolean
 }
 
 export type Event = UIEvent<{
@@ -37,4 +38,5 @@ export type Event = UIEvent<{
     onUserLogIn: { newSignUp?: boolean }
     setAuthDialogMode: { mode: AuthDialogMode }
     getCurrentUser: { currentUser: AuthenticatedUser }
+    sendPasswordReset: null
 }>

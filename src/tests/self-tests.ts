@@ -274,11 +274,13 @@ export function createSelfTests(options: {
                 testListId1 = await backgroundModules.customLists.createCustomList(
                     {
                         name: 'My test list #1',
+                        id: Date.now(),
                     },
                 )
                 testListId2 = await backgroundModules.customLists.createCustomList(
                     {
                         name: 'My test list #2',
+                        id: Date.now(),
                     },
                 )
                 await backgroundModules.customLists.insertPageToList({

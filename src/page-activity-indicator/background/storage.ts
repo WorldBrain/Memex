@@ -1,52 +1,16 @@
-import { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { COLLECTION_DEFINITIONS } from '@worldbrain/memex-common/lib/storage/modules/followed-lists/constants'
 import {
     StorageModule,
     StorageModuleConfig,
 } from '@worldbrain/storex-pattern-modules'
-import { STORAGE_VERSIONS } from 'src/storage/constants'
-import { FollowedList, FollowedListEntry } from './types'
+import type { FollowedList, FollowedListEntry } from './types'
 import { getFollowedListEntryIdentifier } from './utils'
 
 export default class PageActivityIndicatorStorage extends StorageModule {
     getConfig(): StorageModuleConfig {
         return {
-            collections: {
-                followedList: {
-                    version: STORAGE_VERSIONS[27].version,
-                    fields: {
-                        name: { type: 'string' },
-                        creator: { type: 'string' },
-                        sharedList: { type: 'string' },
-                        lastSync: { type: 'timestamp', optional: true },
-                    },
-                    indices: [
-                        {
-                            pk: true,
-                            field: 'sharedList',
-                        },
-                    ],
-                    backup: false,
-                    watch: false,
-                },
-                followedListEntry: {
-                    version: STORAGE_VERSIONS[27].version,
-                    fields: {
-                        creator: { type: 'string' },
-                        entryTitle: { type: 'text' },
-                        followedList: { type: 'string' },
-                        normalizedPageUrl: { type: 'string' },
-                        hasAnnotations: { type: 'boolean' },
-                        createdWhen: { type: 'timestamp' },
-                        updatedWhen: { type: 'timestamp' },
-                    },
-                    indices: [
-                        { field: 'normalizedPageUrl' },
-                        { field: 'followedList' },
-                    ],
-                    watch: false,
-                    backup: false,
-                },
-            },
+            collections: COLLECTION_DEFINITIONS,
             operations: {
                 createFollowedList: {
                     collection: 'followedList',
@@ -55,6 +19,11 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                 createFollowedListEntry: {
                     collection: 'followedListEntry',
                     operation: 'createObject',
+                },
+                findFollowedListsByIds: {
+                    collection: 'followedList',
+                    operation: 'findObjects',
+                    args: { sharedList: { $in: '$followedListIds:string[]' } },
                 },
                 findAllFollowedLists: {
                     collection: 'followedList',
@@ -88,7 +57,8 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                             normalizedPageUrl: '$normalizedPageUrl:string',
                         },
                         {
-                            hasAnnotations: '$hasAnnotations:boolean',
+                            hasAnnotationsFromOthers:
+                                '$hasAnnotationsFromOthers:boolean',
                             updatedWhen: '$updatedWhen:number',
                         },
                     ],
@@ -134,6 +104,7 @@ export default class PageActivityIndicatorStorage extends StorageModule {
             name: data.name,
             creator: data.creator,
             lastSync: data.lastSync,
+            platform: data.platform,
             sharedList: data.sharedList,
         })
         return object.id
@@ -142,12 +113,12 @@ export default class PageActivityIndicatorStorage extends StorageModule {
     async createFollowedListEntry(
         data: Omit<
             FollowedListEntry,
-            'updatedWhen' | 'createdWhen' | 'hasAnnotations'
+            'updatedWhen' | 'createdWhen' | 'hasAnnotationsFromOthers'
         > &
             Partial<
                 Pick<
                     FollowedListEntry,
-                    'updatedWhen' | 'createdWhen' | 'hasAnnotations'
+                    'updatedWhen' | 'createdWhen' | 'hasAnnotationsFromOthers'
                 >
             >,
     ): Promise<AutoPk> {
@@ -155,12 +126,22 @@ export default class PageActivityIndicatorStorage extends StorageModule {
             creator: data.creator,
             entryTitle: data.entryTitle,
             followedList: data.followedList,
-            hasAnnotations: data.hasAnnotations ?? false,
+            hasAnnotationsFromOthers: data.hasAnnotationsFromOthers ?? false,
             normalizedPageUrl: data.normalizedPageUrl,
             createdWhen: data.createdWhen ?? Date.now(),
             updatedWhen: data.updatedWhen ?? Date.now(),
         })
         return object.id
+    }
+
+    async findFollowedListsByIds(
+        followedListIds: AutoPk[],
+    ): Promise<Map<AutoPk, FollowedList>> {
+        const followedLists: FollowedList[] = await this.operation(
+            'findFollowedListsByIds',
+            { followedListIds },
+        )
+        return new Map(followedLists.map((list) => [list.sharedList, list]))
     }
 
     async findAllFollowedLists(): Promise<Map<AutoPk, FollowedList>> {
@@ -209,14 +190,14 @@ export default class PageActivityIndicatorStorage extends StorageModule {
     async updateFollowedListEntryHasAnnotations(
         data: Pick<
             FollowedListEntry,
-            'followedList' | 'normalizedPageUrl' | 'hasAnnotations'
+            'followedList' | 'normalizedPageUrl' | 'hasAnnotationsFromOthers'
         > &
             Partial<Pick<FollowedListEntry, 'updatedWhen'>>,
     ): Promise<void> {
         await this.operation('updateFollowedListEntryHasAnnotations', {
             followedList: data.followedList,
             normalizedPageUrl: data.normalizedPageUrl,
-            hasAnnotations: data.hasAnnotations,
+            hasAnnotationsFromOthers: data.hasAnnotationsFromOthers,
             updatedWhen: data.updatedWhen ?? Date.now(),
         })
     }

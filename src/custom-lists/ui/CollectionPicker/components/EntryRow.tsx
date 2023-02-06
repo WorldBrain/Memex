@@ -90,6 +90,7 @@ class EntryRow extends React.Component<Props> {
                 isFocused={focused}
                 id={id}
                 title={resultItem['props'].children}
+                zIndex={10000 - this.props.index}
             >
                 <NameWrapper>
                     {resultItem}
@@ -101,9 +102,9 @@ class EntryRow extends React.Component<Props> {
                             <Icon
                                 heightAndWidth="14px"
                                 // padding="6px"
-                                icon={'people'}
+                                icon={'peopleFine'}
                                 hoverOff
-                                color="lighterText"
+                                color="greyScale5"
                             />
                         </TooltipBox>
                     )}
@@ -157,7 +158,7 @@ class EntryRow extends React.Component<Props> {
                                 <Icon
                                     icon={icons.check}
                                     heightAndWidth="16px"
-                                    color="backgroundColor"
+                                    color="black"
                                 />
                             </SelectionBox>
                         </ButtonContainer>
@@ -194,50 +195,49 @@ const SelectionBox = styled.div<{ selected }>`
     border-radius: 5px;
     background: ${(props) =>
         props.selected
-            ? props.theme.colors.normalText
-            : props.theme.colors.lightHover};
+            ? props.theme.colors.white
+            : props.theme.colors.greyScale3};
 `
 
 export const IconStyleWrapper = styled.div`
     display: flex;
     grid-gap: 10px;
     align-items: center;
-    flex: 1;
     justify-content: flex-end;
 `
 
-const Row = styled.div<{ isFocused }>`
+const Row = styled.div<{ isFocused; zIndex }>`
     align-items: center;
     display: flex;
     justify-content: space-between;
     transition: background 0.3s;
     height: 40px;
-    width: 100%;
+    width: fill-available;
     cursor: pointer;
     border-radius: 5px;
     padding: 0 9px;
     margin: 0 -5px;
     overflow: visible;
-    color: ${(props) => props.isFocused && props.theme.colors.normalText};
-
+    color: ${(props) => props.isFocused && props.theme.colors.greyScale6};
+    z-index: ${(props) => props.zIndex};
     &:last-child {
         border-bottom: none;
     }
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         background: transparent;
     }
 
     ${(props) =>
         props.isFocused &&
         css`
-            outline: 1px solid ${(props) => props.theme.colors.lightHover};
+            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
             background: transparent;
         `}
 
     &:focus {
-        outline: 1px solid ${(props) => props.theme.colors.lightHover};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         background: transparent;
     }
 `
@@ -246,9 +246,11 @@ const NameWrapper = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-    max-width: 70%;
+    max-width: 80%;
     font-size: 14px;
     width: 100%;
+    min-width: 50px;
+    flex: 1;
 `
 
 export default EntryRow

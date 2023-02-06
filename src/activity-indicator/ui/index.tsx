@@ -66,7 +66,7 @@ export class FeedActivityDot extends StatefulUIElement<Props, State, Events> {
 const OuterRing = styled.div`
     width: 14px;
     height: 14px;
-    border: 2px solid ${(props) => props.theme.colors.iconColor};
+    border: 2px solid ${(props) => props.theme.colors.greyScale4};
     cursor: pointer;
     border-radius: 20px;
     display: flex;
@@ -78,6 +78,6 @@ const Dot = styled.div<{ unread: boolean }>`
     border-radius: 10px;
     width: 10px;
     height: 10px;
-    background: ${(props) => props.theme.colors.purple};
+    background: ${(props) => props.theme.colors.prime1};
     cursor: pointer;
 `

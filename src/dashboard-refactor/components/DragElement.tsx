@@ -25,14 +25,14 @@ const DragElement = styled.div<{ id: 'dragged-element' } & Props>`
     border: ${(props) =>
         props.isHoveringOverListItem
             ? 'none'
-            : `solid 2px ${props.theme.colors.purple}`};
+            : `solid 2px ${props.theme.colors.prime1}`};
     border-radius: 4px;
     font-size: 0.8rem;
     max-height: 50px;
     max-width: 330px;
     text-align: center;
     font-weight: 300;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     top: -90vh;
     opacity: ${(props) => (props.isHoveringOverListItem ? 0 : 1)};
     visibility: ${(props) => (props.isHoveringOverListItem ? 0 : 1)};
@@ -40,9 +40,9 @@ const DragElement = styled.div<{ id: 'dragged-element' } & Props>`
     padding: 5px 10px;
     position: absolute;
     margin-left: 25px;
-    background: ${(props) => props.theme.colors.backgroundColor}70;
+    background: ${(props) => props.theme.colors.black}70;
     z-index: 2147483647;
-    border: 1px solid ${(props) => props.theme.colors.purple};
+    border: 1px solid ${(props) => props.theme.colors.prime1};
     backdrop-filter: blur(4px);
     box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.6);
 `

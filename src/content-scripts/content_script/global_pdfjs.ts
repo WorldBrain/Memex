@@ -44,7 +44,7 @@ const getContentFingerprints: GetContentFingerprints = async () => {
 }
 
 Global.main({ loadRemotely: false, getContentFingerprints }).then(
-    (inPageUI) => {
+    async (inPageUI) => {
         inPageUI.events.on('stateChanged', (event) => {
             const sidebarState = event?.changes?.sidebar
             let windowWidth = window.innerWidth
@@ -54,9 +54,16 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
                 let sidebarContainer = sidebar.shadowRoot.getElementById(
                     'annotationSidebarContainer',
                 )
-                let sidebarContainerWidth = sidebarContainer.offsetWidth
+
+                let sidebarContainerWidth = parseFloat(
+                    SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
+                )
+
+                if (sidebarContainer) {
+                    sidebarContainerWidth = sidebarContainer?.offsetWidth
+                }
                 document.body.style.width =
-                    windowWidth - sidebarContainerWidth + 'px'
+                    windowWidth - sidebarContainerWidth - 50 + 'px'
 
                 window.addEventListener('resize', () =>
                     listenToWindowWidthChanges(sidebarContainer),
@@ -86,6 +93,7 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
                 return extractDataFromPDFDocument(pdf, document.title)
             },
         })
+        await inPageUI.showSidebar()
     },
 )
 

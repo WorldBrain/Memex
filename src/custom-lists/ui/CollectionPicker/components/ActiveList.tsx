@@ -4,7 +4,7 @@ import { fontSizeSmall } from 'src/common-ui/components/design-library/typograph
 export const ActiveList = styled.div`
     align-items: center;
     border-radius: 4px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: ${fontSizeSmall}px;
     font-weight: 400;
     padding: 2px 8px;

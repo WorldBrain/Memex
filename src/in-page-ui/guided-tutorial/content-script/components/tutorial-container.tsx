@@ -105,8 +105,8 @@ export default class TutorialContainer extends React.Component<Props, State> {
                                 <PrimaryAction
                                     onClick={this.prevCard}
                                     label={'Back'}
-                                    backgroundColor={'darkhover'}
-                                    fontColor={'normalText'}
+                                    type={'tertiary'}
+                                    size={'medium'}
                                 />
                             ) : (
                                 <div />
@@ -117,10 +117,10 @@ export default class TutorialContainer extends React.Component<Props, State> {
                                     <PrimaryAction
                                         onClick={this.nextCard}
                                         label={'Next'}
-                                        backgroundColor={'purple'}
-                                        fontColor={'backgroundColor'}
-                                        // icon={'longArrowRight'}
-                                        // iconPosition={'right'}
+                                        type={'primary'}
+                                        size={'medium'}
+                                        icon={'longArrowRight'}
+                                        iconPosition={'right'}
                                         // iconSize={'22px'}
                                     />
                                 )
@@ -128,8 +128,10 @@ export default class TutorialContainer extends React.Component<Props, State> {
                                 <PrimaryAction
                                     label={'Finish'}
                                     onClick={this.props.finishTutorial}
-                                    backgroundColor={'purple'}
-                                    fontColor={'backgroundColor'}
+                                    type={'primary'}
+                                    size={'medium'}
+                                    icon={'check'}
+                                    iconPosition={'left'}
                                 />
                             )}
                         </CardFooter>
@@ -178,8 +180,8 @@ const HoverArea = styled.div`
     height: 420px;
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
-    border: 1px solid ${(props) => props.theme.colors.purple};
-    background: ${(props) => props.theme.colors.purple}60;
+    border: 1px solid ${(props) => props.theme.colors.prime1};
+    background: ${(props) => props.theme.colors.prime1}60;
 
     opacity: 0;
     animation: 3s ease-in-out 0.5s MouseAreaAppear infinite;
@@ -200,7 +202,7 @@ const HoverArea = styled.div`
 `
 
 const BottomArea = styled.div`
-    border-top: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
     width: 100%;
 `
 
@@ -230,10 +232,7 @@ const TutorialCardContainer = styled.div<{
 }>`
     top: ${(props) => (props.top ? props.top : null)};
     bottom: ${(props) => (props.bottom ? props.bottom : null)};
-    left: ${(props) =>
-        props.left
-            ? (props.screenWidth - props.width.replace('px', '')) / 2 + 'px'
-            : null};
+    left: auto;
     right: ${(props) => (props.right ? props.right : null)};
     width: ${(props) => (props.width ? props.width : '650px')};
     height: ${(props) => props.height && props.height};
@@ -253,7 +252,7 @@ const TutorialCardContainer = styled.div<{
 
     font-family: 'Satoshi', sans-serif;
     box-shadow: 0px 4px 15px 5px rgb(0 0 0 / 5%);
-    border: 2px solid ${(props) => props.theme.colors.lineGrey};
+    border: 2px solid ${(props) => props.theme.colors.greyScale3};
     animation: 0.3s ease-out 0s 1 slideInFromLeft;
 
     @keyframes slideInFromLeft {

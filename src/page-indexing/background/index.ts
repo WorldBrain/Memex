@@ -47,6 +47,7 @@ import {
     registerRemoteFunctions,
 } from '../../util/webextensionRPC'
 import type { BrowserSettingsStore } from 'src/util/settings'
+import { isUrlSupported } from '../utils'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -191,10 +192,6 @@ export class PageIndexingBackground {
         pageContentInfo[
             contentInfo.primaryIdentifier.normalizedUrl
         ] = contentInfo
-        await this.options.pageIndexingSettingsStore.set(
-            'pageContentInfo',
-            pageContentInfo,
-        )
 
         // Keep track of the orig ID passed into this function, as an alias ID of the main content info
         if (
@@ -208,13 +205,20 @@ export class PageIndexingBackground {
 
         // Keep track of new fingerprints as locators on the main content info
         let hasNewLocators = false
+
+        // This mainly covers the case of not creating lots of locators for local PDFs referred to via in-memory object URLs, which change every time they're dragged into the browser
+        const unsupportedLocationWithExistingLocator =
+            contentInfo.aliasIdentifiers.length > 0 &&
+            !isUrlSupported({ fullUrl: params.locator.originalLocation })
+
         for (const fingerprint of params.fingerprints) {
             if (
                 contentInfo.locators.find(
                     (locator) =>
                         fingerprintsEqual(locator, fingerprint) &&
-                        locator.originalLocation ===
-                            params.locator.originalLocation,
+                        (locator.originalLocation ===
+                            params.locator.originalLocation ||
+                            unsupportedLocationWithExistingLocator),
                 )
             ) {
                 continue
@@ -240,6 +244,10 @@ export class PageIndexingBackground {
                 lastVisited: this.options.getNow(),
             })
         }
+        await this.options.pageIndexingSettingsStore.set(
+            'pageContentInfo',
+            pageContentInfo,
+        )
         if (stored && hasNewLocators) {
             await this.storeLocators(contentInfo.primaryIdentifier)
         }

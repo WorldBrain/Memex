@@ -20,6 +20,7 @@ describe('Social storage', () => {
     }) {
         const listId = await params.customListBg.createCustomList({
             name: DATA.customListNameA,
+            id: Date.now(),
         })
 
         for (const tweet of [DATA.tweetA, DATA.tweetB]) {

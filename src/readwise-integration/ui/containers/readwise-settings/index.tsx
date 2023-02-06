@@ -144,21 +144,23 @@ class ReadwiseSettings extends StatefulUIElement<
                     </>
                 )}
                 <MainBox>
-                    <TextField
-                        placeholder="ReadWise API key"
-                        disabled={!this.state.apiKeyEditable}
-                        value={
-                            selectors.showKeySaving(this.state)
-                                ? 'Saving API key...'
-                                : this.state.apiKey || ''
-                        }
-                        onChange={(e) =>
-                            this.processEvent('setAPIKey', {
-                                key: (e.target as HTMLInputElement).value,
-                            })
-                        }
-                        type="text"
-                    />
+                    {this.state.apiKey || this.state.apiKeyEditable ? (
+                        <TextField
+                            placeholder="ReadWise API key"
+                            disabled={!this.state.apiKeyEditable}
+                            value={
+                                selectors.showKeySaving(this.state)
+                                    ? 'Saving API key...'
+                                    : this.state.apiKey || ''
+                            }
+                            onChange={(e) =>
+                                this.processEvent('setAPIKey', {
+                                    key: (e.target as HTMLInputElement).value,
+                                })
+                            }
+                            type="text"
+                        />
+                    ) : undefined}
                     {selectors.showKeySaveButton(this.state) && (
                         <div>
                             <PrimaryAction
@@ -239,6 +241,6 @@ const SuccessMessage = styled.div`
     border: none;
     font-weight: 300;
     justify-content: flex-start;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     flex-direction: column;
 `

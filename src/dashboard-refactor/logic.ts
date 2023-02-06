@@ -1,6 +1,5 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
-import throttle from 'lodash/throttle'
 import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import * as utils from './search-results/util'
@@ -44,7 +43,8 @@ import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
-import ListsSidebar from './lists-sidebar'
+import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
+import { openPDFInViewer } from 'src/pdf/util'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -123,20 +123,15 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     getInitialState(): State {
-        let mode: State['mode'] = 'search'
-        if (isDuringInstall(this.options.location)) {
-            mode = 'onboarding'
-        } else if (
-            this.options.location.href.includes(MISSING_PDF_QUERY_PARAM)
-        ) {
-            mode = 'locate-pdf'
-            this.options.pdfViewerBG.openPdfViewerForNextPdf()
-        }
-
         return {
-            mode,
-            loadState: 'pristine',
             currentUser: null,
+            loadState: 'pristine',
+            mode: isDuringInstall(this.options.location)
+                ? 'onboarding'
+                : 'search',
+            showDropArea: this.options.location.href.includes(
+                MISSING_PDF_QUERY_PARAM,
+            ),
 
             modals: {
                 showLogin: false,
@@ -211,16 +206,22 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listData: {},
                 followedLists: {
                     loadingState: 'pristine',
-                    isExpanded: true,
+                    isExpanded: false,
                     allListIds: [],
-                    filteredListIds: [],
+                    filteredListIds: null,
+                },
+                joinedLists: {
+                    loadingState: 'pristine',
+                    isExpanded: false,
+                    allListIds: [],
+                    filteredListIds: null,
                 },
                 localLists: {
                     isAddInputShown: false,
                     loadingState: 'pristine',
                     isExpanded: true,
                     allListIds: [],
-                    filteredListIds: [],
+                    filteredListIds: null,
                 },
                 selectedListId: undefined,
                 showFeed: false,
@@ -240,17 +241,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         await loadInitial(this, async () => {
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
+            await this.runSearch(nextState)
             const localListsResult = await this.loadLocalListsData(nextState)
             nextState = localListsResult.nextState
-            await Promise.all([
-                this.loadRemoteListsData(
-                    nextState,
-                    localListsResult.remoteToLocalIdDict,
-                ),
-                this.getFeedActivityStatus(),
-                this.getInboxUnreadCount(),
-                this.runSearch(nextState),
-            ])
+            await this.loadRemoteListsData(
+                nextState,
+                localListsResult.remoteToLocalIdDict,
+            )
+            await this.loadJoinedListsData(nextState)
+            await this.getFeedActivityStatus()
+            await this.getInboxUnreadCount()
         })
     }
 
@@ -374,6 +374,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    private isMatch(value1, value2) {
+        return !value2.some((list) => list.remoteId === value1.remoteId)
+    }
+
     private async loadLocalListsData(previousState: State) {
         const { listsBG, contentShareBG } = this.options
 
@@ -388,15 +392,51 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             }),
             async () => {
-                let localLists = await listsBG.fetchAllLists({
+                let allLists = await listsBG.fetchAllLists({
                     limit: 1000,
                     skipMobileList: true,
                     includeDescriptions: true,
                 })
 
-                const localToRemoteIdDict = await contentShareBG.getRemoteListIds(
-                    { localListIds: localLists.map((list) => list.id) },
+                let joinedLists = await listsBG.fetchCollaborativeLists({
+                    limit: 1000,
+                })
+
+                // a list of all local lists that also have a remote list (could be joined or created)
+                let localToRemoteIdDict = await contentShareBG.getRemoteListIds(
+                    { localListIds: allLists.map((list) => list.id) },
                 )
+
+                // transform the localToRemoteIdDict into an array that can be filtered
+                let localToRemoteIdAsArray = [
+                    ...Object.entries(localToRemoteIdDict),
+                ].map(([localListId, remoteId]) => ({ localListId, remoteId }))
+
+                // check for all local entries that also have remoteentries, and cross check them with the joined lists, keep only the ones that are not in joined lists
+                const localListsWithoutJoinedStatusButMaybeShared = localToRemoteIdAsArray.filter(
+                    (item) => {
+                        return !joinedLists.some(
+                            (list) => list.remoteId === item.remoteId,
+                        )
+                    },
+                )
+
+                // get the locallists by filtering out all IDs that are in the filteredArray
+                let localListsNotJoinedButShared = allLists.filter((item) => {
+                    return localListsWithoutJoinedStatusButMaybeShared.some(
+                        (list) => parseInt(list.localListId) === item.id,
+                    )
+                })
+                let localListsNotShared = allLists.filter((item) => {
+                    return !localToRemoteIdAsArray.some(
+                        (list) => parseInt(list.localListId) === item.id,
+                    )
+                })
+
+                let localLists = [
+                    ...localListsNotShared,
+                    ...localListsNotJoinedButShared,
+                ]
 
                 const listIds: number[] = []
                 const listData: { [id: number]: ListData } = {}
@@ -417,11 +457,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return 0
                 })
 
-                for (const list of localLists) {
+                for (const list of allLists) {
                     const remoteId = localToRemoteIdDict[list.id]
                     if (remoteId) {
                         remoteToLocalIdDict[remoteId] = list.id
                     }
+                }
+
+                for (const list of localLists) {
+                    const remoteId = localToRemoteIdDict[list.id]
                     listIds.push(list.id)
                     listData[list.id] = {
                         remoteId,
@@ -435,6 +479,75 @@ export class DashboardLogic extends UILogic<State, Events> {
                 mutation.listsSidebar = {
                     listData: { $merge: listData },
                     localLists: {
+                        allListIds: { $set: listIds },
+                        filteredListIds: { $set: listIds },
+                    },
+                }
+                this.emitMutation(mutation)
+            },
+        )
+
+        return {
+            nextState: this.withMutation(previousState, mutation),
+            remoteToLocalIdDict,
+        }
+    }
+    private async loadJoinedListsData(previousState: State) {
+        const remoteToLocalIdDict: { [remoteId: string]: number } = {}
+        const mutation: UIMutation<State> = {}
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: {
+                    joinedLists: { loadingState: { $set: taskState } },
+                },
+            }),
+            async () => {
+                let joinedLists = await this.options.listsBG.fetchCollaborativeLists(
+                    {
+                        skip: 0,
+                        limit: 120,
+                    },
+                )
+
+                // const localToRemoteIdDict = await contentShareBG.getRemoteListIds(
+                //     { localListIds: joinedLists.map((list) => list.id) },
+                // )
+
+                const listIds: number[] = []
+                const listData: { [id: number]: ListData } = {}
+
+                joinedLists = joinedLists.sort((listDataA, listDataB) => {
+                    if (
+                        listDataA.name.toLowerCase() <
+                        listDataB.name.toLowerCase()
+                    ) {
+                        return -1
+                    }
+                    if (
+                        listDataA.name.toLowerCase() >
+                        listDataB.name.toLowerCase()
+                    ) {
+                        return 1
+                    }
+                    return 0
+                })
+
+                for (const list of joinedLists) {
+                    listIds.push(list.id)
+                    listData[list.id] = {
+                        remoteId: list.remoteId,
+                        id: list.id,
+                        name: list.name,
+                        isOwnedList: false,
+                        description: list.description,
+                    }
+                }
+
+                mutation.listsSidebar = {
+                    listData: { $merge: listData },
+                    joinedLists: {
                         allListIds: { $set: listIds },
                         filteredListIds: { $set: listIds },
                     },
@@ -468,6 +581,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 const followedLists = await listsBG.fetchAllFollowedLists({
                     limit: 1000,
                 })
+
                 const followedListIds: number[] = []
                 const listData: { [id: number]: ListData } = {}
 
@@ -476,7 +590,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         remoteToLocalIdDict[list.remoteId] ?? list.id
 
                     // Joined lists appear in "Local lists" section, so don't include them here
-                    if (!remoteToLocalIdDict[list.remoteId]) {
+                    if (remoteToLocalIdDict[list.remoteId] == null) {
                         followedListIds.push(localId)
                     }
 
@@ -582,6 +696,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     } =
                         previousState.searchResults.searchType === 'pages' ||
                         previousState.searchResults.searchType === 'videos' ||
+                        previousState.searchResults.searchType === 'events' ||
                         previousState.searchResults.searchType === 'twitter'
                             ? await this.searchPages(searchState)
                             : previousState.searchResults.searchType === 'notes'
@@ -666,6 +781,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         const result = await this.options.searchBG.searchPages(
             stateToSearchParams(state),
         )
+
+        if (state.searchResults.searchType === 'events') {
+            result.docs = result.docs.filter((item) => {
+                return eventProviderUrls.some((items) =>
+                    item.fullUrl.includes(items),
+                )
+            })
+        }
 
         return {
             ...utils.pageSearchResultToState(result),
@@ -1148,14 +1271,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                     )
                 }
 
-                await this.options.searchBG.delPages([pageId])
-
                 this.emitMutation({
                     searchResults: resultsMutation,
                     modals: {
                         deletingPageArgs: { $set: undefined },
                     },
                 })
+                await this.options.searchBG.delPages([pageId])
             },
         )
     }
@@ -1527,7 +1649,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         const { annotationsBG, contentShareBG } = this.options
-        const pageData = previousState.searchResults.pageData.byId[event.pageId]
         const formState =
             previousState.searchResults.results[event.day].pages.byId[
                 event.pageId
@@ -1547,6 +1668,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     annotationData: {
                         fullPageUrl: event.fullPageUrl,
                         comment: formState.inputValue,
+                        localListIds: formState.lists,
                     },
                     shareOpts: {
                         shouldShare: event.shouldShare,
@@ -1560,21 +1682,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
                 const newNoteId = await savePromise
 
-                if (formState.tags.length) {
-                    await annotationsBG.updateAnnotationTags({
-                        url: newNoteId,
-                        tags: formState.tags,
-                    })
-                }
-                const newNoteListIds: number[] = []
-                if (formState.lists.length) {
-                    await contentShareBG.shareAnnotationToSomeLists({
-                        annotationUrl: newNoteId,
-                        localListIds: formState.lists,
-                    })
-                    newNoteListIds.push(...formState.lists)
-                }
-
                 this.emitMutation({
                     searchResults: {
                         noteData: {
@@ -1587,7 +1694,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         displayTime: Date.now(),
                                         comment: formState.inputValue,
                                         tags: formState.tags,
-                                        lists: newNoteListIds,
+                                        lists: formState.lists ?? [],
                                         pageUrl: event.pageId,
                                         isShared: event.shouldShare,
                                         isBulkShareProtected: !!event.isProtected,
@@ -2079,10 +2186,31 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const note = previousState.searchResults.noteData.byId[event.noteId]
-        await this.options.annotationsBG.goToAnnotationFromSidebar({
-            url: note.pageUrl,
-            annotation: note,
+        const cachedAnnotation = this.options.annotationsCache.getAnnotationByLocalId(
+            event.noteId,
+        )
+        const pageData =
+            previousState.searchResults.pageData.byId[
+                cachedAnnotation.normalizedPageUrl
+            ]
+        if (!cachedAnnotation) {
+            console.warn(
+                'Tried to go to highlight from dashboard but could not find associated annotation in cache:',
+                event,
+            )
+            return
+        }
+        if (!pageData?.fullUrl) {
+            console.warn(
+                'Tried to go to highlight from dashboard but could not find associated page data:',
+                event,
+                previousState.searchResults.pageData,
+            )
+        }
+
+        await this.options.contentScriptsBG.goToAnnotationFromDashboardSidebar({
+            fullPageUrl: pageData.fullUrl,
+            annotationCacheId: cachedAnnotation.unifiedId,
         })
     }
 
@@ -2674,9 +2802,30 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchQuery: { $set: event.query },
                 localLists: {
                     filteredListIds: { $set: filteredListIds.localListIds },
+                    isExpanded: {
+                        $set:
+                            filteredListIds.localListIds.length > 0
+                                ? true
+                                : false,
+                    },
                 },
                 followedLists: {
                     filteredListIds: { $set: filteredListIds.followedListIds },
+                    isExpanded: {
+                        $set:
+                            filteredListIds.followedListIds.length > 0
+                                ? true
+                                : false,
+                    },
+                },
+                joinedLists: {
+                    filteredListIds: { $set: filteredListIds.joinedListIds },
+                    isExpanded: {
+                        $set:
+                            filteredListIds.joinedListIds.length > 0
+                                ? true
+                                : false,
+                    },
                 },
             },
         })
@@ -2687,7 +2836,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         this.emitMutation({
             listsSidebar: {
-                localLists: { isAddInputShown: { $set: event.isShown } },
+                localLists: {
+                    isAddInputShown: { $set: event.isShown },
+                    isExpanded: { $set: event.isShown && true },
+                },
             },
         })
     }
@@ -2736,9 +2888,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listCreateState: { $set: taskState } },
             }),
             async () => {
-                const listId = await this.options.listsBG.createCustomList({
-                    name: newListName,
-                })
+                const listId = Date.now()
 
                 this.emitMutation({
                     listsSidebar: {
@@ -2762,6 +2912,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     },
                 })
+                await this.options.listsBG.createCustomList({
+                    name: newListName,
+                    id: listId,
+                })
             },
         )
     }
@@ -2771,7 +2925,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         this.emitMutation({
             listsSidebar: {
-                localLists: { isExpanded: { $set: event.isExpanded } },
+                localLists: {
+                    isExpanded: { $set: event.isExpanded },
+                    isAddInputShown: { $set: !event.isExpanded && false },
+                },
             },
         })
     }
@@ -2782,6 +2939,15 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             listsSidebar: {
                 followedLists: { isExpanded: { $set: event.isExpanded } },
+            },
+        })
+    }
+    setJoinedListsExpanded: EventHandler<'setJoinedListsExpanded'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                joinedLists: { isExpanded: { $set: event.isExpanded } },
             },
         })
     }
@@ -2870,6 +3036,57 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
+    clickPageResult: EventHandler<'clickPageResult'> = async ({
+        event,
+        previousState,
+    }) => {
+        const pageData = previousState.searchResults.pageData.byId[event.pageId]
+        if (!pageData || pageData.fullPdfUrl == null) {
+            return
+        }
+
+        event.synthEvent.preventDefault()
+
+        if (pageData.fullPdfUrl!.startsWith('blob:')) {
+            // Show dropzone for local-only PDFs
+            this.emitMutation({ showDropArea: { $set: true } })
+        } else {
+            await openPDFInViewer(pageData.fullPdfUrl!, {
+                tabsAPI: this.options.tabsAPI,
+                runtimeAPI: this.options.runtimeAPI,
+            })
+        }
+    }
+
+    dropPdfFile: EventHandler<'dropPdfFile'> = async ({ event }) => {
+        event.preventDefault()
+        this.emitMutation({ showDropArea: { $set: false } })
+        const firstItem = event.dataTransfer?.items?.[0]
+        if (!firstItem) {
+            return
+        }
+        try {
+            const file = firstItem.getAsFile()
+            const pdfObjectUrl = URL.createObjectURL(file)
+
+            await openPDFInViewer(pdfObjectUrl, {
+                tabsAPI: this.options.tabsAPI,
+                runtimeAPI: this.options.runtimeAPI,
+            })
+        } catch (err) {}
+    }
+
+    dragFile: EventHandler<'dragFile'> = async ({ event }) => {
+        const firstItem = event?.dataTransfer?.items?.[0]
+        this.emitMutation({
+            showDropArea: {
+                $set:
+                    firstItem?.kind === 'file' &&
+                    firstItem?.type === 'application/pdf',
+            },
+        })
+    }
+
     setListRemoteId: EventHandler<'setListRemoteId'> = async ({
         event,
         previousState,
@@ -2945,7 +3162,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const { editingListId: listId } = previousState.listsSidebar
+        let listId
+        if (event.listId == null) {
+            const { editingListId: listId } = previousState.listsSidebar
+        } else {
+            listId = event.listId
+        }
 
         if (!listId) {
             throw new Error('No list ID is set for editing')
@@ -2997,7 +3219,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const { editingListId: listId } = previousState.listsSidebar
+        let listId
+        if (event.listId == null) {
+            const { editingListId: listId } = previousState.listsSidebar
+        } else {
+            listId = event.listId
+        }
 
         if (!listId) {
             throw new Error('No list ID is set for editing')
@@ -3007,7 +3234,15 @@ export class DashboardLogic extends UILogic<State, Events> {
             id: listId,
         })
 
-        const newName = previousState.listsSidebar.listData[listId].newName
+        // const oldName = previousState.listsSidebar.listData[listId].name
+
+        let newName
+        if (event.value) {
+            newName = event.value
+        } else {
+            newName = previousState.listsSidebar.listData[listId].newName
+        }
+
         if (newName === oldName) {
             return
         }
@@ -3043,12 +3278,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listEditState: { $set: taskState } },
             }),
             async () => {
-                await this.options.listsBG.updateListName({
-                    id: listId,
-                    oldName,
-                    newName,
-                })
-
                 this.emitMutation({
                     listsSidebar: {
                         listData: {
@@ -3061,6 +3290,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                             $set: null,
                         },
                     },
+                })
+                await this.options.listsBG.updateListName({
+                    id: listId,
+                    oldName,
+                    newName,
                 })
             },
         )
@@ -3254,7 +3488,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        this.options.openFeed()
+        // this.options.openFeed()
 
         if (previousState.listsSidebar.hasFeedActivity) {
             await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
@@ -3284,12 +3518,13 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         if (previousState.listsSidebar.hasFeedActivity) {
-            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
             this.emitMutation({
                 listsSidebar: {
                     hasFeedActivity: { $set: false },
                 },
             })
+            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
+            await this.options.activityIndicatorBG.markActivitiesAsSeen()
         }
     }
     /* END - lists sidebar event handlers */

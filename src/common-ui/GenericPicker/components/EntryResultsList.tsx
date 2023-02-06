@@ -42,14 +42,14 @@ export default class EntryResultsList extends React.Component<Props> {
 const RecentItemsNotif = styled.div`
     padding: 5px 10px;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.subText};
+    color: ${(props) => props.theme.colors.greyScale4};
 `
 
 const StyledContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin: 0 5px;
+    margin: 5px 0px 0 0px;
     border-radius: 6px;
     flex-direction: column;
 
@@ -60,7 +60,7 @@ const StyledContainer = styled.div`
 
 const FilterHelp = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     padding: 6px 2px;
     ${StyledIconBase} {
         stroke-width: 2px;

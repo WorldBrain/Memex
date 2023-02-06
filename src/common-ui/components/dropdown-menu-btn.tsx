@@ -99,7 +99,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                     {this.state.selected === i && (
                         <Icon
                             filePath="check"
-                            color="purple"
+                            color="prime1"
                             heightAndWidth="18px"
                             hoverOff
                         />
@@ -135,7 +135,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
 }
 
 const MenuItem = styled.div<{ isSelected }>`
-    background: ${(props) => props.isSelected && props.theme.colors.darkhover};
+    background: ${(props) => props.isSelected && props.theme.colors.greyScale2};
     padding: 10px 10px;
     line-height: 20px;
     width: fill-available;
@@ -147,7 +147,7 @@ const MenuItem = styled.div<{ isSelected }>`
     border-radius: 6px;
     margin: 0 10px;
     cursor: ${(props) => !props.isSelected && 'pointer'};
-    width: 142px;
+    width: 210px;
 
     &:first-child {
         margin-top: 10px;
@@ -163,7 +163,7 @@ const MenuItem = styled.div<{ isSelected }>`
             cursor: pointer;
 
             &:hover {
-                outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+                outline: 1px solid ${(props) => props.theme.colors.greyScale3};
             }
 
             & * {
@@ -179,7 +179,7 @@ const MenuTitle = styled.div`
 `
 
 const MenuItemName = styled.div<{ isSelected }>`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     display: flex;
     align-items: center;
@@ -199,7 +199,7 @@ const Menu = styled.div<{ leftPosition: string }>`
     width: max-content;
     list-style: none;
     border-radius: 12px;
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
+    background: ${(props) => props.theme.colors.greyScale1};
     width: ${(props) => props.width ?? 'max-content'};
     flex-direction: column;
     z-index: 1000;

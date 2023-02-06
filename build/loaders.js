@@ -90,7 +90,7 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
     const styleLoader = injectStyles ? injectStylesLoader : extractStylesLoader
 
     const main = {
-        test: /\.(j|t)sx?$/,
+        test: /\.c?(j|t)sx?$/,
         include: [
             path.resolve(context, './src'),
             ...Object.values(externalTsModules).map((mod) =>

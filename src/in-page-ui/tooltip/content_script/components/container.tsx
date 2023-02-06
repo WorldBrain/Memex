@@ -138,21 +138,20 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
     private createAnnotation: React.MouseEventHandler = async (e) => {
         e.preventDefault()
         e.stopPropagation()
-        await this.props.createAnnotation(e.shiftKey)
 
-        // Remove onboarding select option notification if it's present
-        await conditionallyRemoveOnboardingSelectOption(
-            STAGES.annotation.annotationCreated,
-        )
-
-        this.props.inPageUI.hideTooltip()
-        // quick hack, to prevent the tooltip from popping again
-        // setTimeout(() => {
-        //     this.setState({
-        //         tooltipState: 'pristine',
-        //     })
-        //     this.props.inPageUI.hideTooltip()
-        // }, 100)
+        try {
+            await this.props.createAnnotation(e.shiftKey)
+            // Remove onboarding select option notification if it's present
+            await conditionallyRemoveOnboardingSelectOption(
+                STAGES.annotation.annotationCreated,
+            )
+        } catch (err) {
+            throw err
+        } finally {
+            window.getSelection().empty()
+            // this.setState({ tooltipState: 'pristine' })
+            this.props.inPageUI.hideTooltip()
+        }
     }
 
     private createHighlight: React.MouseEventHandler = async (e) => {
@@ -162,13 +161,22 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         } catch (err) {
             throw err
         } finally {
+            window.getSelection().empty()
             // this.setState({ tooltipState: 'pristine' })
             this.props.inPageUI.hideTooltip()
         }
     }
 
     private addtoSpace: React.MouseEventHandler = async (e) => {
-        await this.props.createAnnotation(false, true)
+        try {
+            await this.props.createAnnotation(false, true)
+        } catch (err) {
+            throw err
+        } finally {
+            // this.setState({ tooltipState: 'pristine' })
+            window.getSelection().empty()
+            this.props.inPageUI.hideTooltip()
+        }
     }
 
     openSettings = (event) => {

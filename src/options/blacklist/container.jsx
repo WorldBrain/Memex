@@ -194,13 +194,13 @@ export default connect(mapStateToProps, mapDispatchToProps)(BlacklistContainer)
 
 const SectionTitle = styled.div`
     font-size: 16px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: bold;
 `
 
 const InfoText = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 300;
     margin-bottom: 10px;
 `

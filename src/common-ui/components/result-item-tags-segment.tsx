@@ -48,7 +48,7 @@ export default function TagsSegment({
                     <Icon
                         filePath={icons.plus}
                         heightAndWidth="10px"
-                        color={'purple'}
+                        color={'prime1'}
                         hoverOff
                     />
                     Add Tags
@@ -63,7 +63,7 @@ export default function TagsSegment({
                 <Icon
                     filePath={icons.plus}
                     heightAndWidth="10px"
-                    color={'purple'}
+                    color={'prime1'}
                     hoverOff
                 />
             </EditIconContainer>
@@ -94,7 +94,7 @@ const Container = styled.div`
     min-height: 24px;
     height: fit-content;
     grid-auto-flow: column;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 const TagsContainer = styled.div`
@@ -104,7 +104,7 @@ const TagsContainer = styled.div`
 
 const TagPill = styled.div`
     background-color: ${(props) => props.theme.colors.backgroundHighlight};
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 12px;
@@ -142,7 +142,7 @@ const EditIconContainerWithText = styled.div`
     grid-gap: 5px;
     font-size: 12px;
     opacity: 0.8;
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
 
     & * {
         cursor: pointer;
@@ -153,7 +153,7 @@ const EditIcon = styled.div`
     outline: none;
     width: 10px;
     height: 10px;
-    background-color: ${(props) => props.theme.colors.purple};
+    background-color: ${(props) => props.theme.colors.prime1};
     mask-image: url(${icons.plus});
     mask-position: center;
     mask-repeat: no-repeat;

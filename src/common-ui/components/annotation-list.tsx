@@ -8,9 +8,6 @@ import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
-import AnnotationEditable from 'src/annotations/components/AnnotationEditable'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import { PageNotesCopyPaster } from 'src/copy-paster'
 import {
     contentSharing,
     auth,
@@ -23,11 +20,9 @@ import type {
     EditForm,
     EditForms,
 } from 'src/sidebar/annotations-sidebar/containers/types'
-import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
-import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { linkStreams } from 'openpgp'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
@@ -76,9 +71,6 @@ interface State {
     /** Received annotations are stored and manipulated through edit/delete */
     annotations: Annotation[]
     editForms: EditForms
-    annotationModes: {
-        [annotationUrl: string]: AnnotationMode
-    }
     annotationsSharingInfo: SharingInfo
     sharingAccess: AnnotationSharingAccess
 }
@@ -105,10 +97,6 @@ class AnnotationList extends Component<Props, State> {
                     tags: curr.tags,
                 },
             }),
-            {},
-        ),
-        annotationModes: this.props.annotations.reduce(
-            (acc, curr) => ({ ...acc, [curr.url]: 'default' }),
             {},
         ),
         sharingAccess: 'sharing-allowed',

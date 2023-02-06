@@ -1,7 +1,10 @@
-import TypedEventEmitter from 'typed-emitter'
-import { Anchor } from 'src/highlighting/types'
-import { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
-import { Annotation } from 'src/highlighting/ui/types/api'
+import type TypedEventEmitter from 'typed-emitter'
+import type { Anchor } from 'src/highlighting/types'
+import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
+import type {
+    UnifiedAnnotation,
+    UnifiedList,
+} from 'src/annotations/cache/types'
 
 export type InPageUISidebarAction =
     | 'comment'
@@ -10,6 +13,8 @@ export type InPageUISidebarAction =
     | 'show_annotation'
     | 'set_sharing_access'
     | 'show_shared_spaces'
+    | 'selected_list_mode_from_web_ui'
+
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'
 export type InPageUIComponentShowState = {
@@ -23,11 +28,14 @@ export interface IncomingAnnotationData {
     tags?: string[]
 }
 
+// TODO: Improve this type so possible fields depend on `action` type
 export interface SidebarActionOptions {
     action: InPageUISidebarAction
     anchor?: Anchor
-    annotation?: Annotation
-    annotationUrl?: string
+    annotationLocalId?: string
+    /** Set this for 'selected_list_mode_from_web_ui' */
+    sharedListId?: string
+    annotationCacheId?: UnifiedAnnotation['unifiedId']
     annotationData?: IncomingAnnotationData
     annotationSharingAccess?: AnnotationSharingAccess
 }
@@ -56,6 +64,7 @@ export interface ShouldSetUpOptions {
 export interface SharedInPageUIInterface {
     events: TypedEventEmitter<SharedInPageUIEvents>
     componentsShown: InPageUIComponentShowState
+    selectedList: UnifiedList['unifiedId'] | null
 
     // Ribbon
     showRibbon(options?: { action?: InPageUIRibbonAction }): Promise<void>

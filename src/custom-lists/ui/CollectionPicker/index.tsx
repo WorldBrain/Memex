@@ -1,5 +1,5 @@
 import React from 'react'
-import styled, { ThemeProvider } from 'styled-components'
+import styled, { ThemeProvider, css } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import ListPickerLogic, {
@@ -25,6 +25,8 @@ import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 
 class SpacePicker extends StatefulUIElement<
     SpacePickerDependencies,
@@ -37,11 +39,14 @@ class SpacePicker extends StatefulUIElement<
     > = {
         spacesBG: collections,
         contentSharingBG: contentSharing,
-        createNewEntry: async (name) =>
+        createNewEntry: async (name, id?) =>
             collections.createCustomList({
                 name,
+                id,
             }),
     }
+
+    static MOD_KEY = getKeyName({ key: 'mod' })
 
     private displayListRef = React.createRef<HTMLDivElement>()
     private contextMenuRef = React.createRef<SpaceContextMenu>()
@@ -52,7 +57,10 @@ class SpacePicker extends StatefulUIElement<
     }
 
     private get shouldShowAddNewEntry(): boolean {
-        if (this.props.filterMode) {
+        if (
+            this.props.filterMode ||
+            this.state.loadingSuggestions === 'running'
+        ) {
             return false
         }
 
@@ -120,6 +128,9 @@ class SpacePicker extends StatefulUIElement<
     handleKeyPress = (event: KeyboardEvent) => {
         this.processEvent('keyPress', { event })
     }
+    handleKeyUp = (event: KeyboardEvent) => {
+        this.processEvent('onKeyUp', { event })
+    }
 
     renderListRow = (entry: SpaceDisplayEntry, index: number) => (
         <EntryRowContainer key={entry.localId}>
@@ -177,14 +188,14 @@ class SpacePicker extends StatefulUIElement<
         if (this.state.newEntryName.length > 0 && !this.props.filterMode) {
             return (
                 <EmptyListsView>
-                    <SectionCircle>
+                    <IconBox heightAndWidth="30px">
                         <Icon
                             filePath={icons.collectionsEmpty}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
-                    </SectionCircle>
+                    </IconBox>
                     <SectionTitle>No Space found</SectionTitle>
                 </EmptyListsView>
             )
@@ -196,27 +207,27 @@ class SpacePicker extends StatefulUIElement<
         ) {
             return (
                 <EmptyListsView>
-                    <SectionCircle>
+                    <IconBox heightAndWidth="30px">
                         <Icon
                             filePath={icons.collectionsEmpty}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
-                    </SectionCircle>
+                    </IconBox>
                     <SectionTitle>No Space found</SectionTitle>
                 </EmptyListsView>
             )
         }
 
-        if (this.state.query === '') {
+        if (this.state.query === '' && this.state.displayEntries.length === 0) {
             return (
                 <EmptyListsView>
                     <SectionCircle>
                         <Icon
                             filePath={icons.collectionsEmpty}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -337,28 +348,33 @@ class SpacePicker extends StatefulUIElement<
                     </>
                 ) : (
                     <PickerContainer>
-                        <PickerSearchInput
-                            searchInputPlaceholder={
-                                this.props.searchInputPlaceholder ??
-                                'Search & Add Spaces'
-                            }
-                            showPlaceholder={
-                                this.state.selectedListIds.length === 0
-                            }
-                            searchInputRef={this.handleSetSearchInputRef}
-                            onChange={this.handleSearchInputChanged}
-                            onKeyPress={this.handleKeyPress}
-                            value={this.state.query}
-                            loading={
-                                this.state.loadingQueryResults === 'running'
-                            }
-                            before={
-                                <EntrySelectedList
-                                    entries={this.selectedDisplayEntries}
-                                    onPress={this.handleSelectedListPress}
-                                />
-                            }
-                        />
+                        <SearchContainer>
+                            <PickerSearchInput
+                                searchInputPlaceholder={
+                                    this.props.searchInputPlaceholder ??
+                                    'Search & Add Spaces'
+                                }
+                                showPlaceholder={
+                                    this.state.selectedListIds.length === 0
+                                }
+                                searchInputRef={this.handleSetSearchInputRef}
+                                onChange={this.handleSearchInputChanged}
+                                onKeyDown={this.handleKeyPress}
+                                onKeyUp={this.handleKeyUp}
+                                value={this.state.query}
+                                loading={
+                                    this.state.loadingQueryResults === 'running'
+                                }
+                                before={
+                                    <EntrySelectedList
+                                        entries={this.selectedDisplayEntries}
+                                        onPress={this.handleSelectedListPress}
+                                    />
+                                }
+                                autoFocus={this.props.autoFocus}
+                            />
+                        </SearchContainer>
+
                         <EntryList ref={this.displayListRef}>
                             {!(
                                 (this.state.query === '' &&
@@ -377,6 +393,8 @@ class SpacePicker extends StatefulUIElement<
                             <AddNewEntry
                                 resultItem={this.state.newEntryName}
                                 onPress={this.handleNewListPress}
+                                resultsCount={this.state.displayEntries.length}
+                                commandKey={SpacePicker.MOD_KEY}
                             />
                         )}
                     </PickerContainer>
@@ -389,9 +407,9 @@ class SpacePicker extends StatefulUIElement<
         return (
             <ThemeProvider theme={Colors.lightTheme}>
                 <OuterSearchBox
-                    onKeyPress={this.handleKeyPress}
                     onClick={this.handleOuterSearchBoxClick}
                     width={this.props.width}
+                    context={this.props.context}
                 >
                     {this.renderMainContent()}
                 </OuterSearchBox>
@@ -400,16 +418,22 @@ class SpacePicker extends StatefulUIElement<
     }
 }
 
+const SearchContainer = styled.div`
+    margin: 5px 5px 0px 5px;
+`
+
 const PrimaryActionBox = styled.div`
-    padding: 10px 0px 0px 10px;
+    padding: 2px 0px 5px 0px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 const EntryListHeader = styled.div`
     padding: 5px 5px;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale4};
     font-weight: 400;
-    margin-bottom: -2px;
+    margin-bottom: 5px;
 `
 
 const EntryList = styled.div`
@@ -426,7 +450,7 @@ const EntryList = styled.div`
 `
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.darkhover};
+    background: ${(props) => props.theme.colors.greyScale2};
     border: 1px solid ${(props) => props.theme.colors.greyScale6};
     border-radius: 8px;
     height: 30px;
@@ -437,16 +461,16 @@ const SectionCircle = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 300;
     text-align: center;
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 400;
     margin-top: 10px;
 `
 
@@ -461,6 +485,14 @@ const LoadingBox = styled.div`
 const OuterSearchBox = styled.div`
     border-radius: 12px;
     width: ${(props) => (props.width ? props.width : '300px')};
+    padding: 0 5px;
+    padding-top: 5px;
+
+    ${(props) =>
+        props.context === 'popup' &&
+        css`
+            width: fill-available;
+        `};
 `
 const PickerContainer = styled.div`
     border-radius: 12px;

@@ -1,4 +1,5 @@
 import Storex from '@worldbrain/storex'
+import fromPairs from 'lodash/fromPairs'
 import { Windows, Tabs, Storage } from 'webextension-polyfill'
 import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
 
@@ -77,8 +78,12 @@ export default class CustomListBackground {
             fetchCollaborativeLists: this.fetchCollaborativeLists,
             fetchListById: this.fetchListById,
             fetchListByName: this.fetchListByName,
+            fetchAnnotationRefsForRemoteListsOnPage: this
+                .fetchAnnotationRefsForRemoteListsOnPage,
             fetchFollowedListsWithAnnotations: this
                 .fetchFollowedListsWithAnnotations,
+            fetchSharedListDataWithPageAnnotations: this
+                .fetchSharedListDataWithPageAnnotations,
             fetchSharedListDataWithOwnership: this
                 .fetchSharedListDataWithOwnership,
             fetchListPagesByUrl: this.fetchListPagesByUrl,
@@ -91,6 +96,7 @@ export default class CustomListBackground {
             addOpenTabsToList: this.addOpenTabsToList,
             removeOpenTabsFromList: this.removeOpenTabsFromList,
             updateListForPage: this.updateListForPage,
+            fetchListDescriptions: this.fetchListDescriptions,
             updateListDescription: this.updateListDescription,
             getInboxUnreadCount: this.getInboxUnreadCount,
         }
@@ -182,6 +188,30 @@ export default class CustomListBackground {
         )
     }
 
+    fetchAnnotationRefsForRemoteListsOnPage: RemoteCollectionsInterface['fetchAnnotationRefsForRemoteListsOnPage'] = async ({
+        sharedListIds,
+        normalizedPageUrl,
+    }) => {
+        const { contentSharing } = await this.options.getServerStorage()
+
+        const listEntriesByPageByList = await contentSharing.getAnnotationListEntriesForListsOnPage(
+            {
+                listReferences: sharedListIds.map((id) => ({
+                    type: 'shared-list-reference',
+                    id,
+                })),
+                normalizedPageUrl,
+            },
+        )
+
+        return fromPairs(
+            Object.entries(listEntriesByPageByList).map(([listId, entries]) => [
+                listId,
+                entries.map((entry) => entry.sharedAnnotation),
+            ]),
+        )
+    }
+
     fetchFollowedListsWithAnnotations: RemoteCollectionsInterface['fetchFollowedListsWithAnnotations'] = async ({
         normalizedPageUrl,
     }) => {
@@ -252,6 +282,7 @@ export default class CustomListBackground {
         return sharedLists.map((list) => ({
             id: list.reference.id as string,
             name: list.title,
+            creatorReference: list.creator,
             sharedAnnotationReferences: annotListEntriesByList
                 .get(list.reference.id)
                 .map((entry) => entry.sharedAnnotation),
@@ -288,6 +319,46 @@ export default class CustomListBackground {
                 isFollowed: true,
                 createdAt: new Date(sharedList.createdWhen),
             }))
+    }
+
+    fetchSharedListDataWithPageAnnotations: RemoteCollectionsInterface['fetchSharedListDataWithPageAnnotations'] = async ({
+        normalizedPageUrl,
+        remoteListId,
+    }) => {
+        const { contentSharing } = await this.options.getServerStorage()
+        const listReference: SharedListReference = {
+            id: remoteListId,
+            type: 'shared-list-reference',
+        }
+        const sharedList = await contentSharing.getListByReference(
+            listReference,
+        )
+        if (sharedList == null) {
+            return null
+        }
+
+        const {
+            [normalizedPageUrl]: annotations,
+        } = await contentSharing.getAnnotationsForPagesInList({
+            listReference,
+            normalizedPageUrls: [normalizedPageUrl],
+        })
+
+        if (!annotations) {
+            return null
+        }
+
+        return {
+            ...sharedList,
+            sharedAnnotations: annotations.map(({ annotation }) => ({
+                ...annotation,
+                creator: { type: 'user-reference', id: annotation.creator },
+                reference: {
+                    type: 'shared-annotation-reference',
+                    id: annotation.id,
+                },
+            })),
+        }
     }
 
     fetchSharedListDataWithOwnership: RemoteCollectionsInterface['fetchSharedListDataWithOwnership'] = async ({
@@ -369,8 +440,9 @@ export default class CustomListBackground {
 
         const missingEntries = new Map<string, number>()
         for (const name of missing) {
-            const id = await this.createCustomList({ name })
+            const id = Date.now()
             missingEntries.set(name, id)
+            await this.createCustomList({ name, id })
         }
 
         const listIds = new Map([...existingLists, ...missingEntries])
@@ -666,6 +738,18 @@ export default class CustomListBackground {
                     pageUrl: normalizeUrl(tab.url),
                 }),
             ),
+        )
+    }
+
+    fetchListDescriptions: RemoteCollectionsInterface['fetchListDescriptions'] = async ({
+        listIds,
+    }) => {
+        const descriptions = await this.storage.fetchListDescriptionsByLists(
+            listIds,
+        )
+        return descriptions.reduce(
+            (acc, curr) => ({ ...acc, [curr.listId]: curr.description }),
+            {},
         )
     }
 

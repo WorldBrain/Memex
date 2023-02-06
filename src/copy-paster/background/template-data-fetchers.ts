@@ -18,6 +18,7 @@ import type {
 } from 'src/content-sharing/background/types'
 import type { Visit, Bookmark, Tag, Page } from 'src/search'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
 
 export function getTemplateDataFetchers({
     storageManager,
@@ -119,13 +120,7 @@ export function getTemplateDataFetchers({
                 .collection('annotations')
                 .findObjects({ url: { $in: annotationUrls } })
 
-            notes.sort(
-                (a, b) =>
-                    a.selector.descriptor.content[1].start -
-                    b.selector.descriptor.content[1].start,
-            )
-
-            return notes.reduce(
+            return notes.sort(sortByPagePosition).reduce(
                 (acc, note) => ({
                     ...acc,
                     [note.url]: {
@@ -144,13 +139,7 @@ export function getTemplateDataFetchers({
                 .collection('annotations')
                 .findObjects({ pageUrl: { $in: normalizedPageUrls } })
 
-            notes.sort(
-                (a, b) =>
-                    a.selector.descriptor.content[1].start -
-                    b.selector.descriptor.content[1].start,
-            )
-
-            return notes.reduce(
+            return notes.sort(sortByPagePosition).reduce(
                 (acc, note) => ({
                     ...acc,
                     [note.pageUrl]: [...(acc[note.pageUrl] ?? []), note.url],

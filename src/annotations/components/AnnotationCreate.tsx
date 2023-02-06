@@ -24,6 +24,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 interface State {
     isTagPickerShown: boolean
@@ -36,7 +37,6 @@ interface State {
 export interface AnnotationCreateEventProps {
     onSave: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
     onCancel: () => void
-    onTagsUpdate?: (tags: string[]) => void
     onCommentChange: (text: string) => void
     getListDetailsById: ListDetailsGetter
     onTagsHover?: React.MouseEventHandler
@@ -87,7 +87,7 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private markdownbuttonRef = createRef<HTMLElement>()
-    private spacePickerButtonRef = createRef<HTMLElement>()
+    private spacePickerButtonRef = createRef<HTMLDivElement>()
 
     private editor: MemexEditorInstance
 
@@ -108,7 +108,7 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     private get displayLists(): Array<{
         id: number
-        name: string
+        name: string | JSX.Element
         isShared: boolean
     }> {
         return this.props.lists.map((id) => ({
@@ -242,27 +242,6 @@ export class AnnotationCreate extends React.Component<Props, State>
         )
     }
 
-    private renderMarkdownHelpButton() {
-        if (!this.state.toggleShowTutorial) {
-            return
-        }
-
-        return (
-            <PopoutBox
-                targetElementRef={this.markdownbuttonRef.current}
-                placement={'bottom-start'}
-                offsetX={10}
-                closeComponent={() => this.toggleShowTutorial()}
-                width={'440px'}
-            >
-                <QuickTutorial
-                    markdownHelpOnTop={true}
-                    getKeyboardShortcutsState={getKeyboardShortcutsState}
-                />
-            </PopoutBox>
-        )
-    }
-
     private renderActionButtons() {
         // const shareIconData = getShareButtonData(
         //     isShared,
@@ -273,17 +252,6 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <DefaultFooterStyled>
                 <BtnContainerStyled>
-                    <MarkdownButtonContainer
-                        onClick={() => this.toggleShowTutorial()}
-                        ref={this.markdownbuttonRef}
-                    >
-                        Formatting
-                        <Icon
-                            filePath={icons.helpIcon}
-                            heightAndWidth={'20px'}
-                            hoverOff
-                        />
-                    </MarkdownButtonContainer>
                     <SaveCancelArea>
                         <TooltipBox
                             tooltipText="Cancel Edit (esc)"
@@ -292,7 +260,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             <Icon
                                 onClick={this.handleCancel}
                                 icon={icons.removeX}
-                                color={'normalText'}
+                                color={'white'}
                                 heightAndWidth="20px"
                             />
                         </TooltipBox>
@@ -303,7 +271,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                         />
                     </SaveCancelArea>
                 </BtnContainerStyled>
-                {this.renderMarkdownHelpButton()}
             </DefaultFooterStyled>
         )
     }
@@ -318,7 +285,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <>
                 <TextBoxContainerStyled>
-                    <EditorContainer vertical="10px">
+                    <EditorContainer>
                         {this.state.onEditClick ? (
                             <MemexEditor
                                 onKeyDown={this.handleInputKeyDown}
@@ -333,7 +300,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     this.props.autoFocus ||
                                     this.state.onEditClick
                                 }
-                                placeholder={`Add private note.\n Save with ${AnnotationCreate.MOD_KEY}+enter (+shift to share)`}
+                                placeholder={`Write a note...`}
                                 isRibbonCommentBox={
                                     this.props.isRibbonCommentBox
                                 }
@@ -348,7 +315,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     })
                                 }
                             >
-                                Add private note (share with 'shift + enter')
+                                Write a note...
                             </EditorDummy>
                         )}
                     </EditorContainer>
@@ -384,11 +351,11 @@ const EditorContainer = styled(Margin)`
     border-radius: 5px;
 
     &:focus-within {
-        background-color: ${(props) => props.theme.colors.darkhover};
+        background-color: ${(props) => props.theme.colors.greyScale2};
         outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     }
     &:hover {
-        background-color: ${(props) => props.theme.colors.darkhover};
+        background-color: ${(props) => props.theme.colors.greyScale2};
         outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     }
 `
@@ -397,15 +364,16 @@ const EditorDummy = styled.div`
     outline: none;
     padding: 10px 10px;
     width: fill-available;
-    border-radius: 3px;
+    border-radius: 6px;
     min-height: 20px;
     white-space: pre-wrap;
     overflow: hidden;
-    background-color: ${(props) => props.theme.colors.darkhover};
+    background-color: ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
     cursor: text;
     float: left;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-style: italic;
     display: flex;
     align-items: center;
 `
@@ -430,7 +398,7 @@ const ShareBtn = styled.div`
     justify-content: center;
     align-items: center;
     height: 24px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 12px;
     cursor: pointer;
     grid-gap: 4px;
@@ -464,6 +432,8 @@ const FooterContainer = styled.div`
     align-items: flex-start;
     z-index: 998;
     width: fill-available;
+    margin-top: 5px;
+    margin-bottom: 5px;
 `
 
 const SaveActionBar = styled.div`
@@ -478,7 +448,7 @@ const SaveActionBar = styled.div`
 const MarkdownButtonContainer = styled.div`
     display: flex;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     align-items: center;
     cursor: pointer;
     margin-right: 15px;
@@ -490,7 +460,7 @@ const MarkdownButtonContainer = styled.div`
     }
 
     &:hover {
-        background-color: ${(props) => props.theme.colors.lightHover};
+        background-color: ${(props) => props.theme.colors.greyScale3};
     }
 `
 
@@ -501,9 +471,8 @@ const TextBoxContainerStyled = styled.div`
     display: flex;
     flex-direction: column;
     font-size: 14px;
-    width: 100%;
+    width: calc(100% - 1px);
     border-radius: 8px;
-    margin-bottom: 10px;
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};

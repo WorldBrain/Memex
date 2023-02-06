@@ -17,7 +17,7 @@ export interface SpaceDisplayEntry {
 }
 
 export interface SpacePickerDependencies {
-    createNewEntry: (name: string) => Promise<number>
+    createNewEntry: (name: string, id?: number) => Promise<number>
     selectEntry: (
         listId: number,
         options?: { protectAnnotation?: boolean },
@@ -35,6 +35,8 @@ export interface SpacePickerDependencies {
     spacesBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface
     width?: string
+    autoFocus?: boolean
+    context?: string
 }
 
 // TODO: This needs cleanup - so inconsistent
@@ -54,6 +56,7 @@ export type SpacePickerEvent = UIEvent<{
     deleteList: { listId: number }
     newEntryPress: { entry: string }
     keyPress: { event: KeyboardEvent }
+    onKeyUp: { event: KeyboardEvent }
     focusInput: {}
 }>
 
@@ -92,6 +95,7 @@ export default class SpacePickerLogic extends UILogic<
 > {
     private searchInputRef?: HTMLInputElement
     private newTabKeys: KeyEvent[] = ['Enter', ',', 'Tab']
+    currentKeysPressed: KeyEvent[] = []
 
     constructor(protected dependencies: SpacePickerDependencies) {
         super()
@@ -153,6 +157,7 @@ export default class SpacePickerLogic extends UILogic<
                     selectedListIds: { $set: selectedEntries },
                     displayEntries: { $set: this.defaultEntries },
                 })
+                this._updateFocus(0, this.defaultEntries)
             })
 
             await executeUITask(this, 'loadingShareStates', async () => {
@@ -185,17 +190,44 @@ export default class SpacePickerLogic extends UILogic<
         this.searchInputRef?.focus()
     }
 
+    onKeyUp: EventHandler<'onKeyUp'> = async ({ event: { event } }) => {
+        let currentKeys = this.currentKeysPressed
+        if (currentKeys.includes('Meta')) {
+            this.currentKeysPressed = []
+            return
+        }
+        currentKeys = currentKeys.filter((key) => key !== event.key)
+        this.currentKeysPressed = currentKeys
+    }
+
     keyPress: EventHandler<'keyPress'> = async ({
         event: { event },
         previousState,
     }) => {
+        let currentKeys: KeyEvent[] = this.currentKeysPressed
+        let keyPressed: any = event.key
+        currentKeys.push(keyPressed)
+
+        this.currentKeysPressed = currentKeys
+
         if (
-            event.key === 'Enter' &&
-            event.metaKey &&
-            this.dependencies.onSubmit
+            (currentKeys.includes('Enter') && currentKeys.includes('Meta')) ||
+            (event.key === 'Enter' && previousState.displayEntries.length === 0)
         ) {
-            await this.dependencies.onSubmit()
+            if (previousState.newEntryName !== '') {
+                await this.newEntryPress({
+                    previousState,
+                    event: { entry: previousState.newEntryName },
+                })
+                return
+            }
+            currentKeys = currentKeys.filter((key) => key !== event.key)
+            this.currentKeysPressed = []
             return
+        }
+
+        if (event.key === 'Enter' && this.dependencies.onSubmit) {
+            await this.dependencies.onSubmit()
         }
 
         if (this.newTabKeys.includes(event.key as KeyEvent)) {
@@ -234,6 +266,7 @@ export default class SpacePickerLogic extends UILogic<
                     ++this.focusIndex,
                     previousState.displayEntries,
                 )
+
                 return
             }
         }
@@ -466,6 +499,9 @@ export default class SpacePickerLogic extends UILogic<
 
             this.emitMutation({ displayEntries: { $set: displayEntries } })
             this._setCreateEntryDisplay(displayEntries, query)
+            if (displayEntries.length > 0) {
+                this._updateFocus(0, displayEntries)
+            }
         })
     }
 
@@ -500,7 +536,7 @@ export default class SpacePickerLogic extends UILogic<
 
     private _updateFocus = (
         focusIndex: number | undefined,
-        displayEntries: SpaceDisplayEntry[],
+        displayEntries?: SpaceDisplayEntry[],
         emit = true,
     ) => {
         this.focusIndex = focusIndex ?? -1
@@ -649,7 +685,7 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     private async createAndDisplayNewList(name: string): Promise<number> {
-        const newId = await this.dependencies.createNewEntry(name)
+        const newId = Date.now()
         const newEntry: SpaceDisplayEntry = {
             name,
             localId: newId,
@@ -658,6 +694,8 @@ export default class SpacePickerLogic extends UILogic<
             createdAt: Date.now(),
         }
         this.defaultEntries.unshift(newEntry)
+
+        let newEntries = this.defaultEntries
         this.emitMutation({
             query: { $set: '' },
             newEntryName: { $set: '' },
@@ -666,6 +704,8 @@ export default class SpacePickerLogic extends UILogic<
                 $set: [...this.defaultEntries],
             },
         } as UIMutation<SpacePickerState>)
+        this._updateFocus((this.focusIndex = 0), newEntries)
+        await this.dependencies.createNewEntry(name, newId)
         return newId
     }
 

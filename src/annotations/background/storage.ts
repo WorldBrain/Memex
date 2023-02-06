@@ -414,7 +414,7 @@ export default class AnnotationStorage extends StorageModule {
         return this.operation('editAnnotation', {
             url,
             comment,
-            lastEdited: new Date(),
+            lastEdited,
         })
     }
 

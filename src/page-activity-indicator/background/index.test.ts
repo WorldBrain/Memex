@@ -35,7 +35,7 @@ const calcExpectedListEntries = (
                           },
                           {
                               id: expect.any(Number),
-                              hasAnnotations: DATA.annotationListEntries[
+                              hasAnnotationsFromOthers: DATA.annotationListEntries[
                                   sharedList
                               ]?.reduce(
                                   (acc, curr) =>
@@ -52,6 +52,16 @@ const calcExpectedListEntries = (
         ...(opts?.extraEntries ?? []),
     ])
 }
+
+const createExpectedListEntry = (
+    entry: any,
+    sharedList: AutoPk,
+    hasAnnotationsFromOthers: boolean,
+) =>
+    sharedListEntryToFollowedListEntry(
+        { ...entry, sharedList },
+        { hasAnnotationsFromOthers, id: expect.any(Number) },
+    )
 
 async function setupTest(opts: {
     skipAuth?: boolean
@@ -239,7 +249,7 @@ describe('Page activity indicator background module tests', () => {
         await serverStorage.manager
             .collection('sharedAnnotationListEntry')
             .createObject({
-                ...DATA.annotationListEntries[DATA.sharedLists[0].id][0],
+                ...DATA.annotationListEntries[DATA.sharedLists[0].id][1],
                 normalizedPageUrl: 'test.com/b',
             })
 
@@ -550,7 +560,7 @@ describe('Page activity indicator background module tests', () => {
             )
         })
 
-        it('should set hasAnnotation flag on existing followedListEntry if new annotation exists on resync', async () => {
+        it('should set hasAnnotations flag on existing followedListEntry if new annotation from another user exists on resync', async () => {
             const {
                 backgroundModules,
                 storageManager,
@@ -564,15 +574,6 @@ describe('Page activity indicator background module tests', () => {
                     .filter((list) => list.creator === DATA.userReferenceA.id)
                     .map((list) => list.id),
             )
-            const createExpectedListEntry = (
-                entry: any,
-                sharedList: AutoPk,
-                hasAnnotations: boolean,
-            ) =>
-                sharedListEntryToFollowedListEntry(
-                    { ...entry, sharedList },
-                    { hasAnnotations, id: expect.any(Number) },
-                )
 
             expect(
                 await storageManager
@@ -635,7 +636,7 @@ describe('Page activity indicator background module tests', () => {
             ])
 
             const serverStorage = await getServerStorage()
-            // Create an annotation list entry for one of the existing list entries
+            // Create an annotation list entry for one of the existing list entries, by different user
             await serverStorage.manager
                 .collection('sharedAnnotationListEntry')
                 .createObject({
@@ -774,6 +775,131 @@ describe('Page activity indicator background module tests', () => {
                         ...DATA.listEntries[DATA.sharedLists[1].id][0],
                         updatedWhen: 4,
                     },
+                    DATA.sharedLists[1].id,
+                    false,
+                ),
+            ])
+        })
+
+        it('should NOT set hasAnnotations flag on existing followedListEntry if new annotation from CURRENT user exists on resync', async () => {
+            const {
+                backgroundModules,
+                storageManager,
+                getServerStorage,
+            } = await setupTest({
+                testData: { ownLists: true },
+            })
+
+            const ownListIds = new Set(
+                DATA.sharedLists
+                    .filter((list) => list.creator === DATA.userReferenceA.id)
+                    .map((list) => list.id),
+            )
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual([])
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            await backgroundModules.pageActivityIndicator.syncFollowedLists()
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(calcExpectedLists(ownListIds, { lastSync: undefined }))
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
+                { now: 1 },
+            )
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(calcExpectedLists(ownListIds, { lastSync: 1 }))
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([
+                createExpectedListEntry(
+                    DATA.listEntries[DATA.sharedLists[0].id][1],
+                    DATA.sharedLists[0].id,
+                    false,
+                ),
+                createExpectedListEntry(
+                    DATA.listEntries[DATA.sharedLists[0].id][0],
+                    DATA.sharedLists[0].id,
+                    true,
+                ),
+                createExpectedListEntry(
+                    DATA.listEntries[DATA.sharedLists[1].id][1],
+                    DATA.sharedLists[1].id,
+                    false,
+                ),
+                createExpectedListEntry(
+                    DATA.listEntries[DATA.sharedLists[1].id][0],
+                    DATA.sharedLists[1].id,
+                    false,
+                ),
+            ])
+
+            const serverStorage = await getServerStorage()
+            // Create an annotation list entry for one of the existing list entries, by current user (should not change status)
+            await serverStorage.manager
+                .collection('sharedAnnotationListEntry')
+                .createObject({
+                    creator: DATA.users[0].id,
+                    sharedList: DATA.sharedLists[1].id,
+                    normalizedPageUrl: 'test.com/a',
+                    updatedWhen: 1,
+                    createdWhen: 1,
+                    uploadedWhen: 1,
+                })
+
+            await backgroundModules.pageActivityIndicator.syncFollowedListEntries(
+                { now: 2 },
+            )
+
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual(calcExpectedLists(ownListIds, { lastSync: 2 }))
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([
+                createExpectedListEntry(
+                    DATA.listEntries[DATA.sharedLists[0].id][1],
+                    DATA.sharedLists[0].id,
+                    false,
+                ),
+                createExpectedListEntry(
+                    DATA.listEntries[DATA.sharedLists[0].id][0],
+                    DATA.sharedLists[0].id,
+                    true,
+                ),
+                createExpectedListEntry(
+                    DATA.listEntries[DATA.sharedLists[1].id][1],
+                    DATA.sharedLists[1].id,
+                    false,
+                ),
+                createExpectedListEntry(
+                    DATA.listEntries[DATA.sharedLists[1].id][0],
                     DATA.sharedLists[1].id,
                     false,
                 ),
@@ -1278,7 +1404,7 @@ describe('Page activity indicator background module tests', () => {
                     extraEntries: [
                         sharedListEntryToFollowedListEntry(newSharedListEntry, {
                             id: expect.any(Number),
-                            hasAnnotations: false,
+                            hasAnnotationsFromOthers: false,
                         }),
                     ],
                 }),
@@ -1328,7 +1454,7 @@ describe('Page activity indicator background module tests', () => {
                             { ...newSharedListEntry, updatedWhen: 5 },
                             {
                                 id: expect.any(Number),
-                                hasAnnotations: true,
+                                hasAnnotationsFromOthers: true,
                             },
                         ),
                     ],

@@ -66,8 +66,8 @@ const Input = styled.input`
     margin-right: 10px;
     margin-left: 10px;
     outline: none;
-    background: ${(props) => props.theme.colors.darkhover};
-    color: ${(props) => props.theme.colors.normalText};
+    background: ${(props) => props.theme.colors.greyScale2};
+    color: ${(props) => props.theme.colors.white};
     border: none;
     height: 22px;
     padding: 6px;

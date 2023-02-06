@@ -1,9 +1,12 @@
 import * as React from 'react'
+import styled, { css } from 'styled-components'
 import ReactDOM from 'react-dom'
 
 import { theme } from 'src/common-ui/components/design-library/theme'
-import { HighlightInteractionsInterface } from 'src/highlighting/types'
-import {
+import type { HighlightInteractionsInterface } from 'src/highlighting/types'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import type {
     SharedInPageUIEvents,
     SidebarActionOptions,
     SharedInPageUIInterface,
@@ -12,13 +15,17 @@ import {
     AnnotationsSidebarContainer,
     Props as ContainerProps,
 } from './AnnotationsSidebarContainer'
-import { AnnotationsSidebarInPageEventEmitter } from '../types'
-import { Annotation } from 'src/annotations/types'
+import type {
+    AnnotationCardInstanceLocation,
+    AnnotationsSidebarInPageEventEmitter,
+} from '../types'
 import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
-import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import type { SidebarContainerLogic } from './logic'
+import type { UnifiedAnnotation } from 'src/annotations/cache/types'
+import { ANNOT_BOX_ID_PREFIX } from '../constants'
+import browser from 'webextension-polyfill'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -31,8 +38,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 > {
     static defaultProps: Pick<
         Props,
-        'isLockable' | 'theme' | 'sidebarContext'
+        'isLockable' | 'theme' | 'sidebarContext' | 'runtimeAPI' | 'storageAPI'
     > = {
+        runtimeAPI: browser.runtime,
+        storageAPI: browser.storage,
         sidebarContext: 'in-page',
         isLockable: true,
         theme: {
@@ -56,7 +65,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         })
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         super.componentDidMount()
         document.addEventListener('keydown', this.listenToEsc)
         document.addEventListener('mousedown', this.listenToOutsideClick)
@@ -103,11 +112,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     async componentDidUpdate(prevProps: Props) {
-        const { pageUrl } = this.props
+        const { fullPageUrl } = this.props
 
-        if (pageUrl !== prevProps.pageUrl) {
+        if (fullPageUrl !== prevProps.fullPageUrl) {
             await this.processEvent('setPageUrl', {
-                pageUrl,
+                fullPageUrl,
                 rerenderHighlights: true,
             })
         }
@@ -119,23 +128,23 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         inPageUI.events.on('stateChanged', this.handleInPageUIStateChange)
         inPageUI.events.on('sidebarAction', this.handleExternalAction)
 
-        sidebarEvents.on('removeTemporaryHighlights', () =>
-            highlighter.removeTempHighlights(),
-        )
-        sidebarEvents.on('highlightAndScroll', (annotation) => {
-            highlighter.highlightAndScroll(annotation.annotation)
+        // No longer used, as of the sidebar refactor
+        // sidebarEvents.on('removeTemporaryHighlights', () =>
+        //     highlighter.removeTempHighlights(),
+        // )
+        // sidebarEvents.on('removeAnnotationHighlight', ({ url }) =>
+        //     highlighter.removeAnnotationHighlight(url),
+        // )
+        // sidebarEvents.on('removeAnnotationHighlights', ({ urls }) =>
+        //     highlighter.removeAnnotationHighlights(urls),
+        // )
+        sidebarEvents.on('highlightAndScroll', async ({ highlight }) => {
+            await highlighter.highlightAndScroll(highlight)
         })
-        sidebarEvents.on('removeAnnotationHighlight', ({ url }) =>
-            highlighter.removeAnnotationHighlight(url),
-        )
-        sidebarEvents.on('removeAnnotationHighlights', ({ urls }) =>
-            highlighter.removeAnnotationHighlights(urls),
-        )
         sidebarEvents.on('renderHighlight', ({ highlight }) =>
             highlighter.renderHighlight(highlight, () => {
                 inPageUI.showSidebar({
-                    annotationUrl: highlight.url,
-                    anchor: highlight.selector,
+                    annotationCacheId: highlight.unifiedId,
                     action: 'show_annotation',
                 })
             }),
@@ -143,13 +152,16 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         sidebarEvents.on('renderHighlights', async ({ highlights }) => {
             await highlighter.renderHighlights(
                 highlights,
-                ({ annotationUrl }) => {
+                ({ unifiedAnnotationId }) =>
                     inPageUI.showSidebar({
-                        annotationUrl,
+                        annotationCacheId: unifiedAnnotationId,
                         action: 'show_annotation',
-                    })
-                },
+                    }),
+                { removeExisting: true },
             )
+        })
+        sidebarEvents.on('setSelectedList', async (selectedList) => {
+            inPageUI.selectedList = selectedList
         })
     }
 
@@ -169,32 +181,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         return containerNode?.getRootNode() as Document
     }
 
-    private activateAnnotation(
-        url: string,
+    private async activateAnnotation(
+        unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
         annotationMode: 'edit' | 'edit_spaces' | 'show',
     ) {
-        if (annotationMode === 'show') {
-            this.processEvent('switchAnnotationMode', {
-                annotationUrl: url,
-                context: 'pageAnnotations',
-                mode: 'default',
-            })
-        } else {
-            this.processEvent('setAnnotationEditMode', {
-                annotationUrl: url,
-                context: 'pageAnnotations',
-            })
-
-            if (annotationMode === 'edit_spaces') {
-                this.processEvent('setListPickerAnnotationId', {
-                    id: url,
-                    position: 'lists-bar',
-                })
-            }
-        }
-
-        this.processEvent('setActiveAnnotationUrl', { annotationUrl: url })
-        const annotationBoxNode = this.getDocument()?.getElementById(url)
+        await this.processEvent('setActiveAnnotation', {
+            unifiedAnnotationId,
+            mode: annotationMode,
+        })
+        const annotationBoxNode = this.getDocument()?.getElementById(
+            ANNOT_BOX_ID_PREFIX + unifiedAnnotationId,
+        )
 
         if (!annotationBoxNode) {
             return
@@ -210,24 +207,32 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         await (this.logic as SidebarContainerLogic).annotationsLoadComplete
 
         if (event.action === 'comment') {
-            await this.processEvent('addNewPageComment', {
-                comment: event.annotationData?.commentText,
-                tags: event.annotationData?.tags,
+            await this.processEvent('setNewPageNoteText', {
+                comment: event.annotationData?.commentText ?? '',
+            })
+        } else if (event.action === 'selected_list_mode_from_web_ui') {
+            await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+            await browser.storage.local.set({
+                '@Sidebar-reading_view': true,
+            })
+            await this.processEvent('setSelectedListFromWebUI', {
+                sharedListId: event.sharedListId,
             })
         } else if (event.action === 'show_annotation') {
-            this.activateAnnotation(event.annotationUrl, 'show')
+            await this.activateAnnotation(event.annotationCacheId, 'show')
         } else if (event.action === 'edit_annotation') {
-            this.activateAnnotation(event.annotationUrl, 'edit')
+            await this.activateAnnotation(event.annotationCacheId, 'edit')
         } else if (event.action === 'edit_annotation_spaces') {
-            this.activateAnnotation(event.annotationUrl, 'edit_spaces')
+            await this.activateAnnotation(
+                event.annotationCacheId,
+                'edit_spaces',
+            )
         } else if (event.action === 'set_sharing_access') {
             await this.processEvent('receiveSharingAccessChange', {
                 sharingAccess: event.annotationSharingAccess,
             })
         } else if (event.action === 'show_shared_spaces') {
-            // TODO: Shouldn't need to trigger two events here. Confusing interface
-            await this.processEvent('expandMyNotes', null)
-            await this.processEvent('expandSharedSpaces', { listIds: [] })
+            await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
         }
 
         this.forceUpdate()
@@ -264,19 +269,20 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     protected bindAnnotationFooterEventProps(
-        annotation: Annotation,
-        followedListId?: string,
+        annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'body'>,
+        instanceLocation: AnnotationCardInstanceLocation,
     ) {
         const boundProps = super.bindAnnotationFooterEventProps(
             annotation,
-            followedListId,
+            instanceLocation,
         )
-
         return {
             ...boundProps,
             onDeleteConfirm: (e) => {
                 boundProps.onDeleteConfirm(e)
-                this.props.highlighter.removeAnnotationHighlight(annotation.url)
+                this.props.highlighter.removeAnnotationHighlight(
+                    annotation.unifiedId,
+                )
             },
         }
     }
@@ -289,8 +295,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                     <LoginModal
                         routeToLoginBtn
                         ignoreReactPortal
-                        contentSharingBG={this.props.contentSharing}
-                        contentScriptBG={this.props.contentScriptBackground}
+                        contentSharingBG={this.props.contentSharingBG}
+                        contentScriptBG={this.props.contentScriptsBG}
                         onClose={() =>
                             this.processEvent('setLoginModalShown', {
                                 shown: false,
@@ -301,7 +307,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 {this.state.showDisplayNameSetupModal && (
                     <DisplayNameModal
                         ignoreReactPortal
-                        authBG={this.props.auth}
+                        authBG={this.props.authBG}
                         onClose={() =>
                             this.processEvent('setDisplayNameSetupModalShown', {
                                 shown: false,
@@ -336,16 +342,199 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         )
     }
 
-    // protected renderTopBanner() {
-    //     return (
-    //         <UpdateNotifBanner
-    //             theme={{
-    //                 ...theme,
-    //                 position: 'fixed',
-    //                 width: 'fill-available',
-    //                 iconSize: '20px',
-    //             }}
-    //         />
-    //     )
-    // }
+    private renderSelectedListPill() {
+        if (this.state.pillVisibility === 'hide') {
+            return null
+        }
+        return (
+            <IsolatedViewPill
+                onClick={async () =>
+                    Promise.all([
+                        this.processEvent('setPillVisibility', {
+                            value: 'unhover',
+                        }),
+                        this.props.inPageUI.showSidebar(),
+                    ])
+                }
+                onMouseOver={() =>
+                    this.processEvent('setPillVisibility', {
+                        value: 'hover',
+                    })
+                }
+                onMouseLeave={() =>
+                    this.processEvent('setPillVisibility', {
+                        value: 'unhover',
+                    })
+                }
+                pillVisibility={this.state.pillVisibility}
+            >
+                <IconContainer pillVisibility={this.state.pillVisibility}>
+                    <Icon
+                        filePath="highlight"
+                        heightAndWidth="20px"
+                        hoverOff
+                        color="prime1"
+                    />
+                </IconContainer>
+                <IsolatedPillContent>
+                    <TogglePillHoverSmallText
+                        pillVisibility={this.state.pillVisibility}
+                    >
+                        All annotations added to Space
+                    </TogglePillHoverSmallText>
+                    <TogglePillMainText>
+                        {
+                            this.props.annotationsCache.lists.byId[
+                                this.state.selectedListId
+                            ].name
+                        }
+                    </TogglePillMainText>
+                </IsolatedPillContent>
+                <CloseContainer pillVisibility={this.state.pillVisibility}>
+                    <CloseBox>
+                        <TooltipBox
+                            tooltipText={'Exit focus mode for this Space'}
+                            placement={'left-start'}
+                        >
+                            <Icon
+                                filePath="removeX"
+                                heightAndWidth="22px"
+                                onClick={(event) => {
+                                    event.stopPropagation()
+                                    this.processEvent('setPillVisibility', {
+                                        value: 'hide',
+                                    })
+                                    this.processEvent('setSelectedList', {
+                                        unifiedListId: null,
+                                    })
+                                }}
+                            />
+                        </TooltipBox>
+                    </CloseBox>
+                </CloseContainer>
+            </IsolatedViewPill>
+        )
+    }
+
+    render() {
+        if (
+            this.state.selectedListId != null &&
+            this.state.showState === 'hidden' &&
+            this.state.fullPageUrl != null
+        ) {
+            return this.renderSelectedListPill()
+        }
+
+        return super.render()
+    }
 }
+
+const IsolatedViewPill = styled.div<{ pillVisibility: string }>`
+    display: flex;
+    position: relative;
+    padding: 10px 20px 10px 15px;
+    justify-content: flex-start;
+    align-items: flex-end;
+    max-height: 26px;
+    max-width: 300px;
+    min-width: 50px;
+    grid-gap: 10px;
+    position: fixed;
+    width: fit-content;
+    bottom: 20px;
+    right: 20px;
+    cursor: pointer;
+    background-color: ${(props) => props.theme.colors.black};
+    border-radius: 10px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+
+    ${(props) =>
+        props.pillVisibility === 'hover' &&
+        css`
+            align-items: flex-end;
+            max-height: 60px;
+            max-width: 400px;
+            min-width: 280px;
+        `}
+
+    transition: max-width 0.2s ease-in-out, max-height 0.15s ease-in-out;
+`
+
+const IconContainer = styled.div<{ pillVisibility: string }>`
+    display: flex;
+    height: fill-available;
+    align-items: flex-start;
+    height: 26px;
+    transition: height 0.15s ease-in-out;
+
+    ${(props) =>
+        props.pillVisibility === 'hover' &&
+        css`
+            height: 45px;
+        `}
+`
+
+const CloseBox = styled.div`
+    position: relative;
+`
+
+const CloseContainer = styled.div<{ pillVisibility: string }>`
+    display: flex;
+    height: fill-available;
+    align-items: flex-start;
+    justify-content: flex-end;
+    height: 45px;
+    width: 50px;
+    opacity: 0;
+    transition: opacity 0.1s ease-in-out;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    visibility: hidden;
+
+    ${(props) =>
+        props.pillVisibility === 'hover' &&
+        css`
+            opacity: 1;
+            visibility: visible;
+        `}
+`
+
+const IsolatedPillContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 5px;
+`
+
+const TogglePillHoverSmallText = styled.div<{ pillVisibility: string }>`
+    font-size: 14px;
+    position: absolute;
+    font-weight: 300;
+    color: ${(props) => props.theme.colors.greyScale5};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    visibility: hidden;
+    opacity: 0;
+    top: 20px;
+    transition: top 0.05s ease-in-out, opacity 0.05s ease-in-out;
+
+    ${(props) =>
+        props.pillVisibility === 'hover' &&
+        css`
+            opacity: 1;
+            top: 10px;
+            visibility: visible;
+        `};
+`
+
+const TogglePillMainText = styled.div`
+    font-size: 16px;
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.white};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    padding-bottom: 2px;
+`

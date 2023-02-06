@@ -1,6 +1,8 @@
-import {
+import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import type {
     PersonalCloudUpdatePushBatch,
     PersonalCloudClientInstruction,
+    PersonalCloudDeviceId,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 
 export interface PersonalCloudBackgroundEvents {
@@ -25,12 +27,10 @@ export interface ExecuteClientInstructionsAction {
 }
 
 export interface LocalPersonalCloudSettings {
-    deviceId?: PersonalCloudDeviceID
+    deviceId?: PersonalCloudDeviceId
     lastSeen?: number
     isSetUp?: boolean
 }
-
-export type PersonalCloudDeviceID = number | string
 
 export interface PersonalCloudRemoteInterface {
     enableCloudSyncForNewInstall: () => Promise<void>
@@ -46,3 +46,13 @@ export interface PersonalCloudStats {
     pendingDownloads: number
     pendingUploads: number
 }
+
+export type AuthChanges =
+    | {
+          nextUser: AuthenticatedUser
+          deviceId: PersonalCloudDeviceId
+      }
+    | {
+          nextUser: null
+          deviceId: null
+      }

@@ -13,7 +13,7 @@ class OnboardingBox extends PureComponent<Props> {
                     <div className={styles.container}>
                         {this.props.children}
                     </div>
-                    <div className={styles.backgroundColor} />
+                    <div className={styles.black} />
                 </FlexLayout>
             </div>
         )
@@ -26,7 +26,7 @@ const FlexLayout = styled.div`
     justify-content: center; /* We need the white box to sit in the middle of the screen */
     height: 100vh;
     overflow: hidden;
-    background-color: ${(props) => props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.black};
 `
 
 export default OnboardingBox

@@ -2,6 +2,12 @@ import 'core-js'
 import { EventEmitter } from 'events'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
+import {
+    MemexOpenLinkDetail,
+    MemexRequestHandledDetail,
+    MEMEX_OPEN_LINK_EVENT_NAME,
+    MEMEX_REQUEST_HANDLED_EVENT_NAME,
+} from '@worldbrain/memex-common/lib/services/memex-extension'
 
 // import { setupScrollReporter } from 'src/activity-logger/content_script'
 import { setupPageContentRPC } from 'src/page-analysis/content_script'
@@ -32,15 +38,19 @@ import * as sidebarUtils from 'src/sidebar-overlay/utils'
 import * as constants from '../constants'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import type { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
-import { createAnnotationsCache } from 'src/annotations/annotations-cache'
+import { PageAnnotationsCache } from 'src/annotations/cache'
 import type { AnalyticsEvent } from 'src/analytics/types'
 import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
 import { main as searchInjectionMain } from 'src/content-scripts/content_script/search-injection'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
-import { getUnderlyingResourceUrl, isFullUrlPDF } from 'src/util/uri-utils'
-import { copyPaster, subscription } from 'src/util/remote-functions-background'
+import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
+import {
+    bookmarks,
+    copyPaster,
+    subscription,
+} from 'src/util/remote-functions-background'
 import { ContentLocatorFormat } from '../../../external/@worldbrain/memex-common/ts/personal-cloud/storage/types'
 import { setupPdfViewerListeners } from './pdf-detection'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
@@ -48,9 +58,15 @@ import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { checkPageBlacklisted } from 'src/blacklist/utils'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { runtime } from 'webextension-polyfill'
-import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { hydrateCache } from 'src/annotations/cache/utils'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { UNDO_HISTORY } from 'src/constants'
+import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import { isUrlPDFViewerUrl } from 'src/pdf/util'
+import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -76,6 +92,61 @@ export async function main(
         injectMemexExtDetectionEl()
     }
 
+    let keysPressed = []
+
+    document.addEventListener('keydown', (event) => {
+        undoAnnotationHistory(event)
+    })
+
+    document.addEventListener('keyup', (event) => {
+        keysPressed.filter((item) => item != event.key)
+    })
+
+    const undoAnnotationHistory = async (event) => {
+        if (
+            event.target.nodeName === 'INPUT' ||
+            event.target.nodeName === 'TEXTAREA'
+        ) {
+            return
+        }
+
+        if (event.key === 'Meta') {
+            keysPressed.push(event.key)
+        }
+        if (event.key === 'z') {
+            if (keysPressed.includes('Meta')) {
+                let lastActions = await globalThis['browser'].storage.local.get(
+                    `${UNDO_HISTORY}`,
+                )
+
+                lastActions = lastActions[`${UNDO_HISTORY}`]
+
+                let lastAction = lastActions[0]
+
+                if (lastAction.url !== window.location.href) {
+                    await globalThis['browser'].storage.local.remove([
+                        `${UNDO_HISTORY}`,
+                    ])
+                    return
+                } else {
+                    highlightRenderer.undoHighlight(lastAction.id)
+                    lastActions.shift()
+                    await globalThis['browser'].storage.local.set({
+                        [`${UNDO_HISTORY}`]: lastActions,
+                    })
+                }
+
+                const existing =
+                    annotationsCache.annotations.byId[lastAction.id]
+                annotationsCache.removeAnnotation({ unifiedId: lastAction.id })
+
+                if (existing?.localId != null) {
+                    await annotationsBG.deleteAnnotation(existing.localId)
+                }
+            }
+        }
+    }
+
     setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
     setupPageContentRPC()
 
@@ -92,9 +163,15 @@ export async function main(
     } = {}
 
     // 2. Initialise dependencies required by content scripts
+    const authBG = runInBackground<AuthRemoteFunctionsInterface>()
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
+    const contentSharingBG = runInBackground<ContentSharingInterface>()
     const tagsBG = runInBackground<RemoteTagsInterface>()
+    const contentScriptsBG = runInBackground<
+        ContentScriptsInterface<'caller'>
+    >()
+    const syncSettingsBG = runInBackground<RemoteSyncSettingsInterface>()
     const collectionsBG = runInBackground<RemoteCollectionsInterface>()
     const pageActivityIndicatorBG = runInBackground<
         RemotePageActivityIndicatorInterface
@@ -104,16 +181,10 @@ export async function main(
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
     const highlightRenderer = new HighlightRenderer({
-        notificationsBG: runInBackground(),
+        annotationsBG,
+        contentSharingBG,
     })
-    const annotationEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
-
-    const annotationsCache = createAnnotationsCache({
-        tags: tagsBG,
-        customLists: collectionsBG,
-        annotations: annotationsBG,
-        contentSharing: runInBackground(),
-    })
+    const sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
@@ -136,16 +207,43 @@ export async function main(
             delete components[component]
         },
     })
-    const fullPageUrl = await pageInfo.getPageUrl()
-    const loadAnnotationsPromise = annotationsCache.load(fullPageUrl)
+    const _currentUser = await authBG.getCurrentUser()
+    const currentUser: UserReference = _currentUser
+        ? { type: 'user-reference', id: _currentUser.id }
+        : undefined
+    const fullPageUrl = await pageInfo.getFullPageUrl()
+    const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
+    const annotationsCache = new PageAnnotationsCache({ normalizedPageUrl })
+    window['__annotationsCache'] = annotationsCache
+
+    const pageHasBookMark =
+        (await bookmarks.pageHasBookmark(fullPageUrl)) ?? undefined
+
+    if (pageHasBookMark) {
+        await bookmarks.setBookmarkStatusInBrowserIcon(true, fullPageUrl)
+    } else {
+        await bookmarks.setBookmarkStatusInBrowserIcon(false, fullPageUrl)
+    }
+
+    const loadCacheDataPromise = hydrateCache({
+        fullPageUrl,
+        user: currentUser,
+        cache: annotationsCache,
+        bgModules: {
+            annotations: annotationsBG,
+            customLists: collectionsBG,
+            contentSharing: contentSharingBG,
+            pageActivityIndicator: pageActivityIndicatorBG,
+        },
+    })
 
     const annotationFunctionsParams = {
         inPageUI,
         annotationsCache,
         getSelection: () => document.getSelection(),
-        getUrlAndTitle: async () => ({
+        getFullPageUrlAndTitle: async () => ({
             title: pageInfo.getPageTitle(),
-            pageUrl: await pageInfo.getPageUrl(),
+            fullPageUrl: await pageInfo.getFullPageUrl(),
         }),
     }
 
@@ -156,6 +254,7 @@ export async function main(
             highlightRenderer.saveAndRenderHighlight({
                 ...annotationFunctionsParams,
                 analyticsEvent,
+                currentUser,
                 shouldShare,
             }),
         createAnnotation: (analyticsEvent?: AnalyticsEvent<'Annotations'>) => (
@@ -166,6 +265,7 @@ export async function main(
                 ...annotationFunctionsParams,
                 showSpacePicker,
                 analyticsEvent,
+                currentUser,
                 shouldShare,
             }),
     }
@@ -177,6 +277,7 @@ export async function main(
         async registerRibbonScript(execute): Promise<void> {
             await execute({
                 inPageUI,
+                currentUser,
                 annotationsManager,
                 getRemoteFunction: remoteFunction,
                 highlighter: highlightRenderer,
@@ -185,11 +286,9 @@ export async function main(
                 tags: tagsBG,
                 customLists: collectionsBG,
                 activityIndicatorBG: runInBackground(),
-                contentSharing: runInBackground(),
+                contentSharing: contentSharingBG,
                 bookmarks: runInBackground(),
-                syncSettings: createSyncSettingsStore({
-                    syncSettingsBG: runInBackground(),
-                }),
+                syncSettings: createSyncSettingsStore({ syncSettingsBG }),
                 tooltip: {
                     getState: tooltipUtils.getTooltipState,
                     setState: tooltipUtils.setTooltipState,
@@ -198,7 +297,7 @@ export async function main(
                     getState: tooltipUtils.getHighlightsState,
                     setState: tooltipUtils.setHighlightsState,
                 },
-                getPageUrl: pageInfo.getPageUrl,
+                getPageUrl: pageInfo.getFullPageUrl,
             })
             components.ribbon?.resolve()
         },
@@ -214,27 +313,28 @@ export async function main(
         },
         async registerSidebarScript(execute): Promise<void> {
             await execute({
-                events: annotationEvents,
+                events: sidebarEvents,
                 initialState: inPageUI.componentsShown.sidebar
                     ? 'visible'
                     : 'hidden',
                 inPageUI,
+                currentUser,
                 annotationsCache,
                 highlighter: highlightRenderer,
-                annotations: annotationsBG,
-                tags: tagsBG,
-                auth: runInBackground(),
-                customLists: collectionsBG,
-                contentSharing: runInBackground(),
-                syncSettingsBG: runInBackground(),
+                authBG,
+                annotationsBG,
+                syncSettingsBG,
+                contentSharingBG,
+                pageActivityIndicatorBG,
+                customListsBG: collectionsBG,
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,
                 analytics,
                 copyToClipboard,
-                getPageUrl: pageInfo.getPageUrl,
+                getFullPageUrl: pageInfo.getFullPageUrl,
                 copyPaster,
                 subscription,
                 contentConversationsBG: runInBackground(),
-                contentScriptBackground: runInBackground(),
+                contentScriptsBG: runInBackground(),
             })
             components.sidebar?.resolve()
         },
@@ -255,8 +355,8 @@ export async function main(
         },
         async registerSearchInjectionScript(execute): Promise<void> {
             await execute({
+                syncSettingsBG,
                 requestSearcher: remoteFunction('search'),
-                syncSettingsBG: runInBackground(),
             })
         },
     }
@@ -265,7 +365,7 @@ export async function main(
 
     // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
     // so it is included in this global content script where it adds less than 500kb.
-    await loadAnnotationsPromise
+    await loadCacheDataPromise
     await contentScriptRegistry.registerHighlightingScript(highlightMain)
 
     // 5. Registers remote functions that can be used to interact with components
@@ -284,12 +384,16 @@ export async function main(
         insertTooltip: async () => inPageUI.showTooltip(),
         removeTooltip: async () => inPageUI.removeTooltip(),
         insertOrRemoveTooltip: async () => inPageUI.toggleTooltip(),
-        goToHighlight: async (annotation, pageAnnotations) => {
-            await highlightRenderer.renderHighlights(
-                pageAnnotations,
-                annotationsBG.toggleSidebarOverlay,
-            )
-            highlightRenderer.highlightAndScroll(annotation)
+        goToHighlight: async (annotationCacheId) => {
+            const unifiedAnnotation =
+                annotationsCache.annotations.byId[annotationCacheId]
+            if (!unifiedAnnotation) {
+                console.warn(
+                    "Tried to go to highlight in new page that doesn't exist in cache",
+                )
+                return
+            }
+            await highlightRenderer.highlightAndScroll(unifiedAnnotation)
         },
         createHighlight: annotationsFunctions.createHighlight({
             category: 'Highlights',
@@ -323,6 +427,7 @@ export async function main(
         }),
     })
     const loadContentScript = createContentScriptLoader({
+        contentScriptsBG,
         loadRemotely: params.loadRemotely,
     })
     if (
@@ -360,27 +465,28 @@ export async function main(
 
     if (
         (isSidebarEnabled && !isPageBlacklisted) ||
-        pageActivityStatus === 'has-annotations'
+        pageActivityStatus !== 'no-activity'
     ) {
         await inPageUI.loadComponent('ribbon', {
             keepRibbonHidden: !isSidebarEnabled,
-            showPageActivityIndicator: pageActivityStatus === 'has-annotations',
+            showPageActivityIndicator: pageActivityStatus !== 'no-activity',
         })
     }
 
     injectYoutubeContextMenu(annotationsFunctions)
-
+    setupWebUIActions({ contentScriptsBG, bgScriptBG, pageActivityIndicatorBG })
     return inPageUI
 }
 
 type ContentScriptLoader = (component: ContentScriptComponent) => Promise<void>
-export function createContentScriptLoader(args: { loadRemotely: boolean }) {
+export function createContentScriptLoader(args: {
+    contentScriptsBG: ContentScriptsInterface<'caller'>
+    loadRemotely: boolean
+}) {
     const remoteLoader: ContentScriptLoader = async (
         component: ContentScriptComponent,
     ) => {
-        await runInBackground<
-            ContentScriptsInterface<'caller'>
-        >().injectContentScriptComponent({
+        await args.contentScriptsBG.injectContentScriptComponent({
             component,
         })
     }
@@ -419,8 +525,10 @@ class PageInfo {
         if (window.location.href === this._href) {
             return
         }
+        this.isPdf = isUrlPDFViewerUrl(window.location.href, {
+            runtimeAPI: runtime,
+        })
         const fullUrl = getUnderlyingResourceUrl(window.location.href)
-        this.isPdf = isFullUrlPDF(fullUrl)
         this._identifier = await runInBackground<
             PageIndexingInterface<'caller'>
         >().initContentIdentifier({
@@ -440,7 +548,7 @@ class PageInfo {
         this._href = window.location.href
     }
 
-    getPageUrl = async () => {
+    getFullPageUrl = async () => {
         await this.refreshIfNeeded()
         return this._identifier.fullUrl
     }
@@ -477,4 +585,43 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
     })
 
     observer.observe(document, config)
+}
+
+export function setupWebUIActions(args: {
+    contentScriptsBG: ContentScriptsInterface<'caller'>
+    pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
+    bgScriptBG: RemoteBGScriptInterface
+}) {
+    const confirmRequest = (requestId: number) => {
+        const detail: MemexRequestHandledDetail = { requestId }
+        const event = new CustomEvent(MEMEX_REQUEST_HANDLED_EVENT_NAME, {
+            detail,
+        })
+        document.dispatchEvent(event)
+    }
+
+    document.addEventListener(MEMEX_OPEN_LINK_EVENT_NAME, async (event) => {
+        const detail = event.detail as MemexOpenLinkDetail
+        confirmRequest(detail.requestId)
+
+        // Handle local PDFs first (memex.cloud URLs)
+        if (isPagePdf({ url: detail.originalPageUrl })) {
+            await args.bgScriptBG.openOverviewTab({ missingPdf: true })
+            return
+        }
+
+        // TODO: more robust way of checking this?
+        // Handle remote PDFs next (non-memex.cloud URLs with .pdf ext)
+        if (detail.originalPageUrl.endsWith('.pdf')) {
+            await args.contentScriptsBG.openPdfInViewer({
+                fullPdfUrl: detail.originalPageUrl,
+            })
+            return
+        }
+
+        await args.contentScriptsBG.openPageWithSidebarInSelectedListMode({
+            fullPageUrl: detail.originalPageUrl,
+            sharedListId: detail.sharedListId,
+        })
+    })
 }

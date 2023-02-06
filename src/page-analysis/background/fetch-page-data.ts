@@ -1,4 +1,5 @@
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { runtime } from 'webextension-polyfill'
 
 import extractFavIcon from 'src/page-analysis/background/content-extraction/extract-fav-icon'
 // import extractPdfContent from 'src/page-analysis/background/content-extraction/extract-pdf-content'
@@ -8,7 +9,7 @@ import extractPageMetadataFromRawContent, {
 } from './content-extraction'
 import { PageDataResult } from './types'
 import { FetchPageDataError } from './fetch-page-data-error'
-import { isFullUrlPDF } from 'src/util/uri-utils'
+import { isUrlPDFViewerUrl } from 'src/pdf/util'
 
 export type FetchPageData = (args: {
     url: string
@@ -62,7 +63,7 @@ const fetchPageData: FetchPageData = ({
     let cancel: CancelXHR
 
     // Check if pdf and run code for pdf instead
-    if (isFullUrlPDF(url)) {
+    if (isUrlPDFViewerUrl(url, { runtimeAPI: runtime })) {
         run = async () => {
             // TODO: PDFs can no longer be processed in the BG SW, thus can't be remotely fetched like this
             return {}

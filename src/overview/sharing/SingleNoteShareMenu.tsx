@@ -15,6 +15,9 @@ import {
     PRIVATIZE_ANNOT_MSG,
     PRIVATIZE_ANNOT_AFFIRM_LABEL,
     PRIVATIZE_ANNOT_NEGATIVE_LABEL,
+    SELECT_SPACE_ANNOT_SUBTITLE,
+    SELECT_SPACE_AFFIRM_LABEL,
+    SELECT_SPACE_NEGATIVE_LABEL,
 } from './constants'
 import type { AnnotationSharingState } from 'src/content-sharing/background/types'
 
@@ -36,7 +39,7 @@ export interface Props extends ShareMenuCommonProps {
     isShared?: boolean
     annotationUrl: string
     shareImmediately?: boolean
-    listData: { [listId: number]: { remoteId?: string } }
+    getRemoteListIdForLocalId: (localListId: number) => string | null
     postShareHook?: (
         state: AnnotationSharingState,
         opts?: { keepListsIfUnsharing?: boolean },
@@ -186,7 +189,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
         if (
             this.props.isShared &&
-            this.props.listData[listId]?.remoteId != null &&
+            this.props.getRemoteListIdForLocalId(listId) != null &&
             selectType === 'select'
         ) {
             this.setState({
@@ -210,13 +213,15 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             confirmationMode.type === 'public-select-space'
                 ? SELECT_SPACE_ANNOT_MSG
                 : PRIVATIZE_ANNOT_MSG
+        const subTitleText = SELECT_SPACE_ANNOT_SUBTITLE
+
         const affirmativeLabel =
             confirmationMode.type === 'public-select-space'
-                ? undefined
+                ? SELECT_SPACE_AFFIRM_LABEL
                 : PRIVATIZE_ANNOT_AFFIRM_LABEL
         const negativeLabel =
             confirmationMode.type === 'public-select-space'
-                ? undefined
+                ? SELECT_SPACE_NEGATIVE_LABEL
                 : PRIVATIZE_ANNOT_NEGATIVE_LABEL
 
         const handleConfirmation = (affirmative: boolean) => () => {
@@ -242,6 +247,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         return (
             <ConfirmDialog
                 titleText={text}
+                subTitleText={subTitleText}
                 negativeLabel={negativeLabel}
                 affirmativeLabel={affirmativeLabel}
                 handleConfirmation={handleConfirmation}
@@ -259,22 +265,12 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                             showLink={this.state.showLink}
                             onCopyLinkClick={this.handleLinkCopy}
                             linkTitleCopy="Link to this annotation"
-                            privacyOptionsTitleCopy="Privacy settings"
+                            privacyOptionsTitleCopy={undefined}
                             isLoading={
                                 this.state.shareState === 'running' ||
                                 this.state.loadState === 'running'
                             }
                             privacyOptions={[
-                                {
-                                    icon: 'globe',
-                                    title: 'Public',
-                                    hasProtectedOption: true,
-                                    onClick: this.handleSetShared,
-                                    isSelected: this.props.isShared,
-                                    shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
-                                    description:
-                                        'Auto-added to Spaces the page is shared to',
-                                },
                                 {
                                     icon: 'personFine',
                                     title: 'Private',
@@ -282,8 +278,26 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                     onClick: this.handleSetPrivate,
                                     isSelected: !this.props.isShared,
                                     shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
-                                    description:
-                                        'Private to you, until shared (in bulk)',
+                                    description: (
+                                        <>
+                                            Private to you <br /> unless shared
+                                            in specific Spaces
+                                        </>
+                                    ),
+                                },
+                                {
+                                    icon: 'globe',
+                                    title: 'Public',
+                                    hasProtectedOption: true,
+                                    onClick: this.handleSetShared,
+                                    isSelected: this.props.isShared,
+                                    shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
+                                    description: (
+                                        <>
+                                            Auto-shared to Spaces <br /> the
+                                            page is added to{' '}
+                                        </>
+                                    ),
                                 },
                             ]}
                             shortcutHandlerDict={{
@@ -307,6 +321,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                 'unselect',
                             )}
                             width={'fill-available'}
+                            autoFocus={false}
                         />
                     </>
                 ) : (
@@ -322,13 +337,6 @@ const SectionTitle = styled.div`
     font-weight: 700;
     margin-top: 10px;
     margin-bottom: 5px;
-    padding-left: 15px;
-    color: ${(props) => props.theme.colors.normalText};
-`
-
-const SectionSubTitle = styled.div`
-    font-size: 12px;
-    font-weight: 400;
-    padding-left: 15px;
-    color: ${(props) => props.theme.colors.lighterText};
+    padding: 0 20px;
+    color: ${(props) => props.theme.colors.white};
 `

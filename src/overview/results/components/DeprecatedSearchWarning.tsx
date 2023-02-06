@@ -41,7 +41,7 @@ export default class DeprecatedSearchWarning extends React.Component<Props> {
                         Why?!?
                     </InfoBtn>
                     <CancelBtn
-                        src={icons.close}
+                        src={icons.removeX}
                         onClick={this.props.onCancelBtnClick}
                     />
                 </BtnContainer>

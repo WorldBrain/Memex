@@ -6,8 +6,12 @@ import styled, { keyframes, css } from 'styled-components'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const openAnimation = keyframes`
- 0% { padding-bottom: 10px; opacity: 0 }
- 100% { padding-bottom: 0px; opacity: 1 }
+ 0% { zoom: 0.8; opacity: 0 }
+ 80% { zoom: 1.05; opacity: 0.8 }
+ 100% { zoom: 1; opacity: 1 }
+
+/* 0% { padding-bottom: 10px; opacity: 0 }
+ 100% { padding-bottom: 0px; opacity: 1 } */
 `
 
 const MemexTooltip = styled.div`
@@ -26,7 +30,7 @@ const MemexTooltip = styled.div`
     animation-duration: 0.1s;
     /* transition: all 1s ease-in-out; */
     width: fit-content;
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
     background: ${(props) => props.theme.colors.greyScale1};
 `
 
@@ -69,7 +73,7 @@ export function _renderButtons({ closeTooltip, state }) {
             <Icon
                 filePath={'removeX'}
                 heightAndWidth="20px"
-                color={'darkerIconColor'}
+                color={'greyScale3'}
             />
         </TooltipBox>
     )

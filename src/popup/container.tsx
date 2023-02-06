@@ -38,7 +38,6 @@ const styles = require('./components/Popup.css')
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 import { createSyncSettingsStore } from 'src/sync-settings/util'
-import { isFullUrlPDF } from 'src/util/uri-utils'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import checkBrowser from 'src/util/check-browser'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
@@ -181,7 +180,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 
     private get isCurrentPagePDF(): boolean {
-        return isFullUrlPDF(this.props.url)
+        return this.props.url?.endsWith('.pdf')
     }
 
     getPDFMode = () => {
@@ -300,6 +299,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <BackContainer
                         onClick={this.props.toggleShowCollectionsPicker}
                         header={'Add Page to Spaces'}
+                        showAutoSaved={this.state.showAutoSaved}
                     />
                     <CollectionPicker
                         selectEntry={(listId) =>
@@ -316,10 +316,14 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         }
                         createNewEntry={async (name) => {
                             this.props.onCollectionAdd(name)
-                            return collections.createCustomList({ name })
+                            return collections.createCustomList({
+                                name: name,
+                                id: Date.now(),
+                            })
                         }}
                         initialSelectedListIds={() => this.state.pageListIds}
                         actOnAllTabs={this.handleListAllTabs}
+                        context={'popup'}
                     />
                 </SpacePickerContainer>
             )
@@ -422,14 +426,14 @@ const MemexLogo = styled.div`
 const QuickSettingsContainer = styled.div`
     display: flex;
     grid-gap: 10px;
-    color: ${(props) => props.theme.colors.darkText};
+    color: ${(props) => props.theme.colors.greyScale4};
     white-space: nowrap;
     align-items: center;
     padding-left: 20px;
 `
 
-const SpacerLine = styled.hr`
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+const SpacerLine = styled.div`
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     width: 100%;
 `
 
@@ -439,12 +443,12 @@ const Footer = styled.div`
     padding: 0 15px 0 20px;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid ${(props) => props.theme.colors.lightHover};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 const PopupContainerContainer = styled.div`
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
-    border: 1px solid ${(props) => props.theme.colors.lightHover};
+    background: ${(props) => props.theme.colors.greyScale1};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 const ButtonContainer = styled.div`
@@ -460,7 +464,7 @@ const FeedActivitySectionInnerContainer = styled.div`
     font-size: 14px;
     justify-content: flex-start;
     cursor: pointer;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 500;
     flex: 1;
     width: fill-available;
@@ -468,7 +472,7 @@ const FeedActivitySectionInnerContainer = styled.div`
 
 const NoticeTitle = styled.div`
     font-size: 16px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: bold;
     text-align: center;
     margin-bottom: 20px;
@@ -479,12 +483,12 @@ const LoadingBox = styled.div`
     height: 200px;
     justify-content: center;
     align-items: center;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.greyScale1};
 `
 
 const NoticeSubTitle = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.greyScale8};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 300;
     padding-bottom: 15px;
     text-align: center;
@@ -523,7 +527,7 @@ const FeedActivitySection = styled.div`
     display: flex;
     justify-content: space-between;
     height: 50px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     align-items: center;
     padding: 0px 20px 0px 20px;
     grid-auto-flow: column;
@@ -534,14 +538,14 @@ const FeedActivitySection = styled.div`
     }
 
     // &:hover {
-    //     background-color: ${(props) => props.theme.colors.backgroundColor};
+    //     background-color: ${(props) => props.theme.colors.black};
     // }
 `
 
 const SpacePickerContainer = styled.div`
     display: flex;
     flex-direction: column;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.greyScale1};
     min-height: 500px;
 `
 

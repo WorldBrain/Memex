@@ -1,6 +1,7 @@
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type Storex from '@worldbrain/storex'
+import fromPairs from 'lodash/fromPairs'
 import * as Raven from 'src/util/raven'
 import type { ServerStorageModules } from 'src/storage/types'
 import type {
@@ -48,6 +49,7 @@ export class PageActivityIndicatorBackground {
         })
 
         this.remoteFunctions = {
+            getPageFollowedLists: this.getPageFollowedLists,
             getPageActivityStatus: this.getPageActivityStatus,
         }
     }
@@ -132,6 +134,39 @@ export class PageActivityIndicatorBackground {
         }
     }
 
+    private getPageFollowedLists: RemotePageActivityIndicatorInterface['getPageFollowedLists'] = async (
+        fullPageUrl,
+        extraFollowedListIds,
+    ) => {
+        const normalizedPageUrl = normalizeUrl(fullPageUrl)
+        const followedListEntries = await this.storage.findFollowedListEntriesByPage(
+            { normalizedPageUrl },
+        )
+
+        const followedListHasAnnotsById = new Map(
+            followedListEntries.map((entry) => [
+                entry.followedList,
+                entry.hasAnnotationsFromOthers,
+            ]),
+        )
+        const followedLists = await this.storage.findFollowedListsByIds([
+            ...followedListHasAnnotsById.keys(),
+            ...(extraFollowedListIds ?? []),
+        ])
+        return fromPairs(
+            [...followedLists.values()].map((list) => [
+                list.sharedList,
+                {
+                    hasAnnotationsFromOthers:
+                        followedListHasAnnotsById.get(list.sharedList) ?? false,
+                    sharedList: list.sharedList,
+                    creator: list.creator,
+                    name: list.name,
+                },
+            ]),
+        )
+    }
+
     private getPageActivityStatus: RemotePageActivityIndicatorInterface['getPageActivityStatus'] = async (
         fullPageUrl,
     ) => {
@@ -143,11 +178,20 @@ export class PageActivityIndicatorBackground {
             return 'no-activity'
         }
         return followedListEntries.reduce(
-            (acc, curr) => acc || curr.hasAnnotations,
+            (acc, curr) => acc || curr.hasAnnotationsFromOthers,
             false,
         )
             ? 'has-annotations'
             : 'no-annotations'
+    }
+
+    private async getCurrentUser(): Promise<UserReference | null> {
+        const userId = await this.deps.getCurrentUserId()
+        if (userId == null) {
+            return null
+        }
+
+        return { type: 'user-reference', id: userId }
     }
 
     createFollowedList: PageActivityIndicatorStorage['createFollowedList'] = (
@@ -208,14 +252,13 @@ export class PageActivityIndicatorBackground {
     }
 
     async syncFollowedLists(): Promise<void> {
-        const userId = await this.deps.getCurrentUserId()
-        if (userId == null) {
+        const user = await this.getCurrentUser()
+        if (user == null) {
             return
         }
-        const sharedLists = await this.getAllUserFollowedSharedListsFromServer({
-            id: userId,
-            type: 'user-reference',
-        })
+        const sharedLists = await this.getAllUserFollowedSharedListsFromServer(
+            user,
+        )
         const existingFollowedListsLookup = await this.storage.findAllFollowedLists()
 
         // Remove any local followedLists that don't have an associated remote sharedList (carry over from old implementation, b)
@@ -241,10 +284,10 @@ export class PageActivityIndicatorBackground {
     async syncFollowedListEntries(opts?: {
         now?: number
         /** If defined, will constrain the sync to only these followedLists. Else will sync all. */
-        forFollowedLists?: FollowedList[]
+        forFollowedLists?: Array<Pick<FollowedList, 'sharedList' | 'lastSync'>>
     }): Promise<void> {
-        const userId = await this.deps.getCurrentUserId()
-        if (userId == null) {
+        const currentUser = await this.getCurrentUser()
+        if (currentUser == null) {
             return
         }
         const now = opts?.now ?? Date.now()
@@ -270,16 +313,18 @@ export class PageActivityIndicatorBackground {
                     from: followedList.lastSync,
                 },
             )
+
             const sharedAnnotationListEntries = await contentSharing.getAnnotationListEntries(
                 {
                     listReference,
-                    // NOTE: We have to always get all the annotation entries as there's way to determine the true->false case for `followedListEntry.hasAnnotations` if you only have partial results
+                    ignoreFromUser: currentUser,
+                    // NOTE: We have to always get all the annotation entries as there's way to determine the true->false case for `followedListEntry.hasAnnotationsFromOthers` if you only have partial results
                     // from: localFollowedList?.lastSync,
                 },
             )
 
             for (const entry of sharedListEntries) {
-                const hasAnnotations = !!sharedAnnotationListEntries[
+                const hasAnnotationsFromOthers = !!sharedAnnotationListEntries[
                     entry.normalizedUrl
                 ]?.length
                 const localFollowedListEntry = existingFollowedListEntryLookup.get(
@@ -297,17 +342,18 @@ export class PageActivityIndicatorBackground {
                                 creator: entry.creator.id,
                                 sharedList: entry.sharedList.id,
                             },
-                            { hasAnnotations },
+                            { hasAnnotationsFromOthers },
                         ),
                     )
                 } else if (
-                    localFollowedListEntry.hasAnnotations !== hasAnnotations
+                    localFollowedListEntry.hasAnnotationsFromOthers !==
+                    hasAnnotationsFromOthers
                 ) {
                     await this.storage.updateFollowedListEntryHasAnnotations({
                         normalizedPageUrl: entry.normalizedUrl,
                         followedList: entry.sharedList.id,
+                        hasAnnotationsFromOthers,
                         updatedWhen: now,
-                        hasAnnotations,
                     })
                 }
             }
@@ -332,7 +378,7 @@ export class PageActivityIndicatorBackground {
                         sharedList: entry.sharedList.id,
                     }),
                 )
-                if (localFollowedListEntry?.hasAnnotations) {
+                if (localFollowedListEntry?.hasAnnotationsFromOthers) {
                     continue
                 }
 
@@ -340,14 +386,14 @@ export class PageActivityIndicatorBackground {
                     normalizedPageUrl: entry.normalizedPageUrl,
                     followedList: entry.sharedList.id,
                     updatedWhen: now,
-                    hasAnnotations: true,
+                    hasAnnotationsFromOthers: true,
                 })
             }
 
             // This handles the case where the last annotation for an entry was deleted
             for (const localEntry of existingFollowedListEntryLookup.values()) {
                 if (
-                    localEntry.hasAnnotations &&
+                    localEntry.hasAnnotationsFromOthers &&
                     !sharedAnnotationListEntries[localEntry.normalizedPageUrl]
                         ?.length
                 ) {
@@ -355,7 +401,7 @@ export class PageActivityIndicatorBackground {
                         normalizedPageUrl: localEntry.normalizedPageUrl,
                         followedList: localEntry.followedList,
                         updatedWhen: now,
-                        hasAnnotations: false,
+                        hasAnnotationsFromOthers: false,
                     })
                 }
             }

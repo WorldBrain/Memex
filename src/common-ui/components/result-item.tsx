@@ -14,8 +14,6 @@ import { SocialPage } from 'src/social-integration/types'
 import PageResultItem from './page-result-item'
 import SocialResultItem from './social-result-item'
 import SemiCircularRibbon from './semi-circular-ribbon'
-import { isFullUrlPDF } from 'src/util/uri-utils'
-import { getExtURL } from 'src/in-page-ui/tooltip/utils'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 
