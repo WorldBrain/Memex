@@ -996,8 +996,6 @@ const DefaultFooterStyled = styled.div`
 `
 
 const AnnotationStyled = styled.div`
-    color: rgb(54, 54, 46);
-
     box-sizing: border-box;
     display: flex;
     flex-direction: column;

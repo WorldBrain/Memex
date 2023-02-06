@@ -571,7 +571,7 @@ export default class SearchResultsContainer extends React.Component<
                     'Learn the basics about saving and searching what you read online'
                 videoURL =
                     'https://share.descript.com/embed/QTnFzKBo7XM?autoplay=1'
-                readURL = 'https://tutorials.memex.garden/webhighlights'
+                readURL = 'https://tutorials.memex.garden/memexbasics'
                 onDismiss = () => this.dismissTutorials(this.props.searchType)
             }
             if (this.props.searchType === 'notes') {
@@ -587,7 +587,7 @@ export default class SearchResultsContainer extends React.Component<
                     'Learn the basics about adding highlights to videos on Youtube, Vimeo and HTML5 videos'
                 videoURL =
                     'https://share.descript.com/embed/4yYXrC63L95?autoplay=1'
-                readURL = 'https://tutorials.memex.garden/webhighlights'
+                readURL = 'https://tutorials.memex.garden/videoAnnotations'
                 onDismiss = () => this.dismissTutorials(this.props.searchType)
             }
             if (this.props.searchType === 'twitter') {
@@ -595,7 +595,7 @@ export default class SearchResultsContainer extends React.Component<
                     'Learn the basics about saving and annotating tweets on the web and on mobile'
                 videoURL =
                     'https://share.descript.com/embed/TVgEKP80LqR?autoplay=1'
-                readURL = 'https://tutorials.memex.garden/webhighlights'
+                readURL = 'https://tutorials.memex.garden/tweets'
                 onDismiss = () => this.dismissTutorials(this.props.searchType)
             }
             if (this.props.searchType === 'pdf') {
@@ -603,7 +603,7 @@ export default class SearchResultsContainer extends React.Component<
                     'Learn the basics about annotating PDFs on the web and your hard drive'
                 videoURL =
                     'https://share.descript.com/embed/Vl7nXyy3sLb?autoplay=1'
-                readURL = 'https://tutorials.memex.garden/webhighlights'
+                readURL = 'https://tutorials.memex.garden/PDFannotations'
                 onDismiss = () => this.dismissTutorials(this.props.searchType)
             }
         }
@@ -620,7 +620,7 @@ export default class SearchResultsContainer extends React.Component<
                 </MobileAdContainer>
             )
             videoURL = 'https://share.descript.com/embed/Vl7nXyy3sLb?autoplay=1'
-            readURL = 'https://tutorials.memex.garden/webhighlights'
+            readURL = 'https://tutorials.memex.garden/mobileApp'
             onDismiss = this.props.onDismissMobileAd
         }
 

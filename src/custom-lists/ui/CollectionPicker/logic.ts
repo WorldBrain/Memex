@@ -37,6 +37,7 @@ export interface SpacePickerDependencies {
     width?: string
     autoFocus?: boolean
     context?: string
+    closePicker?: () => void
 }
 
 // TODO: This needs cleanup - so inconsistent
@@ -226,9 +227,9 @@ export default class SpacePickerLogic extends UILogic<
             return
         }
 
-        if (event.key === 'Enter' && this.dependencies.onSubmit) {
-            await this.dependencies.onSubmit()
-        }
+        // if (event.key === 'Enter' && this.dependencies.onSubmit) {
+        //     await this.dependencies.onSubmit()
+        // }
 
         if (this.newTabKeys.includes(event.key as KeyEvent)) {
             if (previousState.newEntryName !== '' && !(this.focusIndex >= 0)) {
@@ -269,6 +270,9 @@ export default class SpacePickerLogic extends UILogic<
 
                 return
             }
+        }
+        if (event.key === 'Escape') {
+            this.dependencies.closePicker()
         }
     }
 

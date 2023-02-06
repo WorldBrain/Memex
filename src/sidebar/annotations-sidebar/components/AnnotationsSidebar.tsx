@@ -746,7 +746,7 @@ export class AnnotationsSidebar extends React.Component<
                                 />
                             </TooltipBox>
                         ) : undefined}
-                        {listData.creator?.id === this.props.currentUser?.id &&
+                        {/* {listData.creator?.id === this.props.currentUser?.id &&
                         listData.remoteId == null ? (
                             <TooltipBox
                                 tooltipText="Share Space"
@@ -769,7 +769,7 @@ export class AnnotationsSidebar extends React.Component<
                                     }
                                 />
                             </TooltipBox>
-                        ) : undefined}
+                        ) : undefined} */}
                         {listInstance.annotationRefsLoadState !== 'success' &&
                         listData.hasRemoteAnnotationsToLoad ? (
                             this.renderLoader(undefined, 20)
@@ -1392,7 +1392,7 @@ export class AnnotationsSidebar extends React.Component<
                         fontColor="greyScale6"
                         onClick={() => this.props.onResetSpaceSelect()}
                     />
-                    {this.renderPermissionStatusButton()}
+                    {/* {this.renderPermissionStatusButton()} */}
                 </IsolatedViewHeaderTopBar>
                 <SpaceTitle>{selectedList.name}</SpaceTitle>
                 <SpaceDescription>{selectedList.description}</SpaceDescription>
