@@ -68,8 +68,8 @@ export class ContentScriptsBackground {
         fullPageUrl: string,
         openIsolatedView: (tabId: number) => Promise<true>,
         checkIfSidebarWorks: (tabId) => Promise<boolean>,
-        retryDelay = 100,
-        delayBeforeExecution = 1500,
+        retryDelay = 150,
+        delayBeforeExecution = 1,
     ) {
         const { browserAPIs } = this.options
         const activeTab = await browserAPIs.tabs.create({
@@ -91,14 +91,15 @@ export class ContentScriptsBackground {
                     let itWorked = false
                     let i = 0
                     while (!itWorked) {
-                        console.log('retry #', ++i)
+                        // console.log('retry #', ++i)
                         const done = await Promise.race([
                             delay(retryDelay),
                             checkIfSidebarWorks(tabId),
                         ])
 
                         if (done) {
-                            console.log('IT WORKED!')
+                            console.log('SIDEBAR READY!')
+                            await delay(250)
                             openIsolatedView(tabId)
                             itWorked = true
                         }
@@ -148,9 +149,7 @@ export class ContentScriptsBackground {
             async (tabId) => {
                 await runInTab<InPageUIContentScriptRemoteInterface>(
                     tabId,
-                ).showSidebar({
-                    action: 'show_shared_spaces',
-                })
+                ).testIfSidebarSetup()
                 return true
             },
         )

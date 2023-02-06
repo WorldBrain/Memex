@@ -1222,6 +1222,15 @@ export class SidebarContainerLogic extends UILogic<
         return nextState
     }
 
+    setIsolatedViewOnSidebarLoad: EventHandler<
+        'setIsolatedViewOnSidebarLoad'
+    > = async ({}) => {
+        this.emitMutation({
+            activeTab: { $set: 'spaces' },
+            loadState: { $set: 'running' },
+        })
+    }
+
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
         previousState,
@@ -1512,6 +1521,10 @@ export class SidebarContainerLogic extends UILogic<
                 previousState,
                 cachedList.unifiedId,
             )
+            this.emitMutation({
+                loadState: { $set: 'success' },
+            })
+
             return
         }
 
@@ -1542,6 +1555,10 @@ export class SidebarContainerLogic extends UILogic<
                 isForeignList: true,
                 hasRemoteAnnotationsToLoad: true,
                 unifiedAnnotationIds: [], // Will be populated soon when annots get cached
+            })
+
+            this.emitMutation({
+                loadState: { $set: 'success' },
             })
 
             let sharedAnnotationReferences: SharedAnnotationReference[] = []
