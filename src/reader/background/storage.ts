@@ -3,7 +3,7 @@ import {
     StorageModuleConfig,
     StorageModuleConstructorArgs,
 } from '@worldbrain/storex-pattern-modules'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { ReadableData } from 'src/reader/types'
 import { now } from 'moment'
 import Readability from 'readability/Readability'

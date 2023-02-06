@@ -6,7 +6,7 @@ import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
 } from '@worldbrain/memex-common/lib/storage/modules/tags/constants'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 
 export default class TagStorage extends StorageModule {

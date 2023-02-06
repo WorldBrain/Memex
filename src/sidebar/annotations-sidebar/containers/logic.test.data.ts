@@ -9,7 +9,7 @@ import type {
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import type { PageList } from 'src/custom-lists/background/types'
 import type {

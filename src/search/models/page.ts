@@ -6,7 +6,7 @@ import Visit from './visit'
 import Bookmark from './bookmark'
 import Tag from './tag'
 import { DBGet } from '../types'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { initErrHandler } from '../storage'
 
 // Keep these properties as Symbols to avoid storing them to DB

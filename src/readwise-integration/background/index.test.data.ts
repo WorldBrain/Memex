@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import type { ReadwiseHighlight } from '@worldbrain/memex-common/lib/readwise-integration/api/types'
 
 import * as DATA from 'src/tests/common-fixtures.data'

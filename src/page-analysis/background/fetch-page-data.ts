@@ -1,4 +1,4 @@
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { runtime } from 'webextension-polyfill'
 
 import extractFavIcon from 'src/page-analysis/background/content-extraction/extract-fav-icon'
