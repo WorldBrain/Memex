@@ -66,9 +66,10 @@ export class ContentScriptsBackground {
 
     private async doSomethingInNewTab(
         fullPageUrl: string,
-        something: (tabId: number) => Promise<true>,
-        retryDelay = 500,
-        delayBeforeExecution = 2000,
+        openIsolatedView: (tabId: number) => Promise<true>,
+        checkIfSidebarWorks: (tabId) => Promise<boolean>,
+        retryDelay = 100,
+        delayBeforeExecution = 1500,
     ) {
         const { browserAPIs } = this.options
         const activeTab = await browserAPIs.tabs.create({
@@ -90,14 +91,15 @@ export class ContentScriptsBackground {
                     let itWorked = false
                     let i = 0
                     while (!itWorked) {
-                        console.log('try in tab #', ++i)
+                        console.log('retry #', ++i)
                         const done = await Promise.race([
                             delay(retryDelay),
-                            something(tabId),
+                            checkIfSidebarWorks(tabId),
                         ])
 
                         if (done) {
                             console.log('IT WORKED!')
+                            openIsolatedView(tabId)
                             itWorked = true
                         }
                     }
@@ -132,15 +134,26 @@ export class ContentScriptsBackground {
         { tab },
         { fullPageUrl, sharedListId },
     ) => {
-        await this.doSomethingInNewTab(fullPageUrl, async (tabId) => {
-            await runInTab<InPageUIContentScriptRemoteInterface>(
-                tabId,
-            ).showSidebar({
-                action: 'selected_list_mode_from_web_ui',
-                sharedListId,
-            })
-            return true
-        })
+        await this.doSomethingInNewTab(
+            fullPageUrl,
+            async (tabId) => {
+                await runInTab<InPageUIContentScriptRemoteInterface>(
+                    tabId,
+                ).showSidebar({
+                    action: 'selected_list_mode_from_web_ui',
+                    sharedListId,
+                })
+                return true
+            },
+            async (tabId) => {
+                await runInTab<InPageUIContentScriptRemoteInterface>(
+                    tabId,
+                ).showSidebar({
+                    action: 'show_shared_spaces',
+                })
+                return true
+            },
+        )
     }
 
     goToAnnotationFromDashboardSidebar: ContentScriptsInterface<
@@ -149,19 +162,31 @@ export class ContentScriptsBackground {
         { tab },
         { fullPageUrl, annotationCacheId },
     ) => {
-        await this.doSomethingInNewTab(fullPageUrl, async (tabId) => {
-            await runInTab<InPageUIContentScriptRemoteInterface>(
-                tabId,
-            ).showSidebar({
-                annotationCacheId,
-                action: 'show_annotation',
-            })
+        await this.doSomethingInNewTab(
+            fullPageUrl,
+            async (tabId) => {
+                await runInTab<InPageUIContentScriptRemoteInterface>(
+                    tabId,
+                ).showSidebar({
+                    annotationCacheId,
+                    action: 'show_annotation',
+                })
 
-            await runInTab<InPageUIContentScriptRemoteInterface>(
-                tabId,
-            ).goToHighlight(annotationCacheId)
-            return true
-        })
+                await runInTab<InPageUIContentScriptRemoteInterface>(
+                    tabId,
+                ).goToHighlight(annotationCacheId)
+                return true
+            },
+            async (tabId) => {
+                await runInTab<InPageUIContentScriptRemoteInterface>(
+                    tabId,
+                ).showSidebar({
+                    annotationCacheId,
+                    action: 'show_annotation',
+                })
+                return true
+            },
+        )
     }
 
     private handleHistoryStateUpdate = async ({

@@ -14,6 +14,7 @@ export type InPageUISidebarAction =
     | 'set_sharing_access'
     | 'show_shared_spaces'
     | 'selected_list_mode_from_web_ui'
+    | 'show_my_annotations'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'
