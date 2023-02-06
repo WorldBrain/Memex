@@ -1,5 +1,5 @@
 import normalizeUrl from '@worldbrain/memex-url-utils/lib/normalize'
-import { default as transformUrl } from '@worldbrain/memex-url-utils/lib/extract-parts'
+import { extractUrlParts as transformUrl } from '@worldbrain/memex-common/lib/url-utils/extract-parts'
 import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/lib/constants'
 
 import transformPageText from '../util/transform-page-text'

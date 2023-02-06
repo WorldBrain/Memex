@@ -3,8 +3,8 @@ import { Tabs, Browser } from 'webextension-polyfill'
 import {
     normalizeUrl,
     isFullUrl,
-    URLNormalizer,
-} from '@worldbrain/memex-url-utils'
+} from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { URLNormalizer } from '@worldbrain/memex-common/lib/url-utils/normalize/types'
 
 import {
     makeRemotelyCallable,
