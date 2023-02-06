@@ -1448,12 +1448,11 @@ export class SidebarContainerLogic extends UILogic<
 
         if (list.remoteId != null) {
             let nextState = state
-            if (listInstance.annotationRefsLoadState === 'pristine') {
-                nextState = await this.loadRemoteAnnotationReferencesForSpecificLists(
-                    state,
-                    [list],
-                )
-            }
+            nextState = await this.loadRemoteAnnotationReferencesForSpecificLists(
+                state,
+                [list],
+            )
+
             await this.maybeLoadListRemoteAnnotations(nextState, unifiedListId)
         }
 
