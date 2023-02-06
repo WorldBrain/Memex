@@ -189,7 +189,7 @@ export class SidebarContainerLogic extends UILogic<
             cacheLoadState: this.options.shouldHydrateCacheOnInit
                 ? 'pristine'
                 : 'success',
-            loadState: 'pristine',
+            loadState: 'running',
             noteCreateState: 'pristine',
             secondarySearchState: 'pristine',
             remoteAnnotationsLoadState: 'pristine',
@@ -353,6 +353,7 @@ export class SidebarContainerLogic extends UILogic<
         await loadInitial<SidebarContainerState>(this, async () => {
             this.emitMutation({
                 showState: { $set: initialState ?? 'hidden' },
+                loadState: { $set: 'running' },
             })
 
             if (shouldHydrateCacheOnInit && fullPageUrl != null) {
