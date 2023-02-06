@@ -3,7 +3,7 @@ import { Thunk } from 'src/sidebar-overlay/types'
 import * as selectors from 'src/sidebar-overlay/sidebar/selectors'
 import { RES_PAGE_SIZE } from 'src/sidebar-overlay/sidebar/constants'
 import { AnnotSearchParams } from 'src/search/background/types'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
     nextResultsPage,
     setIsLoading,
