@@ -54,21 +54,22 @@ export default class Logic extends UILogic<State, Event> {
             this.emitMutation({
                 autoLoginState: { $set: 'running' },
             })
-            const done = await Promise.all([
-                this.autoLoginAvailable(),
-                this.openLinkIfAvailable(),
-            ])
+            await this.autoLoginAvailable()
 
-            if (done) {
-                if (this.hasAccountSynced) {
-                    await this._onUserLogIn(false)
-                } else {
-                    await this._onUserLogIn(true)
+            if (this.hasAccountSynced) {
+                console.log('accountsynced', this.hasAccountSynced)
+
+                // @Vincent: Optimisation here: Ideallyl we can start checking for if the link is available at the same time we start checking for account data. Saves a bunch of time for the user in the UI
+                const linkAvailable = await this.checkIfAutoOpenLinkAvailable()
+                if (linkAvailable) {
+                    console.log('link available')
+                    await this.openLinkIfAvailable()
                 }
+                await this._onUserLogIn(false)
             } else {
                 this.emitMutation({
                     loadState: { $set: 'pristine' },
-                    autoLoginState: { $set: 'running' },
+                    autoLoginState: { $set: 'pristine' },
                 })
             }
         } else {
@@ -85,15 +86,18 @@ export default class Logic extends UILogic<State, Event> {
     private autoLoginAvailable = async () => {
         let user = undefined
         let retries = 0
-        let maxRetries = 20
+        let maxRetries = 30
         while (user == null && retries !== maxRetries + 1) {
             user = await this.dependencies.authBG.getCurrentUser()
+
             if (user != null) {
                 this.hasAccountSynced = true
                 this.isExistingUser = true
+                console.log('user', user)
                 return true
             } else {
                 retries++
+                console.log('retrying findign user data')
                 if (retries === maxRetries) {
                     return false
                 }
@@ -111,9 +115,6 @@ export default class Logic extends UILogic<State, Event> {
         while (!linkAvailable && retries !== maxRetries + 1) {
             const linkToOpen = await browser.storage.local.get('@URL_TO_OPEN')
             if (linkToOpen['@URL_TO_OPEN'] != null) {
-                this.emitMutation({
-                    preventOnboardingFlow: { $set: true },
-                })
                 payLoad = linkToOpen['@URL_TO_OPEN']
                 await browser.storage.local.remove('@URL_TO_OPEN')
                 await this.dependencies.contentScriptsBG.openPageWithSidebarInSelectedListMode(
@@ -122,6 +123,31 @@ export default class Logic extends UILogic<State, Event> {
                         sharedListId: payLoad.sharedListId,
                     },
                 )
+                return true
+            } else {
+                retries++
+                if (retries === maxRetries) {
+                    return false
+                }
+                await delay(500)
+            }
+        }
+    }
+
+    private checkIfAutoOpenLinkAvailable = async () => {
+        let linkAvailable = false
+        let payLoad
+        let retries = 0
+        let maxRetries = 6
+
+        while (!linkAvailable && retries !== maxRetries + 1) {
+            const linkToOpen = await browser.storage.local.get('@URL_TO_OPEN')
+            if (linkToOpen['@URL_TO_OPEN'] != null) {
+                this.hasLinkToOpen = true
+                console.log('link to open', linkToOpen['@URL_TO_OPEN'])
+                this.emitMutation({
+                    preventOnboardingFlow: { $set: true },
+                })
                 return true
             } else {
                 retries++
@@ -146,38 +172,37 @@ export default class Logic extends UILogic<State, Event> {
     private async _onUserLogIn(newSignUp: boolean) {
         this.emitMutation({
             newSignUp: { $set: newSignUp },
+            setSaveState: { $set: 'running' },
+            loadState: { $set: 'running' },
         })
 
-        if (newSignUp) {
+        this.syncPromise = executeUITask(this, 'syncState', async () =>
+            this.dependencies.personalCloudBG.enableCloudSyncForNewInstall(),
+        )
+        if (!newSignUp) {
             this.emitMutation({
-                setSaveState: { $set: 'pristine' },
-                loadState: { $set: 'pristine' },
-                authDialogMode: { $set: 'signup' },
+                preventOnboardingFlow: { $set: true },
             })
         }
 
-        if (this.isExistingUser) {
-            this.emitMutation({
-                shouldShowLogin: { $set: false },
-            })
-            this.syncPromise = executeUITask(this, 'syncState', async () =>
-                this.dependencies.personalCloudBG.enableCloudSyncForNewInstall(),
-            )
-        }
-        if (!newSignUp) {
-            this.emitMutation({
-                setSaveState: { $set: 'running' },
-                authDialogMode: { $set: 'login' },
-            })
-            this.syncPromise = executeUITask(this, 'syncState', async () =>
-                this.dependencies.personalCloudBG.enableCloudSyncForNewInstall(),
-            )
+        if (this.hasLinkToOpen) {
+            console.log('shouldclose')
+            window.close()
+        } else {
             this.dependencies.navToDashboard()
         }
     }
 
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({ event }) => {
-        await this._onUserLogIn(!!event.newSignUp)
+        if ((this.hasLinkToOpen = true)) {
+            this.emitMutation({
+                loadState: { $set: 'running' },
+            })
+            await this.openLinkIfAvailable()
+            await this._onUserLogIn(!!event.newSignUp)
+        } else {
+            await this._onUserLogIn(!!event.newSignUp)
+        }
     }
 
     goToSyncStep: EventHandler<'goToSyncStep'> = async ({ previousState }) => {
