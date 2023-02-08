@@ -9,6 +9,7 @@ import {
 } from '@worldbrain/memex-common/lib/authentication/auth-sync'
 import type { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 import type { Runtime } from 'webextension-polyfill'
+import { browser } from 'webextension-polyfill-ts'
 
 function validSender(sender: any, expectedOrigins: string[]) {
     if (!(typeof sender === 'object' && typeof sender.origin === 'string')) {
@@ -61,7 +62,6 @@ async function sendTokenToAppHandler(
     sendResponse: (obj: ReturnType<typeof packMessage>) => void,
     messageObj: ReturnType<typeof unpackMessage>,
 ) {
-    console.log('Trying to send token to app.')
     if (messageObj.message !== ExtMessage.TOKEN_REQUEST) {
         sendResponse(packMessage(ExtMessage.LOGGED_IN))
         return
@@ -80,7 +80,6 @@ async function loginWithAppTokenHandler(
     sendResponse: (obj: ReturnType<typeof packMessage>) => void,
     messageObj: ReturnType<typeof unpackMessage>,
 ) {
-    console.log('Trying to get token from app.')
     if (messageObj.message === ExtMessage.TOKEN) {
         if (messageObj.payload) {
             await authService.loginWithToken(messageObj.payload)
@@ -112,6 +111,11 @@ export async function listenToWebAppMessage(
             }
             reactingToMessage = true
 
+            if (messageObj.message === ExtMessage.URL_TO_OPEN) {
+                storeURLtoOpenAfterLogin(messageObj.payload)
+                return true
+            }
+
             // Can not use a promise here, otherwise the listener will never resolve
             authService
                 .getCurrentUser()
@@ -139,4 +143,8 @@ export async function listenToWebAppMessage(
         expectedOrigins,
         runtimeAPI,
     )
+}
+
+async function storeURLtoOpenAfterLogin(message) {
+    await browser.storage.local.set({ '@URL_TO_OPEN': JSON.parse(message) })
 }

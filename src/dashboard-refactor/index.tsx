@@ -1375,7 +1375,12 @@ export class DashboardContainer extends StatefulUIElement<
         // <GlobalStyle />
         const { listsSidebar, mode } = this.state
         if (mode === 'onboarding') {
-            return <Onboarding authBG={this.props.authBG} />
+            return (
+                <Onboarding
+                    contentScriptsBG={this.props.contentScriptsBG}
+                    authBG={this.props.authBG}
+                />
+            )
         }
 
         const lockedState = {

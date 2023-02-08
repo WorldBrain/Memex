@@ -91,14 +91,12 @@ export class ContentScriptsBackground {
                     let itWorked = false
                     let i = 0
                     while (!itWorked) {
-                        // console.log('retry #', ++i)
                         const done = await Promise.race([
                             delay(retryDelay),
                             checkIfSidebarWorks(tabId),
                         ])
 
                         if (done) {
-                            console.log('SIDEBAR READY!')
                             await delay(250)
                             openIsolatedView(tabId)
                             itWorked = true

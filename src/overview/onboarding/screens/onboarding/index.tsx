@@ -34,10 +34,15 @@ export default class OnboardingScreen extends StatefulUIElement<
 > {
     static defaultProps: Pick<
         Props,
-        'navToDashboard' | 'authBG' | 'personalCloudBG' | 'navToGuidedTutorial'
+        | 'navToDashboard'
+        | 'authBG'
+        | 'personalCloudBG'
+        | 'navToGuidedTutorial'
+        | 'contentScriptsBG'
     > = {
         authBG: runInBackground(),
         personalCloudBG: runInBackground(),
+        contentScriptsBG: runInBackground(),
         navToDashboard: () => {
             window.location.href = OVERVIEW_URL
             window.location.reload()
@@ -134,57 +139,65 @@ export default class OnboardingScreen extends StatefulUIElement<
         <>
             <WelcomeContainer>
                 <LeftSide>
-                    <ContentBox>
-                        {this.state.authDialogMode === 'signup' && (
-                            <>
-                                <Title>Welcome to Memex</Title>
-                                <DescriptionText>
-                                    Create an account to get started
-                                </DescriptionText>
-                            </>
-                        )}
-                        {this.state.authDialogMode === 'login' &&
-                            setSaveState !== 'running' && (
-                                <UserScreenContainer>
-                                    <Title>Welcome Back!</Title>
+                    {this.state.loadState === 'running' ? (
+                        <>
+                            <LoadingIndicator size={40} />
+                        </>
+                    ) : (
+                        <ContentBox>
+                            {this.state.authDialogMode === 'signup' && (
+                                <>
+                                    <Title>Welcome to Memex</Title>
                                     <DescriptionText>
-                                        Login to continue
+                                        Create an account to get started
+                                    </DescriptionText>
+                                </>
+                            )}
+                            {this.state.authDialogMode === 'login' &&
+                                setSaveState !== 'running' && (
+                                    <UserScreenContainer>
+                                        <Title>Welcome Back!</Title>
+                                        <DescriptionText>
+                                            Login to continue
+                                        </DescriptionText>
+                                    </UserScreenContainer>
+                                )}
+                            {setSaveState === 'running' && <></>}
+                            {this.state.authDialogMode === 'resetPassword' && (
+                                <UserScreenContainer>
+                                    <Title>Reset your password</Title>
+                                    <DescriptionText>
+                                        We'll send you an email with reset
+                                        instructions
                                     </DescriptionText>
                                 </UserScreenContainer>
                             )}
-                        {setSaveState === 'running' && <></>}
-                        {this.state.authDialogMode === 'resetPassword' && (
-                            <UserScreenContainer>
-                                <Title>Reset your password</Title>
-                                <DescriptionText>
-                                    We'll send you an email with reset
-                                    instructions
-                                </DescriptionText>
-                            </UserScreenContainer>
-                        )}
-                        {this.state.authDialogMode ===
-                            'ConfirmResetPassword' && (
-                            <UserScreenContainer>
-                                <Title>Check your Emails</Title>
-                                <DescriptionText>
-                                    Don't forget the spam folder!
-                                </DescriptionText>
-                            </UserScreenContainer>
-                        )}
-                        <AuthDialog
-                            onAuth={({ reason }) => {
-                                this.processEvent('onUserLogIn', {
-                                    newSignUp: reason === 'register',
-                                })
-                            }}
-                            onModeChange={({ mode, setSaveState }) => {
-                                this.processEvent('setAuthDialogMode', { mode })
-                                this.processEvent('setSaveState', {
-                                    setSaveState,
-                                })
-                            }}
-                        />
-                    </ContentBox>
+                            {this.state.authDialogMode ===
+                                'ConfirmResetPassword' && (
+                                <UserScreenContainer>
+                                    <Title>Check your Emails</Title>
+                                    <DescriptionText>
+                                        Don't forget the spam folder!
+                                    </DescriptionText>
+                                </UserScreenContainer>
+                            )}
+                            <AuthDialog
+                                onAuth={({ reason }) => {
+                                    this.processEvent('onUserLogIn', {
+                                        newSignUp: reason === 'register',
+                                    })
+                                }}
+                                onModeChange={({ mode, setSaveState }) => {
+                                    this.processEvent('setAuthDialogMode', {
+                                        mode,
+                                    })
+                                    this.processEvent('setSaveState', {
+                                        setSaveState,
+                                    })
+                                }}
+                            />
+                        </ContentBox>
+                    )}
                 </LeftSide>
                 {this.renderInfoSide()}
             </WelcomeContainer>
@@ -196,6 +209,8 @@ export default class OnboardingScreen extends StatefulUIElement<
             <OnboardingBox>
                 {this.state.shouldShowLogin
                     ? this.renderLoginStep(this.state.setSaveState)
+                    : this.state.preventOnboardingFlow
+                    ? this.processEvent('finishOnboarding', null)
                     : this.processEvent('finishOnboarding', null) &&
                       this.processEvent('goToGuidedTutorial', null)}
             </OnboardingBox>
