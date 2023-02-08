@@ -40,6 +40,7 @@ export default class Logic extends UILogic<State, Event> {
         passwordConfirm: '',
         setSaveState: 'pristine',
         preventOnboardingFlow: false,
+        autoLoginState: 'pristine',
     })
 
     async init() {
@@ -50,6 +51,9 @@ export default class Logic extends UILogic<State, Event> {
         })
 
         if (await this.checkIfMemexSocialTabOpen()) {
+            this.emitMutation({
+                autoLoginState: { $set: 'running' },
+            })
             const done = await Promise.all([
                 this.autoLoginAvailable(),
                 this.openLinkIfAvailable(),
@@ -64,6 +68,7 @@ export default class Logic extends UILogic<State, Event> {
             } else {
                 this.emitMutation({
                     loadState: { $set: 'pristine' },
+                    autoLoginState: { $set: 'running' },
                 })
             }
         } else {
@@ -80,7 +85,7 @@ export default class Logic extends UILogic<State, Event> {
     private autoLoginAvailable = async () => {
         let user = undefined
         let retries = 0
-        let maxRetries = 10
+        let maxRetries = 20
         while (user == null && retries !== maxRetries + 1) {
             user = await this.dependencies.authBG.getCurrentUser()
             if (user != null) {
@@ -101,7 +106,7 @@ export default class Logic extends UILogic<State, Event> {
         let linkAvailable = false
         let payLoad
         let retries = 0
-        let maxRetries = 10
+        let maxRetries = 20
 
         while (!linkAvailable && retries !== maxRetries + 1) {
             const linkToOpen = await browser.storage.local.get('@URL_TO_OPEN')

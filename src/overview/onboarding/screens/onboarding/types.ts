@@ -29,6 +29,7 @@ export interface State {
     passwordMatch: boolean
     setSaveState: UITaskState
     preventOnboardingFlow: boolean
+    autoLoginState: UITaskState
 }
 
 export type Event = UIEvent<{

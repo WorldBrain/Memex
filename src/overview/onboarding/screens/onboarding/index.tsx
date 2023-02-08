@@ -136,72 +136,75 @@ export default class OnboardingScreen extends StatefulUIElement<
     }
 
     private renderLoginStep = (setSaveState) => (
-        <>
-            <WelcomeContainer>
-                <LeftSide>
-                    {this.state.loadState === 'running' ? (
-                        <>
-                            <LoadingIndicator size={40} />
-                        </>
-                    ) : (
-                        <ContentBox>
-                            {this.state.authDialogMode === 'signup' && (
-                                <>
-                                    <Title>Welcome to Memex</Title>
-                                    <DescriptionText>
-                                        Create an account to get started
-                                    </DescriptionText>
-                                </>
-                            )}
-                            {this.state.authDialogMode === 'login' &&
-                                setSaveState !== 'running' && (
-                                    <UserScreenContainer>
-                                        <Title>Welcome Back!</Title>
-                                        <DescriptionText>
-                                            Login to continue
-                                        </DescriptionText>
-                                    </UserScreenContainer>
-                                )}
-                            {setSaveState === 'running' && <></>}
-                            {this.state.authDialogMode === 'resetPassword' && (
+        <WelcomeContainer>
+            <LeftSide>
+                {this.state.loadState === 'running' ? (
+                    <LoadingIndicatorBox>
+                        <LoadingIndicator size={40} />
+                        {this.state.autoLoginState === 'running' && (
+                            <DescriptionText>
+                                Preparing a smooth ride
+                            </DescriptionText>
+                        )}
+                    </LoadingIndicatorBox>
+                ) : (
+                    <ContentBox>
+                        {this.state.authDialogMode === 'signup' && (
+                            <>
+                                <Title>Welcome to Memex</Title>
+                                <DescriptionText>
+                                    Create an account to get started
+                                </DescriptionText>
+                            </>
+                        )}
+                        {this.state.authDialogMode === 'login' &&
+                            setSaveState !== 'running' && (
                                 <UserScreenContainer>
-                                    <Title>Reset your password</Title>
+                                    <Title>Welcome Back!</Title>
                                     <DescriptionText>
-                                        We'll send you an email with reset
-                                        instructions
+                                        Login to continue
                                     </DescriptionText>
                                 </UserScreenContainer>
                             )}
-                            {this.state.authDialogMode ===
-                                'ConfirmResetPassword' && (
-                                <UserScreenContainer>
-                                    <Title>Check your Emails</Title>
-                                    <DescriptionText>
-                                        Don't forget the spam folder!
-                                    </DescriptionText>
-                                </UserScreenContainer>
-                            )}
-                            <AuthDialog
-                                onAuth={({ reason }) => {
-                                    this.processEvent('onUserLogIn', {
-                                        newSignUp: reason === 'register',
-                                    })
-                                }}
-                                onModeChange={({ mode, setSaveState }) => {
-                                    this.processEvent('setAuthDialogMode', {
-                                        mode,
-                                    })
-                                    this.processEvent('setSaveState', {
-                                        setSaveState,
-                                    })
-                                }}
-                            />
-                        </ContentBox>
-                    )}
-                </LeftSide>
-                {this.renderInfoSide()}
-            </WelcomeContainer>
-        </>
+                        {setSaveState === 'running' && <></>}
+                        {this.state.authDialogMode === 'resetPassword' && (
+                            <UserScreenContainer>
+                                <Title>Reset your password</Title>
+                                <DescriptionText>
+                                    We'll send you an email with reset
+                                    instructions
+                                </DescriptionText>
+                            </UserScreenContainer>
+                        )}
+                        {this.state.authDialogMode ===
+                            'ConfirmResetPassword' && (
+                            <UserScreenContainer>
+                                <Title>Check your Emails</Title>
+                                <DescriptionText>
+                                    Don't forget the spam folder!
+                                </DescriptionText>
+                            </UserScreenContainer>
+                        )}
+                        <AuthDialog
+                            onAuth={({ reason }) => {
+                                this.processEvent('onUserLogIn', {
+                                    newSignUp: reason === 'register',
+                                })
+                            }}
+                            onModeChange={({ mode, setSaveState }) => {
+                                this.processEvent('setAuthDialogMode', {
+                                    mode,
+                                })
+                                this.processEvent('setSaveState', {
+                                    setSaveState,
+                                })
+                            }}
+                        />
+                    </ContentBox>
+                )}
+            </LeftSide>
+            {this.renderInfoSide()}
+        </WelcomeContainer>
     )
 
     render() {
@@ -217,6 +220,14 @@ export default class OnboardingScreen extends StatefulUIElement<
         )
     }
 }
+
+const LoadingIndicatorBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 30px;
+`
 
 const UserScreenContainer = styled.div`
     display: flex;
@@ -311,15 +322,19 @@ const WelcomeContainer = styled.div`
     justify-content: space-between;
     overflow: hidden;
     background-color: ${(props) => props.theme.colors.black};
+    height: 100vh;
 `
 
 const LeftSide = styled.div`
     width: fill-available;
     display: flex;
-    justify-content: center;
     align-items: center;
-    flex-direction: column;
-    background-color: ${(props) => props.theme.colors.black};
+    z-index: 2;
+    flex-direction: row;
+    z-index: 2;
+    /* position: absolute; */
+    justify-content: flex-start;
+    margin-left: 20%;
 
     @media (max-width: 1000px) {
         width: 100%;
@@ -336,6 +351,10 @@ const ContentBox = styled.div`
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+    padding: 30px 50px;
+    background: ${(props) => props.theme.colors.black}30;
+    backdrop-filter: blur(5px);
+    border-radius: 20px;
 `
 
 const Title = styled.div`
@@ -363,6 +382,10 @@ const RightSide = styled.div`
     grid-auto-flow: row;
     justify-content: center;
     align-items: center;
+    position: absolute;
+    right: 0;
+    top: 0%;
+    z-index: 1;
 
     @media (max-width: 1000px) {
         display: none;
@@ -373,6 +396,7 @@ const CommentDemo = styled.img`
     height: fill-available;
     width: auto;
     margin: auto;
+    opacity: 0.4;
 `
 
 const TitleSmall = styled.div`
