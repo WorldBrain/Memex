@@ -50,29 +50,29 @@ export default class PageActivityIndicator extends React.PureComponent<
                 isExpanded={this.state.isExpanded}
             >
                 <ExpandedContainer isExpanded={this.state.isExpanded}>
-                    <Icon icon="goTo" heightAndWidth="20px" />
-                    <TextBox>
-                        <TextMain>Page is annotated</TextMain>
-                        <TextSecondary>
-                            in Memex Spaces you follow
-                        </TextSecondary>
-                    </TextBox>
-
                     <Icon
                         icon="removeX"
-                        heightAndWidth="20px"
+                        heightAndWidth="22px"
                         onClick={(event) => {
                             event.stopPropagation()
                             this.setState({ isShown: false })
                             this.keepNotShown = true
                         }}
                     />
+                    <TextBox>
+                        <TextMain>Page is annotated</TextMain>
+                        <TextSecondary>
+                            in Memex Spaces you follow
+                        </TextSecondary>
+                    </TextBox>
+                    <Icon icon="goTo" heightAndWidth="24px" />
                 </ExpandedContainer>
                 <MiniContainer isExpanded={this.state.isExpanded}>
                     <Icon
                         filePath={logoNoText}
                         heightAndWidth="30px"
                         color="prime2"
+                        hoverOff
                     />
                 </MiniContainer>
             </Container>
@@ -97,7 +97,7 @@ const Container = styled.div<{ isExpanded }>`
     z-index: 30000000000;
     border-radius: 6px;
     padding: 10px;
-    border: 1px solid ${(props) => props.theme.colors.greyScale4};
+    border: 1px solid ${(props) => props.theme.colors.greyScale2};
     background-color: ${(props) => props.theme.colors.black};
     box-shadow: 0px 4px 16px rgba(14, 15, 21, 0.3),
         0px 12px 24px rgba(14, 15, 21, 0.15);
@@ -115,6 +115,10 @@ const Container = styled.div<{ isExpanded }>`
             max-width: 300px;
             width: fit-content;
         `};
+
+    & * {
+        cursor: pointer;
+    }
 `
 
 const MiniContainer = styled.div<{

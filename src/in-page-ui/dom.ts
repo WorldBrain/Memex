@@ -58,12 +58,17 @@ export function createShadowRootIfSupported(
          * More info: https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow#Parameters
          */
         shadow = container.attachShadow({ mode: 'open' })
-
         const fontFile = runtime.getURL('/fonts/Satoshi/satoshi.css')
+        const style = document.createElement('style')
+        style.dataset.description = 'memex-satoshi-font-faces'
+
+        style.appendChild(document.createTextNode(styles))
+        document.head.appendChild(style)
+
         var innerHTML = ''
         innerHTML += '<style>'
         innerHTML +=
-            ':host {all: initial, font-family: "Satoshi"} :host * {font-family: "Satoshi", sans-serif; line-height: initial}'
+            ':host {all: initial, font-family: "Satoshi"} :host * {font-family: "Satoshi"; line-height: initial}'
         innerHTML += `</style> <link rel="stylesheet" href="${fontFile}" />`
         shadow.innerHTML = innerHTML
 
@@ -80,3 +85,128 @@ export function createShadowRootIfSupported(
 
     return { rootElement, shadow }
 }
+
+const rootDirectory = runtime.getURL('/fonts/Satoshi/')
+
+const styles = `
+@font-face {
+    font-family: 'Satoshi';
+    src: url(${rootDirectory}Satoshi-Variable.woff2) format('woff2'),
+        url(${rootDirectory}Satoshi-Variable.woff) format('woff'),
+        url(${rootDirectory}Satoshi-Variable.ttf) format('truetype');
+    font-weight: 300;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Satoshi';
+    src: url(${rootDirectory}Satoshi-VariableItalic.woff2) format('woff2'),
+        url(${rootDirectory}Satoshi-VariableItalic.woff) format('woff'),
+        url(${rootDirectory}Satoshi-VariableItalic.ttf) format('truetype');
+    font-weight: 300;
+    font-display: swap;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Satoshi';
+    src: url(${rootDirectory}Satoshi-Light.woff2) format('woff2'),
+        url(${rootDirectory}Satoshi-Light.woff) format('woff'),
+        url(${rootDirectory}Satoshi-Light.ttf) format('truetype');
+    font-weight: 300;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Satoshi';
+    src: url(${rootDirectory}Satoshi-LightItalic.woff2) format('woff2'),
+        url(${rootDirectory}Satoshi-LightItalic.woff) format('woff'),
+        url(${rootDirectory}Satoshi-LightItalic.ttf) format('truetype');
+    font-weight: 300;
+    font-display: swap;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Satoshi';
+    src: url(${rootDirectory}Satoshi-Regular.woff2) format('woff2'),
+        url(${rootDirectory}Satoshi-Regular.woff) format('woff'),
+        url(${rootDirectory}Satoshi-Regular.ttf) format('truetype');
+    font-weight: 400;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Satoshi';
+    src: url(${rootDirectory}Satoshi-Italic.woff2) format('woff2'),
+        url(${rootDirectory}Satoshi-Italic.woff) format('woff'),
+        url(${rootDirectory}Satoshi-Italic.ttf) format('truetype');
+    font-weight: 400;
+    font-display: swap;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Satoshi';
+    src: url(${rootDirectory}Satoshi-Medium.woff2) format('woff2'),
+        url(${rootDirectory}Satoshi-Medium.woff) format('woff'),
+        url(${rootDirectory}Satoshi-Medium.ttf) format('truetype');
+    font-weight: 500;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Satoshi';
+    src: url(${rootDirectory}Satoshi-MediumItalic.woff2) format('woff2'),
+        url(${rootDirectory}Satoshi-MediumItalic.woff) format('woff'),
+        url(${rootDirectory}Satoshi-MediumItalic.ttf) format('truetype');
+    font-weight: 500;
+    font-display: swap;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Satoshi';
+    src: url(${rootDirectory}Satoshi-Bold.woff2) format('woff2'),
+        url(${rootDirectory}Satoshi-Bold.woff) format('woff'),
+        url(${rootDirectory}Satoshi-Bold.ttf) format('truetype');
+    font-weight: 700;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Satoshi';
+    src: url(${rootDirectory}Satoshi-BoldItalic.woff2) format('woff2'),
+        url(${rootDirectory}Satoshi-BoldItalic.woff) format('woff'),
+        url(${rootDirectory}Satoshi-BoldItalic.ttf) format('truetype');
+    font-weight: 700;
+    font-display: swap;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Satoshi';
+    src: url(${rootDirectory}Satoshi-Black.woff2) format('woff2'),
+        url(${rootDirectory}Satoshi-Black.woff) format('woff'),
+        url(${rootDirectory}Satoshi-Black.ttf) format('truetype');
+    font-weight: 900;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Satoshi';
+    src: url(${rootDirectory}Satoshi-BlackItalic.woff2) format('woff2'),
+        url(${rootDirectory}Satoshi-BlackItalic.woff) format('woff'),
+        url(${rootDirectory}Satoshi-BlackItalic.ttf) format('truetype');
+    font-weight: 900;
+    font-display: swap;
+    font-style: italic;
+}
+
+`

@@ -373,9 +373,9 @@ const EditorDummy = styled.div`
     cursor: text;
     float: left;
     color: ${(props) => props.theme.colors.greyScale5};
-    font-style: italic;
     display: flex;
     align-items: center;
+    font-weight: 400;
 `
 
 const SaveCancelArea = styled.div`

@@ -40,7 +40,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareMenu'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import type { AnnotationSharingStates } from 'src/content-sharing/background/types'
-import { getLocalStorage } from 'src/util/storage'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
@@ -203,9 +203,16 @@ export class AnnotationsSidebar extends React.Component<
             SHOW_ISOLATED_VIEW_KEY,
         )
 
-        this.setState({
-            showIsolatedViewNotif: isolatedViewNotifVisible,
-        })
+        if (isolatedViewNotifVisible == null) {
+            await setLocalStorage(SHOW_ISOLATED_VIEW_KEY, true)
+            this.setState({
+                showIsolatedViewNotif: true,
+            })
+        } else {
+            this.setState({
+                showIsolatedViewNotif: isolatedViewNotifVisible,
+            })
+        }
     }
 
     componentWillUnmount() {}
@@ -920,7 +927,9 @@ export class AnnotationsSidebar extends React.Component<
             )
 
             let followedLists = allLists.filter(
-                (list) => this.spaceOwnershipStatus(list) === 'Follower',
+                (list) =>
+                    this.spaceOwnershipStatus(list) === 'Follower' &&
+                    !list.isForeignList,
             )
 
             let joinedLists = allLists.filter(
@@ -1071,10 +1080,49 @@ export class AnnotationsSidebar extends React.Component<
         return this.renderListAnnotations(selectedListId, true)
     }
 
+    isolatedViewNotifVisible = async () =>
+        await setLocalStorage(SHOW_ISOLATED_VIEW_KEY, false)
+
+    private renderFocusModeNotif(listData) {
+        if (
+            this.state.showIsolatedViewNotif &&
+            (this.spaceOwnershipStatus(listData) === 'Contributor' ||
+                this.spaceOwnershipStatus(listData) === 'Creator')
+        ) {
+            return (
+                <FocusModeNotifContainer>
+                    <FocusModeNotifTopBar>
+                        <FocusModeNotifTitle>
+                            <Icon
+                                filePath={'commentAdd'}
+                                heightAndWidth={'20px'}
+                                color={'prime1'}
+                                hoverOff
+                            />
+                            Space Focus Mode
+                        </FocusModeNotifTitle>
+                        <Icon
+                            filePath={'removeX'}
+                            heightAndWidth={'20px'}
+                            color={'greyScale5'}
+                        />
+                    </FocusModeNotifTopBar>
+                    <FocusModeNotifExplainer>
+                        While you have a Space opened in this view (even with
+                        the sidebar closed), all new highlights and notes are
+                        automatically added to it.
+                    </FocusModeNotifExplainer>
+                </FocusModeNotifContainer>
+            )
+        }
+    }
+
     private renderResultsBody() {
         const selectedList = this.props.annotationsCache.lists.byId[
             this.props.selectedListId
         ]
+
+        const listData = this.props.lists.byId[this.props.selectedListId]
 
         if (this.props.activeTab === 'feed') {
             return this.renderFeed()
@@ -1093,6 +1141,7 @@ export class AnnotationsSidebar extends React.Component<
         ) {
             return (
                 <>
+                    {this.renderFocusModeNotif(listData)}
                     {this.renderSelectedListTopBar()}
                     <AnnotationsSectionStyled>
                         {this.renderAnnotationsEditableForSelectedList()}
@@ -1392,7 +1441,7 @@ export class AnnotationsSidebar extends React.Component<
                         fontColor="greyScale6"
                         onClick={() => this.props.onResetSpaceSelect()}
                     />
-                    {/* {this.renderPermissionStatusButton()} */}
+                    {this.renderPermissionStatusButton()}
                 </IsolatedViewHeaderTopBar>
                 <SpaceTitle>{selectedList.name}</SpaceTitle>
                 <SpaceDescription>{selectedList.description}</SpaceDescription>
@@ -1438,57 +1487,83 @@ export class AnnotationsSidebar extends React.Component<
 
         if (permissionStatus === 'Follower') {
             return (
-                <PermissionInfoButton
+                <PrimaryAction
                     label="Follower"
-                    type="secondary"
+                    type="forth"
                     size="small"
-                    icon="plus"
-                >
-                    <Icon
-                        filePath="plusIcon"
-                        color="greyScale5"
-                        heightAndWidth="20px"
-                        hoverOff
-                    />
-                    Follower
-                </PermissionInfoButton>
+                    icon="check"
+                    onClick={null}
+                    fontColor={'greyScale6'}
+                />
             )
         }
 
         if (permissionStatus === 'Creator') {
-            if (selectedList.remoteId == null) {
-                return (
-                    <PrimaryAction
+            return (
+                <CreatorActionButtons>
+                    <TooltipBox
+                        tooltipText={
+                            <span>
+                                While being in this view, even if the sidebar
+                                closes, all new annotations are added to to this
+                                Space.
+                            </span>
+                        }
+                        placement={'bottom-end'}
+                        width={'200px'}
+                    >
+                        {/* <PrimaryAction
                         type="tertiary"
                         size="small"
                         icon="link"
                         label={'Share Space'}
                         onClick={null}
                         fontColor={'greyScale5'}
-                    />
-                )
-            } else {
-                return (
-                    <CreatorActionButtons>
-                        <PrimaryAction
-                            type="tertiary"
-                            size="small"
-                            icon="link"
-                            label={'Share Space'}
-                            onClick={null}
-                            fontColor={'greyScale5'}
-                        />
+                    /> */}
                         <PrimaryAction
                             type="forth"
                             size="small"
                             icon="personFine"
                             label={'Creator'}
                             onClick={null}
-                            fontColor={'greyScale5'}
+                            fontColor={'greyScale6'}
                         />
-                    </CreatorActionButtons>
-                )
-            }
+                    </TooltipBox>
+                </CreatorActionButtons>
+            )
+            // if (selectedList.remoteId == null) {
+            //     return (
+            //         <PrimaryAction
+            //             type="tertiary"
+            //             size="small"
+            //             icon="link"
+            //             label={'Share Space'}
+            //             onClick={null}
+            //             fontColor={'greyScale5'}
+            //         />
+            //     )
+            // } else {
+            //     return (
+            //         <CreatorActionButtons>
+            //             {/* <PrimaryAction
+            //                 type="tertiary"
+            //                 size="small"
+            //                 icon="link"
+            //                 label={'Share Space'}
+            //                 onClick={null}
+            //                 fontColor={'greyScale5'}
+            //             /> */}
+            //             <PrimaryAction
+            //                 type="forth"
+            //                 size="small"
+            //                 icon="personFine"
+            //                 label={'Creator'}
+            //                 onClick={null}
+            //                 fontColor={'greyScale5'}
+            //             />
+            //         </CreatorActionButtons>
+            //     )
+            // }
         }
 
         if (permissionStatus === 'Contributor') {
@@ -1496,25 +1571,22 @@ export class AnnotationsSidebar extends React.Component<
                 <TooltipBox
                     tooltipText={
                         <span>
-                            You can add pages & <br /> annotations to this Space
+                            You can add pages & annotations to this Space.{' '}
+                            <br /> While being in this view, even if the sidebar
+                            closes, all new annotations are added to it.
                         </span>
                     }
                     placement={'bottom-end'}
+                    width={'200px'}
                 >
-                    <PermissionInfoButton
+                    <PrimaryAction
                         label="Contributor"
-                        type="secondary"
+                        type="forth"
                         size="small"
-                        icon="plus"
-                    >
-                        <Icon
-                            filePath="peopleFine"
-                            color="greyScale5"
-                            heightAndWidth="20px"
-                            hoverOff
-                        />
-                        Contributor
-                    </PermissionInfoButton>
+                        icon="peopleFine"
+                        onClick={null}
+                        fontColor={'greyScale6'}
+                    />
                 </TooltipBox>
             )
         }
@@ -1672,6 +1744,44 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const FocusModeNotifContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    background-color: ${(props) => props.theme.colors.black};
+    border-radius: 8px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale2};
+    margin: 10px;
+    grid-gap: 10px;
+
+    & * {
+        font-family: Satoshi, sans-serif;
+    }
+`
+
+const FocusModeNotifTopBar = styled.div`
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+`
+
+const FocusModeNotifTitle = styled.div`
+    display: flex;
+    color: ${(props) => props.theme.colors.white};
+    font-size: 16px;
+    align-items: center;
+    grid-gap: 5px;
+    font-weight: 500;
+`
+
+const FocusModeNotifExplainer = styled.div`
+    display: flex;
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 14px;
+    line-height: 21px;
+`
+
 export default AnnotationsSidebar
 /// Search bar
 // TODO: Move icons to styled components library, refactored shared css
@@ -1723,7 +1833,7 @@ const SpaceTypeSection = styled.div`
     flex-direction: column;
     width: fill-available;
 
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale1};
     &:first-child {
         margin-top: -10px;
     }
@@ -1906,6 +2016,7 @@ const IsolatedViewHeaderTopBar = styled.div`
     margin: 0px 0px 0px -10px;
     justify-content: space-between;
     width: fill-available;
+    z-index: 100;
 `
 
 const TopBarContainer = styled.div`
@@ -2242,6 +2353,7 @@ const AnnotationsSectionStyled = styled.div`
     align-items: flex-start;
     height: fill-available;
     flex: 1;
+    z-index: 19;
     overflow: scroll;
     padding: 5px 10px 0px 10px;
 
