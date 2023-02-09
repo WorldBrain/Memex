@@ -165,9 +165,6 @@ export default class Logic extends UILogic<State, Event> {
         this.syncPromise = executeUITask(this, 'syncState', async () =>
             this.dependencies.personalCloudBG.enableCloudSyncForNewInstall(),
         )
-        if (!newSignUp) {
-            this.dependencies.navToGuidedTutorial()
-        }
 
         if (this.hasLinkToOpen) {
             await this.openLinkIfAvailable()
