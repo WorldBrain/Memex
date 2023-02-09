@@ -1,7 +1,7 @@
 :root {
     /* #f0f0f0 in decimal RGB */
-    color: #12131b !important;
     --highlightColor: var(--defaultHighlightColorCSS);
+    color: #12131b !important;
 }
 
 .memex-highlight {
@@ -15,7 +15,7 @@
     /* prettier-ignore */
     background-color: rgba(var(--defaultHighlightColorCSS), 0.5);
     border-bottom: 2px solid rgb(var(--defaultHighlightColorCSS));
-    color: #12131b !important ;
+    color: #12131b !important;
 }
 
 .hoveredHighlight {

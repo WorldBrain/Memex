@@ -10,7 +10,7 @@ export interface Dependencies {
     personalCloudBG: PersonalCloudRemoteInterface
     navToDashboard: () => void
     navToGuidedTutorial: () => void
-    contentScriptsBG: ContentScriptsInterface<'caller'>
+    contentScriptsBG: ContentScriptsInterface<'provider' | 'caller'>
 }
 
 export interface State {

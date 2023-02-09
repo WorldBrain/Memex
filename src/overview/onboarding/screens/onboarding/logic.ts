@@ -44,7 +44,7 @@ export default class Logic extends UILogic<State, Event> {
     })
 
     async init() {
-        const { authBG, contentScriptsBG } = this.dependencies
+        const { authBG } = this.dependencies
         this.emitMutation({
             mode: { $set: 'signup' },
             loadState: { $set: 'running' },
@@ -118,6 +118,7 @@ export default class Logic extends UILogic<State, Event> {
                 payLoad = linkToOpen['@URL_TO_OPEN']
                 await browser.storage.local.remove('@URL_TO_OPEN')
                 await this.dependencies.contentScriptsBG.openPageWithSidebarInSelectedListMode(
+                    null,
                     {
                         fullPageUrl: payLoad.originalPageUrl,
                         sharedListId: payLoad.sharedListId,
