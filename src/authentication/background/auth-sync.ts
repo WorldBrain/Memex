@@ -111,6 +111,11 @@ export async function listenToWebAppMessage(
             }
             reactingToMessage = true
 
+            if (messageObj.message === ExtMessage.EXT_IS_READY) {
+                sendResponse(packMessage(ExtMessage.EXT_IS_READY_RESPONSE))
+                reactingToMessage = false
+                return true
+            }
             if (messageObj.message === ExtMessage.URL_TO_OPEN) {
                 storeURLtoOpenAfterLogin(messageObj.payload)
                 return true
