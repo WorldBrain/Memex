@@ -7,7 +7,7 @@ import delay from 'src/util/delay'
 import { openPDFInViewer } from 'src/pdf/util'
 
 export class ContentScriptsBackground {
-    remoteFunctions: ContentScriptsInterface<'provider'>
+    remoteFunctions: ContentScriptsInterface<'provider' | 'caller'>
 
     constructor(
         private options: {

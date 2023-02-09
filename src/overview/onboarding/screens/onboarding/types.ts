@@ -10,11 +10,10 @@ export interface Dependencies {
     personalCloudBG: PersonalCloudRemoteInterface
     navToDashboard: () => void
     navToGuidedTutorial: () => void
-    contentScriptsBG: ContentScriptsInterface<'provider' | 'caller'>
+    contentScriptsBG: ContentScriptsInterface<'caller'>
 }
 
 export interface State {
-    saveState: UITaskState
     loadState: UITaskState
     syncState: UITaskState
     authDialogMode?: AuthDialogMode
@@ -27,7 +26,6 @@ export interface State {
     passwordConfirm: string
     displayName: string
     passwordMatch: boolean
-    setSaveState: UITaskState
     preventOnboardingFlow: boolean
     autoLoginState: UITaskState
 }
@@ -38,5 +36,4 @@ export type Event = UIEvent<{
     goToGuidedTutorial: null
     onUserLogIn: { newSignUp?: boolean }
     setAuthDialogMode: { mode: AuthDialogMode }
-    setSaveState: { setSaveState: UITaskState }
 }>

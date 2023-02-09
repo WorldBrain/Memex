@@ -35,10 +35,8 @@ export default class Logic extends UILogic<State, Event> {
         email: '',
         password: '',
         displayName: '',
-        saveState: 'running',
         passwordMatch: false,
         passwordConfirm: '',
-        setSaveState: 'pristine',
         preventOnboardingFlow: false,
         autoLoginState: 'pristine',
     })
@@ -57,14 +55,7 @@ export default class Logic extends UILogic<State, Event> {
             await this.autoLoginAvailable()
 
             if (this.hasAccountSynced) {
-                console.log('accountsynced', this.hasAccountSynced)
-
-                // @Vincent: Optimisation here: Ideallyl we can start checking for if the link is available at the same time we start checking for account data. Saves a bunch of time for the user in the UI
-                const linkAvailable = await this.checkIfAutoOpenLinkAvailable()
-                if (linkAvailable) {
-                    console.log('link available')
-                    await this.openLinkIfAvailable()
-                }
+                await this.checkIfAutoOpenLinkAvailable()
                 await this._onUserLogIn(false)
             } else {
                 this.emitMutation({
@@ -86,18 +77,16 @@ export default class Logic extends UILogic<State, Event> {
     private autoLoginAvailable = async () => {
         let user = undefined
         let retries = 0
-        let maxRetries = 30
+        let maxRetries = 20
         while (user == null && retries !== maxRetries + 1) {
             user = await this.dependencies.authBG.getCurrentUser()
 
             if (user != null) {
                 this.hasAccountSynced = true
                 this.isExistingUser = true
-                console.log('user', user)
                 return true
             } else {
                 retries++
-                console.log('retrying findign user data')
                 if (retries === maxRetries) {
                     return false
                 }
@@ -118,7 +107,6 @@ export default class Logic extends UILogic<State, Event> {
                 payLoad = linkToOpen['@URL_TO_OPEN']
                 await browser.storage.local.remove('@URL_TO_OPEN')
                 await this.dependencies.contentScriptsBG.openPageWithSidebarInSelectedListMode(
-                    null,
                     {
                         fullPageUrl: payLoad.originalPageUrl,
                         sharedListId: payLoad.sharedListId,
@@ -137,15 +125,13 @@ export default class Logic extends UILogic<State, Event> {
 
     private checkIfAutoOpenLinkAvailable = async () => {
         let linkAvailable = false
-        let payLoad
         let retries = 0
-        let maxRetries = 6
+        let maxRetries = 8
 
         while (!linkAvailable && retries !== maxRetries + 1) {
             const linkToOpen = await browser.storage.local.get('@URL_TO_OPEN')
             if (linkToOpen['@URL_TO_OPEN'] != null) {
                 this.hasLinkToOpen = true
-                console.log('link to open', linkToOpen['@URL_TO_OPEN'])
                 this.emitMutation({
                     preventOnboardingFlow: { $set: true },
                 })
@@ -173,7 +159,6 @@ export default class Logic extends UILogic<State, Event> {
     private async _onUserLogIn(newSignUp: boolean) {
         this.emitMutation({
             newSignUp: { $set: newSignUp },
-            setSaveState: { $set: 'running' },
             loadState: { $set: 'running' },
         })
 
@@ -181,29 +166,26 @@ export default class Logic extends UILogic<State, Event> {
             this.dependencies.personalCloudBG.enableCloudSyncForNewInstall(),
         )
         if (!newSignUp) {
-            this.emitMutation({
-                preventOnboardingFlow: { $set: true },
-            })
+            this.dependencies.navToGuidedTutorial()
         }
 
         if (this.hasLinkToOpen) {
-            console.log('shouldclose')
+            await this.openLinkIfAvailable()
             window.close()
         } else {
             this.dependencies.navToDashboard()
+            if (newSignUp) {
+                this.dependencies.navToGuidedTutorial()
+            }
         }
     }
 
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({ event }) => {
-        if ((this.hasLinkToOpen = true)) {
-            this.emitMutation({
-                loadState: { $set: 'running' },
-            })
-            await this.openLinkIfAvailable()
-            await this._onUserLogIn(!!event.newSignUp)
-        } else {
-            await this._onUserLogIn(!!event.newSignUp)
-        }
+        this.emitMutation({
+            loadState: { $set: 'running' },
+        })
+        await this.checkIfAutoOpenLinkAvailable()
+        await this._onUserLogIn(!!event.newSignUp)
     }
 
     goToSyncStep: EventHandler<'goToSyncStep'> = async ({ previousState }) => {
@@ -217,19 +199,7 @@ export default class Logic extends UILogic<State, Event> {
         this.dependencies.navToDashboard()
     }
 
-    goToGuidedTutorial: EventHandler<'goToGuidedTutorial'> = ({}) => {
-        this.dependencies.navToGuidedTutorial()
-    }
-
-    finishOnboarding: EventHandler<'finishOnboarding'> = ({}) => {
-        this.dependencies.navToDashboard()
-    }
-
     setAuthDialogMode: EventHandler<'setAuthDialogMode'> = ({ event }) => {
         return { authDialogMode: { $set: event.mode } }
-    }
-
-    setSaveState: EventHandler<'setSaveState'> = ({ event }) => {
-        return { setSaveState: { $set: event.setSaveState } }
     }
 }

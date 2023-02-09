@@ -56,77 +56,6 @@ export default class OnboardingScreen extends StatefulUIElement<
         super(props, new Logic(props))
     }
 
-    private renderTutorialStep = () => (
-        <WelcomeContainer>
-            <LeftSide>
-                <ContentBox>
-                    <Title>Learn the basics in 90 seconds.</Title>
-                    <DescriptionText>
-                        Hop on our guided tutorial and get yourself up and
-                        running in no time.
-                    </DescriptionText>
-                    <TutorialContainer>
-                        <ConfirmContainer>
-                            <PrimaryAction
-                                onClick={() => {
-                                    this.processEvent(
-                                        'goToGuidedTutorial',
-                                        null,
-                                    )
-                                }}
-                                label={'Get Started'}
-                                icon={'longArrowRight'}
-                            />
-                        </ConfirmContainer>
-                        {/* <GoToDashboard
-                            onClick={() => {
-                                this.processEvent('finishOnboarding', null)
-                            }}
-                        >
-                            or go to search dashboard
-                        </GoToDashboard> */}
-                    </TutorialContainer>
-                </ContentBox>
-            </LeftSide>
-            {this.renderInfoSide()}
-        </WelcomeContainer>
-    )
-
-    private renderSyncStep = () => (
-        <div className={styles.welcomeScreen}>
-            <div className={styles.loadingSpinner}>
-                <LoadingIndicator />
-            </div>
-            <div className={styles.contentBox}>
-                <div className={styles.titleText}>
-                    Syncing with Existing Data
-                </div>
-                <div className={styles.descriptionText}>
-                    This process continues in the background.
-                    <br />
-                    It may take a while for all data to appear in your dashboard
-                    and you may experience temporary performance issues.
-                </div>
-            </div>
-            <ButtonBar>
-                <PrimaryAction
-                    label="Go to Dashboard"
-                    onClick={() => this.processEvent('finishOnboarding', null)}
-                />
-            </ButtonBar>
-        </div>
-    )
-
-    private renderOnboardingSteps() {
-        switch (this.state.step) {
-            case 'tutorial':
-                return this.renderTutorialStep()
-            case 'sync':
-            default:
-                return this.renderSyncStep()
-        }
-    }
-
     private renderInfoSide = () => {
         return (
             <RightSide>
@@ -135,17 +64,15 @@ export default class OnboardingScreen extends StatefulUIElement<
         )
     }
 
-    private renderLoginStep = (setSaveState) => (
+    private renderLoginStep = () => (
         <WelcomeContainer>
             <LeftSide>
                 {this.state.loadState === 'running' ? (
                     <LoadingIndicatorBox>
                         <LoadingIndicator size={40} />
-                        {this.state.autoLoginState === 'running' && (
-                            <DescriptionText>
-                                Preparing a smooth ride
-                            </DescriptionText>
-                        )}
+                        <DescriptionText>
+                            Preparing a smooth ride
+                        </DescriptionText>
                     </LoadingIndicatorBox>
                 ) : (
                     <ContentBox>
@@ -157,16 +84,14 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 </DescriptionText>
                             </>
                         )}
-                        {this.state.authDialogMode === 'login' &&
-                            setSaveState !== 'running' && (
-                                <UserScreenContainer>
-                                    <Title>Welcome Back!</Title>
-                                    <DescriptionText>
-                                        Login to continue
-                                    </DescriptionText>
-                                </UserScreenContainer>
-                            )}
-                        {setSaveState === 'running' && <></>}
+                        {this.state.authDialogMode === 'login' && (
+                            <UserScreenContainer>
+                                <Title>Welcome Back!</Title>
+                                <DescriptionText>
+                                    Login to continue
+                                </DescriptionText>
+                            </UserScreenContainer>
+                        )}
                         {this.state.authDialogMode === 'resetPassword' && (
                             <UserScreenContainer>
                                 <Title>Reset your password</Title>
@@ -191,12 +116,9 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     newSignUp: reason === 'register',
                                 })
                             }}
-                            onModeChange={({ mode, setSaveState }) => {
+                            onModeChange={({ mode }) => {
                                 this.processEvent('setAuthDialogMode', {
                                     mode,
-                                })
-                                this.processEvent('setSaveState', {
-                                    setSaveState,
                                 })
                             }}
                         />
@@ -208,16 +130,7 @@ export default class OnboardingScreen extends StatefulUIElement<
     )
 
     render() {
-        return (
-            <OnboardingBox>
-                {this.state.shouldShowLogin
-                    ? this.renderLoginStep(this.state.setSaveState)
-                    : this.state.preventOnboardingFlow
-                    ? this.processEvent('finishOnboarding', null)
-                    : this.processEvent('finishOnboarding', null) &&
-                      this.processEvent('goToGuidedTutorial', null)}
-            </OnboardingBox>
-        )
+        return <OnboardingBox>{this.renderLoginStep()}</OnboardingBox>
     }
 }
 
@@ -226,7 +139,9 @@ const LoadingIndicatorBox = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    grid-gap: 30px;
+    grid-gap: 40px;
+    height: 300px;
+    width: 400px;
 `
 
 const UserScreenContainer = styled.div`
