@@ -64,6 +64,7 @@ interface State {
     renderFeedback: boolean
     pickerColor: string
     showPickerSave: boolean
+    renderLiveChat: boolean
 }
 
 export default class Ribbon extends Component<Props, State> {
@@ -95,6 +96,7 @@ export default class Ribbon extends Component<Props, State> {
         showPickerSave: false,
         renderFeedback: false,
         pickerColor: DEFAULT_HIGHLIGHT_COLOR,
+        renderLiveChat: false,
     }
 
     constructor(props: Props) {
@@ -365,6 +367,8 @@ export default class Ribbon extends Component<Props, State> {
         }
     }
 
+    renderLiveChat() {}
+
     private renderExtraButtons() {
         if (!this.props.showExtraButtons) {
             return
@@ -382,6 +386,7 @@ export default class Ribbon extends Component<Props, State> {
                     this.setState({
                         showColorPicker: false,
                         renderFeedback: false,
+                        renderLiveChat: false,
                     })
                     this.props.toggleShowExtraButtons()
                 }}
@@ -400,6 +405,17 @@ export default class Ribbon extends Component<Props, State> {
                             height="533"
                         />
                     </FeedbackContainer>
+                ) : this.state.renderLiveChat ? (
+                    <ChatBox>
+                        <LoadingIndicator size={30} />
+                        <ChatFrame
+                            src={
+                                'https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599'
+                            }
+                            height={600}
+                            width={500}
+                        />
+                    </ChatBox>
                 ) : (
                     <ExtraButtonContainer>
                         <BlockListArea>
@@ -575,6 +591,20 @@ export default class Ribbon extends Component<Props, State> {
                                 hoverOff
                             />
                             <InfoText>Feature Requests & Bugs</InfoText>
+                        </ExtraButtonRow>
+                        <ExtraButtonRow
+                            onClick={() =>
+                                this.setState({
+                                    renderLiveChat: true,
+                                })
+                            }
+                        >
+                            <Icon
+                                filePath={icons.chatWithUs}
+                                heightAndWidth="22px"
+                                hoverOff
+                            />
+                            <InfoText>Live Chat Support</InfoText>
                         </ExtraButtonRow>
                     </ExtraButtonContainer>
                 )}
@@ -972,6 +1002,23 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 }
+
+const ChatBox = styled.div`
+    position: relative;
+    height: 600px;
+    width: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+`
+const ChatFrame = styled.iframe`
+    border: none;
+    border-radius: 12px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+`
 
 const DateText = styled.span`
     color: ${(props) => props.theme.colors.white};

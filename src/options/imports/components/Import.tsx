@@ -82,9 +82,9 @@ class Import extends React.PureComponent<Props> {
             <div>
                 <SettingSection
                     icon={'discord'}
-                    title={'Discord Hive Sync'}
+                    title={'Discord Channel Sync'}
                     description={
-                        'Sync all links/videos/events posted in a discord channel to a Memex Space.'
+                        'Sync all links/videos/events posted in a discord channel to Memex Spaces.'
                     }
                 >
                     <WatchVideoButton>

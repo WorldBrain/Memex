@@ -60,33 +60,18 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                     <MenuList>
                         <MenuItem
                             onClick={() =>
-                                window.open(
-                                    'https://links.memex.garden/announcements/pioneer-plan',
-                                )
-                            }
-                            top={top}
-                        >
-                            <Icon
-                                filePath={'feed'}
-                                heightAndWidth="22px"
-                                hoverOff
-                                color={top ? 'black' : null}
-                            />
-                            Get Early Bird Discount
-                        </MenuItem>
-                        <MenuItem
-                            onClick={() =>
                                 this.setState({
                                     showChat: true,
                                 })
                             }
+                            top={top}
                         >
                             <Icon
                                 filePath={icons.chatWithUs}
                                 heightAndWidth="22px"
                                 hoverOff
                             />
-                            Chat with us
+                            Live Chat Support
                         </MenuItem>
                         <MenuItem
                             onClick={() =>
