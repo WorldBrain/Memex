@@ -211,7 +211,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 comment: event.annotationData?.commentText ?? '',
             })
         } else if (event.action === 'selected_list_mode_from_web_ui') {
-            await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+            await this.processEvent('setIsolatedViewOnSidebarLoad', null)
             await browser.storage.local.set({
                 '@Sidebar-reading_view': true,
             })
@@ -233,6 +233,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
         } else if (event.action === 'show_shared_spaces') {
             await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+        } else if (event.action === 'show_my_annotations') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'annotations',
+            })
+        } else if (event.action === 'check_sidebar_status') {
+            return true
         }
 
         this.forceUpdate()

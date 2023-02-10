@@ -375,6 +375,7 @@ export async function main(
         ping: async () => true,
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: inPageUI.showRibbon.bind(inPageUI),
+        testIfSidebarSetup: inPageUI.testIfSidebarSetup.bind(inPageUI),
         reloadRibbon: () => inPageUI.reloadRibbon(),
         insertRibbon: async () => inPageUI.loadComponent('ribbon'),
         removeRibbon: async () => inPageUI.removeRibbon(),

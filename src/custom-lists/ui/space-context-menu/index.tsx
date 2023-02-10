@@ -467,6 +467,8 @@ const DetailsText = styled.span`
     opacity: 0.8;
     font-size: 14px;
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     color: ${(props) => props.theme.colors.greyScale5};
     margin-bottom: 5px;
     margin-top: -5px;

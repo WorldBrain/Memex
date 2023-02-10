@@ -12,6 +12,8 @@ const StyledModalBox = styled.div`
 `
 const HeaderText = styled.h2`
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-style: normal;
     font-weight: 600;
     font-size: 20px;

@@ -41,6 +41,8 @@
     display: flex;
     color: #888;
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-weight: 400;
     align-items: center;
     padding: 2px 5px;

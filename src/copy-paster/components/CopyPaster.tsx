@@ -9,6 +9,8 @@ const CopyPasterWrapper = styled.div`
     min-width: 270px;
     & * {
         font-family: 'Satoshi', sans-serif;
+        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            'ss04' on, 'liga' off;
     }
 `
 

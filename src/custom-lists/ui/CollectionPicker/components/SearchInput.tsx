@@ -109,12 +109,16 @@ const SearchInput = styled(TextField)`
     flex: 1;
     color: ${(props) => props.theme.colors.white};
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-size: 14px;
     height: fill-available;
     width: fill-available;
 
     & * {
-        font-family: 'Satoshi';
+        font-family: 'Satoshi', sans-serif;
+        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            'ss04' on, 'liga' off;
     }
 
     &:focus {

@@ -7,6 +7,8 @@ color9 from colors;
 
 .tagContainer * {
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 }
 
 .menuItem {

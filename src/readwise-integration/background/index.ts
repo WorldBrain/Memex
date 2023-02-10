@@ -21,6 +21,7 @@ import {
 import type { Page } from 'src/search'
 import type DirectLinkingBackground from 'src/annotations/background'
 import type CustomListBackground from 'src/custom-lists/background'
+import TurndownService from 'turndown'
 
 type ReadwiseInterfaceMethod<
     Method extends keyof ReadwiseInterface<'provider'>
@@ -186,7 +187,7 @@ function annotationToReadwise(
             ...annotation.listNames,
         ]),
         text: annotation?.body?.length
-            ? annotation.body
+            ? convertHTMLintoMarkdown(annotation.body)
             : formatReadwiseHighlightTime(annotation?.createdWhen),
     }
 }
@@ -206,4 +207,14 @@ function makePageDataCache(options: { getPageData: GetPageData }): GetPageData {
         pageDataCache[normalizedUrl] = pageData
         return pageData
     }
+}
+
+function convertHTMLintoMarkdown(html) {
+    let turndownService = new TurndownService({
+        headingStyle: 'atx',
+        hr: '---',
+        codeBlockStyle: 'fenced',
+    })
+    const markdown = turndownService.turndown(html)
+    return markdown
 }

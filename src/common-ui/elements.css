@@ -32,6 +32,8 @@ radius3 from colors;
 
 .fontFamily {
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 }
 
 /* Tag Pill */
@@ -49,6 +51,8 @@ radius3 from colors;
     align-items: center;
     white-space: nowrap;
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 }
 
 .tagPillSuggestions {
@@ -163,6 +167,8 @@ radius3 from colors;
     font-size: 14px;
     color: #222;
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     border-radius: 3px;
     border: none;
     padding: 10px 7px;

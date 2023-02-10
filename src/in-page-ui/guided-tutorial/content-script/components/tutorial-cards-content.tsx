@@ -502,7 +502,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                                 filePath={icons.phone}
                                 heightAndWidth="28px"
                                 hoverOff
-                                color={'greyScale1'}
+                                color={'prime1'}
                             />
                             <ActionText>
                                 Personalised Onboarding Call
@@ -517,7 +517,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                                 filePath={icons.searchIcon}
                                 heightAndWidth="28px"
                                 hoverOff
-                                color={'greyScale1'}
+                                color={'prime1'}
                             />
                             <ActionText>Community FAQs</ActionText>
                         </ActionCard>

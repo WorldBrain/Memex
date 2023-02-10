@@ -189,6 +189,8 @@ const ListSpaceContainer = styled.div<{
     align-items: center;
     white-space: nowrap;
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     text-overflow: ellipsis;
     max-width: 200px;
 

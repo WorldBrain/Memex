@@ -34,10 +34,15 @@ export default class OnboardingScreen extends StatefulUIElement<
 > {
     static defaultProps: Pick<
         Props,
-        'navToDashboard' | 'authBG' | 'personalCloudBG' | 'navToGuidedTutorial'
+        | 'navToDashboard'
+        | 'authBG'
+        | 'personalCloudBG'
+        | 'navToGuidedTutorial'
+        | 'contentScriptsBG'
     > = {
         authBG: runInBackground(),
         personalCloudBG: runInBackground(),
+        contentScriptsBG: runInBackground(),
         navToDashboard: () => {
             window.location.href = OVERVIEW_URL
             window.location.reload()
@@ -51,77 +56,6 @@ export default class OnboardingScreen extends StatefulUIElement<
         super(props, new Logic(props))
     }
 
-    private renderTutorialStep = () => (
-        <WelcomeContainer>
-            <LeftSide>
-                <ContentBox>
-                    <Title>Learn the basics in 90 seconds.</Title>
-                    <DescriptionText>
-                        Hop on our guided tutorial and get yourself up and
-                        running in no time.
-                    </DescriptionText>
-                    <TutorialContainer>
-                        <ConfirmContainer>
-                            <PrimaryAction
-                                onClick={() => {
-                                    this.processEvent(
-                                        'goToGuidedTutorial',
-                                        null,
-                                    )
-                                }}
-                                label={'Get Started'}
-                                icon={'longArrowRight'}
-                            />
-                        </ConfirmContainer>
-                        {/* <GoToDashboard
-                            onClick={() => {
-                                this.processEvent('finishOnboarding', null)
-                            }}
-                        >
-                            or go to search dashboard
-                        </GoToDashboard> */}
-                    </TutorialContainer>
-                </ContentBox>
-            </LeftSide>
-            {this.renderInfoSide()}
-        </WelcomeContainer>
-    )
-
-    private renderSyncStep = () => (
-        <div className={styles.welcomeScreen}>
-            <div className={styles.loadingSpinner}>
-                <LoadingIndicator />
-            </div>
-            <div className={styles.contentBox}>
-                <div className={styles.titleText}>
-                    Syncing with Existing Data
-                </div>
-                <div className={styles.descriptionText}>
-                    This process continues in the background.
-                    <br />
-                    It may take a while for all data to appear in your dashboard
-                    and you may experience temporary performance issues.
-                </div>
-            </div>
-            <ButtonBar>
-                <PrimaryAction
-                    label="Go to Dashboard"
-                    onClick={() => this.processEvent('finishOnboarding', null)}
-                />
-            </ButtonBar>
-        </div>
-    )
-
-    private renderOnboardingSteps() {
-        switch (this.state.step) {
-            case 'tutorial':
-                return this.renderTutorialStep()
-            case 'sync':
-            default:
-                return this.renderSyncStep()
-        }
-    }
-
     private renderInfoSide = () => {
         return (
             <RightSide>
@@ -130,10 +64,17 @@ export default class OnboardingScreen extends StatefulUIElement<
         )
     }
 
-    private renderLoginStep = (setSaveState) => (
-        <>
-            <WelcomeContainer>
-                <LeftSide>
+    private renderLoginStep = () => (
+        <WelcomeContainer>
+            <LeftSide>
+                {this.state.loadState === 'running' ? (
+                    <LoadingIndicatorBox>
+                        <LoadingIndicator size={40} />
+                        <DescriptionText>
+                            Preparing a smooth ride
+                        </DescriptionText>
+                    </LoadingIndicatorBox>
+                ) : (
                     <ContentBox>
                         {this.state.authDialogMode === 'signup' && (
                             <>
@@ -143,16 +84,14 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 </DescriptionText>
                             </>
                         )}
-                        {this.state.authDialogMode === 'login' &&
-                            setSaveState !== 'running' && (
-                                <UserScreenContainer>
-                                    <Title>Welcome Back!</Title>
-                                    <DescriptionText>
-                                        Login to continue
-                                    </DescriptionText>
-                                </UserScreenContainer>
-                            )}
-                        {setSaveState === 'running' && <></>}
+                        {this.state.authDialogMode === 'login' && (
+                            <UserScreenContainer>
+                                <Title>Welcome Back!</Title>
+                                <DescriptionText>
+                                    Login to continue
+                                </DescriptionText>
+                            </UserScreenContainer>
+                        )}
                         {this.state.authDialogMode === 'resetPassword' && (
                             <UserScreenContainer>
                                 <Title>Reset your password</Title>
@@ -177,31 +116,33 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     newSignUp: reason === 'register',
                                 })
                             }}
-                            onModeChange={({ mode, setSaveState }) => {
-                                this.processEvent('setAuthDialogMode', { mode })
-                                this.processEvent('setSaveState', {
-                                    setSaveState,
+                            onModeChange={({ mode }) => {
+                                this.processEvent('setAuthDialogMode', {
+                                    mode,
                                 })
                             }}
                         />
                     </ContentBox>
-                </LeftSide>
-                {this.renderInfoSide()}
-            </WelcomeContainer>
-        </>
+                )}
+            </LeftSide>
+            {this.renderInfoSide()}
+        </WelcomeContainer>
     )
 
     render() {
-        return (
-            <OnboardingBox>
-                {this.state.shouldShowLogin
-                    ? this.renderLoginStep(this.state.setSaveState)
-                    : this.processEvent('finishOnboarding', null) &&
-                      this.processEvent('goToGuidedTutorial', null)}
-            </OnboardingBox>
-        )
+        return <OnboardingBox>{this.renderLoginStep()}</OnboardingBox>
     }
 }
+
+const LoadingIndicatorBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 40px;
+    height: 300px;
+    width: 400px;
+`
 
 const UserScreenContainer = styled.div`
     display: flex;
@@ -296,15 +237,19 @@ const WelcomeContainer = styled.div`
     justify-content: space-between;
     overflow: hidden;
     background-color: ${(props) => props.theme.colors.black};
+    height: 100vh;
 `
 
 const LeftSide = styled.div`
     width: fill-available;
     display: flex;
-    justify-content: center;
     align-items: center;
-    flex-direction: column;
-    background-color: ${(props) => props.theme.colors.black};
+    z-index: 2;
+    flex-direction: row;
+    z-index: 2;
+    /* position: absolute; */
+    justify-content: flex-start;
+    margin-left: 20%;
 
     @media (max-width: 1000px) {
         width: 100%;
@@ -321,6 +266,10 @@ const ContentBox = styled.div`
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+    padding: 30px 50px;
+    background: ${(props) => props.theme.colors.black}30;
+    backdrop-filter: blur(5px);
+    border-radius: 20px;
 `
 
 const Title = styled.div`
@@ -348,6 +297,10 @@ const RightSide = styled.div`
     grid-auto-flow: row;
     justify-content: center;
     align-items: center;
+    position: absolute;
+    right: 0;
+    top: 0%;
+    z-index: 1;
 
     @media (max-width: 1000px) {
         display: none;
@@ -358,6 +311,7 @@ const CommentDemo = styled.img`
     height: fill-available;
     width: auto;
     margin: auto;
+    opacity: 0.4;
 `
 
 const TitleSmall = styled.div`
@@ -368,7 +322,9 @@ const TitleSmall = styled.div`
 `
 
 const StyledAuthDialog = styled.div`
-    font-family: 'Satoshi';
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     display: flex;
     justify-content: center;
     align-items: center;

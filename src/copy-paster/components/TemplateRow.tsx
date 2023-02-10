@@ -136,6 +136,8 @@ const Title = styled.div`
     text-align: left;
 
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;

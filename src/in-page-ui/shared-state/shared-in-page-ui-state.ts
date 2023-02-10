@@ -114,6 +114,10 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         delete this._pendingEvents[eventName]
     }
 
+    async testIfSidebarSetup() {
+        return true
+    }
+
     async showSidebar(options?: SidebarActionOptions) {
         const maybeEmitAction = () => {
             if (options?.action) {

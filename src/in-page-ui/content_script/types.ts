@@ -17,6 +17,7 @@ export interface InPageUIContentScriptRemoteInterface
     reloadRibbon(): Promise<void>
     insertOrRemoveRibbon(): Promise<void>
     updateRibbon(): Promise<void>
+    testIfSidebarSetup: () => void
 
     // Tooltip
     showContentTooltip(): Promise<void>

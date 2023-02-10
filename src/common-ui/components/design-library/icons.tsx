@@ -152,3 +152,4 @@ export const webMonetizationLogoConfirmed = browser.runtime.getURL(
 )
 export const winLogo = browser.runtime.getURL('/img/windows_logo.svg')
 export const youtubeLogo = browser.runtime.getURL('/img/youtube-logo.svg')
+export const reply = browser.runtime.getURL('/img/reply.svg')

@@ -13,6 +13,7 @@ import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components
 
 const textStyles = `
     font-family: 'Satoshi', sans-serif;
+font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
     font-weight: ${fonts.primary.weight.normal};
     font-size: 14px;
     line-height: 15px;

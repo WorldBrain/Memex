@@ -235,6 +235,7 @@ export default class Ribbon extends Component<Props, State> {
                     initialSelectedListIds={
                         this.props.lists.fetchInitialListSelections
                     }
+                    closePicker={this.hideListPicker}
                 />
             </PopoutBox>
         )

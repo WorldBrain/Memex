@@ -137,6 +137,7 @@ export default class PageResultView extends PureComponent<Props> {
                         }
                         createNewEntry={this.props.createNewList}
                         initialSelectedListIds={() => this.props.lists}
+                        closePicker={() => this.listPickerBtnClickHandler}
                     />
                 </PopoutBox>
             )
@@ -168,6 +169,7 @@ export default class PageResultView extends PureComponent<Props> {
                         }
                         createNewEntry={this.props.createNewList}
                         initialSelectedListIds={() => this.props.lists}
+                        closePicker={() => this.listPickerBtnClickHandler}
                     />
                 </PopoutBox>
             )
