@@ -115,15 +115,14 @@ export default class Logic extends UILogic<State, Event> {
                     )
                 }
                 if (payLoad.type === 'returnToFollowedSpace') {
-                    browser.tabs
+                    await browser.tabs
                         .query({
                             url: payLoad.originalPageUrl,
                             currentWindow: true,
                         })
-                        .then((tab) =>
-                            browser.tabs.update(tab[0].id, { active: true }),
-                        )
-                    console.log('return to followed space', payLoad.fullPageUrl)
+                        .then((tab) => {
+                            browser.tabs.update(tab[0].id, { active: true })
+                        })
                 }
                 return true
             } else {
