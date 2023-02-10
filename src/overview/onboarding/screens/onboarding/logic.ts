@@ -106,12 +106,25 @@ export default class Logic extends UILogic<State, Event> {
             if (linkToOpen['@URL_TO_OPEN'] != null) {
                 payLoad = linkToOpen['@URL_TO_OPEN']
                 await browser.storage.local.remove('@URL_TO_OPEN')
-                await this.dependencies.contentScriptsBG.openPageWithSidebarInSelectedListMode(
-                    {
-                        fullPageUrl: payLoad.originalPageUrl,
-                        sharedListId: payLoad.sharedListId,
-                    },
-                )
+                if (payLoad.type === 'pageToOpen') {
+                    await this.dependencies.contentScriptsBG.openPageWithSidebarInSelectedListMode(
+                        {
+                            fullPageUrl: payLoad.originalPageUrl,
+                            sharedListId: payLoad.sharedListId,
+                        },
+                    )
+                }
+                if (payLoad.type === 'returnToFollowedSpace') {
+                    browser.tabs
+                        .query({
+                            url: payLoad.originalPageUrl,
+                            currentWindow: true,
+                        })
+                        .then((tab) =>
+                            browser.tabs.update(tab[0].id, { active: true }),
+                        )
+                    console.log('return to followed space', payLoad.fullPageUrl)
+                }
                 return true
             } else {
                 retries++
