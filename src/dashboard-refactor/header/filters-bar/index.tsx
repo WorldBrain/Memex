@@ -236,7 +236,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             this.props.toggleDatesFilter,
                             this.props.showDatesFilter,
                             this.props.areDatesFiltered,
-                            'date',
+                            'calendar',
                             this.props.datePickerProps,
                             this.dateFilterButtonRef,
                         )}

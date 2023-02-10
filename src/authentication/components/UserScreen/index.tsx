@@ -65,7 +65,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
         }
 
         if (this.state.authDialogMode === 'signup') {
-            return 'Welcome to Memex'
+            return 'Sign up to get started'
         }
 
         if (this.state.authDialogMode === 'resetPassword') {
