@@ -114,7 +114,9 @@ class Import extends React.PureComponent<Props> {
                                 type="secondary"
                                 size="small"
                                 onClick={() => {
-                                    window.open('')
+                                    window.open(
+                                        'https://links.memex.garden/bots/discord',
+                                    )
                                 }}
                                 label="Install Bot"
                             />
