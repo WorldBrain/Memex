@@ -33,7 +33,9 @@ const SectionTitle = styled.div`
 
 const NoResultsBox = styled.div`
     text-align: center;
-    font-family: 'Satoshi';
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-style: normal;
     font-size: 12px;
     padding: 15px 10px;

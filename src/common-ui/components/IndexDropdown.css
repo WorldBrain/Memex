@@ -125,6 +125,8 @@ color9 from colors;
         font-style: italic;
         font-weight: 500;
         font-family: 'Satoshi', sans-serif;
+        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            'ss04' on, 'liga' off;
     }
 
     &::placeholder {
@@ -159,6 +161,8 @@ color9 from colors;
 
     & * {
         font-family: 'Satoshi', sans-serif;
+        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            'ss04' on, 'liga' off;
     }
 }
 

@@ -2334,6 +2334,8 @@ const LoadingIndicatorStyled = styled(LoadingIndicator)`
 
 const NewAnnotationSection = styled.section`
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     height: auto;
     display: flex;
     flex-direction: column;
@@ -2346,6 +2348,8 @@ const NewAnnotationSection = styled.section`
 
 const AnnotationsSectionStyled = styled.div`
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     color: ${(props) => props.theme.colors.white};
     display: flex;
     flex-direction: column;

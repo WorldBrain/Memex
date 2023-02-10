@@ -13,6 +13,8 @@ color6 from colors;
     height: fit-content;
     padding: 6px 30px 35px 30px;
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-weight: 400;
     color: color4;
     font-size: 16px;

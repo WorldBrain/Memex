@@ -1609,11 +1609,13 @@ const GlobalStyle = createGlobalStyle`
 
     * {
         font-family: 'Satoshi', sans-serif;
+font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
         letter-spacing: 0.8px;
     }
 
     body {
         font-family: 'Satoshi', sans-serif;
+font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
         letter-spacing: 0.8px;
     }
 `
@@ -1862,7 +1864,8 @@ const Container = styled.div`
     scrollbar-width: none;
 
     & * {
-        font-family: 'Satoshi', sans-serif;,
+        font-family: 'Satoshi', sans-serif;
+font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;,
     }
 `
 
@@ -1965,6 +1968,8 @@ const SyncStatusHeaderText = styled.span<{
     textCentered: boolean
 }>`
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-weight: 500;
     color: ${(props) => props.theme.colors.white};
     font-size: 14px;

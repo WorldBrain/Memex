@@ -982,6 +982,7 @@ const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
     background: ${(props) => props.theme.colors.black};
     border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
+font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
     box-sizing: content-box;
     right: 40px;
 

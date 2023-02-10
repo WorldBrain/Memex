@@ -18,6 +18,8 @@ const PioneerPlanContainer = styled.div`
     width: 100%;
     flex-direction: column;
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 `
 const PioneerPlanContentBox = styled.div`
     display: flex;

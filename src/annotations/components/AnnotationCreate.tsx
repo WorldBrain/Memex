@@ -370,6 +370,8 @@ const EditorDummy = styled.div`
     overflow: hidden;
     background-color: ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     cursor: text;
     float: left;
     color: ${(props) => props.theme.colors.greyScale5};

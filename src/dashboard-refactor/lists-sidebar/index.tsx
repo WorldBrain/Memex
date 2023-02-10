@@ -263,6 +263,8 @@ const SidebarInnerContent = styled.div`
 
 const NoCollectionsMessage = styled.div`
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     display: grid;
     grid-auto-flow: column;
     grid-gap: 10px;

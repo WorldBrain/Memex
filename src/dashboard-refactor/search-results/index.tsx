@@ -1082,10 +1082,15 @@ const TutorialContent = styled.div<{ showTutorialVideo: boolean }>`
 `
 
 const TutorialTitle = styled.div`
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 500;
-    color: ${(props) => props.theme.colors.white};
+    background: ${(props) => props.theme.colors.headerGradient};
     line-height: 30px;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    // @ts-ignore
+    text-fill-color: transparent;
 `
 
 const TutorialButtons = styled.div`

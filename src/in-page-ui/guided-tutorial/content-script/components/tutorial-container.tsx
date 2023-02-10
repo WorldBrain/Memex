@@ -251,6 +251,8 @@ const TutorialCardContainer = styled.div<{
     grid-gap: 30px;
 
     font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     box-shadow: 0px 4px 15px 5px rgb(0 0 0 / 5%);
     border: 2px solid ${(props) => props.theme.colors.greyScale3};
     animation: 0.3s ease-out 0s 1 slideInFromLeft;
