@@ -1357,6 +1357,18 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
 
+        await this.detectConversationThreads(
+            unifiedListId,
+            list.remoteId,
+            sharedAnnotationReferences,
+        )
+    }
+
+    async detectConversationThreads(
+        unifiedListId: string,
+        remoteListId: string,
+        sharedAnnotationReferences: SharedAnnotationReference[],
+    ) {
         await executeUITask(
             this,
             (taskState) => ({
@@ -1372,16 +1384,18 @@ export class SidebarContainerLogic extends UILogic<
                     annotationReferences: sharedAnnotationReferences,
                     sharedListReference: {
                         type: 'shared-list-reference',
-                        id: list.remoteId,
+                        id: remoteListId,
                     },
                     getThreadsForAnnotations: ({
                         annotationReferences,
                         sharedListReference,
                     }) =>
-                        contentConversationsBG.getThreadsForSharedAnnotations({
-                            sharedAnnotationReferences: annotationReferences,
-                            sharedListReference,
-                        }),
+                        this.options.contentConversationsBG.getThreadsForSharedAnnotations(
+                            {
+                                sharedAnnotationReferences: annotationReferences,
+                                sharedListReference,
+                            },
+                        ),
                 })
             },
         )
@@ -1546,10 +1560,11 @@ export class SidebarContainerLogic extends UILogic<
             })
 
             let sharedAnnotationReferences: SharedAnnotationReference[] = []
+            const sharedAnnotationUnifiedIds: string[] = []
 
             sharedList.sharedAnnotations.forEach((sharedAnnot) => {
                 sharedAnnotationReferences.push(sharedAnnot.reference)
-                annotationsCache.addAnnotation({
+                const { unifiedId } = annotationsCache.addAnnotation({
                     body: sharedAnnot.body,
                     creator: sharedAnnot.creator,
                     comment: sharedAnnot.comment,
@@ -1565,6 +1580,7 @@ export class SidebarContainerLogic extends UILogic<
                     privacyLevel: AnnotationPrivacyLevels.SHARED,
                     localListIds: [],
                 })
+                sharedAnnotationUnifiedIds.push(unifiedId)
             })
 
             this.emitMutation({
@@ -1580,6 +1596,17 @@ export class SidebarContainerLogic extends UILogic<
                         },
                     },
                 },
+                conversations: {
+                    $merge: fromPairs(
+                        sharedAnnotationUnifiedIds.map((unifiedId) => [
+                            generateAnnotationCardInstanceId(
+                                { unifiedId },
+                                unifiedList.unifiedId,
+                            ),
+                            getInitialAnnotationConversationState(),
+                        ]),
+                    ),
+                },
             })
 
             this.options.events?.emit('renderHighlights', {
@@ -1588,6 +1615,12 @@ export class SidebarContainerLogic extends UILogic<
                     unifiedList.unifiedId,
                 ),
             })
+
+            await this.detectConversationThreads(
+                unifiedList.unifiedId,
+                event.sharedListId,
+                sharedAnnotationReferences,
+            )
         })
 
         // const list = previousState.lists.byId[event.unifiedListId]
