@@ -19,6 +19,7 @@ import type {
 import type { Visit, Bookmark, Tag, Page } from 'src/search'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
+import TurndownService from 'turndown'
 
 export function getTemplateDataFetchers({
     storageManager,
@@ -125,7 +126,7 @@ export function getTemplateDataFetchers({
                     ...acc,
                     [note.url]: {
                         url: note.url,
-                        body: note.body,
+                        body: convertHTMLintoMarkdown(note.body),
                         comment: note.comment,
                         pageUrl: note.pageUrl,
                         createdAt: note.createdWhen,
@@ -285,4 +286,14 @@ export function getTemplateDataFetchers({
             return entries
         }),
     }
+}
+
+function convertHTMLintoMarkdown(html) {
+    let turndownService = new TurndownService({
+        headingStyle: 'atx',
+        hr: '---',
+        codeBlockStyle: 'fenced',
+    })
+    const markdown = turndownService.turndown(html)
+    return markdown
 }
