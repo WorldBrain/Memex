@@ -1,5 +1,6 @@
 import fromPairs from 'lodash/fromPairs'
 import { isFullUrl, normalizeUrl } from '@worldbrain/memex-url-utils'
+import browser from 'webextension-polyfill'
 import {
     UILogic,
     UIEventHandler,
@@ -64,6 +65,7 @@ import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtu
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { Storage } from 'webextension-polyfill'
+import throttle from 'lodash/throttle'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -117,6 +119,9 @@ export class SidebarContainerLogic extends UILogic<
      */
     annotationsLoadComplete = resolvablePromise()
     syncSettings: SyncSettingsStore<'contentSharing' | 'extension'>
+    resizeObserver
+    sidebar
+    readingViewState
 
     constructor(private options: SidebarLogicOptions) {
         super()
@@ -347,14 +352,22 @@ export class SidebarContainerLogic extends UILogic<
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.cacheAnnotationsSubscription(annotationsCache.annotations)
         this.cacheListsSubscription(annotationsCache.lists)
-        await storageAPI.local.set({ '@Sidebar-reading_view': false })
-        this.readingViewStorageListener(true)
+        this.sidebar = document
+            .getElementById('memex-sidebar-container')
+            ?.shadowRoot.getElementById('annotationSidebarContainer')
+        this.readingViewState =
+            (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
+        // this.readingViewStorageListener(true)
 
         await loadInitial<SidebarContainerState>(this, async () => {
             this.emitMutation({
                 showState: { $set: initialState ?? 'hidden' },
                 loadState: { $set: 'running' },
             })
+
+            if (initialState === 'visible') {
+                this.readingViewStorageListener(true)
+            }
 
             if (shouldHydrateCacheOnInit && fullPageUrl != null) {
                 const hasNetworkActivity = await pageActivityIndicatorBG.getPageActivityStatus(
@@ -469,14 +482,27 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     private readingViewStorageListener = async (enable: boolean) => {
+        this.resizeObserver = new ResizeObserver(this.debounceReadingWidth)
+
+        if (this.readingViewState['@Sidebar-reading_view']) {
+            this.emitMutation({
+                readingView: { $set: true },
+            })
+            this.resizeObserver.observe(this.sidebar)
+            window.addEventListener('resize', this.debounceReadingWidth)
+            this.setReadingWidth()
+        }
+
         const { storageAPI } = this.options
         if (enable) {
             storageAPI.onChanged.addListener(this.toggleReadingView)
         } else {
-            await storageAPI.local.set({ '@Sidebar-reading_view': false })
             storageAPI.onChanged.removeListener(this.toggleReadingView)
+            this.resizeObserver.disconnect()
         }
     }
+
+    private debounceReadingWidth = throttle(this.setReadingWidth.bind(this), 50)
 
     private toggleReadingView = (changes: Storage.StorageChange) => {
         for (let key of Object.entries(changes)) {
@@ -484,8 +510,28 @@ export class SidebarContainerLogic extends UILogic<
                 this.emitMutation({
                     readingView: { $set: key[1].newValue },
                 })
+                if (key[1].newValue) {
+                    this.setReadingWidth()
+                    this.resizeObserver.observe(this.sidebar)
+                    window.addEventListener('resize', this.debounceReadingWidth)
+                } else {
+                    document.body.style.width = 'initial'
+                    this.resizeObserver.disconnect()
+                    window.removeEventListener(
+                        'resize',
+                        this.debounceReadingWidth,
+                    )
+                }
             }
         }
+    }
+
+    private setReadingWidth() {
+        const sidebar = this.sidebar
+        let currentsidebarWidth = sidebar.offsetWidth
+        let currentWindowWidth = window.innerWidth
+        let readingWidth = currentWindowWidth - currentsidebarWidth - 50 + 'px'
+        document.body.style.width = readingWidth
     }
 
     sortAnnotations: EventHandler<'sortAnnotations'> = ({

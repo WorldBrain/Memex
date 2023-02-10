@@ -77,7 +77,7 @@ export default class Logic extends UILogic<State, Event> {
     private autoLoginAvailable = async () => {
         let user = undefined
         let retries = 0
-        let maxRetries = 20
+        let maxRetries = 30
         while (user == null && retries !== maxRetries + 1) {
             user = await this.dependencies.authBG.getCurrentUser()
 

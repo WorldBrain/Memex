@@ -45,39 +45,6 @@ const getContentFingerprints: GetContentFingerprints = async () => {
 
 Global.main({ loadRemotely: false, getContentFingerprints }).then(
     async (inPageUI) => {
-        inPageUI.events.on('stateChanged', (event) => {
-            const sidebarState = event?.changes?.sidebar
-            let windowWidth = window.innerWidth
-
-            if (sidebarState === true) {
-                let sidebar = document.getElementById('memex-sidebar-container')
-                let sidebarContainer = sidebar.shadowRoot.getElementById(
-                    'annotationSidebarContainer',
-                )
-
-                let sidebarContainerWidth = parseFloat(
-                    SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
-                )
-
-                if (sidebarContainer) {
-                    sidebarContainerWidth = sidebarContainer?.offsetWidth
-                }
-                document.body.style.width =
-                    windowWidth - sidebarContainerWidth - 50 + 'px'
-
-                window.addEventListener('resize', () =>
-                    listenToWindowWidthChanges(sidebarContainer),
-                )
-                sidebar.addEventListener('mouseup', () =>
-                    listenToSidebarWidthChanges(sidebarContainer),
-                )
-
-                document.body.classList.add('memexSidebarOpen')
-            } else if (sidebarState === false) {
-                document.body.classList.remove('memexSidebarOpen')
-                document.body.style.width = '100%'
-            }
-        })
         makeRemotelyCallableType<InPDFPageUIContentScriptRemoteInterface>({
             extractPDFContents: async () => {
                 const searchParams = new URLSearchParams(location.search)
@@ -96,13 +63,3 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
         await inPageUI.showSidebar()
     },
 )
-
-function listenToWindowWidthChanges(sidebarContainer) {
-    let sidebarContainerWidth = sidebarContainer.offsetWidth
-    document.body.style.width = window.innerWidth - sidebarContainerWidth + 'px'
-}
-
-function listenToSidebarWidthChanges(sidebarContainer) {
-    let sidebarContainerWidth = sidebarContainer.offsetWidth
-    document.body.style.width = window.innerWidth - sidebarContainerWidth + 'px'
-}
