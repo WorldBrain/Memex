@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic from './logic'
@@ -79,17 +79,11 @@ export default class OnboardingScreen extends StatefulUIElement<
                         {this.state.authDialogMode === 'signup' && (
                             <>
                                 <Title>Welcome to Memex</Title>
-                                <DescriptionText>
-                                    Create an account to get started
-                                </DescriptionText>
                             </>
                         )}
                         {this.state.authDialogMode === 'login' && (
                             <UserScreenContainer>
                                 <Title>Welcome Back!</Title>
-                                <DescriptionText>
-                                    Login to continue
-                                </DescriptionText>
                             </UserScreenContainer>
                         )}
                         {this.state.authDialogMode === 'resetPassword' && (
@@ -149,88 +143,6 @@ const UserScreenContainer = styled.div`
     flex-direction: column;
     justify-content: center;
 `
-const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 10px;
-`
-
-const TutorialContainer = styled.div`
-    display: grid;
-    grid-gap: 20px;
-    grid-auto-flow: column;
-    align-items: center;
-    justify-content: flex-start;
-`
-
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
-    height: 80px;
-    width: 80px;
-    margin-bottom: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const DisplayNameContainer = styled.div`
-    display: grid;
-    grid-gap: 5px;
-    grid-auto-flow: row;
-    justify-content: flex-start;
-    align-items: center;
-`
-
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.greyScale5};
-    font-size: 12px;
-    opacity: 0.7;
-    padding-left: 10px;
-`
-
-const FeatureInfoBox = styled.div`
-    display: grid;
-    grid-gap: 10px;
-    grid-auto-flow: row;
-    justify-content: center;
-    align-items: center;
-`
-
-const ConfirmContainer = styled.div`
-    & > div {
-        width: 100%;
-        border-radius: 8px;
-        height: 50px;
-    }
-`
-const TextInputContainer = styled.div`
-    display: flex;
-    grid-auto-flow: column;
-    grid-gap: 10px;
-    align-items: center;
-    justify-content: flex-start;
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
-    height: 50px;
-    border-radius: 8px;
-    width: 350px;
-    padding: 0 15px;
-`
-
-const TextInput = styled.input`
-    outline: none;
-    height: fill-available;
-    width: fill-available;
-    color: ${(props) => props.theme.colors.greyScale5};
-    font-size: 14px;
-    border: none;
-    background: transparent;
-
-    &::placeholder {
-        color: ${(props) => props.theme.colors.greyScale5};
-    }
-`
 
 const WelcomeContainer = styled.div`
     display: flex;
@@ -238,6 +150,27 @@ const WelcomeContainer = styled.div`
     overflow: hidden;
     background-color: ${(props) => props.theme.colors.black};
     height: 100vh;
+`
+
+const openAnimation = keyframes`
+ 0% { opacity: 0; margin-top: 100px;}
+ 100% { opacity: 1; margin-top: 0px;}
+`
+
+const AnnotationBox = styled.div<{
+    isActive: boolean
+    zIndex: number
+    order: number
+}>`
+    width: 99%;
+    z-index: ${(props) => props.zIndex};
+
+    animation-name: ${openAnimation};
+    animation-duration: 600ms;
+    animation-delay: ${(props) => props.order * 40}ms;
+    animation-timing-function: cubic-bezier(0.16, 0.67, 0.47, 0.97);
+    animation-fill-mode: backwards;
+    position: relative;
 `
 
 const LeftSide = styled.div`
@@ -250,6 +183,12 @@ const LeftSide = styled.div`
     /* position: absolute; */
     justify-content: flex-start;
     margin-left: 20%;
+    animation-name: ${openAnimation};
+    animation-duration: 600ms;
+    animation-delay: ${(props) => props.order * 40}ms;
+    animation-timing-function: cubic-bezier(0.16, 0.67, 0.47, 0.97);
+    animation-fill-mode: backwards;
+    position: relative;
 
     @media (max-width: 1000px) {
         width: 100%;
@@ -265,7 +204,7 @@ const ContentBox = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
     padding: 30px 50px;
     background: ${(props) => props.theme.colors.black}30;
     backdrop-filter: blur(5px);
@@ -273,19 +212,22 @@ const ContentBox = styled.div`
 `
 
 const Title = styled.div`
-    color: ${(props) => props.theme.colors.white};
-    font-size: 26px;
+    background: ${(props) => props.theme.colors.headerGradient};
+    font-size: 30px;
     font-weight: 800;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     margin-top: 30px;
-    text-align: center;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: left;
 `
 
 const DescriptionText = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
     font-size: 18px;
     font-weight: 300;
-    margin-bottom: 34px;
+    margin-bottom: 40px;
     text-align: center;
 `
 

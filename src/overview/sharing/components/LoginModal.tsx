@@ -70,9 +70,12 @@ export default class LoginModal extends React.PureComponent<Props> {
 
 const TitleText = styled.div`
     font-family: ${(props) => props.theme.fonts.primary};
-    color: ${(props) => props.theme.colors.white};
-    font-size: 20px;
+    background: ${(props) => props.theme.colors.headerGradient};
+    font-size: 26px;
     font-weight: bold;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 
     padding-bottom: 30px;
 `

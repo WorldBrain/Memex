@@ -79,8 +79,8 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         />
                                     </TextInputContainer>
                                     <InfoText>
-                                        Name shown on shared Spaces, page links
-                                        and annotations
+                                        Shown on shared Spaces, annotations &
+                                        replies.
                                     </InfoText>
                                 </DisplayNameContainer>
                                 <TextInputContainer>
@@ -557,7 +557,7 @@ const DisplayNameContainer = styled.div`
 
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
-    font-size: 12px;
+    font-size: 14px;
     text-align: center;
 `
 
@@ -586,8 +586,8 @@ const TextInputContainer = styled.div`
     background: ${(props) => props.theme.colors.greyScale2};
     height: 44px;
     border-radius: 8px;
-    width: 350px;
     padding: 0 15px;
+    width: 350px;
     &:focus-within {
         outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     }
@@ -720,7 +720,6 @@ const EmailPasswordError = styled.div`
 const AuthBox = styled(Margin)`
     display: flex;
     justify-content: center;
-    width: 350px;
 `
 
 const Footer = styled.div`
