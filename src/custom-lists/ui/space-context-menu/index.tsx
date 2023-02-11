@@ -332,7 +332,8 @@ const LoadingContainer = styled.div`
     justify-content: center;
     align-items: center;
     width: fill-available;
-    width: 250px;
+    justify-self: center;
+    min-width: 250px;
 `
 
 const ShareSectionContainer = styled.div`

@@ -1152,7 +1152,6 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
     z-index: 2147483644;
     /* animation: slide-in ease-out;
     animation-duration: 0.05s; */
-    transition: all 0.1s cubic-bezier(0.4, 0, 0.16, 0.87);
 
     ${(props) =>
         props.isPeeking &&
@@ -1162,6 +1161,7 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
             width: 44px;
             padding-right: 25px;
             right: 0px;
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.16, 0.87);
         `}
 
     ${(props) =>
@@ -1176,6 +1176,7 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
             padding: 0 7px 0 5px;
             right: 0px;
             background: ${(props) => props.theme.colors.black};
+            transition: unset;
 
             & .removeSidebar {
                 visibility: hidden;
