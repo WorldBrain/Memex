@@ -360,7 +360,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     )
 
                     if (highlightEl.parentNode.nodeName === 'A') {
-                        highlightEl.style['color'] = '#0b0080'
+                        highlightEl.style['color'] = '#3366cc'
                     }
                 }
 
@@ -535,7 +535,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
             highlightEl.dataset.annotation = highlight.unifiedId
 
             if (highlightEl.parentNode.nodeName === 'A') {
-                highlightEl.style['color'] = '#0b0080'
+                highlightEl.style['color'] = '#3366cc'
             }
 
             const clickListener = async (e: MouseEvent) => {

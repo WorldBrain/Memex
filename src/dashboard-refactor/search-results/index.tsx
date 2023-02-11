@@ -1304,7 +1304,7 @@ const ResultsBox = styled.div<{ zIndex: number }>`
     margin-top: 2px;
     flex-direction: column;
     width: fill-available;
-    height: fill-available;
+    height: 100vh;
     overflow: scroll;
     padding-bottom: 100px;
     align-items: center;

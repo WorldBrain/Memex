@@ -1,13 +1,13 @@
 :root {
     /* #f0f0f0 in decimal RGB */
     --highlightColor: var(--defaultHighlightColorCSS);
-    color: #12131b !important;
+    color: #12131b;
 }
 
 .memex-highlight {
     /* default state */
     cursor: pointer;
-    color: #12131b !important;
+    color: #12131b;
     background-color: rgb(var(--highlightColor));
 }
 
@@ -15,11 +15,11 @@
     /* prettier-ignore */
     background-color: rgba(var(--defaultHighlightColorCSS), 0.5);
     border-bottom: 2px solid rgb(var(--defaultHighlightColorCSS));
-    color: #12131b !important;
+    color: #12131b;
 }
 
 .hoveredHighlight {
     background-color: rgba(var(--defaultHighlightColorCSS), 0.7);
     fill: rgba(var(--defaultHighlightColorCSS), 0.7);
-    color: #12131b !important;
+    color: #12131b;
 }

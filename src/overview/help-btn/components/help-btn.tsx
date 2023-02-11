@@ -70,6 +70,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                                 filePath={icons.chatWithUs}
                                 heightAndWidth="22px"
                                 hoverOff
+                                color={'greyScale1'}
                             />
                             Live Chat Support
                         </MenuItem>
@@ -206,7 +207,7 @@ const MenuList = styled.div`
     width: 250px;
     padding: 10px;
     position: relative;
-    height: 400px;
+    height: 360px;
     grid-gap: 2px;
 `
 
@@ -247,7 +248,8 @@ const MenuItem = styled.div<{ order: number }>`
     background-color: ${(props) => props.top && props.theme.colors.prime1};
     color: ${(props) =>
         props.top ? props.theme.colors.black : props.theme.colors.greyScale6};
-    font-weight: ${(props) => (props.top ? '600' : '400')};
+    justify-content: ${(props) => props.top && 'center'};
+    font-weight: 400;
     height: 40px;
     padding: 0 10px;
     display: flex;
