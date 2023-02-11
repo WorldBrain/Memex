@@ -607,6 +607,7 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             showState: { $set: 'hidden' },
             activeAnnotationId: { $set: null },
+            readingView: { $set: false },
         })
 
         document.body.style.width = 'initial'

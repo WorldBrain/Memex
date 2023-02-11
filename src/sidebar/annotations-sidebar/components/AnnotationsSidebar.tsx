@@ -1049,7 +1049,8 @@ export class AnnotationsSidebar extends React.Component<
         }
     }
 
-    private throwNoSelectedListError() {
+    private throwNoSelected
+    rror() {
         throw new Error(
             'Isolated view specific render method called when state not set',
         )
@@ -1472,6 +1473,11 @@ export class AnnotationsSidebar extends React.Component<
 
         return undefined
     }
+    private throwNoSelectedListError() {
+        throw new Error(
+            'Isolated view specific render method called when state not set',
+        )
+    }
 
     private renderPermissionStatusButton() {
         const { selectedListId, annotationsCache, currentUser } = this.props
@@ -1485,7 +1491,7 @@ export class AnnotationsSidebar extends React.Component<
 
         const permissionStatus = this.spaceOwnershipStatus(selectedList)
 
-        if (permissionStatus === 'Follower') {
+        if (permissionStatus === 'Follower' && !selectedList.isForeignList) {
             return (
                 <PrimaryAction
                     label="Follower"
