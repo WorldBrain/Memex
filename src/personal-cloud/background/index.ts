@@ -191,6 +191,9 @@ export class PersonalCloudBackground {
     }
 
     async setup() {
+        const deviceID = await this.options.settingStore.get('deviceId')
+        this.deviceId = deviceID
+
         this.currentSchemaVersion = getCurrentSchemaVersion(
             this.options.storageManager,
         )

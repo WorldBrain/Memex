@@ -5,9 +5,9 @@
     "description": "Search, annotate and organize what you've read online.",
     "manifest_version": 3,
     "icons": {
-        "16": "./img/worldbrain-logo-narrow-bw-16.png",
-        "48": "./img/worldbrain-logo-narrow-bw-48.png",
-        "128": "./img/worldbrain-logo-narrow-bw.png"
+        "16": "./img/browserIcons/logo-16.png",
+        "48": "./img/browserIcons/logo-48.png",
+        "128": "./img/browserIcons/logo-128.png"
     },
     "externally_connectable": {
         "matches": [
@@ -37,9 +37,9 @@
         "default_popup": "./popup.html",
         "default_title": "Memex",
         "default_icon": {
-            "16": "./img/worldbrain-logo-narrow-bw-16.png",
-            "48": "./img/worldbrain-logo-narrow-bw-48.png",
-            "128": "./img/worldbrain-logo-narrow-bw.png"
+            "16": "./img/browserIcons/logo-16.png",
+            "48": "./img/browserIcons/logo-48.png",
+            "128": "./img/browserIcons/logo-128.png"
         }
     },
     "omnibox": {
