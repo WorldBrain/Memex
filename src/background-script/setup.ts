@@ -447,8 +447,18 @@ export function createBackgroundModules(options: {
 
     async function* authChangeGenerator(): AsyncIterableIterator<AuthChanges> {
         for await (const nextUser of authChanges(auth.authService)) {
-            const deviceId =
-                nextUser != null ? await createDeviceId(nextUser.id) : null
+            const existingDeviceID = await personalCloudSettingStore.get(
+                'deviceId',
+            )
+            let deviceId: PersonalCloudDeviceId | null = existingDeviceID
+            if (!existingDeviceID) {
+                const userId = nextUser.id
+                if (userId) {
+                    const newDeviceId = await createDeviceId(userId)
+                    await personalCloudSettingStore.set('deviceId', newDeviceId)
+                    deviceId = newDeviceId
+                }
+            }
 
             yield { nextUser, deviceId }
         }
