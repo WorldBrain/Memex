@@ -2,9 +2,7 @@ import React from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 
 import { runInBackground } from 'src/util/webextensionRPC'
-import NotificationContainer, {
-    selectors as notifs,
-} from '../../../notifications'
+import { selectors as notifs } from '../../../notifications'
 import { selectors as filters } from 'src/search-filters'
 import NoResultBadTerm from './NoResultBadTerm'
 import ResultsMessage from './results-message'
@@ -12,7 +10,6 @@ import ResultList from './ResultListContainer'
 import DeprecatedSearchWarning, {
     shouldShowDeprecatedSearchWarning,
 } from './DeprecatedSearchWarning'
-import OnboardingMessage from './onboarding-message'
 import SearchTypeSwitch from './search-type-switch'
 import * as actions from '../actions'
 import * as selectors from '../selectors'
@@ -90,10 +87,10 @@ class ResultsContainer extends React.Component<Props, State> {
     }
 
     private goToAnnotation = async (annotation: Annotation) => {
-        await this.annotations.goToAnnotationFromSidebar({
-            url: annotation.pageUrl,
-            annotation,
-        })
+        // await this.annotations.goToAnnotationFromSidebar({
+        //     url: annotation.pageUrl,
+        //     annotation,
+        // })
     }
 
     private getOnboardingStatus = async () => {
@@ -123,7 +120,7 @@ class ResultsContainer extends React.Component<Props, State> {
                         <Icon
                             filePath={icons.heartEmpty}
                             heightAndWidth="24px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -218,18 +215,12 @@ class ResultsContainer extends React.Component<Props, State> {
     render() {
         return (
             <div className={styles.main}>
-                {this.props.showInbox ? (
-                    <NotificationContainer />
-                ) : (
-                    <>
-                        <SearchTypeSwitch
-                            copyPaster={this.props.copyPaster}
-                            showSocialSearch={this.state.showSocialSearch}
-                        />
-                        {this.renderDeprecatedSearchWarning()}
-                        {this.renderContent()}
-                    </>
-                )}
+                <SearchTypeSwitch
+                    copyPaster={this.props.copyPaster}
+                    showSocialSearch={this.state.showSocialSearch}
+                />
+                {this.renderDeprecatedSearchWarning()}
+                {this.renderContent()}
             </div>
         )
     }
@@ -259,7 +250,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
 })
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundColor};
+    background: ${(props) => props.theme.colors.black};
     border-radius: 100px;
     height: 60px;
     width: 60px;
@@ -270,7 +261,7 @@ const SectionCircle = styled.div`
 `
 
 const ImportInfo = styled.div`
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     font-size: 14px;
     margin-bottom: 40px;
     font-weight: 500;

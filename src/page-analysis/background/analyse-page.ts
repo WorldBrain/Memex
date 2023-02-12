@@ -75,9 +75,7 @@ async function extractPageContent(options: {
         throw new Error(`Could extract raw page content`)
     }
 
-    const content = await extractPageMetadataFromRawContent(rawContent, {
-        fetch: options.fetch,
-    })
+    const content = await extractPageMetadataFromRawContent(rawContent, options)
     if (options.includeContent === 'metadata-with-full-text') {
         content.fullText = await getPageFullText(rawContent, content)
     }

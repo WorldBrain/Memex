@@ -66,36 +66,32 @@ class SearchInjectionContainer extends React.Component {
                         isChecked={this.state.injectionPreference.google}
                         handleChange={this.bindToggleInjection('google')}
                         id="si-google"
-                    >
-                        Google
-                    </Checkbox>
+                        label={'Google'}
+                    />
                 </CheckBoxRow>
                 <CheckBoxRow>
                     <Checkbox
                         isChecked={this.state.injectionPreference.duckduckgo}
                         handleChange={this.bindToggleInjection('duckduckgo')}
                         id="si-ddg"
-                    >
-                        DuckDuckGo
-                    </Checkbox>
+                        label={'DuckDuckGo'}
+                    />
                 </CheckBoxRow>
                 <CheckBoxRow>
                     <Checkbox
                         isChecked={this.state.injectionPreference.brave}
                         handleChange={this.bindToggleInjection('brave')}
                         id="si-brave"
-                    >
-                        Brave
-                    </Checkbox>
+                        label={'Brave'}
+                    />
                 </CheckBoxRow>
                 <CheckBoxRow>
                     <Checkbox
                         isChecked={this.state.injectionPreference.bing}
                         handleChange={this.bindToggleInjection('bing')}
                         id="si-bing"
-                    >
-                        Bing
-                    </Checkbox>
+                        label={'Bing'}
+                    />
                 </CheckBoxRow>
             </SearchInjection>
         )
@@ -104,6 +100,18 @@ class SearchInjectionContainer extends React.Component {
 
 const CheckBoxRow = styled.div`
     height: 50px;
+    margin-left: -10px;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: fill-available;
+    cursor: pointer;
+
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+    }
 `
 
 export default SearchInjectionContainer

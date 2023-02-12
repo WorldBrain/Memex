@@ -1,23 +1,23 @@
 import { ThunkAction } from 'redux-thunk'
 
-import { State as BlacklistBtnState } from './blacklist-button/reducer'
 import { State as BookmarkBtnState } from './bookmark-button/reducer'
 import { State as TagsBtnState } from './tags-button/reducer'
 import { State as CollectionsBtnState } from './collections-button/reducer'
 import { State as PauseBtnState } from './pause-button/reducer'
 import { State as NotifsBtnState } from './notif-button/reducer'
 import { State as SidebarBtnState } from './sidebar-button/reducer'
+import { State as RibbonBtnState } from './sidebar-open-button/reducer'
 import { State as TooltipBtnState } from './tooltip-button/reducer'
 import { State as PopupState } from './reducer'
 import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
 
 export interface RootState {
-    blacklistBtn?: BlacklistBtnState
     bookmarkBtn?: BookmarkBtnState
     tagsBtn: TagsBtnState
     collectionsBtn: CollectionsBtnState
     pauseBtn?: PauseBtnState
     sidebarBtn?: SidebarBtnState
+    sidebarOpenBtn?: RibbonBtnState
     tooltipBtn?: TooltipBtnState
     notifsBtn?: NotifsBtnState
     popup?: PopupState

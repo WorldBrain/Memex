@@ -4,23 +4,20 @@ import { StyleSheetManager, ThemeProvider } from 'styled-components'
 
 import { theme } from 'src/common-ui/components/design-library/theme'
 import RibbonHolder from './containers/ribbon-holder'
-import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import { RibbonContainerDependencies } from './containers/ribbon/types'
+import type { RibbonHolderDependencies } from './containers/ribbon-holder/logic'
+import type { InPageUIRootMount } from 'src/in-page-ui/types'
 
 export function setupRibbonUI(
-    target: HTMLElement,
-    options: {
-        inPageUI: SharedInPageUIInterface
-        containerDependencies: RibbonContainerDependencies
-    },
+    mount: InPageUIRootMount,
+    deps: RibbonHolderDependencies,
 ) {
     ReactDOM.render(
-        <StyleSheetManager target={target}>
+        <StyleSheetManager target={mount.shadowRoot as any}>
             <ThemeProvider theme={theme}>
-                <RibbonHolder {...options} />
+                <RibbonHolder {...deps} />
             </ThemeProvider>
         </StyleSheetManager>,
-        target,
+        mount.rootElement,
     )
 }
 

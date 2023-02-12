@@ -1,7 +1,7 @@
 import React, { KeyboardEventHandler } from 'react'
 import qs from 'query-string'
 import { connect, MapStateToProps } from 'react-redux'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import styled from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -14,6 +14,7 @@ import LinkButton from './components/LinkButton'
 import CopyPDFLinkButton from './components/CopyPDFLinkButton'
 import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
+import { SidebarOpenButton } from './sidebar-open-button'
 import {
     selectors as tagsSelectors,
     acts as tagActs,
@@ -29,7 +30,6 @@ import { BookmarkButton } from './bookmark-button'
 import * as selectors from './selectors'
 import * as acts from './actions'
 import { ClickHandler, RootState } from './types'
-import { EVENT_NAMES } from '../analytics/internal/constants'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import TagPicker from 'src/tags/ui/TagPicker'
 import { tags, collections } from 'src/util/remote-functions-background'
@@ -38,9 +38,7 @@ const styles = require('./components/Popup.css')
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 import { createSyncSettingsStore } from 'src/sync-settings/util'
-import { isFullUrlPDF } from 'src/util/uri-utils'
-import { ToggleSwitchButton } from './components/ToggleSwitchButton'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import checkBrowser from 'src/util/check-browser'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
@@ -100,8 +98,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         await this.props.initState()
     }
 
-    processAnalyticsEvent = remoteFunction('processEvent')
-
     closePopup = () => window.close()
 
     onSearchEnter: KeyboardEventHandler<HTMLInputElement> = (event) => {
@@ -110,10 +106,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             analytics.trackEvent({
                 category: 'Search',
                 action: 'searchViaPopup',
-            })
-
-            this.processAnalyticsEvent({
-                type: EVENT_NAMES.SEARCH_POPUP,
             })
 
             const queryFilters = extractQueryFilters(this.props.searchValue)
@@ -188,7 +180,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 
     private get isCurrentPagePDF(): boolean {
-        return isFullUrlPDF(this.props.url)
+        return this.props.url?.endsWith('.pdf')
     }
 
     getPDFMode = () => {
@@ -250,6 +242,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                                 url: `chrome://extensions/?id=${browser.runtime.id}`,
                             })
                         }
+                        size={'medium'}
+                        type={'primary'}
                     />
                 </BlurredNotice>
             )
@@ -264,6 +258,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         onClick={() =>
                             this.processEvent('togglePDFReader', null)
                         }
+                        size={'medium'}
+                        type={'primary'}
                     />
                 </BlurredNotice>
             )
@@ -302,7 +298,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 <SpacePickerContainer>
                     <BackContainer
                         onClick={this.props.toggleShowCollectionsPicker}
-                        header={'Add to Spaces'}
+                        header={'Add Page to Spaces'}
+                        showAutoSaved={this.state.showAutoSaved}
                     />
                     <CollectionPicker
                         selectEntry={(listId) =>
@@ -319,10 +316,14 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         }
                         createNewEntry={async (name) => {
                             this.props.onCollectionAdd(name)
-                            return collections.createCustomList({ name })
+                            return collections.createCustomList({
+                                name: name,
+                                id: Date.now(),
+                            })
                         }}
                         initialSelectedListIds={() => this.state.pageListIds}
                         actOnAllTabs={this.handleListAllTabs}
+                        context={'popup'}
                     />
                 </SpacePickerContainer>
             )
@@ -330,19 +331,57 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
         return (
             <PopupContainerContainer>
-                <FeedActivitySection>
-                    <FeedActivitySectionInnerContainer
-                        onClick={() => window.open(this.whichFeed(), '_blank')}
-                    >
-                        <FeedActivityDot
-                            key="activity-feed-indicator"
-                            activityIndicatorBG={this.activityIndicatorBG}
-                            openFeedUrl={() =>
-                                window.open(this.whichFeed(), '_blank')
-                            }
+                {this.maybeRenderBlurredNotice()}
+                <FeedActivitySection
+                    onClick={() => window.open(this.whichFeed(), '_blank')}
+                >
+                    <FeedActivitySectionInnerContainer>
+                        <Icon
+                            icon={icons.feed}
+                            heightAndWidth="22px"
+                            hoverOff
                         />
                         Activity Feed
                     </FeedActivitySectionInnerContainer>
+                    <FeedActivityDot
+                        key="activity-feed-indicator"
+                        activityIndicatorBG={this.activityIndicatorBG}
+                        openFeedUrl={() =>
+                            window.open(this.whichFeed(), '_blank')
+                        }
+                    />
+                </FeedActivitySection>
+                <BookmarkButton closePopup={this.closePopup} />
+                <CollectionsButton pageListsIds={this.state.pageListIds} />
+                <SpacerLine />
+                {this.isCurrentPagePDF === true && (
+                    <PDFReaderButton
+                        pdfMode={this.getPDFMode()}
+                        //closePopup={this.closePopup}
+                        onBtnClick={() =>
+                            this.processEvent('togglePDFReader', null)
+                        }
+                        onToggleClick={() => {
+                            this.processEvent('togglePDFReaderEnabled', null)
+                        }}
+                        isEnabled={this.state.isPDFReaderEnabled}
+                    />
+                )}
+                {this.getPDFMode() === 'reader' && (
+                    <CopyPDFLinkButton
+                        currentPageUrl={this.state.currentPageUrl}
+                    />
+                )}
+                <LinkButton goToDashboard={this.onSearchClick} />
+                <SidebarOpenButton closePopup={this.closePopup} />
+                <QuickSettingsContainer>
+                    Quick Settings <SpacerLine />
+                </QuickSettingsContainer>
+
+                <SidebarButton closePopup={this.closePopup} />
+                <TooltipButton closePopup={this.closePopup} />
+                <Footer>
+                    <MemexLogo />
                     <ButtonContainer>
                         <Icon
                             onClick={() =>
@@ -362,34 +401,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         />
                         {/*<NotifButton />*/}
                     </ButtonContainer>
-                </FeedActivitySection>
-                {this.maybeRenderBlurredNotice()}
-                <BookmarkButton closePopup={this.closePopup} />
-                <CollectionsButton pageListsIds={this.state.pageListIds} />
-                {this.state.shouldShowTagsUIs && <TagsButton />}
-                <hr />
-                <LinkButton goToDashboard={this.onSearchClick} />
-
-                <hr />
-
-                <SidebarButton closePopup={this.closePopup} />
-                <TooltipButton closePopup={this.closePopup} />
-                <PDFReaderButton
-                    pdfMode={this.getPDFMode()}
-                    //closePopup={this.closePopup}
-                    onBtnClick={() =>
-                        this.processEvent('togglePDFReader', null)
-                    }
-                    onToggleClick={() => {
-                        this.processEvent('togglePDFReaderEnabled', null)
-                    }}
-                    isEnabled={this.state.isPDFReaderEnabled}
-                />
-                {this.getPDFMode() === 'reader' && (
-                    <CopyPDFLinkButton
-                        currentPageUrl={this.state.currentPageUrl}
-                    />
-                )}
+                </Footer>
             </PopupContainerContainer>
         )
     }
@@ -399,7 +411,45 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 }
 
-const PopupContainerContainer = styled.div``
+const MemexLogo = styled.div`
+    background-image: url('/img/memexLogoGrey.svg');
+    background-position: left center;
+    height: 24px;
+    width: 110px;
+    display: flex;
+    justify-content: flex-start;
+    outline: none;
+    border: none;
+    background-repeat: no-repeat;
+`
+
+const QuickSettingsContainer = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    color: ${(props) => props.theme.colors.greyScale4};
+    white-space: nowrap;
+    align-items: center;
+    padding-left: 20px;
+`
+
+const SpacerLine = styled.div`
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
+    width: 100%;
+`
+
+const Footer = styled.div`
+    height: 40px;
+    display: flex;
+    padding: 0 15px 0 20px;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
+`
+
+const PopupContainerContainer = styled.div`
+    background: ${(props) => props.theme.colors.greyScale1};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+`
 
 const ButtonContainer = styled.div`
     display: flex;
@@ -414,19 +464,17 @@ const FeedActivitySectionInnerContainer = styled.div`
     font-size: 14px;
     justify-content: flex-start;
     cursor: pointer;
-    color: ${(props) => props.theme.colors.darkerText};
-    font-weight: 700;
+    color: ${(props) => props.theme.colors.white};
+    font-weight: 500;
     flex: 1;
-    max-width: 50%;
+    width: fill-available;
 `
 
 const NoticeTitle = styled.div`
     font-size: 16px;
-    color: ${(props) => props.theme.colors.primary};
+    color: ${(props) => props.theme.colors.white};
     font-weight: bold;
-    padding-bottom: 10px;
     text-align: center;
-    padding: 0 10px;
     margin-bottom: 20px;
 `
 
@@ -435,12 +483,13 @@ const LoadingBox = styled.div`
     height: 200px;
     justify-content: center;
     align-items: center;
+    background-color: ${(props) => props.theme.colors.greyScale1};
 `
 
 const NoticeSubTitle = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.darkgrey};
-    font-weight: normal;
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-weight: 300;
     padding-bottom: 15px;
     text-align: center;
     padding: 0 10px;
@@ -451,14 +500,10 @@ const BlurredNotice = styled.div<{
     browser: string
     location: string
 }>`
-    position absolute;
-    height: ${(props) =>
-        props.browser === 'firefox' && props.location === 'local'
-            ? '90%'
-            : ' 66%'};
-    border-bottom: 1px solid #e0e0e0;
+    position: absolute;
+    height: 100%;
     width: 100%;
-    z-index: 20;
+    z-index: 30;
     overflow-y: ${(props) =>
         props.browser === 'firefox' && props.location === 'local'
             ? 'hidden'
@@ -466,23 +511,14 @@ const BlurredNotice = styled.div<{
     background: ${(props) => (props.browser === 'firefox' ? 'white' : 'none')};
     backdrop-filter: blur(10px);
     display: flex;
-    justify-content: flex-start;
-    padding-top: 50px;
+    justify-content: center;
     align-items: center;
     flex-direction: column;
-`
 
-const DashboardButtonBox = styled.div`
-    height: 45px;
-    width: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+    scrollbar-width: none;
 
-    &: hover {
-        background-color: #e0e0e0;
-        border-radius: 3px;
+    &::-webkit-scrollbar {
+        display: none;
     }
 `
 
@@ -491,36 +527,26 @@ const FeedActivitySection = styled.div`
     display: flex;
     justify-content: space-between;
     height: 50px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     align-items: center;
-    padding: 0px 10px 0px 24px;
+    padding: 0px 20px 0px 20px;
     grid-auto-flow: column;
+    width: fill-available;
+
+    & * {
+        cursor: pointer;
+    }
 
     // &:hover {
-    //     background-color: ${(props) => props.theme.colors.backgroundColor};
+    //     background-color: ${(props) => props.theme.colors.black};
     // }
-`
-
-const BottomBarBox = styled.div`
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    height: 45px;
-
-    & > div {
-        width: 45px;
-    }
-`
-
-const LinkButtonBox = styled.img`
-    height: 24px;
-    width: 24px;
 `
 
 const SpacePickerContainer = styled.div`
     display: flex;
     flex-direction: column;
+    background-color: ${(props) => props.theme.colors.greyScale1};
+    min-height: 500px;
 `
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({

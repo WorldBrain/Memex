@@ -11,8 +11,6 @@ const ResultItem = (props) => (
     <RootContainer>
         <Root href={props.url} target="_blank" onClick={props.onLinkClick}>
             <InfoContainer>
-                <Title>{props.title}</Title>
-
                 <DetailsContainer>
                     <Url>
                         {
@@ -24,6 +22,7 @@ const ResultItem = (props) => (
                     </Url>
                     <DisplayTime> {niceTime(props.displayTime)} </DisplayTime>
                 </DetailsContainer>
+                <Title>{props.title}</Title>
                 {props.tags.length > 0 && (
                     <TagBox>{showTags(props.tags)}</TagBox>
                 )}
@@ -36,7 +35,7 @@ const Root = styled.a`
     padding: 20px 20px;
     text-decoration: none !important;
     display: flex;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     &:last-child {
         border-bottom: none;
@@ -46,14 +45,15 @@ const Root = styled.a`
 const RootContainer = styled.div`
     height: fit-content;
     width: fill-available;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
+    background: ${(props) => props.theme.colors.black};
 
     &:last-child {
         border-bottom: none;
     }
 
     &:hover ${Root} {
-        background: ${(props) => props.theme.colors.backgroundColor};
+        background: ${(props) => props.theme.colors.greyScale3};
     }
 `
 
@@ -63,13 +63,13 @@ const InfoContainer = styled.div`
     align-items: flex-start;
     flex-direction: column;
     width: fill-available;
-    grid-gap: 3px;
+    grid-gap: 8px;
 `
 
 const TagItem = styled.div`
     padding: 2px 8px;
     border-radius: 3px;
-    background-color: ${(props) => props.theme.colors.purple};
+    background-color: ${(props) => props.theme.colors.prime1};
     color: white;
     display: flex;
     align-items: center;
@@ -87,15 +87,16 @@ const TagBox = styled.div`
 
 const Title = styled.div`
     font-size: 15px;
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: bold;
     text-decoration: none;
 `
 
 const Url = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     text-decoration: none;
+    font-weight: 200;
 `
 
 const DetailsContainer = styled.div`
@@ -105,7 +106,7 @@ const DetailsContainer = styled.div`
 `
 
 const DisplayTime = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
 `
 

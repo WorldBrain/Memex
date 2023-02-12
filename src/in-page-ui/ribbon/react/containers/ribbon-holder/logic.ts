@@ -1,21 +1,25 @@
 import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
-import { RibbonContainerDependencies } from '../ribbon/types'
-import {
+import type { RibbonContainerDependencies } from '../ribbon/types'
+import type {
     SharedInPageUIInterface,
     InPageUIComponentShowState,
+    ShouldSetUpOptions,
 } from 'src/in-page-ui/shared-state/types'
 
 export interface RibbonHolderState {
     state: 'visible' | 'hidden'
     isSidebarOpen: boolean
+    keepPageActivityIndicatorHidden: boolean
 }
 
 export type RibbonHolderEvents = UIEvent<{
+    openSidebarToSharedSpaces: null
     show: null
     hide: null
 }>
 
 export interface RibbonHolderDependencies {
+    setUpOptions: ShouldSetUpOptions
     inPageUI: SharedInPageUIInterface
     containerDependencies: RibbonContainerDependencies
 }
@@ -40,6 +44,7 @@ export class RibbonHolderLogic extends UILogic<
                 ? 'visible'
                 : 'hidden',
             isSidebarOpen: this.dependencies.inPageUI.componentsShown.sidebar,
+            keepPageActivityIndicatorHidden: false,
         }
     }
 
@@ -69,9 +74,26 @@ export class RibbonHolderLogic extends UILogic<
         return { state: { $set: 'hidden' } }
     }
 
+    openSidebarToSharedSpaces: EventHandler<
+        'openSidebarToSharedSpaces'
+    > = async ({}) => {
+        this.emitMutation({
+            keepPageActivityIndicatorHidden: { $set: true },
+        })
+        await this.dependencies.inPageUI.showSidebar({
+            action: 'show_shared_spaces',
+        })
+    }
+
     _handleUIStateChange = (event: {
         newState: InPageUIComponentShowState
     }) => {
         this.emitMutation({ isSidebarOpen: { $set: event.newState.sidebar } })
+
+        if (event.newState.sidebar === true) {
+            this.emitMutation({
+                keepPageActivityIndicatorHidden: { $set: true },
+            })
+        }
     }
 }

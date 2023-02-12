@@ -1,23 +1,26 @@
-import React from 'react'
-import styled from 'styled-components'
+import React, { ChangeEventHandler } from 'react'
+import styled, { css } from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 import { Loader, Search as SearchIcon } from '@styled-icons/feather'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { browser } from 'webextension-polyfill-ts'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 
 const search = browser.runtime.getURL('/img/search.svg')
 
 interface Props {
     onChange: (value: string) => void
-    onKeyPress: (e: KeyboardEvent) => void
+    onKeyDown: (e: KeyboardEvent) => void
+    onKeyUp: (e: KeyboardEvent) => void
     searchInputPlaceholder: string
     value: string
     before: JSX.Element
     searchInputRef?: (e: HTMLTextAreaElement | HTMLInputElement) => void
     showPlaceholder?: boolean
     loading?: boolean
+    autoFocus?: boolean
 }
 
 interface State {
@@ -40,64 +43,62 @@ export const keyEvents: KeyEvent[] = [
 export class PickerSearchInput extends React.Component<Props, State> {
     state = { isFocused: false }
 
-    onChange = (value: string) => this.props.onChange(value)
-
-    handleSpecialKeyPress = {
-        test: (e: KeyboardEvent) => keyEvents.includes(e.key as KeyEvent),
-        handle: (e: KeyboardEvent) => this.props.onKeyPress(e),
-    }
+    onChange: ChangeEventHandler = (e) =>
+        this.props.onChange((e.target as HTMLInputElement).value)
 
     render() {
         return (
-            <SearchBox isFocused={this.state.isFocused} id={'pickerSearchBox'}>
-                <Icon filePath={search} heightAndWidth="14px" hoverOff />
-                <SearchInput
-                    placeholder={
-                        this.props.showPlaceholder ?? true
-                            ? this.props.searchInputPlaceholder
-                            : 'Search & Add Spaces'
-                    }
-                    defaultValue={this.props.value}
-                    onChange={this.onChange}
-                    onKeyDown={(e) => e.stopPropagation()}
-                    onFocus={() => this.setState({ isFocused: true })}
-                    onBlur={() => this.setState({ isFocused: false })}
-                    specialHandlers={[this.handleSpecialKeyPress]}
-                    type={'input'}
-                    updateRef={this.props.searchInputRef}
-                    autoFocus
-                    size="5"
-                />
-                {this.props.loading && <Loader size={20} />}
-            </SearchBox>
+            <SearchInput
+                placeholder={
+                    this.props.showPlaceholder ?? true
+                        ? this.props.searchInputPlaceholder
+                        : 'Search & Add Spaces'
+                }
+                value={this.props.value}
+                onChange={this.onChange}
+                onKeyDown={(e) => {
+                    this.props.onKeyDown(e)
+                    e.stopPropagation()
+                }}
+                onKeyUp={(e) => {
+                    this.props.onKeyUp(e)
+                    e.stopPropagation()
+                }}
+                type={'input'}
+                componentRef={this.props.searchInputRef}
+                icon="searchIcon"
+                autoFocus={
+                    this.props.autoFocus != null ? this.props.autoFocus : true
+                }
+                id={'pickerSearchBox'}
+            />
         )
     }
 }
 
-const StyledSearchIcon = styled(SearchIcon)`
-    color: ${(props) => props.theme.tag.searchIcon};
-    stroke-width: 2px;
-    margin-right: 8px;
-`
-
-const SearchBox = styled.div`
+const SearchBox = styled.div<{ isFocused: boolean }>`
     align-items: center;
-    background-color: ${(props) => props.theme.colors.backgroundColorDarker};
+    background-color: ${(props) => props.theme.colors.greyScale2};
     border-radius: 3px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     display: flex;
     flex-wrap: wrap;
     font-size: 1rem;
     padding: 10px;
-    margin-left: 10px;
-    margin-right: 10px;
     transition: border 0.1s;
     margin-bottom: 4px;
     grid-gap: 5px;
     min-height: 20px;
+    margin: 10px 10px 0px 10px;
+
+    ${(props) =>
+        props.isFocused &&
+        css`
+            outline: 1px solid ${(props) => props.theme.colors.lineGrey};
+        `}
 `
 
-const SearchInput = styled(TextInputControlled)`
+const SearchInput = styled(TextField)`
     border: none;
     background-image: none;
     background-color: transparent;
@@ -106,11 +107,19 @@ const SearchInput = styled(TextInputControlled)`
     box-shadow: none;
     display: flex;
     flex: 1;
-    color: ${(props) => props.theme.colors.normalText};
-    font-family: 'Inter'
+    color: ${(props) => props.theme.colors.white};
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-size: 14px;
     height: fill-available;
     width: fill-available;
+
+    & * {
+        font-family: 'Satoshi', sans-serif;
+        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            'ss04' on, 'liga' off;
+    }
 
     &:focus {
         border: none;
@@ -118,5 +127,9 @@ const SearchInput = styled(TextInputControlled)`
         -webkit-box-shadow: none;
         -moz-box-shadow: none;
         box-shadow: none;
+    }
+
+    &:focus ${SearchBox} {
+        border: 1px solid ${(props) => props.theme.colors.lineGrey};
     }
 `

@@ -11,53 +11,36 @@ const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 10px 15px 10px 15px;
+    padding: 10px 15px 0px 18px;
     height: 30px;
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
+`
+
+const ButtonBox = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    align-items: center;
+    justify-self: flex-end;
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale4};
     font-size: 14px;
-    font-weight: bold;
-`
-
-const HeaderplaceHolder = styled.div`
-    width: 24px;
-`
-
-const CreateNewButton = styled.button`
-    font-family: ${(props) => props.theme.fonts.primary};
-    font-style: normal;
-    font-weight: normal;
-    font-size: 14px;
-    color: ${(props) => props.theme.colors.primary};
-    cursor: pointer;
-    padding: 0px;
-
-    outline: none;
-    border: none;
-    background: transparent;
-`
-
-const NoResults = styled.p`
-    text-align: center
-    font-family: ${(props) => props.theme.fonts.primary};
-    font-style: normal;
-    font-size: 12px;
-    padding: 0 15px;
-    color: ${(props) => props.theme.colors.primary};
+    font-weight: 400;
+    flex: 1;
+    white-space: nowrap;
 `
 
 const NoResultsBox = styled.div`
-    text-align: center
-    font-family: 'Inter',
+    text-align: center;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-style: normal;
     font-size: 12px;
     padding: 15px 10px;
-    color: ${(props) => props.theme.colors.normalText};
-    display:flex;
+    color: ${(props) => props.theme.colors.white};
+    display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
@@ -70,7 +53,7 @@ const Center = styled.div`
     height: 200px;
     align-items: center;
     flex-direction: column;
-    grid-gap: 30px;
+    grid-gap: 10px;
 `
 
 const ContentBlock = styled.div`
@@ -86,23 +69,28 @@ const ContentBlock = styled.div`
 `
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight}80;
-    border-radius: 100px;
-    height: 32px;
-    width: 32px;
+    background: ${(props) => props.theme.colors.greyScale2};
+    border: 1px solid ${(props) => props.theme.colors.greyScale6};
+    border-radius: 8px;
+    height: 30px;
+    width: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
 `
 
-const InfoText = styled.div<{ small: boolean }>`
-    color: ${(props) =>
-        props.small
-            ? props.theme.colors.normalText
-            : props.theme.colors.lighterText};
-    font-size: ${(props) => (props.small ? '12px' : '14px')};
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 14px;
+    font-weight: 300;
     text-align: center;
-    margin-top: ${(props) => props.small && '-25px'};
+`
+const InfoTextTitle = styled.div`
+    color: ${(props) => props.theme.colors.white};
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    margin-top: 20px;
 `
 
 interface InternalTemplateListProps {
@@ -125,7 +113,7 @@ class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
                         <Icon
                             filePath={icons.copy}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -172,7 +160,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
             return (
                 <Center>
                     <LoadingIndicator size={25} />
-                    <InfoText>Copying Content</InfoText>
+                    <InfoTextTitle>Copying Content</InfoTextTitle>
                     <InfoText small>Don't close this modal</InfoText>
                 </Center>
             )
@@ -181,22 +169,26 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
         return (
             <>
                 <Header>
-                    <Icon
-                        filePath={icons.helpIcon}
-                        heightAndWidth="16px"
-                        onClick={() =>
-                            window.open(
-                                'https://links.memex.garden/tutorials/text-exporter',
-                            )
-                        }
-                    />
                     <SectionTitle>Copy/Paste Templates</SectionTitle>
-                    <Icon
-                        filePath={icons.plus}
-                        color="purple"
-                        heightAndWidth="16px"
-                        onClick={this.props.onClickNew}
-                    />
+                    <ButtonBox>
+                        <Icon
+                            filePath={icons.helpIcon}
+                            heightAndWidth="18px"
+                            padding={'5px'}
+                            onClick={() =>
+                                window.open(
+                                    'https://links.memex.garden/tutorials/text-exporter',
+                                )
+                            }
+                        />
+                        <Icon
+                            filePath={icons.plus}
+                            color="prime1"
+                            padding={'5px'}
+                            heightAndWidth="16px"
+                            onClick={this.props.onClickNew}
+                        />
+                    </ButtonBox>
                 </Header>
                 <ContentBlock>
                     <InternalTemplateList

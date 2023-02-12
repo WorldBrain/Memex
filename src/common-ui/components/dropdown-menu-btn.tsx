@@ -1,8 +1,6 @@
 import React from 'react'
-import styled, { ThemeProvider } from 'styled-components'
-
-import { ClickAway } from 'src/util/click-away-wrapper'
-import ButtonTooltip, { Props as ButtonTooltipProps } from './button-tooltip'
+import styled, { ThemeProvider, css } from 'styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 export interface MenuItemProps {
     name: string
@@ -24,7 +22,6 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     onMenuItemClick?: (itemProps: T) => void
     theme?: ThemeProps
     keepSelectedState?: boolean
-    tooltipProps?: ButtonTooltipProps
     initSelectedIndex?: number
     btnId?: string
     menuTitle?: string
@@ -95,120 +92,101 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
             <MenuItem
                 key={i}
                 onClick={this.handleItemClick(props, i)}
-                theme={{
-                    isDisabled: props.isDisabled,
-                    isSelected: this.props.keepSelectedState
-                        ? this.state.selected === i
-                        : false,
-                }}
+                isSelected={this.state.selected === i}
             >
                 <MenuItemName isSelected={this.state.selected === i}>
                     {props.name}
-                    {props.isDisabled && props.soonAvailable && (
-                        <SoonPill>Coming Soon</SoonPill>
+                    {this.state.selected === i && (
+                        <Icon
+                            filePath="check"
+                            color="prime1"
+                            heightAndWidth="18px"
+                            hoverOff
+                        />
                     )}
                 </MenuItemName>
                 {props.info && <MenuItemInfo>{props.info}</MenuItemInfo>}
             </MenuItem>
         ))
 
-    // private renderMenuBtn = () => {
-    //     const btn = (
-    //         <MenuBtn
-    //             isOpen={this.state.isOpen}
-    //             id={this.props.btnId}
-    //             onClick={this.toggleMenu}
-    //         >
-    //             {this.props.btnChildren}
-    //         </MenuBtn>
-    //     )
-
-    //     if (this.props.tooltipProps) {
-    //         return (
-    //             <ButtonTooltip {...this.props.tooltipProps}>
-    //                 {btn}
-    //             </ButtonTooltip>
-    //         )
-    //     }
-
-    //     return btn
-    // }
-
     render() {
         return (
             <ThemeProvider theme={this.theme}>
-                <ClickAway onClickAway={this.props.onClickOutside}>
-                    <Menu
-                        onMouseEnter={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation
-                        }}
-                        onMouseLeave={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation
-                        }}
-                        width={this.props.width}
-                        leftPosition={this.theme.leftMenuOffset}
-                    >
-                        {this.props.menuTitle && (
-                            <MenuTitle>{this.props.menuTitle}</MenuTitle>
-                        )}
-                        {this.props.children ?? this.renderMenuItems()}
-                    </Menu>
-                </ClickAway>
+                <Menu
+                    onMouseEnter={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation
+                    }}
+                    onMouseLeave={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation
+                    }}
+                    width={this.props.width}
+                    leftPosition={this.theme.leftMenuOffset}
+                >
+                    {this.props.menuTitle && (
+                        <MenuTitle>{this.props.menuTitle}</MenuTitle>
+                    )}
+                    {this.props.children ?? this.renderMenuItems()}
+                </Menu>
             </ThemeProvider>
         )
     }
 }
 
-const MenuContainer = styled.div`
-    position: relative;
-    flex: 1;
-    align-items: center;
-    display: flex;
-    width: 100%;
-    height: 100%;
-`
-
-const MenuItem = styled.li`
-    ${({ theme }) =>
-        theme.isDisabled
-            ? 'color: #97b2b8;'
-            : '&:hover { background: #F8FBFF; cursor: pointer; }'};
-    ${({ theme }) => theme.isSelected && 'background: #e5f0ff80;'};
+const MenuItem = styled.div<{ isSelected }>`
+    background: ${(props) => props.isSelected && props.theme.colors.greyScale2};
     padding: 10px 10px;
     line-height: 20px;
     width: fill-available;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    border-radius: 5px;
+    white-space: nowrap;
+    border-radius: 6px;
+    margin: 0 10px;
+    cursor: ${(props) => !props.isSelected && 'pointer'};
+    width: 210px;
+
+    &:first-child {
+        margin-top: 10px;
+    }
+
+    &:last-child {
+        margin-bottom: 10px;
+    }
+
+    ${(props) =>
+        !props.isSelected &&
+        css`
+            cursor: pointer;
+
+            &:hover {
+                outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+            }
+
+            & * {
+                cursor: pointer;
+            }
+        `};
 `
 
 const MenuTitle = styled.div`
     padding: 8px 15px 0px 15px;
     margin-bottom: 10px;
-`
-
-const SoonPill = styled.span`
-    background: ${(props) => props.theme.colors.purple};
-    color: #fff;
-    padding: 2px 5px;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 5px;
-    font-size: 10px;
+    font-size: 14px;
 `
 
 const MenuItemName = styled.div<{ isSelected }>`
-    font-weight: ${(props) => (props.isSelected ? '500' : '400')};
-    color: ${(props) => (props.isSelected ? '#347AE2' : '#96A0B5')};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     display: flex;
     align-items: center;
+    grid-gap: 5px;
+    justify-content: space-between;
+    width: -webkit-fill-available;
+    height: 24px;
 `
 
 const MenuItemInfo = styled.div`
@@ -217,32 +195,12 @@ const MenuItemInfo = styled.div`
     padding-top: 5px;
 `
 
-const MenuBtn = styled.div<{ isOpen: boolean }>`
-    box-sizing: border-box;
-    cursor: pointer;
-    font-size: 14px;
-    border: none;
-    outline: none;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-`
-
 const Menu = styled.div<{ leftPosition: string }>`
-    position: absolute;
     width: max-content;
     list-style: none;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
-    background: white;
+    border-radius: 12px;
+    background: ${(props) => props.theme.colors.greyScale1};
     width: ${(props) => props.width ?? 'max-content'};
     flex-direction: column;
-    top: 25px;
-    left: ${(props) => props.leftPosition};
     z-index: 1000;
-    padding: 10px;
 `

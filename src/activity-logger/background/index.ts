@@ -1,18 +1,19 @@
-import { Tabs } from 'webextension-polyfill-ts'
+import { Tabs } from 'webextension-polyfill'
 
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
-import initPauser, { getState as getPauseState } from './pause-logging'
+// import initPauser, { getState as getPauseState } from './pause-logging'
 import { ActivityLoggerInterface } from './types'
 
 export default class ActivityLoggerBackground {
     remoteFunctions: ActivityLoggerInterface
 
-    private toggleLoggingPause = initPauser()
+    // private toggleLoggingPause = initPauser()
 
     constructor() {
         this.remoteFunctions = {
             isLoggingPaused: this.isLoggingPaused.bind(this),
-            toggleLoggingPause: this.toggleLoggingPause,
+            // toggleLoggingPause: this.toggleLoggingPause,
+            toggleLoggingPause: () => {},
         }
     }
 
@@ -23,8 +24,9 @@ export default class ActivityLoggerBackground {
     }
 
     private async isLoggingPaused(): Promise<boolean> {
-        const result = await getPauseState()
+        // const result = await getPauseState()
 
-        return result !== false
+        // return result !== false
+        return false
     }
 }

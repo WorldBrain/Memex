@@ -9,7 +9,7 @@ import { StatefulUIElement } from 'src/util/ui-logic'
 import Ribbon from '../../components/ribbon'
 import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
 import analytics from 'src/analytics'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -109,13 +109,12 @@ export default class RibbonContainer extends StatefulUIElement<
                 ref={this.ribbonRef}
                 setRef={this.props.setRef}
                 getListDetailsById={(id) => {
-                    const { annotationsCache } = this.props
+                    const listDetails = this.props.annotationsCache.getListByLocalId(
+                        id,
+                    )
                     return {
-                        name:
-                            annotationsCache.listData[id]?.name ??
-                            'Missing list',
-                        isShared:
-                            annotationsCache.listData[id]?.remoteId != null,
+                        name: listDetails?.name ?? 'Missing list',
+                        isShared: listDetails?.remoteId != null,
                     }
                 }}
                 toggleShowExtraButtons={() => {
@@ -126,6 +125,10 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 showExtraButtons={this.state.areExtraButtonsShown}
                 showTutorial={this.state.areTutorialShown}
+                showFeed={this.state.showFeed}
+                toggleFeed={() => {
+                    this.processEvent('toggleFeed', null)
+                }}
                 isExpanded={this.props.state === 'visible'}
                 getRemoteFunction={this.props.getRemoteFunction}
                 // annotationsManager={this.props.annotationsManager}
@@ -151,10 +154,13 @@ export default class RibbonContainer extends StatefulUIElement<
                 }}
                 sidebar={{
                     isSidebarOpen: this.props.isSidebarOpen,
+                    isWidthLocked: this.state.isWidthLocked,
                     setShowSidebarCommentBox: () =>
                         this.props.inPageUI.showSidebar({ action: 'comment' }),
                     openSidebar: this.handleSidebarOpen,
                     closeSidebar: () => this.props.inPageUI.hideSidebar(),
+                    toggleReadingView: () =>
+                        this.processEvent('toggleReadingView', null),
                 }}
                 commentBox={{
                     ...this.state.commentBox,
@@ -220,13 +226,16 @@ export default class RibbonContainer extends StatefulUIElement<
                             value: { added: null, deleted: id, selected: [] },
                         }),
                     createNewEntry: async (name) => {
-                        const listId = await this.props.customLists.createCustomList(
-                            { name },
-                        )
-                        this.props.annotationsCache.addNewListData({
+                        const listId = Date.now()
+
+                        this.props.annotationsCache.addList({
                             name,
-                            id: listId,
+                            localId: listId,
                             remoteId: null,
+                            description: null,
+                            unifiedAnnotationIds: [],
+                            hasRemoteAnnotationsToLoad: false,
+                            creator: this.props.currentUser,
                         })
                         await this.processEvent('updateLists', {
                             value: {
@@ -234,6 +243,10 @@ export default class RibbonContainer extends StatefulUIElement<
                                 deleted: null,
                                 selected: [],
                             },
+                        })
+                        await this.props.customLists.createCustomList({
+                            name: name,
+                            id: listId,
                         })
                         return listId
                     },

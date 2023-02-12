@@ -18,9 +18,10 @@ class Layout extends Component {
                 <Navigation
                     currentLocation={this.props.location}
                     routes={routes}
-                />
+                >
+                    <AccountMenu />
+                </Navigation>
                 <div className={styles.route}>{this.props.children}</div>
-                <AccountMenu />
                 <HelpBtn />
             </RootContainer>
         )
@@ -28,13 +29,17 @@ class Layout extends Component {
 }
 
 const RootContainer = styled.div`
-    background-color: ${(props) => props.theme.colors.backgroundColor};
+    background-color: ${(props) => props.theme.colors.black};
     display: flex;
     flex-direction: row;
+    min-width: fit-content;
 
     & * {
         box-sizing: border-box;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Satoshi', sans-serif;
+        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            'ss04' on, 'liga' off;
+        letter-spacing: 0.8px;
     }
 `
 

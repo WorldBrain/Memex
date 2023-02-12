@@ -1,5 +1,5 @@
 import urlRegex from 'url-regex'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 import { OVERVIEW_URL } from '../constants'
 

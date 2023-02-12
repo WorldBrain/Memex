@@ -4,12 +4,13 @@ import styled from 'styled-components'
 import { Template } from '../types'
 import TemplateEditor from './TemplateEditor'
 import TemplateList from './TemplateList'
-import { ClickAway } from 'src/util/click-away-wrapper'
-import { isLoading } from 'src/overview/results/selectors'
 
 const CopyPasterWrapper = styled.div`
+    min-width: 270px;
     & * {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Satoshi', sans-serif;
+        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            'ss04' on, 'liga' off;
     }
 `
 
@@ -48,32 +49,30 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
         const { copyPasterEditingTemplate, templates } = this.props
 
         return (
-            <ClickAway onClickAway={this.handleClickOutside}>
-                <CopyPasterWrapper>
-                    {copyPasterEditingTemplate ? (
-                        <TemplateEditor
-                            isNew={this.props.isNew}
-                            template={copyPasterEditingTemplate}
-                            onClickSave={() => this.props.onClickSave()}
-                            onClickCancel={this.props.onClickCancel}
-                            onClickDelete={() => this.props.onClickDelete()}
-                            onClickHowto={this.props.onClickHowto}
-                            onTitleChange={(s) => this.props.onTitleChange(s)}
-                            onCodeChange={(s) => this.props.onCodeChange(s)}
-                        />
-                    ) : (
-                        <TemplateList
-                            templates={templates}
-                            isLoading={this.props.isLoading}
-                            onClickSetIsFavourite={this.props.onSetIsFavourite}
-                            onClickEdit={(id) => this.props.onClickEdit(id)}
-                            onClickHowto={this.props.onClickHowto}
-                            onClickNew={this.props.onClickNew}
-                            onClick={this.props.onClick}
-                        />
-                    )}
-                </CopyPasterWrapper>
-            </ClickAway>
+            <CopyPasterWrapper>
+                {copyPasterEditingTemplate ? (
+                    <TemplateEditor
+                        isNew={this.props.isNew}
+                        template={copyPasterEditingTemplate}
+                        onClickSave={() => this.props.onClickSave()}
+                        onClickCancel={this.props.onClickCancel}
+                        onClickDelete={() => this.props.onClickDelete()}
+                        onClickHowto={this.props.onClickHowto}
+                        onTitleChange={(s) => this.props.onTitleChange(s)}
+                        onCodeChange={(s) => this.props.onCodeChange(s)}
+                    />
+                ) : (
+                    <TemplateList
+                        templates={templates}
+                        isLoading={this.props.isLoading}
+                        onClickSetIsFavourite={this.props.onSetIsFavourite}
+                        onClickEdit={(id) => this.props.onClickEdit(id)}
+                        onClickHowto={this.props.onClickHowto}
+                        onClickNew={this.props.onClickNew}
+                        onClick={this.props.onClick}
+                    />
+                )}
+            </CopyPasterWrapper>
         )
     }
 }

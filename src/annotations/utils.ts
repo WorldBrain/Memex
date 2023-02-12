@@ -1,4 +1,4 @@
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { TextTruncator } from './types'
 import type { AnnotationShareOpts } from './annotation-save-logic'
@@ -21,36 +21,40 @@ export const truncateText: TextTruncator = (
         maxLineBreaks: 8,
     },
 ) => {
-    if (text.length > maxLength) {
-        let checkedLength = maxLength
+    if (text) {
+        if (text.length > maxLength) {
+            let checkedLength = maxLength
 
-        // Find the next space to cut off at
-        while (
-            text.charAt(checkedLength) !== ' ' &&
-            checkedLength < text.length
-        ) {
-            checkedLength++
+            // Find the next space to cut off at
+            while (
+                text.charAt(checkedLength) !== ' ' &&
+                checkedLength < text.length
+            ) {
+                checkedLength++
+            }
+
+            return {
+                isTooLong: true,
+                text: text.slice(0, checkedLength) + '…',
+            }
         }
 
-        return {
-            isTooLong: true,
-            text: text.slice(0, checkedLength) + '…',
-        }
-    }
-
-    for (let i = 0, newlineCount = 0; i < text.length; ++i) {
-        if (text[i] === '\n') {
-            newlineCount++
-            if (newlineCount > maxLineBreaks) {
-                return {
-                    isTooLong: true,
-                    text: text.slice(0, i) + '…',
+        for (let i = 0, newlineCount = 0; i < text.length; ++i) {
+            if (text[i] === '\n') {
+                newlineCount++
+                if (newlineCount > maxLineBreaks) {
+                    return {
+                        isTooLong: true,
+                        text: text.slice(0, i) + '…',
+                    }
                 }
             }
         }
-    }
 
-    return { isTooLong: false, text }
+        return { isTooLong: false, text }
+    } else {
+        return { isTooLong: false, text: undefined }
+    }
 }
 
 export function shareOptsToPrivacyLvl(

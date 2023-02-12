@@ -2,7 +2,6 @@ import React, { PureComponent, MouseEventHandler } from 'react'
 
 import { remoteFunction } from '../../../util/webextensionRPC'
 import Message from './Message'
-import { EVENT_NAMES } from '../../../analytics/internal/constants'
 
 const styles = require('./CFBox.css')
 
@@ -11,13 +10,9 @@ export interface Props {
 }
 
 class CrowdfundingBox extends PureComponent<Props> {
-    private _processEventRPC = remoteFunction('processEvent')
     private _openLearnMoreUrl = remoteFunction('openLearnMoreTab')
 
     private _openNewLink = async () => {
-        await this._processEventRPC({
-            type: EVENT_NAMES.LEARN_MORE_CROWD_FUNDING,
-        })
         await this._openLearnMoreUrl()
     }
 

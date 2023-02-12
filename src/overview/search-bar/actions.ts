@@ -12,13 +12,11 @@ import {
     selectors as filters,
 } from '../../search-filters'
 import { actions as notifActs } from '../../notifications'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
 import * as Raven from 'src/util/raven'
-import { auth, featuresBeta } from 'src/util/remote-functions-background'
+import { auth } from 'src/util/remote-functions-background'
 import { stripTagPattern, splitInputIntoTerms } from './utils'
 import { BackgroundSearchParams } from 'src/search/background/types'
 
-const processEventRPC = remoteFunction('processEvent')
 const pageSearchRPC = remoteFunction('searchPages')
 const annotSearchRPC = remoteFunction('searchAnnotations')
 const socialSearchRPC = remoteFunction('searchSocial')
@@ -81,10 +79,6 @@ export const setQueryTagsDomains: (
         })
     }
 
-    if (input.length > 0) {
-        processEventRPC({ type: EVENT_NAMES.NLP_SEARCH })
-    }
-
     dispatch(resultsActs.setLoading(true))
     dispatch(setQuery(input))
 }
@@ -136,7 +130,6 @@ export const search: (args?: any) => Thunk = (
         skip: results.resultsSkip(state),
         lists: filters.listFilterParam(state),
         contentTypes: filters.contentType(state),
-        base64Img: !fromOverview,
         usersInc: filters.usersInc(state),
         usersExc: filters.usersExc(state),
         hashtagsInc: filters.hashtagsInc(state),
@@ -151,7 +144,7 @@ export const search: (args?: any) => Thunk = (
             : pageSearchRPC
 
         // Tell background script to search
-        const searchResult = await searchRPC(searchParams)
+        const searchResult = undefined
         dispatch(resultsActs.updateSearchResult({ overwrite, searchResult }))
 
         if (searchResult.docs.length) {

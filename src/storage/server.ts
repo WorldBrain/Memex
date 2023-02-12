@@ -1,6 +1,6 @@
 import { getFirebase } from 'src/util/firebase-app-initialized'
-import 'firebase/database'
-import 'firebase/firestore'
+import 'firebase/compat/database'
+import 'firebase/compat/firestore'
 import StorageManager, { StorageBackend } from '@worldbrain/storex'
 import { FirestoreStorageBackend } from '@worldbrain/storex-backend-firestore'
 import {
@@ -21,6 +21,8 @@ import ContentConversationStorage from '@worldbrain/memex-common/lib/content-con
 import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
 import ActivityFollowsStorage from '@worldbrain/memex-common/lib/activity-follows/storage'
 import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
+import { RetroSyncStorage as DiscordRetroSyncStorage } from '@worldbrain/memex-common/lib/discord/queue'
+import DiscordStorage from '@worldbrain/memex-common/lib/discord/storage'
 import {
     ChangeWatchMiddleware,
     ChangeWatchMiddlewareSettings,
@@ -60,7 +62,7 @@ export function createLazyServerStorage(
     let serverStoragePromise: Promise<ServerStorage>
 
     try {
-        window['setServerStorageLoggingEnabled'] = (value: boolean) =>
+        globalThis['setServerStorageLoggingEnabled'] = (value: boolean) =>
             (shouldLogOperations = value)
     } catch (e) {}
 
@@ -93,7 +95,7 @@ export function createLazyServerStorage(
                 operationExecuter: operationExecuter('contentConversations'),
                 ...options,
             })
-            const userManagement = new UserStorage({
+            const users = new UserStorage({
                 storageManager,
                 operationExecuter: operationExecuter('users'),
             })
@@ -108,21 +110,31 @@ export function createLazyServerStorage(
                 storageManager,
                 operationExecuter: operationExecuter('activityFollows'),
             })
-            const serverStorage: ServerStorage = {
+            const discord = new DiscordStorage({
                 storageManager,
-                storageModules: {
+                operationExecuter: operationExecuter('discord'),
+            })
+            const discordRetroSync = new DiscordRetroSyncStorage({
+                storageManager,
+                operationExecuter: operationExecuter('discordRetroSync'),
+            })
+            const serverStorage: ServerStorage = {
+                manager: storageManager,
+                modules: {
                     sharedSyncLog,
-                    userManagement,
+                    users,
                     contentSharing,
                     activityStreams,
                     activityFollows,
                     contentConversations,
                     personalCloud,
+                    discordRetroSync,
+                    discord,
                 },
             }
             registerModuleMapCollections(
                 storageManager.registry,
-                serverStorage.storageModules,
+                serverStorage.modules,
             )
             await storageManager.finishInitialization()
 
@@ -221,6 +233,19 @@ function createStorageManager(
     },
 ) {
     const storageManager = new StorageManager({ backend })
+    setupServerStorageManagerMiddleware(storageManager, options)
+    return storageManager
+}
+
+export function setupServerStorageManagerMiddleware(
+    storageManager: StorageManager,
+    options?: {
+        changeWatchSettings?: Omit<
+            ChangeWatchMiddlewareSettings,
+            'storageManager'
+        >
+    },
+) {
     const middleware: StorageMiddleware[] = [
         createOperationLoggingMiddleware({
             shouldLog: () => shouldLogOperations,
@@ -235,7 +260,6 @@ function createStorageManager(
         )
     }
     storageManager.setMiddleware(middleware)
-    return storageManager
 }
 
 function getFirebaseOperationExecuter(storageManager: StorageManager) {

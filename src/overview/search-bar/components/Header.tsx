@@ -4,13 +4,12 @@ import React, {
     KeyboardEventHandler,
 } from 'react'
 import { Link } from 'react-router'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import cx from 'classnames'
 
-import BackupStatus from 'src/backup-restore/ui/backup-status-bar/BackupStatusBarContainer'
 import { OVERVIEW_URL } from 'src/constants'
 import BackToSearch from 'src/overview/sidebar-left/components/BackToSearch'
 import SearchFilters from 'src/search-filters'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const styles = require('./Header.css')
 
@@ -100,20 +99,20 @@ class Header extends PureComponent<Props> {
                         >
                             Filters
                             {this.props.showClearFiltersBtn && (
-                                <ButtonTooltip
+                                <TooltipBox
                                     tooltipText="Clear all Filters"
-                                    position="bottom"
+                                    placement="bottom"
                                 >
                                     <span
                                         className={styles.clearFilters}
                                         onClick={this.props.clearFilters}
                                     />
-                                </ButtonTooltip>
+                                </TooltipBox>
                             )}
                         </div>
                     </div>
                     <div className={styles.links}>
-                        <BackupStatus />
+                        {/* <BackupStatus localBackupSettings={} /> */}
                         {/*<InboxButton
                             toggleInbox={this.props.toggleInbox}
                             showInbox={this.props.showInbox}

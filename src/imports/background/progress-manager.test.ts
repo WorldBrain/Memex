@@ -21,8 +21,8 @@ const runSuite = (DATA: TestData, skip = false) => () => {
     beforeAll(() => {
         // Init fake data source
         const dataSources = new DataSources({
-            history: DATA.history,
-            bookmarks: DATA.bookmarks,
+            history: DATA.history as any,
+            bookmarks: DATA.bookmarks as any,
         })
 
         const itemCreator = new ItemCreator({

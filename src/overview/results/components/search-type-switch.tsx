@@ -4,7 +4,6 @@ import { connect, MapStateToProps, MapDispatchToProps } from 'react-redux'
 
 import styled from 'styled-components'
 
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { RootState } from 'src/options/types'
 import * as selectors from '../selectors'
@@ -18,6 +17,7 @@ import {
 } from 'src/copy-paster'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const styles = require('./search-type-switch.css')
 
@@ -121,21 +121,21 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                         >
                             Social
                             <span className={styles.betaBox}>
-                                <ButtonTooltip
+                                <TooltipBox
                                     tooltipText="Saving Tweets is in beta mode. Bugs may appear. Let us know: support@worldbrain.io or github.com/worldbrain"
-                                    position="bottom"
+                                    placement="bottom"
                                 >
                                     <span className={styles.beta}>beta</span>
-                                </ButtonTooltip>
+                                </TooltipBox>
                             </span>
                         </button>
                     )}
                 </div>
                 <div className={styles.btnsContainer}>
                     {this.props.showShareListIcon && (
-                        <ButtonTooltip
+                        <TooltipBox
                             tooltipText="Share selected list"
-                            position="bottom"
+                            placement="bottom"
                         >
                             <button
                                 className={styles.searchActionBtn}
@@ -146,13 +146,13 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                                     src={icons.shareEmpty}
                                 />
                             </button>
-                        </ButtonTooltip>
+                        </TooltipBox>
                     )}
                     {this.props.showCopyPasterIcon && (
                         <>
-                            <ButtonTooltip
+                            <TooltipBox
                                 tooltipText="Copy-Paste Results"
-                                position="bottom"
+                                placement="bottom"
                             >
                                 <button
                                     className={styles.searchActionBtn}
@@ -165,7 +165,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                                         src={icons.copy}
                                     />
                                 </button>
-                            </ButtonTooltip>
+                            </TooltipBox>
                             <CopyPasterWrapperTopBar>
                                 {this.renderCopyPaster()}
                             </CopyPasterWrapperTopBar>

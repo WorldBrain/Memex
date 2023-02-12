@@ -5,9 +5,12 @@ import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-n
 import MemexEditor, {
     MemexEditorInstance,
 } from '@worldbrain/memex-common/lib/editor'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 
 interface State {
     editorHeight: string
+    youtubeShortcut: string | null
 }
 
 export interface AnnotationEditEventProps {
@@ -23,6 +26,7 @@ export interface AnnotationEditEventProps {
     ) => void
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
+    onListsBarPickerBtnClick: React.MouseEventHandler
 }
 
 export interface AnnotationEditGeneralProps {
@@ -30,6 +34,8 @@ export interface AnnotationEditGeneralProps {
     editorHeight?: string
     isShared?: boolean
     isBulkShareProtected?: boolean
+    getYoutubePlayer?(): YoutubePlayer
+    contextLocation?: string
 }
 
 export interface Props
@@ -43,6 +49,11 @@ class AnnotationEdit extends React.Component<Props> {
 
     state: State = {
         editorHeight: '50px',
+        youtubeShortcut: null,
+    }
+
+    async componentDidMount() {
+        await this.youtubeKeyboardShortcut()
     }
 
     private editorRef: MemexEditorInstance
@@ -103,10 +114,17 @@ class AnnotationEdit extends React.Component<Props> {
         }
     }
 
+    private youtubeKeyboardShortcut = async () => {
+        const shortcuts = await getKeyboardShortcutsState()
+        const youtubeShortcut = shortcuts.createAnnotation.shortcut
+        this.setState({ youtubeShortcut })
+    }
+
     render() {
         return (
             <EditorContainer editorHeight={this.props.editorHeight}>
                 <MemexEditor
+                    getYoutubePlayer={this.props.getYoutubePlayer}
                     onContentUpdate={(content) =>
                         this.props.onCommentChange(content)
                     }
@@ -115,6 +133,7 @@ class AnnotationEdit extends React.Component<Props> {
                     placeholder={`Add Note. Click on ( ? ) for formatting help.`}
                     setEditorInstanceRef={(ref) => (this.editorRef = ref)}
                     autoFocus
+                    youtubeShortcut={this.state.youtubeShortcut}
                 />
             </EditorContainer>
         )
@@ -125,8 +144,9 @@ export default AnnotationEdit
 
 const EditorContainer = styled.div`
     height: fit-content;
-    transition: height 0.4s linear;
-    border-top: 1px solid #f0f0f0;
+    padding: 0 10px;
+    // transition: height 1s ease-in-out;
+    // border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     &:first-child {
         border-top: none;

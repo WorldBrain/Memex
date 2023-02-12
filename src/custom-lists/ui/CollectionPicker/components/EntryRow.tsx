@@ -1,10 +1,10 @@
 import React, { SyntheticEvent } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { Layers } from '@styled-icons/feather'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import type { SpaceDisplayEntry } from '../logic'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export interface Props extends SpaceDisplayEntry {
     onPress?: (entry: SpaceDisplayEntry) => void
@@ -18,6 +18,7 @@ export interface Props extends SpaceDisplayEntry {
     resultItem: React.ReactNode
     contextMenuBtnRef?: React.RefObject<HTMLDivElement>
     selected?: boolean
+    allTabsButtonPressed?: number
 }
 
 class EntryRow extends React.Component<Props> {
@@ -45,10 +46,10 @@ class EntryRow extends React.Component<Props> {
     }
 
     private handleActOnAllPress: React.MouseEventHandler = (e) => {
-        this.props.onPressActOnAll &&
-            this.props.onPressActOnAll(this._getEntry())
         e.preventDefault()
         e.stopPropagation()
+        this.props.onPressActOnAll &&
+            this.props.onPressActOnAll(this._getEntry())
         return false
     }
 
@@ -79,7 +80,7 @@ class EntryRow extends React.Component<Props> {
             contextMenuBtnRef,
         } = this.props
 
-        console.log(resultItem['props'].children)
+        let cleanID = parseInt(id.split('ListKeyName-')[1])
 
         return (
             <Row
@@ -89,22 +90,23 @@ class EntryRow extends React.Component<Props> {
                 isFocused={focused}
                 id={id}
                 title={resultItem['props'].children}
+                zIndex={10000 - this.props.index}
             >
                 <NameWrapper>
                     {resultItem}
                     {remoteId != null && (
-                        <ButtonTooltip
+                        <TooltipBox
                             tooltipText={'Shared Space'}
-                            position="bottom"
+                            placement="bottom"
                         >
                             <Icon
                                 heightAndWidth="14px"
                                 // padding="6px"
-                                icon={'people'}
+                                icon={'peopleFine'}
                                 hoverOff
-                                color="lighterText"
+                                color="greyScale5"
                             />
-                        </ButtonTooltip>
+                        </TooltipBox>
                     )}
                 </NameWrapper>
                 <IconStyleWrapper>
@@ -119,33 +121,52 @@ class EntryRow extends React.Component<Props> {
                     )}
                     {focused && onPressActOnAll && (
                         <ButtonContainer>
-                            <ButtonTooltip
-                                tooltipText={
-                                    this.props.actOnAllTooltipText ?? ''
-                                }
-                                position="left"
-                            >
-                                <Icon
-                                    filePath={icons.multiEdit}
-                                    heightAndWidth="16px"
-                                    onClick={this.handleActOnAllPress}
-                                />
-                            </ButtonTooltip>
+                            {this.props.allTabsButtonPressed === cleanID ? (
+                                <TooltipBox
+                                    tooltipText={
+                                        <>
+                                            All open tabs in this window
+                                            <br /> have been added to this Space
+                                        </>
+                                    }
+                                    placement="top"
+                                >
+                                    <Icon
+                                        filePath={icons.checkRound}
+                                        heightAndWidth="20px"
+                                    />
+                                </TooltipBox>
+                            ) : (
+                                <TooltipBox
+                                    tooltipText={
+                                        this.props.actOnAllTooltipText ?? ''
+                                    }
+                                    placement="top"
+                                >
+                                    <Icon
+                                        filePath={icons.multiEdit}
+                                        heightAndWidth="20px"
+                                        onClick={this.handleActOnAllPress}
+                                    />
+                                </TooltipBox>
+                            )}
                         </ButtonContainer>
                     )}
                     {selected ? (
-                        <ButtonContainer>
-                            <IconImg src={icons.blueRoundCheck} />
+                        <ButtonContainer selected={selected}>
+                            <SelectionBox selected={selected}>
+                                <Icon
+                                    icon={icons.check}
+                                    heightAndWidth="16px"
+                                    color="black"
+                                />
+                            </SelectionBox>
                         </ButtonContainer>
                     ) : focused ? (
                         <ButtonContainer>
-                            <IconImg src={icons.blueRoundCheck} faded={true} />
+                            <SelectionBox selected={selected} />
                         </ButtonContainer>
-                    ) : (
-                        <ButtonContainer>
-                            <EmptyCircle />
-                        </ButtonContainer>
-                    )}
+                    ) : null}
                 </IconStyleWrapper>
             </Row>
         )
@@ -156,52 +177,68 @@ export const ActOnAllTabsButton = styled(Layers)`
     pointer-events: auto !important;
 `
 
-const ButtonContainer = styled.div`
+const ButtonContainer = styled.div<{ selected }>`
+    height: 20px;
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    border-radius: 5px;
+    align-items: center;
+`
+
+const SelectionBox = styled.div<{ selected }>`
     height: 20px;
     width: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-`
-
-const IconImg = styled.img<{ faded? }>`
-    opacity: ${(props) => props.faded && '0.5'};
-    height: 20px;
-    width: 20px;
-`
-
-const EmptyCircle = styled.div`
-    height: 18px;
-    width: 18px;
-    border-radius: 18px;
-    border 2px solid ${(props) => props.theme.colors.lineGrey};
+    border-radius: 5px;
+    background: ${(props) =>
+        props.selected
+            ? props.theme.colors.white
+            : props.theme.colors.greyScale3};
 `
 
 export const IconStyleWrapper = styled.div`
     display: flex;
     grid-gap: 10px;
     align-items: center;
-    flex: 1;
     justify-content: flex-end;
 `
 
-const Row = styled.div`
+const Row = styled.div<{ isFocused; zIndex }>`
     align-items: center;
     display: flex;
     justify-content: space-between;
     transition: background 0.3s;
     height: 40px;
-    width: 100%;
-    max-width: 260px;
+    width: fill-available;
     cursor: pointer;
     border-radius: 5px;
-    padding: 0 10px;
-    color: ${(props) => props.isFocused && props.theme.colors.normalText};
-    background: ${(props) =>
-        props.isFocused && props.theme.colors.backgroundColor};
-
+    padding: 0 9px;
+    margin: 0 -5px;
+    overflow: visible;
+    color: ${(props) => props.isFocused && props.theme.colors.greyScale6};
+    z-index: ${(props) => props.zIndex};
     &:last-child {
         border-bottom: none;
+    }
+
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+        background: transparent;
+    }
+
+    ${(props) =>
+        props.isFocused &&
+        css`
+            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+            background: transparent;
+        `}
+
+    &:focus {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+        background: transparent;
     }
 `
 
@@ -209,9 +246,11 @@ const NameWrapper = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-    max-width: 70%;
+    max-width: 80%;
     font-size: 14px;
     width: 100%;
+    min-width: 50px;
+    flex: 1;
 `
 
 export default EntryRow

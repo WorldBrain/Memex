@@ -3,11 +3,10 @@ import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { ButtonTooltip } from '.'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     tags: string[]
-    showEditBtn: boolean
     onTagClick?: (tag: string) => void
     onEditBtnClick: React.MouseEventHandler
 }
@@ -15,7 +14,6 @@ export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
 export default function TagsSegment({
     tags,
     onTagClick,
-    showEditBtn,
     onEditBtnClick,
     ...props
 }: Props) {
@@ -23,7 +21,7 @@ export default function TagsSegment({
         return (
             <Container {...props}>
                 <WarningBox>
-                    <ButtonTooltip
+                    <TooltipBox
                         tooltipText={
                             <span>
                                 Tags will soon be deprecated & merged into
@@ -32,10 +30,10 @@ export default function TagsSegment({
                                 Click to learn more
                             </span>
                         }
-                        position={'right'}
+                        placement={'right'}
                     >
                         <Icon
-                            filePath={icons.alertRound}
+                            filePath={'warning'}
                             color={'warning'}
                             heightAndWidth="18px"
                             onClick={() =>
@@ -44,13 +42,13 @@ export default function TagsSegment({
                                 )
                             }
                         />
-                    </ButtonTooltip>
+                    </TooltipBox>
                 </WarningBox>
                 <EditIconContainerWithText onClick={onEditBtnClick}>
                     <Icon
                         filePath={icons.plus}
                         heightAndWidth="10px"
-                        color={'purple'}
+                        color={'prime1'}
                         hoverOff
                     />
                     Add Tags
@@ -65,7 +63,7 @@ export default function TagsSegment({
                 <Icon
                     filePath={icons.plus}
                     heightAndWidth="10px"
-                    color={'purple'}
+                    color={'prime1'}
                     hoverOff
                 />
             </EditIconContainer>
@@ -96,7 +94,7 @@ const Container = styled.div`
     min-height: 24px;
     height: fit-content;
     grid-auto-flow: column;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 const TagsContainer = styled.div`
@@ -106,7 +104,7 @@ const TagsContainer = styled.div`
 
 const TagPill = styled.div`
     background-color: ${(props) => props.theme.colors.backgroundHighlight};
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 12px;
@@ -117,7 +115,9 @@ const TagPill = styled.div`
     cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
     align-items: center;
     white-space: nowrap;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 `
 
 const EditIconContainer = styled.div`
@@ -144,7 +144,7 @@ const EditIconContainerWithText = styled.div`
     grid-gap: 5px;
     font-size: 12px;
     opacity: 0.8;
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
 
     & * {
         cursor: pointer;
@@ -155,7 +155,7 @@ const EditIcon = styled.div`
     outline: none;
     width: 10px;
     height: 10px;
-    background-color: ${(props) => props.theme.colors.purple};
+    background-color: ${(props) => props.theme.colors.prime1};
     mask-image: url(${icons.plus});
     mask-position: center;
     mask-repeat: no-repeat;

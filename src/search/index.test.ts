@@ -1,11 +1,6 @@
-import pick from 'lodash/pick'
 import * as DATA from './index.test.data'
 import { FavIcon } from './models'
-import { SearchIndex } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import TagsBackground from 'src/tags/background'
-import { PageIndexingBackground } from 'src/page-indexing/background'
-import BookmarksBackground from 'src/bookmarks/background'
 import { BackgroundModules } from 'src/background-script/setup'
 
 jest.mock('./models/abstract-model')
@@ -501,14 +496,14 @@ describe('Search index integration', () => {
     describe('read-write ops', () => {
         let origTimeout
 
-        beforeEach(async () => {
-            // These tests will change the index data, so reset each time to avoid side-effects from other tests
-            // await insertTestData()
-            origTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL
-            jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000
-        })
+        // beforeEach(async () => {
+        //     // These tests will change the index data, so reset each time to avoid side-effects from other tests
+        //     // await insertTestData()
+        //     origTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL
+        //     jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000
+        // })
 
-        afterEach(() => (jasmine.DEFAULT_TIMEOUT_INTERVAL = origTimeout))
+        // afterEach(() => (jasmine.DEFAULT_TIMEOUT_INTERVAL = origTimeout))
 
         test('add page with extra data', async () => {
             const { searchIndex, storageManager, pages } = await setupTest()

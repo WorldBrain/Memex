@@ -29,7 +29,10 @@ export class EntrySelectedList extends React.PureComponent<Props> {
                         {...{ [this.dataAttribute]: entry }} // Need to set a dynamic prop here
                     >
                         <Entry>{entry}</Entry>
-                        <Icon heightAndWidth={'10px'} filePath={icons.close} />
+                        <Icon
+                            heightAndWidth={'10px'}
+                            filePath={icons.removeX}
+                        />
                     </ActiveEntry>
                 ))}
             </React.Fragment>
@@ -69,6 +72,6 @@ const Entry = styled.div`
     color: ${(props) => props.theme.colors.darkerText};
 
     &:hover {
-        background: ${(props) => props.theme.colors.darkhover};
+        background: ${(props) => props.theme.colors.greyScale2};
     }
 `

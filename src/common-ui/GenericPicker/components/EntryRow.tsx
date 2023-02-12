@@ -1,7 +1,6 @@
 import React, { SyntheticEvent } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { Layers } from '@styled-icons/feather'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { DisplayEntry } from '../types'
@@ -50,13 +49,7 @@ class EntryRow extends React.Component<Props> {
     }
 
     render() {
-        const {
-            remote,
-            selected,
-            focused,
-            onPressActOnAll,
-            resultItem,
-        } = this.props
+        const { remote, selected, focused, resultItem } = this.props
 
         return (
             <Row
@@ -65,52 +58,23 @@ class EntryRow extends React.Component<Props> {
                 onMouseLeave={this.handleMouseOut}
                 isFocused={focused}
             >
-                <NameWrapper>
-                    {remote && (
-                        <ButtonTooltip
-                            tooltipText={'Shared Space'}
-                            position="bottom"
-                        >
-                            <Icon
-                                heightAndWidth="12px"
-                                padding="6px"
-                                filePath={icons.people}
-                                hoverOff
-                            />
-                        </ButtonTooltip>
-                    )}
-                    {resultItem}
-                </NameWrapper>
+                <NameWrapper>{resultItem}</NameWrapper>
                 <IconStyleWrapper>
-                    {focused && (
-                        <ButtonContainer>
-                            <ButtonTooltip
-                                tooltipText={
-                                    this.props.actOnAllTooltipText ?? ''
-                                }
-                                position="left"
-                            >
-                                <Icon
-                                    filePath={icons.multiEdit}
-                                    heightAndWidth="16px"
-                                    onClick={this.handleActOnAllPress}
-                                />
-                            </ButtonTooltip>
-                        </ButtonContainer>
-                    )}
                     {selected ? (
-                        <ButtonContainer>
-                            <IconImg src={icons.blueRoundCheck} />
+                        <ButtonContainer selected={selected}>
+                            <SelectionBox selected={selected}>
+                                <Icon
+                                    icon={icons.check}
+                                    heightAndWidth="16px"
+                                    color="black"
+                                />
+                            </SelectionBox>
                         </ButtonContainer>
                     ) : focused ? (
                         <ButtonContainer>
-                            <IconImg src={icons.blueRoundCheck} faded={true} />
+                            <SelectionBox selected={selected} />
                         </ButtonContainer>
-                    ) : (
-                        <ButtonContainer>
-                            <EmptyCircle />
-                        </ButtonContainer>
-                    )}
+                    ) : null}
                 </IconStyleWrapper>
             </Row>
         )
@@ -121,12 +85,68 @@ export const ActOnAllTabsButton = styled(Layers)`
     pointer-events: auto !important;
 `
 
-const ButtonContainer = styled.div`
+const ButtonContainer = styled.div<{ selected }>`
+    height: 20px;
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    border-radius: 5px;
+    align-items: center;
+`
+
+const SelectionBox = styled.div<{ selected }>`
     height: 20px;
     width: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
+    border-radius: 5px;
+    background: ${(props) =>
+        props.selected
+            ? props.theme.colors.white
+            : props.theme.colors.greyScale3};
+`
+
+export const IconStyleWrapper = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    align-items: center;
+    flex: 1;
+    justify-content: flex-end;
+`
+
+const Row = styled.div<{ isFocused }>`
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    transition: background 0.3s;
+    height: 40px;
+    width: fill-available;
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 0 10px;
+    color: ${(props) => props.isFocused && props.theme.colors.greyScale6};
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+        background: transparent;
+    }
+
+    ${(props) =>
+        props.isFocused &&
+        css`
+            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+            background: transparent;
+        `}
+
+    &:focus {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+        background: transparent;
+    }
 `
 
 const IconImg = styled.img<{ faded? }>`
@@ -139,40 +159,16 @@ const EmptyCircle = styled.div`
     height: 18px;
     width: 18px;
     border-radius: 18px;
-    border: 2px solid ${(props) => props.theme.colors.lineGrey};
-`
-
-export const IconStyleWrapper = styled.div`
-    display: flex;
-    grid-gap: 10px;
-    align-items: center;
-`
-
-const Row = styled.div`
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    transition: background 0.3s;
-    height: 40px;
-    margin: 0px 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    padding: 0 10px;
-    color: ${(props) => props.isFocused && props.theme.colors.normalText};
-    background: ${(props) =>
-        props.isFocused && props.theme.colors.backgroundColor};
-
-    &:last-child {
-        border-bottom: none;
-    }
+    border: 2px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 const NameWrapper = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: 80%;
+    max-width: 70%;
     font-size: 14px;
+    width: 100%;
 `
 
 export default EntryRow

@@ -8,19 +8,15 @@ import { withCurrentUser } from 'src/authentication/components/AuthConnector'
 import { WhiteSpacer10 } from 'src/common-ui/components/design-library/typography'
 import { UserFeature } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { fetchBackupPath, checkServerStatus } from '../../utils'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'
 import { AuthContextInterface } from 'src/authentication/background/types'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { auth, subscription } from 'src/util/remote-functions-background'
-import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
-import { DumpPane } from './dump-pane'
+import { subscription } from 'src/util/remote-functions-background'
 import styled from 'styled-components'
-import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { Status } from '@sentry/node'
+import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 
 const styles = require('../../styles.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
@@ -36,14 +32,9 @@ interface Props {
     authorizedFeatures: UserFeature[]
     backupPath: string
     showSubscriptionModal: () => void
-    personalCloudBG?: PersonalCloudRemoteInterface
 }
 
 export class OverviewContainer extends Component<Props & AuthContextInterface> {
-    static defaultProps: Pick<Props, 'personalCloudBG'> = {
-        personalCloudBG: runInBackground(),
-    }
-
     state = {
         automaticBackupEnabled: null,
         backupTimes: null,
@@ -60,13 +51,11 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
         subscribeModal: false,
         backupPath: null,
         loadingChargebee: false,
-        isCloudSyncEnabled: true,
         isDev: process.env.NODE_ENV !== 'production',
     }
 
     async componentDidMount() {
         const status = await checkServerStatus()
-        const isCloudSyncEnabled = await this.props.personalCloudBG.isCloudSyncEnabled()
         const backupTimes = await remoteFunction('getBackupTimes')()
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
         const backupLocation = await remoteFunction('getBackendLocation')()
@@ -83,7 +72,6 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
         }
         this.setState({
             automaticBackupEnabled,
-            isCloudSyncEnabled,
             backupTimes,
             hasInitialBackup,
             backupLocation,
@@ -97,7 +85,7 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
             loadingChargebee: true,
         })
         const portalLink = await subscription.getManageLink()
-        window.open(portalLink['access_url'])
+        globalThis.open(portalLink['access_url'])
         this.setState({
             loadingChargebee: false,
         })
@@ -127,28 +115,6 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
         this.setState({ automaticBackupEnabled: false })
     }
 
-    private renderUpgradeBtn() {
-        if (this.state.loadingChargebee) {
-            return (
-                <SecondaryAction
-                    label={<LoadingIndicator />}
-                    onClick={undefined}
-                />
-            )
-        }
-
-        return (
-            <SecondaryAction
-                label="⭐️ Upgrade"
-                onClick={
-                    this.props.currentUser?.subscriptionStatus
-                        ? this.openPortal
-                        : this.props.showSubscriptionModal
-                }
-            />
-        )
-    }
-
     private renderOldBackupPanes() {
         const automaticBackupsAllowed = this.props.currentUser?.authorizedFeatures?.includes(
             'backup',
@@ -156,25 +122,20 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
 
         return (
             <>
-                <Section>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.imports}
-                            heightAndWidth="34px"
-                            color="purple"
-                            hoverOff
-                        />
-                    </SectionCircle>
-                    <SectionTitle>Backup your data locally</SectionTitle>
+                <SettingSection
+                    title={'Backup your data locally'}
+                    icon={'folder'}
+                    description={
+                        'Automatically backup your data to your local hard drive with the Memex backup helper'
+                    }
+                >
                     {!this.state.hasInitialBackup ? (
                         <StatusLine>
-                            <InfoText>
-                                Automatically backup your data to your local
-                                hard drive with the Memex backup helper
-                            </InfoText>
                             <PrimaryAction
                                 onClick={this.props.onBackupRequested}
                                 label={'Start Wizard'}
+                                size={'medium'}
+                                type={'primary'}
                             />
                         </StatusLine>
                     ) : (
@@ -213,31 +174,29 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                                         this.props.onBackupRequested(true)
                                     }}
                                 >
-                                    <Icon
-                                        filePath={
-                                            this.state.backupPath === null &&
-                                            this.state.backupLocation ===
-                                                'local'
-                                                ? icons.warning
-                                                : icons.folder
-                                        }
-                                        heightAndWidth="20px"
-                                        hoverOff
-                                    />
-                                    {this.state.backupPath &&
-                                    this.state.backupPath.length ? (
-                                        <>
-                                            <PathString>
-                                                {this.state.backupPath}
-                                            </PathString>
-                                        </>
+                                    {this.state.backupTimes.lastBackup &&
+                                    this.state.backupPath === null ? (
+                                        <TextField
+                                            icon={'warning'}
+                                            value={
+                                                this.state.backupPath &&
+                                                this.state.backupPath.length
+                                                    ? this.state.backupPath
+                                                    : 'Your Memex Backup Helper is not running!'
+                                            }
+                                            disabled
+                                        />
                                     ) : (
-                                        <PathString>
-                                            {this.state.backupPath === null &&
-                                                this.state.backupLocation ===
-                                                    'local' &&
-                                                'Your Memex Backup Helper is not running!'}
-                                        </PathString>
+                                        <TextField
+                                            icon={'folder'}
+                                            value={
+                                                this.state.backupPath &&
+                                                this.state.backupPath.length
+                                                    ? this.state.backupPath
+                                                    : 'Click to select folder'
+                                            }
+                                            disabled
+                                        />
                                     )}
                                 </SelectFolderArea>
                                 {this.state.backupPath && (
@@ -254,7 +213,7 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                             </StatusLine>
                         </div>
                     )}
-                </Section>
+                </SettingSection>
 
                 {/* Settings Section */}
                 {/* {this.state.hasInitialBackup && (
@@ -319,9 +278,7 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                     />
                 )}
                 {
-                    !this.state.isCloudSyncEnabled
-                        ? this.renderOldBackupPanes()
-                        : this.renderOldBackupPanes()
+                    this.renderOldBackupPanes()
                     //<DumpPane onDumpClick={this.props.onDumpRequested} />
                 }
                 {this.state.isDev && (
@@ -358,24 +315,23 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
 }
 
 const SelectFolderArea = styled.div`
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
     border-radius: 12px;
-    padding: 10px 15px;
     display: grid;
-    grid-gap: 10px;
-    grid-auto-flow: column;
     align-items: center;
-    justify-content: flex-start;
-    margin: 0 0 30px 0;
     cursor: pointer;
+    margin-bottom: 20px;
 
-    &: hover {
-        background: ${(props) => props.theme.colors.backgroundColor};
+    & * {
+        cursor: pointer;
+    }
+
+    &:hover {
+        opacity: 0.8;
     }
 `
 
 const PathString = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-weight: 400;
     font-size: 14px;
 `
@@ -401,50 +357,17 @@ const InfoBlock = styled.div`
 `
 
 const Number = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 18px;
     font-weight: bold;
 `
 
 const SubTitle = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 16px;
     font-weight: normal;
+    font-weight: 300;
 `
-
-const Section = styled.div`
-    background: #ffffff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    border-radius: 12px;
-    padding: 50px;
-    margin-bottom: 30px;
-`
-
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
-    height: 80px;
-    width: 80px;
-    margin-bottom: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 10px;
-`
-
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
-    font-size: 14px;
-    margin-bottom: 40px;
-    font-weight: 500;
-`
-
 const StatusLine = styled.div`
     display: grid;
     grid-auto-flow: row;

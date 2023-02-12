@@ -116,9 +116,11 @@ describe('Annotations search', () => {
         // Insert collections + collection entries
         coll1Id = await customListsBg.createCustomList({
             name: DATA.coll1,
+            id: Date.now(),
         })
         coll2Id = await customListsBg.createCustomList({
             name: DATA.coll2,
+            id: Date.now(),
         })
 
         await contentSharingBg.shareList({ localListId: coll1Id })
@@ -158,11 +160,6 @@ describe('Annotations search', () => {
     async function setupTest() {
         const setup = await setupBackgroundIntegrationTest({
             includePostSyncProcessor: true,
-            tabManager: {
-                getActiveTab: () => ({ id: 1, url: 'test' }),
-                getTabState: () => undefined,
-                getTabStateByUrl: () => undefined,
-            } as any,
         })
         await insertTestData(setup)
 

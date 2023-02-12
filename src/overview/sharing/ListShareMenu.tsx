@@ -184,7 +184,6 @@ export default class ListShareMenu extends React.Component<Props, State> {
                 showLink={this.state.showLink}
                 onCopyLinkClick={this.handleLinkCopy}
                 onPlusBtnClick={this.handlePlusBtnClick}
-                onClickOutside={this.props.closeShareMenu}
                 linkTitleCopy="Link to Space and its public annotations"
                 privacyOptionsTitleCopy="Set privacy for all annotations in this Space"
                 isLoading={
@@ -197,14 +196,14 @@ export default class ListShareMenu extends React.Component<Props, State> {
                         shortcut: `shift+${ListShareMenu.MOD_KEY}+enter`,
                         description:
                             'Auto-added to Spaces the page is shared to',
-                        icon: 'webLogo',
+                        icon: 'globe',
                         onClick: this.handleSetShared,
                     },
                     {
                         title: 'Private',
                         shortcut: `${ListShareMenu.MOD_KEY}+enter`,
                         description: 'Private to you, until made public',
-                        icon: 'person',
+                        icon: 'personFine',
                         onClick: this.handleSetPrivate,
                     },
                 ]}

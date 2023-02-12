@@ -1,5 +1,6 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color6 from colors;
+@value color4,
+color6 from colors;
 
 .tooltip {
     composes: toolTips from 'src/common-ui/elements.css';
@@ -17,7 +18,9 @@
     transition: all 1s ease-in-out;
 
     & > * {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Satoshi', sans-serif;
+        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            'ss04' on, 'liga' off;
     }
 }
 
@@ -216,7 +219,8 @@
 
 .buttonImg {
     width: auto;
-    height: 16px !important; /* stylelint-disable-line declaration-no-important */
+    height: 16px !important;
+    /* stylelint-disable-line declaration-no-important */
     margin: 0 5px;
 
     &:hover {
@@ -226,7 +230,8 @@
 
 .closeBtn {
     & .buttonImg {
-        height: 14px !important; /* stylelint-disable-line declaration-no-important */
+        height: 14px !important;
+        /* stylelint-disable-line declaration-no-important */
     }
 }
 

@@ -17,18 +17,25 @@ import type { ServerStorageModules } from 'src/storage/types'
 import type { ContentSharingInterface } from './types'
 import { ContentSharingClientStorage } from './storage'
 import type { GenerateServerID } from '../../background-script/types'
-import AnnotationStorage from 'src/annotations/background/storage'
+import type AnnotationStorage from 'src/annotations/background/storage'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import AnnotationSharingService from '@worldbrain/memex-common/lib/content-sharing/service/annotation-sharing'
 import ListSharingService from '@worldbrain/memex-common/lib/content-sharing/service/list-sharing'
+import type { BrowserSettingsStore } from 'src/util/settings'
+
+export interface LocalContentSharingSettings {
+    remotePageIdLookup: {
+        [normalizedUrl: string]: { remoteId: string; asOf: number }
+    }
+}
 
 export default class ContentSharingBackground {
+    static ONE_WEEK_MS = 604800000
+
     private annotationSharingService: AnnotationSharingService
     private listSharingService: ListSharingService
     remoteFunctions: ContentSharingInterface
     storage: ContentSharingClientStorage
-
-    _ensuredPages: { [normalizedUrl: string]: string } = {}
 
     constructor(
         public options: {
@@ -38,9 +45,12 @@ export default class ContentSharingBackground {
             annotations: AnnotationStorage
             auth: AuthBackground
             analytics: Analytics
-            services: Pick<Services, 'contentSharing'>
-            captureException?: (e: Error) => void
+            servicesPromise: Promise<Pick<Services, 'contentSharing'>>
             remoteEmitter: RemoteEventEmitter<'contentSharing'>
+            contentSharingSettingsStore: BrowserSettingsStore<
+                LocalContentSharingSettings
+            >
+            captureException?: (e: Error) => void
             getServerStorage: () => Promise<
                 Pick<ServerStorageModules, 'contentSharing'>
             >
@@ -98,51 +108,63 @@ export default class ContentSharingBackground {
                     }),
             },
         })
-        this.listSharingService = new ListSharingService({
-            storage: this.storage,
-            waitForSync: options.waitForSync,
-            generateServerId: options.generateServerId,
-            listKeysService: options.services.contentSharing,
-            annotationSharingService: this.annotationSharingService,
-            listStorage: {
-                getList: (listId) =>
-                    options.customListsBG.storage.fetchListById(listId),
-                getListEntriesForPages: ({ listId, normalizedPageUrls }) =>
-                    options.customListsBG.storage.fetchListPageEntriesByUrls({
+
+        options.servicesPromise.then((services) => {
+            this.listSharingService = new ListSharingService({
+                storage: this.storage,
+                waitForSync: options.waitForSync,
+                generateServerId: options.generateServerId,
+                listKeysService: services.contentSharing,
+                annotationSharingService: this.annotationSharingService,
+                listStorage: {
+                    getList: (listId) =>
+                        options.customListsBG.storage.fetchListById(listId),
+                    getListEntriesForPages: ({ listId, normalizedPageUrls }) =>
+                        options.customListsBG.storage.fetchListPageEntriesByUrls(
+                            {
+                                listId,
+                                normalizedPageUrls,
+                            },
+                        ),
+                    insertPageToList: ({
                         listId,
-                        normalizedPageUrls,
-                    }),
-                insertPageToList: ({
-                    listId,
-                    fullPageUrl,
-                    normalizedPageUrl,
-                }) =>
-                    options.customListsBG.storage.insertPageToList({
-                        listId,
-                        fullUrl: fullPageUrl,
-                        pageUrl: normalizedPageUrl,
-                    }),
-            },
-            annotationStorage: {
-                getAnnotations: (annotationUrls) =>
-                    options.annotations.getAnnotations(annotationUrls),
-                getEntriesByList: (listId) =>
-                    options.annotations.findListEntriesByList({ listId }),
-                insertAnnotationToList: async (entry) =>
-                    options.annotations.insertAnnotToList({
-                        listId: entry.listId,
-                        url: entry.annotationUrl,
-                    }),
-                removeAnnotationFromList: async (entry) =>
-                    options.annotations.removeAnnotFromList({
-                        listId: entry.listId,
-                        url: entry.annotationUrl,
-                    }),
-            },
+                        fullPageUrl,
+                        normalizedPageUrl,
+                    }) =>
+                        options.customListsBG.storage.insertPageToList({
+                            listId,
+                            fullUrl: fullPageUrl,
+                            pageUrl: normalizedPageUrl,
+                        }),
+                },
+                annotationStorage: {
+                    getAnnotations: (annotationUrls) =>
+                        options.annotations.getAnnotations(annotationUrls),
+                    getEntriesByList: (listId) =>
+                        options.annotations.findListEntriesByList({ listId }),
+                    insertAnnotationToList: async (entry) =>
+                        options.annotations.insertAnnotToList({
+                            listId: entry.listId,
+                            url: entry.annotationUrl,
+                        }),
+                    removeAnnotationFromList: async (entry) =>
+                        options.annotations.removeAnnotFromList({
+                            listId: entry.listId,
+                            url: entry.annotationUrl,
+                        }),
+                },
+            })
         })
 
         this.remoteFunctions = {
-            ...options.services.contentSharing,
+            getExistingKeyLinksForList: async (...args) => {
+                const { contentSharing } = await options.servicesPromise
+                return contentSharing.getExistingKeyLinksForList(...args)
+            },
+            deleteKeyLink: async (...args) => {
+                const { contentSharing } = await options.servicesPromise
+                return contentSharing.deleteKeyLink(...args)
+            },
             shareList: this.shareList,
             shareAnnotation: this.shareAnnotation,
             shareAnnotations: this.shareAnnotations,
@@ -195,6 +217,14 @@ export default class ContentSharingBackground {
             deleteAnnotationShare: this.deleteAnnotationShare,
             canWriteToSharedListRemoteId: this.canWriteToSharedListRemoteId,
             canWriteToSharedList: this.canWriteToSharedList,
+            // TODO: properly implement these 3 (via listKeys service)
+            generateKeyLink: async () => {
+                return { link: '', roleID: SharedListRoleID.Commenter }
+            },
+            hasCurrentKey: () => false,
+            processCurrentKey: async () => {
+                return { result: 'denied' }
+            },
         }
     }
 
@@ -243,6 +273,7 @@ export default class ContentSharingBackground {
     }
 
     shareList: ContentSharingInterface['shareList'] = async (options) => {
+        await this.options.servicesPromise
         return this.listSharingService.shareList(options)
     }
 
@@ -310,6 +341,45 @@ export default class ContentSharingBackground {
         return { sharingStates: await this.getAnnotationSharingStates(options) }
     }
 
+    private async getRemotePageIdLookupCache(): Promise<
+        LocalContentSharingSettings['remotePageIdLookup']
+    > {
+        const lookupCache = await this.options.contentSharingSettingsStore.get(
+            'remotePageIdLookup',
+        )
+        return lookupCache ?? {}
+    }
+
+    private async cacheRemotePageId(
+        normalizedPageUrl: string,
+        remoteId: string,
+    ): Promise<void> {
+        const lookupCache = await this.getRemotePageIdLookupCache()
+
+        await this.options.contentSharingSettingsStore.set(
+            'remotePageIdLookup',
+            {
+                ...lookupCache,
+                [normalizedPageUrl]: { remoteId, asOf: Date.now() },
+            },
+        )
+    }
+
+    private async lookupRemotePageIdInCache(
+        normalizedPageUrl: string,
+    ): Promise<string | null> {
+        const lookupCache = await this.getRemotePageIdLookupCache()
+        const contents = lookupCache[normalizedPageUrl]
+        if (
+            !contents ||
+            Date.now() - contents.asOf > ContentSharingBackground.ONE_WEEK_MS
+        ) {
+            return null
+        }
+
+        return contents.remoteId
+    }
+
     ensureRemotePageId: ContentSharingInterface['ensureRemotePageId'] = async (
         normalizedPageUrl,
     ) => {
@@ -320,8 +390,12 @@ export default class ContentSharingBackground {
                 `Tried to execute sharing action without being authenticated`,
             )
         }
-        if (this._ensuredPages[normalizedPageUrl]) {
-            return this._ensuredPages[normalizedPageUrl]
+
+        let remotePageId = await this.lookupRemotePageIdInCache(
+            normalizedPageUrl,
+        )
+        if (remotePageId != null) {
+            return remotePageId
         }
 
         const userReference = {
@@ -330,15 +404,20 @@ export default class ContentSharingBackground {
         }
 
         const page = await this.storage.getPage(normalizedPageUrl)
+        if (page == null) {
+            throw new Error(
+                'No local page data exists for the given normalized page URL',
+            )
+        }
 
         const { contentSharing } = await this.options.getServerStorage()
         const reference = await contentSharing.ensurePageInfo({
             pageInfo: pick(page, 'fullTitle', 'originalUrl', 'normalizedUrl'),
             creatorReference: userReference,
         })
-        const id = contentSharing.getSharedPageInfoLinkID(reference)
-        this._ensuredPages[normalizedPageUrl] = id
-        return id
+        remotePageId = contentSharing.getSharedPageInfoLinkID(reference)
+        await this.cacheRemotePageId(normalizedPageUrl, remotePageId)
+        return remotePageId
     }
 
     unshareAnnotationsFromAllLists: ContentSharingInterface['unshareAnnotationsFromAllLists'] = async (

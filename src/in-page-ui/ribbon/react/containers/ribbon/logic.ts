@@ -4,10 +4,16 @@ import * as componentTypes from '../../components/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import { TaskState } from 'ui-logic-core/lib/types'
 import { loadInitial } from 'src/util/ui-logic'
-import { generateAnnotationUrl } from 'src/annotations/utils'
+import {
+    generateAnnotationUrl,
+    shareOptsToPrivacyLvl,
+} from 'src/annotations/utils'
 import { resolvablePromise } from 'src/util/resolvable'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { Analytics } from 'src/analytics'
+import { createAnnotation } from 'src/annotations/annotation-save-logic'
+import browser from 'webextension-polyfill'
+import { Storage } from 'webextension-polyfill-ts'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -36,8 +42,10 @@ export interface RibbonContainerState {
     pageUrl: string
     loadState: TaskState
     isRibbonEnabled: boolean | null
+    isWidthLocked: boolean | null
     areExtraButtonsShown: boolean
     areTutorialShown: boolean
+    showFeed: boolean
     highlights: ValuesOf<componentTypes.RibbonHighlightsProps>
     tooltip: ValuesOf<componentTypes.RibbonTooltipProps>
     // sidebar: ValuesOf<componentTypes.RibbonSidebarProps>
@@ -57,6 +65,8 @@ export type RibbonContainerEvents = UIEvent<
         highlightAnnotations: null
         toggleShowExtraButtons: null
         toggleShowTutorial: null
+        toggleFeed: null
+        toggleReadingView: null
         hydrateStateFromDB: { url: string }
     } & SubcomponentHandlers<'highlights'> &
         SubcomponentHandlers<'tooltip'> &
@@ -107,6 +117,9 @@ export class RibbonContainerLogic extends UILogic<
     private initLogicResolvable = resolvablePromise()
 
     commentSavedTimeout = 2000
+    readingView = false
+    sidebar
+    resizeObserver
 
     constructor(private dependencies: RibbonLogicOptions) {
         super()
@@ -118,16 +131,19 @@ export class RibbonContainerLogic extends UILogic<
             loadState: 'pristine',
             areExtraButtonsShown: false,
             areTutorialShown: false,
+            showFeed: false,
+            isWidthLocked: false,
             isRibbonEnabled: null,
             highlights: {
                 areHighlightsEnabled: false,
             },
             tooltip: {
-                isTooltipEnabled: false,
+                isTooltipEnabled: undefined,
             },
             commentBox: INITIAL_RIBBON_COMMENT_BOX_STATE,
             bookmark: {
                 isBookmarked: false,
+                lastBookmarkTimestamp: undefined,
             },
             tagging: {
                 tags: [],
@@ -150,23 +166,44 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async (incoming) => {
-        const { getPageUrl, syncSettings } = this.dependencies
-
+        const { getPageUrl } = this.dependencies
         await loadInitial<RibbonContainerState>(this, async () => {
-            const [url, areTagsMigrated] = await Promise.all([
-                getPageUrl(),
-                syncSettings.extension.get('areTagsMigratedToSpaces'),
-            ])
-
+            const [url] = await Promise.all([getPageUrl()])
             this.emitMutation({
                 pageUrl: { $set: url },
-                tagging: {
-                    shouldShowTagsUIs: { $set: !areTagsMigrated },
-                },
             })
             await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
         this.initLogicResolvable.resolve()
+
+        // this.sidebar = document
+        //     .getElementById('memex-sidebar-container')
+        //     ?.shadowRoot.getElementById('annotationSidebarContainer')
+        this.initReadingViewListeners()
+        const url = await getPageUrl()
+        const bookmark = await this.dependencies.bookmarks.findBookmark(url)
+        if (bookmark?.time) {
+            this.emitMutation({
+                bookmark: {
+                    lastBookmarkTimestamp: { $set: bookmark.time },
+                },
+            })
+        }
+    }
+
+    async initReadingViewListeners() {
+        const readingViewState = await browser.storage.local.get(
+            '@Sidebar-reading_view',
+        )
+
+        this.emitMutation({
+            isWidthLocked: { $set: readingViewState['@Sidebar-reading_view'] },
+        })
+
+        // init listeners to local storage flag for reading view
+        await browser.storage.onChanged.addListener((changes) => {
+            this.setReadingWidthOnListener(changes)
+        })
     }
 
     hydrateStateFromDB: EventHandler<'hydrateStateFromDB'> = async ({
@@ -177,19 +214,18 @@ export class RibbonContainerLogic extends UILogic<
             url,
         })
 
+        const bookmark = await this.dependencies.bookmarks.findBookmark(url)
+
         this.emitMutation({
             pageUrl: { $set: url },
             pausing: {
                 isPaused: {
-                    $set: await true,
+                    $set: true,
                 },
             },
             bookmark: {
-                isBookmarked: {
-                    $set: await this.dependencies.bookmarks.pageHasBookmark(
-                        url,
-                    ),
-                },
+                isBookmarked: { $set: !!bookmark },
+                lastBookmarkTimestamp: { $set: bookmark?.time },
             },
             isRibbonEnabled: {
                 $set: await this.dependencies.getSidebarEnabled(),
@@ -215,6 +251,68 @@ export class RibbonContainerLogic extends UILogic<
 
     cleanup() {}
 
+    toggleReadingView: EventHandler<'toggleReadingView'> = async ({
+        previousState,
+    }) => {
+        if (previousState.isWidthLocked) {
+            this.resetReadingWidth()
+        } else {
+            this.setReadingWidth()
+        }
+    }
+
+    setReadingWidth = async () => {
+        // set member variable for internal logic use
+        this.readingView = true
+
+        // set mutation for UI changes
+        this.emitMutation({
+            isWidthLocked: { $set: true },
+        })
+        await browser.storage.local.set({ '@Sidebar-reading_view': true })
+    }
+    resetReadingWidth = async () => {
+        // set member variable for internal logic use
+        this.readingView = false
+
+        // set mutation for UI changes
+        this.emitMutation({
+            isWidthLocked: { $set: false },
+        })
+
+        // remove listeners and values
+        this.tearDownListeners()
+        await browser.storage.local.set({ '@Sidebar-reading_view': false })
+    }
+
+    setReadingWidthOnListener = (changes: Storage.StorageChange) => {
+        if (Object.entries(changes)[0][0] === '@Sidebar-reading_view') {
+            this.emitMutation({
+                isWidthLocked: { $set: Object.entries(changes)[0][1].newValue },
+            })
+            this.readingView = Object.entries(changes)[0][1].newValue
+
+            if (Object.entries(changes)[0][1].newValue) {
+                this.emitMutation({
+                    isWidthLocked: { $set: true },
+                })
+            }
+
+            if (!Object.entries(changes)[0][1].newValue) {
+                this.emitMutation({
+                    isWidthLocked: { $set: false },
+                })
+            }
+        }
+    }
+
+    tearDownListeners() {
+        browser.storage.onChanged.removeListener((changes) => {
+            this.setReadingWidthOnListener(changes)
+        })
+        // this.resizeObserver.disconnect()
+    }
+
     /**
      * This exists due to a race-condition between bookmark shortcut and init hydration logic.
      * Having this ensures any event handler can wait until the init logic is taken care and also
@@ -236,6 +334,23 @@ export class RibbonContainerLogic extends UILogic<
         return latestState
     }
 
+    toggleFeed: EventHandler<'toggleFeed'> = ({ previousState }) => {
+        this.dependencies.setRibbonShouldAutoHide(previousState.showFeed)
+        const mutation: UIMutation<RibbonContainerState> = {
+            showFeed: { $set: !previousState.showFeed },
+            areExtraButtonsShown: { $set: false },
+            areTutorialShown: { $set: false },
+        }
+
+        if (!previousState.showFeed) {
+            mutation.commentBox = { showCommentBox: { $set: false } }
+            mutation.tagging = { showTagsPicker: { $set: false } }
+            mutation.lists = { showListsPicker: { $set: false } }
+        }
+
+        this.emitMutation(mutation)
+    }
+
     toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'> = ({
         previousState,
     }) => {
@@ -245,6 +360,7 @@ export class RibbonContainerLogic extends UILogic<
         const mutation: UIMutation<RibbonContainerState> = {
             areExtraButtonsShown: { $set: !previousState.areExtraButtonsShown },
             areTutorialShown: { $set: false },
+            showFeed: { $set: false },
         }
 
         if (!previousState.areExtraButtonsShown) {
@@ -265,6 +381,7 @@ export class RibbonContainerLogic extends UILogic<
         const mutation: UIMutation<RibbonContainerState> = {
             areTutorialShown: { $set: !previousState.areTutorialShown },
             areExtraButtonsShown: { $set: false },
+            showFeed: { $set: false },
         }
 
         if (!previousState.areTutorialShown) {
@@ -293,9 +410,17 @@ export class RibbonContainerLogic extends UILogic<
     }) => {
         const postInitState = await this.waitForPostInitState(previousState)
 
+        await this.dependencies.bookmarks.setBookmarkStatusInBrowserIcon(
+            true,
+            postInitState.pageUrl,
+        )
+
         const updateState = (isBookmarked) =>
             this.emitMutation({
-                bookmark: { isBookmarked: { $set: isBookmarked } },
+                bookmark: {
+                    isBookmarked: { $set: isBookmarked },
+                    lastBookmarkTimestamp: { $set: Date.now() },
+                },
             })
 
         const shouldBeBookmarked = !postInitState.bookmark.isBookmarked
@@ -331,6 +456,7 @@ export class RibbonContainerLogic extends UILogic<
                       search: { showSearchBox: { $set: false } },
                       areExtraButtonsShown: { $set: false },
                       areTutorialShown: { $set: false },
+                      showFeed: { $set: false },
                   }
                 : {}
 
@@ -355,7 +481,7 @@ export class RibbonContainerLogic extends UILogic<
 
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
-        const annotationUrl = generateAnnotationUrl({
+        const localAnnotationId = generateAnnotationUrl({
             pageUrl,
             now: () => Date.now(),
         })
@@ -368,27 +494,41 @@ export class RibbonContainerLogic extends UILogic<
                 },
             },
         })
+        const now = Date.now()
 
-        await this.dependencies.annotationsCache.create(
-            {
-                pageUrl,
+        const { remoteAnnotationId, savePromise } = await createAnnotation({
+            annotationsBG: this.dependencies.annotations,
+            contentSharingBG: this.dependencies.contentSharing,
+            annotationData: {
                 comment,
-                url: annotationUrl,
-                tags: commentBox.tags,
-                lists: commentBox.lists,
+                fullPageUrl: pageUrl,
+                localId: localAnnotationId,
+                createdWhen: new Date(now),
             },
-            {
+        })
+        this.dependencies.annotationsCache.addAnnotation({
+            localId: localAnnotationId,
+            remoteId: remoteAnnotationId ?? undefined,
+            comment,
+            normalizedPageUrl: pageUrl,
+            unifiedListIds: [],
+            lastEdited: now,
+            createdWhen: now,
+            localListIds: commentBox.lists,
+            creator: this.dependencies.currentUser,
+            privacyLevel: shareOptsToPrivacyLvl({
                 shouldShare,
-                shouldCopyShareLink: shouldShare,
                 isBulkShareProtected: isProtected,
-            },
-        )
-
+            }),
+        })
         this.dependencies.setRibbonShouldAutoHide(true)
 
-        await new Promise((resolve) =>
-            setTimeout(resolve, this.commentSavedTimeout),
-        )
+        await Promise.all([
+            new Promise((resolve) =>
+                setTimeout(resolve, this.commentSavedTimeout),
+            ),
+            savePromise,
+        ])
         this.emitMutation({ commentBox: { isCommentSaved: { $set: false } } })
     }
 
@@ -518,10 +658,11 @@ export class RibbonContainerLogic extends UILogic<
             lists: { pageListIds: { $set: [...pageListsSet] } },
         })
 
-        await this.dependencies.annotationsCache.updatePublicAnnotationLists({
-            added: event.value.added,
-            deleted: event.value.deleted,
-        })
+        // TODO: cache implement
+        // await this.dependencies.annotationsCache.updatePublicAnnotationLists({
+        //     added: event.value.added,
+        //     deleted: event.value.deleted,
+        // })
         return this.dependencies.customLists.updateListForPage({
             added: event.value.added,
             deleted: event.value.deleted,
@@ -550,6 +691,7 @@ export class RibbonContainerLogic extends UILogic<
                       search: { showSearchBox: { $set: false } },
                       areExtraButtonsShown: { $set: false },
                       areTutorialShown: { $set: false },
+                      showFeed: { $set: false },
                   }
                 : {}
 

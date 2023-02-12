@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -95,7 +95,7 @@ export default class DataCleaner extends React.PureComponent<Props> {
         if (dataCleaningState === 'error') {
             return (
                 <>
-                    <Icon icon="alertRound" height="20px" />
+                    <Icon icon="warning" height="20px" />
                     <Header>There was an error</Header>
                     <Text>
                         <a href={supportLink}>Contact support</a> if problem

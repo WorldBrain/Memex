@@ -27,7 +27,7 @@ class NoResultBadTerm extends PureComponent<Props> {
 
 const Title = styled.div`
     font-size: 16px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
 `
 
 const SubTitle = styled.div``

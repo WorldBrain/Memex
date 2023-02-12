@@ -1,4 +1,8 @@
-import firebase from 'firebase/app'
+import firebase from 'firebase/compat/app'
+import 'firebase/compat/auth'
+import 'firebase/compat/functions'
+import 'firebase/compat/firestore'
+import 'firebase/compat/storage'
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_MEMEX_API_KEY,
@@ -20,7 +24,7 @@ export const getFirebase = () => {
             .settings({ cacheSizeBytes: 1000000 * 10, merge: true })
         firebase
             .firestore()
-            .enablePersistence({ synchronizeTabs: true })
+            .enablePersistence({ synchronizeTabs: false })
             .catch((error) => {
                 console.warn(
                     'Could not enable Firestore offline persistence. Reason: ',

@@ -4,7 +4,6 @@ import expect from 'expect'
 import fetchMock from 'fetch-mock'
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import {
     createBackgroundModules,
     registerBackgroundModuleCollections,
@@ -28,12 +27,10 @@ import { setStorageMiddleware } from 'src/storage/middleware'
 import { JobDefinition } from 'src/job-scheduler/background/types'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { ServerStorage } from 'src/storage/types'
-import { Browser } from 'webextension-polyfill-ts'
-import { TabManager } from 'src/tab-management/background/tab-manager'
+import { Browser } from 'webextension-polyfill'
 import { createServices } from 'src/services'
 import { MemoryUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/memory'
 import { PersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
-import { NullPersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/null'
 import { createPersistentStorageManager } from 'src/storage/persistent-storage'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
@@ -43,15 +40,15 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { clearRemotelyCallableFunctions } from 'src/util/webextensionRPC'
-import { Services } from 'src/services/types'
+import { AuthServices, Services } from 'src/services/types'
 import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
+import { createAuthServices } from 'src/services/local-services'
+import { MockPushMessagingService } from './push-messaging'
 
 fetchMock.restore()
-
 export interface BackgroundIntegrationTestSetupOpts {
     customMiddleware?: StorageMiddleware[]
-    tabManager?: TabManager
-    signalTransportFactory?: SignalTransportFactory
     getServerStorage?: () => Promise<ServerStorage>
     personalCloudBackend?: PersonalCloudBackend
     browserLocalStorage?: MemoryBrowserStorage
@@ -61,6 +58,8 @@ export interface BackgroundIntegrationTestSetupOpts {
     startWithSyncDisabled?: boolean
     useDownloadTranslationLayer?: boolean
     services?: Services
+    pushMessagingService?: MockPushMessagingService
+    authServices?: AuthServices
 }
 
 export async function setupBackgroundIntegrationTest(
@@ -90,35 +89,19 @@ export async function setupBackgroundIntegrationTest(
         options?.getServerStorage ?? createLazyMemoryServerStorage()
     const serverStorage = await getServerStorage()
 
+    const authServices =
+        options?.authServices ??
+        createAuthServices({
+            backend: 'memory',
+            getServerStorage,
+        })
     const services =
         options?.services ??
         (await createServices({
             backend: 'memory',
             getServerStorage,
+            authService: authServices.auth,
         }))
-
-    const auth: AuthBackground = new AuthBackground({
-        authService: services.auth,
-        subscriptionService: services.subscriptions,
-        remoteEmitter: { emit: async () => {} },
-        scheduleJob: (job: JobDefinition) => {
-            console['info'](
-                'Running job immediately while in testing, job:',
-                job,
-            )
-            console['info'](`Ran job ${job.name} returned:`, job.job())
-        },
-        localStorageArea: browserLocalStorage,
-        backendFunctions: {
-            registerBetaUser: async () => {},
-        },
-        getUserManagement: async () =>
-            (await getServerStorage()).storageModules.userManagement,
-    })
-    const analyticsManager = new AnalyticsManager({
-        backend: new FakeAnalytics(),
-        shouldTrack: async () => true,
-    })
 
     const browserAPIs = ({
         webNavigation: {
@@ -133,16 +116,23 @@ export async function setupBackgroundIntegrationTest(
         },
         alarms: {
             onAlarm: { addListener: () => {} },
+            create: () => null,
+            clear: () => null,
         },
         tabs: {
             query: () => [],
             get: () => null,
+            onRemoved: { addListener: () => {} },
         },
         contextMenus: {
             create: () => {},
+            update: () => {},
+            onClicked: { addListener: () => {} },
         },
         runtime: {
             getURL: () => '',
+            onStartup: { addListener: () => {} },
+            onMessageExternal: { addListener: () => {} },
         },
         extension: {
             getURL: () => '',
@@ -158,6 +148,27 @@ export async function setupBackgroundIntegrationTest(
         },
     } as any) as Browser
 
+    const jobScheduler = new JobScheduler({
+        alarmsAPI: browserAPIs.alarms,
+        storageAPI: browserAPIs.storage,
+    })
+
+    const auth: AuthBackground = new AuthBackground({
+        jobScheduler,
+        authServices,
+        runtimeAPI: browserAPIs.runtime,
+        remoteEmitter: { emit: async () => {} },
+        localStorageArea: browserLocalStorage,
+        backendFunctions: {
+            registerBetaUser: async () => {},
+        },
+        getUserManagement: async () => serverStorage.modules.users,
+    })
+    const analyticsManager = new AnalyticsManager({
+        backend: new FakeAnalytics(),
+        shouldTrack: async () => true,
+    })
+
     const fetchPageDataProcessor = options?.includePostSyncProcessor
         ? new MockFetchPageDataProcessor()
         : null
@@ -168,9 +179,12 @@ export async function setupBackgroundIntegrationTest(
         )
     }
 
+    const pushMessagingService =
+        options?.pushMessagingService ?? new MockPushMessagingService()
     let nextServerId = 1337
     const userMessages = new MemoryUserMessageService()
     const backgroundModules = createBackgroundModules({
+        manifestVersion: '3',
         getNow,
         storageManager,
         persistentStorageManager,
@@ -178,12 +192,10 @@ export async function setupBackgroundIntegrationTest(
         localStorageChangesManager: null,
         getServerStorage,
         browserAPIs,
-        tabManager: options?.tabManager,
-        signalTransportFactory: options?.signalTransportFactory,
         fetchPageDataProcessor,
         auth,
-        disableSyncEnryption: !options?.enableSyncEncyption,
-        services,
+        servicesPromise: new Promise((res) => res(services)),
+        authServices,
         fetch,
         userMessageService: userMessages,
         callFirebaseFunction: (name, ...args) => {
@@ -192,9 +204,12 @@ export async function setupBackgroundIntegrationTest(
         personalCloudBackend:
             options?.personalCloudBackend ??
             new StorexPersonalCloudBackend({
-                storageManager: serverStorage.storageManager,
-                storageModules: serverStorage.storageModules,
-                services,
+                services: {
+                    activityStreams: services.activityStreams,
+                    pushMessaging: new MockPushMessagingService(),
+                },
+                storageManager: serverStorage.manager,
+                storageModules: serverStorage.modules,
                 clientSchemaVersion: STORAGE_VERSIONS[25].version,
                 view: new PersonalCloudHub().getView(),
                 getUserId: async () =>
@@ -208,16 +223,14 @@ export async function setupBackgroundIntegrationTest(
                 clientDeviceType: PersonalDeviceType.DesktopBrowser,
             }),
         contentSharingBackend: new ContentSharingBackend({
-            storageManager: serverStorage.storageManager,
-            activityFollows: serverStorage.storageModules.activityFollows,
-            contentSharing: serverStorage.storageModules.contentSharing,
+            storageManager: serverStorage.manager,
+            storageModules: serverStorage.modules,
             getCurrentUserId: async () =>
                 (await auth.authService.getCurrentUser()).id,
-            userMessages,
+            services: { pushMessaging: pushMessagingService },
         }),
         generateServerId: () => nextServerId++,
     })
-    backgroundModules.sync.initialSync.debug = false
 
     registerBackgroundModuleCollections({
         storageManager,
@@ -248,7 +261,7 @@ export async function setupBackgroundIntegrationTest(
         },
     }
 
-    await setStorageMiddleware(storageManager, {
+    setStorageMiddleware(storageManager, {
         storexHub: backgroundModules.storexHub,
         contentSharing: backgroundModules.contentSharing,
         personalCloud: backgroundModules.personalCloud,
@@ -266,13 +279,14 @@ export async function setupBackgroundIntegrationTest(
 
     return {
         storageManager,
+        pushMessagingService,
         persistentStorageManager,
         backgroundModules,
         browserLocalStorage,
         storageOperationLogger,
         storageChangeDetector,
-        authService: services.auth as MemoryAuthService,
-        subscriptionService: services.subscriptions as MemorySubscriptionsService,
+        authService: authServices.auth as MemoryAuthService,
+        subscriptionService: authServices.subscriptions as MemorySubscriptionsService,
         getServerStorage,
         browserAPIs,
         fetchPageDataProcessor,

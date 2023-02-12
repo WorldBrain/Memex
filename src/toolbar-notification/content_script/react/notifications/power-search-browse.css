@@ -1,9 +1,13 @@
 @value colors: 'src/common-ui/colors.css';
-@value color4, color6, color2 from colors;
+@value color4,
+color6,
+color2 from colors;
 
 .container {
     display: flex;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     flex-direction: row;
     width: 100%;
 }

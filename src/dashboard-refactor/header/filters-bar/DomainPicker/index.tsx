@@ -1,5 +1,4 @@
 import React from 'react'
-import onClickOutside from 'react-onclickoutside'
 import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
 
@@ -15,9 +14,9 @@ import EntryResultsList from 'src/common-ui/GenericPicker/components/EntryResult
 import EntryRow from 'src/common-ui/GenericPicker/components/EntryRow' // ActOnAllTabsButton, // IconStyleWrapper,
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
-import { EntrySelectedList } from 'src/common-ui/GenericPicker/components/EntrySelectedList'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 
 class DomainPicker extends StatefulUIElement<
     DomainPickerDependencies,
@@ -108,30 +107,30 @@ class DomainPicker extends StatefulUIElement<
         if (this.state.query === '') {
             return (
                 <EmptyDomainsView>
-                    <SectionCircle>
+                    <IconBox heightAndWidth="30px">
                         <Icon
                             filePath={icons.globe}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
-                    </SectionCircle>
+                    </IconBox>
                     <SectionTitle>No Domains to filter</SectionTitle>
-                    <InfoText>Save your first page or annotation</InfoText>
+                    <InfoText>Save a first page or annotation</InfoText>
                 </EmptyDomainsView>
             )
         }
 
         return (
             <EmptyDomainsView>
-                <SectionCircle>
+                <IconBox heightAndWidth="30px">
                     <Icon
                         filePath={icons.globe}
                         heightAndWidth="16px"
-                        color="purple"
+                        color="prime1"
                         hoverOff
                     />
-                </SectionCircle>
+                </IconBox>
                 <SectionTitle>No domains found for query</SectionTitle>
             </EmptyDomainsView>
         )
@@ -141,7 +140,7 @@ class DomainPicker extends StatefulUIElement<
         if (this.state.loadingSuggestions) {
             return (
                 <LoadingBox>
-                    <LoadingIndicator />
+                    <LoadingIndicator size={30} />
                 </LoadingBox>
             )
         }
@@ -150,22 +149,22 @@ class DomainPicker extends StatefulUIElement<
             <>
                 <PickerSearchInput
                     searchInputPlaceholder={this.searchInputPlaceholder}
-                    showPlaceholder={this.state.selectedEntries.length === 0}
+                    showPlaceholder={this.state?.selectedEntries.length === 0}
                     searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}
                     onKeyPress={this.handleKeyPress}
-                    value={this.state.query}
-                    loading={this.state.loadingQueryResults}
-                    before={
-                        <EntrySelectedList
-                            dataAttributeName="domain-name"
-                            entriesSelected={this.selectedDisplayEntries}
-                            onPress={this.handleSelectedDomainPress}
-                        />
-                    }
+                    value={this.state?.query}
+                    loading={this.state?.loadingQueryResults}
+                    // before={
+                    //     <EntrySelectedList
+                    //         dataAttributeName="domain-name"
+                    //         entriesSelected={this.selectedDisplayEntries}
+                    //         onPress={this.handleSelectedDomainPress}
+                    //     />
+                    // }
                 />
                 <EntryResultsList
-                    entries={this.state.displayEntries}
+                    entries={this.state?.displayEntries}
                     renderEntryRow={this.renderDomainRow}
                     emptyView={this.renderEmptyDomain()}
                     id="domainResults"
@@ -190,39 +189,41 @@ class DomainPicker extends StatefulUIElement<
 }
 
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
+    background: ${(props) => props.theme.colors.greyScale2};
+    border: 1px solid ${(props) => props.theme.colors.greyScale6};
+    border-radius: 8px;
     height: 30px;
     width: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 5px;
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale6};
+    margin-top: 10px;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 400;
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 300;
 `
 
 const LoadingBox = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    height: 300px;
     width: 100%;
 `
 
 const OuterSearchBox = styled.div`
-    background: ${(props) => props.theme.background};
     border-radius: 12px;
+    width: 300px;
+    padding: 10px;
 `
 
 const EmptyDomainsView = styled.div`
@@ -237,8 +238,8 @@ const EmptyDomainsView = styled.div`
 const DomainResultItem = styled.div`
     display: flex;
     border-radius: 4px;
-    color: ${(props) => props.theme.colors.normalText};
-    padding: 0 8px;
+    color: ${(props) => props.theme.colors.greyScale6};
+    padding: 0px;
     margin: 2px 4px 2px 0;
     font-weight: 400;
     font-size: 14px;
@@ -250,4 +251,4 @@ const DomainResultItem = styled.div`
     }
 `
 
-export default onClickOutside(DomainPicker)
+export default DomainPicker

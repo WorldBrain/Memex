@@ -6,7 +6,7 @@ import Visit from './visit'
 import Bookmark from './bookmark'
 import Tag from './tag'
 import { DBGet } from '../types'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { initErrHandler } from '../storage'
 
 // Keep these properties as Symbols to avoid storing them to DB
@@ -333,14 +333,16 @@ export default class Page extends AbstractModel
         const existingVisitsTimeMap = new Map<number, Visit>()
         existingVisits.forEach((v) => existingVisitsTimeMap.set(v.time, v))
 
-        return Promise.all<[number, string]>(
-            this[visitsProp].map((v: Visit) => {
-                if (!v._hasChanged(existingVisitsTimeMap.get(v.time))) {
-                    return v.pk
-                }
+        return Promise.all<[number, string][]>(
+            this[visitsProp].map(
+                async (v: Visit): Promise<[number, string]> => {
+                    if (!v._hasChanged(existingVisitsTimeMap.get(v.time))) {
+                        return v.pk
+                    }
 
-                return v.save()
-            }),
+                    return v.save()
+                },
+            ),
         )
     }
 
@@ -352,7 +354,7 @@ export default class Page extends AbstractModel
         const existingTagsNameMap = new Map<string, Tag>()
         existingTags.forEach((t) => existingTagsNameMap.set(t.name, t))
 
-        return Promise.all<[string, string]>(
+        return Promise.all<[string, string][]>(
             this[tagsProp].map((t: Tag) => {
                 if (existingTagsNameMap.get(t.name)) {
                     return [t.name, t.url]

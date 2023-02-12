@@ -2,8 +2,6 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-
-import ButtonTooltip from '../../common-ui/components/button-tooltip'
 import * as selectors from './selectors'
 import * as actions from './actions'
 import * as constants from './constants'
@@ -18,11 +16,12 @@ import StatusReport from './components/StatusReport'
 import { acts as searchBarActs } from 'src/overview/search-bar'
 import { OPTIONS_URL } from 'src/constants'
 import AdvSettings from '../imports/components/AdvSettingsContainer'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import styled from 'styled-components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 class ImportContainer extends Component {
     static propTypes = {
@@ -123,7 +122,7 @@ class ImportContainer extends Component {
                     <Icon
                         filePath={icons.stop}
                         heightAndWidth="14px"
-                        color="purple"
+                        color="prime1"
                         hoverOff
                     />
                     {this.state.waitingOnCancelConfirm
@@ -154,17 +153,10 @@ class ImportContainer extends Component {
             return (
                 <PrimaryAction
                     onClick={this.handleBtnClick(boundActions.pause)}
-                    label={
-                        <ButtonContent>
-                            <Icon
-                                filePath={icons.pause}
-                                heightAndWidth="14px"
-                                color="white"
-                                hoverOff
-                            />
-                            Pause Import
-                        </ButtonContent>
-                    }
+                    label={'Pause Import'}
+                    type={'secondary'}
+                    size={'medium'}
+                    icon={'pause'}
                 />
             )
         }
@@ -173,17 +165,10 @@ class ImportContainer extends Component {
             return (
                 <PrimaryAction
                     onClick={this.handleBtnClick(boundActions.resume)}
-                    label={
-                        <ButtonContent>
-                            <Icon
-                                filePath={icons.playFull}
-                                heightAndWidth="14px"
-                                color="white"
-                                hoverOff
-                            />
-                            Resume Import
-                        </ButtonContent>
-                    }
+                    label={'Resume Import'}
+                    type={'secondary'}
+                    size={'medium'}
+                    icon={'play'}
                 />
             )
         }
@@ -191,35 +176,19 @@ class ImportContainer extends Component {
         if (this.props.isStopped) {
             return (
                 <FinishBntContainer>
-                    <SecondaryAction
+                    <PrimaryAction
                         onClick={this.handleBtnClick(boundActions.finish)}
-                        label={
-                            <ButtonContent>
-                                <Icon
-                                    filePath={icons.redo}
-                                    heightAndWidth="14px"
-                                    color="purple"
-                                    hoverOff
-                                />
-                                Start new import
-                            </ButtonContent>
-                        }
-                    >
-                        Start new import
-                    </SecondaryAction>
+                        label={'Start new import'}
+                        type={'forth'}
+                        size={'medium'}
+                        icon={'redo'}
+                    />
                     <PrimaryAction
                         onClick={() => window.open(`${OPTIONS_URL}#/overview`)}
-                        label={
-                            <ButtonContent>
-                                <Icon
-                                    filePath={icons.searchIcon}
-                                    heightAndWidth="14px"
-                                    color="white"
-                                    hoverOff
-                                />
-                                Go to dashboard
-                            </ButtonContent>
-                        }
+                        label={' Go to dashboard'}
+                        type={'primary'}
+                        size={'medium'}
+                        icon={'searchIcon'}
                     />
                 </FinishBntContainer>
             )
@@ -230,19 +199,10 @@ class ImportContainer extends Component {
             <PrimaryAction
                 onClick={this.handleBtnClick(boundActions.start)}
                 isDisabled={isDisabled}
-                customClass={'startImport'}
-                type="submit"
-                label={
-                    <ButtonContent>
-                        <Icon
-                            filePath={icons.playFull}
-                            heightAndWidth="14px"
-                            color="white"
-                            hoverOff
-                        />
-                        Start Import
-                    </ButtonContent>
-                }
+                type="primary"
+                icon={'play'}
+                label={'Start Import'}
+                size={'medium'}
             />
         )
     }
@@ -388,16 +348,16 @@ class ImportContainer extends Component {
         <ButtonBar helpText={this.renderHelpText()} {...this.props}>
             {this.props.shouldRenderEsts && (
                 <React.Fragment>
-                    <ButtonTooltip
+                    <TooltipBox
                         tooltipText="Recalculate Numbers"
-                        position="bottom"
+                        placement="bottom"
                     >
                         <Icon
                             onClick={this.props.recalcEsts}
-                            heightAndWidth="16px"
+                            heightAndWidth="30px"
                             filePath={icons.reload}
                         />
-                    </ButtonTooltip>
+                    </TooltipBox>
                 </React.Fragment>
             )}
             {this.props.isRunning && this.renderCancelButton()}
@@ -465,7 +425,7 @@ const SectionTitleSmall = styled.div`
     margin-bottom: 10px;
     margin-top: 10px;
     padding-top: 10px;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 export default connect(mapStateToProps, mapDispatchToProps)(ImportContainer)

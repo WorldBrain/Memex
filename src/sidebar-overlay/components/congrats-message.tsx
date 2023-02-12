@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { remoteFunction } from 'src/util/webextensionRPC'
 
 const styles = require('./congrats-message.css')

@@ -1,13 +1,13 @@
 import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import moment from 'moment'
 import ToggleSwitch from '../../../../common-ui/components/ToggleSwitch'
 import { remoteFunction } from 'src/util/webextensionRPC'
 
 import ConfirmModalBtn from '../../../../common-ui/components/ConfirmModalBtn'
 import { BackupTimes } from 'src/backup-restore/types'
-import SyncNowOverlayPaneContainer from 'src/sync/components/device-list/SyncNowOverlayPane'
+// import SyncNowOverlayPaneContainer from 'src/sync/components/device-list/SyncNowOverlayPane'
 const styles = require('./StatusOverlay.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
 import {
@@ -82,7 +82,7 @@ export default class StatusOverlay extends PureComponent<Props> {
     }
 
     onBackupSetupRequested() {
-        window.open(`${browser.runtime.getURL('/options.html')}#/backup`)
+        globalThis.open(`${browser.runtime.getURL('/options.html')}#/backup`)
     }
 
     enableAutomaticBackup() {
@@ -91,7 +91,7 @@ export default class StatusOverlay extends PureComponent<Props> {
             this.setState({ automaticBackupEnabled: true })
         }
         if (!this.state.hasInitialBackup) {
-            window.location.href = `${browser.runtime.getURL(
+            globalThis.location.href = `${browser.runtime.getURL(
                 '/options.html',
             )}#/backup`
         }
@@ -124,7 +124,7 @@ export default class StatusOverlay extends PureComponent<Props> {
                     )}
                     <div className={styles.statusSection}>
                         <div className={styles.syncSection}>
-                            <SyncNowOverlayPaneContainer />
+                            {/* <SyncNowOverlayPaneContainer /> */}
                         </div>
                         <WhiteSpacer20 />
                         <div className={styles.backupSection}>

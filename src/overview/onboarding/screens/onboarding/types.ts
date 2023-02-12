@@ -3,16 +3,17 @@ import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { AuthDialogMode } from 'src/authentication/components/AuthDialog/types'
+import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
     personalCloudBG: PersonalCloudRemoteInterface
     navToDashboard: () => void
     navToGuidedTutorial: () => void
+    contentScriptsBG: ContentScriptsInterface<'caller'>
 }
 
 export interface State {
-    saveState: UITaskState
     loadState: UITaskState
     syncState: UITaskState
     authDialogMode?: AuthDialogMode
@@ -25,7 +26,8 @@ export interface State {
     passwordConfirm: string
     displayName: string
     passwordMatch: boolean
-    setSaveState: UITaskState
+    preventOnboardingFlow: boolean
+    autoLoginState: UITaskState
 }
 
 export type Event = UIEvent<{
@@ -34,5 +36,4 @@ export type Event = UIEvent<{
     goToGuidedTutorial: null
     onUserLogIn: { newSignUp?: boolean }
     setAuthDialogMode: { mode: AuthDialogMode }
-    setSaveState: { setSaveState: UITaskState }
 }>

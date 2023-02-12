@@ -57,6 +57,12 @@ export default function ({
             filename: 'options.html',
             template: htmlTemplates.options,
         }),
+        new HtmlPlugin({
+            title: 'Playground',
+            chunks: ['playground'],
+            filename: 'playground.html',
+            template: htmlTemplates.options,
+        }),
         new HtmlIncAssetsPlugin({
             append: false,
             assets: staticFiles.htmlAssets,
@@ -72,7 +78,7 @@ export default function ({
         new IgnorePlugin(/^\.\/locale$/, /moment$/),
     ]
 
-    if (mode === 'development') {
+    if (mode === 'development' && process.env.NO_CACHE !== 'true') {
         plugins.push(
             new HardSourcePlugin({
                 environmentHash: {

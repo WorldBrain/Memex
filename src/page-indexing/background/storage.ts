@@ -5,7 +5,7 @@ import {
     StorageModuleConstructorArgs,
 } from '@worldbrain/storex-pattern-modules'
 import { COLLECTION_DEFINITIONS as PAGE_COLLECTION_DEFINITIONS } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { PipelineRes, VisitInteraction } from 'src/search'
 import { initErrHandler } from 'src/search/storage'
 import { getTermsField } from '@worldbrain/memex-common/lib/storage/utils'

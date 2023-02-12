@@ -71,6 +71,7 @@ export default class ReadwiseSettingsLogic extends UILogic<
                     { key: previousState.apiKey },
                 )
                 if (!validationResult.success) {
+                    this.emitMutation({ keySaveState: { $set: 'error' } })
                     this.emitMutation({
                         keySaveError: { $set: 'This API key is not valid' },
                         apiKeyEditable: { $set: true },
@@ -82,19 +83,28 @@ export default class ReadwiseSettingsLogic extends UILogic<
                 await this.dependencies.readwise.setAPIKey({
                     validatedKey: previousState.apiKey,
                 })
+
+                this.emitMutation({
+                    apiKeyEditable: { $set: false },
+                })
             },
         )
 
-        if (!keyValid || !previousState.syncExistingNotes) {
+        if (!keyValid) {
+            this.emitMutation({ keySaveState: { $set: 'error' } })
             return
         }
-        await executeUITask<ReadwiseSettingsState>(
-            this,
-            'syncState',
-            async () => {
-                await this.dependencies.readwise.uploadAllAnnotations({})
-            },
-        )
+
+        if (previousState.syncExistingNotes) {
+            await executeUITask<ReadwiseSettingsState>(
+                this,
+                'syncState',
+                async () => {
+                    await this.dependencies.readwise.uploadAllAnnotations({})
+                },
+            )
+            return
+        }
     }
 
     removeAPIKey: EventHandler<'removeAPIKey'> = async ({ previousState }) => {

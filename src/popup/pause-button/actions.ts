@@ -5,9 +5,7 @@ import analytics from '../../analytics'
 import { remoteFunction } from '../../util/webextensionRPC'
 import { Thunk } from '../types'
 import * as selectors from './selectors'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
 
-const processEventRPC = remoteFunction('processEvent')
 const togglePauseRPC = remoteFunction('toggleLoggingPause')
 
 export const setPaused = createAction<boolean>('pause/setPaused')
@@ -28,13 +26,6 @@ export const togglePaused: () => Thunk = () => (dispatch, getState) => {
         category: 'Settings',
         action: isPaused ? 'resumeIndexingViaPopup' : 'pauseIndexingViaPopup',
         value: isPaused ? undefined : pauseTime,
-    })
-
-    processEventRPC({
-        type: isPaused
-            ? EVENT_NAMES.RESUME_INDEXING
-            : EVENT_NAMES.PAUSE_INDEXING,
-        details: isPaused ? undefined : { pauseValue: pauseTime },
     })
 
     // Tell background script to pause

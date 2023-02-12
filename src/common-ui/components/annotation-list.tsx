@@ -8,9 +8,6 @@ import {
     AnnotationSharingInfo,
     AnnotationSharingAccess,
 } from 'src/content-sharing/ui/types'
-import AnnotationEditable from 'src/annotations/components/AnnotationEditable'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import { PageNotesCopyPaster } from 'src/copy-paster'
 import {
     contentSharing,
     auth,
@@ -23,11 +20,9 @@ import type {
     EditForm,
     EditForms,
 } from 'src/sidebar/annotations-sidebar/containers/types'
-import { AnnotationMode } from 'src/sidebar/annotations-sidebar/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
-import TagPicker from 'src/tags/ui/TagPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { linkStreams } from 'openpgp'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
@@ -76,9 +71,6 @@ interface State {
     /** Received annotations are stored and manipulated through edit/delete */
     annotations: Annotation[]
     editForms: EditForms
-    annotationModes: {
-        [annotationUrl: string]: AnnotationMode
-    }
     annotationsSharingInfo: SharingInfo
     sharingAccess: AnnotationSharingAccess
 }
@@ -105,10 +97,6 @@ class AnnotationList extends Component<Props, State> {
                     tags: curr.tags,
                 },
             }),
-            {},
-        ),
-        annotationModes: this.props.annotations.reduce(
-            (acc, curr) => ({ ...acc, [curr.url]: 'default' }),
             {},
         ),
         sharingAccess: 'sharing-allowed',
@@ -152,242 +140,242 @@ class AnnotationList extends Component<Props, State> {
         }))
     }
 
-    private updateAnnotationShareState = (annotationUrl: string) => (
-        info: AnnotationSharingInfo,
-    ) =>
-        this.setState((state) => ({
-            annotationsSharingInfo: {
-                ...state.annotationsSharingInfo,
-                [annotationUrl]: info,
-            },
-        }))
+    // private updateAnnotationShareState = (annotationUrl: string) => (
+    //     info: AnnotationSharingInfo,
+    // ) =>
+    //     this.setState((state) => ({
+    //         annotationsSharingInfo: {
+    //             ...state.annotationsSharingInfo,
+    //             [annotationUrl]: info,
+    //         },
+    //     }))
 
-    private toggleIsExpanded = () => {
-        this.setState(
-            (prevState: State): State => ({
-                ...prevState,
-                isExpanded: !prevState.isExpanded,
-            }),
-        )
-    }
+    // private toggleIsExpanded = () => {
+    //     this.setState(
+    //         (prevState: State): State => ({
+    //             ...prevState,
+    //             isExpanded: !prevState.isExpanded,
+    //         }),
+    //     )
+    // }
 
-    private handleEditAnnotation = (url: string) => () => {
-        const { annotations, editForms } = this.state
+    // private handleEditAnnotation = (url: string) => () => {
+    //     const { annotations, editForms } = this.state
 
-        const index = annotations.findIndex((annot) => annot.url === url)
-        const form = editForms[url]
-        const annotation: Annotation = annotations[index]
+    //     const index = annotations.findIndex((annot) => annot.url === url)
+    //     const form = editForms[url]
+    //     const annotation: Annotation = annotations[index]
 
-        if (
-            !annotation ||
-            (!annotation.body &&
-                !form.commentText?.length &&
-                !form.tags?.length)
-        ) {
-            return
-        }
+    //     if (
+    //         !annotation ||
+    //         (!annotation.body &&
+    //             !form.commentText?.length &&
+    //             !form.tags?.length)
+    //     ) {
+    //         return
+    //     }
 
-        const newAnnotations: Annotation[] = [
-            ...annotations.slice(0, index),
-            {
-                ...annotation,
-                comment: form.commentText,
-                tags: form.tags,
-                lastEdited: new Date(),
-            },
-            ...annotations.slice(index + 1),
-        ]
+    //     const newAnnotations: Annotation[] = [
+    //         ...annotations.slice(0, index),
+    //         {
+    //             ...annotation,
+    //             comment: form.commentText,
+    //             tags: form.tags,
+    //             lastEdited: new Date(),
+    //         },
+    //         ...annotations.slice(index + 1),
+    //     ]
 
-        this.props.handleEditAnnotation(url, form.commentText, form.tags)
+    //     this.props.handleEditAnnotation(url, form.commentText, form.tags)
 
-        this.setState((state) => ({
-            annotations: newAnnotations,
-            annotationModes: { ...state.annotationModes, [url]: 'default' },
-            editForms: {
-                ...state.editForms,
-                [url]: {
-                    ...INIT_FORM_STATE,
-                    commentText: state.editForms[url].commentText,
-                    tags: state.editForms[url].tags,
-                },
-            },
-        }))
-    }
+    //     this.setState((state) => ({
+    //         annotations: newAnnotations,
+    //         annotationModes: { ...state.annotationModes, [url]: 'default' },
+    //         editForms: {
+    //             ...state.editForms,
+    //             [url]: {
+    //                 ...INIT_FORM_STATE,
+    //                 commentText: state.editForms[url].commentText,
+    //                 tags: state.editForms[url].tags,
+    //             },
+    //         },
+    //     }))
+    // }
 
-    private handleDeleteAnnotation = (url: string) => () => {
-        this.props.handleDeleteAnnotation(url)
+    // private handleDeleteAnnotation = (url: string) => () => {
+    //     this.props.handleDeleteAnnotation(url)
 
-        // Delete the annotation in the state too
-        const { annotations } = this.state
-        const index = this.state.annotations.findIndex(
-            (annot) => annot.url === url,
-        )
-        const newAnnotations = [
-            ...annotations.slice(0, index),
-            ...annotations.slice(index + 1),
-        ]
-        this.setState({
-            annotations: newAnnotations,
-        })
-    }
+    //     // Delete the annotation in the state too
+    //     const { annotations } = this.state
+    //     const index = this.state.annotations.findIndex(
+    //         (annot) => annot.url === url,
+    //     )
+    //     const newAnnotations = [
+    //         ...annotations.slice(0, index),
+    //         ...annotations.slice(index + 1),
+    //     ]
+    //     this.setState({
+    //         annotations: newAnnotations,
+    //     })
+    // }
 
-    private handleGoToAnnotation = (annotation: Annotation) => () => {
-        this.props.goToAnnotation(annotation)
-    }
+    // private handleGoToAnnotation = (annotation: Annotation) => () => {
+    //     this.props.goToAnnotation(annotation)
+    // }
 
-    private handleTagPickerClick = (url: string) => () => {
-        this.props.setActiveTagPickerNoteId(url)
-    }
-    private handleListPickerClick = (url: string) => () => {
-        this.props.setActiveListPickerNoteId(url)
-    }
+    // private handleTagPickerClick = (url: string) => () => {
+    //     this.props.setActiveTagPickerNoteId(url)
+    // }
+    // private handleListPickerClick = (url: string) => () => {
+    //     this.props.setActiveListPickerNoteId(url)
+    // }
 
-    private handleEditCancel = (url: string, commentText: string) => () =>
-        this.setState((state) => ({
-            annotationModes: { [url]: 'default' },
-            editForms: {
-                ...state.editForms,
-                [url]: {
-                    ...state.editForms[url],
-                    commentText,
-                },
-            },
-        }))
+    // private handleEditCancel = (url: string, commentText: string) => () =>
+    //     this.setState((state) => ({
+    //         annotationModes: { [url]: 'default' },
+    //         editForms: {
+    //             ...state.editForms,
+    //             [url]: {
+    //                 ...state.editForms[url],
+    //                 commentText,
+    //             },
+    //         },
+    //     }))
 
-    private handleShareClick = (url: string) => () => {
-        if (this.props.setActiveShareMenuNoteId != null) {
-            this.props.setActiveShareMenuNoteId(url)
-        }
-    }
+    // private handleShareClick = (url: string) => () => {
+    //     if (this.props.setActiveShareMenuNoteId != null) {
+    //         this.props.setActiveShareMenuNoteId(url)
+    //     }
+    // }
 
-    private renderTagPicker(annot: Annotation) {
-        if (this.props.activeTagPickerNoteId !== annot.url) {
-            return null
-        }
+    // private renderTagPicker(annot: Annotation) {
+    //     if (this.props.activeTagPickerNoteId !== annot.url) {
+    //         return null
+    //     }
 
-        return (
-            <div className={styles.hoverBoxWrapper}>
-                <HoverBox>
-                    {/* <TagPicker
-                        onUpdateEntrySelection={(args) =>
-                            this.tagsBG.updateTagForPage({
-                                ...args,
-                                url: annot.url,
-                            })
-                        }
-                        initialSelectedEntries={() => annot.tags}
-                        onClickOutside={() =>
-                            this.props.setActiveTagPickerNoteId(undefined)
-                        }
-                    /> */}
-                </HoverBox>
-            </div>
-        )
-    }
-    private renderListPicker(annot: Annotation) {
-        if (this.props.activeListPickerNoteId !== annot.url) {
-            return null
-        }
+    //     return (
+    //         <div className={styles.hoverBoxWrapper}>
+    //             <HoverBox>
+    //                 {/* <TagPicker
+    //                     onUpdateEntrySelection={(args) =>
+    //                         this.tagsBG.updateTagForPage({
+    //                             ...args,
+    //                             url: annot.url,
+    //                         })
+    //                     }
+    //                     initialSelectedEntries={() => annot.tags}
+    //                     onClickOutside={() =>
+    //                         this.props.setActiveTagPickerNoteId(undefined)
+    //                     }
+    //                 /> */}
+    //             </HoverBox>
+    //         </div>
+    //     )
+    // }
+    // private renderListPicker(annot: Annotation) {
+    //     if (this.props.activeListPickerNoteId !== annot.url) {
+    //         return null
+    //     }
 
-        return (
-            <div className={styles.hoverBoxWrapper}>
-                <HoverBox>
-                    {/* <CollectionPicker
-                        onUpdateEntrySelection={async (args) => {
-                            //  TODO implement picker
-                            const name = args.added ?? args.deleted
-                            const list = await this.collectionsBG.fetchListByName(
-                                { name },
-                            )
-                            const id = list.id
-                            if (args.added != null) {
-                                this.contentShareBG.shareAnnotationToSomeLists({
-                                    annotationUrl: annot.url,
-                                    localListIds: [id],
-                                })
-                            } else if (args.deleted != null) {
-                                this.contentShareBG.unshareAnnotationFromSomeLists(
-                                    {
-                                        annotationUrl: annot.url,
-                                        localListIds: [id],
-                                    },
-                                )
-                            }
-                        }}
-                        initialSelectedEntries={() => annot.lists}
-                        onClickOutside={() =>
-                            this.props.setActiveListPickerNoteId(undefined)
-                        }
-                    /> */}
-                </HoverBox>
-            </div>
-        )
-    }
+    //     return (
+    //         <div className={styles.hoverBoxWrapper}>
+    //             <HoverBox>
+    //                 {/* <CollectionPicker
+    //                     onUpdateEntrySelection={async (args) => {
+    //                         //  TODO implement picker
+    //                         const name = args.added ?? args.deleted
+    //                         const list = await this.collectionsBG.fetchListByName(
+    //                             { name },
+    //                         )
+    //                         const id = list.id
+    //                         if (args.added != null) {
+    //                             this.contentShareBG.shareAnnotationToSomeLists({
+    //                                 annotationUrl: annot.url,
+    //                                 localListIds: [id],
+    //                             })
+    //                         } else if (args.deleted != null) {
+    //                             this.contentShareBG.unshareAnnotationFromSomeLists(
+    //                                 {
+    //                                     annotationUrl: annot.url,
+    //                                     localListIds: [id],
+    //                                 },
+    //                             )
+    //                         }
+    //                     }}
+    //                     initialSelectedEntries={() => annot.lists}
+    //                     onClickOutside={() =>
+    //                         this.props.setActiveListPickerNoteId(undefined)
+    //                     }
+    //                 /> */}
+    //             </HoverBox>
+    //         </div>
+    //     )
+    // }
 
-    private renderCopyPasterManager(annot: Annotation) {
-        if (this.props.activeCopyPasterAnnotationId !== annot.url) {
-            return null
-        }
+    // private renderCopyPasterManager(annot: Annotation) {
+    //     if (this.props.activeCopyPasterAnnotationId !== annot.url) {
+    //         return null
+    //     }
 
-        return (
-            <div className={styles.hoverBoxWrapper}>
-                <HoverBox>
-                    <PageNotesCopyPaster
-                        copyPaster={this.props.copyPaster}
-                        annotationUrls={[annot.url]}
-                        normalizedPageUrls={[annot.pageUrl]}
-                        onClickOutside={() =>
-                            this.props.setActiveCopyPasterAnnotationId?.(
-                                undefined,
-                            )
-                        }
-                    />
-                </HoverBox>
-            </div>
-        )
-    }
+    //     return (
+    //         <div className={styles.hoverBoxWrapper}>
+    //             <HoverBox>
+    //                 <PageNotesCopyPaster
+    //                     copyPaster={this.props.copyPaster}
+    //                     annotationUrls={[annot.url]}
+    //                     normalizedPageUrls={[annot.pageUrl]}
+    //                     onClickOutside={() =>
+    //                         this.props.setActiveCopyPasterAnnotationId?.(
+    //                             undefined,
+    //                         )
+    //                     }
+    //                 />
+    //             </HoverBox>
+    //         </div>
+    //     )
+    // }
 
-    private renderShareMenu(annot: Annotation) {
-        if (this.props.activeShareMenuNoteId !== annot.url) {
-            return null
-        }
+    // private renderShareMenu(annot: Annotation) {
+    //     if (this.props.activeShareMenuNoteId !== annot.url) {
+    //         return null
+    //     }
 
-        return (
-            <div className={styles.hoverBoxWrapper}>
-                <HoverBox>
-                    {/* <SingleNoteShareMenu
-                        contentSharingBG={this.props.contentSharing}
-                        copyLink={async (link) => {
-                            analytics.trackEvent({
-                                category: 'ContentSharing',
-                                action: 'copyNoteLink',
-                            })
+    //     return (
+    //         <div className={styles.hoverBoxWrapper}>
+    //             <HoverBox>
+    //                 {/* <SingleNoteShareMenu
+    //                     contentSharingBG={this.props.contentSharing}
+    //                     copyLink={async (link) => {
+    //                         analytics.trackEvent({
+    //                             category: 'ContentSharing',
+    //                             action: 'copyNoteLink',
+    //                         })
 
-                            await copyToClipboard(link)
-                        }}
-                        annotationUrl={annot.url}
-                        postShareHook={(state) => {
-                            const privacyState = getAnnotationPrivacyState(
-                                state.privacyLevel,
-                            )
-                            return this.updateAnnotationShareState(annot.url)({
-                                status: privacyState.public
-                                    ? 'shared'
-                                    : 'unshared',
-                                taskState: 'success',
-                                privacyLevel: privacyState.protected
-                                    ? AnnotationPrivacyLevels.PROTECTED
-                                    : undefined,
-                            })
-                        }}
-                        closeShareMenu={() =>
-                            this.props.setActiveShareMenuNoteId?.(undefined)
-                        }
-                    /> */}
-                </HoverBox>
-            </div>
-        )
-    }
+    //                         await copyToClipboard(link)
+    //                     }}
+    //                     annotationUrl={annot.url}
+    //                     postShareHook={(state) => {
+    //                         const privacyState = getAnnotationPrivacyState(
+    //                             state.privacyLevel,
+    //                         )
+    //                         return this.updateAnnotationShareState(annot.url)({
+    //                             status: privacyState.public
+    //                                 ? 'shared'
+    //                                 : 'unshared',
+    //                             taskState: 'success',
+    //                             privacyLevel: privacyState.protected
+    //                                 ? AnnotationPrivacyLevels.PROTECTED
+    //                                 : undefined,
+    //                         })
+    //                     }}
+    //                     closeShareMenu={() =>
+    //                         this.props.setActiveShareMenuNoteId?.(undefined)
+    //                     }
+    //                 /> */}
+    //             </HoverBox>
+    //         </div>
+    //     )
+    // }
 
     private handleEditFormUpdate = (
         url: string,
@@ -405,105 +393,105 @@ class AnnotationList extends Component<Props, State> {
     }
 
     private renderAnnotations() {
-        return this.state.annotations.map((annot) => (
-            <AnnotationEditable
-                getListDetailsById={(i) => ({
-                    name: 'dead code',
-                    isShared: false,
-                })}
-                key={annot.url}
-                {...annot}
-                body={annot.body}
-                comment={annot.comment}
-                className={styles.annotation}
-                createdWhen={annot.createdWhen!}
-                isShared={false}
-                isBulkShareProtected={false}
-                mode={this.state.annotationModes[annot.url]}
-                onGoToAnnotation={this.handleGoToAnnotation(annot)}
-                renderShareMenuForAnnotation={() => this.renderShareMenu(annot)}
-                renderCopyPasterForAnnotation={() =>
-                    this.renderCopyPasterManager(annot)
-                }
-                renderTagsPickerForAnnotation={() =>
-                    this.renderTagPicker(annot)
-                }
-                renderListsPickerForAnnotation={() =>
-                    this.renderListPicker(annot)
-                }
-                annotationEditDependencies={{
-                    comment: this.state.editForms[annot.url].commentText,
-                    onCommentChange: (commentText) =>
-                        this.handleEditFormUpdate(annot.url, () => ({
-                            commentText,
-                        })),
-                    onEditCancel: this.handleEditCancel(
-                        annot.url,
-                        annot.comment,
-                    ),
-                    onEditConfirm: () => this.handleEditAnnotation(annot.url),
-                }}
-                annotationFooterDependencies={{
-                    onEditIconClick: () =>
-                        this.setState({
-                            annotationModes: {
-                                [annot.url]: 'edit',
-                            },
-                        }),
-                    onDeleteCancel: this.handleEditCancel(
-                        annot.url,
-                        annot.comment,
-                    ),
-                    onDeleteConfirm: this.handleDeleteAnnotation(annot.url),
-                    onDeleteIconClick: () =>
-                        this.setState({
-                            annotationModes: { [annot.url]: 'delete' },
-                        }),
-                    onTagIconClick: this.handleTagPickerClick(annot.url),
-                    onListIconClick: this.handleListPickerClick(annot.url),
-                    onShareClick: this.handleShareClick(annot.url),
-                    onCopyPasterBtnClick:
-                        this.props.setActiveCopyPasterAnnotationId != null
-                            ? () =>
-                                  this.props.setActiveCopyPasterAnnotationId(
-                                      annot.url,
-                                  )
-                            : undefined,
-                }}
-            />
-        ))
+        return null
+        // return this.state.annotations.map((annot) => (
+        //     <AnnotationEditable
+        //         getListDetailsById={(i) => ({
+        //             name: 'dead code',
+        //             isShared: false,
+        //         })}
+        //         key={annot.url}
+        //         {...annot}
+        //         body={annot.body}
+        //         comment={annot.comment}
+        //         className={styles.annotation}
+        //         createdWhen={annot.createdWhen!}
+        //         isShared={false}
+        //         isBulkShareProtected={false}
+        //         mode={this.state.annotationModes[annot.url]}
+        //         onGoToAnnotation={this.handleGoToAnnotation(annot)}
+        //         renderShareMenuForAnnotation={() => this.renderShareMenu(annot)}
+        //         renderCopyPasterForAnnotation={() =>
+        //             this.renderCopyPasterManager(annot)
+        //         }
+        //         renderTagsPickerForAnnotation={() =>
+        //             this.renderTagPicker(annot)
+        //         }
+        //         renderListsPickerForAnnotation={() =>
+        //             this.renderListPicker(annot)
+        //         }
+        //         annotationEditDependencies={{
+        //             comment: this.state.editForms[annot.url].commentText,
+        //             onCommentChange: (commentText) =>
+        //                 this.handleEditFormUpdate(annot.url, () => ({
+        //                     commentText,
+        //                 })),
+        //             onEditCancel: this.handleEditCancel(
+        //                 annot.url,
+        //                 annot.comment,
+        //             ),
+        //             onEditConfirm: () => this.handleEditAnnotation(annot.url),
+        //         }}
+        //         annotationFooterDependencies={{
+        //             onEditIconClick: () =>
+        //                 this.setState({
+        //                     annotationModes: {
+        //                         [annot.url]: 'edit',
+        //                     },
+        //                 }),
+        //             onDeleteCancel: this.handleEditCancel(
+        //                 annot.url,
+        //                 annot.comment,
+        //             ),
+        //             onDeleteConfirm: this.handleDeleteAnnotation(annot.url),
+        //             onDeleteIconClick: () =>
+        //                 this.setState({
+        //                     annotationModes: { [annot.url]: 'delete' },
+        //                 }),
+        //             onTagIconClick: this.handleTagPickerClick(annot.url),
+        //             onListIconClick: this.handleListPickerClick(annot.url),
+        //             onShareClick: this.handleShareClick(annot.url),
+        //             onCopyPasterBtnClick:
+        //                 this.props.setActiveCopyPasterAnnotationId != null
+        //                     ? () =>
+        //                           this.props.setActiveCopyPasterAnnotationId(
+        //                               annot.url,
+        //                           )
+        //                     : undefined,
+        //         }}
+        //     />
+        // ))
     }
 
     render() {
         const { isExpanded } = this.state
-        return (
-            <div
-                className={cx({
-                    [styles.parentExpanded]: isExpanded,
-                })}
-            >
-                {/* Annotation count text and toggle arrow */}
-                <div
-                    className={cx(styles.resultCount, {
-                        [styles.expandedCount]: this.state.isExpanded,
-                    })}
-                    onClick={this.toggleIsExpanded}
-                >
-                    <b>{this.props.annotations.length}</b>{' '}
-                    <span className={styles.resultsText}>results</span>
-                    <span
-                        className={cx(styles.icon, {
-                            [styles.inverted]: this.state.isExpanded,
-                        })}
-                    />
-                </div>
+        return undefined
+        // <div
+        //     className={cx({
+        //         [styles.parentExpanded]: isExpanded,
+        //     })}
+        // >
+        //     {/* Annotation count text and toggle arrow */}
+        //     <div
+        //         className={cx(styles.resultCount, {
+        //             [styles.expandedCount]: this.state.isExpanded,
+        //         })}
+        //         onClick={this.toggleIsExpanded}
+        //     >
+        //         <b>{this.props.annotations.length}</b>{' '}
+        //         <span className={styles.resultsText}>results</span>
+        //         <span
+        //             className={cx(styles.icon, {
+        //                 [styles.inverted]: this.state.isExpanded,
+        //             })}
+        //         />
+        //     </div>
 
-                {/* Container for displaying AnnotationBox */}
-                <div className={styles.annotationList}>
-                    {isExpanded ? this.renderAnnotations() : null}
-                </div>
-            </div>
-        )
+        //     {/* Container for displaying AnnotationBox */}
+        //     <div className={styles.annotationList}>
+        //         {isExpanded ? this.renderAnnotations() : null}
+        //     </div>
+        // </div>
     }
 }
 

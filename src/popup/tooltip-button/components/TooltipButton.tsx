@@ -6,7 +6,7 @@ import type { RootState } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
 import { CheckboxToggle } from 'src/common-ui/components'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -36,29 +36,21 @@ class InPageSwitches extends PureComponent<Props> {
 
     render() {
         return (
-            <ButtonItem>
-                <ButtonInnerContainer onClick={this.props.showTooltip}>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.highlighterEmpty}
-                            heightAndWidth="18px"
-                            hoverOff
-                        />
-                    </SectionCircle>
+            <ButtonItem onClick={this.props.handleChange}>
+                <ButtonInnerContainer>
+                    <Icon
+                        filePath={icons.tooltipOn}
+                        heightAndWidth="22px"
+                        hoverOff
+                    />
                     <ButtonInnerContent>
-                        Show Highlighter Tooltip
-                        <SubTitle>when selecting text on current page</SubTitle>
+                        Enable Highlighter Tooltip
+                        <SubTitle>when selecting text</SubTitle>
                     </ButtonInnerContent>
                 </ButtonInnerContainer>
                 <ToggleSwitchButton
-                    toggleHoverText={
-                        <span>
-                            Always Show <br />
-                            when selecting Text
-                        </span>
-                    }
                     isEnabled={this.props.isEnabled}
-                    onToggleClick={this.props.handleChange}
+                    onToggleClick={null}
                 />
             </ButtonItem>
         )
@@ -68,6 +60,8 @@ class InPageSwitches extends PureComponent<Props> {
 const ButtonInnerContainer = styled.div`
     display: flex;
     grid-gap: 15px;
+    display: flex;
+    align-items: center;
 `
 
 const SectionCircle = styled.div`
@@ -87,13 +81,14 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     align-items: center;
     justify-content: space-between;
     padding: 5px 10px;
-    margin: 0px 10px;
+    margin: 0px 10px 10px 10px;
     border-radius: 8px;
-    height: 55px;
+    height: 50px;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+    border: 1px solid transparent;
 
     &:hover {
-        background: ${(props) => props.theme.colors.backgroundColorDarker};
+        border: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 
     & * {
@@ -108,13 +103,13 @@ const ButtonInnerContent = styled.div`
     justify-content: center;
     align-items: flex-start;
     font-size: 14px;
-    font-weight: 600;
-    color: ${(props) => props.theme.colors.darkerText};
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.greyScale6};
 `
 
 const SubTitle = styled.div`
-    font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 400;
 `
 

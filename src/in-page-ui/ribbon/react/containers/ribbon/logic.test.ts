@@ -11,11 +11,13 @@ import {
 import { Annotation } from 'src/annotations/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
-import { createAnnotationsCache } from 'src/annotations/annotations-cache'
 import { FakeAnalytics } from 'src/analytics/mock'
 import * as DATA from './logic.test.data'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
+import { PageAnnotationsCache } from 'src/annotations/cache'
+import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
 describe('Ribbon logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -53,16 +55,9 @@ describe('Ribbon logic', () => {
         let globalTooltipState = false
         let globalHighlightsState = false
         const analytics = new FakeAnalytics()
-        const annotationsCache = createAnnotationsCache(
-            {
-                ...backgroundModules,
-                contentSharing:
-                    backgroundModules.contentSharing.remoteFunctions,
-                customLists: backgroundModules.customLists.remoteFunctions,
-                annotations,
-            },
-            { skipPageIndexing: true },
-        )
+        const annotationsCache = new PageAnnotationsCache({
+            normalizedPageUrl: currentTab.normalizedUrl,
+        })
 
         const syncSettings = createSyncSettingsStore({
             syncSettingsBG: backgroundModules.syncSettings,
@@ -253,6 +248,7 @@ describe('Ribbon logic', () => {
         device,
     }) => {
         const fullPageUrl = DATA.CURRENT_TAB_URL_1
+        const normalizedPageUrl = normalizeUrl(fullPageUrl)
         await device.storageManager
             .collection('customLists')
             .createObject(DATA.LISTS_1[0])
@@ -297,7 +293,24 @@ describe('Ribbon logic', () => {
         }
 
         await ribbon.init()
-        await annotationsCache.load(fullPageUrl)
+        annotationsCache.setAnnotations(
+            [DATA.ANNOT_1, DATA.ANNOT_2].map((annot) =>
+                reshapeAnnotationForCache(
+                    annot as Annotation &
+                        Required<
+                            Pick<Annotation, 'createdWhen' | 'lastEdited'>
+                        >,
+                    {
+                        extraData: {
+                            creator: {
+                                type: 'user-reference',
+                                id: TEST_USER.id,
+                            },
+                        },
+                    },
+                ),
+            ),
+        )
 
         await expectListEntries([])
         expect(annotationsCache.annotations).toEqual([
@@ -790,17 +803,19 @@ describe('Ribbon logic', () => {
     })
 
     it('should rehydrate state on URL change', async ({ device }) => {
-        const pageBookmarksMockDB: { [url: string]: boolean } = {}
+        // const pageBookmarksMockDB: { [url: string]: boolean } = {}
 
-        device.backgroundModules.bookmarks.remoteFunctions = {
-            pageHasBookmark: async (url) => pageBookmarksMockDB[url] ?? false,
-            addPageBookmark: async (args) => {
-                pageBookmarksMockDB[args.url] = true
-            },
-            delPageBookmark: async (args) => {
-                pageBookmarksMockDB[args.url] = false
-            },
-        }
+        // device.backgroundModules.bookmarks.remoteFunctions = {
+        //     pageHasBookmark: async (url) => pageBookmarksMockDB[url] ?? false,
+        //     setBookmarkStatusInBrowserIcon: async (value, url) => pageBookmarksMockDB[url],
+        //     findBookmark: async (url) => pageBookmarksMockDB[url] ?? false,
+        //     addPageBookmark: async (args) => {
+        //         pageBookmarksMockDB[args.url] = true
+        //     },
+        //     delPageBookmark: async (args) => {
+        //         pageBookmarksMockDB[args.url] = false
+        //     },
+        // }
 
         const newURL = 'https://www.newurl.com'
 

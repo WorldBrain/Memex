@@ -26,7 +26,7 @@ const Container = styled.tr`
     cursor: pointer;
 
     &:nth-child(2n + 2) {
-        background: ${(props) => props.theme.colors.backgroundColor};
+        background: ${(props) => props.theme.colors.black};
     }
 `
 
@@ -37,7 +37,7 @@ const UrlCol = styled.span`
 `
 
 const ErrorCol = styled.span`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
 `
 

@@ -1,73 +1,56 @@
-import firebaseModule from 'firebase'
+import { httpsCallable, getFunctions } from 'firebase/functions'
 import FirebaseFunctionsActivityStreamsService from '@worldbrain/memex-common/lib/activity-streams/services/firebase-functions/client'
 import MemoryStreamsService from '@worldbrain/memex-common/lib/activity-streams/services/memory'
-import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
-import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import {
-    createAuthDependencies,
-    DevAuthState,
-} from 'src/authentication/background/setup'
-import { subscriptionRedirect } from 'src/authentication/background/redirect'
-import { ServerStorage } from 'src/storage/types'
-import { Services } from './types'
+import type { ServerStorage } from 'src/storage/types'
+import type { Services } from './types'
 import ListKeysService from './content-sharing'
 import ContentConversationsService from './content-conversations'
+import type { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 
 export async function createServices(options: {
+    authService: AuthService
     backend: 'firebase' | 'memory'
-    firebase?: typeof firebaseModule
     getServerStorage: () => Promise<ServerStorage>
 }): Promise<Services> {
-    const { storageModules } = await options.getServerStorage()
+    const { modules: storageModules } = await options.getServerStorage()
     if (options.backend === 'memory') {
-        const auth = new MemoryAuthService()
-
         return {
-            auth,
             contentSharing: new ListKeysService({
                 serverStorage: storageModules.contentSharing,
             }),
             contentConversations: new ContentConversationsService({
-                services: { auth },
+                services: { auth: options.authService },
                 storage: {
                     contentConversations: storageModules.contentConversations,
                 },
             }),
-            subscriptions: new MemorySubscriptionsService(),
             activityStreams: new MemoryStreamsService({
                 storage: {
                     contentConversations: storageModules.contentConversations,
                     contentSharing: storageModules.contentSharing,
-                    users: storageModules.userManagement,
+                    users: storageModules.users,
                 },
-                getCurrentUserId: async () => (await auth.getCurrentUser()).id,
+                getCurrentUserId: async () => {
+                    const currentUser = await options.authService.getCurrentUser()
+                    return currentUser?.id ?? null
+                },
             }),
         }
     }
 
-    const authDeps = createAuthDependencies({
-        redirectUrl: subscriptionRedirect,
-        devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,
-    })
-
     return {
-        auth: authDeps.authService,
         contentSharing: new ListKeysService({
             serverStorage: storageModules.contentSharing,
         }),
         contentConversations: new ContentConversationsService({
-            services: { auth: authDeps.authService },
+            services: { auth: options.authService },
             storage: {
                 contentConversations: storageModules.contentConversations,
             },
         }),
-        subscriptions: authDeps.subscriptionService,
         activityStreams: new FirebaseFunctionsActivityStreamsService({
             executeCall: async (name, params) => {
-                const functions = (
-                    options.firebase ?? firebaseModule
-                ).functions()
-                const result = await functions.httpsCallable(name)(params)
+                const result = await httpsCallable(getFunctions(), name)(params)
                 return result.data
             },
         }),

@@ -1,5 +1,16 @@
 @value colors: 'src/common-ui/colors.css';
-@value color1, color2, color3, color4, color5, color6, color7, color8, color11, color12, color16, radius3 from colors;
+@value color1,
+color2,
+color3,
+color4,
+color5,
+color6,
+color7,
+color8,
+color11,
+color12,
+color16,
+radius3 from colors;
 
 /* Animations */
 
@@ -20,7 +31,9 @@
 /* FONTs */
 
 .fontFamily {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 }
 
 /* Tag Pill */
@@ -37,7 +50,9 @@
     display: flex;
     align-items: center;
     white-space: nowrap;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 }
 
 .tagPillSuggestions {
@@ -151,7 +166,9 @@
     font-weight: 400;
     font-size: 14px;
     color: #222;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     border-radius: 3px;
     border: none;
     padding: 10px 7px;

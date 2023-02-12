@@ -39,7 +39,7 @@ export const joinSpaces = (spaceNames?: string[]): string | undefined =>
 
 export const serializeDate = (
     date?: Date,
-    locale = window.navigator.language,
+    locale = globalThis.navigator.language,
 ): string | undefined =>
     date == null ? undefined : date.toLocaleString(locale)
 
@@ -79,7 +79,7 @@ const omitEmptyFields = (docs: TemplateDoc[]): TemplateDoc[] =>
     })
 
 const omitEmpty = <T extends any>(obj: T): T => {
-    const clone = { ...obj }
+    const clone = { ...(obj as any) }
     for (const key in clone) {
         if (clone[key] == null || clone[key]?.length === 0) {
             delete clone[key]

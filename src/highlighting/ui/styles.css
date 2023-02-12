@@ -1,27 +1,25 @@
+:root {
+    /* #f0f0f0 in decimal RGB */
+    --highlightColor: var(--defaultHighlightColorCSS);
+    color: #12131b;
+}
+
 .memex-highlight {
-    background: #d4e8ff;
-    transition: all 0.1s;
+    /* default state */
     cursor: pointer;
-
-    &.medium {
-        background: #ffff3c66;
-    }
-
-    &.dark {
-        background: #ffff3c66;
-    }
-
-    &.tmp {
-        background: #ffff3c66;
-    }
+    color: #12131b;
+    background-color: rgb(var(--highlightColor));
 }
 
-.memex-highlight-tmp {
-    background: #ffff3c66;
-    transition: all 0.1s;
-    cursor: pointer;
+.selectedHighlight {
+    /* prettier-ignore */
+    background-color: rgba(var(--defaultHighlightColorCSS), 0.5);
+    border-bottom: 2px solid rgb(var(--defaultHighlightColorCSS));
+    color: #12131b;
 }
 
-.dark-mode {
-    color: #000;
+.hoveredHighlight {
+    background-color: rgba(var(--defaultHighlightColorCSS), 0.7);
+    fill: rgba(var(--defaultHighlightColorCSS), 0.7);
+    color: #12131b;
 }

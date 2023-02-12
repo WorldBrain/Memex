@@ -18,11 +18,12 @@ type AnnotationCreateData = {
     localId?: string
     createdWhen?: Date
     selector?: Anchor
+    localListIds?: number[]
 } & ({ body: string; comment?: string } | { body?: string; comment: string })
 
 interface AnnotationUpdateData {
     localId: string
-    comment: string
+    comment: string | null
 }
 
 export interface SaveAnnotationParams<
@@ -37,7 +38,7 @@ export interface SaveAnnotationParams<
 }
 
 export interface SaveAnnotationReturnValue {
-    remoteAnnotationLink: string | null
+    remoteAnnotationId: string | null
     savePromise: Promise<string>
 }
 
@@ -51,7 +52,7 @@ export async function createAnnotation({
 }: SaveAnnotationParams<AnnotationCreateData>): Promise<
     SaveAnnotationReturnValue
 > {
-    let remoteAnnotationId: string
+    let remoteAnnotationId: string = null
     if (shareOpts?.shouldShare) {
         remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
 
@@ -61,9 +62,7 @@ export async function createAnnotation({
     }
 
     return {
-        remoteAnnotationLink: shareOpts?.shouldShare
-            ? getNoteShareUrl({ remoteAnnotationId })
-            : null,
+        remoteAnnotationId,
         savePromise: (async () => {
             const annotationUrl = await annotationsBG.createAnnotation(
                 {
@@ -98,6 +97,13 @@ export async function createAnnotation({
                 privacyLevel: shareOptsToPrivacyLvl(shareOpts),
             })
 
+            if (annotationData.localListIds?.length) {
+                await contentSharingBG.shareAnnotationToSomeLists({
+                    annotationUrl,
+                    localListIds: annotationData.localListIds,
+                })
+            }
+
             return annotationUrl
         })(),
     }
@@ -112,7 +118,7 @@ export async function updateAnnotation({
 }: SaveAnnotationParams<AnnotationUpdateData>): Promise<
     SaveAnnotationReturnValue
 > {
-    let remoteAnnotationId: string
+    let remoteAnnotationId: string = null
     if (shareOpts?.shouldShare) {
         const remoteAnnotMetadata = await contentSharingBG.getRemoteAnnotationMetadata(
             { annotationUrls: [annotationData.localId] },
@@ -128,20 +134,20 @@ export async function updateAnnotation({
     }
 
     return {
-        remoteAnnotationLink: shareOpts?.shouldShare
-            ? getNoteShareUrl({ remoteAnnotationId })
-            : null,
+        remoteAnnotationId,
         savePromise: (async () => {
-            await annotationsBG.editAnnotation(
-                annotationData.localId,
-                annotationData.comment
-                    .replace(/\\\[/g, '[')
-                    .replace(/\\\]/g, ']')
-                    .replace(/\\\(/g, '(')
-                    .replace(/\\\)/g, ')')
-                    .replace(/\    \n/g, '')
-                    .replace(/\*   /g, ' * '),
-            )
+            if (annotationData.comment != null) {
+                await annotationsBG.editAnnotation(
+                    annotationData.localId,
+                    annotationData.comment
+                        .replace(/\\\[/g, '[')
+                        .replace(/\\\]/g, ']')
+                        .replace(/\\\(/g, '(')
+                        .replace(/\\\)/g, ')')
+                        .replace(/\    \n/g, '')
+                        .replace(/\*   /g, ' * '),
+                )
+            }
 
             await Promise.all([
                 shareOpts?.shouldShare &&
@@ -149,7 +155,6 @@ export async function updateAnnotation({
                         remoteAnnotationId,
                         annotationUrl: annotationData.localId,
                         shareToLists: true,
-                        skipPrivacyLevelUpdate: true,
                     }),
                 !shareOpts?.skipPrivacyLevelUpdate &&
                     contentSharingBG.setAnnotationPrivacyLevel({

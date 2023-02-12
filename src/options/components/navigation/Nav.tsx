@@ -23,12 +23,15 @@ const Root = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    border-right: 1px solid ${(props) => props.theme.colors.lineGrey};
-    background: white;
+    border-right: 1px solid ${(props) => props.theme.colors.greyScale3};
+    background-color: ${(props) => props.theme.colors.greyScale1};
 `
 
 const NavItem = styled.ul`
     padding-inline-start: 0px;
+    color: ${(props) => props.theme.colors.white};
+    display: flex;
+    flex-direction: column;
 `
 
 export default Nav

@@ -3,12 +3,12 @@ import PropTypes from 'prop-types'
 import { LoadingIndicator, Checkbox } from 'src/common-ui/components'
 import { IMPORT_TYPE as TYPE, IMPORT_SERVICES as SERVICES } from '../constants'
 import classNames from 'classnames'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import localStyles from './Import.css'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Margin from 'src/dashboard-refactor/components/Margin'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const EstimatesTable = ({
     onAllowHistoryClick,
@@ -29,14 +29,8 @@ const EstimatesTable = ({
                     id="bookmarks"
                     handleChange={onAllowBookmarksClick}
                     isChecked={allowTypes[TYPE.BOOKMARK]}
-                >
-                    {' '}
-                    <div className={localStyles.labelContainer}>
-                        <span className={localStyles.checkboxText}>
-                            Browser Bookmarks
-                        </span>
-                    </div>
-                </Checkbox>
+                    label={'Browser Bookmarks'}
+                />
             </LabelRow>
             <InfoRow>
                 <ImportRemaining>
@@ -52,13 +46,8 @@ const EstimatesTable = ({
                     id="html"
                     isChecked={allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE}
                     handleChange={onAllowHTMLClick}
-                >
-                    <div className={localStyles.labelContainer}>
-                        <span className={localStyles.checkboxText}>
-                            HTML File
-                        </span>
-                    </div>
-                </Checkbox>
+                    label={'HTML File'}
+                />
                 {!isLoading && blobUrl === null && (
                     <UploaderBox>
                         <label
@@ -83,9 +72,9 @@ const EstimatesTable = ({
                         {allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE && (
                             <>
                                 <Margin left="5px" />
-                                <ButtonTooltip
+                                <TooltipBox
                                     tooltipText="How can I get that file?"
-                                    position="right"
+                                    placement="right"
                                 >
                                     <Icon
                                         filePath={icons.helpIcon}
@@ -96,7 +85,7 @@ const EstimatesTable = ({
                                             )
                                         }}
                                     />
-                                </ButtonTooltip>
+                                </TooltipBox>
                             </>
                         )}
                     </UploaderBox>
@@ -158,12 +147,12 @@ const ImportRemaining = styled.span`
     font-size: 22px;
     font-weight: bold;
     padding-right: 10px;
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.white};
 `
 
 const ImportRemainingInfo = styled.span`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     vertical-align: bottom;
 `
 
@@ -190,7 +179,7 @@ const InfoRow = styled.div`
 `
 
 const UploaderBox = styled.div`
-    margin-left 20px;
+    margin-left: 20px;
     display: flex;
 `
 

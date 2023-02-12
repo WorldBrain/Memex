@@ -13,3 +13,32 @@ export interface BackupInterface<Role extends RemoteFunctionRole> {
     getBackupTimes: RemotePositionalFunction<Role, [], BackupTimes>
     startBackup: RemotePositionalFunction<Role, [], void>
 }
+
+export interface LocalBackupSettings {
+    saveBlobs: any
+    lastBackup: Date
+    accessTokenExpiry: Date
+    lastBackupFinished: Date
+    lastProblemNotifShown: Date
+    backupStatus: 'success' | 'fail' | 'no_backup'
+    backupStatusId:
+        | 'backup_error'
+        | 'drive_size_empty'
+        | 'auto_backup_expired'
+        | 'success'
+        | 'no_backup'
+
+    accessToken: string
+    refreshToken: string
+    backendLocation: string
+
+    isOnboarding: boolean
+    runningBackup: boolean
+    runningRestore: boolean
+    hasInitialBackup: boolean
+    driveAuthenticated: boolean
+    progressSuccessful: boolean
+    backupIsAuthenticating: boolean
+    restoreIsAuthenticating: boolean
+    automaticBackupsEnabled: boolean
+}

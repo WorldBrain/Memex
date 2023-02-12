@@ -8,6 +8,7 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import styled from 'styled-components'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 export interface OwnProps {
     pageListsIds: number[]
@@ -58,34 +59,38 @@ class CollectionsButton extends PureComponent<Props> {
                 }
                 disabled={this.props.isDisabled}
             >
-                <SectionCircle>
-                    <Icon
-                        filePath={
-                            this.props.pageListsIds.length > 0
-                                ? icons.collectionsFull
-                                : icons.collectionsEmpty
-                        }
-                        heightAndWidth="18px"
-                        hoverOff
-                    />
-                </SectionCircle>
+                <Icon
+                    filePath={
+                        this.props.pageListsIds.length > 0
+                            ? icons.collectionsFull
+                            : icons.collectionsEmpty
+                    }
+                    heightAndWidth="22px"
+                    hoverOff
+                    color={
+                        this.props.pageListsIds.length > 0
+                            ? 'prime1'
+                            : 'greyScale6'
+                    }
+                />
                 <ButtonInnerContent>
-                    Add to Spaces
-                    <SubTitle>{this.state.highlightInfo}</SubTitle>
+                    Add Page to Spaces
+                    <ShortCutContainer>
+                        <KeyboardShortcuts
+                            keys={this.state.highlightInfo?.split('+')}
+                        />
+                    </ShortCutContainer>
                 </ButtonInnerContent>
             </ButtonItem>
         )
     }
 }
 
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight}80;
-    border-radius: 100px;
-    height: 32px;
-    width: 32px;
+const ShortCutContainer = styled.div`
     display: flex;
-    justify-content: center;
     align-items: center;
+    color: ${(props) => props.theme.colors.greyScale6};
+    grid-gap: 3px;
 `
 
 const ButtonItem = styled.div<{ disabled: boolean }>`
@@ -95,13 +100,15 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     border-radius: 8px;
     align-items: center;
     justify-content: flex-start;
-    padding: 5px 10px;
-    margin: 0px 10px;
+    padding: 0px 10px;
+    margin: 0px 10px 10px 10px;
     height: 50px;
+
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+    border: 1px solid transparent;
 
     &:hover {
-        background: ${(props) => props.theme.colors.backgroundColorDarker};
+        border: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 
     & * {
@@ -112,18 +119,13 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
 const ButtonInnerContent = styled.div`
     display: flex;
     grid-gap: 5px;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     font-size: 14px;
-    font-weight: 600;
-    color: ${(props) => props.theme.colors.darkerText};
-`
-
-const SubTitle = styled.div`
-    font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
-    font-weight: 400;
+    font-weight: 500;
+    width: 100%;
+    color: ${(props) => props.theme.colors.greyScale6};
 `
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({

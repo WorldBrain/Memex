@@ -1,5 +1,5 @@
 import TabManagementBackground from '.'
-import { Tabs } from 'webextension-polyfill-ts'
+import { Tabs } from 'webextension-polyfill'
 
 export type FakeTab = FakeHtmlTab | FakePdfTab
 export interface FakeHtmlTab {

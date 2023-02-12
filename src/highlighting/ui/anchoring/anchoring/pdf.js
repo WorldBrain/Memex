@@ -223,7 +223,7 @@ function getPageOffset(pageIndex) {
  * @param {number} offset
  * @return {Promise<PageOffset>}
  */
-function findPage(offset) {
+export function findPage(offset) {
     let index = 0
     let total = 0
 
@@ -294,11 +294,13 @@ async function anchorByPosition(pageIndex, start, end) {
         const root = page.textLayer.textLayerDiv
         const startPos = new TextPosition(root, start)
         const endPos = new TextPosition(root, end)
+
         return new TextRange(startPos, endPos).toRange()
     }
 
     // The page has not been rendered yet. Create a placeholder element and
     // anchor to that instead.
+
     let placeholder = page.div.querySelector('.annotator-placeholder')
     if (!placeholder) {
         placeholder = document.createElement('span')
@@ -309,6 +311,7 @@ async function anchorByPosition(pageIndex, start, end) {
     const range = document.createRange()
     range.setStartBefore(placeholder)
     range.setEndAfter(placeholder)
+
     return range
 }
 
@@ -448,7 +451,6 @@ export function anchor(root, selectors) {
                     const length = end - start
 
                     checkQuote(textContent.substr(start, length))
-
                     return anchorByPosition(index, start, end)
                 },
             )
@@ -465,6 +467,7 @@ export function anchor(root, selectors) {
                 const { pageIndex, anchor } = quotePositionCache[quote.exact][
                     position.start
                 ]
+
                 return anchorByPosition(pageIndex, anchor.start, anchor.end)
             }
 

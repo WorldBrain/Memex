@@ -6,7 +6,7 @@ import {
     TypographySubTextNormal,
 } from 'src/common-ui/components/design-library/typography'
 import styled from 'styled-components'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 interface ShareNonPioneerInfoProps {
     onClickUpgrade: () => void

@@ -56,42 +56,50 @@ class TooltipButton extends PureComponent<Props, State> {
 
     render() {
         return (
-            <ButtonItem>
-                <ButtonInnerContainer onClick={this.props.openSidebar}>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.sidebarIcon}
-                            heightAndWidth="18px"
-                            hoverOff
-                        />
-                    </SectionCircle>
+            <ButtonItem onClick={this.props.handleChange}>
+                <ButtonInnerContainer>
+                    <Icon
+                        filePath={icons.quickActionRibbon}
+                        heightAndWidth="22px"
+                        hoverOff
+                    />
                     <ButtonInnerContent>
-                        Open Annotation Sidebar
-                        <SubTitle>{this.state.highlightInfo}</SubTitle>
+                        Enable Quick Action Ribbon
+                        <SubTitle>Hover over right side of screen</SubTitle>
                     </ButtonInnerContent>
                 </ButtonInnerContainer>
                 <ToggleSwitchButton
-                    toggleHoverText="Enable Permanently"
                     isEnabled={this.props.isEnabled}
-                    onToggleClick={this.props.handleChange}
+                    onToggleClick={null}
                 />
             </ButtonItem>
         )
     }
 }
 
+const ShortCutContainer = styled.div`
+    display: flex;
+    align-items: center;
+    color: ${(props) => props.theme.colors.greyScale6};
+    grid-gap: 3px;
+`
+
+const ShortCutText = styled.div`
+    display: block;
+    font-weight: 400;
+    color: ${(props) => props.theme.colors.greyScale6};
+    letter-spacing: 1px;
+    margin-right: -1px;
+
+    &:first-letter {
+        text-transform: capitalize;
+    }
+`
+
 const ButtonInnerContainer = styled.div`
     display: flex;
     grid-gap: 15px;
-`
-
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight}80;
-    border-radius: 100px;
-    height: 32px;
-    width: 32px;
     display: flex;
-    justify-content: center;
     align-items: center;
 `
 
@@ -102,13 +110,14 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     align-items: center;
     justify-content: space-between;
     padding: 5px 10px;
-    margin: 10px 10px 0px 10px;
+    margin: 5px 10px 0px 10px;
     border-radius: 8px;
     height: 50px;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+    border: 1px solid transparent;
 
     &:hover {
-        background: ${(props) => props.theme.colors.backgroundColorDarker};
+        border: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 
     & * {
@@ -123,13 +132,14 @@ const ButtonInnerContent = styled.div`
     justify-content: center;
     align-items: flex-start;
     font-size: 14px;
-    font-weight: 600;
-    color: ${(props) => props.theme.colors.darkerText};
+    font-weight: 500;
+    width: 100%;
+    color: ${(props) => props.theme.colors.greyScale6};
 `
 
 const SubTitle = styled.div`
-    font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 400;
 `
 

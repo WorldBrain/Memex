@@ -10,6 +10,7 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 const styles = require('./BookmarkButton.css')
 const buttonStyles = require('../../components/Button.css')
@@ -64,34 +65,34 @@ class BookmarkButton extends PureComponent<Props> {
                 onClick={!this.props.isDisabled && this.props.toggleBookmark}
                 disabled={this.props.isDisabled || this.props.isBookmarked}
             >
-                <SectionCircle>
-                    <Icon
-                        filePath={
-                            this.props.isBookmarked
-                                ? icons.heartFull
-                                : icons.heartEmpty
-                        }
-                        heightAndWidth="18px"
-                        hoverOff
-                    />
-                </SectionCircle>
+                <Icon
+                    filePath={
+                        this.props.isBookmarked
+                            ? icons.heartFull
+                            : icons.heartEmpty
+                    }
+                    color={this.props.isBookmarked ? 'prime1' : 'greyScale6'}
+                    heightAndWidth="22px"
+                    hoverOff
+                />
                 <ButtonInnerContent>
                     {text}
-                    <SubTitle>{this.state.highlightInfo}</SubTitle>
+                    <ShortCutContainer>
+                        <KeyboardShortcuts
+                            keys={this.state.highlightInfo?.split('+')}
+                        />
+                    </ShortCutContainer>
                 </ButtonInnerContent>
             </ButtonItem>
         )
     }
 }
 
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight}68;
-    border-radius: 100px;
-    height: 32px;
-    width: 32px;
+const ShortCutContainer = styled.div`
     display: flex;
-    justify-content: center;
     align-items: center;
+    color: ${(props) => props.theme.colors.greyScale6};
+    grid-gap: 3px;
 `
 
 const ButtonItem = styled.div<{ disabled: boolean }>`
@@ -100,14 +101,15 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     width: fill-available;
     align-items: center;
     justify-content: flex-start;
-    padding: 5px 10px;
+    padding: 0px 10px;
     margin: 10px 10px 0px 10px;
     height: 50px;
     border-radius: 8px;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+    border: 1px solid transparent;
 
     &:hover {
-        background: ${(props) => props.theme.colors.backgroundColorDarker};
+        border: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 
     & * {
@@ -118,18 +120,13 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
 const ButtonInnerContent = styled.div`
     display: flex;
     grid-gap: 5px;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     font-size: 14px;
-    font-weight: 600;
-    color: ${(props) => props.theme.colors.darkerText};
-`
-
-const SubTitle = styled.div`
-    font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
-    font-weight: 400;
+    font-weight: 500;
+    width: 100%;
+    color: ${(props) => props.theme.colors.greyScale6};
 `
 
 const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({

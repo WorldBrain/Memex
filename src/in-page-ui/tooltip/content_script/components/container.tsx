@@ -1,13 +1,11 @@
 import React from 'react'
-import onClickOutside from 'react-onclickoutside'
-import { features } from 'src/util/remote-functions-background'
 
 import Tooltip from './tooltip'
 import {
-    CopiedComponent,
-    CreatingLinkComponent,
-    DoneComponent,
-    ErrorComponent,
+    // CopiedComponent,
+    // CreatingLinkComponent,
+    // DoneComponent,
+    // ErrorComponent,
     InitialComponent,
 } from './tooltip-states'
 
@@ -21,7 +19,16 @@ import type {
     TooltipInPageUIInterface,
     AnnotationFunctions,
 } from 'src/in-page-ui/tooltip/types'
-import { UserFeatureOptIn } from 'src/features/background/feature-opt-ins'
+import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
+import {
+    shortcuts,
+    ShortcutElData,
+} from 'src/options/settings/keyboard-shortcuts'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import type {
+    Shortcut,
+    BaseKeyboardShortcuts,
+} from 'src/in-page-ui/keyboard-shortcuts/types'
 
 export interface Props extends AnnotationFunctions {
     inPageUI: TooltipInPageUIInterface
@@ -29,30 +36,43 @@ export interface Props extends AnnotationFunctions {
     createAndCopyDirectLink: any
     openSettings: any
     destroyTooltip: any
-    isFeatureEnabled(feature: UserFeatureOptIn): Promise<boolean>
 }
 
 interface TooltipContainerState {
     showTooltip: boolean
-    showCreateLink: boolean
     showingCloseMessage?: boolean
     position: { x: number; y: number } | {}
     tooltipState: 'copied' | 'running' | 'pristine' | 'done'
+    keyboardShortCuts: {}
+}
+
+async function getShortCut(name: string) {
+    let keyboardShortcuts = await getKeyboardShortcutsState()
+    const short: Shortcut = keyboardShortcuts[name]
+
+    let shortcut = short.shortcut.split('+')
+
+    return shortcut
 }
 
 class TooltipContainer extends React.Component<Props, TooltipContainerState> {
     state: TooltipContainerState = {
         showTooltip: false,
-        showCreateLink: false,
         position: { x: 250, y: 200 },
         tooltipState: 'copied',
+        keyboardShortCuts: undefined,
     }
 
     async componentDidMount() {
         this.props.inPageUI.events?.on('stateChanged', this.handleUIStateChange)
         this.props.onInit(this.showTooltip)
+
         this.setState({
-            showCreateLink: await this.props.isFeatureEnabled('DirectLink'),
+            keyboardShortCuts: {
+                createHighlight: await getShortCut('createHighlight'),
+                createAnnotation: await getShortCut('createAnnotation'),
+                createAnnotationWithSpace: await getShortCut('addToCollection'),
+            },
         })
     }
 
@@ -105,34 +125,33 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         this.setState({ showingCloseMessage: true })
     }
 
-    createLink = async () => {
-        this.setState({
-            tooltipState: 'running',
-        })
-        await this.props.createAndCopyDirectLink()
-        this.setState({
-            tooltipState: 'copied',
-        })
-    }
+    // createLink = async () => {
+    //     this.setState({
+    //         tooltipState: 'running',
+    //     })
+    //     await this.props.createAndCopyDirectLink()
+    //     this.setState({
+    //         tooltipState: 'copied',
+    //     })
+    // }
 
     private createAnnotation: React.MouseEventHandler = async (e) => {
         e.preventDefault()
         e.stopPropagation()
-        await this.props.createAnnotation(e.shiftKey)
 
-        // Remove onboarding select option notification if it's present
-        await conditionallyRemoveOnboardingSelectOption(
-            STAGES.annotation.annotationCreated,
-        )
-
-        this.props.inPageUI.hideTooltip()
-        // quick hack, to prevent the tooltip from popping again
-        // setTimeout(() => {
-        //     this.setState({
-        //         tooltipState: 'pristine',
-        //     })
-        //     this.props.inPageUI.hideTooltip()
-        // }, 100)
+        try {
+            await this.props.createAnnotation(e.shiftKey)
+            // Remove onboarding select option notification if it's present
+            await conditionallyRemoveOnboardingSelectOption(
+                STAGES.annotation.annotationCreated,
+            )
+        } catch (err) {
+            throw err
+        } finally {
+            window.getSelection().empty()
+            // this.setState({ tooltipState: 'pristine' })
+            this.props.inPageUI.hideTooltip()
+        }
     }
 
     private createHighlight: React.MouseEventHandler = async (e) => {
@@ -142,7 +161,20 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         } catch (err) {
             throw err
         } finally {
+            window.getSelection().empty()
             // this.setState({ tooltipState: 'pristine' })
+            this.props.inPageUI.hideTooltip()
+        }
+    }
+
+    private addtoSpace: React.MouseEventHandler = async (e) => {
+        try {
+            await this.props.createAnnotation(false, true)
+        } catch (err) {
+            throw err
+        } finally {
+            // this.setState({ tooltipState: 'pristine' })
+            window.getSelection().empty()
             this.props.inPageUI.hideTooltip()
         }
     }
@@ -157,25 +189,22 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             case 'pristine':
                 return (
                     <InitialComponent
-                        createLink={
-                            this.state.showCreateLink
-                                ? this.createLink
-                                : undefined
-                        }
                         createHighlight={this.createHighlight}
                         createAnnotation={this.createAnnotation}
+                        addtoSpace={this.addtoSpace}
                         closeTooltip={this.closeTooltip}
                         state={this.state.tooltipState}
+                        keyboardShortCuts={this.state.keyboardShortCuts}
                     />
                 )
-            case 'running':
-                return <CreatingLinkComponent />
-            case 'copied':
-                return <CopiedComponent />
-            case 'done':
-                return <DoneComponent />
-            default:
-                return <ErrorComponent />
+            // case 'running':
+            //     return <CreatingLinkComponent />
+            // case 'copied':
+            //     return <CopiedComponent />
+            // case 'done':
+            //     return <DoneComponent />
+            // default:
+            //     return <ErrorComponent />
         }
     }
 
@@ -185,17 +214,21 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         return (
             <div className="memex-tooltip-container">
                 {showTooltip ? (
-                    <Tooltip
-                        {...position}
-                        state={tooltipState}
-                        tooltipComponent={this.renderTooltipComponent()}
-                        closeTooltip={this.closeTooltip}
-                        openSettings={this.openSettings}
-                    />
+                    <ClickAway
+                        onClickAway={() => this.props.inPageUI.hideTooltip()}
+                    >
+                        <Tooltip
+                            {...position}
+                            state={tooltipState}
+                            tooltipComponent={this.renderTooltipComponent()}
+                            closeTooltip={this.closeTooltip}
+                            openSettings={this.openSettings}
+                        />
+                    </ClickAway>
                 ) : null}
             </div>
         )
     }
 }
 
-export default onClickOutside(TooltipContainer)
+export default TooltipContainer

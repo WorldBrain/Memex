@@ -35,23 +35,15 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         )
     }
 
-    private encodeImage = (img: Blob, base64Img?: boolean) =>
+    private encodeImage = (img: Blob) =>
         new Promise<string>((resolve, reject) => {
-            if (!base64Img) {
-                return resolve(URL.createObjectURL(img))
-            }
-
             const reader = new FileReader()
             reader.onerror = reject
             reader.onload = () => resolve(reader.result as string)
             reader.readAsDataURL(img)
         })
 
-    private async lookupPages(
-        pageUrls: string[],
-        pageMap: Map<string, Page>,
-        base64Img?: boolean,
-    ) {
+    private async lookupPages(pageUrls: string[], pageMap: Map<string, Page>) {
         const pages = await this.backend.dexieInstance
             .table('pages')
             .where('url')
@@ -69,7 +61,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
 
         for (const page of pages) {
             const screenshot = page.screenshot
-                ? await this.encodeImage(page.screenshot, base64Img)
+                ? await this.encodeImage(page.screenshot)
                 : undefined
 
             pageMap.set(page.url, {
@@ -83,7 +75,6 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
     private async lookupFavIcons(
         hostnames: string[],
         favIconMap: Map<string, string>,
-        base64Img?: boolean,
     ) {
         // Find all assoc. fav-icons and create object URLs pointing to the Blobs
         const favIcons = await this.backend.dexieInstance
@@ -101,15 +92,11 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                 )
                 continue
             }
-            favIconMap.set(hostname, await this.encodeImage(favIcon, base64Img))
+            favIconMap.set(hostname, await this.encodeImage(favIcon))
         }
     }
 
-    private async lookupUsers(
-        userIds: number[],
-        userMap: Map<number, User>,
-        base64Img?: boolean,
-    ) {
+    private async lookupUsers(userIds: number[], userMap: Map<number, User>) {
         const users = await this.backend.dexieInstance
             .table(USERS_COLL)
             .where('id')
@@ -119,7 +106,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
 
         for (const user of users) {
             const profilePic = user.profilePic
-                ? await this.encodeImage(user.profilePic, base64Img)
+                ? await this.encodeImage(user.profilePic)
                 : undefined
 
             userMap.set(user.id, {
@@ -309,7 +296,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         const [visits, bms] = await Promise.all([visitQueryP, bmQueryP])
 
         const visitMap = new Map<string, number>()
-        for (const [time, url] of visits) {
+        for (const [time, url] of visits as Array<[number, string]>) {
             if (upperTimeBound && time > upperTimeBound) {
                 continue
             }
@@ -347,11 +334,9 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
     async findMatchingPages(
         pageUrls: string[],
         {
-            base64Img,
             upperTimeBound,
             latestTimes,
         }: {
-            base64Img?: boolean
             upperTimeBound?: number
             /**
              * If defined, it should be the same length as main input `pageUrls`, containing the latest times
@@ -374,7 +359,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
 
         // Run the first set of queries to get display data
         await Promise.all([
-            this.lookupPages(pageUrls, pageMap, base64Img),
+            this.lookupPages(pageUrls, pageMap),
             this.lookupTags(pageUrls, tagMap),
             this.lookupLists(pageUrls, listMap),
             this.lookupAnnots(pageUrls, annotMap),
@@ -394,7 +379,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                       pageMap,
                       upperTimeBound,
                   ),
-            this.lookupFavIcons([...hostnames], favIconMap, base64Img),
+            this.lookupFavIcons([...hostnames], favIconMap),
         ])
 
         // Map page results back to original input
@@ -426,11 +411,9 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
     async findMatchingSocialPages(
         socialMap: Map<number, SocialPage>,
         {
-            base64Img,
             upperTimeBound,
             latestTimes,
         }: {
-            base64Img?: boolean
             upperTimeBound?: number
             latestTimes?: number[]
         },
@@ -456,7 +439,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         )
 
         await Promise.all([
-            this.lookupUsers([...userIds], userMap, base64Img),
+            this.lookupUsers([...userIds], userMap),
             this.lookupSocialBookmarks(postIds, socialMap),
         ])
 

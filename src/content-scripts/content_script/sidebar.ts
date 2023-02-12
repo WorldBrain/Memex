@@ -5,8 +5,9 @@ import {
     setupInPageSidebarUI,
     destroyInPageSidebarUI,
 } from 'src/sidebar/annotations-sidebar/index'
-import { browser } from 'webextension-polyfill-ts'
-import { InPageUIRootMount } from 'src/in-page-ui/types'
+import browser from 'webextension-polyfill'
+import type { InPageUIRootMount } from 'src/in-page-ui/types'
+import type { ShouldSetUpOptions } from 'src/in-page-ui/shared-state/types'
 
 export const main: SidebarScriptMain = async (dependencies) => {
     const cssFile = browser.runtime.getURL(`/content_script_sidebar.css`)
@@ -24,7 +25,7 @@ export const main: SidebarScriptMain = async (dependencies) => {
         'componentShouldSetUp',
         ({ component, options }) => {
             if (component === 'sidebar') {
-                setUp({ showOnLoad: options.showSidebarOnLoad })
+                setUp(options)
             }
         },
     )
@@ -37,12 +38,12 @@ export const main: SidebarScriptMain = async (dependencies) => {
         },
     )
 
-    const setUp = async (options: { showOnLoad?: boolean } = {}) => {
+    const setUp = async (options: ShouldSetUpOptions = {}) => {
         createMount()
         setupInPageSidebarUI(mount, {
             ...dependencies,
-            pageUrl: await dependencies.getPageUrl(),
-            initialState: options.showOnLoad ? 'visible' : 'hidden',
+            fullPageUrl: await dependencies.getFullPageUrl(),
+            initialState: options.showSidebarOnLoad ? 'visible' : 'hidden',
         })
     }
 
@@ -55,5 +56,5 @@ export const main: SidebarScriptMain = async (dependencies) => {
     }
 }
 
-const registry = window['contentScriptRegistry'] as ContentScriptRegistry
+const registry = globalThis['contentScriptRegistry'] as ContentScriptRegistry
 registry.registerSidebarScript(main)

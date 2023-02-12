@@ -19,6 +19,7 @@ import {
     AnnotationSharingState,
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
+import { PageAnnotationsCache } from 'src/annotations/cache'
 
 type DataSeeder = (
     logic: TestLogicContainer<RootState, Events>,
@@ -150,14 +151,21 @@ export async function setupTest(
     const logic = new DashboardLogic({
         location,
         analytics,
+        annotationsCache: new PageAnnotationsCache({ normalizedPageUrl: '' }),
         annotationsBG: insertBackgroundFunctionTab(
             device.backgroundModules.directLinking.remoteFunctions,
         ) as any,
+        contentScriptsBG: insertBackgroundFunctionTab(
+            device.backgroundModules.contentScripts.remoteFunctions,
+        ) as any,
+        tabsAPI: device.browserAPIs.tabs,
+        runtimeAPI: device.browserAPIs.runtime,
         localStorage: device.browserAPIs.storage.local,
         authBG: device.backgroundModules.auth.remoteFunctions,
-        personalCloudBG: device.backgroundModules.personalCloud.remoteFunctions,
         tagsBG: device.backgroundModules.tags.remoteFunctions,
         syncSettingsBG: device.backgroundModules.syncSettings.remoteFunctions,
+        pageActivityIndicatorBG:
+            device.backgroundModules.pageActivityIndicator.remoteFunctions,
         document: args.mockDocument,
         listsBG: {
             ...device.backgroundModules.customLists.remoteFunctions,

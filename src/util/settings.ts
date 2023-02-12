@@ -6,6 +6,7 @@ export interface SettingStore<Settings> {
         value: Settings[Key],
     ): Promise<void>
     get<Key extends keyof Settings>(key: Key): Promise<Settings[Key] | null>
+    remove<Key extends keyof Settings>(key: Key): Promise<void>
 }
 
 export class BrowserSettingsStore<Settings> implements SettingStore<Settings> {
@@ -31,6 +32,11 @@ export class BrowserSettingsStore<Settings> implements SettingStore<Settings> {
         return this.__rawGet(storageKey)
     }
 
+    async remove<Key extends keyof Settings>(key: Key): Promise<void> {
+        const storageKey = this._makeStorageKey(key as string)
+        await this.localBrowserStorage.remove(storageKey)
+    }
+
     async __rawGet<ReturnType = any>(key: string): Promise<ReturnType | null> {
         const response = await this.localBrowserStorage.get(key)
         return (response[key] as ReturnType) ?? null
@@ -53,5 +59,9 @@ export class MemorySettingStore<Settings> implements SettingStore<Settings> {
 
     async get<Key extends keyof Settings>(key: Key): Promise<Settings[Key]> {
         return this.settings[key]
+    }
+
+    async remove<Key extends keyof Settings>(key: Key): Promise<void> {
+        delete this.settings[key]
     }
 }

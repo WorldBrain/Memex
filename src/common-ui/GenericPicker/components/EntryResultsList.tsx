@@ -42,22 +42,25 @@ export default class EntryResultsList extends React.Component<Props> {
 const RecentItemsNotif = styled.div`
     padding: 5px 10px;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.subText};
+    color: ${(props) => props.theme.colors.greyScale4};
 `
 
 const StyledContainer = styled.div`
-    overflow-y: auto;
-    max-height: 280px;
-
-    scrollbar-width: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 5px 0px 0 0px;
+    border-radius: 6px;
+    flex-direction: column;
 
     &::-webkit-scrollbar {
         display: none;
     }
 `
+
 const FilterHelp = styled.div`
-    font-size: ${fontSizeSmall}px;
-    color: ${(props) => props.theme.text};
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.white};
     padding: 6px 2px;
     ${StyledIconBase} {
         stroke-width: 2px;

@@ -18,6 +18,8 @@ import type {
 } from 'src/content-sharing/background/types'
 import type { Visit, Bookmark, Tag, Page } from 'src/search'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
+import TurndownService from 'turndown'
 
 export function getTemplateDataFetchers({
     storageManager,
@@ -119,12 +121,12 @@ export function getTemplateDataFetchers({
                 .collection('annotations')
                 .findObjects({ url: { $in: annotationUrls } })
 
-            return notes.reduce(
+            return notes.sort(sortByPagePosition).reduce(
                 (acc, note) => ({
                     ...acc,
                     [note.url]: {
                         url: note.url,
-                        body: note.body,
+                        body: convertHTMLintoMarkdown(note.body),
                         comment: note.comment,
                         pageUrl: note.pageUrl,
                         createdAt: note.createdWhen,
@@ -138,7 +140,7 @@ export function getTemplateDataFetchers({
                 .collection('annotations')
                 .findObjects({ pageUrl: { $in: normalizedPageUrls } })
 
-            return notes.reduce(
+            return notes.sort(sortByPagePosition).reduce(
                 (acc, note) => ({
                     ...acc,
                     [note.pageUrl]: [...(acc[note.pageUrl] ?? []), note.url],
@@ -284,4 +286,14 @@ export function getTemplateDataFetchers({
             return entries
         }),
     }
+}
+
+function convertHTMLintoMarkdown(html) {
+    let turndownService = new TurndownService({
+        headingStyle: 'atx',
+        hr: '---',
+        codeBlockStyle: 'fenced',
+    })
+    const markdown = turndownService.turndown(html)
+    return markdown
 }

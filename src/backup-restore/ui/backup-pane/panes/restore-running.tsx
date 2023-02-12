@@ -1,11 +1,19 @@
 import React from 'react'
 import RunningProcess from './running-process'
+import type { BrowserSettingsStore } from 'src/util/settings'
+import type { LocalBackupSettings } from 'src/backup-restore/background/types'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 
 const styles = require('../../styles.css')
 
-export default function RestoreRunning({ onFinish }: { onFinish: () => void }) {
+export default function RestoreRunning({
+    onFinish,
+    localBackupSettings,
+}: {
+    onFinish: () => void
+    localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
+}) {
     return (
         <div>
             <div className={styles.background}>
@@ -21,9 +29,7 @@ export default function RestoreRunning({ onFinish }: { onFinish: () => void }) {
                     eventMessageName="restore-event"
                     preparingStepLabel="Preparing restore"
                     synchingStepLabel="Restoring your Memex backup"
-                    renderHeader={renderHeader}
-                    renderFailMessage={renderFailMessage}
-                    renderSuccessMessage={renderSuccessMessage}
+                    localBackupSettings={localBackupSettings}
                     onFinish={onFinish}
                 />
             </div>

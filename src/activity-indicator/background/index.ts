@@ -1,8 +1,8 @@
 import ActivityIndicatorService from '@worldbrain/memex-common/lib/activity-streams/services/activity-indicator'
-import type ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
+import type { ActivityStreamsStorage } from '@worldbrain/memex-common/lib/activity-streams/storage/types'
 import * as Raven from 'src/util/raven'
 
-import type { Services } from 'src/services/types'
+import type { AuthServices, Services } from 'src/services/types'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 
@@ -24,22 +24,27 @@ export default class ActivityIndicatorBackground {
     constructor(
         private options: {
             getActivityStreamsStorage: () => Promise<ActivityStreamsStorage>
-            services: Pick<Services, 'activityStreams' | 'auth'>
+            authServices: Pick<AuthServices, 'auth'>
+            servicesPromise: Promise<Pick<Services, 'activityStreams'>>
             syncSettings: SyncSettingsStore<'activityIndicator'>
         },
     ) {
-        this.service = new ActivityIndicatorService({
-            authService: options.services.auth,
-            activityStreamsService: options.services.activityStreams,
-            getActivityStreamsStorage: options.getActivityStreamsStorage,
-            getStatusCacheFlag: () =>
-                options.syncSettings.activityIndicator.get('feedHasActivity'),
-            setStatusCacheFlag: (hasActivity) =>
-                options.syncSettings.activityIndicator.set(
-                    'feedHasActivity',
-                    hasActivity,
-                ),
-            captureError: (error) => Raven.captureException(error),
+        options.servicesPromise.then((services) => {
+            this.service = new ActivityIndicatorService({
+                authService: options.authServices.auth,
+                activityStreamsService: services.activityStreams,
+                getActivityStreamsStorage: options.getActivityStreamsStorage,
+                getStatusCacheFlag: () =>
+                    options.syncSettings.activityIndicator.get(
+                        'feedHasActivity',
+                    ),
+                setStatusCacheFlag: (hasActivity) =>
+                    options.syncSettings.activityIndicator.set(
+                        'feedHasActivity',
+                        hasActivity,
+                    ),
+                captureError: (error) => Raven.captureException(error),
+            })
         })
 
         this.remoteFunctions = {
@@ -53,10 +58,12 @@ export default class ActivityIndicatorBackground {
     }
 
     checkActivityStatus: ActivityIndicatorInterface['checkActivityStatus'] = async () => {
+        await this.options.servicesPromise
         return this.service.checkActivityStatus()
     }
 
     markActivitiesAsSeen = async () => {
+        await this.options.servicesPromise
         return this.service.markActivitiesAsSeen()
 
         // Below is the old implementation (not used since first implemented)

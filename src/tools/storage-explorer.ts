@@ -11,6 +11,8 @@ import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fe
 import { createServices } from 'src/services'
 import { createPersistentStorageManager } from 'src/storage/persistent-storage'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
+import DeprecatedStorageModules from 'src/background-script/deprecated-storage-modules'
+import { createAuthServices } from 'src/services/local-services'
 
 type CommandLineArguments =
     | { command: 'list-collections' }
@@ -52,9 +54,14 @@ async function main() {
         global['URL'] = URL
     }
 
-    const services = await createServices({
+    const authServices = createAuthServices({
         backend: 'memory',
         getServerStorage: () => Promise.reject(), // FIXME
+    })
+    const servicesPromise = createServices({
+        backend: 'memory',
+        getServerStorage: () => Promise.reject(), // FIXME
+        authService: authServices.auth,
     })
 
     const storageManager = initStorex()
@@ -62,9 +69,10 @@ async function main() {
         idbImplementation: inMemory(),
     })
     const backgroundModules = createBackgroundModules({
+        manifestVersion: '3',
         getServerStorage: () => Promise.reject(), // FIXME
-        services,
-        signalTransportFactory: null,
+        authServices,
+        servicesPromise,
         analyticsManager: null,
         storageManager,
         persistentStorageManager,
@@ -81,7 +89,10 @@ async function main() {
         fetchPageDataProcessor: new MockFetchPageDataProcessor(),
         callFirebaseFunction: () => null as any,
     })
-    const storageModules = getBackgroundStorageModules(backgroundModules)
+    const storageModules = getBackgroundStorageModules(
+        backgroundModules,
+        new DeprecatedStorageModules({ storageManager }),
+    )
 
     const display = console['log'].bind(console) // Circumvent linter
     if (args.command === 'list-operations') {

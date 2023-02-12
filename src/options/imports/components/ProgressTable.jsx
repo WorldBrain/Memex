@@ -39,7 +39,7 @@ const ProgressRow = ({
         <ViewFailedItems onClick={changeShowDetails}>
             View Failed Items
             <Icon
-                filePath={icons.triangle}
+                filePath={icons.arrowDown}
                 rotation={!showDownloadDetails ? '-90' : '0'}
                 heightAndWidth={'16px'}
             />
@@ -99,7 +99,7 @@ ProgressTable.propTypes = {
 }
 
 const ViewFailedItems = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 16px;
     display: grid;
     grid-gap: 10px;
@@ -142,12 +142,12 @@ const Number = styled.div`
 `
 
 const NumberSmall = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 18px;
     font-weight: bold;
 `
 const SubTitle = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 16px;
     font-weight: normal;
 `

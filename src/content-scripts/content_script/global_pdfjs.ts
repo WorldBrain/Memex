@@ -1,16 +1,22 @@
+import browser from 'webextension-polyfill'
+import type { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import * as Global from './global'
 import {
     FingerprintSchemeType,
     ContentFingerprint,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import type { GetContentFingerprints } from './types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { Browser, browser } from 'webextension-polyfill-ts'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from 'src/sidebar/annotations-sidebar/constants'
+import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
+import { extractDataFromPDFDocument } from 'src/pdf/util'
+
+// TODO: Properly type the PDFjs-provided globals
 
 const waitForDocument = async () => {
     while (true) {
-        const pdfApplication = (window as any)['PDFViewerApplication']
+        const pdfApplication = (globalThis as any)['PDFViewerApplication']
         const pdfViewer = pdfApplication?.pdfViewer
         const pdfDocument: { fingerprint?: string; fingerprints?: string[] } =
             pdfViewer?.pdfDocument
@@ -38,41 +44,22 @@ const getContentFingerprints: GetContentFingerprints = async () => {
 }
 
 Global.main({ loadRemotely: false, getContentFingerprints }).then(
-    (inPageUI) => {
-        inPageUI.events.on('stateChanged', (event) => {
-            const sidebarState = event?.changes?.sidebar
+    async (inPageUI) => {
+        makeRemotelyCallableType<InPDFPageUIContentScriptRemoteInterface>({
+            extractPDFContents: async () => {
+                const searchParams = new URLSearchParams(location.search)
+                const filePath = searchParams.get('file')
 
-            if (sidebarState === true) {
-                document.body.classList.add('memexSidebarOpen')
-                setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '450px')
+                if (!filePath?.length) {
+                    return null
+                }
 
-                let SidebarInitialWidth = getLocalStorage(
-                    SIDEBAR_WIDTH_STORAGE_KEY,
-                ).then((width) => {
-                    let SidebarInitialAsInteger = parseFloat(
-                        width.toString().replace('px', ''),
-                    )
-                    let WindowInitialWidth =
-                        (
-                            window.innerWidth - SidebarInitialAsInteger
-                        ).toString() + 'px'
-                    document.body.style.width = WindowInitialWidth
-                })
-
-                browser.storage.onChanged.addListener((changes) => {
-                    let SidebarWidth = changes[
-                        SIDEBAR_WIDTH_STORAGE_KEY
-                    ].newValue.replace('px', '')
-                    SidebarWidth = parseFloat(SidebarWidth)
-                    let windowWidth = window.innerWidth
-                    let width = (windowWidth - SidebarWidth).toString()
-                    width = width + 'px'
-                    document.body.style.width = width
-                })
-            } else if (sidebarState === false) {
-                document.body.classList.remove('memexSidebarOpen')
-                document.body.style.width = window.innerWidth.toString() + 'px'
-            }
+                const pdf: PDFDocumentProxy = await (globalThis as any)[
+                    'pdfjsLib'
+                ].getDocument(filePath).promise
+                return extractDataFromPDFDocument(pdf, document.title)
+            },
         })
+        await inPageUI.showSidebar()
     },
 )

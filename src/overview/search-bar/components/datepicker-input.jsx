@@ -1,9 +1,9 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import styled from 'styled-components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 class DatePickerInput extends PureComponent {
     static propTypes = {
@@ -19,9 +19,9 @@ class DatePickerInput extends PureComponent {
     render() {
         return (
             <DatepickerInput>
-                <ButtonTooltip
+                <TooltipBox
                     tooltipText="You can also type e.g. 'last Friday 10am'"
-                    position="bottom"
+                    placement="bottom"
                 >
                     <Input
                         name={this.props.name}
@@ -32,19 +32,19 @@ class DatePickerInput extends PureComponent {
                         disabled={this.props.disabled}
                         autoFocus={this.props.autoFocus}
                     />
-                </ButtonTooltip>
+                </TooltipBox>
                 <ClearButtonContainer>
                     {this.props.value && (
-                        <ButtonTooltip
+                        <TooltipBox
                             tooltipText="Clear Selection"
-                            position="bottom"
+                            placement="bottom"
                         >
                             <Icon
                                 path={icons.removeX}
                                 heightAndWidth={'14px'}
                                 onClick={(e) => this.props.clearFilter(e)}
                             />
-                        </ButtonTooltip>
+                        </TooltipBox>
                     )}
                 </ClearButtonContainer>
             </DatepickerInput>
@@ -66,13 +66,17 @@ const Input = styled.input`
     margin-right: 10px;
     margin-left: 10px;
     outline: none;
-    background: ${(props) => props.theme.colors.backgroundColorDarker};
-    color: ${(props) => props.theme.colors.normalText};
+    background: ${(props) => props.theme.colors.greyScale2};
+    color: ${(props) => props.theme.colors.white};
     border: none;
-    height: 25px;
+    height: 22px;
     padding: 6px;
     font-size: 14px;
     width: 150px;
+
+    &:focus {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+    }
 `
 
 export default DatePickerInput

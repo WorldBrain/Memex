@@ -1,7 +1,7 @@
 /*
 DOM manipulation helper functions
 */
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
@@ -174,8 +174,6 @@ export const handleRender = async (
             )[0]
             container.insertBefore(target, container.firstChild)
         }
-
-        // console.log(containerIdentifier)
 
         // // If re-rendering remove the already present component
         // const component = document.getElementById('memexResults')

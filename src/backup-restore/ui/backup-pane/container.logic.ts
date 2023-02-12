@@ -1,39 +1,37 @@
 import React from 'react'
 const mapValues = require('lodash/mapValues')
 import { redirectToGDriveLogin } from 'src/backup-restore/ui/utils'
-import { Analytics } from 'src/analytics/types'
+import type { Analytics } from 'src/analytics/types'
+import type { BrowserSettingsStore } from 'src/util/settings'
+import type { LocalBackupSettings } from 'src/backup-restore/background/types'
 
 export async function getInitialState({
     analytics,
-    localStorage,
+    localBackupSettings,
     remoteFunction,
 }: {
     analytics: Analytics
-    localStorage: any
+    localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
     remoteFunction: any
 }) {
     const isAuthenticated = await remoteFunction(
         'isBackupBackendAuthenticated',
     )()
 
-    const runningRestore = await localStorage.getItem(
-        'backup.restore.restore-running',
-    )
-    const runningBackup = await localStorage.getItem(
-        'backup.onboarding.running-backup',
-    )
-    const progressSuccess = !!(await localStorage.getItem('backup.success'))
+    const runningRestore = await localBackupSettings.get('runningRestore')
+    const runningBackup = await localBackupSettings.get('runningBackup')
+    const progressSuccess = !!(await localBackupSettings.get(
+        'progressSuccessful',
+    ))
     const backendLocation = await remoteFunction('getBackendLocation')()
     const hasInitialBackup = !!(await remoteFunction('hasInitialBackup')())
-    const driveAuthenticated = !!(await localStorage.getItem(
-        'drive-token-access',
+    const driveAuthenticated = !!(await localBackupSettings.get('accessToken'))
+    const isOnboarding = !!(await localBackupSettings.get('isOnboarding'))
+    const backupIsAuthenticating = !!(await localBackupSettings.get(
+        'backupIsAuthenticating',
     ))
-    const isOnboarding = !!(await localStorage.getItem('backup.onboarding'))
-    const backupIsAuthenticating = !!(await localStorage.getItem(
-        'backup.onboarding.authenticating',
-    ))
-    const restoreIsAuthenticating = !!(await localStorage.getItem(
-        'backup.restore.authenticating',
+    const restoreIsAuthenticating = !!(await localBackupSettings.get(
+        'restoreIsAuthenticating',
     ))
 
     return {
@@ -56,7 +54,7 @@ export async function getInitialState({
             },
             {
                 remoteFunction,
-                localStorage,
+                localBackupSettings: localBackupSettings,
                 analytics,
             },
         ),
@@ -79,7 +77,7 @@ export async function getStartScreen(
     dependencies: {
         remoteFunction: any
         analytics: Analytics
-        localStorage: any
+        localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
     },
 ) {
     // This is for now pretty hacky. What happens is that on
@@ -92,11 +90,9 @@ export async function getStartScreen(
         // using a progressSuccess message because that would allow to separately decide on if
         // any process is finished, so we don't have to implement this for every kind of process.
         if (state.progressSuccess) {
-            await dependencies.localStorage.removeItem('backup.onboarding')
-            await dependencies.localStorage.removeItem('backup.success')
-            await dependencies.localStorage.removeItem(
-                'backup.onboarding.running-backup',
-            )
+            await dependencies.localBackupSettings.remove('isOnboarding')
+            await dependencies.localBackupSettings.remove('progressSuccessful')
+            await dependencies.localBackupSettings.remove('runningBackup')
             return 'overview'
         } else {
             return 'running-backup'
@@ -105,24 +101,22 @@ export async function getStartScreen(
 
     if (state.runningRestore) {
         if (state.progressSuccess) {
-            await dependencies.localStorage.removeItem('backup.success')
-            await dependencies.localStorage.removeItem(
-                'backup.restore.restore-running',
-            )
+            await dependencies.localBackupSettings.remove('progressSuccessful')
+            await dependencies.localBackupSettings.remove('runningRestore')
             return 'overview'
         } else {
             return 'restore-running'
         }
     }
 
-    await dependencies.localStorage.removeItem('backup.onboarding')
+    await dependencies.localBackupSettings.remove('isOnboarding')
 
     const driveIsAuthenticating =
         state.backupIsAuthenticating || state.restoreIsAuthenticating
     if (driveIsAuthenticating) {
         if (state.backupIsAuthenticating) {
-            await dependencies.localStorage.removeItem(
-                'backup.onboarding.authenticating',
+            await dependencies.localBackupSettings.remove(
+                'backupIsAuthenticating',
             )
             if (state.driveAuthenticated) {
                 return 'running-backup'
@@ -130,8 +124,8 @@ export async function getStartScreen(
                 return 'onboarding-size'
             }
         } else {
-            await dependencies.localStorage.removeItem(
-                'backup.restore.authenticating',
+            await dependencies.localBackupSettings.remove(
+                'restoreIsAuthenticating',
             )
             if (state.driveAuthenticated) {
                 return 'restore-running'
@@ -150,7 +144,7 @@ export async function getStartScreen(
     ) {
         return 'onboarding-size'
     } else {
-        await dependencies.localStorage.removeItem('backup.success')
+        await dependencies.localBackupSettings.remove('progressSuccessful')
         return 'overview'
     }
 }
@@ -158,9 +152,15 @@ export async function getStartScreen(
 export async function processEvent({
     state,
     event,
-    localStorage,
     analytics,
     remoteFunction,
+    localBackupSettings,
+}: {
+    state
+    event
+    analytics
+    remoteFunction
+    localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
 }) {
     const _onBlobPreferenceChange = () => {
         analytics.trackEvent({
@@ -172,8 +172,8 @@ export async function processEvent({
         return {}
     }
 
-    const triggerOnboarding = () => {
-        localStorage.setItem('backup.onboarding', true)
+    const triggerOnboarding = async () => {
+        await localBackupSettings.set('isOnboarding', true)
         analytics.trackEvent({
             category: 'Backup',
             action: 'onboarding-triggered',
@@ -204,15 +204,12 @@ export async function processEvent({
                     return triggerOnboarding()
                 }
 
-                const driveAuthenticated = await localStorage.getItem(
-                    'drive-token-access',
+                const driveAuthenticated = await localBackupSettings.get(
+                    'accessToken',
                 )
 
                 if (hasInitialBackup) {
-                    localStorage.setItem(
-                        'backup.onboarding.running-backup',
-                        true,
-                    )
+                    await localBackupSettings.set('runningBackup', true)
                     return { screen: 'running-backup' }
                 }
 
@@ -227,10 +224,9 @@ export async function processEvent({
                     return { screen: 'onboarding-where' }
                 }
             },
-            onRestoreRequested: () => {
+            onRestoreRequested: async () => {
                 if (
-                    localStorage.getItem('backup.restore.restore-running') ===
-                    true
+                    (await localBackupSettings.get('runningRestore')) === true
                 ) {
                     return { screen: 'restore-running' }
                 }
@@ -248,9 +244,9 @@ export async function processEvent({
                     category: 'Backup',
                     action: 'onboarding-where-chosen',
                 })
-                localStorage.setItem('backup.automatic-backups-enabled', 'true')
+                await localBackupSettings.set('automaticBackupsEnabled', true)
                 await remoteFunction('enableAutomaticBackup')
-                localStorage.setItem('backup.onboarding.running-backup', true)
+                await localBackupSettings.set('runningBackup', true)
                 return { screen: 'running-backup' }
             },
             onChangeLocalLocation: () => {
@@ -277,9 +273,9 @@ export async function processEvent({
 
                 if (choice.type === 'automatic') {
                     // TODO: (ch): Hack, setting the key here, don't know why the following remoteFunction does not work
-                    localStorage.setItem(
-                        'backup.automatic-backups-enabled',
-                        'true',
+                    await localBackupSettings.set(
+                        'automaticBackupsEnabled',
+                        true,
                     )
                     await remoteFunction('enableAutomaticBackup')
                 }
@@ -291,29 +287,27 @@ export async function processEvent({
         },
         'onboarding-size': {
             onBlobPreferenceChange: _onBlobPreferenceChange,
-            onLoginRequested: () => {
+            onLoginRequested: async () => {
                 analytics.trackEvent({
                     category: 'Backup',
                     action: 'onboarding-login-requested',
                 })
-                localStorage.setItem('backup.onboarding.authenticating', true)
+                await localBackupSettings.set('backupIsAuthenticating', true)
                 return { redirect: { to: 'gdrive-login' } }
             },
-            onBackupRequested: () => {
+            onBackupRequested: async () => {
                 analytics.trackEvent({
                     category: 'Backup',
                     action: 'onboarding-backup-requested',
                 })
-                localStorage.setItem('backup.onboarding.running-backup', true)
+                await localBackupSettings.set('runningBackup', true)
                 return { screen: 'running-backup' }
             },
         },
         'running-backup': {
             onFinish: async () => {
-                await localStorage.removeItem('backup.onboarding')
-                await localStorage.removeItem(
-                    'backup.onboarding.running-backup',
-                )
+                await localBackupSettings.remove('isOnboarding')
+                await localBackupSettings.remove('runningBackup')
                 return { screen: 'overview' }
             },
         },
@@ -327,17 +321,20 @@ export async function processEvent({
                 await remoteFunction('initRestoreProcedure')(location)
 
                 if (location === 'google-drive' && !state.isAuthenticated) {
-                    localStorage.setItem('backup.restore.authenticating', true)
+                    await localBackupSettings.set(
+                        'restoreIsAuthenticating',
+                        true,
+                    )
                     return { redirect: { to: 'gdrive-login' } }
                 } else {
-                    localStorage.setItem('backup.restore.restore-running', true)
+                    await localBackupSettings.set('runningRestore', true)
                     return { screen: 'restore-running' }
                 }
             },
         },
         'restore-running': {
-            onFinish: () => {
-                localStorage.removeItem('backup.restore.restore-running')
+            onFinish: async () => {
+                await localBackupSettings.remove('runningRestore')
                 return { screen: 'overview' }
             },
         },
@@ -372,7 +369,7 @@ export const getScreenHandlers = ({
     screenConfig: ScreenConfig
     eventProcessor: typeof processEvent
     dependencies: {
-        localStorage: any
+        localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
         analytics: any
         remoteFunction: (name: string) => (...args) => Promise<any>
     }

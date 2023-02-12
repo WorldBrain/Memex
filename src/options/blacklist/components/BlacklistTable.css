@@ -1,24 +1,39 @@
 .tableContainer {
     overflow-y: scroll;
     clear: both;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none; /* stylelint-disable-line*/
 }
 
 .table {
     border-collapse: collapse;
-    background: white;
-    width: 100%;
+    width: fill-available;
     font-size: 14px;
+    display: flex;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none; /* stylelint-disable-line*/
+
+    & tbody {
+        width: fill-available;
+    }
 
     & th,
     & td {
         border-collapse: collapse;
         color: #777;
-        padding: 15px 20px;
+        padding: 15px 0px;
     }
 
     & th {
         background: #333;
-        color: white;
         font-weight: 200;
         font-size: 0.7em;
         letter-spacing: 0.2em;

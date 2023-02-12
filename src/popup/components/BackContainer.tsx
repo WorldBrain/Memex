@@ -7,6 +7,7 @@ interface Props {
     children?: any
     onClick: () => void
     header?: string
+    showAutoSaved?: boolean
 }
 
 export const BackContainer = (props: Props) => (
@@ -14,14 +15,25 @@ export const BackContainer = (props: Props) => (
         <IconBoxBox>
             <IconBox>
                 <Icon
-                    filePath={icons.arrowRight}
+                    filePath={icons.arrowLeft}
                     onClick={props.onClick}
-                    heightAndWidth="16px"
+                    heightAndWidth="22px"
                 />
             </IconBox>
         </IconBoxBox>
         <Header>{props.header}</Header>
-        <AutoSaveNote>Autosaved</AutoSaveNote>
+        <Placeholder />
+        {props.showAutoSaved ? (
+            <AutoSaveNote>
+                <Icon
+                    color={'prime1'}
+                    heightAndWidth="20px"
+                    hoverOff
+                    icon={'check'}
+                />
+                Autosaved
+            </AutoSaveNote>
+        ) : undefined}
     </Container>
 )
 
@@ -32,14 +44,13 @@ const IconBoxBox = styled.div`
 `
 
 const IconBox = styled.div`
-    transform: rotate(-180deg);
     width: fit-content;
 `
 
 const Header = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-weight: 700;
-    font-size: 16px;
+    color: ${(props) => props.theme.colors.greyScale4};
+    font-weight: 400;
+    font-size: 14px;
 `
 
 const Container = styled.div`
@@ -47,13 +58,19 @@ const Container = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
-    padding: 0 20px;
+    padding: 0 15px;
+    margin-bottom: -10px;
 `
 
 const AutoSaveNote = styled.div`
     font-weight: 400;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
-    width: 60px;
+    color: ${(props) => props.theme.colors.greyScale6};
+    display: flex;
+    align-items: center;
+    right: 20px;
+    position: absolute;
+`
+const Placeholder = styled.div`
+    width: 70px;
 `

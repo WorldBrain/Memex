@@ -3,6 +3,7 @@ import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 
 export const LIST_DATA = {
     name: 'My shared list',
+    id: Date.now(),
 }
 
 export const PAGE_1_DATA = {

@@ -1,4 +1,4 @@
-import { Alarms, Storage } from 'webextension-polyfill-ts'
+import { Alarms, Storage } from 'webextension-polyfill'
 
 import { JobDefinition, PrimedJob } from './types'
 import { SCHEDULES } from '../constants'
@@ -27,7 +27,7 @@ export class JobScheduler {
     }
 
     private static calcTimeFromNow = (minutes: number, now = Date.now()) =>
-        typeof minutes === 'undefined' ? minutes : now + minutes * 60 * 1000
+        minutes == null ? minutes : now + minutes * 60 * 1000
 
     private setTimeoutKey = (key: string, value: number) =>
         this.props.storageAPI.local.set({
@@ -68,7 +68,9 @@ export class JobScheduler {
     ) {
         const timeToRun = await this.getTimeoutKey(name)
 
-        if (timeToRun < now) {
+        if (timeToRun === JobScheduler.NOT_SET) {
+            await job()
+        } else if (timeToRun < now) {
             await job()
             await this.setTimeoutKey(
                 name,
@@ -112,6 +114,16 @@ export class JobScheduler {
         }
     }
 
+    async scheduleJob(job: JobDefinition<PrimedJob>) {
+        this.jobs.set(job.name, job)
+
+        this.props.alarmsAPI.create(job.name, {
+            when: job.when,
+            delayInMinutes: job.delayInMinutes,
+            periodInMinutes: job.periodInMinutes,
+        })
+    }
+
     // Schedule all periodic ping attempts at a random minute past the hour, every hour
     async scheduleJobHourly(job: JobDefinition<PrimedJob>) {
         this.jobs.set(job.name, job)
@@ -139,5 +151,9 @@ export class JobScheduler {
         this.props.alarmsAPI.create(job.name, {
             when: job.when,
         })
+    }
+
+    async clearScheduledJob(name: string) {
+        await this.props.alarmsAPI.clear(name)
     }
 }

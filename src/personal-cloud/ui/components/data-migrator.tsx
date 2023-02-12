@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -93,7 +93,7 @@ export default class DataMigrator extends React.PureComponent<Props> {
             return (
                 <>
                     <TopComponent>
-                        <Icon icon="alertRound" height="20px" />
+                        <Icon icon="warning" height="20px" />
                     </TopComponent>
                     <SectionTitle>
                         There was an error with migrating your data to the cloud
@@ -142,7 +142,7 @@ const SectionTitle = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     margin-bottom: 40px;
     text-align: center;

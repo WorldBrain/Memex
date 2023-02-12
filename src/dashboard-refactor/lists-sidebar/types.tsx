@@ -17,6 +17,7 @@ export interface SidebarPeekState {
 export interface ListData {
     id: number
     name: string
+    newName?: string
     remoteId?: string
     description?: string
     isOwnedList?: boolean
@@ -28,7 +29,7 @@ export interface ListGroupCommon
     extends Pick<ListsSidebarGroupProps, 'loadingState'> {
     isExpanded: boolean
     allListIds: number[]
-    filteredListIds: number[]
+    filteredListIds: number[] | null
 }
 
 export interface FollowedListGroup extends ListGroupCommon {}
@@ -43,6 +44,8 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         listData: { [id: number]: ListData }
         followedLists: FollowedListGroup
         localLists: LocalListGroup
+        joinedLists: ListGroupCommon
+        spaceSidebarWidth: number
 
         inboxUnreadCount: number
         dragOverListId?: number
@@ -58,6 +61,7 @@ export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
         listCreateState: TaskState
         listEditState: TaskState
         listShareLoadingState: TaskState
+        showFeed?: boolean
     }
 
 export type Events = UIEvent<{
@@ -74,9 +78,10 @@ export type Events = UIEvent<{
     setFollowedLists: { lists: ListData[] }
     setLocalListsExpanded: { isExpanded: boolean }
     setFollowedListsExpanded: { isExpanded: boolean }
+    setJoinedListsExpanded: { isExpanded: boolean }
 
-    changeListName: { value: string }
-    confirmListEdit: { value: string }
+    changeListName: { value: string; listId?: number }
+    confirmListEdit: { value: string; listId?: number }
     cancelListEdit: null
     setDragOverListId: { listId?: number }
     setEditingListId: { listId: number }
@@ -92,6 +97,7 @@ export type Events = UIEvent<{
     updateSelectedListDescription: { description: string }
 
     clickFeedActivityIndicator: null
+    switchToFeed: null
 }>
 
 export type ListNameHighlightIndices = [number, number]

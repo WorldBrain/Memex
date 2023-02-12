@@ -8,7 +8,7 @@ import {
 } from 'src/common-ui/components/design-library/typography'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { SignInScreen } from 'src/authentication/components/SignIn'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'

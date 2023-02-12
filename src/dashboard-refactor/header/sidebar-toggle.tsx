@@ -1,12 +1,9 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
-
-import colors from '../colors'
 import { SidebarLockedState } from '../lists-sidebar/types'
 import { Icon } from '../styled-components'
 import { HoverState } from '../types'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { ButtonTooltip } from 'src/common-ui/components'
 
 const arrowStyles = `
     left: 2px;
@@ -15,7 +12,7 @@ const arrowStyles = `
 `
 
 export const Container = styled.div`
-    height: 80px;
+    height: 44px;
     width: 60px;
     border: none;
     position: relative;
@@ -24,7 +21,7 @@ export const Container = styled.div`
     align-items: center;
     cursor: pointer;
     z-index: 1;
-    padding-left: 12px;
+    padding-left: 9px;
 `
 
 export const BtnBackground = styled.div`
@@ -54,6 +51,14 @@ export const RightArrow = styled.div`
     animation: 0.2s cubic-bezier(0.65, 0.05, 0.36, 1);
 `
 
+const TriggerArea = styled.div`
+    position: absolute;
+    height: 80px;
+    width: 180px;
+    left: 0px;
+    top: 0px;
+`
+
 export interface SidebarToggleProps {
     sidebarLockedState: SidebarLockedState
     hoverState: HoverState
@@ -69,26 +74,38 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
         return (
             <Container
                 isHovered={isHovered}
-                onMouseLeave={onHoverLeave}
+                // onMouseLeave={onHoverLeave}
                 onClick={toggleSidebarLockedState}
                 onMouseEnter={onHoverEnter}
+                onMouseOver={onHoverEnter}
+                id="testingthis"
             >
-                {isHovered ? (
-                    <ButtonTooltip
-                        tooltipText={
-                            isSidebarLocked ? (
-                                <span>
-                                    Click to close sidebar.
-                                    <br />
-                                    Open by hovering on left side of screen
-                                </span>
-                            ) : (
-                                'Click to lock open sidebar'
-                            )
-                        }
-                        position={'right'}
-                    >
-                        <BtnBackground>
+                {!isSidebarLocked ? (
+                    <>
+                        {isHovered ? (
+                            <Icon
+                                path={icons.arrowRight}
+                                rotation="0"
+                                heightAndWidth="26px"
+                            />
+                        ) : (
+                            <Icon
+                                path={icons.hamburger}
+                                heightAndWidth="26px"
+                            />
+                        )}
+                        {isHovered && (
+                            <TriggerArea
+                                onMouseEnter={onHoverEnter}
+                                onMouseLeave={onHoverLeave}
+                            />
+                        )}
+                    </>
+                ) : (
+                    <Icon path={icons.arrowLeft} heightAndWidth="26px" />
+                )}
+
+                {/* <BtnBackground>
                             {isSidebarLocked ? (
                                 <Icon
                                     path={icons.doubleArrow}
@@ -103,10 +120,10 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
                                 />
                             )}
                         </BtnBackground>
-                    </ButtonTooltip>
                 ) : (
+
                     <Icon path={icons.hamburger} heightAndWidth="20px" />
-                )}
+                )} */}
             </Container>
         )
     }

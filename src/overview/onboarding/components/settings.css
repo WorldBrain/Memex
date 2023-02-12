@@ -2,7 +2,9 @@
 @value color6 from colors;
 
 .container * {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 }
 
 .container {

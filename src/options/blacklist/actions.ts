@@ -3,8 +3,7 @@ import { createAction } from 'redux-act'
 import analytics from 'src/analytics'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import * as selectors from './selectors'
-import { STORAGE_KEY } from './constants'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
+import { INPAGE_UI_BLACKLIST_STORAGE_KEY as STORAGE_KEY } from 'src/blacklist/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications } from 'src/util/remote-functions-background'
 import * as Raven from 'src/util/raven'
@@ -12,7 +11,6 @@ import * as Raven from 'src/util/raven'
 const deletePagesByPattern = remoteFunction('delPagesByPattern')
 const getMatchingPageCount = remoteFunction('getMatchingPageCount')
 const dirtyEstsCache = remoteFunction('dirtyEstsCache')
-const processEvent = remoteFunction('processEvent')
 
 export const setMatchedCount = createAction('settings/setMatchedCount') as any
 export const setModalShow = createAction('settings/setModalShow') as any
@@ -34,14 +32,13 @@ export const removeSiteFromBlacklist = createAction(
 export const initBlacklist = () => async (dispatch) => {
     dispatch(setIsLoading(true))
     try {
-        const { [STORAGE_KEY]: blacklist } = await window[
+        const { [STORAGE_KEY]: blacklist } = await globalThis[
             'browser'
         ].storage.local.get({
-            [STORAGE_KEY]: '[]',
+            [STORAGE_KEY]: [],
         })
 
-        const parsedBlacklist = JSON.parse(blacklist)
-        dispatch(setBlacklist(parsedBlacklist))
+        dispatch(setBlacklist(blacklist))
     } catch (err) {
         Raven.captureException(err)
         dispatch(setBlacklist([]))
@@ -56,10 +53,6 @@ export const addToBlacklist = (expression) => async (dispatch, getState) => {
         action: 'createEntryViaSettings',
     })
 
-    processEvent({
-        type: EVENT_NAMES.ADD_BLACKLIST_ENTRY,
-    })
-
     const oldBlacklist = selectors.blacklist(getState())
     const newEntry = {
         expression,
@@ -71,8 +64,8 @@ export const addToBlacklist = (expression) => async (dispatch, getState) => {
     dispatch(setIsLoading(true))
     dispatch(setModalShow(true))
     try {
-        await window['browser'].storage.local.set({
-            [STORAGE_KEY]: JSON.stringify([newEntry, ...oldBlacklist]),
+        await globalThis['browser'].storage.local.set({
+            [STORAGE_KEY]: [newEntry, ...oldBlacklist],
         })
         const count = await getMatchingPageCount(expression)
 
@@ -93,18 +86,14 @@ export const removeFromBlacklist = (index) => async (dispatch, getState) => {
         action: 'deleteEntryViaSettings',
     })
 
-    processEvent({
-        type: EVENT_NAMES.REMOVE_BLACKLIST_ENTRY,
-    })
-
     const oldBlacklist = selectors.blacklist(getState())
     const newBlacklist = [
         ...oldBlacklist.slice(0, index),
         ...oldBlacklist.slice(index + 1),
     ]
 
-    await window['browser'].storage.local.set({
-        [STORAGE_KEY]: JSON.stringify(newBlacklist),
+    await globalThis['browser'].storage.local.set({
+        [STORAGE_KEY]: newBlacklist,
     })
 
     dispatch(

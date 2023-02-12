@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 export interface Props {
     titleText: React.ReactChild
@@ -29,14 +29,18 @@ export default class ConfirmDialog extends React.PureComponent<Props> {
                 </TextContainer>
                 <ConfirmBtnRow>
                     <PrimaryAction
-                        label={affirmativeLabel ?? 'Yes'}
-                        onClick={handleConfirmation(true)}
-                        fontSize="12px"
-                    />
-                    <SecondaryAction
                         label={negativeLabel ?? 'No'}
                         onClick={handleConfirmation(false)}
-                        borderOff
+                        type={'primary'}
+                        size={'medium'}
+                        width={'210px'}
+                    />
+                    <PrimaryAction
+                        label={affirmativeLabel ?? 'Yes'}
+                        onClick={handleConfirmation(true)}
+                        type={'forth'}
+                        size={'medium'}
+                        width={'210px'}
                     />
                 </ConfirmBtnRow>
             </Container>
@@ -53,19 +57,19 @@ const TextContainer = styled.div`
 `
 
 const TitleText = styled.div`
-    font-size: 16px;
-    color: ${(props) => props.theme.colors.darkerText};
+    font-size: 20px;
+    color: ${(props) => props.theme.colors.greyScale6};
     text-align: center;
-    font-weight: 800;
-    line-height: 20px;
+    font-weight: 500;
+    line-height: 30px;
 `
 
 const SubTitleText = styled.div`
-    font-size: 14px;
-    color: ${(props) => props.theme.colors.lighterText};
+    font-size: 16px;
+    color: ${(props) => props.theme.colors.greyScale5};
     text-align: center;
     font-weight: 300;
-    line-height: 26px;
+    line-height: 24px;
     white-space: break-spaces;
     text-align: center;
 `
@@ -74,6 +78,7 @@ const ConfirmBtnRow = styled.div`
     display: flex;
     flex-direction: column;
     grid-gap: 10px;
+    align-items: center;
 `
 
 const Container = styled.div`
@@ -81,7 +86,7 @@ const Container = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 30px 20px;
+    padding: 30px 30px;
     grid-gap: 20px;
-    max-width: 500px;
+    max-width: 400px;
 `

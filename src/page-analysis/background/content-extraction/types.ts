@@ -8,3 +8,12 @@ export interface MemexPDFMetadata {
     documentInformationDict?: any
     fingerprints: string[]
 }
+
+export interface ExtractedPDFData {
+    pdfMetadata: MemexPDFMetadata
+    pdfPageTexts: string[]
+    fullText: string
+    title: string
+    author?: string
+    keywords?: string[]
+}

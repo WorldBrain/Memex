@@ -11,7 +11,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import AuthDialog from 'src/authentication/components/AuthDialog'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 export interface Props
     extends Pick<
@@ -51,7 +51,7 @@ export default class LoginModal extends React.PureComponent<Props> {
             <Modal {...this.props}>
                 {this.props.routeToLoginBtn ? (
                     <>
-                        <TitleText>Login or Sign up to Share</TitleText>
+                        <TitleText>Login or Sign up</TitleText>
                         <PrimaryAction
                             onClick={this.handleGoToClick}
                             label={'Next'}
@@ -59,7 +59,7 @@ export default class LoginModal extends React.PureComponent<Props> {
                     </>
                 ) : (
                     <>
-                        <TitleText>Login or Sign up to Share</TitleText>
+                        <TitleText>Login or Sign up</TitleText>
                         <AuthDialog onAuth={() => this.handleLoginSuccess()} />
                     </>
                 )}
@@ -70,9 +70,12 @@ export default class LoginModal extends React.PureComponent<Props> {
 
 const TitleText = styled.div`
     font-family: ${(props) => props.theme.fonts.primary};
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 20px;
+    background: ${(props) => props.theme.colors.headerGradient};
+    font-size: 26px;
     font-weight: bold;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 
     padding-bottom: 30px;
 `

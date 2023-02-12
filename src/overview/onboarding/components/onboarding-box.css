@@ -10,7 +10,7 @@
 }
 
 /* We cant target the body class easily to set a bg color since it shares the layout with the whole extension */
-.backgroundColor {
+.black {
     width: 100%;
     height: 100vh;
     background: #f6fcfa;

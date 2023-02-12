@@ -1,4 +1,4 @@
-import { Browser } from 'webextension-polyfill-ts'
+import { Browser } from 'webextension-polyfill'
 
 export interface LimitedBrowserStorage {
     set: Browser['storage']['local']['set']

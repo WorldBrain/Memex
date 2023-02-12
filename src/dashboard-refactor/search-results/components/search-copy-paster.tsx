@@ -1,8 +1,5 @@
 import React from 'react'
 import styled from 'styled-components'
-import ButtonTooltip from '@worldbrain/memex-common/lib/common-ui/components/button-tooltip'
-
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import {
     AnnotationSearchCopyPaster,
@@ -10,55 +7,73 @@ import {
 } from 'src/copy-paster'
 import { SearchType } from '../types'
 import { BackgroundSearchParams } from 'src/search/background/types'
-import { Icon } from 'src/dashboard-refactor/styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export interface Props {
-    searchType: SearchType
-    isCopyPasterShown: boolean
-    isCopyPasterBtnShown: boolean
-    searchParams: BackgroundSearchParams
-    hideCopyPaster: React.MouseEventHandler
-    toggleCopyPaster: React.MouseEventHandler
+    searchType?: SearchType
+    isCopyPasterShown?: boolean
+    isCopyPasterBtnShown?: boolean
+    searchParams?: BackgroundSearchParams
+    hideCopyPaster?: React.MouseEventHandler
+    toggleCopyPaster?: React.MouseEventHandler
 }
 
-export default function SearchCopyPaster(props: Props) {
-    if (!props.isCopyPasterBtnShown) {
-        return null
-    }
-
+function renderCopyPaster(props: Props) {
     const CopyPaster =
         props.searchType === 'notes'
             ? AnnotationSearchCopyPaster
             : PageSearchCopyPaster
 
     return (
-        <>
-            <ButtonTooltip tooltipText="Copy Search Results" position="bottom">
+        <CopyPaster
+            searchParams={props.searchParams}
+            onClickOutside={props.hideCopyPaster}
+        />
+    )
+}
+
+function renderCopyPasterBox(props, copypasterButtonRef) {
+    if (props.isCopyPasterShown) {
+        return (
+            <PopoutBox
+                placement={'bottom-end'}
+                offsetX={10}
+                closeComponent={props.toggleCopyPaster}
+                targetElementRef={copypasterButtonRef.current}
+            >
+                {renderCopyPaster(props)}
+            </PopoutBox>
+        )
+    } else {
+        return null
+    }
+}
+
+export default function SearchCopyPaster(props: Props) {
+    const copypasterButtonRef = React.useRef<HTMLDivElement>(null)
+
+    return (
+        <Container>
+            <TooltipBox tooltipText={'Copy Search Results'} placement="bottom">
                 <Icon
-                    path={icons.copy}
-                    heightAndWidth="16px"
+                    filePath={icons.copy}
+                    heightAndWidth="22px"
                     onClick={props.toggleCopyPaster}
+                    active={props.isCopyPasterShown}
+                    padding={'6px'}
+                    containerRef={copypasterButtonRef}
                 />
-            </ButtonTooltip>
-            {props.isCopyPasterShown && (
-                <HoverBox
-                    position={'absolute'}
-                    withRelativeContainer
-                    top="25px"
-                    left="-155px"
-                    padding={'0px'}
-                >
-                    <CopyPaster
-                        searchParams={props.searchParams}
-                        onClickOutside={props.hideCopyPaster}
-                    />
-                </HoverBox>
-            )}
-        </>
+            </TooltipBox>
+            {renderCopyPasterBox(props, copypasterButtonRef)}
+        </Container>
     )
 }
 
 // TODO: inheirits from .nakedSquareButton
+
+const Container = styled.div``
 const ActionBtn = styled.button`
     border-radius: 3px;
     padding: 2px;

@@ -16,15 +16,16 @@ export default function NoResults(props: Props) {
 }
 
 const Title = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.darkerText};
     font-size: 14px;
     font-weight: 400;
     margin-bottom: 10px;
-    text-align center;
+    text-align: center;
+    margin-top: 15px;
 `
 
 const Subtitle = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     font-weight: 300;
     display: flex;

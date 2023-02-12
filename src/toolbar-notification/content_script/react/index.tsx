@@ -18,7 +18,7 @@ export function setupUIContainer(
     },
 ) {
     // retargetEvents(shadow)
-    return new Promise(async (resolve) => {
+    return new Promise<void>(async (resolve) => {
         ReactDOM.render(
             <ToolbarNotification
                 type={type}

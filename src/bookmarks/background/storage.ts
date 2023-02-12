@@ -7,8 +7,8 @@ import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
 } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
-import { Bookmark } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/overview/types'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import type { Bookmark } from '@worldbrain/memex-common/lib/storage/modules/mobile-app/features/overview/types'
 
 export default class BookmarksStorage extends StorageModule {
     static BMS_COLL = COLLECTION_NAMES.bookmark
@@ -77,10 +77,14 @@ export default class BookmarksStorage extends StorageModule {
     }
 
     pageHasBookmark = async (url: string): Promise<boolean> => {
+        return !!(await this.findBookmark(url))
+    }
+
+    findBookmark = async (url: string): Promise<Bookmark> => {
         const normalizedUrl = normalizeUrl(url)
-        return !!(await this.operation('findBookmarkByUrl', {
+        return this.operation('findBookmarkByUrl', {
             url: normalizedUrl,
-        }))
+        })
     }
 
     async findTabBookmarks(normalizedPageUrls: string[]): Promise<Bookmark[]> {

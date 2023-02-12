@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
-import OnClickOutside from 'react-onclickoutside'
 
 import styles from './IndexDropdownSB.css'
 import { IndexDropdown } from 'src/common-ui/containers'
@@ -25,4 +24,4 @@ IndexDropdownSB.propTypes = {
 }
 
 // export default IndexDropdownSB
-export default OnClickOutside(IndexDropdownSB)
+export default IndexDropdownSB

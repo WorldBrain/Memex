@@ -1,6 +1,8 @@
-import React, { PureComponent } from 'react'
-import styled from 'styled-components'
+import React, { PureComponent, useState } from 'react'
+import styled, { css, keyframes } from 'styled-components'
 import Waypoint from 'react-waypoint'
+import browser from 'webextension-polyfill'
+// import { SketchPicker } from 'react-color'
 
 import type {
     RootState,
@@ -19,16 +21,10 @@ import type { RootState as ListSidebarState } from '../lists-sidebar/types'
 import TopBar from './components/result-top-bar'
 import SearchTypeSwitch, {
     Props as SearchTypeSwitchProps,
-} from './components/search-type-switch'
-import SearchCopyPaster, {
-    Props as SearchCopyPasterProps,
-} from './components/search-copy-paster'
-import ExpandAllNotes from './components/expand-all-notes'
+} from '@worldbrain/memex-common/lib/common-ui/components/search-type-switch'
 import DayResultGroup from './components/day-result-group'
 import PageResult from './components/page-result'
-import NoResults from './components/no-results'
 import { bindFunctionalProps, formatDayGroupTime } from './util'
-import NotesTypeDropdownMenu from './components/notes-type-dropdown-menu'
 import { SortingDropdownMenuBtn } from 'src/sidebar/annotations-sidebar/components/SortingDropdownMenu'
 import { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 import {
@@ -40,24 +36,22 @@ import AnnotationEditable from 'src/annotations/components/HoverControlledAnnota
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
-import TagPicker from 'src/tags/ui/TagPicker'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import DismissibleResultsMessage from './components/dismissible-results-message'
 import MobileAppAd from 'src/sync/components/device-list/mobile-app-ad'
-import OnboardingMsg from './components/onboarding-msg'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import ListDetails, {
     Props as ListDetailsProps,
 } from './components/list-details'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import ListShareMenu from 'src/overview/sharing/ListShareMenu'
-import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
-import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from 'src/annotations/types'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -65,9 +59,16 @@ const timestampToString = (timestamp: number) =>
 export type Props = RootState &
     Pick<
         SearchTypeSwitchProps,
-        'onNotesSearchSwitch' | 'onPagesSearchSwitch'
+        | 'onNotesSearchSwitch'
+        | 'onPagesSearchSwitch'
+        | 'onVideosSearchSwitch'
+        | 'onTwitterSearchSwitch'
+        | 'onPDFSearchSwitch'
+        | 'onEventSearchSwitch'
     > & {
+        isSpacesSidebarLocked?: boolean
         searchFilters?: any
+        activePage?: boolean
         searchResults?: any
         searchQuery?: string
         listData: ListSidebarState['listData']
@@ -78,17 +79,15 @@ export type Props = RootState &
         toggleSortMenuShown: () => void
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
-        searchCopyPasterProps: SearchCopyPasterProps
         listDetailsProps: ListDetailsProps
         pagePickerProps: PagePickerAugdProps
+        youtubeService: YoutubeService
         onShowAllNotesClick: React.MouseEventHandler
         noResultsType: NoResultsType
         onDismissMobileAd: React.MouseEventHandler
         onDismissOnboardingMsg: React.MouseEventHandler
-        showCloudOnboardingModal: React.MouseEventHandler
         onDismissSubscriptionBanner: React.MouseEventHandler
         isDisplayed: boolean
-        filterSearchByTag: (tag: string) => void
         openListShareModal: () => void
         newNoteInteractionProps: {
             [Key in keyof AnnotationCreateEventProps]: (
@@ -111,14 +110,136 @@ export type Props = RootState &
         onListLinkCopy(link: string): Promise<void>
         // updateAllResultNotesShareInfo: (info: NoteShareInfo) => void
         updateAllResultNotesShareInfo: (state: AnnotationSharingStates) => void
+        clearInbox: () => void
+        filterByList: (listId: number) => void
     }
 
-export default class SearchResultsContainer extends PureComponent<Props> {
+export interface State {
+    tutorialState: []
+    showTutorialVideo: boolean
+    showHorizontalScrollSwitch: string
+}
+
+export default class SearchResultsContainer extends React.Component<
+    Props,
+    State
+> {
     private renderLoader = (props: { key?: string } = {}) => (
         <Loader {...props}>
             <LoadingIndicator />
         </Loader>
     )
+    componentDidMount() {
+        this.getTutorialState()
+        this.listenToContentSwitcherSizeChanges()
+    }
+
+    listenToContentSwitcherSizeChanges() {
+        let topBarElement = document.getElementById('SearchTypeSwitchContainer')
+
+        if (topBarElement.clientWidth < topBarElement.scrollWidth) {
+            this.setState({
+                showHorizontalScrollSwitch: 'right',
+            })
+        } else {
+            this.setState({
+                showHorizontalScrollSwitch: 'none',
+            })
+        }
+
+        topBarElement.addEventListener('scroll', () => {
+            this.contentSwitcherResizeLogic(topBarElement)
+        })
+
+        const resizeObservation = new ResizeObserver((output) => {
+            this.contentSwitcherResizeLogic(output[0].target)
+        })
+
+        resizeObservation.observe(topBarElement)
+
+        topBarElement.addEventListener('resize', () => {
+            this.contentSwitcherResizeLogic(topBarElement)
+        })
+
+        window.addEventListener('resize', () => {
+            if (topBarElement.clientWidth < topBarElement.scrollWidth) {
+                this.setState({
+                    showHorizontalScrollSwitch: 'right',
+                })
+                if (topBarElement.scrollLeft > 0) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'both',
+                    })
+                }
+                if (
+                    Math.abs(
+                        Math.ceil(
+                            topBarElement.scrollLeft +
+                                topBarElement.clientWidth,
+                        ) - topBarElement.scrollWidth,
+                    ) < 5
+                ) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'left',
+                    })
+                }
+            } else {
+                this.setState({
+                    showHorizontalScrollSwitch: 'none',
+                })
+            }
+        })
+    }
+
+    contentSwitcherResizeLogic(topBarElement) {
+        if (topBarElement.clientWidth < topBarElement.scrollWidth) {
+            this.setState({
+                showHorizontalScrollSwitch: 'right',
+            })
+            if (topBarElement.scrollLeft > 0) {
+                this.setState({
+                    showHorizontalScrollSwitch: 'left',
+                })
+
+                if (
+                    Math.ceil(
+                        topBarElement.scrollLeft + topBarElement.clientWidth,
+                    ) !== topBarElement.scrollWidth
+                ) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'both',
+                    })
+                }
+
+                if (
+                    Math.abs(
+                        Math.ceil(
+                            topBarElement.scrollLeft +
+                                topBarElement.clientWidth,
+                        ) - topBarElement.scrollWidth,
+                    ) < 5
+                ) {
+                    this.setState({
+                        showHorizontalScrollSwitch: 'left',
+                    })
+                }
+            }
+        } else {
+            this.setState({
+                showHorizontalScrollSwitch: 'none',
+            })
+            return
+        }
+    }
+
+    spaceBtnBarDashboardRef = React.createRef<HTMLDivElement>()
+    sortButtonRef = React.createRef<HTMLDivElement>()
+
+    state = {
+        showTutorialVideo: false,
+        tutorialState: undefined,
+        showHorizontalScrollSwitch: 'none',
+    }
 
     private renderNoteResult = (
         day: number,
@@ -151,7 +272,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             <AnnotationEditable
                 zIndex={zIndex}
                 key={noteId}
-                url={noteId}
+                unifiedId={noteId}
                 tags={noteData.tags}
                 lists={listsToDisplay}
                 body={noteData.highlight}
@@ -160,7 +281,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 getListDetailsById={this.props.getListDetailsById}
                 isBulkShareProtected={noteData.isBulkShareProtected}
                 createdWhen={new Date(noteData.displayTime)}
-                onTagClick={this.props.filterSearchByTag}
                 onGoToAnnotation={interactionProps.onGoToHighlightClick}
                 contextLocation={'dashboard'}
                 lastEdited={
@@ -168,127 +288,76 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                         ? new Date(noteData.displayTime)
                         : undefined
                 }
-                mode={noteData.isEditing ? 'edit' : 'default'}
-                renderCopyPasterForAnnotation={() =>
-                    noteData.isCopyPasterShown && (
-                        <HoverBox
-                            padding={'0px'}
-                            right="0"
-                            withRelativeContainer
-                        >
-                            <PageNotesCopyPaster
-                                annotationUrls={[noteId]}
-                                normalizedPageUrls={[pageId]}
-                                onClickOutside={
-                                    interactionProps.onCopyPasterBtnClick
-                                }
-                            />
-                        </HoverBox>
-                    )
-                }
-                renderTagsPickerForAnnotation={
-                    this.props.shouldShowTagsUIs
-                        ? () =>
-                              noteData.isTagPickerShown && (
-                                  <HoverBox
-                                      left="0"
-                                      top="-40px"
-                                      withRelativeContainer
-                                  >
-                                      <TagPicker
-                                          initialSelectedEntries={() =>
-                                              noteData.tags
-                                          }
-                                          onClickOutside={
-                                              interactionProps.onTagPickerBtnClick
-                                          }
-                                          onUpdateEntrySelection={
-                                              interactionProps.updateTags
-                                          }
-                                      />
-                                  </HoverBox>
-                              )
-                        : undefined
-                }
-                renderListsPickerForAnnotation={() =>
-                    noteData.isListPickerShown && (
-                        <HoverBox withRelativeContainer>
-                            <CollectionPicker
-                                initialSelectedListIds={() => listsToDisplay}
-                                onClickOutside={
-                                    interactionProps.onListPickerBtnClick
-                                }
-                                selectEntry={(listId) =>
-                                    interactionProps.updateLists({
-                                        added: listId,
-                                        deleted: null,
-                                        selected: [],
-                                        options: {
-                                            showExternalConfirmations: true,
-                                        },
-                                    })
-                                }
-                                unselectEntry={(listId) =>
-                                    interactionProps.updateLists({
-                                        added: null,
-                                        deleted: listId,
-                                        selected: [],
-                                        options: {
-                                            showExternalConfirmations: true,
-                                        },
-                                    })
-                                }
-                                createNewEntry={interactionProps.createNewList}
-                            />
-                        </HoverBox>
-                    )
-                }
-                renderShareMenuForAnnotation={() =>
-                    noteData.shareMenuShowStatus !== 'hide' && (
-                        <HoverBox
-                            padding={'0px'}
-                            width="350px"
-                            right="0"
-                            withRelativeContainer
-                        >
-                            <SingleNoteShareMenu
-                                listData={this.props.listData}
-                                isShared={noteData.isShared}
-                                shareImmediately={
-                                    noteData.shareMenuShowStatus ===
-                                    'show-n-share'
-                                }
-                                annotationUrl={noteId}
-                                copyLink={this.props.onNoteLinkCopy}
-                                closeShareMenu={
-                                    interactionProps.onShareBtnClick
-                                }
-                                postShareHook={interactionProps.updateShareInfo}
-                                spacePickerProps={{
-                                    initialSelectedListIds: () =>
-                                        listsToDisplay,
-                                    selectEntry: (listId, options) =>
-                                        interactionProps.updateLists({
-                                            added: listId,
-                                            deleted: null,
-                                            selected: [],
-                                            options,
-                                        }),
-                                    unselectEntry: (listId) =>
-                                        interactionProps.updateLists({
-                                            added: null,
-                                            deleted: listId,
-                                            selected: [],
-                                        }),
-                                    createNewEntry:
-                                        interactionProps.createNewList,
-                                }}
-                            />
-                        </HoverBox>
-                    )
-                }
+                isEditing={noteData.isEditing}
+                isDeleting={false}
+                renderCopyPasterForAnnotation={() => (
+                    <PageNotesCopyPaster
+                        annotationUrls={[noteId]}
+                        normalizedPageUrls={[pageId]}
+                    />
+                )}
+                spacePickerButtonRef={this.spaceBtnBarDashboardRef}
+                renderListsPickerForAnnotation={() => (
+                    <CollectionPicker
+                        initialSelectedListIds={() => listsToDisplay}
+                        selectEntry={(listId) =>
+                            interactionProps.updateLists({
+                                added: listId,
+                                deleted: null,
+                                selected: [],
+                                options: {
+                                    showExternalConfirmations: true,
+                                },
+                            })
+                        }
+                        unselectEntry={(listId) =>
+                            interactionProps.updateLists({
+                                added: null,
+                                deleted: listId,
+                                selected: [],
+                                options: {
+                                    showExternalConfirmations: true,
+                                },
+                            })
+                        }
+                        createNewEntry={interactionProps.createNewList}
+                    />
+                )}
+                renderShareMenuForAnnotation={() => (
+                    <SingleNoteShareMenu
+                        getRemoteListIdForLocalId={(localListId) =>
+                            this.props.listData[localListId]?.remoteId ?? null
+                        }
+                        isShared={noteData.isShared}
+                        shareImmediately={
+                            noteData.shareMenuShowStatus === 'show-n-share'
+                        }
+                        annotationUrl={noteId}
+                        copyLink={this.props.onNoteLinkCopy}
+                        postShareHook={interactionProps.updateShareInfo}
+                        spacePickerProps={{
+                            initialSelectedListIds: () => listsToDisplay,
+                            selectEntry: (listId, options) =>
+                                interactionProps.updateLists({
+                                    added: listId,
+                                    deleted: null,
+                                    selected: [],
+                                    options,
+                                }),
+                            unselectEntry: (listId) =>
+                                interactionProps.updateLists({
+                                    added: null,
+                                    deleted: listId,
+                                    selected: [],
+                                }),
+                            createNewEntry: interactionProps.createNewList,
+                        }}
+                    />
+                )}
                 annotationEditDependencies={{
                     comment: noteData.editNoteForm.inputValue,
+                    onListsBarPickerBtnClick:
+                        interactionProps.onListPickerBarBtnClick,
                     onCommentChange: (value) =>
                         interactionProps.onCommentChange({
                             target: { value },
@@ -300,8 +369,6 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 annotationFooterDependencies={{
                     onDeleteCancel: () => undefined,
                     onDeleteConfirm: () => undefined,
-                    onTagIconClick: interactionProps.onTagPickerBtnClick,
-                    onListIconClick: interactionProps.onListPickerBtnClick,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
                     onEditIconClick: interactionProps.onEditBtnClick,
@@ -344,43 +411,36 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                     {...boundAnnotCreateProps}
                     contextLocation={'dashboard'}
                 />
-                {noteIds[notesType].length > 0 && (
-                    <>
-                        <Margin top="3px" />
-                        <NoteTopBarBox
-                            leftSide={
-                                <TopBarRightSideWrapper>
-                                    <ButtonTooltip
-                                        tooltipText="Sort Annotations"
-                                        position="bottom"
-                                    >
-                                        <Icon
-                                            filePath={icons.sort}
-                                            onClick={() =>
-                                                this.props.toggleSortMenuShown()
-                                            }
-                                            height="18px"
-                                            width="20px"
-                                        />
-                                    </ButtonTooltip>
-                                    {this.renderSortingMenuDropDown(
-                                        normalizedUrl,
-                                        day,
-                                    )}
-                                </TopBarRightSideWrapper>
-                            }
-                        />
-                        <Separator />
-                    </>
-                )}
-                {noteIds[notesType].map((noteId, index) => {
-                    const zIndex = noteIds[notesType].length - index
-                    return this.renderNoteResult(
-                        day,
-                        normalizedUrl,
-                        zIndex,
-                    )(noteId)
-                })}
+                <NoteResultContainer>
+                    {noteIds[notesType].length > 0 && (
+                        <SortButtonContainer>
+                            <TooltipBox
+                                tooltipText="Sort Annotations"
+                                placement="bottom"
+                            >
+                                <Icon
+                                    filePath={icons.sort}
+                                    onClick={() =>
+                                        this.props.toggleSortMenuShown()
+                                    }
+                                    height="16px"
+                                    width="16px"
+                                    background="black"
+                                    containerRef={this.sortButtonRef}
+                                />
+                            </TooltipBox>
+                            {this.renderSortingMenuDropDown(normalizedUrl, day)}
+                        </SortButtonContainer>
+                    )}
+                    {noteIds[notesType].map((noteId, index) => {
+                        const zIndex = noteIds[notesType].length - index
+                        return this.renderNoteResult(
+                            day,
+                            normalizedUrl,
+                            zIndex,
+                        )(noteId)
+                    })}
+                </NoteResultContainer>
             </PageNotesBox>
         )
     }
@@ -391,11 +451,10 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         }
 
         return (
-            <HoverBox
-                withRelativeContainer
-                left={'-30px'}
-                padding={'0px'}
-                top={'20px'}
+            <PopoutBox
+                closeComponent={() => this.props.toggleSortMenuShown()}
+                placement="right-start"
+                targetElementRef={this.sortButtonRef.current}
             >
                 <SortingDropdownMenuBtn
                     onMenuItemClick={({ sortingFn }) =>
@@ -404,13 +463,17 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                             normalizedUrl,
                         )(sortingFn)
                     }
-                    onClickOutSide={() => this.props.toggleSortMenuShown()}
                 />
-            </HoverBox>
+            </PopoutBox>
         )
     }
 
-    private renderPageResult = (pageId: string, day: number, index: number) => {
+    private renderPageResult = (
+        pageId: string,
+        day: number,
+        index: number,
+        order: number,
+    ) => {
         const page = {
             ...this.props.pageData.byId[pageId],
             ...this.props.results[day].pages.byId[pageId],
@@ -428,18 +491,25 @@ export default class SearchResultsContainer extends PureComponent<Props> {
 
         return (
             <ResultBox
-                zIndex={index}
+                zIndex={
+                    interactionProps.onMainContentHover
+                        ? index +
+                          this.props.results[day].pages.allIds.length +
+                          1
+                        : index
+                }
                 bottom="10px"
                 key={day.toString() + pageId}
+                order={order}
             >
                 <PageResult
+                    activePage={this.props.activePage}
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={this.props.selectedListId}
+                    youtubeService={this.props.youtubeService}
                     getListDetailsById={this.props.getListDetailsById}
-                    onTagClick={this.props.filterSearchByTag}
                     shareMenuProps={{
                         normalizedPageUrl: page.normalizedUrl,
-                        closeShareMenu: interactionProps.onShareBtnClick,
                         copyLink: this.props.onPageLinkCopy,
                         postBulkShareHook: (shareInfo) =>
                             interactionProps.updatePageNotesShareInfo(
@@ -454,10 +524,167 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                             ? interactionProps.onTagPickerBtnClick
                             : undefined
                     }
+                    filterbyList={(listId) => {
+                        this.props.filterByList(listId)
+                    }}
                 />
                 {this.renderPageNotes(page, day, interactionProps)}
             </ResultBox>
         )
+    }
+
+    private getTutorialState = async () => {
+        const tutorialStateLoaded = await browser.storage.local.get(
+            '@onboarding-dashboard-tutorials',
+        )
+        this.setState({
+            tutorialState:
+                tutorialStateLoaded['@onboarding-dashboard-tutorials'],
+        })
+    }
+
+    private dismissTutorials = async (type) => {
+        let tutorialState = this.state.tutorialState
+        tutorialState[type] = false
+
+        this.setState({
+            tutorialState: tutorialState,
+        })
+
+        await browser.storage.local.set({
+            '@onboarding-dashboard-tutorials': tutorialState,
+        })
+    }
+
+    private renderOnboardingTutorials() {
+        let title
+        let videoURL
+        let readURL
+        let onDismiss
+
+        if (
+            this.state.tutorialState != null &&
+            this.state.tutorialState[this.props.searchType]
+        ) {
+            if (this.props.searchType === 'pages') {
+                title =
+                    'Learn the basics about saving and searching what you read online'
+                videoURL =
+                    'https://share.descript.com/embed/QTnFzKBo7XM?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/memexbasics'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
+            }
+            if (this.props.searchType === 'notes') {
+                title =
+                    'Learn the basics about adding highlights and notes to web content, PDFs and videos'
+                videoURL =
+                    'https://share.descript.com/embed/0HGxOo3duKu?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/webhighlights'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
+            }
+            if (this.props.searchType === 'videos') {
+                title =
+                    'Learn the basics about adding highlights to videos on Youtube, Vimeo and HTML5 videos'
+                videoURL =
+                    'https://share.descript.com/embed/4yYXrC63L95?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/videoAnnotations'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
+            }
+            if (this.props.searchType === 'twitter') {
+                title =
+                    'Learn the basics about saving and annotating tweets on the web and on mobile'
+                videoURL =
+                    'https://share.descript.com/embed/TVgEKP80LqR?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/tweets'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
+            }
+            if (this.props.searchType === 'pdf') {
+                title =
+                    'Learn the basics about annotating PDFs on the web and your hard drive'
+                videoURL =
+                    'https://share.descript.com/embed/Vl7nXyy3sLb?autoplay=1'
+                readURL = 'https://tutorials.memex.garden/PDFannotations'
+                onDismiss = () => this.dismissTutorials(this.props.searchType)
+            }
+        }
+
+        if (
+            this.props.showMobileAppAd &&
+            this.props.selectedListId === 20201015
+        ) {
+            title = (
+                <MobileAdContainer>
+                    Save pages & create highlights and annotations on your
+                    mobile devices.
+                    <MobileAppAd />
+                </MobileAdContainer>
+            )
+            videoURL = 'https://share.descript.com/embed/Vl7nXyy3sLb?autoplay=1'
+            readURL = 'https://tutorials.memex.garden/mobileApp'
+            onDismiss = this.props.onDismissMobileAd
+        }
+
+        if (title != null) {
+            return (
+                <TutorialContainer
+                    showTutorialVideo={this.state.showTutorialVideo}
+                >
+                    <TutorialContent
+                        showTutorialVideo={this.state.showTutorialVideo}
+                    >
+                        <TutorialTitle>{title}</TutorialTitle>
+                        <TutorialButtons>
+                            <PrimaryAction
+                                size="medium"
+                                type="primary"
+                                iconPosition="right"
+                                icon="longArrowRight"
+                                label="Read More"
+                                onClick={() => window.open(readURL, '_blank')}
+                            />
+
+                            <PrimaryAction
+                                size="medium"
+                                type="tertiary"
+                                label="Dismiss"
+                                onClick={() => onDismiss()}
+                            />
+                        </TutorialButtons>
+                    </TutorialContent>
+                    <TutorialVideoContainer
+                        showTutorialVideo={this.state.showTutorialVideo}
+                    >
+                        {this.state.showTutorialVideo ? (
+                            <TutorialVideo
+                                src={videoURL}
+                                showTutorialVideo={this.state.showTutorialVideo}
+                            />
+                        ) : (
+                            <TutorialVideoBox
+                                onClick={() =>
+                                    this.setState({
+                                        showTutorialVideo: true,
+                                    })
+                                }
+                            >
+                                <TutorialPlayButton>
+                                    <Icon
+                                        hoverOff
+                                        color={'white'}
+                                        filePath={'play'}
+                                        heightAndWidth={'20px'}
+                                    />
+                                    Watch
+                                </TutorialPlayButton>
+                                <TutorialBlurPicture />
+                            </TutorialVideoBox>
+                        )}
+                    </TutorialVideoContainer>
+                </TutorialContainer>
+            )
+        } else {
+            return undefined
+        }
     }
 
     private renderNoResults() {
@@ -470,20 +697,21 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                 this.props.searchFilters.dateFrom > 0)
         ) {
             return (
-                <ResultsMessage>
-                    <SectionCircle>
+                <NoResultsMessage>
+                    <IconBox heightAndWidth="34px" background="dark">
                         <Icon
                             filePath={icons.searchIcon}
-                            heightAndWidth="24px"
-                            color="purple"
+                            heightAndWidth="18px"
+                            color="prime1"
                             hoverOff
                         />
-                    </SectionCircle>
-                    <NoResults title="Nothing found for this query" />
-                </ResultsMessage>
+                    </IconBox>
+                    `Nothing found for "{this.props.searchQuery}"`
+                </NoResultsMessage>
             )
         }
 
+        // if the first time using Memex
         if (
             this.props.searchResults.allIds.length === 0 &&
             this.props.searchQuery.length === 0 &&
@@ -491,135 +719,36 @@ export default class SearchResultsContainer extends PureComponent<Props> {
             !this.props.searchFilters.isTagFilterActive &&
             !this.props.searchFilters.isDomainFilterActive
         ) {
-            if (this.props.noResultsType === 'mobile-list-ad') {
+            if (this.props.selectedListId === 20201015) {
                 return (
-                    <ResultsMessage>
-                        <SectionCircle>
+                    <NoResultsMessage>
+                        <IconBox heightAndWidth="34px" background="dark">
                             <Icon
                                 filePath={icons.phone}
-                                heightAndWidth="24px"
-                                color="purple"
+                                heightAndWidth="18px"
+                                color="prime1"
                                 hoverOff
                             />
-                        </SectionCircle>
-                        <NoResults title="Save & annotate from your mobile devices">
-                            <DismissibleResultsMessage
-                                onDismiss={this.props.onDismissMobileAd}
-                            >
-                                <MobileAppAd />
-                            </DismissibleResultsMessage>
-                        </NoResults>
-                    </ResultsMessage>
+                        </IconBox>
+                        Nothing saved yet from your mobile devices
+                    </NoResultsMessage>
                 )
             }
 
-            if (this.props.searchType === 'notes') {
-                return (
-                    <ResultsMessage>
-                        <SectionCircle>
-                            <Icon
-                                filePath={icons.highlighterEmpty}
-                                heightAndWidth="24px"
-                                color="purple"
-                                hoverOff
-                            />
-                        </SectionCircle>
-                        <NoResults
-                            title={
-                                <span>
-                                    Make your first highlight or annotation
-                                </span>
-                            }
-                        />
-                    </ResultsMessage>
-                )
-            } else {
-                return (
-                    <ResultsMessage>
-                        <SectionCircle>
+            return (
+                <>
+                    <NoResultsMessage>
+                        <IconBox heightAndWidth="34px" background="dark">
                             <Icon
                                 filePath={icons.heartEmpty}
-                                heightAndWidth="24px"
-                                color="purple"
+                                heightAndWidth="18px"
+                                color="prime1"
                                 hoverOff
                             />
-                        </SectionCircle>
-                        <NoResults
-                            title={
-                                <span>
-                                    Save your first website or{' '}
-                                    <ImportInfo
-                                        onClick={() =>
-                                            (window.location.hash = '#/import')
-                                        }
-                                    >
-                                        import your bookmarks.
-                                    </ImportInfo>
-                                </span>
-                            }
-                        ></NoResults>
-                    </ResultsMessage>
-                )
-            }
-        }
-
-        if (
-            this.props.noResultsType === 'mobile-list' &&
-            this.props.searchQuery.length === 0
-        ) {
-            return (
-                <ResultsMessage>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.phone}
-                            heightAndWidth="24px"
-                            color="purple"
-                            hoverOff
-                        />
-                    </SectionCircle>
-                    <NoResults title="Save & annotate from your mobile devices"></NoResults>
-                </ResultsMessage>
-            )
-        }
-
-        if (this.props.noResultsType === 'mobile-list-ad') {
-            return (
-                <ResultsMessage>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.phone}
-                            heightAndWidth="24px"
-                            color="purple"
-                            hoverOff
-                        />
-                    </SectionCircle>
-                    <NoResults title="Save & annotate from your mobile devices">
-                        <DismissibleResultsMessage
-                            onDismiss={this.props.onDismissMobileAd}
-                        >
-                            <MobileAppAd />
-                        </DismissibleResultsMessage>
-                    </NoResults>
-                </ResultsMessage>
-            )
-        }
-
-        if (this.props.noResultsType === 'stop-words') {
-            return (
-                <ResultsMessage>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.searchIcon}
-                            heightAndWidth="24px"
-                            color="purple"
-                            hoverOff
-                        />
-                    </SectionCircle>
-                    <NoResults title="No Results">
-                        Search terms are too common <br />
-                        or have been filtered out to increase performance.
-                    </NoResults>
-                </ResultsMessage>
+                        </IconBox>
+                        Nothing saved yet
+                    </NoResultsMessage>
+                </>
             )
         }
     }
@@ -630,6 +759,13 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         }
 
         if (this.props.searchState === 'running') {
+            return this.renderLoader()
+        }
+
+        if (
+            this.props.clearInboxLoadState === 'running' &&
+            this.props.selectedListId === 20201014
+        ) {
             return this.renderLoader()
         }
 
@@ -649,6 +785,7 @@ export default class SearchResultsContainer extends PureComponent<Props> {
                             id,
                             day,
                             pages.allIds.length - index,
+                            index,
                         ),
                     )}
                 </DayResultGroup>,
@@ -656,7 +793,11 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         }
 
         if (this.props.searchPaginationState === 'running') {
-            days.push(this.renderLoader({ key: 'pagination-loader' }))
+            days.push(
+                <PaginationLoaderBox>
+                    {this.renderLoader({ key: 'pagination-loader' })}
+                </PaginationLoaderBox>,
+            )
         } else if (
             !this.props.areResultsExhausted &&
             this.props.searchState !== 'pristine'
@@ -672,93 +813,404 @@ export default class SearchResultsContainer extends PureComponent<Props> {
         return days
     }
 
-    private renderListShareBtn() {
-        if (this.props.selectedListId == null) {
-            return
-        }
+    // private renderListShareBtn() {
+    //     if (this.props.selectedListId == null) {
+    //         return
+    //     }
 
-        return (
-            <>
-                <ButtonTooltip
-                    tooltipText="Bulk-change privacy of annotations in this Space"
-                    position="bottom"
-                >
-                    <Icon
-                        filePath={icons.multiEdit}
-                        height="16px"
-                        onClick={this.props.toggleListShareMenu}
-                    />
-                </ButtonTooltip>
-                {this.props.isListShareMenuShown && (
-                    <HoverBox
-                        width="340px"
-                        top="20px"
-                        right="-90px"
-                        withRelativeContainer
-                        position="absolute"
-                        padding={'0px'}
-                    >
-                        <ListShareMenu
-                            openListShareModal={this.props.openListShareModal}
-                            copyLink={this.props.onListLinkCopy}
-                            closeShareMenu={this.props.toggleListShareMenu}
-                            listId={this.props.selectedListId}
-                            shareImmediately={false}
-                            postBulkShareHook={(shareState) =>
-                                this.props.updateAllResultNotesShareInfo(
-                                    shareState,
-                                )
-                            }
-                        />
-                    </HoverBox>
-                )}
-            </>
-        )
+    //     return (
+    //         <>
+    //             <TooltipBox
+    //                 tooltipText="Bulk-change privacy of annotations in this Space"
+    //                 placement="bottom"
+    //             >
+    //                 <Icon
+    //                     filePath={icons.multiEdit}
+    //                     height="16px"
+    //                     onClick={this.props.toggleListShareMenu}
+    //                 />
+    //             </TooltipBox>
+    //             {this.props.isListShareMenuShown && (
+    //                 <HoverBox
+    //                     width="340px"
+    //                     top="20px"
+    //                     right="-90px"
+    //                     withRelativeContainer
+    //                     position="absolute"
+    //                 >
+    //                     <ListShareMenu
+    //                         openListShareModal={this.props.openListShareModal}
+    //                         copyLink={this.props.onListLinkCopy}
+    //                         listId={this.props.selectedListId}
+    //                         shareImmediately={false}
+    //                         postBulkShareHook={(shareState) =>
+    //                             this.props.updateAllResultNotesShareInfo(
+    //                                 shareState,
+    //                             )
+    //                         }
+    //                     />
+    //                 </HoverBox>
+    //             )}
+    //         </>
+    //     )
+    // }
+
+    private firstTimeUser() {
+        if (
+            this.props.searchResults.allIds.length === 0 &&
+            this.props.searchQuery.length === 0 &&
+            !this.props.searchFilters.isDateFilterActive &&
+            !this.props.searchFilters.isTagFilterActive &&
+            !this.props.searchFilters.isDomainFilterActive
+        ) {
+            return true
+        } else {
+            return false
+        }
     }
 
     render() {
         return (
             <ResultsContainer bottom="100px">
-                {this.props.isCloudUpgradeBannerShown && (
-                    <CloudUpgradeBanner
-                        onGetStartedClick={this.props.showCloudOnboardingModal}
-                        width="fill-available"
-                    />
-                )}
-                {this.props.isSubscriptionBannerShown && (
-                    <PioneerPlanBanner
-                        onHideClick={this.props.onDismissSubscriptionBanner}
-                        width="fill-available"
-                    />
-                )}
-                {this.props.selectedListId != null && (
-                    <ListDetails {...this.props.listDetailsProps} />
-                )}
-                <PageTopBarBox
-                    isDisplayed={this.props.isDisplayed}
-                    bottom="5px"
-                >
-                    <TopBar
-                        leftSide={<SearchTypeSwitch {...this.props} />}
-                        rightSide={
-                            <RightSideButton>
-                                {this.renderListShareBtn()}
-                                <SearchCopyPaster
-                                    {...this.props.searchCopyPasterProps}
+                <ResultsBox>
+                    {this.props.selectedListId != null && (
+                        <ListDetails
+                            {...this.props.listDetailsProps}
+                            listId={this.props.selectedListId}
+                            clearInbox={this.props.clearInbox}
+                        />
+                    )}
+                    <ReferencesContainer>
+                        {this.props.listData[this.props.selectedListId]
+                            ?.remoteId != null && (
+                            <>
+                                <Icon
+                                    hoverOff
+                                    heightAndWidth="12px"
+                                    color={'greyScale6'}
+                                    icon={'warning'}
                                 />
-                                <ExpandAllNotes
-                                    isEnabled={this.props.areAllNotesShown}
-                                    onClick={this.props.onShowAllNotesClick}
+                                <InfoText>
+                                    Only your own contributions to this space
+                                    are visible locally.
+                                </InfoText>
+                            </>
+                        )}
+                    </ReferencesContainer>
+                    <PageTopBarBox isDisplayed={this.props.isDisplayed}>
+                        <TopBar
+                            leftSide={
+                                <ContentTypeSwitchContainer id="ContentTypeSwitchContainer">
+                                    <SearchTypeSwitchContainer>
+                                        {this.state
+                                            .showHorizontalScrollSwitch ===
+                                            'left' ||
+                                        this.state
+                                            .showHorizontalScrollSwitch ===
+                                            'both' ? (
+                                            <IconContainerLeft>
+                                                <Icon
+                                                    filePath="arrowLeft"
+                                                    heightAndWidth="22px"
+                                                    onClick={() =>
+                                                        document
+                                                            .getElementById(
+                                                                'SearchTypeSwitchContainer',
+                                                            )
+                                                            .scrollBy({
+                                                                left: -200,
+                                                                top: 0,
+                                                                behavior:
+                                                                    'smooth',
+                                                            })
+                                                    }
+                                                />
+                                            </IconContainerLeft>
+                                        ) : undefined}
+                                        <SearchTypeSwitch {...this.props} />
+                                        {this.state
+                                            .showHorizontalScrollSwitch ===
+                                            'right' ||
+                                        this.state
+                                            .showHorizontalScrollSwitch ===
+                                            'both' ? (
+                                            <IconContainerRight>
+                                                <Icon
+                                                    filePath="arrowRight"
+                                                    heightAndWidth="22px"
+                                                    onClick={() =>
+                                                        document
+                                                            .getElementById(
+                                                                'SearchTypeSwitchContainer',
+                                                            )
+                                                            .scrollBy({
+                                                                left: 200,
+                                                                top: 0,
+                                                                behavior:
+                                                                    'smooth',
+                                                            })
+                                                    }
+                                                />
+                                            </IconContainerRight>
+                                        ) : undefined}
+                                    </SearchTypeSwitchContainer>
+                                </ContentTypeSwitchContainer>
+                            }
+                            rightSide={undefined}
+                        />
+                    </PageTopBarBox>
+                    {this.renderOnboardingTutorials()}
+                    {this.renderResultsByDay()}
+                    {this.props.areResultsExhausted &&
+                        this.props.searchState === 'success' &&
+                        this.props.clearInboxLoadState !== 'running' &&
+                        this.props.searchResults.allIds.length > 0 && (
+                            <ResultsExhaustedMessage>
+                                <Icon
+                                    filePath="checkRound"
+                                    heightAndWidth="22px"
+                                    hoverOff
+                                    color={'greyScale4'}
                                 />
-                            </RightSideButton>
-                        }
-                    />
-                </PageTopBarBox>
-                {this.renderResultsByDay()}
+                                End of results
+                            </ResultsExhaustedMessage>
+                        )}
+                </ResultsBox>
             </ResultsContainer>
         )
     }
 }
+
+const NoteResultContainer = styled.div`
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: fill-available;
+`
+
+const SortButtonContainer = styled.div`
+    position: absolute;
+    top: 6px;
+    left: -23px;
+    z-index: 100;
+`
+
+const PaginationLoaderBox = styled.div`
+    margin-top: -30px;
+`
+
+const IconContainerRight = styled.div`
+    position: absolute;
+    right: 5px;
+    top: 4px;
+    border-radius: 5px;
+
+    background: ${(props) => props.theme.colors.black}70;
+    z-index: 20;
+    backdrop-filter: blur(4px);
+`
+const IconContainerLeft = styled.div`
+    position: absolute;
+    left: 5px;
+    top: 4px;
+    border-radius: 5px;
+
+    background: ${(props) => props.theme.colors.black}70;
+    z-index: 20;
+    backdrop-filter: blur(4px);
+`
+
+const SearchTypeSwitchContainer = styled.div`
+    display: flex;
+    grid-gap: 3px;
+    position: relative;
+    width: fill-available;
+    padding-right: 30px;
+`
+
+const MobileAdContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+`
+
+const TutorialVideo = styled.iframe<{ showTutorialVideo: boolean }>`
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    border: none;
+    border-radius: 5px;
+`
+
+const TutorialContainer = styled.div<{ showTutorialVideo: boolean }>`
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    grid-gap: 40px;
+    padding: 26px 34px;
+    background-color: ${(props) => props.theme.colors.greyScale1};
+    border-radius: 8px;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    width: fill-available;
+    max-width: calc(${sizeConstants.searchResults.widthPx}px - 70px);
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            flex-direction: column-reverse;
+            grid-gap: 20px;
+        `}
+`
+
+const TutorialContent = styled.div<{ showTutorialVideo: boolean }>`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
+    height: fill-available;
+    justify-content: space-between;
+    height: 170px;
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            height: 120px;
+        `}
+`
+
+const TutorialTitle = styled.div`
+    font-size: 20px;
+    font-weight: 500;
+    background: ${(props) => props.theme.colors.headerGradient};
+    line-height: 30px;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    // @ts-ignore
+    text-fill-color: transparent;
+`
+
+const TutorialButtons = styled.div`
+    display: flex;
+    grid-gap: 5px;
+`
+
+const TutorialVideoContainer = styled.div<{ showTutorialVideo: boolean }>`
+    position: relative;
+    height: 170px;
+    max-width: 300px;
+    width: 100%;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            height: 0px;
+            padding-top: 56.25%;
+            width: fill-available;
+            max-width: fill-available;
+        `}
+`
+
+const TutorialVideoBox = styled.div<{ showTutorialVideo: boolean }>`
+    position: relative;
+    height: 170px;
+    max-width: 300px;
+    width: fill-available;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 0.8;
+    }
+
+    ${(props) =>
+        props.showTutorialVideo &&
+        css`
+            width: fill-available;
+            height: unset;
+        `}
+`
+
+const TutorialBlurPicture = styled.div`
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-image: url('/img/tutorialBlur.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    border-radius: 5px;
+    height: 170px;
+    max-width: 300px;
+    width: fill-available;
+    background-size: cover;
+`
+
+const TutorialPlayButton = styled.div`
+    height: 40px;
+    width: fit-content;
+    padding: 0 15px;
+    background-color: ${(props) => props.theme.colors.greyScale3};
+    color: ${(props) => props.theme.colors.white};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50px;
+    z-index: 1;
+    font-size: 14px;
+    grid-gap: 5px;
+`
+
+const ResultsExhaustedMessage = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    color: ${(props) => props.theme.colors.greyScale4};
+    padding: 10px;
+    white-space: nowrap;
+    width: fill-available;
+    justify-content: center;
+    font-size: 16px;
+    align-items: center;
+    max-width: ${sizeConstants.searchResults.widthPx}px;
+`
+const NoResultsMessage = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    color: ${(props) => props.theme.colors.greyScale4};
+    padding: 30px;
+    white-space: nowrap;
+    width: fill-available;
+    justify-content: center;
+    font-size: 18px;
+    align-items: center;
+`
+
+const ContentTypeSwitchContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    grid-gap: 10px;
+    width: fill-available;
+    padding: 10px 0px 9px 0px;
+
+    /* overflow-x: scroll;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none; */
+`
 
 const ResultsMessage = styled.div`
     padding-top: 30px;
@@ -768,38 +1220,34 @@ const ResultsMessage = styled.div`
     flex-direction: column;
 `
 
-const PageTopBarBox = styled(Margin)<{ isDisplayed: boolean }>`
-    width: 96%;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
-    padding: 0px 15px;
-    height: 40px;
-    max-width: calc(${sizeConstants.searchResults.widthPx}px + 30px);
-    z-index: 2147483639;
-    margin-top: -6px;
+const InfoText = styled.div`
+    color: ${(props) => props.theme.colors.darkText};
+    font-size: 14px;
+    font-weight: 300;
+`
+
+const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
+    /* padding: 0px 15px; */
+    height: fit-content;
+    max-width: calc(${sizeConstants.searchResults.widthPx}px);
+    z-index: 3000;
     position: sticky;
-    top: ${(props) => (props.isDisplayed === true ? '110px' : '60px')};
-    background: ${(props) => props.theme.colors.backgroundColor};
+    top: 0px;
+    background: ${(props) => props.theme.colors.black};
+    width: fill-available;
 `
 
-const IconBox = styled.div`
+const ReferencesContainer = styled.div`
+    width: 100%;
+    font-weight: lighter;
+    font-size: 16px;
+    color: ${(props) => props.theme.colors.greyScale4};
     display: flex;
-    justify-content: center;
+    flex-direction: row;
     align-items: center;
-    border-radius: 3px;
-    padding: 4px;
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.grey};
-    }
-`
-
-const RightSideButton = styled.div`
-    display: flex;
-    align-items: center;
-    display: grid;
-    grid-auto-flow: column;
-    grid-gap: 10px;
-    align-items: center;
+    justify-content: flex-start;
+    grid-gap: 5px;
+    max-width: ${sizeConstants.searchResults.widthPx}px;
 `
 
 const NoteTopBarBox = styled(TopBar)`
@@ -807,11 +1255,22 @@ const NoteTopBarBox = styled(TopBar)`
     display: flex;
 `
 
-const ResultBox = styled(Margin)<{ zIndex: number }>`
+const openAnimation = keyframes`
+ 0% { margin-top: 30px; opacity: 0 }
+ 100% { margin-top: 0px; opacity: 1 }
+`
+
+const ResultBox = styled(Margin)<{ zIndex: number; order }>`
     flex-direction: column;
     justify-content: space-between;
     width: 100%;
     z-index: ${(props) => props.zIndex};
+
+    animation-name: ${openAnimation};
+    animation-delay: ${(props) => props.order * 30}ms;
+    animation-duration: 0.4s;
+    animation-timing-function: cubic-bezier(0.16, 0.67, 0.41, 0.83);
+    animation-fill-mode: backwards;
 `
 
 const PageNotesBox = styled(Margin)`
@@ -820,13 +1279,15 @@ const PageNotesBox = styled(Margin)`
     width: fill-available;
     padding-left: 10px;
     padding-top: 5px;
-    border-left: 4px solid ${(props) => props.theme.colors.lineGrey};
+    border-left: 4px solid ${(props) => props.theme.colors.greyScale3};
     z-index: 4;
+    position: relative;
+    align-items: flex-start;
 `
 
 const Separator = styled.div`
     width: 100%;
-    border-bottom: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     margin-bottom: -2px;
 `
 
@@ -838,13 +1299,41 @@ const Loader = styled.div`
     height: 300px;
 `
 
+const ResultsBox = styled.div<{ zIndex: number }>`
+    display: flex;
+    margin-top: 2px;
+    flex-direction: column;
+    width: fill-available;
+    height: 100vh;
+    overflow: scroll;
+    padding-bottom: 100px;
+    align-items: center;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+`
+
 const ResultsContainer = styled(Margin)`
     display: flex;
     flex-direction: column;
     align-self: center;
-    max-width: ${sizeConstants.searchResults.widthPx}px;
-    margin-bottom: 100px;
     width: fill-available;
+    margin-bottom: ${sizeConstants.header.heightPx}px;
+    width: fill-available;
+    padding: 0 24px;
+    z-index: 27;
+    height: fill-available;
+
+    width: fill-available;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const TopBarRightSideWrapper = styled.div`
@@ -879,18 +1368,18 @@ const IconImg = styled.img`
     width: 18px;
 `
 const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
+    background: ${(props) => props.theme.colors.greyScale2};
+    border: 1px solid ${(props) => props.theme.colors.greyScale6};
+    border-radius: 8px;
     height: 60px;
     width: 60px;
-    margin-bottom: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
 `
 
 const ImportInfo = styled.span`
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     margin-bottom: 40px;
     font-weight: 500;
     cursor: pointer;

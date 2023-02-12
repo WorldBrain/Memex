@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import styled from 'styled-components'
 
 const RemovedText = (props) => {
@@ -14,7 +14,7 @@ const RemovedText = (props) => {
 
 const RemoveContainer = styled.div`
     box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.1);
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     padding: 20px;
     grid-gap: 15px;
     font-size: 14px;
@@ -23,7 +23,6 @@ const RemoveContainer = styled.div`
 
 RemovedText.propTypes = {
     undo: PropTypes.func.isRequired,
-    // position: PropTypes.string.isRequired,
 }
 
 export default RemovedText

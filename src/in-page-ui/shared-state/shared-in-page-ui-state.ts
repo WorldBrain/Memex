@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events'
-import TypedEventEmitter from 'typed-emitter'
+import type TypedEventEmitter from 'typed-emitter'
 
-import { MaybePromise } from 'src/util/types'
-import {
+import type { MaybePromise } from 'src/util/types'
+import type {
     SharedInPageUIInterface,
     SharedInPageUIEvents,
     InPageUIComponentShowState,
@@ -15,7 +15,7 @@ import {
     getRemoteEventEmitter,
     TypedRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
-import { ContentSharingEvents } from 'src/content-sharing/background/types'
+import type { ContentSharingEvents } from 'src/content-sharing/background/types'
 
 export interface SharedInPageUIDependencies {
     getNormalizedPageUrl: () => MaybePromise<string>
@@ -23,6 +23,13 @@ export interface SharedInPageUIDependencies {
     unloadComponent: (component: InPageUIComponent) => void
 }
 
+/**
+ * This class controls the UI state for main components of a given page.
+ *
+ * All main UI components lke the sidebar and ribbon should receive a shared
+ * instance of this class and will subscribe to changes against it.
+ *
+ */
 export class SharedInPageUIState implements SharedInPageUIInterface {
     contentSharingEvents: TypedRemoteEventEmitter<'contentSharing'>
     events = new EventEmitter() as TypedEventEmitter<SharedInPageUIEvents>
@@ -38,6 +45,21 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         tooltip: false,
         highlights: false,
     }
+
+    /**
+     * Keep track of currently selected space for other UI elements to follow.
+     *
+     * Other main UI components may be interested in this to know, for
+     * instance, how what is the selected space for creating new annotations.
+     *
+     * The actual original source of truth for this is the
+     * AnnotationSidebarContainer selectedList state value. That is
+     * propagated to AnnotationSidebarInPage using selectedListChanged
+     * UIlogic event, which will then update this value here.
+     *
+     */
+    selectedList: SharedInPageUIInterface['selectedList'] = null
+
     _pendingEvents: {
         sidebarAction?: {
             emittedWhen: number
@@ -92,6 +114,10 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         delete this._pendingEvents[eventName]
     }
 
+    async testIfSidebarSetup() {
+        return true
+    }
+
     async showSidebar(options?: SidebarActionOptions) {
         const maybeEmitAction = () => {
             if (options?.action) {
@@ -107,9 +133,12 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
             return
         }
 
+        if (!this.componentsShown.ribbon) {
+            await this.showRibbon()
+        }
+
         await this._setState('sidebar', true)
         maybeEmitAction()
-        this.showRibbon()
     }
 
     _emitAction(
@@ -148,6 +177,10 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         component: InPageUIComponent,
         options: ShouldSetUpOptions = {},
     ) {
+        // NOTE: The loadComponent call is not async, though if you remove the await then the `componentShouldSetUp` event
+        //  gets sent off too early and the components won't properly receive it. Adding setTimeout(0) to the following call
+        //  doesn't seem to fix it as simply putting await does.
+        // TODO: fix this - could indicate a deeper timing issue
         await this.options.loadComponent(component)
         this._maybeEmitShouldSetUp(component, options)
     }

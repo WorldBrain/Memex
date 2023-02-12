@@ -1,6 +1,7 @@
 import { COLLECTION_NAMES as PAGES_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
 import { COLLECTION_NAMES as TAGS_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/tags/constants'
 import { COLLECTION_NAMES as LISTS_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { COLLECTION_NAMES as FOLLOWED_LISTS_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/followed-lists/constants'
 import { COLLECTION_NAMES as ANNOTATIONS_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/annotations/constants'
 import { COLLECTION_NAMES as TEMPLATE_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/copy-paster/constants'
 import { COLLECTION_NAMES as SHARING_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/content-sharing/client-storage'
@@ -26,4 +27,5 @@ export const CLOUD_SYNCED_COLLECTIONS: string[] = [
     SHARING_COLLECTION_NAMES.annotationPrivacy,
     SHARING_COLLECTION_NAMES.listMetadata,
     SHARING_COLLECTION_NAMES.annotationMetadata,
+    FOLLOWED_LISTS_COLLECTION_NAMES.followedList,
 ]

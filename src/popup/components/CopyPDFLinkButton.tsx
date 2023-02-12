@@ -42,13 +42,11 @@ class CopyPDFLinkButton extends PureComponent<Props, State> {
         return (
             <ButtonItem onClick={() => this.copyUrl()}>
                 <ButtonInnerContainer>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.copy}
-                            heightAndWidth="18px"
-                            hoverOff
-                        />
-                    </SectionCircle>
+                    <Icon
+                        filePath={icons.copy}
+                        heightAndWidth="22px"
+                        hoverOff
+                    />
                     <ButtonInnerContent>
                         {this.state.isCopied === false ? (
                             <div className={styles.buttonInnerContent}>
@@ -88,13 +86,13 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     align-items: center;
     justify-content: space-between;
     border-radius: 8px;
-    padding: 5px 10px;
-    margin: 0px 10px 10px 10px;
+    padding: 0px 10px;
+    margin: 0px 10px -10px 10px;
     height: 50px;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
     &:hover {
-        background: ${(props) => props.theme.colors.backgroundColorDarker};
+        background: ${(props) => props.theme.colors.greyScale3};
     }
 
     & * {
@@ -109,8 +107,8 @@ const ButtonInnerContent = styled.div`
     justify-content: center;
     align-items: flex-start;
     font-size: 14px;
-    font-weight: 600;
-    color: ${(props) => props.theme.colors.darkerText};
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.white};
 `
 
 export default CopyPDFLinkButton

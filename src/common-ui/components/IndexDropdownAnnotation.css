@@ -1,5 +1,6 @@
 @value colors: '../../common-ui/colors.css';
-@value color11, color14 from colors;
+@value color11,
+color14 from colors;
 
 .menuItem {
     composes: hoverColor from '../../common-ui/colors.css';
@@ -109,7 +110,9 @@
     &:placeholder-shown {
         font-style: italic;
         font-weight: 500;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Satoshi', sans-serif;
+        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            'ss04' on, 'liga' off;
     }
 
     &::placeholder {

@@ -3,13 +3,13 @@ import styled, { css, keyframes } from 'styled-components'
 import Logic, { Dependencies, State, Event } from './logic'
 import { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
-import { Icon } from 'src/dashboard-refactor/styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -19,13 +19,9 @@ import EditableMenuItem, {
 import { getListShareUrl } from 'src/content-sharing/utils'
 
 export interface Props extends Dependencies {
-    xPosition?: number
-    yPosition?: number
-    fixedPositioning?: boolean
     editableProps: Omit<EditableMenuItemProps, 'nameValue' | 'onNameChange'>
     onDeleteSpaceConfirm?: React.MouseEventHandler
     onDeleteSpaceIntent?: React.MouseEventHandler
-    onClose: (saveChanges?: boolean) => void
 }
 
 // NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
@@ -48,14 +44,8 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         copyToClipboard,
     }
 
-    private containerElRef = React.createRef<HTMLDivElement>()
-
     constructor(props: Props) {
         super(props, new Logic(props))
-    }
-
-    getContainerRect(): DOMRect | null {
-        return this.containerElRef?.current?.getBoundingClientRect() ?? null
     }
 
     private handleWebViewOpen: React.MouseEventHandler = (e) => {
@@ -70,21 +60,14 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             return (
                 <ShareSectionContainer onClick={wrapClick}>
                     <PrimaryAction
-                        label={
-                            <ButtonLabel>
-                                {' '}
-                                <Icon
-                                    color="white"
-                                    heightAndWidth="12px"
-                                    path={icons.link}
-                                    hoverOff
-                                />{' '}
-                                Share this Space
-                            </ButtonLabel>
-                        }
+                        icon={'link'}
+                        label={'Share Space'}
                         onClick={wrapClick((e) =>
                             this.processEvent('shareSpace', null),
                         )}
+                        size={'medium'}
+                        type={'secondary'}
+                        fullWidth
                     />
                 </ShareSectionContainer>
             )
@@ -94,73 +77,70 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             <ShareSectionContainer onClick={wrapClick}>
                 {this.state.inviteLinks.map(
                     ({ link, showCopyMsg, roleID }, linkIndex) => (
-                        <Margin bottom="3px" key={link}>
-                            <LinkAndRoleBox viewportBreakpoint="normal">
-                                <CopyLinkBox>
-                                    <LinkBox
-                                        left="small"
-                                        onClick={wrapClick((e) =>
-                                            this.processEvent(
-                                                'copyInviteLink',
-                                                { linkIndex },
-                                            ),
-                                        )}
+                        <LinkAndRoleBox viewportBreakpoint="normal">
+                            <PermissionArea>
+                                <TooltipBox
+                                    placement={'right'}
+                                    tooltipText={
+                                        sharedListRoleIDToString(roleID) ===
+                                        'Contributor' ? (
+                                            <span>
+                                                Add highlights,
+                                                <br /> pages & replies
+                                            </span>
+                                        ) : (
+                                            <span>
+                                                View & reply <br />
+                                                to highlights & pages
+                                            </span>
+                                        )
+                                    }
+                                >
+                                    <PermissionText
+                                        title={null}
+                                        viewportBreakpoint="normal"
                                     >
-                                        <Link>
-                                            {showCopyMsg
-                                                ? 'Copied to clipboard'
-                                                : link.split('https://')[1]}
-                                        </Link>
-                                        <IconContainer id={'iconContainer'}>
-                                            <Icon
-                                                heightAndWidth="14px"
-                                                path={icons.copy}
-                                                onClick={wrapClick(() =>
-                                                    this.processEvent(
-                                                        'copyInviteLink',
-                                                        { linkIndex },
-                                                    ),
-                                                )}
-                                            />
-                                            <Icon
-                                                heightAndWidth="14px"
-                                                path={icons.goTo}
-                                                onClick={wrapClick(() =>
-                                                    window.open(link),
-                                                )}
-                                            />
-                                        </IconContainer>
-                                    </LinkBox>
-                                </CopyLinkBox>
-                                <PermissionArea>
-                                    <ButtonTooltip
-                                        position={'bottomSingleLine'}
-                                        tooltipText={
-                                            sharedListRoleIDToString(roleID) ===
-                                            'Contributor' ? (
-                                                <span>
-                                                    Add highlights, pages &
-                                                    replies
-                                                </span>
-                                            ) : (
-                                                <span>
-                                                    View & reply to highlights &
-                                                    pages
-                                                </span>
-                                            )
-                                        }
-                                    >
-                                        <PermissionText
-                                            title={null}
-                                            viewportBreakpoint="normal"
-                                        >
-                                            {sharedListRoleIDToString(roleID) +
-                                                ' Access'}
-                                        </PermissionText>
-                                    </ButtonTooltip>
-                                </PermissionArea>
-                            </LinkAndRoleBox>
-                        </Margin>
+                                        {sharedListRoleIDToString(roleID) +
+                                            ' Access'}
+                                    </PermissionText>
+                                </TooltipBox>
+                            </PermissionArea>
+                            <CopyLinkBox>
+                                <LinkBox
+                                    left="small"
+                                    onClick={wrapClick((e) =>
+                                        this.processEvent('copyInviteLink', {
+                                            linkIndex,
+                                        }),
+                                    )}
+                                >
+                                    <Link>
+                                        {showCopyMsg
+                                            ? 'Copied to clipboard'
+                                            : link.split('https://')[1]}
+                                    </Link>
+                                    <IconContainer id={'iconContainer'}>
+                                        <Icon
+                                            heightAndWidth="20px"
+                                            filePath={'copy'}
+                                            onClick={wrapClick(() =>
+                                                this.processEvent(
+                                                    'copyInviteLink',
+                                                    { linkIndex },
+                                                ),
+                                            )}
+                                        />
+                                        <Icon
+                                            heightAndWidth="20px"
+                                            filePath={'goTo'}
+                                            onClick={wrapClick(() =>
+                                                window.open(link),
+                                            )}
+                                        />
+                                    </IconContainer>
+                                </LinkBox>
+                            </CopyLinkBox>
+                        </LinkAndRoleBox>
                     ),
                 )}
             </ShareSectionContainer>
@@ -188,18 +168,25 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                 <DeleteBox>
                     <TitleBox>Delete this Space?</TitleBox>
                     <DetailsText>
-                        This does not delete the pages in it
+                        This does NOT delete the pages in it
                     </DetailsText>
-                    <PrimaryAction
-                        onClick={wrapClick(this.props.onDeleteSpaceConfirm)}
-                        label={<ButtonLabel>Delete</ButtonLabel>}
-                    />
-                    <SecondaryAction
-                        onClick={wrapClick(() =>
-                            this.processEvent('cancelDeleteSpace', null),
-                        )}
-                        label={<ButtonLabel>Cancel</ButtonLabel>}
-                    />
+                    <ButtonRow>
+                        <PrimaryAction
+                            onClick={wrapClick(this.props.onDeleteSpaceConfirm)}
+                            label={'Delete'}
+                            icon={'trash'}
+                            type={'secondary'}
+                            size={'medium'}
+                        />
+                        <PrimaryAction
+                            onClick={wrapClick(() =>
+                                this.processEvent('cancelDeleteSpace', null),
+                            )}
+                            label={'Cancel'}
+                            type={'tertiary'}
+                            size={'medium'}
+                        />
+                    </ButtonRow>
                 </DeleteBox>
             )
         }
@@ -209,9 +196,11 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             this.state.inviteLinksLoadState === 'running'
         ) {
             return (
-                <LoadingContainer>
-                    <LoadingIndicator size={30} />
-                </LoadingContainer>
+                <ContextMenuContainer>
+                    <LoadingContainer>
+                        <LoadingIndicator size={30} />
+                    </LoadingContainer>
+                </ContextMenuContainer>
             )
         }
 
@@ -220,91 +209,136 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             wrapClick(() => this.processEvent('deleteSpace', null))
 
         return (
-            <>
+            <ContextMenuContainer>
+                {this.props.remoteListId && (
+                    <SectionTitle>Sharing Links</SectionTitle>
+                )}
                 {this.renderShareLinks()}
-                <MenuButton onClick={deleteHandler}>
-                    <Margin horizontal="10px">
-                        <Icon heightAndWidth="14px" path={icons.trash} />
-                    </Margin>
-                    Delete
-                </MenuButton>
+
+                <SectionTitle>Edit Space</SectionTitle>
                 <EditArea>
                     <EditableMenuItem
                         {...this.props.editableProps}
+                        confirmWithEnter={() => {
+                            this.setState({
+                                showSaveButton: false,
+                            })
+                        }}
                         onNameChange={(name) =>
                             this.processEvent('updateSpaceName', { name })
                         }
                         nameValue={this.state.nameValue}
                     />
                 </EditArea>
-            </>
+                <ButtonBox>
+                    <PrimaryAction
+                        onClick={deleteHandler}
+                        icon={'trash'}
+                        size={'medium'}
+                        type={'tertiary'}
+                        label={'Delete Space'}
+                    />
+                    <>
+                        {this.state?.showSaveButton && (
+                            <Icon
+                                filePath="check"
+                                color="prime1"
+                                heightAndWidth="24px"
+                                onClick={() => {
+                                    this.setState({
+                                        showSaveButton: false,
+                                    })
+                                    this.props.editableProps.onConfirmClick(
+                                        this.state.nameValue,
+                                    )
+                                }}
+                            />
+                        )}
+                    </>
+                </ButtonBox>
+            </ContextMenuContainer>
         )
     }
 
     render() {
-        return (
-            <ModalRoot
-                ref={this.containerElRef}
-                fixedPosition={this.props.fixedPositioning}
-            >
-                {!this.props.fixedPositioning && (
-                    <Overlay
-                        onClick={wrapClick((e) => this.props.onClose(true))}
-                    />
-                )}
-                <ModalContent
-                    // onMouseLeave={closeModal}
-                    x={this.props.xPosition}
-                    y={this.props.yPosition}
-                    fixedPosition={this.props.fixedPositioning}
-                >
-                    <MenuContainer>{this.renderMainContent()}</MenuContainer>
-                </ModalContent>
-            </ModalRoot>
-        )
+        return <MenuContainer>{this.renderMainContent()}</MenuContainer>
     }
 }
 
+const ButtonBox = styled.div`
+    width: fill-available;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    grid-gap: 5px;
+`
+const ButtonRow = styled.div`
+    width: fill-available;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 5px;
+`
+
+const ContextMenuContainer = styled.div`
+    display: flex;
+    grid-gap: 5px;
+    flex-direction: column;
+    width: fill-available;
+    padding: 10px 10px 10px 10px;
+    min-height: fit-content;
+    height: fit-content;
+    justify-content: center;
+    align-items: flex-start;
+    /* width: 250px; */
+`
+
+const SectionTitle = styled.div`
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.greyScale4};
+    font-weight: 400;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+`
+
 const DeleteBox = styled.div`
-    padding: 20px;
     display: flex;
     grid-gap: 10px;
     justify-content: center;
     flex-direction: column;
+    width: fill-available;
+    padding: 15px;
 `
 
 const PermissionArea = styled.div`
-    z-index: auto;
+    z-index: 31;
+    position: relative;
 `
 
 const EditArea = styled.div`
-    border-top: 1px solid #f0f0f0;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     width: fill-available;
-    padding-bottom: 5px;
+    margin-bottom: 3px;
 `
 
 const IconContainer = styled.div`
     display: none;
-    grid-gap: 5px;
-    grid-auto-flow: column;
-
-    & > div {
-        background: white;
-    }
 `
 
 const LoadingContainer = styled.div`
     display: flex;
-    height: 126px;
+    height: 170px;
     justify-content: center;
     align-items: center;
-    border-bottom: 1px solid #f0f0f0;
+    width: fill-available;
+    justify-self: center;
+    min-width: 250px;
 `
 
 const ShareSectionContainer = styled.div`
-    padding: 10px;
-    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 10px;
+    width: fill-available;
 `
 
 const ButtonLabel = styled.div`
@@ -312,8 +346,6 @@ const ButtonLabel = styled.div`
     grid-auto-flow: column;
     grid-gap: 5px;
     align-items: center;
-    font-size: 14px;
-    font-weight: 400;
 
     & * {
         cursor: pointer;
@@ -325,13 +357,9 @@ const ModalRoot = styled.div<{ fixedPosition: boolean }>`
         props.fixedPosition
             ? ''
             : `
-    z-index: 1000;
     border-radius: 12px;
-    height: 100%;
-    width: 100%;
-    position: relative;
-    width: 100%;
 `}
+    background-color: ${(props) => props.theme.colors.greyScale1};
     ${(props) =>
         props.x || props.y
             ? ''
@@ -344,107 +372,27 @@ const ModalRoot = styled.div<{ fixedPosition: boolean }>`
 /* Modal content */
 
 const ModalContent = styled.div<{
-    x: number
-    y: number
     fixedPosition: boolean
 }>`
-    z-index: 999;
-    position: fixed;
     text-align: center;
-    border-radius: 4px;
-    width: 300px;
-    bottom: ${(props) => (props.x && props.y ? props.y + 'px' : 'unset')};
-    right: ${(props) => (props.x && props.y ? props.x + 'px' : 'unset')};
-`
-
-const Overlay = styled.div`
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 995;
-    border-radius: 5px;
-    backdrop-filter: ${(props) =>
-        props.x && props.y ? 'backdrop-filter: blur(3px)' : 'unset'};
 `
 
 const MenuContainer = styled.div`
     display: flex;
     flex-direction: column;
-    width: 100%;
-    max-width: 350px;
-    position: absolute;
-    background-color: ${colors.white};
-    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
     border-radius: 12px;
-    z-index: 1;
-`
-
-const IconBox = styled.div<Props>`
-    display: ${(props) =>
-        props.hasActivity ||
-        props.newItemsCount ||
-        props.dropReceivingState?.isDraggedOver ||
-        props.dropReceivingState?.wasPageDropped
-            ? 'flex'
-            : 'None'};
-
-    height: 100%;
-    align-items: center;
-    justify-content: flex-end;
-    padding-right: 10px;
-    padding-left: 5px;
+    width: 300px;
 `
 
 const TitleBox = styled.div`
     display: flex;
     flex: 1;
     height: 100%;
-    padding-left: 15px;
     align-items: center;
-    padding-right: 10px;
     font-weight: bold;
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.white};
     justify-content: center;
-`
-
-const MenuButton = styled.div`
-    height: 34px;
-    font-family: 'Inter', sans-serif;
-    font-weight: ${fonts.primary.weight.normal};
-    color: ${(props) => props.theme.colors.normalText};
-    font-size: 14px;
-    line-height: 18px;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    cursor: pointer;
-    padding: 0px 10px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    &:hover {
-        background-color: ${(props) => props.theme.colors.lightHover};
-    }
-    & > div {
-        width: auto;
-    }
-`
-
-// probably want to use timing function to get this really looking good. This is just quick and dirty
-
-const blinkingAnimation = keyframes`
- 0% {
-    background-color: ${(props) => props.theme.colors.lightHover};
- }
- 50% {
- background-color: transparent;
- }
- 100% {
-    background-color: ${(props) => props.theme.colors.lightHover};
- }
-
+    font-size: 16px;
 `
 
 const LinkAndRoleBox = styled.div<{
@@ -454,7 +402,8 @@ const LinkAndRoleBox = styled.div<{
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
+    grid-gap: 5px;
 
     ${(props) =>
         (props.viewportBreakpoint === 'small' ||
@@ -466,24 +415,31 @@ const LinkAndRoleBox = styled.div<{
             align-items: flex-start;
         `}
 
-    &:hover {
-        #iconContainer {
-            display: grid;
+    &:hover ${IconContainer} {
+            height: fit-content;
+            width: fit-content;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            grid-gap: 5px;
+            grid-auto-flow: row;
+            border-radius: 6px;
+            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         }
-    }
+
 `
 
 const LinkBox = styled(Margin)`
     width: fill-available;
     display: flex;
-    background-color: ${(props) => props.theme.colors.lineGrey};
     font-size: 14px;
     border-radius: 3px;
     text-align: left;
     height: 30px;
     cursor: pointer;
-    padding-right: 10px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.white};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    background: ${(props) => props.theme.colors.greyScale2};
 `
 
 const Link = styled.span`
@@ -511,24 +467,27 @@ const CopyLinkBox = styled.div`
 const DetailsText = styled.span`
     opacity: 0.8;
     font-size: 14px;
-    font-family: 'Inter', sans-serif;
-    font-weight: ${fonts.primary.weight.normal};
-    color: ${(props) => props.theme.colors.normalText};
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
+    color: ${(props) => props.theme.colors.greyScale5};
     margin-bottom: 5px;
     margin-top: -5px;
+    text-align: center;
 `
 
 const PermissionText = styled.span<{
     viewportBreakpoint: string
 }>`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     opacity: 0.8;
     display: flex;
     flex-direction: row;
     white-space: nowrap;
     justify-content: flex-end;
     font-size: 12px;
-    z-index: 0;
+    z-index: 30;
+    margin-bottom: 2px;
 
     ${(props) =>
         (props.viewportBreakpoint === 'small' ||

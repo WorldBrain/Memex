@@ -1,6 +1,6 @@
 import React from 'react'
-import { browser } from 'webextension-polyfill-ts'
-import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
+import browser from 'webextension-polyfill'
+import { remoteFunction } from 'src/util/webextensionRPC'
 import Results from './Results'
 import strictUriEncode from 'strict-uri-encode'
 import ResultItem from './ResultItem'
@@ -10,13 +10,10 @@ import { getLocalStorage } from '../utils'
 import Notification from './Notification'
 import { UPDATE_NOTIFS } from '../../notifications/notifications'
 import * as actionTypes from '../../notifications/action-types'
-import { actionRegistry } from '../../notifications/registry'
 import ActionButton from '../../notifications/components/ActionButton'
 import OptIn from '../../notifications/components/OptIn'
 import ToggleSwitch from '../../common-ui/components/ToggleSwitch'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
 import type { SearchEngineName, ResultItemProps } from '../types'
-import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import CloudUpgradeBanner from 'src/personal-cloud/ui/components/cloud-upgrade-banner'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
@@ -25,6 +22,7 @@ import { sleepPromise } from 'src/util/promises'
 import styled from 'styled-components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 
 const search = browser.runtime.getURL('/img/search.svg')
 
@@ -52,10 +50,8 @@ interface State {
 }
 
 class Container extends React.Component<Props, State> {
-    trackEvent: any
     readNotification: any
     fetchNotifById: any
-    processEvent: any
     openOverviewRPC: any
     syncSettings: Props['syncSettings']
 
@@ -70,10 +66,8 @@ class Container extends React.Component<Props, State> {
         this.undoRemove = this.undoRemove.bind(this)
         this.changePosition = this.changePosition.bind(this)
         this.handleClickTick = this.handleClickTick.bind(this)
-        this.trackEvent = remoteFunction('trackEvent')
         this.readNotification = remoteFunction('readNotification')
         this.fetchNotifById = remoteFunction('fetchNotifById')
-        this.processEvent = remoteFunction('processEvent')
         this.openOverviewRPC = remoteFunction('openOverviewTab')
         this.syncSettings = props.syncSettings
     }
@@ -127,7 +121,6 @@ class Container extends React.Component<Props, State> {
         } catch (e) {
             const searchRes = []
             const searchResDocs = searchRes.slice(0, limit)
-            console.log(e)
             this.setState({
                 searchResults: searchResDocs,
             })
@@ -155,10 +148,7 @@ class Container extends React.Component<Props, State> {
         })
     }
 
-    handleResultLinkClick = () =>
-        this.processEvent({
-            type: EVENT_NAMES.CLICK_RESULT_LINK,
-        })
+    handleResultLinkClick = () => {}
 
     renderResultItems() {
         if (!this.state.searchResults) {
@@ -191,14 +181,14 @@ class Container extends React.Component<Props, State> {
         if (this.state.searchResults?.length === 0) {
             return (
                 <NoResultsSection>
-                    <SectionCircle>
+                    <IconBox heightAndWidth="30px" background="light">
                         <Icon
                             filePath={search}
                             heightAndWidth="20px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
-                    </SectionCircle>
+                    </IconBox>
                     <SectionTitle>No Results for this Query</SectionTitle>
                     <InfoText>
                         For more flexible search,
@@ -274,12 +264,6 @@ class Container extends React.Component<Props, State> {
         // Triggering the Removed text UI to pop up
         await this._persistEnabledChange(false)
 
-        this.trackEvent({
-            category: 'Search integration',
-            action: 'Disabled',
-            name: 'Content script',
-        })
-
         this.setState({
             removed: true,
             dropdown: false,
@@ -305,13 +289,6 @@ class Container extends React.Component<Props, State> {
     }
 
     async handleClickTick() {
-        this.processEvent({
-            type: EVENT_NAMES.READ_NOTIFICATION_SEARCH_ENGINE,
-            details: {
-                notificationId: this.state.notification.id,
-            },
-        })
-
         await this.readNotification(this.state.notification.id)
 
         this.setState({
@@ -319,32 +296,7 @@ class Container extends React.Component<Props, State> {
         })
     }
 
-    handleToggleStorageOption(action, value) {
-        this.processEvent({
-            type: EVENT_NAMES.TOGGLE_STORAGE_SEARCH_ENGINE,
-            details: {
-                notificationId: this.state.notification.id,
-            },
-        })
-
-        action = {
-            ...action,
-            value,
-        }
-
-        actionRegistry[action.type]({
-            definition: action,
-        })
-    }
-
     handleClickOpenNewTabButton(url) {
-        this.processEvent({
-            type: EVENT_NAMES.CLICK_OPEN_NEW_LINK_BUTTON_SEARCH,
-            details: {
-                notificationId: this.state.notification.id,
-            },
-        })
-
         window.open(url, '_blank').focus()
     }
 
@@ -380,23 +332,13 @@ class Container extends React.Component<Props, State> {
                 <OptIn fromSearch label={buttons[0].label}>
                     <ToggleSwitch
                         defaultValue
-                        onChange={(val) =>
-                            this.handleToggleStorageOption(action, val)
-                        }
+                        onChange={(val) => {}}
                         fromSearch
                     />
                 </OptIn>
             )
         } else {
-            return (
-                <ActionButton
-                    handleClick={actionRegistry[action.type]({
-                        definition: action,
-                    })}
-                >
-                    {` ${buttons[0].label} `}
-                </ActionButton>
-            )
+            return null
         }
     }
 
@@ -420,12 +362,7 @@ class Container extends React.Component<Props, State> {
     render() {
         // If the state.removed is true, show the RemovedText component
         if (this.state.removed) {
-            return (
-                <RemovedText
-                    undo={this.undoRemove}
-                    position={this.state.position}
-                />
-            )
+            return <RemovedText undo={this.undoRemove} />
         }
 
         if (!this.state.position) {
@@ -434,13 +371,6 @@ class Container extends React.Component<Props, State> {
 
         return (
             <>
-                {this.state.isCloudUpgradeBannerShown && (
-                    <CloudUpgradeBanner
-                        onGetStartedClick={() => this.openOverviewRPC()}
-                        direction="column"
-                        width={this.state.position === 'side' && '420px'}
-                    />
-                )}
                 {/* {this.state.isSubscriptionBannerShown && (
                     <PioneerPlanBanner
                         onHideClick={this.handleSubBannerDismiss}
@@ -471,7 +401,7 @@ class Container extends React.Component<Props, State> {
 const SearchLink = styled.span`
     padding-left: 2px;
     cursor: pointer;
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
 `
 
 const NoResultsSection = styled.div`
@@ -481,18 +411,6 @@ const NoResultsSection = styled.div`
     flex-direction: column;
     padding: 30px 0px;
 `
-
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
-    height: 50px;
-    width: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
-`
-
 const SectionTitle = styled.div`
     color: ${(props) => props.theme.colors.darkerText};
     font-size: 16px;
@@ -501,7 +419,7 @@ const SectionTitle = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     font-weight: 400;
     text-align: center;

@@ -1,5 +1,10 @@
 @value colors: 'src/common-ui/colors.css';
-@value color11, color12, color14, color4, color6, color9 from colors;
+@value color11,
+color12,
+color14,
+color4,
+color6,
+color9 from colors;
 
 .menuItem {
     composes: hoverColor from 'src/common-ui/colors.css';
@@ -53,7 +58,8 @@
     font-weight: 400;
     color: black;
     padding: 0;
-    background-color: transparent !important; /* stylelint-disable-line declaration-no-important */
+    background-color: transparent !important;
+    /* stylelint-disable-line declaration-no-important */
 }
 
 .isNewNoteInvisible {
@@ -118,7 +124,9 @@
     &:placeholder-shown {
         font-style: italic;
         font-weight: 500;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Satoshi', sans-serif;
+        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            'ss04' on, 'liga' off;
     }
 
     &::placeholder {
@@ -152,7 +160,9 @@
     }
 
     & * {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Satoshi', sans-serif;
+        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            'ss04' on, 'liga' off;
     }
 }
 
@@ -279,7 +289,6 @@
     height: 7px;
     position: relative;
 
-    background-image: url('../../../img/times-solid.svg');
     background-repeat: no-repeat;
     border-color: transparent;
     background-color: #83c9f4;
@@ -294,7 +303,6 @@
     height: 7px;
     position: relative;
 
-    background-image: url('../../../img/times-solid.svg');
     background-repeat: no-repeat;
     border-color: transparent;
     background-color: #fff;

@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const localStyles = require('src/options/privacy/components/Privacy.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
 
 const PDFOptions = (props) => (

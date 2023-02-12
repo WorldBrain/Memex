@@ -1,0 +1,81 @@
+{
+    "name": "Memex",
+    "short_name": "Memex",
+    "version": "0.3.3",
+    "description": "Search, annotate and organize what you've read online.",
+    "manifest_version": 3,
+    "icons": {
+        "16": "./img/browserIcons/logo-16.png",
+        "48": "./img/browserIcons/logo-48.png",
+        "128": "./img/browserIcons/logo-128.png"
+    },
+    "externally_connectable": {
+        "matches": [
+            "http://localhost:3000/*",
+            "https://staging.memex.social/*",
+            "https://memex.social/*"
+        ]
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["lib/browser-polyfill.js", "content_script.js"],
+            "css": ["/content_script.css"],
+            "run_at": "document_end"
+        }
+    ],
+    "applications": {
+        "gecko": {
+            "id": "info@worldbrain.io"
+        }
+    },
+    "options_page": "./options.html#/settings",
+    "action": {
+        "default_popup": "./popup.html",
+        "default_title": "Memex",
+        "default_icon": {
+            "16": "./img/browserIcons/logo-16.png",
+            "48": "./img/browserIcons/logo-48.png",
+            "128": "./img/browserIcons/logo-128.png"
+        }
+    },
+    "omnibox": {
+        "keyword": "m"
+    },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'; connect-src http: https: data: blob: wss: file:"
+    },
+    "permissions": [
+        "alarms",
+        "bookmarks",
+        "history",
+        "scripting",
+        "tabs",
+        "contextMenus",
+        "unlimitedStorage",
+        "webNavigation",
+        "notifications",
+        "storage"
+    ],
+    "host_permissions": ["<all_urls>"],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "/lib/pdf.worker.min.js",
+                "/img/*",
+                "/content_script*.css",
+                "/fonts/*",
+                "content_script_*.js",
+                "file:/*",
+                "chrome-extension:/*",
+                "blob:*",
+                "data:*",
+                "filesystem:/*"
+            ],
+            "matches": ["<all_urls>"]
+        }
+    ]
+}

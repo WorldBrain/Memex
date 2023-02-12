@@ -1,4 +1,4 @@
-import type { Browser } from 'webextension-polyfill-ts'
+import type { Browser } from 'webextension-polyfill'
 import type { UIEvent } from 'ui-logic-core'
 import type { TaskState } from 'ui-logic-core/lib/types'
 
@@ -28,21 +28,25 @@ import type { BackupInterface } from 'src/backup-restore/background/types'
 import type { SearchFiltersState, SearchFilterEvents } from './header/types'
 import type { UIServices } from 'src/services/ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
-import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import type { PDFRemoteInterface } from 'src/pdf/background/types'
+import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
+import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
+import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
 export interface RootState {
     loadState: TaskState
     currentUser: AuthenticatedUser | null
-    isCloudEnabled: boolean
-    mode: 'search' | 'locate-pdf' | 'onboarding'
+    mode: 'search' | 'onboarding'
     syncMenu: SyncModalState
     searchResults: SearchResultsState
     searchFilters: SearchFiltersState
     listsSidebar: ListsSidebarState
     modals: DashboardModalsState
+    showDropArea: boolean
+    activePageID?: string
+    activeDay?: number
 }
 
 export type Events = UIEvent<
@@ -51,8 +55,9 @@ export type Events = UIEvent<
         SearchFilterEvents &
         ListsSidebarEvents &
         SyncModalEvents & {
-            search: { paginate?: boolean }
-            closeCloudOnboardingModal: { didFinish: boolean }
+            search: { paginate?: boolean; searchID?: number }
+            dragFile: React.DragEvent | null
+            dropPdfFile: React.DragEvent
         }
 >
 
@@ -65,15 +70,19 @@ export interface DashboardDependencies {
     backupBG: BackupInterface<'caller'>
     contentShareBG: ContentSharingInterface
     contentConversationsBG: ContentConversationsInterface
-    personalCloudBG: PersonalCloudRemoteInterface
     listsBG: RemoteCollectionsInterface
     searchBG: SearchInterface
+    annotationsCache: PageAnnotationsCacheInterface
+    contentScriptsBG: ContentScriptsInterface<'caller'>
     annotationsBG: AnnotationInterface<'caller'>
     activityIndicatorBG: ActivityIndicatorInterface
     syncSettingsBG: RemoteSyncSettingsInterface
+    pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     pdfViewerBG: PDFRemoteInterface
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']
+    runtimeAPI: Browser['runtime']
+    tabsAPI: Browser['tabs']
     openFeed: () => void
     openCollectionPage: (remoteCollectionId: string) => void
     renderUpdateNotifBanner: () => JSX.Element
@@ -112,7 +121,6 @@ export interface DashboardModalsState {
     shareListId?: number
     showLogin?: boolean
     showSubscription?: boolean
-    showCloudOnboarding?: boolean
     showDisplayNameSetup?: boolean
     showNoteShareOnboarding?: boolean
 
@@ -128,7 +136,6 @@ export type DashboardModalsEvents = UIEvent<{
     setShareListId: { listId?: number }
     setShowLoginModal: { isShown: boolean }
     setShowSubscriptionModal: { isShown: boolean }
-    setShowCloudOnboardingModal: { isShown: boolean }
     setShowDisplayNameSetupModal: { isShown: boolean }
     setShowNoteShareOnboardingModal: { isShown: boolean }
 
@@ -136,9 +143,10 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingPageArgs: PageEventArgs
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null
+    setSpaceSidebarWidth: { width: number }
 
     setPrivatizeNoteConfirmArgs: DashboardModalsState['confirmPrivatizeNoteArgs']
     setSelectNoteSpaceConfirmArgs: DashboardModalsState['confirmSelectNoteSpaceArgs']
 }>
 
-export type ListSource = 'local-lists' | 'followed-lists'
+export type ListSource = 'local-lists' | 'followed-lists' | 'joined-lists'

@@ -5,7 +5,7 @@ import {
     ModalColRight,
     ModalColRightBig,
 } from 'src/common-ui/components/design-library/ModalBox'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import {
     TypographyBodyBlock,
     TypographyHeadingPage,

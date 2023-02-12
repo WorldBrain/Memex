@@ -6,6 +6,13 @@
     "background": {
         "scripts": ["lib/browser-polyfill.js", "background.js"]
     },
+    "externally_connectable": {
+        "matches": [
+            "http://localhost:3000/*",
+            "https://staging.memex.social/*",
+            "https://memex.social/*"
+        ]
+    },
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
@@ -18,27 +25,21 @@
         "default_title": "Memex",
         "default_popup": "./popup.html"
     },
-    "commands": {
-        "openOverview": {
-            "description": "Open Search Overview"
-        }
-    },
     "applications": {
         "gecko": {
             "id": "info@worldbrain.io"
         }
     },
     "icons": {
-        "16": "./img/worldbrain-logo-narrow-bw-16.png",
-        "48": "./img/worldbrain-logo-narrow-bw-48.png",
-        "128": "./img/worldbrain-logo-narrow-bw.png"
+        "16": "./img/browserIcons/logo-16.png",
+        "48": "./img/browserIcons/logo-48.png",
+        "128": "./img/browserIcons/logo-128.png"
     },
     "permissions": [
         "<all_urls>",
         "alarms",
         "idle",
         "bookmarks",
-        "history",
         "contextMenus",
         "tabs",
         "webNavigation",
@@ -61,8 +62,7 @@
         "data:*",
         "filesystem:/*"
     ],
-    "content_security_policy": "script-src 'self'; object-src 'self'; connect-src http: https: data: blob: wss: file:",
-
+    "content_security_policy": "script-src 'self' https://www.youtube.com; object-src 'self'; connect-src http: https: data: blob: wss: file:",
     "omnibox": {
         "keyword": "m"
     },

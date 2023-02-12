@@ -1,5 +1,5 @@
 import Storex, { FindManyOptions } from '@worldbrain/storex'
-import { Bookmarks } from 'webextension-polyfill-ts'
+import { Bookmarks } from 'webextension-polyfill'
 
 export type DBGet = () => Promise<Storex>
 

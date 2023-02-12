@@ -1,7 +1,7 @@
 import type Dexie from 'dexie'
 import type StorageManager from '@worldbrain/storex'
 import { getObjectByPk, getObjectWhereByPk } from '@worldbrain/storex/lib/utils'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import {
     getCurrentSchemaVersion,
     isTermsField,
@@ -16,22 +16,22 @@ import {
     PersonalCloudClientStorageType,
     PersonalCloudUpdate,
     PersonalCloudOverwriteUpdate,
+    PersonalCloudDeviceId,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
-import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import {
     PersonalCloudAction,
     PersonalCloudActionType,
     LocalPersonalCloudSettings,
-    PersonalCloudDeviceID,
     PersonalCloudRemoteInterface,
     PersonalCloudStats,
+    AuthChanges,
 } from './types'
 import {
     PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
     PASSIVE_DATA_CUTOFF_DATE,
 } from './constants'
-import {
+import type {
     ActionExecutor,
     ActionPreprocessor,
 } from '@worldbrain/memex-common/lib/action-queue/types'
@@ -41,21 +41,24 @@ import { prepareDataMigration } from 'src/personal-cloud/storage/migration-prepa
 import type { SettingStore } from 'src/util/settings'
 import { blobToString } from 'src/util/blob-utils'
 import * as Raven from 'src/util/raven'
-import { RemoteEventEmitter } from '../../util/webextensionRPC'
+import type { RemoteEventEmitter } from '../../util/webextensionRPC'
 import type { LocalExtensionSettings } from 'src/background-script/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
+import type { Runtime } from 'webextension-polyfill'
+import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
+    runtimeAPI: Runtime.Static
     storageManager: StorageManager
     syncSettingsStore: SyncSettingsStore<'dashboard'>
     persistentStorageManager: StorageManager
     remoteEventEmitter: RemoteEventEmitter<'personalCloud'>
     getUserId(): Promise<string | number | null>
-    userIdChanges(): AsyncIterableIterator<AuthenticatedUser>
+    authChanges(): AsyncIterableIterator<AuthChanges>
     settingStore: SettingStore<LocalPersonalCloudSettings>
     localExtSettingStore: SettingStore<LocalExtensionSettings>
-    createDeviceId(userId: number | string): Promise<PersonalCloudDeviceID>
     writeIncomingData(params: {
         storageType: PersonalCloudClientStorageType
         collection: string
@@ -63,6 +66,7 @@ export interface PersonalCloudBackgroundOptions {
         updates: { [key: string]: any }
     }): Promise<void>
     getServerStorageManager(): Promise<StorageManager>
+    jobScheduler: JobScheduler
 }
 
 export class PersonalCloudBackground {
@@ -73,18 +77,16 @@ export class PersonalCloudBackground {
     changesIntegrating: Promise<void>
     pushMutex = new AsyncMutex()
     pullMutex = new AsyncMutex()
-    deviceId?: string | number
+    deviceId: PersonalCloudDeviceId | null = null
     reportExecutingAction?: (action: PersonalCloudAction) => void
     remoteFunctions: PersonalCloudRemoteInterface
     emitEvents = true
-    debug = false
+    debug = process.env.NODE_ENV === 'development'
 
     strictErrorReporting = false
     _integrationError?: Error
 
     stats: PersonalCloudStats = {
-        // countingDownloads: false,
-        // countingUploads: true,
         pendingDownloads: 0,
         pendingUploads: 0,
     }
@@ -97,6 +99,14 @@ export class PersonalCloudBackground {
             retryIntervalInMs: PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
             executeAction: this.executeAction,
             preprocessAction: this.preprocessAction,
+            setTimeout: (job, timeout) => {
+                options.jobScheduler.scheduleJobOnce({
+                    name: 'personal-cloud-action-queue-retry',
+                    when: Date.now() + timeout,
+                    job,
+                })
+                return -1
+            },
         })
 
         this.setupEventListeners()
@@ -117,22 +127,26 @@ export class PersonalCloudBackground {
     }
 
     private setupEventListeners() {
+        this.options.runtimeAPI.onStartup.addListener(async () => {
+            await this.startSync()
+        })
         this.actionQueue.events.on('statsChanged', (stats) => {
             this._modifyStats({
                 pendingUploads: stats.pendingActionCount,
             })
         })
-        this.options.backend.events.on('incomingChangesPending', (event) => {
-            this._modifyStats({
-                pendingDownloads:
-                    this.stats.pendingDownloads + event.changeCountDelta,
-            })
-        })
-        this.options.backend.events.on('incomingChangesProcessed', (event) => {
-            this._modifyStats({
-                pendingDownloads: this.stats.pendingDownloads - event.count,
-            })
-        })
+        // TODO: re-implement pending download count
+        // this.options.backend.events.on('incomingChangesPending', (event) => {
+        //     this._modifyStats({
+        //         pendingDownloads:
+        //             this.stats.pendingDownloads + event.changeCountDelta,
+        //     })
+        // })
+        // this.options.backend.events.on('incomingChangesProcessed', (event) => {
+        //     this._modifyStats({
+        //         pendingDownloads: this.stats.pendingDownloads - event.count,
+        //     })
+        // })
     }
 
     private prepareDataMigration = async () => {
@@ -173,13 +187,13 @@ export class PersonalCloudBackground {
 
     private isCloudSyncEnabled = () => this.options.settingStore.get('isSetUp')
 
-    private async startCloudSyncIfEnabled() {
-        if (await this.isCloudSyncEnabled()) {
-            await this.startSync()
-        }
+    triggerSyncContinuation() {
+        this.options.backend.triggerSyncContinuation()
     }
 
     async setup() {
+        this.deviceId = await this.options.settingStore.get('deviceId')
+
         this.currentSchemaVersion = getCurrentSchemaVersion(
             this.options.storageManager,
         )
@@ -187,23 +201,24 @@ export class PersonalCloudBackground {
         await this.actionQueue.setup({ paused: true })
         this._modifyStats({
             pendingUploads: this.actionQueue.pendingActionCount,
-            // countingUploads: false,
         })
 
-        const userId = await this.options.getUserId()
-        if (userId) {
-            await this.createOrLoadDeviceId(userId)
-        }
-
-        await this.startCloudSyncIfEnabled()
+        await this.startSync()
     }
 
-    async observeAuthChanges() {
-        for await (const nextUser of this.options.userIdChanges()) {
-            await this.handleAuthChange(nextUser?.id)
+    private async observeAuthChanges() {
+        for await (const { nextUser, deviceId } of this.options.authChanges()) {
+            this.deviceId = deviceId
 
-            if (nextUser) {
-                await this.startCloudSyncIfEnabled()
+            if (nextUser != null) {
+                this.actionQueue.unpause()
+                await this.startSync()
+            } else {
+                this.actionQueue.pause()
+                this._modifyStats({
+                    pendingDownloads: 0,
+                    pendingUploads: 0,
+                })
             }
         }
     }
@@ -219,7 +234,11 @@ export class PersonalCloudBackground {
 
     async startSync() {
         const userId = await this.options.getUserId()
-        await this.handleAuthChange(userId)
+        if (userId != null) {
+            this.actionQueue.unpause()
+        } else {
+            this.actionQueue.pause()
+        }
 
         if (!this.pendingActionsExecuting) {
             this.pendingActionsExecuting = this.actionQueue.executePendingActions()
@@ -230,36 +249,6 @@ export class PersonalCloudBackground {
         }
         if (!this.changesIntegrating) {
             this.changesIntegrating = this.integrateContinuously()
-        }
-    }
-
-    private async createOrLoadDeviceId(userId: string | number) {
-        const { settingStore, createDeviceId } = this.options
-
-        this.deviceId = await settingStore.get('deviceId')
-        if (!this.deviceId) {
-            this.deviceId = await createDeviceId(userId)
-            await settingStore.set('deviceId', this.deviceId!)
-        }
-    }
-
-    async handleAuthChange(userId: string | number | null) {
-        if (userId) {
-            await this.createOrLoadDeviceId(userId)
-            this.actionQueue.unpause()
-        } else {
-            this.actionQueue.pause()
-            delete this.deviceId
-        }
-
-        const isAuthenticated = !!this.deviceId
-        if (!isAuthenticated) {
-            this._modifyStats({
-                // countingDownloads: false,
-                pendingDownloads: 0,
-                pendingUploads: 0,
-            })
-            return
         }
     }
 
@@ -313,11 +302,13 @@ export class PersonalCloudBackground {
     }
 
     async integrateUpdates(updates: PersonalCloudUpdateBatch) {
+        this.options.remoteEventEmitter.emit('downloadStarted')
         const { releaseMutex } = await this.pullMutex.lock()
         for (const update of updates) {
             await this.integrateUpdate(update)
         }
         releaseMutex()
+        this.options.remoteEventEmitter.emit('downloadStopped')
     }
 
     async integrateUpdate(update: PersonalCloudUpdate) {
@@ -509,10 +500,10 @@ export class PersonalCloudBackground {
     }
 
     executeAction: ActionExecutor<PersonalCloudAction> = async ({ action }) => {
-        if (!this.deviceId) {
-            console.warn(
-                'Tried to execute action without deviceId, so pausing the action queue',
-            )
+        if (!this.deviceId || !(await this.options.getUserId())) {
+            // console.warn(
+            //     'Tried to execute action without deviceId, so pausing the action queue',
+            // )
             return { pauseAndRetry: true }
         }
         this._debugLog('Executing action', action)
@@ -535,7 +526,7 @@ export class PersonalCloudBackground {
                         type: PersonalCloudActionType.ExecuteClientInstructions,
                         clientInstructions,
                     },
-                    { queueInteraction: 'queue-and-return' },
+                    { queueInteraction: 'skip-queue' },
                 )
             }
         } else if (

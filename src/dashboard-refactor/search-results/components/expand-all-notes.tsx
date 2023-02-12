@@ -1,14 +1,14 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
-import { ButtonTooltip } from 'src/common-ui/components'
-import { Icon } from 'src/dashboard-refactor/styled-components'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 import colors from 'src/dashboard-refactor/colors'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export interface Props {
-    onClick: React.MouseEventHandler<HTMLButtonElement>
-    isEnabled: boolean
+    onClick?: React.MouseEventHandler<HTMLButtonElement>
+    isEnabled?: boolean
 }
 
 export default class ExpandAllNotes extends PureComponent<Props> {
@@ -17,53 +17,27 @@ export default class ExpandAllNotes extends PureComponent<Props> {
     }
 
     render() {
-        return (
-            <ExpandAllNotesBtn onClick={this.props.onClick}>
-                {!this.props.isEnabled ? (
-                    <ButtonTooltip
-                        tooltipText="Expand all annotations"
-                        position="bottom"
-                    >
-                        <Icon
-                            path={icons.expand}
-                            heightAndWidth="16px"
-                            onClick={this.props.onClick}
-                        />
-                    </ButtonTooltip>
-                ) : (
-                    <ButtonTooltip
-                        tooltipText="Collapse all annotations"
-                        position="bottom"
-                    >
-                        <Icon
-                            path={icons.compress}
-                            heightAndWidth="16px"
-                            onClick={this.props.onClick}
-                        />
-                    </ButtonTooltip>
-                )}
-            </ExpandAllNotesBtn>
+        return !this.props.isEnabled || this.props.isEnabled == null ? (
+            <TooltipBox tooltipText="Expand all annotations" placement="bottom">
+                <Icon
+                    filePath={icons.expand}
+                    heightAndWidth="24px"
+                    onClick={this.props.onClick}
+                    padding={'5px'}
+                />
+            </TooltipBox>
+        ) : (
+            <TooltipBox
+                tooltipText="Collapse all annotations"
+                placement="bottom"
+            >
+                <Icon
+                    filePath={icons.compress}
+                    heightAndWidth="24px"
+                    onClick={this.props.onClick}
+                    padding={'5px'}
+                />
+            </TooltipBox>
         )
     }
 }
-
-const IconBox = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 3px;
-    padding: 4px;
-`
-
-const ExpandAllNotesBtn = styled.button`
-    color: ${colors.darkBlue};
-    font-weight: 600;
-    cursor: pointer;
-    outline: none;
-    display: flex;
-    border: none;
-    width: 24px;
-    align-items: center;
-    background-color: transparent;
-    justify-content: center;
-`

@@ -1,21 +1,32 @@
 import React, { ReactNode } from 'react'
 import styled from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
-
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 interface Props {
     onPress: () => void
-    children: ReactNode | ReactNode[]
+    children?: ReactNode | ReactNode[]
     resultItem: ReactNode
+    resultsCount: number
+    commandKey: string
 }
 
 export default (props: Props) => {
     return (
         <AddNew onClick={props.onPress}>
             <ContentBox>
-                <Title>Create (Enter)</Title>
-                {props.resultItem}
+                <Title>Create "{props.resultItem}"</Title>
+                {props.resultsCount === 0 && (
+                    <KeyboardShortcuts size={'small'} keys={['Enter']} />
+                )}
+                {props.resultsCount > 0 && (
+                    <KeyboardShortcuts
+                        size={'small'}
+                        keys={[props.commandKey, 'Enter']}
+                    />
+                )}
             </ContentBox>
-            <Flex />
             {props.children}
         </AddNew>
     )
@@ -28,26 +39,37 @@ const Flex = styled.div`
 export const AddNew = styled.div`
     align-items: start;
     display: flex;
+    justify-content: center;
     align-items: center;
-    color: ${(props) => props.theme.text};
+    color: ${(props) => props.theme.colors.black};
+    background: ${(props) => props.theme.colors.white};
     font-size: ${fontSizeSmall}px;
-    font-weight: 700;
-    height: 50px;
-    padding: 0 20px;
+    font-weight: 500;
+    min-height: 20px;
+    height: fit-content;
+    padding: 8px 20px;
     word-break: break-word;
     cursor: pointer;
+    border-radius: 5px;
+    margin: 10px;
+
+    & * {
+        cursor: pointer;
+    }
 `
 
 const ContentBox = styled.div`
     display: flex;
     flex-direction: row;
     grid-gap: 10px;
-    fonts-size: 14px;
+    font-size: 14px;
     align-items: center;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
 `
 
 const Title = styled.span`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.black};
     font-size: 14px;
+    display: flex;
+    flex: 1;
 `

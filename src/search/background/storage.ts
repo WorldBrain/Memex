@@ -120,7 +120,6 @@ export default class SearchStorage extends StorageModule {
                 args: [
                     '$results:any',
                     {
-                        base64Img: '$base64Img:boolean',
                         upperTimeBound: '$endDate:number',
                     },
                 ],
@@ -142,7 +141,6 @@ export default class SearchStorage extends StorageModule {
                 args: [
                     '$pageUrls:string[]',
                     {
-                        base64Img: '$base64Img:boolean',
                         upperTimeBound: '$upperTimeBound:number',
                         latestTimes: '$latestTimes:number[]',
                     },
@@ -273,7 +271,6 @@ export default class SearchStorage extends StorageModule {
             PageUrlMapperPlugin.MAP_OP_ID,
             {
                 pageUrls,
-                base64Img: params.base64Img,
                 upperTimeBound: params.endDate,
             },
         )
@@ -469,7 +466,6 @@ export default class SearchStorage extends StorageModule {
         return this.operation(PageUrlMapperPlugin.MAP_OP_ID, {
             pageUrls: ids.map(([url]) => url),
             upperTimeBound: params.endDate,
-            base64Img: params.base64Img,
             latestTimes,
         })
     }
@@ -486,7 +482,6 @@ export default class SearchStorage extends StorageModule {
 
         return this.operation(PageUrlMapperPlugin.MAP_OP_SOCIAL_ID, {
             results,
-            base64Img: params.base64Img,
             upperTimeBound: params.endDate,
         })
     }

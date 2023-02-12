@@ -1,10 +1,9 @@
 import React from 'react'
-import styled from 'styled-components'
-import { browser } from 'webextension-polyfill-ts'
+import styled, { css, keyframes } from 'styled-components'
+import browser from 'webextension-polyfill'
 import ListShareModal from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal'
 import { createGlobalStyle } from 'styled-components'
-import type { UIMutation } from 'ui-logic-core'
-
+import { sizeConstants } from 'src/dashboard-refactor/constants'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
 import { RootState, Events, DashboardDependencies, ListSource } from './types'
@@ -19,17 +18,11 @@ import SubscribeModal from 'src/authentication/components/Subscription/Subscribe
 import Onboarding from 'src/overview/onboarding'
 import { HelpBtn } from 'src/overview/help-btn'
 import FiltersBar from './header/filters-bar'
+import SidebarToggle from './header/sidebar-toggle'
+import { Rnd } from 'react-rnd'
 import { AnnotationsSidebarInDashboardResults as NotesSidebar } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInDashboardResults'
 import { AnnotationsSidebarContainer as NotesSidebarContainer } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarContainer'
-import {
-    AnnotationsCacheInterface,
-    createAnnotationsCache,
-} from 'src/annotations/annotations-cache'
-import {
-    updatePickerValues,
-    areSearchFiltersEmpty,
-    stateToSearchParams,
-} from './util'
+import { updatePickerValues, stateToSearchParams } from './util'
 import analytics from 'src/analytics'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { deriveStatusIconColor } from './header/sync-status-menu/util'
@@ -37,11 +30,9 @@ import { FILTER_PICKERS_LIMIT } from './constants'
 import DragElement from './components/DragElement'
 import Margin from './components/Margin'
 import { getFeedUrl, getListShareUrl } from 'src/content-sharing/utils'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { Props as ListDetailsProps } from './search-results/components/list-details'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
-import CloudOnboardingModal from 'src/personal-cloud/ui/onboarding'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import PdfLocator from './components/PdfLocator'
 import ConfirmModal from 'src/common-ui/components/ConfirmModal'
@@ -56,6 +47,16 @@ import {
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
 import type { ListDetailsGetter } from 'src/annotations/types'
+import * as icons from 'src/common-ui/components/design-library/icons'
+import SearchCopyPaster from './search-results/components/search-copy-paster'
+import ExpandAllNotes from './search-results/components/expand-all-notes'
+import SyncStatusMenu from './header/sync-status-menu'
+import { SETTINGS_URL } from 'src/constants'
+import { SyncStatusIcon } from './header/sync-status-menu/sync-status-icon'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { PageAnnotationsCache } from 'src/annotations/cache'
+import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import { createYoutubeServiceOptions } from '@worldbrain/memex-common/lib/services/youtube/library'
 
 export interface Props extends DashboardDependencies {}
 
@@ -64,6 +65,8 @@ export class DashboardContainer extends StatefulUIElement<
     RootState,
     Events
 > {
+    static SYNC_MENU_TOGGLE_BTN_CLASS = 'sync-menu-toggle-btn'
+
     static MEMEX_SOCIAL_URL =
         process.env.NODE_ENV === 'production'
             ? 'https://memex.social'
@@ -75,10 +78,14 @@ export class DashboardContainer extends StatefulUIElement<
         | 'copyToClipboard'
         | 'document'
         | 'location'
+        | 'tabsAPI'
+        | 'runtimeAPI'
         | 'localStorage'
+        | 'annotationsCache'
+        | 'contentScriptsBG'
+        | 'pageActivityIndicatorBG'
         | 'contentConversationsBG'
         | 'activityIndicatorBG'
-        | 'personalCloudBG'
         | 'contentShareBG'
         | 'syncSettingsBG'
         | 'annotationsBG'
@@ -95,10 +102,13 @@ export class DashboardContainer extends StatefulUIElement<
         copyToClipboard,
         document: window.document,
         location: window.location,
+        tabsAPI: browser.tabs,
+        runtimeAPI: browser.runtime,
         localStorage: browser.storage.local,
+        pageActivityIndicatorBG: runInBackground(),
         contentConversationsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
-        personalCloudBG: runInBackground(),
+        contentScriptsBG: runInBackground(),
         contentShareBG: runInBackground(),
         syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
@@ -108,34 +118,37 @@ export class DashboardContainer extends StatefulUIElement<
         listsBG: runInBackground(),
         tagsBG: runInBackground(),
         authBG: runInBackground(),
+        annotationsCache: new PageAnnotationsCache({
+            normalizedPageUrl: '', // TODO: cache - figure out page URL here
+        }),
         openFeed: () => window.open(getFeedUrl(), '_blank'),
         openCollectionPage: (remoteListId) =>
             window.open(getListShareUrl({ remoteListId }), '_blank'),
     }
 
-    private annotationsCache: AnnotationsCacheInterface
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
+
+    youtubeService: YoutubeService
 
     private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
         window.location.hash = '#/' + route
     }
 
+    private SidebarContainer = React.createRef<HTMLElement>()
+
     constructor(props: Props) {
         super(props, new DashboardLogic(props))
 
-        this.annotationsCache = createAnnotationsCache(
-            {
-                contentSharing: props.contentShareBG,
-                annotations: props.annotationsBG,
-                customLists: props.listsBG,
-                tags: props.tagsBG,
-            },
-            { skipPageIndexing: true },
-        )
+        this.youtubeService = new YoutubeService(createYoutubeServiceOptions())
     }
 
     private getListDetailsById: ListDetailsGetter = (id) => ({
-        name: this.state.listsSidebar.listData[id]?.name ?? 'Missing list',
+        name: this.state.listsSidebar.listData[id]?.name ?? undefined,
+        //  (
+        //     <LoadingBox>
+        //         <LoadingIndicator size={8} />
+        //     </LoadingBox>
+        // ),
         isShared: this.state.listsSidebar.listData[id]?.remoteId != null,
     })
 
@@ -167,6 +180,9 @@ export class DashboardContainer extends StatefulUIElement<
                 this.processEvent('updateSelectedListDescription', {
                     description,
                 }),
+            saveTitle: (value, listId) => {
+                this.processEvent('confirmListEdit', { value, listId })
+            },
             onAddContributorsClick: listData.isOwnedList
                 ? () =>
                       this.processEvent('setShareListId', {
@@ -178,7 +194,8 @@ export class DashboardContainer extends StatefulUIElement<
 
     // TODO: move this to logic class - main reason it exists separately is that it needs to return the created list ID
     private async createNewListViaPicker(name: string): Promise<number> {
-        const listId = await this.props.listsBG.createCustomList({ name })
+        const listId = Date.now()
+
         this.processMutation({
             listsSidebar: {
                 listData: {
@@ -193,6 +210,8 @@ export class DashboardContainer extends StatefulUIElement<
                 },
             },
         })
+        await this.props.listsBG.createCustomList({ name: name, id: listId })
+
         return listId
     }
 
@@ -201,6 +220,10 @@ export class DashboardContainer extends StatefulUIElement<
         source: ListSource,
     ): ListSidebarItemProps[] => {
         const { listsSidebar } = this.state
+
+        if (listIds == null) {
+            return undefined
+        }
 
         return listIds.map((listId) => ({
             source,
@@ -233,6 +256,7 @@ export class DashboardContainer extends StatefulUIElement<
                 changeListName: (value) =>
                     this.processEvent('changeListName', { value }),
                 onCancelClick: () => this.processEvent('cancelListEdit', null),
+                cancelListEdit: () => this.processEvent('cancelListEdit', null),
                 onConfirmClick: (value) =>
                     this.processEvent('confirmListEdit', { value }),
                 initValue: listsSidebar.listData[listId].name,
@@ -292,6 +316,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <FiltersBar
+                spaceSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 searchFilters={searchFilters}
                 isDisplayed={searchFilters.searchFiltersOpen}
                 showTagsFilter={searchFilters.isTagFilterActive}
@@ -311,7 +336,6 @@ export class DashboardContainer extends StatefulUIElement<
                 areDomainsFiltered={searchFilters.domainsIncluded.length > 0}
                 datePickerProps={{
                     onClickOutside: toggleDatesFilter,
-                    onEscapeKeyDown: toggleDatesFilter,
                     startDate: searchFilters.dateFrom,
                     startDateText: searchFilters.dateFromInput,
                     endDate: searchFilters.dateTo,
@@ -329,7 +353,6 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 domainPickerProps={{
                     onClickOutside: toggleDomainsFilter,
-                    onEscapeKeyDown: toggleDomainsFilter,
                     initialSelectedEntries: () => searchFilters.domainsIncluded,
                     queryEntries: (query) =>
                         searchBG.suggest({
@@ -354,7 +377,6 @@ export class DashboardContainer extends StatefulUIElement<
                 tagPickerProps={
                     searchResults.shouldShowTagsUIs && {
                         onClickOutside: toggleTagsFilter,
-                        onEscapeKeyDown: toggleTagsFilter,
                         initialSelectedEntries: () =>
                             searchFilters.tagsIncluded,
                         queryEntries: (query) =>
@@ -381,7 +403,6 @@ export class DashboardContainer extends StatefulUIElement<
                 spacePickerProps={{
                     spacesBG: this.props.listsBG,
                     onClickOutside: toggleSpacesFilter,
-                    onEscapeKeyDown: toggleSpacesFilter,
                     contentSharingBG: this.props.contentShareBG,
                     createNewEntry: () => undefined,
                     initialSelectedListIds: () => searchFilters.spacesIncluded,
@@ -398,16 +419,47 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderHeader() {
         const {
-            isCloudEnabled,
             searchFilters,
             listsSidebar,
             currentUser,
             syncMenu,
+            searchResults,
         } = this.state
         const syncStatusIconState = deriveStatusIconColor(this.state)
+
         return (
             <HeaderContainer
                 searchBarProps={{
+                    renderExpandButton: () => (
+                        <ExpandAllNotes
+                            isEnabled={searchResultUtils.areAllNotesShown(
+                                searchResults,
+                            )}
+                            onClick={() =>
+                                this.processEvent('setAllNotesShown', null)
+                            }
+                        />
+                    ),
+                    renderCopyPasterButton: () => (
+                        <SearchCopyPaster
+                            searchType={searchResults.searchType}
+                            searchParams={stateToSearchParams(this.state)}
+                            isCopyPasterShown={
+                                searchResults.isSearchCopyPasterShown
+                            }
+                            isCopyPasterBtnShown
+                            hideCopyPaster={() =>
+                                this.processEvent('setSearchCopyPasterShown', {
+                                    isShown: false,
+                                })
+                            }
+                            toggleCopyPaster={() =>
+                                this.processEvent('setSearchCopyPasterShown', {
+                                    isShown: !searchResults.isSearchCopyPasterShown,
+                                })
+                            }
+                        />
+                    ),
                     searchQuery: searchFilters.searchQuery,
                     searchFiltersOpen: searchFilters.searchFiltersOpen,
                     onSearchFiltersOpen: () =>
@@ -420,11 +472,12 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setSearchQuery', { query: '' }),
                 }}
                 sidebarLockedState={{
-                    isSidebarLocked: listsSidebar.isSidebarLocked,
-                    toggleSidebarLockedState: () =>
+                    isSidebarLocked: listsSidebar.isSidebarLocked ?? undefined,
+                    toggleSidebarLockedState: () => {
                         this.processEvent('setSidebarLocked', {
                             isLocked: !listsSidebar.isSidebarLocked,
-                        }),
+                        })
+                    },
                 }}
                 sidebarToggleHoverState={{
                     isHovered: listsSidebar.isSidebarToggleHovered,
@@ -444,7 +497,6 @@ export class DashboardContainer extends StatefulUIElement<
                 syncStatusIconState={syncStatusIconState}
                 syncStatusMenuProps={{
                     ...syncMenu,
-                    isCloudEnabled,
                     syncStatusIconState,
                     isLoggedIn: currentUser != null,
                     outsideClickIgnoreClass:
@@ -453,18 +505,15 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setShowLoginModal', {
                             isShown: true,
                         }),
-                    onMigrateClick: () =>
-                        this.processEvent('setShowCloudOnboardingModal', {
-                            isShown: true,
-                        }),
                     onClickOutside: () =>
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: false,
                         }),
-                    onToggleDisplayState: () =>
+                    onToggleDisplayState: () => {
                         this.processEvent('setSyncStatusMenuDisplayState', {
-                            isShown: !syncMenu.isDisplayed,
-                        }),
+                            isShown: syncMenu.isDisplayed,
+                        })
+                    },
                 }}
             />
         )
@@ -475,26 +524,34 @@ export class DashboardContainer extends StatefulUIElement<
 
         const lockedState = {
             isSidebarLocked: listsSidebar.isSidebarLocked,
-            toggleSidebarLockedState: () =>
+            toggleSidebarLockedState: () => {
                 this.processEvent('setSidebarLocked', {
                     isLocked: !listsSidebar.isSidebarLocked,
-                }),
+                })
+                // this.processEvent('calculateMainContentWidth', {
+                //     spaceSidebarWidth: !listsSidebar.isSidebarLocked
+                //         ? '250px'
+                //         : '0px',
+                // })
+            },
         }
 
         return (
             <ListsSidebarContainer
                 {...listsSidebar}
+                spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
                 lockedState={lockedState}
                 openFeedUrl={() =>
                     this.processEvent('clickFeedActivityIndicator', null)
                 }
+                switchToFeed={() => this.processEvent('switchToFeed', null)}
                 onAllSavedSelection={() =>
-                    this.processEvent('resetFilters', null)
+                    this.processEvent('setSelectedListId', { listId: null })
                 }
-                isAllSavedSelected={areSearchFiltersEmpty(this.state)}
-                onListSelection={(listId) =>
+                isAllSavedSelected={null}
+                onListSelection={(listId) => {
                     this.processEvent('setSelectedListId', { listId })
-                }
+                }}
                 peekState={{
                     isSidebarPeeking: listsSidebar.isSidebarPeeking,
                     setSidebarPeekState: (isPeeking) => () =>
@@ -505,23 +562,29 @@ export class DashboardContainer extends StatefulUIElement<
                 searchBarProps={{
                     searchQuery: listsSidebar.searchQuery,
                     sidebarLockedState: lockedState,
-                    hasPerfectMatch: true,
                     onCreateNew: (value) =>
                         this.processEvent('confirmListCreate', { value }),
                     onSearchQueryChange: (query) =>
                         this.processEvent('setListQueryValue', { query }),
                     onInputClear: () =>
                         this.processEvent('setListQueryValue', { query: '' }),
+                    localLists: this.listsStateToProps(
+                        listsSidebar.localLists.filteredListIds ?? undefined,
+                        'local-lists',
+                    ),
                 }}
                 listsGroups={[
                     {
                         ...listsSidebar.localLists,
                         title: 'My Spaces',
-                        onAddBtnClick: () =>
+                        onAddBtnClick: (event) => {
+                            event.preventDefault()
+                            event.stopPropagation()
                             this.processEvent('setAddListInputShown', {
                                 isShown: !listsSidebar.localLists
                                     .isAddInputShown,
-                            }),
+                            })
+                        },
                         confirmAddNewList: (value) =>
                             this.processEvent('confirmListCreate', { value }),
                         cancelAddNewList: (shouldSave) =>
@@ -531,7 +594,8 @@ export class DashboardContainer extends StatefulUIElement<
                                 isExpanded: !listsSidebar.localLists.isExpanded,
                             }),
                         listsArray: this.listsStateToProps(
-                            listsSidebar.localLists.filteredListIds,
+                            listsSidebar.localLists.filteredListIds ??
+                                undefined,
                             'local-lists',
                         ),
                     },
@@ -544,8 +608,24 @@ export class DashboardContainer extends StatefulUIElement<
                                     .isExpanded,
                             }),
                         listsArray: this.listsStateToProps(
-                            listsSidebar.followedLists.filteredListIds,
+                            listsSidebar.followedLists.filteredListIds ??
+                                undefined,
                             'followed-lists',
+                        ),
+                    },
+                    {
+                        ...listsSidebar.joinedLists,
+                        title: 'Joined Spaces',
+                        onExpandBtnClick: () => {
+                            this.processEvent('setJoinedListsExpanded', {
+                                isExpanded: !listsSidebar.joinedLists
+                                    .isExpanded,
+                            })
+                        },
+                        listsArray: this.listsStateToProps(
+                            listsSidebar.joinedLists.filteredListIds ??
+                                undefined,
+                            'joined-lists',
                         ),
                     },
                 ]}
@@ -572,11 +652,28 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderPdfLocator() {
+        if (!this.state.showDropArea) {
+            return
+        }
         return (
-            <PdfLocator
-                title="Test title"
-                url="https://testsite.com/test.pdf"
-            />
+            <DropZoneBackground
+                onDragOver={(event) => event.preventDefault()}
+                onDragEnter={(event) => event.preventDefault()}
+                onDrop={(event) => this.processEvent('dropPdfFile', event)}
+                // This exists as a way for the user to click it away if gets "stuck" (TODO: make it not get stuck)
+                onClick={(event) => this.processEvent('dragFile', null)}
+            >
+                <DropZoneFrame>
+                    <DropZoneContent>
+                        <Icon
+                            icon={icons.filePDF}
+                            heightAndWidth={'40px'}
+                            hoverOff
+                        />
+                        <DropZoneTitle>Drop PDF here to open it</DropZoneTitle>
+                    </DropZoneContent>
+                </DropZoneFrame>
+            </DropZoneBackground>
         )
     }
 
@@ -585,8 +682,15 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                filterByList={(listId) =>
+                    this.processEvent('setSelectedListId', { listId })
+                }
+                clearInbox={() => this.processEvent('clearInbox', null)}
+                isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
+                activePage={this.state.activePageID && true}
                 listData={listsSidebar.listData}
                 getListDetailsById={this.getListDetailsById}
+                youtubeService={this.youtubeService}
                 toggleSortMenuShown={() =>
                     this.processEvent('setSortMenuShown', {
                         isShown: !searchResults.isSortMenuShown,
@@ -627,15 +731,7 @@ export class DashboardContainer extends StatefulUIElement<
                 onDismissSubscriptionBanner={() =>
                     this.processEvent('dismissSubscriptionBanner', null)
                 }
-                showCloudOnboardingModal={() =>
-                    this.processEvent('setShowCloudOnboardingModal', {
-                        isShown: true,
-                    })
-                }
                 noResultsType={searchResults.noResultsType}
-                filterSearchByTag={(tag) =>
-                    this.processEvent('addIncludedTag', { tag })
-                }
                 paginateSearch={() =>
                     this.processEvent('search', { paginate: true })
                 }
@@ -663,6 +759,20 @@ export class DashboardContainer extends StatefulUIElement<
                 onPagesSearchSwitch={() =>
                     this.processEvent('setSearchType', { searchType: 'pages' })
                 }
+                onVideosSearchSwitch={() => {
+                    this.processEvent('setSearchType', { searchType: 'videos' })
+                }}
+                onTwitterSearchSwitch={() => {
+                    this.processEvent('setSearchType', {
+                        searchType: 'twitter',
+                    })
+                }}
+                onPDFSearchSwitch={() => {
+                    this.processEvent('setSearchType', { searchType: 'pdf' })
+                }}
+                onEventSearchSwitch={() => {
+                    this.processEvent('setSearchType', { searchType: 'events' })
+                }}
                 onPageLinkCopy={(link) =>
                     this.processEvent('copyShareLink', {
                         link,
@@ -682,6 +792,12 @@ export class DashboardContainer extends StatefulUIElement<
                     })
                 }
                 pageInteractionProps={{
+                    onClick: (day, pageId) => async (event) =>
+                        this.processEvent('clickPageResult', {
+                            day,
+                            pageId,
+                            synthEvent: event,
+                        }),
                     onNotesBtnClick: (day, pageId) => (e) => {
                         const pageData = searchResults.pageData.byId[pageId]
                         if (e.shiftKey) {
@@ -697,6 +813,51 @@ export class DashboardContainer extends StatefulUIElement<
                         this.notesSidebarRef.current.toggleSidebarShowForPageId(
                             pageData.fullUrl,
                         )
+
+                        // this.processEvent('setPageNotesShown', {
+                        //     day,
+                        //     pageId,
+                        //     areShown: !searchResults.results[day].pages.byId[
+                        //         pageId
+                        //     ].areNotesShown,
+                        // })
+
+                        this.processEvent('setActivePage', {
+                            activeDay: day,
+                            activePageID: pageId,
+                            activePage: true,
+                        })
+
+                        // if (
+                        //     searchResults.results[day].pages.byId[pageId]
+                        //         .activePage
+                        // ) {
+                        //     this.processEvent('setActivePage', {
+                        //         activeDay: undefined,
+                        //         activePageID: undefined,
+                        //         activePage: false,
+                        //     })
+                        //     this.processEvent('setPageNotesShown', {
+                        //         day,
+                        //         pageId,
+                        //         areShown:
+                        //             searchResults.results[day].pages.byId[
+                        //                 pageId
+                        //             ].areNotesShown && false,
+                        //     })
+                        // } else if (this.state.activePageID) {
+                        //     this.processEvent('setActivePage', {
+                        //         activeDay: this.state.activeDay,
+                        //         activePageID: this.state.activePageID,
+                        //         activePage: false,
+                        //     })
+                        // } else {
+                        //     this.processEvent('setActivePage', {
+                        //         activeDay: day,
+                        //         activePageID: pageId,
+                        //         activePage: true,
+                        //     })
+                        // }
                     },
                     onTagPickerBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageTagPickerShown', {
@@ -706,13 +867,17 @@ export class DashboardContainer extends StatefulUIElement<
                                 pageId
                             ].isTagPickerShown,
                         }),
-                    onListPickerBtnClick: (day, pageId) => () =>
+                    onListPickerFooterBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageListPickerShown', {
                             day,
                             pageId,
-                            isShown: !searchResults.results[day].pages.byId[
-                                pageId
-                            ].isListPickerShown,
+                            show: 'footer',
+                        }),
+                    onListPickerBarBtnClick: (day, pageId) => () =>
+                        this.processEvent('setPageListPickerShown', {
+                            day,
+                            pageId,
+                            show: 'lists-bar',
                         }),
                     onCopyPasterBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageCopyPasterShown', {
@@ -765,11 +930,12 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             hover: null,
                         }),
-                    onRemoveFromListBtnClick: (day, pageId) => () =>
+                    onRemoveFromListBtnClick: (day, pageId) => () => {
                         this.processEvent('removePageFromList', {
                             day,
                             pageId,
-                        }),
+                        })
+                    },
                     onPageDrag: (day, pageId) => (e) =>
                         this.processEvent('dragPage', {
                             day,
@@ -816,12 +982,6 @@ export class DashboardContainer extends StatefulUIElement<
                             day,
                             pageId,
                             value,
-                        }),
-                    onTagsUpdate: (day, pageId) => (tags) =>
-                        this.processEvent('setPageNewNoteTags', {
-                            day,
-                            pageId,
-                            tags,
                         }),
                     createNewList: (day, pageId) => async (name) =>
                         this.createNewListViaPicker(name),
@@ -897,11 +1057,15 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: !searchResults.noteData.byId[noteId]
                                 .isTagPickerShown,
                         }),
-                    onListPickerBtnClick: (noteId) => () =>
+                    onListPickerBarBtnClick: (noteId) => () =>
                         this.processEvent('setNoteListPickerShown', {
                             noteId,
-                            isShown: !searchResults.noteData.byId[noteId]
-                                .isListPickerShown,
+                            show: 'lists-bar',
+                        }),
+                    onListPickerFooterBtnClick: (noteId) => () =>
+                        this.processEvent('setNoteListPickerShown', {
+                            noteId,
+                            show: 'footer',
                         }),
                     onCopyPasterBtnClick: (noteId) => () =>
                         this.processEvent('setNoteCopyPasterShown', {
@@ -970,20 +1134,6 @@ export class DashboardContainer extends StatefulUIElement<
                             keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                         }),
                 }}
-                searchCopyPasterProps={{
-                    searchType: searchResults.searchType,
-                    searchParams: stateToSearchParams(this.state),
-                    isCopyPasterShown: searchResults.isSearchCopyPasterShown,
-                    isCopyPasterBtnShown: true,
-                    hideCopyPaster: () =>
-                        this.processEvent('setSearchCopyPasterShown', {
-                            isShown: false,
-                        }),
-                    toggleCopyPaster: () =>
-                        this.processEvent('setSearchCopyPasterShown', {
-                            isShown: !searchResults.isSearchCopyPasterShown,
-                        }),
-                }}
             />
         )
     }
@@ -1041,11 +1191,12 @@ export class DashboardContainer extends StatefulUIElement<
                 <DeleteConfirmModal
                     isShown
                     message="Delete this Space?"
-                    submessage="This does not delete the pages in it"
+                    submessage="This does NOT delete the pages in it"
                     onClose={() => this.processEvent('cancelListDelete', null)}
                     deleteDocs={() =>
                         this.processEvent('confirmListDelete', null)
                     }
+                    icon={icons.collectionsEmpty}
                 />
             )
         }
@@ -1151,23 +1302,72 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (modalsState.showCloudOnboarding) {
-            return (
-                <CloudOnboardingModal
-                    services={this.props.services}
-                    backupBG={this.props.backupBG}
-                    syncSettingsBG={this.props.syncSettingsBG}
-                    personalCloudBG={this.props.personalCloudBG}
-                    onModalClose={(args) =>
-                        this.processEvent('closeCloudOnboardingModal', {
-                            didFinish: !!args.didFinish,
-                        })
-                    }
-                />
-            )
-        }
-
         return null
+    }
+
+    private whichFeed = () => {
+        if (process.env.NODE_ENV === 'production') {
+            return 'https://memex.social/feed'
+        } else {
+            return 'https://staging.memex.social/feed'
+        }
+    }
+
+    private renderHeaderBar() {
+        // attempt at using the sync header in the dashboard top level, instad of header. leaving this here for now we may need it not sure
+        return (
+            <HeaderBar>
+                <RightHeader>
+                    <SyncStatusHeaderBox
+                        className={
+                            DashboardContainer.SYNC_MENU_TOGGLE_BTN_CLASS
+                        }
+                        onClick={() =>
+                            this.processEvent('setSyncStatusMenuDisplayState', {
+                                isShown: !this.state.syncMenu.isDisplayed,
+                            })
+                        }
+                    >
+                        <Margin>
+                            <SyncStatusIcon
+                                color={deriveStatusIconColor(this.state)}
+                            />
+                        </Margin>
+                        <SyncStatusHeaderText>Sync Status</SyncStatusHeaderText>
+                    </SyncStatusHeaderBox>
+                    <SettingsSection
+                        vertical="auto"
+                        horizontal="17px"
+                        onClick={() => window.open(SETTINGS_URL, '_self')}
+                    >
+                        <Icon heightAndWidth="22px" filePath={icons.settings} />
+                    </SettingsSection>
+                    <SyncStatusMenu
+                        syncStatusIconState={deriveStatusIconColor(this.state)}
+                        {...this.state.syncMenu}
+                        isLoggedIn={this.state.currentUser != null}
+                        outsideClickIgnoreClass={
+                            HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS
+                        }
+                        onLoginClick={() =>
+                            this.processEvent('setShowLoginModal', {
+                                isShown: true,
+                            })
+                        }
+                        onClickOutside={() =>
+                            this.processEvent('setSyncStatusMenuDisplayState', {
+                                isShown: false,
+                            })
+                        }
+                        // onToggleDisplayState={() =>
+                        //     this.processEvent('setSyncStatusMenuDisplayState', {
+                        //         isShown: !this.state.syncMenu.isDisplayed,
+                        //     })
+                        // }
+                    />
+                </RightHeader>
+            </HeaderBar>
+        )
     }
 
     render() {
@@ -1177,51 +1377,229 @@ export class DashboardContainer extends StatefulUIElement<
         if (mode === 'onboarding') {
             return (
                 <Onboarding
+                    contentScriptsBG={this.props.contentScriptsBG}
                     authBG={this.props.authBG}
-                    personalCloudBG={this.props.personalCloudBG}
                 />
             )
         }
 
+        const lockedState = {
+            isSidebarLocked: listsSidebar.isSidebarLocked,
+            toggleSidebarLockedState: () => {
+                this.processEvent('setSidebarLocked', {
+                    isLocked: !listsSidebar.isSidebarLocked,
+                })
+                // this.processEvent('calculateMainContentWidth', {
+                //     spaceSidebarWidth: !listsSidebar.isSidebarLocked
+                //         ? '250px'
+                //         : '0px',
+                // })
+            },
+        }
+
+        const sidebarToggleHoverState = {
+            isHovered: listsSidebar.isSidebarToggleHovered,
+            onHoverEnter: () =>
+                this.processEvent('setSidebarToggleHovered', {
+                    isHovered: true,
+                }),
+            onHoverLeave: () =>
+                this.processEvent('setSidebarToggleHovered', {
+                    isHovered: false,
+                }),
+        }
+
+        const style = {
+            display:
+                !listsSidebar.isSidebarPeeking && !listsSidebar.isSidebarLocked
+                    ? 'none'
+                    : 'flex',
+            top: listsSidebar.isSidebarPeeking ? '20px' : '0',
+            height: listsSidebar.isSidebarPeeking ? '90vh' : '100vh',
+            position: listsSidebar.isSidebarPeeking ? 'fixed' : 'sticky',
+        }
+
+        const isPeeking = this.state.listsSidebar.isSidebarPeeking
+            ? this.state.listsSidebar.isSidebarPeeking
+            : undefined
         return (
-            <Container>
-                {this.renderHeader()}
-                {this.renderFiltersBar()}
-                <Margin bottom="5px" />
-                {this.renderListsSidebar()}
-                {mode === 'locate-pdf'
-                    ? this.renderPdfLocator()
-                    : this.renderSearchResults()}
-                {this.renderModals()}
-                <NotesSidebar
-                    tags={this.props.tagsBG}
-                    auth={this.props.authBG}
-                    refSidebar={this.notesSidebarRef}
-                    customLists={this.props.listsBG}
-                    annotations={this.props.annotationsBG}
-                    annotationsCache={this.annotationsCache}
-                    contentSharing={this.props.contentShareBG}
-                    syncSettingsBG={this.props.syncSettingsBG}
-                    contentConversationsBG={this.props.contentConversationsBG}
-                    setLoginModalShown={(isShown) =>
-                        this.processEvent('setShowLoginModal', { isShown })
-                    }
-                    setDisplayNameModalShown={(isShown) =>
-                        this.processEvent('setShowDisplayNameSetupModal', {
-                            isShown,
-                        })
-                    }
-                    showAnnotationShareModal={() =>
-                        this.processEvent('setShowNoteShareOnboardingModal', {
-                            isShown: true,
-                        })
-                    }
-                />
-                <HelpBtn />
-                <DragElement
-                    isHoveringOverListItem={listsSidebar.dragOverListId != null}
-                />
-                {this.props.renderUpdateNotifBanner()}
+            <Container
+                onDragEnter={(event) => this.processEvent('dragFile', event)}
+            >
+                {this.renderPdfLocator()}
+                <MainContainer>
+                    <SidebarHeaderContainer>
+                        <SidebarToggleBox>
+                            <SidebarToggle
+                                sidebarLockedState={lockedState}
+                                hoverState={sidebarToggleHoverState}
+                            />
+                            <ActivityIndicator
+                                hasActivities={listsSidebar.hasFeedActivity}
+                            />
+                        </SidebarToggleBox>
+                    </SidebarHeaderContainer>
+                    <PeekTrigger
+                        onMouseEnter={(isPeeking) => {
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking,
+                            })
+                        }}
+                        onDragEnter={(isPeeking) => {
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking,
+                            })
+                        }}
+                    />
+                    <MainFrame>
+                        <ListSidebarContent
+                            ref={this.SidebarContainer}
+                            style={style}
+                            size={{
+                                height: listsSidebar.isSidebarPeeking
+                                    ? '90vh'
+                                    : '100vh',
+                            }}
+                            peeking={
+                                listsSidebar.isSidebarPeeking
+                                    ? listsSidebar.isSidebarPeeking
+                                    : undefined
+                            }
+                            position={{
+                                x:
+                                    listsSidebar.isSidebarLocked &&
+                                    `$sizeConstants.header.heightPxpx`,
+                            }}
+                            locked={
+                                listsSidebar.isSidebarLocked
+                                    ? listsSidebar.isSidebarLocked.toString()
+                                    : undefined
+                            }
+                            onMouseLeave={() => {
+                                if (this.state.listsSidebar.isSidebarPeeking) {
+                                    this.processEvent('setSidebarPeeking', {
+                                        isPeeking: false,
+                                    })
+                                }
+                            }}
+                            // default={{ width: sizeConstants.listsSidebar.widthPx }}
+                            resizeHandleClasses={{
+                                right: 'sidebarResizeHandleSidebar',
+                            }}
+                            resizeGrid={[1, 0]}
+                            dragAxis={'none'}
+                            minWidth={sizeConstants.listsSidebar.width + 'px'}
+                            maxWidth={'500px'}
+                            disableDragging={true}
+                            enableResizing={{
+                                top: false,
+                                right: true,
+                                bottom: false,
+                                left: false,
+                                topRight: false,
+                                bottomRight: false,
+                                bottomLeft: false,
+                                topLeft: false,
+                            }}
+                            onResizeStop={(
+                                e,
+                                direction,
+                                ref,
+                                delta,
+                                position,
+                            ) => {
+                                this.processEvent('setSpaceSidebarWidth', {
+                                    width: ref.style.width,
+                                })
+                            }}
+                        >
+                            {this.renderListsSidebar()}
+                        </ListSidebarContent>
+                        <MainContent>
+                            {this.state.listsSidebar.showFeed ? (
+                                <FeedContainer>
+                                    <TitleContainer>
+                                        <SectionTitle>
+                                            Activity Feed
+                                        </SectionTitle>
+                                        <SectionDescription>
+                                            Updates from Spaces you follow or
+                                            conversation you participate in
+                                        </SectionDescription>
+                                    </TitleContainer>
+                                    <FeedFrame src={this.whichFeed()} />
+                                </FeedContainer>
+                            ) : (
+                                <>
+                                    {this.renderHeader()}
+                                    {this.renderFiltersBar()}
+                                    {this.renderSearchResults()}
+                                </>
+                            )}
+                        </MainContent>
+                        <NotesSidebar
+                            hasFeedActivity={listsSidebar.hasFeedActivity}
+                            clickFeedActivityIndicator={() =>
+                                this.processEvent(
+                                    'clickFeedActivityIndicator',
+                                    null,
+                                )
+                            }
+                            shouldHydrateCacheOnInit
+                            annotationsCache={this.props.annotationsCache}
+                            youtubeService={this.youtubeService}
+                            authBG={this.props.authBG}
+                            refSidebar={this.notesSidebarRef}
+                            customListsBG={this.props.listsBG}
+                            annotationsBG={this.props.annotationsBG}
+                            contentSharingBG={this.props.contentShareBG}
+                            contentScriptsBG={this.props.contentScriptsBG}
+                            syncSettingsBG={this.props.syncSettingsBG}
+                            pageActivityIndicatorBG={
+                                this.props.pageActivityIndicatorBG
+                            }
+                            contentConversationsBG={
+                                this.props.contentConversationsBG
+                            }
+                            setLoginModalShown={(isShown) =>
+                                this.processEvent('setShowLoginModal', {
+                                    isShown,
+                                })
+                            }
+                            setDisplayNameModalShown={(isShown) =>
+                                this.processEvent(
+                                    'setShowDisplayNameSetupModal',
+                                    {
+                                        isShown,
+                                    },
+                                )
+                            }
+                            showAnnotationShareModal={() =>
+                                this.processEvent(
+                                    'setShowNoteShareOnboardingModal',
+                                    {
+                                        isShown: true,
+                                    },
+                                )
+                            }
+                            onNotesSidebarClose={() =>
+                                this.processEvent('setActivePage', {
+                                    activeDay: undefined,
+                                    activePageID: undefined,
+                                    activePage: false,
+                                })
+                            }
+                        />
+                    </MainFrame>
+                    {this.renderModals()}
+                    <HelpBtn />
+                    <DragElement
+                        isHoveringOverListItem={
+                            listsSidebar.dragOverListId != null
+                        }
+                    />
+                    {this.props.renderUpdateNotifBanner()}
+                </MainContainer>
             </Container>
         )
     }
@@ -1230,23 +1608,376 @@ export class DashboardContainer extends StatefulUIElement<
 const GlobalStyle = createGlobalStyle`
 
     * {
-        font-family: 'Inter', sans-serif;,
+        font-family: 'Satoshi', sans-serif;
+font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
+        letter-spacing: 0.8px;
     }
 
     body {
-        font-family: 'Inter', sans-serif;';
+        font-family: 'Satoshi', sans-serif;
+font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
+        letter-spacing: 0.8px;
     }
 `
 
+const MainContainer = styled.div`
+    display: flex;
+    display: flex;
+    flex-direction: column;
+    height: fill-available;
+    width: fill-available;
+`
+
+const DropZoneBackground = styled.div`
+    position: absolute;
+    height: fill-available;
+    width: fill-available;
+    top: 0px;
+    left: 0px;
+    background: ${(props) => props.theme.colors.black}60;
+    backdrop-filter: blur(20px);
+    padding: 40px;
+    display: flex;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+`
+
+const DropZoneFrame = styled.div`
+    border: 1px solid ${(props) => props.theme.colors.prime1}60;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: fill-available;
+    width: fill-available;
+`
+
+const showText = keyframes`
+ 0% { opacity: 0.3; scale: 0.95 }
+ 100% { opacity: 1; scale: 1}
+`
+
+const DropZoneContent = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 10px;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0.3;
+    scale: 0.95;
+
+    animation: ${showText} 400ms cubic-bezier(0.4, 0, 0.2, 1) 50ms forwards;
+`
+
+const DropZoneTitle = styled.div`
+    color: ${(props) => props.theme.colors.white};
+    font-size: 20px;
+    text-align: center;
+`
+
+const ContentArea = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: fill-available;
+    height: fill-available;
+`
+
+const HeaderBar = styled.div`
+    height: ${sizeConstants.header.heightPx}px;
+    width: fill-available;
+    position: sticky;
+    top: 0;
+    left: 150px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: ${(props) => props.theme.colors.black};
+    z-index: 30;
+    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.greyScale3};
+`
+
+const MainContent = styled.div<{ responsiveWidth: string }>`
+    width: fill-available;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    height: 100%;
+    flex: 1;
+    width: 360px;
+
+    ${(props) =>
+        props.responsiveWidth &&
+        css<{ responsiveWidth: string }>`
+            width: ${(props) => props.responsiveWidth};
+        `};
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+`
+
+const ListSidebarContent = styled(Rnd)<{
+    locked: boolean
+    peeking: boolean
+}>`
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    z-index: 3000;
+    left: 0px;
+
+    ${(props) =>
+        props.locked &&
+        css`
+            height: 100vh;
+            background-color: ${(props) => props.theme.colors.greyScale1};
+            border-right: solid 1px ${(props) => props.theme.colors.greyScale2};
+            padding-top: ${sizeConstants.header.heightPx}px;
+        `}
+    ${(props) =>
+        props.peeking &&
+        css`
+            position: absolute
+            height: max-content;
+            background-color: ${(props) => props.theme.colors.greyScale1};
+            //box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
+            margin-top: 50px;
+            margin-bottom: 9px;
+            margin-left: 10px;
+            height: 90vh;
+            top: 20px;
+            left: 0px;
+            border-radius: 10px;
+            animation: slide-in ease-in-out;
+            animation-duration: 0.15s;
+            border: 1px solid ${(props) => props.theme.colors.greyScale2};
+        `}
+    ${(props) =>
+        !props.peeking &&
+        !props.locked &&
+        css`
+            display: none;
+        `}
+
+
+        @keyframes slide-in {
+            0% {
+                left: -200px;
+                opacity: 0%;
+            }
+            100% {
+                left: 0px;
+                opacity: 100%;
+            }
+        }
+`
+
+// const ListSidebarContent = styled.div`
+//     width: fit-content;
+//     block-size: fit-content;
+// `
+
+const LoadingBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+`
+
+const FeedContainer = styled.div`
+    display: flex;
+    width: fill-available;
+    height: 100%;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    grid-gap: 20px;
+    margin-top: 60px;
+    max-width: 800px;
+`
+
+const FeedFrame = styled.iframe`
+    width: fill-available;
+    min-height: 100vh;
+    height: 100%;
+    border: none;
+`
+
+const TitleContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    grid-gap: 10px;
+    width: fill-available;
+    padding: 0 30px;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.white};
+    font-size: 24px;
+    font-weight: bold;
+`
+const SectionDescription = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 16px;
+    font-weight: 300;
+`
+
+const MainFrame = styled.div`
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+    height: fill-available;
+
+    width: fill-available;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+`
+
 const Container = styled.div`
-display: flex;
-flex-direction: column;
-width: fill-available;
-background-color: ${(props) => props.theme.colors.backgroundColor};
-min-height: 100vh;
-height: 100%;
+    display: flex;
+    flex-direction: column;
+    width: fill-available;
+    background-color: ${(props) => props.theme.colors.black};
+    min-height: 100vh;
+    height: 100vh;
+    /* min-width: fit-content; */
+    width: fill-available;
+    overflow: hidden;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 
     & * {
-        font-family: 'Inter', sans-serif;,
+        font-family: 'Satoshi', sans-serif;
+font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;,
+    }
+`
+
+const PeekTrigger = styled.div`
+    height: 100vh;
+    width: 10px;
+    position: fixed;
+    background: transparent;
+    z-index: 50;
+`
+
+const SidebarToggleBox = styled(Margin)`
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+`
+
+const ActivityIndicator = styled.div<{ hasActivities }>`
+    border-radius: 20px;
+    height: 10px;
+    width: 10px;
+    margin-left: -24px;
+    border: ${(props) =>
+        props.hasActivities && '2px solid' + props.theme.colors.prime1};
+    background: ${(props) => props.hasActivities && props.theme.colors.prime1};
+`
+
+const SidebarHeaderContainer = styled.div`
+    height: 100%;
+    width: ${sizeConstants.listsSidebar.width}px;
+    display: flex;
+    position: sticky;
+    top: 0px;
+    z-index: 4000;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 1;
+
+    & div {
+        justify-content: flex-start;
+    }
+`
+
+const SettingsSection = styled(Margin)`
+    width: min-content;
+    cursor: pointer;
+    height: 24px;
+    width: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 3px;
+
+    &:hover {
+        background-color: ${(props) => props.theme.colors.greyScale1};
+    }
+`
+
+const RightHeader = styled.div`
+    width: min-content;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    position: absolute;
+    right: 10px;
+`
+
+const SyncStatusHeaderBox = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 3px;
+    height: 24px;
+    grid-gap: 5px;
+
+    & > div {
+        width: auto;
+    }
+
+    &:hover {
+        background-color: ${(props) => props.theme.colors.greyScale1};
+    }
+
+    @media screen and (max-width: 900px) {
+        padding: 4px 4px 4px 4px;
+        margin-left: 15px;
+        width: 20px;
+    }
+`
+
+const SyncStatusHeaderText = styled.span<{
+    textCentered: boolean
+}>`
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.white};
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    ${(props) => (props.textCentered ? 'text-align: center;' : '')}
+
+    @media screen and (max-width: 600px) {
+        display: none;
     }
 `

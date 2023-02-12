@@ -1,9 +1,9 @@
-import { Alarms } from 'webextension-polyfill-ts'
+import { Alarms } from 'webextension-polyfill'
 
 import { JobScheduler } from './job-scheduler'
 import { JobDefinition, PrimedJob } from './types'
 
-class MockAlarmsApi {
+export class MockAlarmsApi {
     listener: (alarm: Alarms.Alarm, now?: number) => Promise<void>
     alarms: Map<string, Alarms.CreateAlarmInfoType> = new Map()
 
@@ -13,6 +13,11 @@ class MockAlarmsApi {
 
     create(name: string, info: Alarms.CreateAlarmInfoType) {
         this.alarms.set(name, info)
+    }
+
+    async clear(name: string) {
+        this.alarms.delete(name)
+        return true
     }
 }
 

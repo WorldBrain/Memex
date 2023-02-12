@@ -11,19 +11,20 @@ export function pageIsStub(page: Pick<PipelineRes, 'text' | 'terms'>): boolean {
 }
 
 export const isUrlSupported = (params: {
-    url: string
+    fullUrl: string
     allowFileUrls?: boolean
 }) => {
     const unsupportedUrlPrefixes = [
+        'blob:',
         'about:',
         'chrome://',
         'moz-extension://',
         'chrome-extension://',
     ]
-    const fullUrl = getUnderlyingResourceUrl(params.url)
+    const fullUrl = getUnderlyingResourceUrl(params.fullUrl)
 
     // Ignore file URLs, though check `params.url` as the processed `fullUrl` may be a valid file URL (local PDF opened in PDF reader)
-    if (params.url.startsWith('file://') && !params.allowFileUrls) {
+    if (params.fullUrl.startsWith('file://') && !params.allowFileUrls) {
         return false
     }
 
@@ -46,13 +47,15 @@ export async function maybeIndexTabs(
     const indexed: { fullUrl: string }[] = []
 
     const tabIdsByUrls = await Promise.all(
-        tabs.filter(isUrlSupported).map(async (tab) => {
-            const { fullUrl } = await options.waitForContentIdentifier({
-                tabId: tab.id,
-                fullUrl: getUnderlyingResourceUrl(tab.url),
-            })
-            return [fullUrl, tab.id] as [string, number]
-        }),
+        tabs
+            .filter((tab) => isUrlSupported({ fullUrl: tab.url }))
+            .map(async (tab) => {
+                const { fullUrl } = await options.waitForContentIdentifier({
+                    tabId: tab.id,
+                    fullUrl: getUnderlyingResourceUrl(tab.url),
+                })
+                return [fullUrl, tab.id] as [string, number]
+            }),
     )
 
     for (const [fullUrl, tabId] of tabIdsByUrls) {

@@ -25,7 +25,6 @@ export interface GenericPickerDependencies {
     onUpdateEntrySelection: PickerUpdateHandler
     queryEntries: (query: string) => Promise<string[]>
     actOnAllTabs?: (query: string) => Promise<void>
-    onEscapeKeyDown?: () => void | Promise<void>
     loadDefaultSuggestions: () => string[] | Promise<string[]>
     initialSelectedEntries?: () => string[] | Promise<string[]>
     children?: any
@@ -173,10 +172,6 @@ export default abstract class GenericPickerLogic<
                 )
             }
         }
-
-        if (key === 'Escape' && this.dependencies.onEscapeKeyDown) {
-            return this.dependencies.onEscapeKeyDown()
-        }
     }
 
     searchInputChanged = async ({
@@ -246,6 +241,9 @@ export default abstract class GenericPickerLogic<
             }),
         })
         this._setCreateEntryDisplay(results, displayEntries, term)
+        if (displayEntries.length > 0) {
+            this._updateFocus(0, displayEntries)
+        }
     }
 
     _query = debounce(this._queryBoth, 150, { leading: true })

@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events'
 import { RecurringTask } from '@worldbrain/storex-sync/lib/utils/recurring-task'
+import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 
 export class ConnectivityCheckerBackground extends EventEmitter {
     static DEF_CHECK_INTERVAL = 60000
@@ -8,6 +9,7 @@ export class ConnectivityCheckerBackground extends EventEmitter {
         'https://worldbrain.io/wp-content/uploads/2019/04/cropped-logo_squared_favicon-32x32.png'
     static CONNECTED_EVENT = 'connected'
     static DISCONNECTED_EVENT = 'disconnected'
+    static RECURRING_JOB_NAME = 'retry-connection-check'
 
     private recurringTask: RecurringTask
     private checkingConnectionWait: Promise<void>
@@ -19,6 +21,7 @@ export class ConnectivityCheckerBackground extends EventEmitter {
             target?: string
             checkingTimeout?: number
             checkingInterval?: number
+            jobScheduler: JobScheduler
         },
     ) {
         super()
@@ -43,7 +46,7 @@ export class ConnectivityCheckerBackground extends EventEmitter {
             return this.checkingConnectionWait
         }
 
-        this.checkingConnectionWait = new Promise(resolve => {
+        this.checkingConnectionWait = new Promise((resolve) => {
             if (this.recurringTask) {
                 this.recurringTask.stop()
             }
@@ -59,6 +62,20 @@ export class ConnectivityCheckerBackground extends EventEmitter {
                     }
                 },
                 {
+                    setTimeout: (job, timeout) => {
+                        this.props.jobScheduler.scheduleJobOnce({
+                            name:
+                                ConnectivityCheckerBackground.RECURRING_JOB_NAME,
+                            when: Date.now() + timeout,
+                            job,
+                        })
+                        return -1
+                    },
+                    clearTimeout: () => {
+                        this.props.jobScheduler.clearScheduledJob(
+                            ConnectivityCheckerBackground.RECURRING_JOB_NAME,
+                        )
+                    },
                     intervalInMs,
                     onError: this.handleProcessingError,
                 },
@@ -79,7 +96,7 @@ export class ConnectivityCheckerBackground extends EventEmitter {
     }
 
     private runCheck(): Promise<boolean> {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             this.props.xhr.open('GET', this.props.target, true)
             this.props.xhr.onload = () => resolve(true)
             this.props.xhr.onerror = () => resolve(false)

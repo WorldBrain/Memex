@@ -13,6 +13,7 @@ export interface Props {
     overflow?: string
     padding?: string
     onMouseLeave?: () => void
+    zIndex?: number
 }
 
 export class HoverBox extends React.Component<Props> {
@@ -40,18 +41,19 @@ export const HoverBoxContainer = styled.div<Props>`
 `
 
 export const HoverBoxDiv = styled.div<Props>`
-    box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
+    box-shadow: 0px 24px 48px 0px ${(props) => props.theme.colors.black};
     border-radius: 12px;
-    overflow: ${(props) => (props.overflow ? props.overflow : 'visible')};;
-    position: ${(props) => (props.position ? props.position : 'absolute')};;
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    background: ${(props) => props.theme.colors.greyScale1};
+    overflow: ${(props) => (props.overflow ? props.overflow : 'visible')};
+    position: ${(props) => (props.position ? props.position : 'absolute')};
     width: ${(props) => (props.width ? props.width : '300px')};
     height: ${(props) => (props.height ? props.height : 'fit-content')};
     ${(props) => (props.top ? `top: ${props.top};` : '')}
     ${(props) => (props.left ? `left: ${props.left};` : '')}
     ${(props) => (props.right ? `right: ${props.right};` : '')}
     ${(props) => (props.bottom ? `bottom: ${props.bottom};` : '')}
-    background-color: #fff;
-    z-index: 1001;
+    z-index: ${(props) => (props.zIndex ? props.zIndex : '1001')};
     padding: ${(props) => (props.padding ? props.padding : '10px 0px')};
 
     &::-webkit-scrollbar {
@@ -67,7 +69,7 @@ export const HoverBoxDashboard = styled.div`
     position: absolute;
     width: 300px;
     z-index: 1;
-    background-color: #fff;
+    background: ${(props) => props.theme.colors.greyScale1};
     border-radius: 12px;
     right: 20px;
     padding: 10px 0px;

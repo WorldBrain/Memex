@@ -20,20 +20,23 @@ import {
 } from './utils'
 import { RemoteEventEmitter } from 'src/util/webextensionRPC'
 import {
-    AuthRemoteEvents,
     AuthRemoteFunctionsInterface,
     AuthSettings,
     AuthBackendFunctions,
     EmailPasswordCredentials,
 } from './types'
-import { JobDefinition } from 'src/job-scheduler/background/types'
 import { isDev } from 'src/analytics/internal/constants'
 import { setupRequestInterceptors } from 'src/authentication/background/redirect'
 import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 import { User } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
-import firebase from 'firebase'
+import { getAuth, sendPasswordResetEmail, updateEmail } from 'firebase/auth'
+import type { FirebaseError } from 'firebase/app'
+import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
+import type { AuthServices } from 'src/services/types'
+import { listenToWebAppMessage } from './auth-sync'
+import type { Runtime } from 'webextension-polyfill'
 
 export class AuthBackground {
     authService: AuthService
@@ -41,28 +44,24 @@ export class AuthBackground {
     settings: SettingStore<AuthSettings>
     subscriptionService: SubscriptionsService
     remoteFunctions: AuthRemoteFunctionsInterface
-    scheduleJob: (job: JobDefinition) => void
-    getUserManagement: () => Promise<UserStorage>
-    private _firebase: typeof firebase
 
     private _userProfile?: Promise<User>
 
     constructor(
         public options: {
-            authService: AuthService
-            subscriptionService: SubscriptionsService
+            runtimeAPI: Runtime.Static
+            authServices: AuthServices
+            jobScheduler: JobScheduler
             localStorageArea: LimitedBrowserStorage
             backendFunctions: AuthBackendFunctions
-            getUserManagement: () => Promise<UserStorage>
-            scheduleJob: (job: JobDefinition) => void
             remoteEmitter: RemoteEventEmitter<'auth'>
+            getUserManagement: () => Promise<UserStorage>
+            getFCMRegistrationToken?: () => Promise<string>
         },
     ) {
-        this.authService = options.authService
+        this.authService = options.authServices.auth
         this.backendFunctions = options.backendFunctions
-        this.subscriptionService = options.subscriptionService
-        this.scheduleJob = options.scheduleJob
-        this.getUserManagement = options.getUserManagement
+        this.subscriptionService = options.authServices.subscriptions
         this.settings = new BrowserSettingsStore<AuthSettings>(
             options.localStorageArea,
             {
@@ -122,7 +121,7 @@ export class AuthBackground {
                 if (!user) {
                     return null
                 }
-                const userManagement = await this.getUserManagement()
+                const userManagement = await this.options.getUserManagement()
                 this._userProfile = userManagement.getUser({
                     type: 'user-reference',
                     id: user.id,
@@ -130,7 +129,7 @@ export class AuthBackground {
                 return this._userProfile
             },
             getUserByReference: async (reference) => {
-                const userManagement = await this.getUserManagement()
+                const userManagement = await this.options.getUserManagement()
                 return userManagement.getUser(reference)
             },
             updateUserProfile: async (updates) => {
@@ -140,14 +139,16 @@ export class AuthBackground {
                 }
                 delete this._userProfile
 
-                const userManagement = await this.getUserManagement()
+                const userManagement = await this.options.getUserManagement()
                 await userManagement.updateUser(
                     { type: 'user-reference', id: user.id },
                     {},
-                    updates,
+                    { displayName: updates.displayName },
                 )
             },
         }
+
+        listenToWebAppMessage(this.authService, options.runtimeAPI)
     }
 
     refreshUserInfo = async () => {
@@ -157,7 +158,9 @@ export class AuthBackground {
     }
 
     setupRequestInterceptor() {
-        setupRequestInterceptors({ webRequest: window['browser'].webRequest })
+        setupRequestInterceptors({
+            webRequest: globalThis['browser'].webRequest,
+        })
     }
 
     _scheduleSubscriptionCheck = (
@@ -172,7 +175,7 @@ export class AuthBackground {
                     ).toLocaleString()}`,
                 )
 
-            this.scheduleJob({
+            this.options.jobScheduler.scheduleJobOnce({
                 name: 'user-subscription-expiry-refresh',
                 when,
                 job: async () => {
@@ -184,7 +187,7 @@ export class AuthBackground {
                 },
             })
         } else {
-            this.scheduleJob({
+            this.options.jobScheduler.scheduleJobOnce({
                 name: 'user-subscription-expiry-refresh',
                 when: Date.now(),
                 job: () => null,
@@ -192,12 +195,12 @@ export class AuthBackground {
         }
     }
 
-    sendPasswordResetEmailProcess = async (email) => {
-        return firebase.auth().sendPasswordResetEmail(email)
+    sendPasswordResetEmailProcess = async (email: string) => {
+        await sendPasswordResetEmail(getAuth(), email)
     }
 
-    changeEmailProcess = async (email) => {
-        return firebase.auth().currentUser.updateEmail(email)
+    changeEmailProcess = async (email: string) => {
+        await updateEmail(getAuth().currentUser, email)
     }
 
     registerRemoteEmitter() {
@@ -231,6 +234,18 @@ export class AuthBackground {
                 'onAuthStateChanged',
                 userWithClaims,
             )
+
+            if (this.options.getFCMRegistrationToken != null && user != null) {
+                const userManagement = await this.options.getUserManagement()
+                const token = await this.options.getFCMRegistrationToken()
+                await userManagement.addUserFCMRegistrationToken(
+                    {
+                        type: 'user-reference',
+                        id: user.id,
+                    },
+                    token,
+                )
+            }
         })
     }
 
@@ -258,7 +273,7 @@ export class AuthBackground {
         }
 
         if (options.displayName) {
-            const userManagement = await this.getUserManagement()
+            const userManagement = await this.options.getUserManagement()
             await userManagement.updateUser(
                 { type: 'user-reference', id: user.id },
                 { knownStatus: 'new' },
@@ -278,7 +293,7 @@ export class AuthBackground {
             )
             return { result: { status: 'authenticated' } }
         } catch (e) {
-            const firebaseError: firebase.FirebaseError = e
+            const firebaseError: FirebaseError = e
             if (firebaseError.code === 'auth/invalid-email') {
                 return { result: { status: 'error', reason: 'invalid-email' } }
             }

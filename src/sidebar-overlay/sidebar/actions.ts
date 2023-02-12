@@ -5,7 +5,6 @@ import { Page } from './types'
 import * as selectors from './selectors'
 import AnnotationsManager from '../../annotations/annotations-manager'
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { FLOWS, STAGES } from 'src/overview/onboarding/constants'
 import {
     fetchOnboardingStage,
@@ -14,9 +13,6 @@ import {
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications } from 'src/util/remote-functions-background'
 import { setAnnotations } from 'src/annotations/actions'
-
-// Remote function declarations.
-const processEventRPC = remoteFunction('processEvent')
 
 export const setAnnotationsManager = createAction<AnnotationsManager>(
     'setAnnotationsManager',
@@ -63,7 +59,6 @@ export const initState: () => Thunk = () => (dispatch) => {
 
 export const closeSidebar: () => Thunk = () => async (dispatch) => {
     dispatch(setSidebarOpen(false))
-    await processEventRPC({ type: EVENT_NAMES.CLOSE_SIDEBAR_PAGE })
 }
 
 export const checkAndSetCongratsMessage: () => Thunk = () => async (
@@ -80,9 +75,6 @@ export const checkAndSetCongratsMessage: () => Thunk = () => async (
         onboardingAnnotationStage === STAGES.annotation.annotationCreated
     ) {
         dispatch(setShowCongratsMessage(true))
-        await processEventRPC({
-            type: EVENT_NAMES.FINISH_ANNOTATION_ONBOARDING,
-        })
         await setOnboardingStage(FLOWS.annotation, STAGES.done)
     } else if (showCongratsMessage) {
         // Since we need to display the congrats message only once,

@@ -1,12 +1,12 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic from './logic'
 import type { State, Event, Dependencies } from './types'
 import OnboardingBox from '../../components/onboarding-box'
 import { OVERVIEW_URL } from 'src/constants'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -34,10 +34,15 @@ export default class OnboardingScreen extends StatefulUIElement<
 > {
     static defaultProps: Pick<
         Props,
-        'navToDashboard' | 'authBG' | 'personalCloudBG' | 'navToGuidedTutorial'
+        | 'navToDashboard'
+        | 'authBG'
+        | 'personalCloudBG'
+        | 'navToGuidedTutorial'
+        | 'contentScriptsBG'
     > = {
         authBG: runInBackground(),
         personalCloudBG: runInBackground(),
+        contentScriptsBG: runInBackground(),
         navToDashboard: () => {
             window.location.href = OVERVIEW_URL
             window.location.reload()
@@ -51,159 +56,49 @@ export default class OnboardingScreen extends StatefulUIElement<
         super(props, new Logic(props))
     }
 
-    private renderTutorialStep = () => (
-        <WelcomeContainer>
-            <LeftSide>
-                <ContentBox>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.check}
-                            heightAndWidth="34px"
-                            color="purple"
-                            hoverOff
-                        />
-                    </SectionCircle>
-                    <Title>Learn the basics in 90 seconds.</Title>
-                    <DescriptionText>
-                        Hop on our guided tutorial and get yourself up and
-                        running in no time.
-                    </DescriptionText>
-                    <TutorialContainer>
-                        <ConfirmContainer>
-                            <PrimaryAction
-                                onClick={() => {
-                                    this.processEvent(
-                                        'goToGuidedTutorial',
-                                        null,
-                                    )
-                                }}
-                                label={'Get Started'}
-                                fontSize={'14px'}
-                            />
-                        </ConfirmContainer>
-                        <GoToDashboard
-                            onClick={() => {
-                                this.processEvent('finishOnboarding', null)
-                            }}
-                        >
-                            or go to search dashboard
-                        </GoToDashboard>
-                    </TutorialContainer>
-                </ContentBox>
-            </LeftSide>
-            {this.renderInfoSide()}
-        </WelcomeContainer>
-    )
-
-    private renderSyncStep = () => (
-        <div className={styles.welcomeScreen}>
-            <div className={styles.loadingSpinner}>
-                <LoadingIndicator />
-            </div>
-            <div className={styles.contentBox}>
-                <div className={styles.titleText}>
-                    Syncing with Existing Data
-                </div>
-                <div className={styles.descriptionText}>
-                    This process continues in the background.
-                    <br />
-                    It may take a while for all data to appear in your dashboard
-                    and you may experience temporary performance issues.
-                </div>
-            </div>
-            <ButtonBar>
-                <PrimaryAction
-                    label="Go to Dashboard"
-                    onClick={() => this.processEvent('finishOnboarding', null)}
-                />
-            </ButtonBar>
-        </div>
-    )
-
-    private renderOnboardingSteps() {
-        switch (this.state.step) {
-            case 'tutorial':
-                return this.renderTutorialStep()
-            case 'sync':
-            default:
-                return this.renderSyncStep()
-        }
-    }
-
     private renderInfoSide = () => {
         return (
             <RightSide>
-                <CommentDemo src={'img/commentDemo.svg'} />
-                <FeatureInfoBox>
-                    <TitleSmall>
-                        Curate, annotate and discuss the web
-                    </TitleSmall>
-                    <DescriptionText>
-                        By yourself and with your team, friends and community.
-                    </DescriptionText>
-                </FeatureInfoBox>
+                <CommentDemo src={'img/welcomeScreenIllustration.svg'} />
             </RightSide>
         )
     }
 
-    private renderLoginStep = (setSaveState) => (
-        <>
-            <WelcomeContainer>
-                <LeftSide>
+    private renderLoginStep = () => (
+        <WelcomeContainer>
+            <LeftSide>
+                {this.state.loadState === 'running' ? (
+                    <LoadingIndicatorBox>
+                        <LoadingIndicator size={40} />
+                        <DescriptionText>
+                            Preparing a smooth ride
+                        </DescriptionText>
+                    </LoadingIndicatorBox>
+                ) : (
                     <ContentBox>
                         {this.state.authDialogMode === 'signup' && (
                             <>
-                                <LogoImg src={'/img/onlyIconLogo.svg'} />
                                 <Title>Welcome to Memex</Title>
-                                <DescriptionText>
-                                    Create an account to get started
-                                </DescriptionText>
                             </>
                         )}
-                        {this.state.authDialogMode === 'login' &&
-                            setSaveState !== 'running' && (
-                                <UserScreenContainer>
-                                    <SectionCircle>
-                                        <Icon
-                                            filePath={icons.login}
-                                            heightAndWidth="24px"
-                                            color="purple"
-                                            hoverOff
-                                        />
-                                    </SectionCircle>
-                                    <SectionTitle>Welcome Back!</SectionTitle>
-                                    <DescriptionText>
-                                        Login to continue
-                                    </DescriptionText>
-                                </UserScreenContainer>
-                            )}
-                        {setSaveState === 'running' && <></>}
+                        {this.state.authDialogMode === 'login' && (
+                            <UserScreenContainer>
+                                <Title>Welcome Back!</Title>
+                            </UserScreenContainer>
+                        )}
                         {this.state.authDialogMode === 'resetPassword' && (
                             <UserScreenContainer>
-                                <SectionCircle>
-                                    <Icon
-                                        filePath={icons.reload}
-                                        heightAndWidth="24px"
-                                        color="purple"
-                                        hoverOff
-                                    />
-                                </SectionCircle>
-                                <SectionTitle>Reset your password</SectionTitle>
-                                <DescriptionText></DescriptionText>
+                                <Title>Reset your password</Title>
+                                <DescriptionText>
+                                    We'll send you an email with reset
+                                    instructions
+                                </DescriptionText>
                             </UserScreenContainer>
                         )}
                         {this.state.authDialogMode ===
                             'ConfirmResetPassword' && (
                             <UserScreenContainer>
-                                <SectionCircle>
-                                    <Icon
-                                        filePath={icons.mail}
-                                        heightAndWidth="24px"
-                                        color="purple"
-                                        hoverOff
-                                    />
-                                </SectionCircle>
-                                <SectionTitle>Check your Emails</SectionTitle>
+                                <Title>Check your Emails</Title>
                                 <DescriptionText>
                                     Don't forget the spam folder!
                                 </DescriptionText>
@@ -215,129 +110,85 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     newSignUp: reason === 'register',
                                 })
                             }}
-                            onModeChange={({ mode, setSaveState }) => {
-                                this.processEvent('setAuthDialogMode', { mode })
-                                this.processEvent('setSaveState', {
-                                    setSaveState,
+                            onModeChange={({ mode }) => {
+                                this.processEvent('setAuthDialogMode', {
+                                    mode,
                                 })
                             }}
                         />
                     </ContentBox>
-                </LeftSide>
-                {this.renderInfoSide()}
-            </WelcomeContainer>
-        </>
+                )}
+            </LeftSide>
+            {this.renderInfoSide()}
+        </WelcomeContainer>
     )
 
     render() {
-        return (
-            <OnboardingBox>
-                {this.state.shouldShowLogin
-                    ? this.renderLoginStep(this.state.setSaveState)
-                    : this.renderOnboardingSteps()}
-            </OnboardingBox>
-        )
+        return <OnboardingBox>{this.renderLoginStep()}</OnboardingBox>
     }
 }
 
+const LoadingIndicatorBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 40px;
+    height: 300px;
+    width: 400px;
+`
+
 const UserScreenContainer = styled.div`
-    margin-bottom: 30px;
-`
-const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 10px;
-`
-
-const TutorialContainer = styled.div`
-    display: grid;
-    grid-gap: 20px;
-    grid-auto-flow: column;
-    align-items: center;
-    justify-content: flex-start;
-`
-
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
-    height: 80px;
-    width: 80px;
-    margin-bottom: 30px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: center;
-`
-
-const DisplayNameContainer = styled.div`
-    display: grid;
-    grid-gap: 5px;
-    grid-auto-flow: row;
-    justify-content: flex-start;
-    align-items: center;
-`
-
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
-    font-size: 12px;
-    opacity: 0.7;
-    padding-left: 10px;
-`
-
-const FeatureInfoBox = styled.div`
-    display: grid;
-    grid-gap: 10px;
-    grid-auto-flow: row;
-    justify-content: center;
-    align-items: center;
-`
-
-const ConfirmContainer = styled.div`
-    & > div {
-        width: 100%;
-        border-radius: 8px;
-        height: 50px;
-    }
-`
-const TextInputContainer = styled.div`
-    display: flex;
-    grid-auto-flow: column;
-    grid-gap: 10px;
-    align-items: center;
-    justify-content: flex-start;
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
-    height: 50px;
-    border-radius: 8px;
-    width: 350px;
-    padding: 0 15px;
-`
-
-const TextInput = styled.input`
-    outline: none;
-    height: fill-available;
-    width: fill-available;
-    color: ${(props) => props.theme.colors.lighterText};
-    font-size: 14px;
-    border: none;
-    background: transparent;
-
-    &::placeholder {
-        color: ${(props) => props.theme.colors.lighterText};
-    }
 `
 
 const WelcomeContainer = styled.div`
     display: flex;
     justify-content: space-between;
     overflow: hidden;
+    background-color: ${(props) => props.theme.colors.black};
+    height: 100vh;
+`
+
+const openAnimation = keyframes`
+ 0% { opacity: 0; margin-top: 100px;}
+ 100% { opacity: 1; margin-top: 0px;}
+`
+
+const AnnotationBox = styled.div<{
+    isActive: boolean
+    zIndex: number
+    order: number
+}>`
+    width: 99%;
+    z-index: ${(props) => props.zIndex};
+
+    animation-name: ${openAnimation};
+    animation-duration: 600ms;
+    animation-delay: ${(props) => props.order * 40}ms;
+    animation-timing-function: cubic-bezier(0.16, 0.67, 0.47, 0.97);
+    animation-fill-mode: backwards;
+    position: relative;
 `
 
 const LeftSide = styled.div`
-    width: 60%;
+    width: fill-available;
     display: flex;
-    justify-content: center;
     align-items: center;
-    flex-direction: column;
+    z-index: 2;
+    flex-direction: row;
+    z-index: 2;
+    /* position: absolute; */
+    justify-content: flex-start;
+    margin-left: 20%;
+    animation-name: ${openAnimation};
+    animation-duration: 600ms;
+    animation-delay: ${(props) => props.order * 40}ms;
+    animation-timing-function: cubic-bezier(0.16, 0.67, 0.47, 0.97);
+    animation-fill-mode: backwards;
+    position: relative;
 
     @media (max-width: 1000px) {
         width: 100%;
@@ -354,37 +205,44 @@ const ContentBox = styled.div`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
+    padding: 30px 50px;
+    background: ${(props) => props.theme.colors.black}30;
+    backdrop-filter: blur(5px);
+    border-radius: 20px;
 `
 
 const Title = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 26px;
+    background: ${(props) => props.theme.colors.headerGradient};
+    font-size: 30px;
     font-weight: 800;
-    margin-bottom: 10px;
-    margin-top: 30px;
-`
-
-const DescriptionText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
-    font-size: 18px;
-    font-weight: normal;
     margin-bottom: 20px;
+    margin-top: 30px;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     text-align: left;
 `
 
+const DescriptionText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 18px;
+    font-weight: 300;
+    margin-bottom: 40px;
+    text-align: center;
+`
+
 const RightSide = styled.div`
-    width: 40%;
-    background-image: url('img/onboardingBackground1.svg');
+    width: min-content;
     height: 100vh;
     background-size: cover;
     background-repeat: no-repeat;
-    display: grid;
     grid-auto-flow: row;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
-    padding: 100px 0 50px 0;
-    overflow: hidden;
+    position: absolute;
+    right: 0;
+    top: 0%;
+    z-index: 1;
 
     @media (max-width: 1000px) {
         display: none;
@@ -392,9 +250,10 @@ const RightSide = styled.div`
 `
 
 const CommentDemo = styled.img`
-    height: 70%;
+    height: fill-available;
     width: auto;
     margin: auto;
+    opacity: 0.4;
 `
 
 const TitleSmall = styled.div`
@@ -405,7 +264,9 @@ const TitleSmall = styled.div`
 `
 
 const StyledAuthDialog = styled.div`
-    font-family: 'Inter';
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -465,13 +326,13 @@ const Footer = styled.div`
 const ModeSwitch = styled.span`
     cursor: pointer;
     font-weight: bold;
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     font-weight: 14px;
 `
 
 const GoToDashboard = styled.span`
     cursor: pointer;
     font-weight: bold;
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     font-size: 15px;
 `

@@ -1,4 +1,4 @@
-import { WebNavigation, Tabs } from 'webextension-polyfill-ts'
+import { WebNavigation, Tabs } from 'webextension-polyfill'
 import { SearchIndex } from 'src/search'
 import { TabState } from 'src/tab-management/background/types'
 
@@ -9,7 +9,6 @@ export interface ActivityLoggerInterface {
 
 export type TabIndexer = (tab: Tabs.Tab) => Promise<void>
 
-export type LoggableTabChecker = (tab: Tabs.Tab) => Promise<boolean>
 export type VisitInteractionUpdater = (
     interalTab: TabState,
     searchIndex: SearchIndex,

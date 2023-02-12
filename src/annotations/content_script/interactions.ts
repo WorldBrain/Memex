@@ -7,7 +7,7 @@ export const createAndCopyDirectLink = async () => {
     const range = selection.getRangeAt(0)
     const url = window.location.href
 
-    const anchor = await extractAnchorFromSelection(selection)
+    const anchor = await extractAnchorFromSelection(selection, url)
     const result: { url: string } = await remoteFunction('createDirectLink')({
         url,
         anchor,

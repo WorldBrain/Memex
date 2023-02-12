@@ -1,9 +1,8 @@
 import kebabCase from 'lodash/kebabCase'
-import { browser, Browser } from 'webextension-polyfill-ts'
+import type { Browser } from 'webextension-polyfill'
 import { UAParser } from 'ua-parser-js'
 import StorageManager from '@worldbrain/storex'
 import { updateOrCreate } from '@worldbrain/storex/lib/utils'
-import { SignalTransportFactory } from '@worldbrain/memex-common/lib/sync'
 import NotificationBackground from 'src/notifications/background'
 import SocialBackground from 'src/social-integration/background'
 import DirectLinkingBackground from 'src/annotations/background'
@@ -15,30 +14,32 @@ import CustomListBackground from 'src/custom-lists/background'
 import TagsBackground from 'src/tags/background'
 import BookmarksBackground from 'src/bookmarks/background'
 import * as backup from '../backup-restore/background'
-import * as backupStorage from '../backup-restore/background/storage'
+import { getAuth } from 'firebase/auth'
+import {
+    getStorage,
+    ref,
+    uploadString,
+    uploadBytes,
+    getDownloadURL,
+} from 'firebase/storage'
 import {
     registerModuleMapCollections,
     StorageModule,
 } from '@worldbrain/storex-pattern-modules'
 import { firebaseService } from '@worldbrain/memex-common/lib/firebase-backend/services/client'
-import { setupBlacklistRemoteFunctions } from 'src/blacklist/background'
 import {
     setImportStateManager,
     ImportStateManager,
 } from 'src/imports/background/state-manager'
 import transformPageHTML from 'src/util/transform-page-html'
 import { setupImportBackgroundModule } from 'src/imports/background'
-import SyncBackground from 'src/sync/background'
-import { PostReceiveProcessor } from 'src/sync/background/post-receive-processor'
 import BackgroundScript from '.'
-import alarms from './alarms'
 import { setupNotificationClickListener } from 'src/util/notifications'
 import { StorageChangesManager } from 'src/util/storage-changes'
 import { AuthBackground } from 'src/authentication/background'
-import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
+// import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
 import { FeaturesBeta } from 'src/features/background/feature-beta'
-import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
-import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
+// import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import { combineSearchIndex } from 'src/search/search-index'
@@ -64,13 +65,12 @@ import {
     remoteEventEmitter,
 } from 'src/util/webextensionRPC'
 import { PageAnalyzerInterface } from 'src/page-analysis/types'
-import { TabManager } from 'src/tab-management/background/tab-manager'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
 import pick from 'lodash/pick'
 import ActivityIndicatorBackground from 'src/activity-indicator/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
 import { SyncSettingsBackground } from 'src/sync-settings/background'
-import { Services } from 'src/services/types'
+import { AuthServices, Services } from 'src/services/types'
 import { captureException } from 'src/util/raven'
 import { PDFBackground } from 'src/pdf/background'
 import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
@@ -84,20 +84,27 @@ import {
     PersonalCloudBackend,
     PersonalCloudService,
     PersonalCloudClientStorageType,
+    SyncTriggerSetup,
+    PersonalCloudDeviceId,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { BrowserSettingsStore } from 'src/util/settings'
-import { LocalPersonalCloudSettings } from 'src/personal-cloud/background/types'
+import type {
+    AuthChanges,
+    LocalPersonalCloudSettings,
+} from 'src/personal-cloud/background/types'
 import { authChanges } from '@worldbrain/memex-common/lib/authentication/utils'
-import FirestorePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firestore'
+import FirebasePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firebase'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
 import { StoredContentType } from 'src/page-indexing/background/types'
 import transformPageText from 'src/util/transform-page-text'
 import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
-import { SharedListRoleID } from '../../external/@worldbrain/memex-common/ts/content-sharing/types'
 import type { ReadwiseSettings } from 'src/readwise-integration/background/types/settings'
 import type { LocalExtensionSettings } from './types'
-import { normalizeUrl } from '@worldbrain/memex-url-utils/lib/normalize/utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
+import DeprecatedStorageModules from './deprecated-storage-modules'
+import { PageActivityIndicatorBackground } from 'src/page-activity-indicator/background'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -105,7 +112,8 @@ export interface BackgroundModules {
     notifications: NotificationBackground
     social: SocialBackground
     pdfBg: PDFBackground
-    connectivityChecker: ConnectivityCheckerBackground
+    // connectivityChecker: ConnectivityCheckerBackground
+    pageActivityIndicator: PageActivityIndicatorBackground
     activityIndicator: ActivityIndicatorBackground
     directLinking: DirectLinkingBackground
     pages: PageIndexingBackground
@@ -117,13 +125,11 @@ export interface BackgroundModules {
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
     syncSettings: SyncSettingsBackground
-    sync: SyncBackground
     bgScript: BackgroundScript
     contentScripts: ContentScriptsBackground
     inPageUI: InPageUIBackground
-    features: FeatureOptIns
+    // features: FeatureOptIns
     featuresBeta: FeaturesBeta
-    pageFetchBacklog: PageFetchBacklogBackground
     storexHub: StorexHubBackground
     copyPaster: CopyPasterBackground
     readable: ReaderBackground
@@ -140,12 +146,13 @@ const globalFetch: typeof fetch =
     typeof fetch !== 'undefined' ? fetch.bind(globalThis) : null
 
 export function createBackgroundModules(options: {
+    manifestVersion: '2' | '3'
     storageManager: StorageManager
     persistentStorageManager: StorageManager
-    services: Services
+    authServices: AuthServices
+    servicesPromise: Promise<Services>
     browserAPIs: Browser
     getServerStorage: () => Promise<ServerStorage>
-    signalTransportFactory: SignalTransportFactory
     localStorageChangesManager: StorageChangesManager
     callFirebaseFunction: <Returns>(
         name: string,
@@ -154,13 +161,10 @@ export function createBackgroundModules(options: {
     personalCloudBackend?: PersonalCloudBackend
     contentSharingBackend?: ContentSharingBackend
     fetchPageDataProcessor?: FetchPageProcessor
-    tabManager?: TabManager
     auth?: AuthBackground
     analyticsManager: Analytics
     captureException?: typeof captureException
     userMessageService?: UserMessageService
-    disableSyncEnryption?: boolean
-    getIceServers?: () => Promise<string[]>
     getNow?: () => number
     fetch?: typeof fetch
     generateServerId?: (collectionName: string) => number | string
@@ -168,6 +172,9 @@ export function createBackgroundModules(options: {
         name: ModuleName,
         options?: { broadcastToTabs?: boolean },
     ): RemoteEventEmitter<ModuleName>
+    getFCMRegistrationToken?: () => Promise<string>
+    // NOTE: Currently only used in MV2 builds, allowing us to trigger sync on Firestore changes
+    setupSyncTriggerListener?: SyncTriggerSetup
     userAgentString?: string
 }): BackgroundModules {
     const createRemoteEventEmitter =
@@ -181,9 +188,9 @@ export function createBackgroundModules(options: {
 
     const { storageManager } = options
     const getServerStorage = async () =>
-        (await options.getServerStorage()).storageModules
+        (await options.getServerStorage()).modules
     const getServerStorageManager = async () =>
-        (await options.getServerStorage()).storageManager
+        (await options.getServerStorage()).manager
 
     const syncSettings = new SyncSettingsBackground({
         storageManager,
@@ -194,10 +201,9 @@ export function createBackgroundModules(options: {
         syncSettingsBG: syncSettings,
     })
 
-    const tabManager = options.tabManager || new TabManager()
     const tabManagement = new TabManagementBackground({
-        tabManager,
         browserAPIs: options.browserAPIs,
+        manifestVersion: options.manifestVersion,
         extractRawPageContent: (tabId) =>
             runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
     })
@@ -216,20 +222,23 @@ export function createBackgroundModules(options: {
     })
 
     const pages = new PageIndexingBackground({
-        storageManager,
         persistentStorageManager: options.persistentStorageManager,
         fetchPageData: options.fetchPageDataProcessor,
+        pageIndexingSettingsStore: new BrowserSettingsStore(
+            options.browserAPIs.storage.local,
+            { prefix: 'pageIndexing.' },
+        ),
         createInboxEntry,
+        storageManager,
         tabManagement,
         getNow,
     })
-    tabManagement.events.on('tabRemoved', (event) => {
-        pages.handleTabClose(event)
+    tabManagement.events.on('tabRemoved', async (event) => {
+        await pages.handleTabClose(event)
     })
     const bookmarks = new BookmarksBackground({
         storageManager,
         pages,
-        tabManager,
         analytics,
         browserAPIs: options.browserAPIs,
     })
@@ -260,6 +269,7 @@ export function createBackgroundModules(options: {
     const pdfBg = new PDFBackground({
         webRequestAPI: options.browserAPIs.webRequest,
         runtimeAPI: options.browserAPIs.runtime,
+        storageAPI: options.browserAPIs.storage,
         tabsAPI: options.browserAPIs.tabs,
         syncSettings: syncSettingsStore,
     })
@@ -277,10 +287,11 @@ export function createBackgroundModules(options: {
     const social = new SocialBackground({ storageManager })
 
     const activityIndicator = new ActivityIndicatorBackground({
-        services: options.services,
+        authServices: options.authServices,
+        servicesPromise: options.servicesPromise,
         syncSettings: syncSettingsStore,
         getActivityStreamsStorage: async () =>
-            (await options.getServerStorage()).storageModules.activityStreams,
+            (await options.getServerStorage()).modules.activityStreams,
     })
 
     const directLinking = new DirectLinkingBackground({
@@ -305,7 +316,7 @@ export function createBackgroundModules(options: {
         pages,
         localBrowserStorage: options.browserAPIs.storage.local,
         getServerStorage,
-        services: options.services,
+        authServices: options.authServices,
         removeChildAnnotationsFromList: directLinking.removeChildAnnotationsFromList.bind(
             directLinking,
         ),
@@ -314,21 +325,22 @@ export function createBackgroundModules(options: {
     const auth =
         options.auth ||
         new AuthBackground({
-            authService: options.services.auth,
+            runtimeAPI: options.browserAPIs.runtime,
+            authServices: options.authServices,
+            jobScheduler: jobScheduler.scheduler,
             remoteEmitter: createRemoteEventEmitter('auth'),
-            subscriptionService: options.services.subscriptions,
             localStorageArea: options.browserAPIs.storage.local,
-            scheduleJob: jobScheduler.scheduler.scheduleJobOnce.bind(
-                jobScheduler.scheduler,
-            ),
+            getFCMRegistrationToken: options.getFCMRegistrationToken,
             backendFunctions: {
                 registerBetaUser: async (params) =>
                     callFirebaseFunction('registerBetaUser', params),
             },
             getUserManagement: async () =>
-                (await options.getServerStorage()).storageModules
-                    .userManagement,
+                (await options.getServerStorage()).modules.users,
         })
+
+    const getCurrentUserId = async (): Promise<AutoPk | null> =>
+        (await auth.authService.getCurrentUser())?.id ?? null
 
     const activityStreams = new ActivityStreamsBackground({
         storageManager,
@@ -338,10 +350,7 @@ export function createBackgroundModules(options: {
     if (!options.userMessageService) {
         const userMessagesService = new FirebaseUserMessageService({
             firebase: getFirebase,
-            auth: {
-                getCurrentUserId: async () =>
-                    (await auth.authService.getCurrentUser())?.id,
-            },
+            auth: { getCurrentUserId },
         })
         options.userMessageService = userMessagesService
         userMessagesService.startListening({
@@ -389,46 +398,90 @@ export function createBackgroundModules(options: {
         prefix: 'localSettings.',
     })
 
-    const connectivityChecker = new ConnectivityCheckerBackground({
-        xhr: new XMLHttpRequest(),
-    })
+    // const connectivityChecker = new ConnectivityCheckerBackground({
+    //     xhr: new XMLHttpRequest(),
+    //     jobScheduler: jobScheduler.scheduler,
+    // })
 
     const storePageContent = async (content: PipelineRes): Promise<void> => {
         await pages.createOrUpdatePage(content)
     }
-    const pageFetchBacklog = new PageFetchBacklogBackground({
-        storageManager,
-        connectivityChecker,
-        fetchPageData: options.fetchPageDataProcessor,
-        storePageContent,
-    })
 
     async function createInboxEntry(fullPageUrl: string) {
         await customLists.createInboxListEntry({ fullUrl: fullPageUrl })
     }
-
-    const postReceiveProcessor =
-        options.fetchPageDataProcessor != null
-            ? new PostReceiveProcessor({
-                  pages,
-                  pageFetchBacklog,
-                  fetchPageData: options.fetchPageDataProcessor,
-              }).processor
-            : undefined
 
     const personalCloudSettingStore = new BrowserSettingsStore<
         LocalPersonalCloudSettings
     >(options.browserAPIs.storage.local, {
         prefix: 'personalCloud.',
     })
+
+    const pageActivityIndicator = new PageActivityIndicatorBackground({
+        fetch,
+        storageManager,
+        getCurrentUserId,
+        getServerStorage,
+        jobScheduler: jobScheduler.scheduler,
+    })
+
+    // TODO: Maybe move this somewhere more appropriate (personal-cloud module)
+    async function createDeviceId(
+        userId: string,
+    ): Promise<PersonalCloudDeviceId> {
+        const uaParser = new UAParser(options.userAgentString)
+        const serverStorage = await options.getServerStorage()
+        const device = await serverStorage.modules.personalCloud.createDeviceInfo(
+            {
+                userId,
+                device: {
+                    type: PersonalDeviceType.DesktopBrowser,
+                    product: PersonalDeviceProduct.Extension,
+                    browser: kebabCase(uaParser.getBrowser().name),
+                    os: kebabCase(uaParser.getOS().name),
+                },
+            },
+        )
+        return device.id
+    }
+
+    async function* authChangeGenerator(): AsyncIterableIterator<AuthChanges> {
+        for await (const nextUser of authChanges(auth.authService)) {
+            const existingDeviceID = await personalCloudSettingStore.get(
+                'deviceId',
+            )
+            let deviceId: PersonalCloudDeviceId | null = existingDeviceID
+            if (!existingDeviceID) {
+                const userId = nextUser.id
+                if (userId) {
+                    const newDeviceId = await createDeviceId(userId)
+                    await personalCloudSettingStore.set('deviceId', newDeviceId)
+                    deviceId = newDeviceId
+                }
+            }
+
+            yield { nextUser, deviceId }
+        }
+    }
+
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
         storageManager,
         syncSettingsStore,
+        getServerStorageManager,
+        runtimeAPI: options.browserAPIs.runtime,
+        jobScheduler: jobScheduler.scheduler,
         persistentStorageManager: options.persistentStorageManager,
         backend:
             options.personalCloudBackend ??
-            new FirestorePersonalCloudBackend({
-                getFirebase,
+            new FirebasePersonalCloudBackend({
+                firebase: {
+                    ref,
+                    getAuth,
+                    getStorage,
+                    uploadBytes,
+                    uploadString,
+                    getDownloadURL,
+                },
                 getServerStorageManager,
                 personalCloudService: firebaseService<PersonalCloudService>(
                     'personalCloud',
@@ -436,52 +489,21 @@ export function createBackgroundModules(options: {
                 ),
                 getCurrentSchemaVersion: () =>
                     getCurrentSchemaVersion(options.storageManager),
-                userChanges: () => authChanges(auth.authService),
-                getUserChangesReference: async () => {
-                    const currentUser = await auth.authService.getCurrentUser()
-                    if (!currentUser) {
-                        return null
-                    }
-                    const firebase = getFirebase()
-                    const firestore = firebase.firestore()
-                    return firestore
-                        .collection('personalDataChange')
-                        .doc(currentUser.id)
-                        .collection('objects')
-                },
+                authChanges: authChangeGenerator,
                 getLastUpdateProcessedTime: () =>
                     personalCloudSettingStore.get('lastSeen'),
                 // NOTE: this is for retrospective collection sync, which is currently unused in the extension
                 getLastCollectionDataProcessedTime: async () => 0,
                 getDeviceId: async () => personalCloud.deviceId!,
                 getClientDeviceType: () => PersonalDeviceType.DesktopBrowser,
+                setupSyncTriggerListener: options.setupSyncTriggerListener,
             }),
         remoteEventEmitter: createRemoteEventEmitter('personalCloud'),
-        createDeviceId: async (userId) => {
-            const uaParser = new UAParser(options.userAgentString)
-            const serverStorage = await options.getServerStorage()
-            const device = await serverStorage.storageModules.personalCloud.createDeviceInfo(
-                {
-                    device: {
-                        type: PersonalDeviceType.DesktopBrowser,
-                        os: kebabCase(uaParser.getOS().name),
-                        browser: kebabCase(uaParser.getBrowser().name),
-                        product: PersonalDeviceProduct.Extension,
-                    },
-                    userId,
-                },
-            )
-            return device.id
-        },
         settingStore: personalCloudSettingStore,
         localExtSettingStore,
-        getUserId: async () =>
-            (await auth.authService.getCurrentUser())?.id ?? null,
-        async *userIdChanges() {
-            for await (const nextUser of authChanges(auth.authService)) {
-                yield nextUser
-            }
-        },
+        getUserId: getCurrentUserId,
+        authChanges: authChangeGenerator,
+        // TODO: Move this somewhere more appropriate (personal-cloud module)
         writeIncomingData: async (params) => {
             const incomingStorageManager =
                 params.storageType === PersonalCloudClientStorageType.Persistent
@@ -517,6 +539,18 @@ export function createBackgroundModules(options: {
                 },
             })
 
+            // For any new incoming followedList, manually pull followedListEntries
+            if (
+                params.collection === 'followedList' &&
+                params.updates.sharedList != null
+            ) {
+                await pageActivityIndicator.syncFollowedListEntries({
+                    forFollowedLists: [
+                        { sharedList: params.updates.sharedList },
+                    ],
+                })
+            }
+
             if (params.collection === 'docContent') {
                 const { normalizedUrl, storedContentType } = params.where ?? {}
                 const { content } = params.updates
@@ -545,7 +579,6 @@ export function createBackgroundModules(options: {
                 )
             }
         },
-        getServerStorageManager,
     })
 
     const contentSharing = new ContentSharingBackground({
@@ -560,12 +593,16 @@ export function createBackgroundModules(options: {
         }),
         waitForSync: () => personalCloud.actionQueue.waitForSync(),
         storageManager,
+        contentSharingSettingsStore: new BrowserSettingsStore(
+            options.browserAPIs.storage.local,
+            { prefix: 'contentSharing.' },
+        ),
         customListsBG: customLists,
         annotations: directLinking.annotationStorage,
         auth,
         analytics: options.analyticsManager,
         getServerStorage,
-        services: options.services,
+        servicesPromise: options.servicesPromise,
         captureException: options.captureException,
         generateServerId,
     })
@@ -579,11 +616,9 @@ export function createBackgroundModules(options: {
     const bgScript = new BackgroundScript({
         storageChangesMan: options.localStorageChangesManager,
         urlNormalizer: normalizeUrl,
-        commandsAPI: browser.commands,
-        runtimeAPI: browser.runtime,
-        storageAPI: browser.storage,
-        alarmsAPI: browser.alarms,
-        tabsAPI: browser.tabs,
+        runtimeAPI: options.browserAPIs.runtime,
+        storageAPI: options.browserAPIs.storage,
+        tabsAPI: options.browserAPIs.tabs,
         localExtSettingStore,
         syncSettingsStore,
         storageManager,
@@ -595,14 +630,9 @@ export function createBackgroundModules(options: {
             tabManagement,
             personalCloud,
             notifications,
+            pageActivityIndicator,
         },
     })
-
-    options.services.contentSharing.preKeyGeneration = async (params) => {
-        if (params.key.roleID > SharedListRoleID.Commenter) {
-            await personalCloud.waitForSync()
-        }
-    }
 
     return {
         auth,
@@ -610,13 +640,14 @@ export function createBackgroundModules(options: {
         analytics,
         jobScheduler,
         notifications,
-        connectivityChecker,
+        // connectivityChecker,
         readable: reader,
         pdfBg,
         directLinking,
         search,
         eventLog: new EventLogBackground({ storageManager }),
         activityIndicator,
+        pageActivityIndicator,
         customLists,
         tags,
         bookmarks,
@@ -626,23 +657,14 @@ export function createBackgroundModules(options: {
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
             searchIndex: search.searchIndex,
-            backupInfoStorage: new backupStorage.LocalBackupInfoStorage(),
+            jobScheduler: jobScheduler.scheduler,
+            localBackupSettings: new BrowserSettingsStore(
+                options.browserAPIs.storage.local,
+                { prefix: 'localBackup.' },
+            ),
             notifications,
             checkAuthorizedForAutoBackup: async () =>
                 auth.remoteFunctions.isAuthorizedForFeature('backup'),
-        }),
-        sync: new SyncBackground({
-            signalTransportFactory: options.signalTransportFactory,
-            disableEncryption: options.disableSyncEnryption,
-            getSharedSyncLog: async () =>
-                (await options.getServerStorage()).storageModules.sharedSyncLog,
-            getIceServers: options.getIceServers,
-            browserAPIs: options.browserAPIs,
-            appVersion: process.env.VERSION,
-            auth: auth.authService,
-            postReceiveProcessor,
-            storageManager,
-            analytics,
         }),
         storexHub: new StorexHubBackground({
             storageManager,
@@ -695,21 +717,27 @@ export function createBackgroundModules(options: {
                 )
             },
         }),
-        features: new FeatureOptIns(),
+        // features: new FeatureOptIns(),
         featuresBeta: new FeaturesBeta(),
         pages,
         bgScript,
-        pageFetchBacklog,
         contentScripts: new ContentScriptsBackground({
-            webNavigation: options.browserAPIs.webNavigation,
-            getURL: bindMethod(options.browserAPIs.runtime, 'getURL'),
-            getTab: bindMethod(options.browserAPIs.tabs, 'get'),
-            injectScriptInTab: (tabId, injection) =>
-                options.browserAPIs.tabs.executeScript(tabId, injection),
             browserAPIs: options.browserAPIs,
+            injectScriptInTab: async (tabId, file) => {
+                if (options.manifestVersion === '3') {
+                    await options.browserAPIs.scripting.executeScript({
+                        target: { tabId },
+                        files: [file],
+                    })
+                } else {
+                    await options.browserAPIs.tabs.executeScript(tabId, {
+                        file,
+                    })
+                }
+            },
         }),
         inPageUI: new InPageUIBackground({
-            queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
+            tabsAPI: options.browserAPIs.tabs,
             contextMenuAPI: options.browserAPIs.contextMenus,
         }),
         copyPaster,
@@ -719,7 +747,7 @@ export function createBackgroundModules(options: {
         contentSharing,
         contentConversations: new ContentConversationsBackground({
             getServerStorage,
-            services: options.services,
+            servicesPromise: options.servicesPromise,
         }),
     }
 }
@@ -742,12 +770,12 @@ export async function setupBackgroundModules(
         bookmarks: backgroundModules.bookmarks,
     })
 
+    // TODO mv3: migrate web req APIs
+    // backgroundModules.auth.setupRequestInterceptor()
     backgroundModules.auth.registerRemoteEmitter()
-    backgroundModules.auth.setupRequestInterceptor()
     backgroundModules.notifications.setupRemoteFunctions()
     backgroundModules.social.setupRemoteFunctions()
     backgroundModules.directLinking.setupRemoteFunctions()
-    backgroundModules.directLinking.setupRequestInterceptor()
     backgroundModules.search.setupRemoteFunctions()
     backgroundModules.activityIndicator.setupRemoteFunctions()
     backgroundModules.eventLog.setupRemoteFunctions()
@@ -757,22 +785,20 @@ export async function setupBackgroundModules(
     backgroundModules.bgScript.setupRemoteFunctions()
     backgroundModules.contentScripts.setupRemoteFunctions()
     backgroundModules.inPageUI.setupRemoteFunctions()
-    backgroundModules.bgScript.setupAlarms(alarms)
-    backgroundModules.pageFetchBacklog.setupBacklogProcessing()
     backgroundModules.bookmarks.setupBookmarkListeners()
     backgroundModules.tabManagement.setupRemoteFunctions()
     backgroundModules.readwise.setupRemoteFunctions()
     backgroundModules.contentConversations.setupRemoteFunctions()
     backgroundModules.pages.setupRemoteFunctions()
     backgroundModules.syncSettings.setupRemoteFunctions()
-    setupNotificationClickListener()
-    setupBlacklistRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()
+    setupNotificationClickListener()
 
-    await backgroundModules.pdfBg.setupRequestInterceptors()
+    // TODO mv3: migrate web req APIs
+    // await backgroundModules.pdfBg.setupRequestInterceptors()
     await backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
-    backgroundModules.sync.registerRemoteEmitter()
+    await backgroundModules.pageActivityIndicator.setup()
 
     // Ensure log-in state gotten from FB + trigger share queue processing, but don't wait for it
     await backgroundModules.auth.authService.refreshUserInfo()
@@ -782,12 +808,13 @@ export async function setupBackgroundModules(
 
 export function getBackgroundStorageModules(
     backgroundModules: BackgroundModules,
+    __deprecatedModules: DeprecatedStorageModules,
 ): { [moduleName: string]: StorageModule } {
     return {
-        pageFetchBacklog: backgroundModules.pageFetchBacklog.storage,
+        pageActivityIndicator: backgroundModules.pageActivityIndicator.storage,
+        pageFetchBacklog: __deprecatedModules.pageFetchBacklogStorage,
         annotations: backgroundModules.directLinking.annotationStorage,
-        readwiseAction:
-            backgroundModules.readwise.__deprecatedActionQueue.storage,
+        readwiseAction: __deprecatedModules.readwiseActionQueueStorage,
         notifications: backgroundModules.notifications.storage,
         customList: backgroundModules.customLists.storage,
         bookmarks: backgroundModules.bookmarks.storage,
@@ -796,8 +823,8 @@ export function getBackgroundStorageModules(
         search: backgroundModules.search.storage,
         social: backgroundModules.social.storage,
         tags: backgroundModules.tags.storage,
-        clientSyncLog: backgroundModules.sync.clientSyncLog,
-        syncInfo: backgroundModules.sync.syncInfoStorage,
+        clientSyncLog: __deprecatedModules.clientSyncLogStorage,
+        syncInfo: __deprecatedModules.syncInfoStorage,
         pages: backgroundModules.pages.storage,
         copyPaster: backgroundModules.copyPaster.storage,
         reader: backgroundModules.readable.storage,
@@ -821,9 +848,13 @@ export function registerBackgroundModuleCollections(options: {
     persistentStorageManager: StorageManager
     backgroundModules: BackgroundModules
 }) {
+    const deprecatedModules = new DeprecatedStorageModules(options)
     registerModuleMapCollections(
         options.storageManager.registry,
-        getBackgroundStorageModules(options.backgroundModules),
+        getBackgroundStorageModules(
+            options.backgroundModules,
+            deprecatedModules,
+        ),
     )
     registerModuleMapCollections(
         options.persistentStorageManager.registry,

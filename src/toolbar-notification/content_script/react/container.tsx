@@ -18,7 +18,6 @@ export interface Props {
 
 export class ToolbarNotification extends Component<Props> {
     openOptionsTab = remoteFunction('openOptionsTab')
-    processEventRPC = remoteFunction('processEvent')
     /**
      * Return extra styles for the container based on whether the postion prop
      * is passed or not.

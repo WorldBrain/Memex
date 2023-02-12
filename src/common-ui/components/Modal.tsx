@@ -2,7 +2,6 @@ import React, { PureComponent, MouseEventHandler } from 'react'
 import styled from 'styled-components'
 
 import Overlay, { Props as OverlayProps } from './Overlay'
-import { close as closeIcon } from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
@@ -14,7 +13,6 @@ export interface Props extends Omit<OverlayProps, 'onClick'> {
 class Modal extends PureComponent<Props> {
     render() {
         const { onClose, ignoreClickOutside, ...props } = this.props
-
         return (
             <Overlay
                 onClick={ignoreClickOutside ? undefined : onClose}
@@ -23,8 +21,8 @@ class Modal extends PureComponent<Props> {
                 {onClose && (
                     <CloseContainer>
                         <Icon
-                            filePath={icons.close}
-                            heightAndWidth="16px"
+                            filePath={icons.removeX}
+                            heightAndWidth="22px"
                             onClick={onClose}
                         />
                     </CloseContainer>

@@ -1,5 +1,4 @@
 import React from 'react'
-import onClickOutside from 'react-onclickoutside'
 import isEqual from 'lodash/isEqual'
 import styled, { ThemeProvider } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -21,14 +20,12 @@ import EntryRow, {
 } from 'src/common-ui/GenericPicker/components/EntryRow'
 import { KeyEvent, DisplayEntry } from 'src/common-ui/GenericPicker/types'
 import * as Colors from 'src/common-ui/components/design-library/colors'
-import { fontSizeNormal } from 'src/common-ui/components/design-library/typography'
-import ButtonTooltip from 'src/common-ui/components/button-tooltip'
 import { TagResultItem } from './components/TagResultItem'
 import { EntrySelectedTag } from './components/EntrySelectedTag'
 import { VALID_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 import { tags } from 'src/util/remote-functions-background'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import colors from 'src/dashboard-refactor/colors'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 export type { TagPickerDependencies }
 
@@ -145,15 +142,15 @@ class TagPicker extends StatefulUIElement<
     renderNewTagAllTabsButton = () =>
         this.props.actOnAllTabs && (
             <IconStyleWrapper show>
-                <ButtonTooltip
+                <TooltipBox
                     tooltipText="Tag all tabs in window"
-                    position="left"
+                    placement="left"
                 >
                     <ActOnAllTabsButton
                         size={20}
                         onClick={this.handleNewTagAllPress}
                     />
-                </ButtonTooltip>
+                </TooltipBox>
             </IconStyleWrapper>
         )
 
@@ -169,7 +166,7 @@ class TagPicker extends StatefulUIElement<
                         <Icon
                             filePath={icons.backup}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -186,7 +183,7 @@ class TagPicker extends StatefulUIElement<
                         <Icon
                             filePath={icons.backup}
                             heightAndWidth="16px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -202,7 +199,7 @@ class TagPicker extends StatefulUIElement<
                     <Icon
                         filePath={icons.backup}
                         heightAndWidth="16px"
-                        color="purple"
+                        color="prime1"
                         hoverOff
                     />
                 </SectionCircle>
@@ -310,7 +307,7 @@ const SectionTitle = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     font-weight: 400;
 `
@@ -374,4 +371,4 @@ const EmptyTagsView = styled.div`
     padding: 20px 15px;
 `
 
-export default onClickOutside(TagPicker)
+export default TagPicker

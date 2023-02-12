@@ -1,4 +1,7 @@
-import { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
+import type {
+    AuthService,
+    LoginHooks,
+} from '@worldbrain/memex-common/lib/authentication/types'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
@@ -6,6 +9,14 @@ import { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import { WorldbrainSubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/worldbrain'
 import { getFirebase } from 'src/util/firebase-app-initialized'
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithCustomToken,
+    signInWithEmailAndPassword,
+    sendPasswordResetEmail,
+} from 'firebase/auth'
+import { getFunctions, httpsCallable } from 'firebase/functions'
 
 export type DevAuthState =
     | ''
@@ -16,9 +27,10 @@ export type DevAuthState =
     | 'user_subscription_expired'
     | 'user_subscription_expires_60s'
 
-export function createAuthDependencies(options?: {
+export function createAuthDependencies(options: {
     devAuthState?: DevAuthState
     redirectUrl: string
+    loginHooks?: LoginHooks
 }): {
     authService: AuthService
     subscriptionService: SubscriptionsService
@@ -26,7 +38,18 @@ export function createAuthDependencies(options?: {
     const devAuthState = (options && options.devAuthState) || ''
     if (devAuthState === '' || devAuthState === 'staging') {
         return {
-            authService: new WorldbrainAuthService(getFirebase()),
+            authService: new WorldbrainAuthService({
+                ...(options.loginHooks ?? {}),
+                firebase: {
+                    getAuth,
+                    getFunctions,
+                    httpsCallable,
+                    signInWithCustomToken,
+                    sendPasswordResetEmail,
+                    signInWithEmailAndPassword,
+                    createUserWithEmailAndPassword,
+                },
+            }),
             subscriptionService: new WorldbrainSubscriptionsService(
                 getFirebase(),
                 options.redirectUrl,

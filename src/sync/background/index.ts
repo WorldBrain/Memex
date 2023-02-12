@@ -1,4 +1,4 @@
-import { Browser } from 'webextension-polyfill-ts'
+import { Browser } from 'webextension-polyfill'
 import StorageManager from '@worldbrain/storex'
 import { SyncPostReceiveProcessor } from '@worldbrain/storex-sync'
 import { SharedSyncLog } from '@worldbrain/storex-sync/lib/shared-sync-log'

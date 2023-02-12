@@ -1,4 +1,4 @@
-import type { Tabs, Runtime, Extension } from 'webextension-polyfill-ts'
+import type { Tabs, Runtime, Extension } from 'webextension-polyfill'
 import type { UIEventHandler } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import {
     UILogic,
@@ -33,6 +33,7 @@ export interface State {
     shouldShowTagsUIs: boolean
     isPDFReaderEnabled: boolean
     isFileAccessAllowed: boolean
+    showAutoSaved: boolean
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -53,6 +54,7 @@ export default class PopupLogic extends UILogic<State, Event> {
         shouldShowTagsUIs: false,
         isPDFReaderEnabled: false,
         isFileAccessAllowed: false,
+        showAutoSaved: false,
     })
 
     async init() {
@@ -123,7 +125,10 @@ export default class PopupLogic extends UILogic<State, Event> {
     }) => {
         const pageListIdsSet = new Set(previousState.pageListIds)
         pageListIdsSet.add(event.listId)
-        this.emitMutation({ pageListIds: { $set: [...pageListIdsSet] } })
+        this.emitMutation({
+            pageListIds: { $set: [...pageListIdsSet] },
+            showAutoSaved: { $set: true },
+        })
     }
 
     delPageList: EventHandler<'delPageList'> = async ({
@@ -132,7 +137,10 @@ export default class PopupLogic extends UILogic<State, Event> {
     }) => {
         const pageListIdsSet = new Set(previousState.pageListIds)
         pageListIdsSet.delete(event.listId)
-        this.emitMutation({ pageListIds: { $set: [...pageListIdsSet] } })
+        this.emitMutation({
+            pageListIds: { $set: [...pageListIdsSet] },
+            showAutoSaved: { $set: true },
+        })
     }
 
     togglePDFReaderEnabled: EventHandler<'togglePDFReaderEnabled'> = async ({

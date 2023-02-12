@@ -1,6 +1,6 @@
-import React, { PureComponent } from 'react'
+import React, { ChangeEventHandler, PureComponent } from 'react'
 import styled from 'styled-components'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 import { formBackground } from 'src/common-ui/components/design-library/colors'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
@@ -8,6 +8,7 @@ import type { TaskState } from 'ui-logic-core/lib/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 
 export interface Props {
     refreshUserInfoOnInit?: boolean
@@ -26,33 +27,6 @@ interface State {
 const Container = styled.div`
     width: fill-available;
 `
-const TextInputContainer = styled.div`
-    display: flex;
-    grid-auto-flow: column;
-    grid-gap: 10px;
-    align-items: center;
-    justify-content: flex-start;
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
-    height: 50px;
-    border-radius: 8px;
-    width: fill-available;
-    padding: 0 15px;
-`
-
-const TextInput = styled.input`
-    outline: none;
-    height: fill-available;
-    width: fill-available;
-    color: ${(props) => props.theme.colors.normalText};
-    font-size: 14px;
-    border: none;
-    background: transparent;
-
-    &::placeholder {
-        color: ${(props) => props.theme.colors.normalText};
-    }
-`
-
 const WarningText = styled.div`
     background-color: ${(props) => props.theme.colors.warning};
     font-size: 14px;
@@ -103,7 +77,7 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
         }
     }
 
-    private changeInput: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    private changeInput: ChangeEventHandler<HTMLInputElement> = (e) => {
         const emailInput = (e.target as HTMLInputElement).value
         this.setState({ emailInput, saveState: 'pristine' })
     }
@@ -120,6 +94,7 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
             await this.props.authBG.changeEmailProcess(email)
             this.setState({ saveState: 'success' })
             this.props.onSaveComplete?.(e)
+            setTimeout(() => this.setState({ saveState: 'pristine' }), 2000)
         } catch (err) {
             this.setState({ saveState: 'error' })
             throw err
@@ -128,7 +103,7 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
 
     private renderBtnLabel() {
         if (this.state.saveState === 'running') {
-            return <LoadingIndicator />
+            return <LoadingIndicator size={20} />
         }
         if (this.state.saveState === 'success') {
             return 'Saved!'
@@ -140,23 +115,21 @@ export default class DisplayNameSetup extends PureComponent<Props, State> {
         return (
             <Container>
                 <InputBox>
-                    <TextInputContainer>
-                        <Icon
-                            filePath={icons.mail}
-                            heightAndWidth="20px"
-                            hoverOff
-                        />
-                        <TextInput
-                            value={this.state.emailInput}
-                            onChange={this.changeInput}
-                            disabled={this.state.saveState === 'running'}
-                            placeholder={'Add Display Name'}
-                        />
-                    </TextInputContainer>
+                    <TextField
+                        value={this.state.emailInput}
+                        onChange={this.changeInput}
+                        disabled={this.state.saveState === 'running'}
+                        placeholder={'Your Email Address'}
+                        icon={'mail'}
+                    />
                     {this.state.email !== this.state.emailInput && (
                         <PrimaryAction
                             label={this.renderBtnLabel()}
                             onClick={this.confirmSave}
+                            type={'primary'}
+                            size={'medium'}
+                            height={'44px'}
+                            width={'80px'}
                         />
                     )}
                 </InputBox>

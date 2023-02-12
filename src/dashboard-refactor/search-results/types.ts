@@ -20,7 +20,8 @@ import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annot
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
     onTagPickerBtnClick?: React.MouseEventHandler
-    onListPickerBtnClick: React.MouseEventHandler
+    onListPickerBarBtnClick: React.MouseEventHandler
+    onListPickerFooterBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
     createNewList: (name: string) => Promise<number>
@@ -42,6 +43,7 @@ export type PageInteractionProps = Omit<
     onTagsHover: React.MouseEventHandler
     onListsHover: React.MouseEventHandler
     onUnhover: React.MouseEventHandler
+    onClick: React.MouseEventHandler
 }
 
 // NOTE: Derived type - edit the original
@@ -103,7 +105,13 @@ export type SearchResultToState = (
     extraPageResultState?: Pick<PageResult, 'areNotesShown'>,
 ) => Pick<RootState, 'results' | 'noteData' | 'pageData'>
 
-export type SearchType = 'pages' | 'notes'
+export type SearchType =
+    | 'pages'
+    | 'notes'
+    | 'videos'
+    | 'twitter'
+    | 'pdf'
+    | 'events'
 export type NotesType = 'search' | 'user' | 'followed'
 
 export interface NoteFormState {
@@ -161,13 +169,14 @@ export interface NoteShareInfo {
     isProtected?: boolean
 }
 
+export type ListPickerShowState = 'footer' | 'lists-bar' | 'hide'
 export interface NoteResult {
     isEditing: boolean
     areRepliesShown: boolean
     isTagPickerShown: boolean
-    isListPickerShown: boolean
-    shareMenuShowStatus: 'show' | 'hide' | 'show-n-share'
     isCopyPasterShown: boolean
+    listPickerShowStatus: ListPickerShowState
+    shareMenuShowStatus: 'show' | 'hide' | 'show-n-share'
     editNoteForm: NoteFormState
 }
 
@@ -175,10 +184,11 @@ export interface PageResult {
     id: string
     notesType: NotesType
     areNotesShown: boolean
+    activePage: boolean
     isShareMenuShown: boolean
     isTagPickerShown: boolean
-    isListPickerShown: boolean
     isCopyPasterShown: boolean
+    listPickerShowStatus: ListPickerShowState
     loadNotesState: TaskState
     newNoteForm: NoteFormState
     noteIds: { [key in NotesType]: string[] }
@@ -204,7 +214,6 @@ export interface RootState {
     shouldShowTagsUIs: boolean
     shouldFormsAutoFocus: boolean
     isSearchCopyPasterShown: boolean
-    isCloudUpgradeBannerShown: boolean
     isSubscriptionBannerShown: boolean
 
     /** Holds page data specific to each page occurrence on a specific day. */
@@ -224,10 +233,13 @@ export interface RootState {
     noteUpdateState: TaskState
     newNoteCreateState: TaskState
     searchPaginationState: TaskState
+    clearInboxLoadState: TaskState
 
     // Misc local storage flags
     showMobileAppAd: boolean
     showOnboardingMsg: boolean
+    activePageID: string
+    activeDay: number
 }
 
 export interface PageEventArgs {
@@ -280,15 +292,22 @@ export type Events = UIEvent<{
     cancelPageDelete: null
 
     // Page result state mutations (*specific to each* occurrence of the page in different days)
+    clickPageResult: PageEventArgs & { synthEvent: React.MouseEvent }
     setPageCopyPasterShown: PageEventArgs & { isShown: boolean }
-    setPageListPickerShown: PageEventArgs & { isShown: boolean }
+    setPageListPickerShown: PageEventArgs & { show: ListPickerShowState }
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageShareMenuShown: PageEventArgs & { isShown: boolean }
     setPageNotesShown: PageEventArgs & { areShown: boolean }
+    setActivePage: {
+        activePage: boolean
+        activeDay?: number
+        activePageID?: string
+    }
     setPageNotesSort: PageEventArgs & { sortingFn: AnnotationsSorter }
     setPageNotesType: PageEventArgs & { noteType: NotesType }
     setPageHover: PageEventArgs & { hover: ResultHoverState }
     removePageFromList: PageEventArgs
+    clearInbox: null
     dragPage: PageEventArgs & { dataTransfer: DataTransfer }
     dropPage: PageEventArgs
     updatePageNotesShareInfo: PageEventArgs & {
@@ -311,7 +330,7 @@ export type Events = UIEvent<{
     // Note result state mutations
     setNoteCopyPasterShown: NoteEventArgs & { isShown: boolean }
     setNoteTagPickerShown: NoteEventArgs & { isShown: boolean }
-    setNoteListPickerShown: NoteEventArgs & { isShown: boolean }
+    setNoteListPickerShown: NoteEventArgs & { show: ListPickerShowState }
     setNoteShareMenuShown: NoteEventArgs & {
         shouldShow: boolean
         mouseEvent: React.MouseEvent

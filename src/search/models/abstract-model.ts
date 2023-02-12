@@ -36,10 +36,7 @@ export default abstract class AbstractModel {
      */
     public static dataURLToBlob = (url: string) => {
         const byteString = atob(url.split(',')[1])
-        const mimeType = url
-            .split(',')[0]
-            .split(':')[1]
-            .split(';')[0]
+        const mimeType = url.split(',')[0].split(':')[1].split(';')[0]
         const buffer = new ArrayBuffer(byteString.length)
         const bufferView = new Uint8Array(buffer)
 
@@ -53,7 +50,7 @@ export default abstract class AbstractModel {
     /**
      * Persist the current Model instance to the `db`.
      */
-    public abstract async save(): Promise<any>
+    public abstract save(): Promise<any>
 
     /**
      * Returns the raw data persisted in the DB.

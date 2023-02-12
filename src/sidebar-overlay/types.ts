@@ -49,10 +49,6 @@ export type MapDispatchToProps<DispatchProps, OwnProps> = (
     ownProps: OwnProps,
 ) => DispatchProps
 
-export interface OpenSidebarArgs {
-    activeUrl?: string
-}
-
 export interface SidebarContextInterface {
     highlighter: HighlightInteractionsInterface
 }

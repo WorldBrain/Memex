@@ -1,5 +1,6 @@
 .cell {
-    padding: 0 !important; /* stylelint-disable-line declaration-no-important */
+    padding: 0 !important;
+    /* stylelint-disable-line declaration-no-important */
 }
 
 .newSiteInputRow {
@@ -17,6 +18,7 @@
     width: 100%;
     padding: 10px 20px;
     margin-left: 0px;
+    visibility: hidden;
 }
 
 .inputButtons {

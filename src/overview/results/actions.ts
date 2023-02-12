@@ -8,7 +8,6 @@ import * as constants from './constants'
 import { SearchResult } from '../types'
 import { selectors as searchBar, acts as searchBarActs } from '../search-bar'
 import { selectors as filters } from '../../search-filters'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import {
     auth,
@@ -19,7 +18,6 @@ import {
 } from 'src/util/remote-functions-background'
 import * as modalActions from 'src/overview/modals/actions'
 
-const processEventRPC = remoteFunction('processEvent')
 const createSocialBookmarkRPC = remoteFunction('addSocialBookmark')
 const deleteSocialBookmarkRPC = remoteFunction('delSocialBookmark')
 
@@ -134,12 +132,6 @@ export const toggleBookmark: (args: {
     const { hasBookmark, user } = results[index]
     dispatch(changeHasBookmark(index))
 
-    processEventRPC({
-        type: hasBookmark
-            ? EVENT_NAMES.REMOVE_RESULT_BOOKMARK
-            : EVENT_NAMES.CREATE_RESULT_BOOKMARK,
-    })
-
     let bookmarkRPC: (args: { url: string; fullUrl: string }) => Promise<void>
     // tslint:disable-next-line: prefer-conditional-expression
     if (hasBookmark) {
@@ -169,7 +161,6 @@ export const updateSearchResult: (a: any) => Thunk = ({
     overwrite = false,
 }) => (dispatch, getState) => {
     trackSearch(searchResult, overwrite, getState())
-    storeSearch(searchResult, overwrite, getState())
 
     const searchAction = overwrite ? setSearchResult : appendSearchResult
 
@@ -278,31 +269,4 @@ function trackSearch(searchResult, overwrite, state) {
         : selectors.currentPageDisplay(state)
 
     analytics.trackEvent({ category: 'Search', action, name, value })
-}
-
-// Internal analytics store
-function storeSearch(searchResult, overwrite, state) {
-    const type =
-        searchResult.totalCount === 0
-            ? EVENT_NAMES.UNSUCCESSFUL_SEARCH
-            : overwrite
-            ? EVENT_NAMES.SUCCESSFUL_SEARCH
-            : EVENT_NAMES.PAGINATE_SEARCH
-
-    processEventRPC({ type })
-
-    if (filters.onlyBookmarks(state)) {
-        processEventRPC({ type: EVENT_NAMES.BOOKMARK_FILTER })
-    }
-
-    if (filters.tags(state).length > 0) {
-        processEventRPC({ type: EVENT_NAMES.TAG_FILTER })
-    }
-
-    if (
-        filters.domainsInc(state).length > 0 ||
-        filters.domainsExc(state).length > 0
-    ) {
-        processEventRPC({ type: EVENT_NAMES.DOMAIN_FILTER })
-    }
 }

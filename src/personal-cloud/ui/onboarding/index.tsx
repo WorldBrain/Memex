@@ -15,7 +15,7 @@ import {
     Container,
 } from '../components/shared-components'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { SUPPORT_EMAIL } from 'src/constants'
 import checkBrowser from 'src/util/check-browser'
 import styled from 'styled-components'
@@ -55,7 +55,7 @@ export default class CloudOnboardingModal extends UIElement<
                         <Icon
                             filePath={icons.backup}
                             heightAndWidth="24px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -124,7 +124,7 @@ export default class CloudOnboardingModal extends UIElement<
                         <Icon
                             filePath={icons.backup}
                             heightAndWidth="24px"
-                            color="purple"
+                            color="prime1"
                             hoverOff
                         />
                     </SectionCircle>
@@ -222,7 +222,7 @@ const SectionTitle = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     margin-bottom: 40px;
     font-weight: 500;

@@ -1,15 +1,14 @@
-import { Tabs, Browser, Bookmarks } from 'webextension-polyfill-ts'
+import { Tabs, Browser, Bookmarks } from 'webextension-polyfill'
 import Storex from '@worldbrain/storex'
 import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
-import { TabManager } from 'src/tab-management/background/tab-manager'
 import BookmarksStorage from './storage'
 import { BookmarksInterface } from './types'
 import Raven from 'raven-js'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import pick from 'lodash/pick'
-import { pageIsStub } from 'src/page-indexing/utils'
 import { Analytics } from 'src/analytics/types'
 import checkBrowser from '../../util/check-browser'
+import browser from 'webextension-polyfill'
 
 export default class BookmarksBackground {
     storage: BookmarksStorage
@@ -19,8 +18,7 @@ export default class BookmarksBackground {
         private options: {
             storageManager: Storex
             pages: PageIndexingBackground
-            browserAPIs: Pick<Browser, 'bookmarks'>
-            tabManager: TabManager
+            browserAPIs: Pick<Browser, 'bookmarks' | 'tabs'>
             analytics: Analytics
         },
     ) {
@@ -32,6 +30,8 @@ export default class BookmarksBackground {
             addPageBookmark: this.addPageBookmark,
             delPageBookmark: this.delPageBookmark,
             pageHasBookmark: this.storage.pageHasBookmark,
+            findBookmark: this.storage.findBookmark,
+            setBookmarkStatusInBrowserIcon: this.setBookmarkStatusInBrowserIcon,
         }
     }
     get ROOT_BM() {
@@ -82,13 +82,11 @@ export default class BookmarksBackground {
             category: 'Bookmarks',
             action: 'createBookmarkForPage',
         })
-        // this.options.tabManager.setBookmarkState(params.url, true)
     }
 
     delPageBookmark = async ({ url }: { url: string }) => {
         await this.storage.delBookmark({ url })
         await this.options.pages.storage.deletePageIfOrphaned(url)
-        // this.options.tabManager.setBookmarkState(url, false)
     }
 
     addBookmark = this.addPageBookmark
@@ -159,8 +157,10 @@ export default class BookmarksBackground {
             return
         }
 
-        let tabId
-        const activeTab = this.options.tabManager.getActiveTab()
+        let tabId: number
+        const [activeTab] = await this.options.browserAPIs.tabs.query({
+            active: true,
+        })
 
         if (activeTab != null && activeTab.url === node.url) {
             tabId = activeTab.id
@@ -169,5 +169,31 @@ export default class BookmarksBackground {
             fullUrl: node.url,
             tabId,
         })
+    }
+
+    setBookmarkStatusInBrowserIcon: BookmarksInterface['setBookmarkStatusInBrowserIcon'] = async (
+        value,
+        pageUrl,
+    ) => {
+        let tabId: number
+        const [activeTab] = await this.options.browserAPIs.tabs.query({
+            active: true,
+        })
+
+        if (activeTab != null && activeTab.url === pageUrl) {
+            tabId = activeTab.id
+        }
+
+        if (value) {
+            await browser.browserAction.setBadgeText({
+                text: '❤️',
+                tabId: activeTab.id,
+            })
+            await browser.browserAction.setBadgeBackgroundColor({
+                color: 'white',
+            })
+        } else {
+            await browser.browserAction.setBadgeText({ text: '' })
+        }
     }
 }

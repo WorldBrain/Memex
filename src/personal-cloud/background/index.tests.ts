@@ -1,3 +1,6 @@
+import SQLite3 from 'better-sqlite3'
+import StorageManager from '@worldbrain/storex'
+import { createSQLiteStorageBackend } from '@worldbrain/storex-backend-sql/lib/sqlite'
 import { generateSyncPatterns } from 'src/util/tests/sync-patterns'
 import type {
     BackgroundIntegrationTest,
@@ -9,17 +12,26 @@ import {
     setupBackgroundIntegrationTest,
     BackgroundIntegrationTestSetupOpts,
 } from 'src/tests/background-integration-tests'
-import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { createLazyTestServerStorage } from 'src/storage/server'
 import {
     PersonalCloudHub,
     StorexPersonalCloudBackend,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
-import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher'
+import {
+    ChangeWatchMiddlewareSettings,
+    ChangeWatchMiddleware,
+    mergeChangeWatchSettings,
+} from '@worldbrain/storex-middleware-change-watcher'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { createServices } from 'src/services'
 import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
+import { registerModuleCollections } from '@worldbrain/storex-pattern-modules'
+import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
+import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
+import { createAuthServices } from 'src/services/local-services'
+import { MockPushMessagingService } from 'src/tests/push-messaging'
 
 export const BASE_TIMESTAMP = 555
 
@@ -262,9 +274,12 @@ export async function setupSyncBackgroundTest(
     options: {
         deviceCount: number
         debugStorageOperations?: boolean
-        withTestUser?: boolean
         superuser?: boolean
         serverChangeWatchSettings?: Omit<
+            ChangeWatchMiddlewareSettings,
+            'storageManager'
+        >
+        sqlChangeWatchSettings?: Omit<
             ChangeWatchMiddlewareSettings,
             'storageManager'
         >
@@ -276,27 +291,91 @@ export async function setupSyncBackgroundTest(
 ) {
     const userId = TEST_USER.id
 
+    const translationLayerTestBackend =
+        process.env.TRANSLATION_LAYER_TEST_BACKEND
     const getServerStorage =
         options.testInstance?.getSetupOptions?.().getServerStorage ??
         createLazyTestServerStorage({
-            changeWatchSettings: options.serverChangeWatchSettings,
+            changeWatchSettings: !!translationLayerTestBackend
+                ? options.serverChangeWatchSettings
+                : mergeChangeWatchSettings([
+                      options.serverChangeWatchSettings,
+                      options.sqlChangeWatchSettings,
+                  ]),
         })
     const serverStorage = await getServerStorage()
     const cloudHub = new PersonalCloudHub()
 
     let now = BASE_TIMESTAMP
     const getNow = () => now++
+    const pushMessagingService = new MockPushMessagingService()
     const setups: BackgroundIntegrationTestSetup[] = []
+
+    let getSqlStorageMananager: () => Promise<StorageManager> | undefined
+    if (translationLayerTestBackend) {
+        if (translationLayerTestBackend === 'sqlite') {
+            const sqlite = SQLite3(':memory:', {
+                // verbose: (...args) => console.log(...args)
+            })
+            const backend = createSQLiteStorageBackend(sqlite, {
+                // debug: true,
+            })
+            const sqlStorageManager = new StorageManager({ backend })
+            const userManagement = new UserStorage({
+                storageManager: sqlStorageManager,
+            })
+            const personalCloudStorage = new PersonalCloudStorage({
+                storageManager: sqlStorageManager,
+                autoPkType: 'number',
+            })
+            sqlStorageManager.registry.registerCollection(
+                'user',
+                userManagement.collections.user,
+            )
+            // serverStorage.storageModules.personalCloud = personalCloudStorage
+            registerModuleCollections(
+                sqlStorageManager.registry,
+                personalCloudStorage,
+            )
+            await sqlStorageManager.finishInitialization()
+
+            const middleware: StorageMiddleware[] = []
+            if (options.sqlChangeWatchSettings) {
+                middleware.push(
+                    new ChangeWatchMiddleware({
+                        ...options.sqlChangeWatchSettings,
+                        storageManager: sqlStorageManager,
+                    }),
+                )
+            }
+            sqlStorageManager.setMiddleware(middleware)
+            getSqlStorageMananager = async () => sqlStorageManager
+        } else {
+            throw new Error(
+                `Unknown TRANSLATION_LAYER_TEST_BACKEND: ${translationLayerTestBackend}`,
+            )
+        }
+    }
+
     for (let i = 0; i < options.deviceCount; ++i) {
-        const services = await createServices({
+        const authServices = createAuthServices({
             backend: 'memory',
             getServerStorage,
         })
+        const services = await createServices({
+            backend: 'memory',
+            getServerStorage,
+            authService: authServices.auth,
+        })
         const personalCloudBackend = new StorexPersonalCloudBackend({
-            storageManager: serverStorage.storageManager,
-            storageModules: serverStorage.storageModules,
+            storageManager: serverStorage.manager,
+            storageModules: serverStorage.modules,
+            getSqlStorageMananager,
             clientSchemaVersion: STORAGE_VERSIONS[25].version,
-            services,
+            services: {
+                activityStreams: services.activityStreams,
+                pushMessaging: pushMessagingService,
+            },
             view: cloudHub.getView(),
             disableFailsafes: !options.enableFailsafes,
             getUserId: async () => userId,
@@ -313,16 +392,15 @@ export async function setupSyncBackgroundTest(
             {
                 ...options,
                 services,
+                authServices,
                 getServerStorage,
+                pushMessagingService,
                 personalCloudBackend,
             },
         )
         setup.backgroundModules.personalCloud.actionQueue.forceQueueSkip = true
         setup.backgroundModules.personalCloud.strictErrorReporting = true
-
-        const memoryAuth = setup.backgroundModules.auth
-            .authService as MemoryAuthService
-        await memoryAuth.setUser({ ...TEST_USER })
+        setup.authService.setUser({ ...TEST_USER })
         setups.push(setup)
     }
 
@@ -345,7 +423,14 @@ export async function setupSyncBackgroundTest(
         await setup.backgroundModules.personalCloud.waitForSync()
     }
 
-    return { userId, setups, sync, serverStorage, getNow }
+    return {
+        userId,
+        setups,
+        sync,
+        serverStorage,
+        getNow,
+        getSqlStorageMananager,
+    }
 }
 
 const getReadablePattern = (pattern: number[]) =>

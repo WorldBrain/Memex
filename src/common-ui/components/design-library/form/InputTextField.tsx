@@ -1,7 +1,9 @@
 import styled from 'styled-components'
 
 export const InputTextField = styled.input`
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-size: 14px;
     font-weight: 400;
     text-align: left;

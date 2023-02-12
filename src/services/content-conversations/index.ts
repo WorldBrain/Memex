@@ -2,16 +2,16 @@ import {
     ContentConversationsServiceInterface,
     CreateReplyResult,
 } from '@worldbrain/memex-common/lib/content-conversations/service/types'
-import { CreateConversationReplyParams } from '@worldbrain/memex-common/lib/content-conversations/storage/types'
-import { Services } from '../types'
-import { ServerStorageModules } from 'src/storage/types'
+import type { CreateConversationReplyParams } from '@worldbrain/memex-common/lib/content-conversations/storage/types'
+import type { ServerStorageModules } from 'src/storage/types'
+import type { AuthServices } from '../types'
 
 export default class ContentConversationsService
     implements ContentConversationsServiceInterface {
     constructor(
         private options: {
             storage: Pick<ServerStorageModules, 'contentConversations'>
-            services: Pick<Services, 'auth'>
+            services: Pick<AuthServices, 'auth'>
         },
     ) {}
 

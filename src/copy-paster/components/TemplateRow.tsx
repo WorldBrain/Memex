@@ -112,7 +112,7 @@ const Row = styled.div`
     align-items: center;
     height: 40px;
     border-radius: 5px;
-    padding: 0px 15px;
+    padding: 0px 10px;
     // border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
 
     &:last-child {
@@ -120,7 +120,7 @@ const Row = styled.div`
     }
 
     &:hover {
-        background-color: ${(props) => props.theme.colors.backgroundColor};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
 
         ${ActionsContainer} { // if DeleteButtonContainer is not under an hovered ContainerSection
             display: flex;
@@ -135,11 +135,13 @@ const Title = styled.div`
     cursor: pointer;
     text-align: left;
 
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-style: normal;
     font-weight: normal;
     font-size: 14px;
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale6};
 
     outline: none;
     border: none;

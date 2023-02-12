@@ -2,10 +2,8 @@ import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import NotificationStorage from './storage'
 import * as notifications from '../notifications'
 import createNotif from 'src/util/notifications'
-import internalAnalytics from 'src/analytics/internal'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { NotifDefinition } from '../types'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import StorageManager from '@worldbrain/storex'
 import type { RemoteNotificationsInterface } from './types'
 
@@ -163,13 +161,6 @@ export default class NotificationBackground {
                             message: notification.system.message,
                         },
                         () => {
-                            internalAnalytics.processEvent({
-                                type: EVENT_NAMES.CLICK_ON_SYSTEM_NOTIFICATION,
-                                details: {
-                                    notificationId: notification.id,
-                                },
-                            })
-
                             return browser.tabs.create({
                                 url,
                             })

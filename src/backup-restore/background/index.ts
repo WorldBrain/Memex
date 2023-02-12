@@ -1,21 +1,23 @@
 // tslint:disable:no-console
-import Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex'
 import Queue, { Options as QueueOpts } from 'queue'
 
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
-import { setupRequestInterceptors } from './redirect'
-import BackupStorage, { BackupInfoStorage } from './storage'
-import { BackupBackend } from './backend'
+import BackupStorage from './storage'
+import type { BackupBackend } from './backend'
 import { BackendSelect } from './backend-select'
 import estimateBackupSize from './estimate-backup-size'
 import BackupProcedure from './procedures/backup'
 import { BackupRestoreProcedure } from './procedures/restore'
 import { ProcedureUiCommunication } from 'src/backup-restore/background/procedures/ui-communication'
-import NotificationBackground from 'src/notifications/background'
+import type NotificationBackground from 'src/notifications/background'
 import { DEFAULT_AUTH_SCOPE } from './backend/google-drive'
-import { SearchIndex } from 'src/search'
+import type { SearchIndex } from 'src/search'
 import * as Raven from 'src/util/raven'
-import { BackupInterface } from './types'
+import type { BackupInterface, LocalBackupSettings } from './types'
+import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
+import type { BrowserSettingsStore } from 'src/util/settings'
+import { checkServerStatus } from '../../backup-restore/ui/utils'
 
 export * from './backend'
 
@@ -25,9 +27,9 @@ export class BackupBackgroundModule {
     storage: BackupStorage
     backendLocation: string
     backend: BackupBackend
-    backupInfoStorage: BackupInfoStorage
+    localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
     changeTrackingQueue: Queue
-    backendSelect = new BackendSelect()
+    backendSelect: BackendSelect
     backupProcedure: BackupProcedure
     backupUiCommunication = new ProcedureUiCommunication('backup-event')
     remoteFunctions: BackupInterface<'provider'>
@@ -37,19 +39,21 @@ export class BackupBackgroundModule {
     )
 
     uiTabId?: any
-    automaticBackupTimeout?: any
+    automaticBackupTimeout: number | null = null
     automaticBackupEnabled?: boolean
     scheduledAutomaticBackupTimestamp?: number
     notifications: NotificationBackground
     checkAuthorizedForAutoBackup: () => Promise<boolean>
+    jobScheduler: JobScheduler
 
     constructor(options: {
         storageManager: Storex
         searchIndex: SearchIndex
-        backupInfoStorage: BackupInfoStorage
         createQueue?: typeof Queue
         queueOpts?: QueueOpts
         notifications: NotificationBackground
+        jobScheduler: JobScheduler
+        localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
         checkAuthorizedForAutoBackup: () => Promise<boolean>
     }) {
         options.createQueue = options.createQueue || Queue
@@ -58,15 +62,19 @@ export class BackupBackgroundModule {
             concurrency: 1,
         }
 
+        this.backendSelect = new BackendSelect({
+            localBackupSettings: options.localBackupSettings,
+        })
+        this.jobScheduler = options.jobScheduler
         this.storageManager = options.storageManager
         this.storage = new BackupStorage({
             storageManager: options.storageManager,
         })
         this.searchIndex = options.searchIndex
-        this.backupInfoStorage = options.backupInfoStorage
         this.changeTrackingQueue = options.createQueue(options.queueOpts)
         this.notifications = options.notifications
         this.checkAuthorizedForAutoBackup = options.checkAuthorizedForAutoBackup
+        this.localBackupSettings = options.localBackupSettings
 
         this.remoteFunctions = {
             enableAutomaticBackup: this.enableAutomaticBackup,
@@ -78,7 +86,7 @@ export class BackupBackgroundModule {
                 await this.disableAutomaticBackup()
 
                 // This is needed so the recording of changes are not restarted on next ext setup
-                await this.backupInfoStorage.storeDate('lastBackup', null)
+                await this.localBackupSettings.set('lastBackup', null)
             },
             getBackupTimes: async () => {
                 return this.getBackupTimes()
@@ -140,9 +148,10 @@ export class BackupBackgroundModule {
                     await this.restoreProcedure.interruptable.cancel()
                 },
                 hasInitialBackup: async () => {
-                    return !!(await this.backupInfoStorage.retrieveDate(
-                        'lastBackup',
-                    ))
+                    return (
+                        (await this.localBackupSettings.get('lastBackup')) !=
+                        null
+                    )
                 },
                 setBackendLocation: async (info, location?: string) => {
                     if (
@@ -160,7 +169,7 @@ export class BackupBackgroundModule {
                         await this.backendSelect.saveBackendLocation(location)
                         this.backend = await this.backendSelect.initLocalBackend()
                     }
-                    this.setupRequestInterceptor()
+                    // this.setupRequestInterceptor()
                     this.initBackendDependants()
                 },
                 getBackendLocation: async (info) => {
@@ -194,16 +203,16 @@ export class BackupBackgroundModule {
                 estimateInitialBackupSize: () => {
                     return this.estimateInitialBackupSize()
                 },
-                setBackupBlobs: (info, saveBlobs) => {
-                    localStorage.setItem('backup.save-blobs', saveBlobs)
+                setBackupBlobs: async (info, saveBlobs) => {
+                    await this.localBackupSettings.set('saveBlobs', saveBlobs)
                 },
 
                 forgetAllChanges: async () => {
                     return this.forgetAllChanges()
                 },
-                setupRequestInterceptor: () => {
-                    return this.setupRequestInterceptor()
-                },
+                // setupRequestInterceptor: () => {
+                //     return this.setupRequestInterceptor()
+                // },
             },
             { insertExtraArg: true },
         )
@@ -216,17 +225,17 @@ export class BackupBackgroundModule {
     }
     async setBackendFromStorage() {
         this.backend = await this.backendSelect.restoreBackend()
-        if (this.backend) {
-            this.setupRequestInterceptor()
-        }
+        // if (this.backend) {
+        //     this.setupRequestInterceptor()
+        // }
         this.initBackendDependants()
     }
 
     initBackendDependants() {
         this.backupProcedure = new BackupProcedure({
+            localBackupSettings: this.localBackupSettings,
             storageManager: this.storageManager,
             storage: this.storage,
-            lastBackupStorage: this.backupInfoStorage,
             backend: this.backend,
         })
     }
@@ -237,7 +246,7 @@ export class BackupBackgroundModule {
             backend = await this.backendSelect.initLocalBackend()
         } else if (provider === 'google-drive') {
             backend = await this.backendSelect.initGDriveBackend()
-            this.setupRequestInterceptor(backend)
+            // this.setupRequestInterceptor(backend)
         }
 
         this.restoreProcedure = new BackupRestoreProcedure({
@@ -252,21 +261,21 @@ export class BackupBackgroundModule {
         this.restoreProcedure = null
     }
 
-    setupRequestInterceptor(backupBackend: BackupBackend = null) {
-        const backend = backupBackend || this.backend
-        setupRequestInterceptors({
-            webRequest: window['browser'].webRequest,
-            handleLoginRedirectedBack: backend
-                ? backend.handleLoginRedirectedBack.bind(backend)
-                : null,
-            // isAutomaticBackupEnabled: () => this.isAutomaticBackupEnabled(),
-            memexCloudOrigin: _getMemexCloudOrigin(),
-        })
-    }
+    // setupRequestInterceptor(backupBackend: BackupBackend = null) {
+    //     const backend = backupBackend || this.backend
+    //     setupRequestInterceptors({
+    //         webRequest: globalThis['browser'].webRequest,
+    //         handleLoginRedirectedBack: backend
+    //             ? backend.handleLoginRedirectedBack.bind(backend)
+    //             : null,
+    //         // isAutomaticBackupEnabled: () => this.isAutomaticBackupEnabled(),
+    //         memexCloudOrigin: _getMemexCloudOrigin(),
+    //     })
+    // }
 
     async startRecordingChangesIfNeeded() {
         if (
-            !(await this.backupInfoStorage.retrieveDate('lastBackup')) ||
+            !(await this.localBackupSettings.get('lastBackup')) ||
             this.storage.recordingChanges
         ) {
             return
@@ -280,18 +289,19 @@ export class BackupBackgroundModule {
         return this.checkAuthorizedForAutoBackup()
     }
 
-    async isAutomaticBackupEnabled() {
+    isAutomaticBackupEnabled = async (): Promise<boolean> => {
         return (
-            localStorage.getItem('backup.automatic-backups-enabled') === 'true'
+            (await this.localBackupSettings.get('automaticBackupsEnabled')) ??
+            false
         )
     }
 
-    async enableAutomaticBackup() {
-        localStorage.setItem('backup.automatic-backups-enabled', 'true')
+    enableAutomaticBackup = async () => {
+        await this.localBackupSettings.set('automaticBackupsEnabled', true)
     }
 
-    async disableAutomaticBackup() {
-        localStorage.setItem('backup.automatic-backups-enabled', 'false')
+    disableAutomaticBackup = async () => {
+        await this.localBackupSettings.set('automaticBackupsEnabled', false)
     }
 
     async scheduleAutomaticBackupIfEnabled() {
@@ -300,7 +310,7 @@ export class BackupBackgroundModule {
 
     scheduleAutomaticBackup() {
         if (
-            this.automaticBackupTimeout ||
+            this.automaticBackupTimeout != null ||
             (this.backupProcedure && this.backupProcedure.running)
         ) {
             return
@@ -309,57 +319,77 @@ export class BackupBackgroundModule {
         const msUntilNextBackup = 1000 * 60 * 15
         // const msUntilNextBackup = 1000 * 30
         this.scheduledAutomaticBackupTimestamp = Date.now() + msUntilNextBackup
-        this.automaticBackupTimeout = setTimeout(() => {
-            this.doBackup()
-        }, msUntilNextBackup)
+        this.jobScheduler.scheduleJobOnce({
+            name: 'automated-legacy-data-backup',
+            when: Date.now() + msUntilNextBackup,
+            job: () => this.doBackup(),
+        })
+        this.automaticBackupTimeout = -1
     }
 
     clearAutomaticBackupTimeout() {
-        if (this.automaticBackupTimeout) {
-            clearTimeout(this.automaticBackupTimeout)
+        if (this.automaticBackupTimeout != null) {
+            this.jobScheduler.clearScheduledJob('automated-legacy-data-backup')
             this.automaticBackupTimeout = null
         }
     }
 
     async forgetAllChanges() {
         await this.storage.forgetAllChanges()
-        await this.backupInfoStorage.clear()
+        await this.localBackupSettings.remove('lastBackup')
+        await this.localBackupSettings.remove('lastBackupFinished')
+        await this.localBackupSettings.remove('lastProblemNotifShown')
     }
 
     async getBackupTimes() {
-        const lastBackup = await this.backupInfoStorage.retrieveDate(
-            'lastBackupFinish',
+        const lastBackup = await this.localBackupSettings.get(
+            'lastBackupFinished',
         )
+
         let nextBackup = null
         if (this.backupProcedure?.running) {
             nextBackup = 'running'
         } else if (await this.isAutomaticBackupEnabled()) {
             nextBackup = new Date(this.scheduledAutomaticBackupTimestamp)
         }
-        const times = {
-            lastBackup: lastBackup?.getTime() ?? null,
-            nextBackup:
-                nextBackup && nextBackup.getTime
-                    ? nextBackup.getTime()
-                    : nextBackup,
+        if (lastBackup) {
+            const times = {
+                lastBackup: lastBackup ?? null,
+                nextBackup:
+                    lastBackup && nextBackup && nextBackup.getTime
+                        ? nextBackup.getTime()
+                        : null,
+            }
+            return times
+        } else {
+            const times = {
+                lastBackup: null,
+                nextBackup: null,
+            }
+            return times
         }
-        return times
     }
 
     async maybeShowBackupProblemNotif(
         notifId: 'incremental_backup_down' | 'backup_error',
     ) {
-        const lastBackup = await this.backupInfoStorage.retrieveDate(
-            'lastBackupFinish',
+        const lastBackup = await this.localBackupSettings.get(
+            'lastBackupFinished',
         )
-        // const backupProblemThreshold = 1000 * 60
-        const backupProblemThreshold = 1000 * 60 * 60 * 24
-        const timeSinceLastBackup = Date.now() - lastBackup.getTime()
-        if (timeSinceLastBackup < backupProblemThreshold) {
+        if (!lastBackup) {
             return
         }
+        // const backupProblemThreshold = 1000 * 60
+        const backupProblemThreshold = 1000 * 60 * 60 * 24
 
-        const lastNotifShown = await this.backupInfoStorage.retrieveDate(
+        if (lastBackup.getTime() > 0) {
+            const timeSinceLastBackup = Date.now() - lastBackup.getTime()
+            if (timeSinceLastBackup < backupProblemThreshold) {
+                return
+            }
+        }
+
+        const lastNotifShown = await this.localBackupSettings.get(
             'lastProblemNotifShown',
         )
         // const problemNotifInterval = 1000 * 95
@@ -385,13 +415,14 @@ export class BackupBackgroundModule {
         await this.notifications.dispatchNotification(notifId, {
             dontStore: !options.storeNotif,
         })
-        await this.backupInfoStorage.storeDate(
-            'lastProblemNotifShown',
-            new Date(),
-        )
+        await this.localBackupSettings.set('lastProblemNotifShown', new Date())
     }
 
     async doBackup() {
+        const status = await checkServerStatus()
+        if (!status) {
+            await this.localBackupSettings.set('backupStatus', 'fail')
+        }
         this.clearAutomaticBackupTimeout()
         const always = () => {
             this.scheduleAutomaticBackupIfEnabled()
@@ -411,9 +442,7 @@ export class BackupBackgroundModule {
         }
         this.backupProcedure.events.once('success', async () => {
             // sets a flag that the progress of the backup has been successful so that the UI can set a proper state
-            localStorage.setItem('progress-successful', 'true')
-
-            this.backupInfoStorage.storeDate('lastBackupFinish', new Date())
+            await this.localBackupSettings.set('progressSuccessful', true)
             always()
         })
         this.backupProcedure.events.once('fail', async () => {

@@ -28,7 +28,11 @@ export const TypographyHeadingBigger = styled.span`
     margin-right: 5px;
     font-weight: bold;
     width: 100%;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 `
 
 export const TypographyHeadingBig = styled.span`
@@ -39,7 +43,9 @@ export const TypographyHeadingBig = styled.span`
     font-weight: bold;
     text-align: center;
     width: 100%;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 `
 
 export const TypographyHeadingNormal = styled.span`
@@ -47,7 +53,9 @@ export const TypographyHeadingNormal = styled.span`
     text-decoration: none;
     font-weight: bold;
     color: ${colorText};
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 `
 
 export const TypographyHeadingSmall = styled.span`
@@ -56,7 +64,9 @@ export const TypographyHeadingSmall = styled.span`
     margin-right: 5px;
     font-weight: bold;
     color: ${colorText};
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 `
 
 export const TypographyLink = styled.span`
@@ -65,18 +75,24 @@ export const TypographyLink = styled.span`
     margin: 5px;
     color: ${colorPrimary};
     cursor: pointer;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 `
 
 export const TypographyHeadingPage = styled.span`
     font-size: ${fontSizeBig}px;
     font-weight: 600;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-style: normal;
     line-height: 1.4;
     text-align: left;
     color: ${colorText};
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 
     @media (max-width: 1300px) {
         font-size: ${fontSizeNormal}px;
@@ -86,12 +102,16 @@ export const TypographyHeadingPage = styled.span`
 export const TypographySubHeading = styled.span`
     font-size: ${fontSizeNormal}px;
     font-weight: 600;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-style: normal;
     line-height: 1.4;
     text-align: left;
     color: ${colorText};
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 
     @media (max-width: 1300px) {
         font-size: ${fontSizeSmall}px;
@@ -101,12 +121,16 @@ export const TypographySubHeading = styled.span`
 export const TypographyTextNormal = styled.span`
     font-size: ${fontSizeNormal}px;
     font-weight: 400;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-style: normal;
     line-height: 1.4;
     text-align: left;
     color: ${colorText};
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 
     @media (max-width: 1300px) {
         font-size: ${fontSizeSmall}px;
@@ -116,12 +140,16 @@ export const TypographyTextNormal = styled.span`
 export const TypographySubTextNormal = styled.span`
     font-size: ${fontSizeNormal}px;
     font-weight: 400;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-style: normal;
     line-height: 1.4;
     text-align: left;
     color: ${colorGrey7};
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 
     @media (max-width: 1300px) {
         font-size: ${fontSizeSmall}px;
@@ -131,12 +159,16 @@ export const TypographySubTextNormal = styled.span`
 export const TypographyTextSmall = styled.span`
     font-size: ${fontSizeSmall}px;
     font-weight: 400;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-style: normal;
     line-height: 1.4;
     text-align: left;
     color: ${colorText};
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 
     @media (max-width: 1300px) {
         font-size: ${fontSizeSmallest}px;
@@ -149,7 +181,9 @@ export const TypographyInputTitle = styled.h2`
     box-sizing: border-box;
     margin-bottom: 5px;
     margin-top: 10px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 `
 
 export const TypographyButtonLabel = styled.span`
@@ -159,11 +193,15 @@ export const TypographyButtonLabel = styled.span`
     line-height: 1.4;
     text-align: center;
     color: #fafafb;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 `
 export const TypographyActionText = styled.span`
     text-align: center;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     font-style: normal;
     font-weight: 600;
     font-size: 1em;
@@ -177,7 +215,9 @@ export const TypographyBody = styled.span`
     margin-top: 20px;
     text-align: left;
     color: ${colorText};
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 `
 
 export const CenterText = styled.div`
@@ -200,7 +240,9 @@ export const TypographyBodyBold = styled.div`
     font-size: 16px;
     color: #544960;
     text-align: center;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 `
 
 export const TypographyBodyCenter = styled.div`
@@ -208,7 +250,9 @@ export const TypographyBodyCenter = styled.div`
     font-size: 16px;
     text-align: center;
     color: #544960;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
 `
 export const HelpBlock = styled.div`
     display: block;

@@ -6,6 +6,7 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 const styles = require('./Button.css')
 const LinkButtonStyles = require('src/popup/collections-button/components/CollectionsButton.css')
@@ -42,30 +43,29 @@ class LinkButton extends PureComponent<Props> {
     render() {
         return (
             <ButtonItem onClick={this.props.goToDashboard}>
-                <SectionCircle>
-                    <Icon
-                        filePath={icons.searchIcon}
-                        heightAndWidth="18px"
-                        hoverOff
-                    />
-                </SectionCircle>
+                <Icon
+                    filePath={icons.searchIcon}
+                    heightAndWidth="22px"
+                    hoverOff
+                />
                 <ButtonInnerContent>
-                    Search Memex
-                    <SubTitle>{this.state.highlightInfo}</SubTitle>
+                    Search & Dashboard
+                    <ShortCutContainer>
+                        <KeyboardShortcuts
+                            keys={this.state.highlightInfo?.split('+')}
+                        />
+                    </ShortCutContainer>
                 </ButtonInnerContent>
             </ButtonItem>
         )
     }
 }
 
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight}80;
-    border-radius: 100px;
-    height: 32px;
-    width: 32px;
+const ShortCutContainer = styled.div`
     display: flex;
-    justify-content: center;
     align-items: center;
+    color: ${(props) => props.theme.colors.greyScale6};
+    grid-gap: 3px;
 `
 
 const ButtonItem = styled.div<{ disabled: boolean }>`
@@ -77,12 +77,13 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
     height: 50px;
     cursor: pointer;
     border-radius: 8px;
-    padding: 5px 10px;
-    margin: 10px;
+    padding: 0px 10px;
+    margin: 10px 10px 0 10px;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+    border: 1px solid transparent;
 
     &:hover {
-        background: ${(props) => props.theme.colors.backgroundColorDarker};
+        border: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 
     & * {
@@ -93,17 +94,18 @@ const ButtonItem = styled.div<{ disabled: boolean }>`
 const ButtonInnerContent = styled.div`
     display: flex;
     grid-gap: 5px;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     font-size: 14px;
-    font-weight: 600;
-    color: ${(props) => props.theme.colors.darkerText};
+    font-weight: 500;
+    width: 100%;
+    color: ${(props) => props.theme.colors.greyScale6};
 `
 
 const SubTitle = styled.div`
     font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 400;
 `
 

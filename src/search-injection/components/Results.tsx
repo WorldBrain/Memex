@@ -4,13 +4,7 @@ import Dropdown from './Dropdown'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { ButtonTooltip } from 'src/common-ui/components'
-import { browser } from 'webextension-polyfill-ts'
-
-const settings = browser.runtime.getURL('/img/settings.svg')
-const compress = browser.runtime.getURL('/img/compress-alt.svg')
-const expand = browser.runtime.getURL('/img/expand-alt.svg')
-const search = browser.runtime.getURL('/img/search.svg')
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const Results = (props) => {
     // const searchEngineClass = `${props.searchEngine}_${props.position}`
@@ -29,12 +23,13 @@ const Results = (props) => {
                             position: 'relative',
                             iconSize: '20px',
                         }}
+                        location="search"
                     />
                 </UpdateNotifBannerBox>
                 <TopBarArea hideResults={props.hideResults}>
                     <ResultsBox>
-                        <ButtonTooltip
-                            position={'bottom'}
+                        <TooltipBox
+                            placement={'bottom'}
                             tooltipText={
                                 props.hideResults
                                     ? 'Show Results'
@@ -42,36 +37,40 @@ const Results = (props) => {
                             }
                         >
                             <Icon
-                                filePath={props.hideResults ? expand : compress}
-                                heightAndWidth="16px"
+                                filePath={
+                                    props.hideResults ? 'expand' : 'compress'
+                                }
+                                heightAndWidth="22px"
                                 onClick={props.toggleHideResults}
                             />
-                        </ButtonTooltip>
+                        </TooltipBox>
                         <TotalCount>{props.totalCount}</TotalCount>
                         <ResultsText>Memex Results</ResultsText>
                     </ResultsBox>
                     <IconArea>
-                        <ButtonTooltip
-                            position={'bottom'}
+                        <TooltipBox
+                            placement={'bottom'}
                             tooltipText={'Go to Dashboard'}
                         >
                             <Icon
-                                filePath={search}
-                                heightAndWidth="16px"
+                                filePath={'searchIcon'}
+                                heightAndWidth="18px"
+                                padding="5px"
                                 onClick={props.seeMoreResults}
                             />
-                        </ButtonTooltip>
+                        </TooltipBox>
                         <SettingsButtonContainer>
-                            <ButtonTooltip
-                                position={'bottom'}
+                            <TooltipBox
+                                placement={'bottom'}
                                 tooltipText={'Settings'}
                             >
                                 <Icon
-                                    filePath={settings}
-                                    heightAndWidth="16px"
+                                    filePath={'settings'}
+                                    heightAndWidth="18px"
+                                    padding="5px"
                                     onClick={props.toggleDropdown}
                                 />
-                            </ButtonTooltip>
+                            </TooltipBox>
                             {props.dropdown && (
                                 <Dropdown
                                     remove={props.removeResults}
@@ -110,14 +109,21 @@ const MemexContainer = styled.div`
     margin-bottom: 20px;
     border-radius: 8px;
     margin-right: ${(props) => (props.position === 'above' ? '0px' : '30px')};
-    background: white;
+    background: ${(props) => props.theme.colors.black};
+    font-family: ${(props) => props.theme.fonts.primary};
+    border-radius: 12px;
+    overflow: hidden;
+
+    & * {
+        font-family: ${(props) => props.theme.fonts.primary};
+    }
 `
 
 const TopBarArea = styled.div<{ hideResults }>`
     border-bottom: ${(props) =>
         props.hideResults
             ? 'none'
-            : '1px solid' + props.theme.colors.lightgrey};
+            : '1px solid' + props.theme.colors.greyScale3};
     height: 50px;
     align-items: center;
     display: flex;
@@ -134,7 +140,7 @@ const ResultsBox = styled.div`
 `
 
 const TotalCount = styled.div`
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     font-weight: bold;
     font-size: 16px;
 `
@@ -170,10 +176,11 @@ const ResultsContainer = styled.div`
 const UpdateNotifBannerBox = styled.div`
     height: fit-content;
     border-radius: 8px 8px 0 0;
-    position: relative;
-    bottom: 0px;
+    position: absolute;
+    top: 0px;
     width: fill-available;
     overflow: hidden;
+    height: 120px;
 `
 
 Results.propTypes = {

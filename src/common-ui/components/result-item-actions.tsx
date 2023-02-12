@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import cx from 'classnames'
 
 import { Props } from './result-item'
@@ -16,7 +16,6 @@ const commentEmpty = browser.runtime.getURL('/img/comment_empty.svg')
 const commentFull = browser.runtime.getURL('/img/comment_full.svg')
 const deleteItem = browser.runtime.getURL('/img/trash.svg')
 const copy = browser.runtime.getURL('/img/copy.svg')
-const readerIcon = browser.runtime.getURL('/img/reader.svg')
 
 class ResultItemActions extends PureComponent<Omit<Props, 'goToAnnotation'>> {
     get bookmarkClass() {

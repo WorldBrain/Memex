@@ -1,4 +1,5 @@
 import keys from 'lodash/fp/keys'
+import browser from 'webextension-polyfill'
 
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
 import { mapToObject } from 'src/util/map-set-helpers'

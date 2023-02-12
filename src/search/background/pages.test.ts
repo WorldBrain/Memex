@@ -399,6 +399,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                         execute: async ({ setup }) => {
                             listId = await customLists(setup).createCustomList({
                                 name: 'test',
+                                id: Date.now(),
                             })
                             setup.injectTime(() => DATA.VISIT_3)
                             await customLists(setup).insertPageToList({

@@ -47,7 +47,7 @@ const AccountMenu = (
 }
 
 const Title = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     font-weight: 500;
     text-align: left;
@@ -64,7 +64,7 @@ const BottomLeft = styled.div`
     height: 50px;
     justify-content: flex-start;
     align-items: center;
-    position: fixed;
+    position: absolute;
     bottom: 20px;
     margin: 0 10px;
     border-radius: 5px;
@@ -74,9 +74,8 @@ const BottomLeft = styled.div`
         cursor: pointer;
     }
 
-    &: hover {
-        background-color: ${(props) =>
-            props.theme.colors.backgroundColorDarker};
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 `
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-
+import { browser } from 'webextension-polyfill-ts'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import analytics from 'src/analytics'
 import { default as Overview } from './panes/overview'
@@ -15,6 +15,8 @@ import Overlay from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
 import type { UIServices } from 'src/services/ui/types'
 import DataDumper from 'src/personal-cloud/ui/components/data-dumper'
 import { SUPPORT_EMAIL } from 'src/constants'
+import { BrowserSettingsStore } from 'src/util/settings'
+import type { LocalBackupSettings } from 'src/backup-restore/background/types'
 
 const styles = require('../styles.css')
 
@@ -78,13 +80,23 @@ export interface Props {
 }
 
 export default class BackupSettingsContainer extends Component<Props> {
+    localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
     state = { screen: null, isAuthenticated: null, isDumpModalShown: false }
+
+    constructor(props: Props) {
+        super(props)
+
+        this.localBackupSettings = new BrowserSettingsStore(
+            browser.storage.local,
+            { prefix: 'localBackup.' },
+        )
+    }
 
     async componentDidMount() {
         const state = await logic.getInitialState({
             analytics,
-            localStorage,
             remoteFunction,
+            localBackupSettings: this.localBackupSettings,
         })
         this.setState(state)
     }
@@ -112,7 +124,7 @@ export default class BackupSettingsContainer extends Component<Props> {
             screenConfig,
             eventProcessor: logic.processEvent,
             dependencies: {
-                localStorage,
+                localBackupSettings: this.localBackupSettings,
                 analytics,
                 remoteFunction,
             },
@@ -123,6 +135,7 @@ export default class BackupSettingsContainer extends Component<Props> {
         return React.createElement(screenConfig.component, {
             ...stateProps,
             ...handlers,
+            localBackupSettings: this.localBackupSettings,
         })
     }
 

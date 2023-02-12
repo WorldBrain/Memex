@@ -1,21 +1,14 @@
 import React, { Component } from 'react'
-import onClickOutside from 'react-onclickoutside'
 import moment from 'moment'
 import chrono from 'chrono-node'
 import classnames from 'classnames'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import analytics from 'src/analytics'
-import { remoteFunction } from 'src/util/webextensionRPC'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/constants'
 import './datepicker-overrides.css'
-import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import DatePickerInput from './datepicker-input'
 import styled from 'styled-components'
-
-const processEvent = remoteFunction('processEvent')
-const styles = require('./DateRangeSelection.css')
-// const stylesPro = require('../../tooltips/components/tooltip.css')
 
 export interface DateRangeSelectionProps {
     env?: 'inpage' | 'overview'
@@ -25,7 +18,6 @@ export interface DateRangeSelectionProps {
     endDateText: string
     disabled?: boolean
     onClickOutside?: React.MouseEventHandler
-    onEscapeKeyDown?: () => void | Promise<void>
     onStartDateChange: (...args) => void
     onStartDateTextChange: (...args) => void
     onEndDateChange: (...args) => void
@@ -89,11 +81,6 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
      * Overrides react-date-picker's input keydown handler to search on Enter key press.
      */
     handleKeydown = ({ isStartDate }) => (event) => {
-        if (event.key === 'Escape' && this.props.onEscapeKeyDown) {
-            this.props.onEscapeKeyDown()
-            return
-        }
-
         if (
             this.props.env === 'inpage' &&
             !(event.ctrlKey || event.metaKey) &&
@@ -146,12 +133,6 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
         }
 
         analytics.trackEvent({ category: 'SearchFilters', action })
-
-        processEvent({
-            type: isStartDate
-                ? EVENT_NAMES.DATEPICKER_NLP_START_DATE
-                : EVENT_NAMES.DATEPICKER_NLP_END_DATE,
-        })
 
         // Get the time from the NLP query, if it could be parsed
         if (nlpDate != null) {
@@ -232,16 +213,6 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
         }
         analytics.trackEvent({ category: 'SearchFilters', action })
 
-        processEvent({
-            type: date
-                ? isStartDate
-                    ? EVENT_NAMES.DATEPICKER_DROPDOWN_START
-                    : EVENT_NAMES.DATEPICKER_DROPDOWN_END
-                : isStartDate
-                ? EVENT_NAMES.DATEPICKER_CLEAR_START
-                : EVENT_NAMES.DATEPICKER_CLEAR_END,
-        })
-
         const updateDate = isStartDate
             ? this.props.onStartDateChange
             : this.props.onEndDateChange
@@ -284,14 +255,9 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                 {/* <div className={styles.dateRangeSelection} id="date-picker">
                     <img src="/img/to-icon.png" className={styles.toIcon} />
                 </div> */}
-                <div
-                    className={classnames(
-                        styles.pickerContainer,
-                        styles.borderRight,
-                    )}
-                >
-                    <div className={styles.dateTitleContainer}>
-                        <DateTitle className={styles.dateTitle}>From</DateTitle>
+                <PickerContainer>
+                    <DateTitleContainer>
+                        <DateTitle>From</DateTitle>
                         <DatePickerInput
                             autoFocus
                             value={this.state.startDateText || startDateText}
@@ -307,13 +273,12 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                                 isStartDate: true,
                             })}
                         />
-                    </div>
-                    <div className={styles.datePickerDiv}>
+                    </DateTitleContainer>
+                    <DatePickerDiv>
                         <DatePicker
                             ref={(dp) => {
                                 this.startDatePicker = dp
                             }}
-                            className={styles.datePicker}
                             dateFormat={FORMAT}
                             isClearable
                             selected={startDate && moment(startDate)}
@@ -324,11 +289,11 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                             })}
                             inline
                         />
-                    </div>
-                </div>
-                <div className={styles.pickerContainer}>
-                    <div className={styles.dateTitleContainer}>
-                        <DateTitle className={styles.dateTitle}>To</DateTitle>
+                    </DatePickerDiv>
+                </PickerContainer>
+                <PickerContainer>
+                    <DateTitleContainer>
+                        <DateTitle>To</DateTitle>
                         <DatePickerInput
                             value={this.state.endDateText || endDateText}
                             name="to"
@@ -343,13 +308,12 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                                 isStartDate: false,
                             })}
                         />
-                    </div>
-                    <div className={styles.datePickerDiv}>
+                    </DateTitleContainer>
+                    <DatePickerDiv>
                         <DatePicker
                             ref={(dp) => {
                                 this.endDatePicker = dp
                             }}
-                            className={styles.datePicker}
                             dateFormat={FORMAT}
                             isClearable
                             selected={endDate && moment(endDate)}
@@ -361,8 +325,8 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
                             })}
                             inline
                         />
-                    </div>
-                </div>
+                    </DatePickerDiv>
+                </PickerContainer>
             </DateRangeDiv>
         )
     }
@@ -370,15 +334,127 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
 
 const DateRangeDiv = styled.div`
     display: flex;
-    background: white;
+    background: ${(props) => props.theme.colors.greyScale1};
     align-items: flex-start;
     border-radius: 12px;
+
+    .react-datepicker {
+        background: ${(props) => props.theme.colors.greyScale3};
+    }
+
+    .react-datepicker__current-month {
+        color: ${(props) => props.theme.colors.white};
+        font-weight: bold;
+    }
+
+    .react-datepicker__header .react-datepicker__day-name {
+        color: ${(props) => props.theme.colors.greyScale5};
+    }
+
+    .react-datepicker__day--outside-month {
+        color: ${(props) => props.theme.colors.greyScale6} !important;
+    }
+
+    .react-datepicker__day--disabled {
+        color: ${(props) => props.theme.colors.greyScale6} !important;
+    }
+
+    .react-datepicker__day--selected {
+        background: ${(props) => props.theme.colors.prime1} !important;
+        border-radius: 3px;
+        color: ${(props) => props.theme.colors.black} !important;
+    }
+
+    .react-datepicker__day {
+        color: ${(props) => props.theme.colors.white};
+        font-weight: bold;
+
+        &:hover {
+            border-radius: 3px;
+            color: ${(props) => props.theme.colors.white};
+            background: ${(props) => props.theme.colors.greyScale2};
+        }
+    }
+
+    .react-datepicker__navigation--next {
+        mask-image: url('/img/arrowRight.svg') !important;
+        mask-repeat: no-repeat !important;
+        transform: rotate(0deg);
+        mask-size: 18px !important;
+        mask-position: center !important;
+        background: ${(props) => props.theme.colorsgreyScale6};
+        height: 20px !important;
+        width: 20px !important;
+    }
+
+    .react-datepicker__navigation--previous {
+        mask-image: url('/img/arrowLeft.svg') !important;
+        mask-repeat: no-repeat !important;
+        mask-size: 18px !important;
+        transform: rotate(0deg);
+        mask-position: center !important;
+        background: ${(props) => props.theme.colorsgreyScale6};
+        height: 20px !important;
+        width: 20px !important;
+    }
 `
 
 const DateTitle = styled.span`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 600;
 `
 
-export default onClickOutside(DateRangeSelection)
+const ToIcon = styled.div`
+    width: 5px;
+    height: 8px;
+    margin-top: 1px;
+`
+
+const PickerContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px 15px 0px;
+    background: ${(props) => props.theme.colors.greyScale1};
+    border-radius: 20px;
+`
+
+const DatePickerDiv = styled.div`
+    margin-top: 20px;
+    background: ${(props) => props.theme.colors.greyScale1};
+
+    & div {
+        background: ${(props) => props.theme.colors.greyScale1};
+    }
+`
+
+const ClearFilters = styled.div`
+    background-image: url('/img/removeIcon.svg');
+    background-size: 10px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    margin-left: 5px;
+    outline: none;
+    border: none;
+`
+
+const DateTitleContainer = styled.div`
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1;
+`
+
+const DatepickerInput = styled.div`
+    display: flex;
+    align-items: center;
+`
+
+const BorderRight = styled.div`
+    border-right: 1px solid color9;
+`
+
+export default DateRangeSelection

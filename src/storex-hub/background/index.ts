@@ -7,14 +7,14 @@ import {
     StorexHubCallbacks_v0,
     HandleRemoteCallResult_v0,
 } from '@worldbrain/storex-hub/lib/public-api'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
     FetchPageProcessor,
     PageContent,
 } from 'src/page-analysis/background/types'
 import { IndexPageArgs } from './types'
 import { PipelineRes } from 'src/search'
-import { Storage } from 'webextension-polyfill-ts'
+import { Storage } from 'webextension-polyfill'
 
 const APP_NAME = 'io.worldbrain.memex'
 

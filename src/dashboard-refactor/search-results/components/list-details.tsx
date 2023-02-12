@@ -1,18 +1,19 @@
-import React, { PureComponent } from 'react'
+import React, { PureComponent, useState } from 'react'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { fonts } from '../../styles'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { ButtonTooltip } from 'src/common-ui/components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import MemexEditor from '@worldbrain/memex-common/lib/editor'
 import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
-import { ClickAway } from 'src/util/click-away-wrapper'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { sizeConstants } from '../../constants'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 
 export interface Props {
     listName: string
@@ -22,23 +23,28 @@ export interface Props {
     isJoinedList?: boolean
     description: string | null
     saveDescription: (description: string) => void
+    saveTitle: (title: string, listId: number) => void
     onAddContributorsClick?: React.MouseEventHandler
+    listId?: number
+    clearInbox?: () => void
 }
 
 interface State {
     description: string
     isEditingDescription: boolean
     showQuickTutorial: boolean
+    spaceTitle: string
 }
 
 export default class ListDetails extends PureComponent<Props, State> {
     static MOD_KEY = getKeyName({ key: 'mod' })
+    private formattingHelpBtn = React.createRef<HTMLDivElement>()
 
-    private formattingHelpBtn = React.createRef<HTMLElement>()
     state: State = {
         description: this.props.description ?? '',
         isEditingDescription: false,
         showQuickTutorial: false,
+        spaceTitle: this.props.listName,
     }
 
     componentWillUpdate(nextProps: Props) {
@@ -47,6 +53,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                 description: nextProps.description ?? '',
                 isEditingDescription: false,
                 showQuickTutorial: false,
+                spaceTitle: nextProps.listName,
             })
         }
     }
@@ -54,8 +61,12 @@ export default class ListDetails extends PureComponent<Props, State> {
     private finishEdit(args: { shouldSave?: boolean }) {
         if (args.shouldSave) {
             this.props.saveDescription(this.state.description)
+            this.props.saveTitle(this.state.spaceTitle, this.props.listId)
         }
-        this.setState({ isEditingDescription: false, showQuickTutorial: false })
+        this.setState({
+            isEditingDescription: false,
+            showQuickTutorial: false,
+        })
     }
 
     private handleDescriptionInputKeyDown: React.KeyboardEventHandler = (e) => {
@@ -77,28 +88,11 @@ export default class ListDetails extends PureComponent<Props, State> {
         }
     }
 
-    private renderMarkdownHelpButton() {
-        return (
-            <MarkdownButtonContainer
-                ref={this.formattingHelpBtn}
-                onClick={() =>
-                    this.setState({
-                        showQuickTutorial: !this.state.showQuickTutorial,
-                    })
-                }
-            >
-                Formatting Help
-                <MarkdownButton src={icons.helpIcon} />
-            </MarkdownButtonContainer>
-        )
-    }
-
     private renderDescription() {
         if (this.state.isEditingDescription) {
             return (
                 <DescriptionEditorContainer>
                     <MemexEditor
-                        autoFocus
                         markdownContent={this.state.description}
                         onKeyDown={this.handleDescriptionInputKeyDown}
                         placeholder="Write a description for this Space"
@@ -106,35 +100,25 @@ export default class ListDetails extends PureComponent<Props, State> {
                             this.setState({ description })
                         }
                     />
-                    <SaveActionBar>
-                        <BtnContainerStyled>
-                            <ButtonTooltip
-                                tooltipText={`${ListDetails.MOD_KEY} + Enter`}
-                                position="bottom"
-                            >
-                                <SaveBtn
-                                    onClick={() =>
-                                        this.finishEdit({ shouldSave: true })
-                                    }
-                                >
-                                    Save
-                                </SaveBtn>
-                            </ButtonTooltip>
-                            <ButtonTooltip tooltipText="esc" position="bottom">
-                                <CancelBtnStyled
-                                    onClick={() =>
-                                        this.setState({
-                                            isEditingDescription: false,
-                                        })
-                                    }
-                                >
-                                    Cancel
-                                </CancelBtnStyled>
-                            </ButtonTooltip>
-                        </BtnContainerStyled>
-                        {this.renderMarkdownHelpButton()}
-                    </SaveActionBar>
                 </DescriptionEditorContainer>
+            )
+        }
+
+        if (this.props.listId === 20201015) {
+            return (
+                <SubtitleText>
+                    {'Things you saved from your mobile devices'}
+                </SubtitleText>
+            )
+        }
+
+        if (this.props.listId === 20201014) {
+            return (
+                <SubtitleText>
+                    {
+                        'Everything you save, annotate or organise appears here so you have a chance to go through it again.'
+                    }
+                </SubtitleText>
             )
         }
 
@@ -147,107 +131,222 @@ export default class ListDetails extends PureComponent<Props, State> {
             return null
         }
 
-        const tooltipText = this.props.isOwnedList ? (
-            <span>Edit Space Description</span>
-        ) : (
-            <span>
-                It isn't yet possible to edit descriptions <br /> of Spaces that
-                aren't yours
-            </span>
-        )
-
         return (
-            <ButtonTooltip position="bottom" tooltipText={tooltipText}>
-                <Margin right={'10px'}>
-                    <Icon
-                        hoverOff={!this.props.isOwnedList}
-                        onClick={() =>
-                            this.props.isOwnedList &&
-                            this.setState({ isEditingDescription: true })
-                        }
-                        heightAndWidth="20px"
-                        color={
-                            this.props.isOwnedList ? 'purple' : 'lighterText'
-                        }
-                        icon={'edit'}
-                    />
-                </Margin>
-            </ButtonTooltip>
+            <TooltipBox placement="bottom" tooltipText={'Edit Space'}>
+                <Icon
+                    hoverOff={!this.props.isOwnedList}
+                    onClick={() =>
+                        this.props.isOwnedList &&
+                        this.setState({ isEditingDescription: true })
+                    }
+                    padding={'5px'}
+                    heightAndWidth="22px"
+                    icon={'edit'}
+                />
+            </TooltipBox>
         )
     }
 
     render() {
         return (
             <>
-                <TopBarContainer top="10px" bottom="10px">
+                <TopBarContainer bottom="10px">
                     <Container
                         hasDescription={this.props.description?.length > 0}
                         center={!this.props.remoteLink}
                     >
-                        <TitleContainer>
-                            <DetailsContainer>
-                                <SectionTitle>
-                                    {this.props.listName}
-                                </SectionTitle>
-                            </DetailsContainer>
-                            <BtnsContainer>
-                                {this.renderEditButton()}
-                                {this.props.remoteLink ? (
-                                    <>
-                                        <Margin right="10px">
-                                            <ButtonTooltip
-                                                tooltipText="Invite people to this Space"
-                                                position="bottom"
-                                            >
-                                                <Icon
-                                                    height="19px"
-                                                    filePath={icons.peopleFine}
-                                                    color="purple"
-                                                    onClick={
-                                                        this.props
-                                                            .onAddContributorsClick
-                                                    }
-                                                />
-                                            </ButtonTooltip>
-                                        </Margin>
-                                        <PrimaryAction
-                                            onClick={() =>
-                                                window.open(
-                                                    this.props.remoteLink,
-                                                )
-                                            }
-                                            label="Open Web View"
-                                            fontSize={'14px'}
-                                        />
-                                    </>
-                                ) : (
-                                    <ButtonTooltip
-                                        tooltipText="Invite people to this Space"
-                                        position="bottom"
+                        {this.state.isEditingDescription ? (
+                            <TitleContainer>
+                                <TextField
+                                    value={this.state.spaceTitle}
+                                    onChange={(e) =>
+                                        this.setState({
+                                            spaceTitle: (e.target as HTMLInputElement)
+                                                .value,
+                                        })
+                                    }
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            this.finishEdit({
+                                                shouldSave:
+                                                    this.props.description !==
+                                                        this.state
+                                                            .description ||
+                                                    this.props.listName !==
+                                                        this.state.spaceTitle,
+                                            })
+                                        } else if (e.key === 'Escape') {
+                                            this.finishEdit({
+                                                shouldSave: false,
+                                            })
+                                            return
+                                        }
+                                    }}
+                                />
+                                <BtnContainerStyled>
+                                    <TooltipBox
+                                        tooltipText="esc"
+                                        placement="bottom"
                                     >
-                                        <PrimaryAction
-                                            onClick={
-                                                this.props
-                                                    .onAddContributorsClick
-                                            }
-                                            label={
-                                                <ShareCollectionBtn>
-                                                    <Icon
-                                                        height="14px"
-                                                        filePath={icons.link}
-                                                        color="white"
-                                                        hoverOff
-                                                    />
-                                                    <ShareCollectionBtnLabel>
-                                                        Share Space
-                                                    </ShareCollectionBtnLabel>
-                                                </ShareCollectionBtn>
+                                        <Icon
+                                            heightAndWidth="22px"
+                                            icon={icons.removeX}
+                                            color={'white'}
+                                            onClick={() =>
+                                                this.setState({
+                                                    isEditingDescription: false,
+                                                })
                                             }
                                         />
-                                    </ButtonTooltip>
-                                )}
-                            </BtnsContainer>
-                        </TitleContainer>
+                                    </TooltipBox>
+                                    <TooltipBox
+                                        tooltipText={`${ListDetails.MOD_KEY} + Enter`}
+                                        placement="bottom"
+                                    >
+                                        <Icon
+                                            heightAndWidth="22px"
+                                            icon={icons.check}
+                                            color={'prime1'}
+                                            onClick={() =>
+                                                this.finishEdit({
+                                                    shouldSave:
+                                                        this.props
+                                                            .description !==
+                                                            this.state
+                                                                .description ||
+                                                        this.props.listName !==
+                                                            this.state
+                                                                .spaceTitle,
+                                                })
+                                            }
+                                        />
+                                    </TooltipBox>
+                                </BtnContainerStyled>
+                            </TitleContainer>
+                        ) : (
+                            <TitleContainer>
+                                <DetailsContainer>
+                                    <SectionTitle>
+                                        {this.props.listName}
+                                        {this.props.listId === 20201015 &&
+                                            'Saved on Mobile'}
+                                        {this.props.listId === 20201014 &&
+                                            'Inbox'}
+                                    </SectionTitle>
+                                    {/* <TitleEditContainer>
+                                    {this.renderEditButton()}
+                                </TitleEditContainer> */}
+                                </DetailsContainer>
+                                <BtnsContainer>
+                                    {this.props.listId === 20201014 ? (
+                                        <TooltipBox
+                                            tooltipText={
+                                                <TooltipTextContent>
+                                                    <strong>Tip:</strong> Remove
+                                                    individual pages with the
+                                                    <br />{' '}
+                                                    <Icon
+                                                        filePath="removeX"
+                                                        hoverOff
+                                                        heightAndWidth="16px"
+                                                    />{' '}
+                                                    icon when hovering page
+                                                    cards
+                                                </TooltipTextContent>
+                                            }
+                                            placement="bottom-end"
+                                        >
+                                            <PrimaryAction
+                                                label={'Clear Inbox'}
+                                                onClick={() =>
+                                                    this.props.clearInbox()
+                                                }
+                                                type={'forth'}
+                                                size={'medium'}
+                                                icon={'removeX'}
+                                            />
+                                        </TooltipBox>
+                                    ) : undefined}
+                                    {this.props.listId !== 20201014 &&
+                                    this.props.listId !== 20201015 ? (
+                                        <SpaceButtonRow>
+                                            {this.props.isOwnedList ? (
+                                                <>
+                                                    <ActionButtons>
+                                                        {this.renderEditButton()}
+                                                        <TooltipBox
+                                                            placement={'bottom'}
+                                                            tooltipText="Open in web view"
+                                                        >
+                                                            <Icon
+                                                                height="22px"
+                                                                padding={'5px'}
+                                                                filePath={
+                                                                    icons.goTo
+                                                                }
+                                                                onClick={() =>
+                                                                    window.open(
+                                                                        this
+                                                                            .props
+                                                                            .remoteLink,
+                                                                    )
+                                                                }
+                                                            />
+                                                        </TooltipBox>
+                                                    </ActionButtons>
+                                                    {this.props.remoteLink ? (
+                                                        <PrimaryAction
+                                                            onClick={
+                                                                this.props
+                                                                    .onAddContributorsClick
+                                                            }
+                                                            size={'medium'}
+                                                            type={'primary'}
+                                                            label={
+                                                                'Share Space'
+                                                            }
+                                                            icon={'invite'}
+                                                        />
+                                                    ) : (
+                                                        <TooltipBox
+                                                            tooltipText="Invite people to this Space"
+                                                            placement="bottom"
+                                                        >
+                                                            <PrimaryAction
+                                                                onClick={
+                                                                    this.props
+                                                                        .onAddContributorsClick
+                                                                }
+                                                                size={'medium'}
+                                                                type={'primary'}
+                                                                label={
+                                                                    'Share Space'
+                                                                }
+                                                                icon={'invite'}
+                                                            />
+                                                        </TooltipBox>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <PrimaryAction
+                                                    onClick={() =>
+                                                        window.open(
+                                                            this.props
+                                                                .remoteLink,
+                                                        )
+                                                    }
+                                                    size={'medium'}
+                                                    type={'primary'}
+                                                    label={'Open in web view'}
+                                                    icon={'goTo'}
+                                                />
+                                            )}
+                                        </SpaceButtonRow>
+                                    ) : undefined}
+                                </BtnsContainer>
+                            </TitleContainer>
+                        )}
                         {this.props.isOwnedList &&
                             !this.props.description?.length &&
                             !this.state.isEditingDescription && (
@@ -266,56 +365,62 @@ export default class ListDetails extends PureComponent<Props, State> {
                     </Container>
                     <DescriptionContainer>
                         {this.renderDescription()}
+                        {/* {!this.state.isEditingDescription && (
+                            <DescriptionEditContainer>
+                                {this.renderEditButton()}
+                            </DescriptionEditContainer>
+                        )} */}
                     </DescriptionContainer>
                     {this.state.showQuickTutorial && (
-                        <ClickAway
-                            ignoreClickOnElement={
-                                this.formattingHelpBtn.current
-                            }
-                            onClickAway={() =>
+                        <PopoutBox
+                            targetElementRef={this.formattingHelpBtn.current}
+                            placement={'bottom-start'}
+                            closeComponent={() =>
                                 this.setState({ showQuickTutorial: false })
                             }
+                            offsetX={5}
                         >
-                            <HoverBox
-                                top={'260px'}
-                                right={'420px'}
-                                width="430px"
-                                height="430px"
-                                overflow="scroll"
-                            >
-                                <QuickTutorial
-                                    markdownHelpOnTop={true}
-                                    getKeyboardShortcutsState={
-                                        getKeyboardShortcutsState
-                                    }
-                                />
-                            </HoverBox>
-                        </ClickAway>
+                            <QuickTutorial
+                                markdownHelpOnTop={true}
+                                getKeyboardShortcutsState={
+                                    getKeyboardShortcutsState
+                                }
+                            />
+                        </PopoutBox>
                     )}
                 </TopBarContainer>
-                {this.props.description?.length > 0 && (
-                    <ReferencesContainer>
-                        References
-                        <Margin top="5px" bottom="5px" width="unset">
-                            {this.props.remoteLink && (
-                                <InfoText>
-                                    Only your own contributions to this space
-                                    are visible locally. To see all, open the{' '}
-                                    <a
-                                        target="_blank"
-                                        href={this.props.remoteLink}
-                                    >
-                                        web view{' '}
-                                    </a>
-                                </InfoText>
-                            )}
-                        </Margin>
-                    </ReferencesContainer>
-                )}
             </>
         )
     }
 }
+
+const SubtitleText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    display: flex;
+    text-align: left;
+    font-size: 14px;
+`
+
+const TooltipTextContent = styled.div`
+    display: block;
+    line-height: 23px;
+
+    > div {
+        display: inline-block;
+        vertical-align: middle;
+    }
+`
+
+const SpaceButtonRow = styled.div`
+    display: flex;
+    grid-gap: 20px;
+    align-items: center;
+`
+const ActionButtons = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    align-items: center;
+`
 
 const TitleContainer = styled.div`
     display: flex;
@@ -325,20 +430,8 @@ const TitleContainer = styled.div`
     grid-gap: 10px;
 `
 
-const ReferencesContainer = styled.div`
-    width: 100%;
-    font-weight: lighter;
-    font-size: 20px;
-    color: #96a0b5;
-    margin-top: 20px;
-    padding-bottom: 5px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-`
-
 const EditDescriptionButton = styled.div`
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime2};
     font-size: 14px;
     border: none;
     background: none;
@@ -349,8 +442,6 @@ const EditDescriptionButton = styled.div`
 const DescriptionEditorContainer = styled.div`
     width: 100%;
     border-radius: 6px;
-    box-shadow: 0px 3px 7px -6px #d0d0d057;
-    background: white;
     margin-top: 5px;
 
     & > div:first-child {
@@ -373,83 +464,39 @@ const BtnContainerStyled = styled.div`
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
-`
-
-const CancelBtnStyled = styled.button`
-    box-sizing: border-box;
-    cursor: pointer;
-    font-size: 14px;
-    border: none;
-    outline: none;
-    padding: 3px 5px;
-    background: transparent;
-    border-radius: 3px;
-    color: red;
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.backgroundColor};
-    }
-
-    &:focus {
-        background-color: #79797945;
-    }
-`
-
-const SaveBtn = styled.div`
-    flex-direction: row;
-    align-items: center;
-    box-sizing: border-box;
-    cursor: pointer;
-    font-size: 14px;
-    border: none;
-    outline: none;
-    margin-right: 5px;
-    background: transparent;
-    border-radius: 3px;
-    font-weight: 700;
-    border: 1px solid ${(props) => props.theme.colors.lightgrey};
-    display: grid;
-    grid-auto-flow: column;
-    padding: 4px 8px;
+    grid-gap: 10px;
 `
 
 const TopBarContainer = styled(Margin)`
-    z-index: 2147483640;
+    z-index: 3010;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background: white;
     border-radius: 10px;
-    padding: 20px;
-`
-
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
-    font-size: 14px;
-    font-weight: 300;
+    padding: 20px 0 5px 0;
+    max-width: ${sizeConstants.searchResults.widthPx}px;
 `
 
 const MarkdownButtonContainer = styled.div`
     display: flex;
     font-size: 12px;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
     align-items: center;
     cursor: pointer;
 `
 
-const MarkdownButton = styled.img`
-    display: flex;
-    height: 16px;
-    opacity: 0.8;
-    mask-position: center center;
-    margin-left: 10px;
-    cursor: pointer;
-`
-
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 24px;
     font-weight: bold;
+`
+
+const TitleEditContainer = styled.div`
+    display: none;
+    margin-left: 5px;
+`
+const DescriptionEditContainer = styled.div`
+    display: none;
 `
 
 const Container = styled.div<{ hasDescription: boolean; center: boolean }>`
@@ -459,10 +506,6 @@ const Container = styled.div<{ hasDescription: boolean; center: boolean }>`
     align-items: flex-start;
     width: 100%;
     z-index: 1002;
-    padding-bottom: ${(props) => (props.hasDescription ? '20px' : '0px')};
-    margin-bottom: ${(props) => (props.hasDescription ? '15px' : '0px')};
-    border-bottom: ${(props) =>
-        props.hasDescription ? '1px solid #f0f0f0' : 'unset'};
 
     & a {
         text-decoration: none;
@@ -472,9 +515,13 @@ const Container = styled.div<{ hasDescription: boolean; center: boolean }>`
 
 const DetailsContainer = styled.div`
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     grid-gap: 5px;
     width: 100%;
+
+    &:hover ${TitleEditContainer} {
+        display: flex;
+    }
 `
 
 const ShareCollectionBtn = styled.div`
@@ -482,10 +529,10 @@ const ShareCollectionBtn = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    grid-gap: 5px;
 `
 
 const ShareCollectionBtnLabel = styled.div`
-    padding-left: 10px;
     font-size: 14px;
 `
 
@@ -494,27 +541,23 @@ const BtnsContainer = styled.div`
     align-items: center;
     z-index: 100;
     align-self: flex-start;
-`
-
-const Name = styled.div`
-    font-family: ${fonts.primary.name};
-    font-style: normal;
-    font-size: 20px;
-    font-weight: ${fonts.primary.weight.bold};
-    color: ${fonts.primary.colors.primary};
-`
-
-const Note = styled.span`
-    font-family: ${fonts.primary.name};
-    font-style: normal;
-    font-size: 12px;
-    color: ${fonts.primary.colors.secondary};
+    grid-gap: 5px;
 `
 
 const DescriptionContainer = styled.div`
     width: 100%;
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-start;
+
+    &:hover ${DescriptionEditContainer} {
+        display: flex;
+        justify-self: flex-start;
+        align-self: flex-start;
+        position: absolute;
+    }
 `
 
 const DescriptionText = styled(Markdown)`
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.greyScale5};
 `

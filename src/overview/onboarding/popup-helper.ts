@@ -1,9 +1,7 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
-import { EVENT_NAMES } from 'src/analytics/internal/constants'
 import { FLOWS, STAGES } from './constants'
 import { fetchOnboardingStage, setOnboardingStage } from './utils'
 
-const processEventRPC = remoteFunction('processEvent')
 const openOptionsRPC = remoteFunction('openOptionsTab')
 
 /**
@@ -34,6 +32,4 @@ export const checkForTaggingStage = async () => {
     setTimeout(async () => {
         openOptionsRPC('overview')
     }, 1000)
-
-    processEventRPC({ type: EVENT_NAMES.FINISH_TAGGING_ONBOARDING })
 }

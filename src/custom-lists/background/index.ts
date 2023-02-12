@@ -1,10 +1,9 @@
 import Storex from '@worldbrain/storex'
-import { Windows, Tabs, Storage } from 'webextension-polyfill-ts'
+import fromPairs from 'lodash/fromPairs'
+import { Windows, Tabs, Storage } from 'webextension-polyfill'
 import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
 
 import CustomListStorage from './storage'
-import internalAnalytics from '../../analytics/internal'
-import { EVENT_NAMES } from '../../analytics/internal/constants'
 import { SearchIndex } from 'src/search'
 import type {
     RemoteCollectionsInterface,
@@ -19,7 +18,7 @@ import { updateSuggestionsCache } from '@worldbrain/memex-common/lib/utils/sugge
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import TabManagementBackground from 'src/tab-management/background'
 import { ServerStorageModules } from 'src/storage/types'
-import { Services } from 'src/services/types'
+import type { AuthServices } from 'src/services/types'
 import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
@@ -45,7 +44,7 @@ export default class CustomListBackground {
             queryTabs?: Tabs.Static['query']
             windows?: Windows.Static
             localBrowserStorage: Storage.LocalStorageArea
-            services: Pick<Services, 'auth'>
+            authServices: Pick<AuthServices, 'auth'>
             // TODO: the fact this needs to be passed down tells me this ideally should be done at a higher level (content sharing BG?)
             removeChildAnnotationsFromList: (
                 normalizedPageUrl: string,
@@ -79,8 +78,12 @@ export default class CustomListBackground {
             fetchCollaborativeLists: this.fetchCollaborativeLists,
             fetchListById: this.fetchListById,
             fetchListByName: this.fetchListByName,
+            fetchAnnotationRefsForRemoteListsOnPage: this
+                .fetchAnnotationRefsForRemoteListsOnPage,
             fetchFollowedListsWithAnnotations: this
                 .fetchFollowedListsWithAnnotations,
+            fetchSharedListDataWithPageAnnotations: this
+                .fetchSharedListDataWithPageAnnotations,
             fetchSharedListDataWithOwnership: this
                 .fetchSharedListDataWithOwnership,
             fetchListPagesByUrl: this.fetchListPagesByUrl,
@@ -93,6 +96,7 @@ export default class CustomListBackground {
             addOpenTabsToList: this.addOpenTabsToList,
             removeOpenTabsFromList: this.removeOpenTabsFromList,
             updateListForPage: this.updateListForPage,
+            fetchListDescriptions: this.fetchListDescriptions,
             updateListDescription: this.updateListDescription,
             getInboxUnreadCount: this.getInboxUnreadCount,
         }
@@ -110,7 +114,7 @@ export default class CustomListBackground {
     private fetchOwnListReferences = async (): Promise<
         SharedListReference[]
     > => {
-        const { auth } = this.options.services
+        const { auth } = this.options.authServices
         const { contentSharing } = await this.options.getServerStorage()
 
         const currentUser = await auth.getCurrentUser()
@@ -127,7 +131,7 @@ export default class CustomListBackground {
     private fetchFollowedListReferences = async (): Promise<
         SharedListReference[]
     > => {
-        const { auth } = this.options.services
+        const { auth } = this.options.authServices
         const { activityFollows } = await this.options.getServerStorage()
 
         const currentUser = await auth.getCurrentUser()
@@ -155,7 +159,7 @@ export default class CustomListBackground {
     private fetchCollaborativeListReferences = async (): Promise<
         SharedListReference[]
     > => {
-        const { auth } = this.options.services
+        const { auth } = this.options.authServices
         const { contentSharing } = await this.options.getServerStorage()
 
         const currentUser = await auth.getCurrentUser()
@@ -184,6 +188,30 @@ export default class CustomListBackground {
         )
     }
 
+    fetchAnnotationRefsForRemoteListsOnPage: RemoteCollectionsInterface['fetchAnnotationRefsForRemoteListsOnPage'] = async ({
+        sharedListIds,
+        normalizedPageUrl,
+    }) => {
+        const { contentSharing } = await this.options.getServerStorage()
+
+        const listEntriesByPageByList = await contentSharing.getAnnotationListEntriesForListsOnPage(
+            {
+                listReferences: sharedListIds.map((id) => ({
+                    type: 'shared-list-reference',
+                    id,
+                })),
+                normalizedPageUrl,
+            },
+        )
+
+        return fromPairs(
+            Object.entries(listEntriesByPageByList).map(([listId, entries]) => [
+                listId,
+                entries.map((entry) => entry.sharedAnnotation),
+            ]),
+        )
+    }
+
     fetchFollowedListsWithAnnotations: RemoteCollectionsInterface['fetchFollowedListsWithAnnotations'] = async ({
         normalizedPageUrl,
     }) => {
@@ -204,7 +232,7 @@ export default class CustomListBackground {
             return true
         })
 
-        const fingerprints = this.options.pages.getContentFingerprints({
+        const fingerprints = await this.options.pages.getContentFingerprints({
             normalizedUrl: normalizedPageUrl,
         })
 
@@ -254,6 +282,7 @@ export default class CustomListBackground {
         return sharedLists.map((list) => ({
             id: list.reference.id as string,
             name: list.title,
+            creatorReference: list.creator,
             sharedAnnotationReferences: annotListEntriesByList
                 .get(list.reference.id)
                 .map((entry) => entry.sharedAnnotation),
@@ -263,7 +292,7 @@ export default class CustomListBackground {
     private fetchListsFromReferences = async (
         references: SharedListReference[],
     ): Promise<PageList[]> => {
-        const { auth } = this.options.services
+        const { auth } = this.options.authServices
         const { contentSharing } = await this.options.getServerStorage()
 
         const sharedLists = await contentSharing.getListsByReferences(
@@ -292,10 +321,50 @@ export default class CustomListBackground {
             }))
     }
 
+    fetchSharedListDataWithPageAnnotations: RemoteCollectionsInterface['fetchSharedListDataWithPageAnnotations'] = async ({
+        normalizedPageUrl,
+        remoteListId,
+    }) => {
+        const { contentSharing } = await this.options.getServerStorage()
+        const listReference: SharedListReference = {
+            id: remoteListId,
+            type: 'shared-list-reference',
+        }
+        const sharedList = await contentSharing.getListByReference(
+            listReference,
+        )
+        if (sharedList == null) {
+            return null
+        }
+
+        const {
+            [normalizedPageUrl]: annotations,
+        } = await contentSharing.getAnnotationsForPagesInList({
+            listReference,
+            normalizedPageUrls: [normalizedPageUrl],
+        })
+
+        if (!annotations) {
+            return null
+        }
+
+        return {
+            ...sharedList,
+            sharedAnnotations: annotations.map(({ annotation }) => ({
+                ...annotation,
+                creator: { type: 'user-reference', id: annotation.creator },
+                reference: {
+                    type: 'shared-annotation-reference',
+                    id: annotation.id,
+                },
+            })),
+        }
+    }
+
     fetchSharedListDataWithOwnership: RemoteCollectionsInterface['fetchSharedListDataWithOwnership'] = async ({
         remoteListId,
     }) => {
-        const currentUser = await this.options.services.auth.getCurrentUser()
+        const currentUser = await this.options.authServices.auth.getCurrentUser()
         if (!currentUser) {
             return null
         }
@@ -371,8 +440,9 @@ export default class CustomListBackground {
 
         const missingEntries = new Map<string, number>()
         for (const name of missing) {
-            const id = await this.createCustomList({ name })
+            const id = Date.now()
             missingEntries.set(name, id)
+            await this.createCustomList({ name, id })
         }
 
         const listIds = new Map([...existingLists, ...missingEntries])
@@ -447,21 +517,16 @@ export default class CustomListBackground {
         return this.storage.countInboxUnread()
     }
 
-    createCustomList = async ({
+    createCustomList: RemoteCollectionsInterface['createCustomList'] = async ({
         name,
         id: _id,
+        type,
         createdAt,
-    }: {
-        name: string
-        id?: number
-        createdAt?: Date
-    }): Promise<number> => {
-        internalAnalytics.processEvent({
-            type: EVENT_NAMES.CREATE_COLLECTION,
-        })
+    }) => {
         const id = _id ?? this.generateListId()
         const inserted = await this.storage.insertCustomList({
             id,
+            type,
             name,
             createdAt,
         })
@@ -506,10 +571,6 @@ export default class CustomListBackground {
             )
         }
 
-        internalAnalytics.processEvent({
-            type: EVENT_NAMES.INSERT_PAGE_COLLECTION,
-        })
-
         if (!params.skipPageIndexing) {
             await this.options.pages.indexPage(
                 {
@@ -546,20 +607,12 @@ export default class CustomListBackground {
     }
 
     removeList = async ({ id }: { id: number }) => {
-        internalAnalytics.processEvent({
-            type: EVENT_NAMES.REMOVE_COLLECTION,
-        })
-
         return this.storage.removeList({
             id,
         })
     }
 
     removePageFromList = async ({ id, url }: { id: number; url: string }) => {
-        await internalAnalytics.processEvent({
-            type: EVENT_NAMES.REMOVE_PAGE_COLLECTION,
-        })
-
         await this.options.removeChildAnnotationsFromList(url, id)
 
         return this.storage.removePageFromList({
@@ -685,6 +738,18 @@ export default class CustomListBackground {
                     pageUrl: normalizeUrl(tab.url),
                 }),
             ),
+        )
+    }
+
+    fetchListDescriptions: RemoteCollectionsInterface['fetchListDescriptions'] = async ({
+        listIds,
+    }) => {
+        const descriptions = await this.storage.fetchListDescriptionsByLists(
+            listIds,
+        )
+        return descriptions.reduce(
+            (acc, curr) => ({ ...acc, [curr.listId]: curr.description }),
+            {},
         )
     }
 

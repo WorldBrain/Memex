@@ -2,8 +2,8 @@
 
 ### Purpose
 
-- logging a user's web page visit activity, interactions in each visit
-- keep track of state related to visit activity per browser tab
+-   logging a user's web page visit activity, interactions in each visit
+-   keep track of state related to visit activity per browser tab
 
 ### How it works
 
@@ -32,6 +32,6 @@ This is done when the user closes the tab or URL is determined to be changed (ne
 
 #### Content script:
 
-Simply handles deriving state from the `scroll` event on `window` and sending that to the background script.
+Simply handles deriving state from the `scroll` event on `globalThis` and sending that to the background script.
 The background script uses this data to derive scroll px/% at any given time and also keep track of the max
 scroll along the y axis.

@@ -1,17 +1,20 @@
-import type { WebRequest, Tabs, Runtime } from 'webextension-polyfill-ts'
+import type { WebRequest, Tabs, Runtime, Storage } from 'webextension-polyfill'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { PDFRemoteInterface } from './types'
 import { PDF_VIEWER_HTML } from '../constants'
 
 export class PDFBackground {
+    static OPEN_PDF_VIEWER_ONE_TIME_KEY =
+        '@PDFViewer-should_use_viewer_next_open'
+
     private routeViewer: string
     private _shouldOpen: boolean
-    private _shouldOpenOneTime: boolean
     remoteFunctions: PDFRemoteInterface
 
     constructor(
         private deps: {
             tabsAPI: Pick<Tabs.Static, 'update'>
+            storageAPI: Pick<Storage.Static, 'local'>
             runtimeAPI: Pick<Runtime.Static, 'getURL'>
             webRequestAPI: Pick<
                 WebRequest.Static,
@@ -24,24 +27,33 @@ export class PDFBackground {
         this.remoteFunctions = {
             refreshSetting: this.refreshSetting,
             openPdfViewerForNextPdf: async () => {
-                this._shouldOpenOneTime = true
+                await deps.storageAPI.local.set({
+                    [PDFBackground.OPEN_PDF_VIEWER_ONE_TIME_KEY]: true,
+                })
             },
             doNotOpenPdfViewerForNextPdf: async () => {
-                this._shouldOpenOneTime = false
+                await deps.storageAPI.local.set({
+                    [PDFBackground.OPEN_PDF_VIEWER_ONE_TIME_KEY]: false,
+                })
             },
         }
     }
 
-    private get shouldOpen(): boolean {
-        if (this._shouldOpenOneTime === true) {
-            this._shouldOpenOneTime = null
-            return true
+    private async shouldOpenPDFViewer(): Promise<boolean | null> {
+        const { storageAPI } = this.deps
+        const {
+            [PDFBackground.OPEN_PDF_VIEWER_ONE_TIME_KEY]: shouldOpenOneTime,
+        } = await storageAPI.local.get(
+            PDFBackground.OPEN_PDF_VIEWER_ONE_TIME_KEY,
+        )
+
+        if (shouldOpenOneTime != null) {
+            await storageAPI.local.set({
+                [PDFBackground.OPEN_PDF_VIEWER_ONE_TIME_KEY]: null,
+            })
+            return shouldOpenOneTime
         }
 
-        if (this._shouldOpenOneTime === false) {
-            this._shouldOpenOneTime = null
-            return false
-        }
         return this._shouldOpen
     }
 
@@ -65,27 +77,25 @@ export class PDFBackground {
         return { redirectUrl: url }
     }
 
-    private beforeRequestListener = (
+    private beforeRequestListener = async (
         details: WebRequest.OnBeforeRequestDetailsType,
     ) => {
         // only called for local files matching *.pdf
-        if (!this.shouldOpen || !details.url) {
-            this._shouldOpenOneTime = null
+        if (!details.url || !(await this.shouldOpenPDFViewer())) {
             return
         }
 
         return this.doRedirect(details.url, details.tabId)
     }
 
-    private headersReceivedListener = (
+    private headersReceivedListener = async (
         details: WebRequest.OnHeadersReceivedDetailsType,
     ) => {
-        if (!this.shouldOpen || !details.url) {
-            this._shouldOpenOneTime = null
-            return
-        }
-        if (!this.isPdfRequestForViewer(details)) {
-            this._shouldOpenOneTime = null
+        if (
+            !details.url ||
+            !(await this.shouldOpenPDFViewer()) ||
+            !this.isPdfRequestForViewer(details)
+        ) {
             return
         }
 

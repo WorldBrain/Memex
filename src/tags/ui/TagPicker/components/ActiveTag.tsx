@@ -3,7 +3,7 @@ import { fontSizeSmall } from 'src/common-ui/components/design-library/typograph
 
 export const ActiveTag = styled.div`
     align-items: center;
-    background: ${(props) => props.theme.colors.purple};
+    background: ${(props) => props.theme.colors.prime1};
     border-radius: 4px;
     color: white;
     font-size: ${fontSizeSmall}px;

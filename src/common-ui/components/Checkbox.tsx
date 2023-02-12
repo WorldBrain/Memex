@@ -22,6 +22,9 @@ export interface Props {
     labelClass?: string
     mode?: 'radio' | 'multiSelect'
     size?: number
+    label?: string
+    subLabel?: string
+    zIndex?: number
 }
 
 class Checkbox extends React.PureComponent<Props> {
@@ -40,35 +43,43 @@ class Checkbox extends React.PureComponent<Props> {
 
     render() {
         return (
-            <Container>
-                <LabelContainer htmlFor={this.props.id}>
-                    <InputContainer
-                        type="checkbox"
-                        checked={this.props.isChecked}
-                        onChange={this.props.handleChange}
-                        id={this.props.id}
-                        disabled={this.props.isDisabled}
-                        name={this.props.name}
-                    />
-                    <LabelText>
-                        <LabelCheck
-                            size={this.props.size}
-                            mode={this.props.mode}
-                            isChecked={this.props.isChecked}
-                        >
+            <LabelContainer zIndex={this.props.zIndex} htmlFor={this.props.id}>
+                <InputContainer
+                    type="checkbox"
+                    checked={this.props.isChecked}
+                    onChange={this.props.handleChange}
+                    id={this.props.id}
+                    disabled={this.props.isDisabled}
+                    name={this.props.name}
+                />
+                <LabelText>
+                    <LabelCheck
+                        size={this.props.size}
+                        mode={this.props.mode}
+                        isChecked={this.props.isChecked}
+                    >
+                        {this.props.isChecked && (
                             <Icon
                                 filePath={icons.check}
-                                color="white"
+                                color="black"
                                 heightAndWidth={'14px'}
                                 hoverOff
                             />
-                        </LabelCheck>
+                        )}
+                    </LabelCheck>
+                    {this.props.label && (
+                        <LabelContentBox>
+                            <LabelTitle>{this.props.label}</LabelTitle>
+                            <SubLabel>{this.props.subLabel}</SubLabel>
+                        </LabelContentBox>
+                    )}
+                    {this.props.children && (
                         <ChildrenBox mode={this.props.mode}>
                             {this.props.children}
                         </ChildrenBox>
-                    </LabelText>
-                </LabelContainer>
-            </Container>
+                    )}
+                </LabelText>
+            </LabelContainer>
         )
     }
 }
@@ -77,31 +88,53 @@ const Container = styled.div`
     cursor: pointer;
 `
 
+const LabelContentBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    margin-left: 10px;
+`
+const LabelTitle = styled.div`
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-weight: 300;
+    font-size: 14px;
+    white-space: nowrap;
+`
+
+const SubLabel = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-weight: 300;
+    font-size: 14px;
+    white-space: nowrap;
+`
+
 const ChildrenBox = styled.span<{ mode }>`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale1};
     border-radius: ${(props) => (props.mode === 'radio' ? '20px' : '3px')};
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
     cursor: pointer;
+    flex: 1;
 
     & * {
         cursor: pointer;
     }
 `
 
-const LabelContainer = styled.label`
+const LabelContainer = styled.label<{ zIndex?: number }>`
     display: flex;
     align-items: center;
     width: 100%;
     cursor: pointer;
+    z-index: ${(props) => props.zIndex};
 `
 
 const InputContainer = styled.input`
     display: none;
     padding: 2px;
-    border: 2px solid ${(props) => props.theme.colors.purple};
+    border: 2px solid ${(props) => props.theme.colors.black};
     cursor: pointer;
 `
 
@@ -111,19 +144,26 @@ const LabelText = styled.span`
     align-items: center;
     width: inherit;
     cursor: pointer;
+    width: fill-available;
+    height: fill-available;
 
     &:hover {
-        color: black;
+        color: ${(props) => props.theme.colors.black};
     }
 `
 
 const LabelCheck = styled.span<{ isChecked; mode; size }>`
-    border-radius: ${(props) => (props.mode === 'radio' ? '20px' : '3px')};
-    border: 2px solid ${(props) => props.theme.colors.purple}70;
+    border-radius: ${(props) => (props.mode === 'radio' ? '20px' : '5px')};
+    border: 2px solid
+        ${(props) =>
+            props.isChecked
+                ? props.theme.colors.white
+                : props.theme.colors.greyScale2};
     background: ${(props) =>
-        props.isChecked ? props.theme.colors.purple : 'white'};
+        props.isChecked
+            ? props.theme.colors.white
+            : props.theme.colors.greyScale2};
     vertical-align: middle;
-    margin-right: 15px;
     width: ${(props) => (props.size ? props.size + 'px' : '24px')};
     height: ${(props) => (props.size ? props.size + 'px' : '24px')};
     display: flex;

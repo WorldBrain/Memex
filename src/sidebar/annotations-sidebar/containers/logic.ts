@@ -1,5 +1,6 @@
 import fromPairs from 'lodash/fromPairs'
 import { isFullUrl, normalizeUrl } from '@worldbrain/memex-url-utils'
+import browser from 'webextension-polyfill'
 import {
     UILogic,
     UIEventHandler,
@@ -13,37 +14,58 @@ import {
     detectAnnotationConversationThreads,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/logic'
 import type { ConversationIdBuilder } from '@worldbrain/memex-common/lib/content-conversations/ui/types'
-import { Annotation } from 'src/annotations/types'
+import type { Annotation } from 'src/annotations/types'
 import type {
     SidebarContainerDependencies,
     SidebarContainerState,
     SidebarContainerEvents,
     EditForm,
-    EditForms,
-    FollowedListState,
+    AnnotationCardInstanceEvent,
 } from './types'
-import { AnnotationsSidebarInPageEventEmitter } from '../types'
+import type { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
-import { generateAnnotationUrl } from 'src/annotations/utils'
+import {
+    generateAnnotationUrl,
+    shareOptsToPrivacyLvl,
+} from 'src/annotations/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
-import { CachedAnnotation } from 'src/annotations/annotations-cache'
-import { initNormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import {
+    initNormalizedState,
+    normalizedStateToArray,
+} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
-import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { browser } from 'webextension-polyfill-ts'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
-import { getInitialAnnotationConversationStates } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import {
-    AnnotationPrivacyState,
-    AnnotationPrivacyLevels,
-} from '@worldbrain/memex-common/lib/annotations/types'
+    getInitialAnnotationConversationState,
+    getInitialAnnotationConversationStates,
+} from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { resolvablePromise } from 'src/util/promises'
+import type {
+    PageAnnotationsCacheInterface,
+    UnifiedAnnotation,
+    UnifiedList,
+} from 'src/annotations/cache/types'
+import * as cacheUtils from 'src/annotations/cache/utils'
+import {
+    createAnnotation,
+    updateAnnotation,
+} from 'src/annotations/annotation-save-logic'
+import {
+    generateAnnotationCardInstanceId,
+    initAnnotationCardInstance,
+    initListInstance,
+} from './utils'
+import type { AnnotationSharingState } from 'src/content-sharing/background/types'
+import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { SharedAnnotationList } from 'src/custom-lists/background/types'
+import { isUrlPDFViewerUrl } from 'src/pdf/util'
+import type { Storage } from 'webextension-polyfill'
+import throttle from 'lodash/throttle'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -54,25 +76,17 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     focusEditNoteForm: (annotationId: string) => void
     setLoginModalShown?: (isShown: boolean) => void
     setDisplayNameModalShown?: (isShown: boolean) => void
+    youtubePlayer?: YoutubePlayer
+    youtubeService?: YoutubeService
 }
 
 type EventHandler<
     EventName extends keyof SidebarContainerEvents
 > = UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
 
-const buildConversationId: ConversationIdBuilder = (
-    baseId,
-    sharedListReference,
-) =>
-    sharedListReference == null
-        ? baseId.toString()
-        : `${sharedListReference.id}:${baseId}`
-
 export const INIT_FORM_STATE: EditForm = {
     isBookmarked: false,
-    isTagInputActive: false,
     commentText: '',
-    tags: [],
     lists: [],
 }
 
@@ -83,6 +97,14 @@ export const createEditFormsForAnnotations = (annots: Annotation[]) => {
     }
     return state
 }
+
+const getAnnotCardInstanceId = <T = any>(
+    e: AnnotationCardInstanceEvent<T>,
+): string =>
+    generateAnnotationCardInstanceId(
+        { unifiedId: e.unifiedAnnotationId },
+        e.instanceLocation,
+    )
 
 export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
@@ -97,6 +119,9 @@ export class SidebarContainerLogic extends UILogic<
      */
     annotationsLoadComplete = resolvablePromise()
     syncSettings: SyncSettingsStore<'contentSharing' | 'extension'>
+    resizeObserver
+    sidebar
+    readingViewState
 
     constructor(private options: SidebarLogicOptions) {
         super()
@@ -110,12 +135,12 @@ export class SidebarContainerLogic extends UILogic<
             annotationConversationEventHandlers<SidebarContainerState>(
                 this as any,
                 {
-                    buildConversationId,
-                    loadUserByReference: options.auth.getUserByReference,
+                    buildConversationId: this.buildConversationId,
+                    loadUserByReference: options.authBG?.getUserByReference,
                     submitNewReply: options.contentConversationsBG.submitReply,
                     isAuthorizedToConverse: async () => true,
                     getCurrentUser: async () => {
-                        const user = await options.auth.getCurrentUser()
+                        const user = await options.authBG.getCurrentUser()
                         if (!user) {
                             return null
                         }
@@ -126,20 +151,17 @@ export class SidebarContainerLogic extends UILogic<
                         }
                     },
                     selectAnnotationData: (state, reference) => {
-                        const annotation =
-                            state.followedAnnotations[reference.id]
+                        const annotation = options.annotationsCache.getAnnotationByRemoteId(
+                            reference.id.toString(),
+                        )
                         if (!annotation) {
                             return null
                         }
                         return {
+                            pageCreatorReference: annotation.creator,
                             normalizedPageUrl: normalizeUrl(
-                                state.pageUrl ?? options.pageUrl,
+                                state.fullPageUrl ?? options.fullPageUrl,
                             ),
-
-                            pageCreatorReference: {
-                                id: annotation.creatorId,
-                                type: 'user-reference',
-                            },
                         }
                     },
                     getSharedAnnotationLinkID: ({ id }) =>
@@ -167,39 +189,39 @@ export class SidebarContainerLogic extends UILogic<
         return {
             ...annotationConversationInitialState(),
 
-            isExpanded: true,
-            isExpandedSharedSpaces: false,
-            sidebarWidth: '450px',
-            loadState: 'pristine',
-            noteCreateState: 'pristine',
-            annotationsLoadState: 'pristine',
-            secondarySearchState: 'pristine',
-            followedListLoadState: 'pristine',
+            activeTab: 'annotations',
 
-            followedLists: initNormalizedState(),
-            followedAnnotations: {},
+            cacheLoadState: this.options.shouldHydrateCacheOnInit
+                ? 'pristine'
+                : 'success',
+            loadState: 'running',
+            noteCreateState: 'pristine',
+            secondarySearchState: 'pristine',
+            remoteAnnotationsLoadState: 'pristine',
+            foreignSelectedListLoadState: 'pristine',
+
             users: {},
+            pillVisibility: 'unhover',
 
             isWidthLocked: false,
             isLocked: false,
-            pageUrl: this.options.pageUrl,
-            showState: this.options.initialState ?? 'hidden',
-            annotationModes: {
-                pageAnnotations: {},
-                searchResults: {},
-            },
+            fullPageUrl: this.options.fullPageUrl,
+            showState: 'hidden',
             annotationSharingAccess: 'sharing-allowed',
-
+            readingView: false,
             showAllNotesCopyPaster: false,
-            activeCopyPasterAnnotationId: undefined,
-            activeTagPickerAnnotationId: undefined,
-            activeListPickerAnnotationId: undefined,
+
+            selectedListId: null,
 
             commentBox: { ...INIT_FORM_STATE },
-            editForms: {},
 
-            annotations: [],
-            activeAnnotationUrl: null,
+            listInstances: {},
+            annotationCardInstances: {},
+
+            annotations: initNormalizedState(),
+            lists: initNormalizedState(),
+
+            activeAnnotationId: null, // TODO: make unified ID
 
             showCommentBox: false,
             showCongratsMessage: false,
@@ -223,100 +245,317 @@ export class SidebarContainerLogic extends UILogic<
             showLoginModal: false,
             showDisplayNameSetupModal: false,
             showAnnotationsShareModal: false,
+            popoutsActive: false,
             showAllNotesShareMenu: false,
             activeShareMenuNoteId: undefined,
             immediatelyShareNotes: false,
+            pageHasNetworkAnnotations: false,
         }
     }
 
-    init: EventHandler<'init'> = async ({ previousState }) => {
-        const { pageUrl, annotationsCache } = this.options
-        annotationsCache.annotationChanges.addListener(
-            'newStateIntent',
-            this.annotationSubscription,
+    private buildConversationId: ConversationIdBuilder = (
+        remoteAnnotId,
+        { id: remoteListId },
+    ) => {
+        const { annotationsCache } = this.options
+        const cachedAnnotation = annotationsCache.getAnnotationByRemoteId(
+            remoteAnnotId.toString(),
+        )
+        const cachedList = annotationsCache.getListByRemoteId(
+            remoteListId.toString(),
         )
 
-        const sidebarInitialWidth = await getLocalStorage(
-            SIDEBAR_WIDTH_STORAGE_KEY,
+        return generateAnnotationCardInstanceId(
+            cachedAnnotation,
+            cachedList.unifiedId,
         )
-        if (sidebarInitialWidth == null) {
-            await setLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY, '450px')
+    }
+
+    private async hydrateAnnotationsCache(
+        fullPageUrl: string,
+        opts: { renderHighlights: boolean },
+    ) {
+        await executeUITask(this, 'cacheLoadState', async () => {
+            await cacheUtils.hydrateCache({
+                fullPageUrl,
+                user: this.options.currentUser,
+                cache: this.options.annotationsCache,
+                bgModules: {
+                    customLists: this.options.customListsBG,
+                    annotations: this.options.annotationsBG,
+                    contentSharing: this.options.contentSharingBG,
+                    pageActivityIndicator: this.options.pageActivityIndicatorBG,
+                },
+            })
+        })
+
+        if (opts.renderHighlights) {
+            this.renderOwnHighlights(this.options.annotationsCache)
         }
+    }
+
+    private renderOwnHighlights = ({
+        annotations,
+    }: Pick<SidebarContainerState, 'annotations'>) => {
+        const highlights = cacheUtils.getUserHighlightsArray(
+            { annotations },
+            this.options.currentUser?.id.toString(),
+        )
+        this.options.events?.emit('renderHighlights', {
+            highlights,
+        })
+    }
+
+    private renderOpenSpaceInstanceHighlights = ({
+        annotations,
+        listInstances,
+        lists,
+    }: Pick<
+        SidebarContainerState,
+        'annotations' | 'lists' | 'listInstances'
+    >) => {
+        const highlights = Object.values(listInstances)
+            .filter((instance) => instance.isOpen)
+            .map(
+                (instance) =>
+                    lists.byId[instance.unifiedListId]?.unifiedAnnotationIds ??
+                    [],
+            )
+            .flat()
+            .map((unifiedAnnotId) => annotations.byId[unifiedAnnotId])
+            .filter((annot) => annot.body?.length > 0 && annot.selector != null)
+
+        this.options.events?.emit('renderHighlights', {
+            highlights,
+        })
+    }
+
+    init: EventHandler<'init'> = async ({ previousState }) => {
+        const {
+            shouldHydrateCacheOnInit,
+            pageActivityIndicatorBG,
+            annotationsCache,
+            initialState,
+            fullPageUrl,
+            storageAPI,
+            runtimeAPI,
+        } = this.options
+        annotationsCache.events.addListener(
+            'newAnnotationsState',
+            this.cacheAnnotationsSubscription,
+        )
+        annotationsCache.events.addListener(
+            'newListsState',
+            this.cacheListsSubscription,
+        )
 
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
-        this.annotationSubscription(annotationsCache.annotations)
+        this.cacheAnnotationsSubscription(annotationsCache.annotations)
+        this.cacheListsSubscription(annotationsCache.lists)
+        this.sidebar = document
+            .getElementById('memex-sidebar-container')
+            ?.shadowRoot.getElementById('annotationSidebarContainer')
+        this.readingViewState =
+            (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
+        // this.readingViewStorageListener(true)
 
         await loadInitial<SidebarContainerState>(this, async () => {
-            const areTagsMigrated = await this.syncSettings.extension.get(
-                'areTagsMigratedToSpaces',
-            )
-            this.emitMutation({ shouldShowTagsUIs: { $set: !areTagsMigrated } })
+            this.emitMutation({
+                showState: { $set: initialState ?? 'hidden' },
+                loadState: { $set: 'running' },
+            })
 
-            // If `pageUrl` prop passed down, load search results on init, else just wait
-            if (pageUrl != null) {
-                await annotationsCache.load(pageUrl)
+            if (initialState === 'visible') {
+                this.readingViewStorageListener(true)
+            }
+
+            if (shouldHydrateCacheOnInit && fullPageUrl != null) {
+                const hasNetworkActivity = await pageActivityIndicatorBG.getPageActivityStatus(
+                    fullPageUrl,
+                )
+                this.emitMutation({
+                    pageHasNetworkAnnotations: {
+                        $set: hasNetworkActivity !== 'no-activity',
+                    },
+                })
+                await this.hydrateAnnotationsCache(fullPageUrl, {
+                    renderHighlights: true,
+                })
             }
         })
         this.annotationsLoadComplete.resolve()
 
-        // load followed lists
-        if (
-            previousState.followedListLoadState === 'pristine' &&
-            pageUrl != null
-        ) {
-            await this.processUIEvent('loadFollowedLists', {
-                previousState,
-                event: null,
+        if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
+            const width = SIDEBAR_WIDTH_STORAGE_KEY
+
+            this.emitMutation({
+                showState: { $set: 'visible' },
+                sidebarWidth: { $set: width },
             })
+
+            setTimeout(async () => {
+                await storageAPI.local.set({
+                    '@Sidebar-reading_view': true,
+                })
+            }, 1000)
         }
     }
 
     cleanup = () => {
-        this.options.annotationsCache.annotationChanges.removeListener(
-            'newStateIntent',
-            this.annotationSubscription,
+        this.options.annotationsCache.events.removeListener(
+            'newAnnotationsState',
+            this.cacheAnnotationsSubscription,
+        )
+        this.options.annotationsCache.events.removeListener(
+            'newListsState',
+            this.cacheListsSubscription,
         )
     }
 
-    private annotationSubscription = (nextAnnotations: CachedAnnotation[]) => {
-        const mutation: UIMutation<SidebarContainerState> = {
+    private cacheListsSubscription = (
+        nextLists: PageAnnotationsCacheInterface['lists'],
+    ) => {
+        this.emitMutation({
+            lists: { $set: nextLists },
+            listInstances: {
+                $set: fromPairs(
+                    normalizedStateToArray(nextLists).map((list) => [
+                        list.unifiedId,
+                        initListInstance(list),
+                    ]),
+                ),
+            },
+        })
+    }
+
+    private cacheAnnotationsSubscription = (
+        nextAnnotations: PageAnnotationsCacheInterface['annotations'],
+    ) => {
+        this.emitMutation({
             noteCreateState: { $set: 'success' },
-            annotations: {
-                $set: nextAnnotations,
+            annotations: { $set: nextAnnotations },
+            annotationCardInstances: {
+                $apply: (
+                    prev: SidebarContainerState['annotationCardInstances'],
+                ) =>
+                    fromPairs(
+                        normalizedStateToArray(nextAnnotations)
+                            .map((annot) => {
+                                const cardIdForMyAnnotsTab = generateAnnotationCardInstanceId(
+                                    annot,
+                                )
+
+                                return [
+                                    ...annot.unifiedListIds
+                                        // Don't create annot card instances for foreign lists (won't show up in spaces tab)
+                                        .filter(
+                                            (unifiedListId) =>
+                                                !this.options.annotationsCache
+                                                    .lists.byId[unifiedListId]
+                                                    ?.isForeignList,
+                                        )
+                                        .map((unifiedListId) => {
+                                            const cardIdForListInstance = generateAnnotationCardInstanceId(
+                                                annot,
+                                                unifiedListId,
+                                            )
+
+                                            return [
+                                                cardIdForListInstance,
+                                                prev[cardIdForListInstance] ??
+                                                    initAnnotationCardInstance(
+                                                        annot,
+                                                    ),
+                                            ]
+                                        }),
+                                    [
+                                        cardIdForMyAnnotsTab,
+                                        prev[cardIdForMyAnnotsTab] ??
+                                            initAnnotationCardInstance(annot),
+                                    ],
+                                ]
+                            })
+                            .flat(),
+                    ),
             },
-            editForms: {
-                $apply: (editForms: EditForms) => {
-                    for (const { url } of nextAnnotations) {
-                        if (editForms[url] == null) {
-                            editForms[url] = { ...INIT_FORM_STATE }
-                        }
-                    }
-                    return editForms
-                },
-            },
+        })
+    }
+
+    private readingViewStorageListener = async (enable: boolean) => {
+        this.resizeObserver = new ResizeObserver(this.debounceReadingWidth)
+
+        if (this.readingViewState['@Sidebar-reading_view']) {
+            this.emitMutation({
+                readingView: { $set: true },
+            })
+            this.resizeObserver.observe(this.sidebar)
+            window.addEventListener('resize', this.debounceReadingWidth)
+            this.setReadingWidth()
         }
 
-        this.emitMutation(mutation)
+        const { storageAPI } = this.options
+        if (enable) {
+            storageAPI.onChanged.addListener(this.toggleReadingView)
+        } else {
+            storageAPI.onChanged.removeListener(this.toggleReadingView)
+            this.resizeObserver.disconnect()
+        }
+    }
+
+    private debounceReadingWidth = throttle(this.setReadingWidth.bind(this), 50)
+
+    private toggleReadingView = (changes: Storage.StorageChange) => {
+        for (let key of Object.entries(changes)) {
+            if (key[0] === '@Sidebar-reading_view') {
+                this.emitMutation({
+                    readingView: { $set: key[1].newValue },
+                })
+                if (key[1].newValue) {
+                    this.setReadingWidth()
+                    this.resizeObserver.observe(this.sidebar)
+                    window.addEventListener('resize', this.debounceReadingWidth)
+                } else {
+                    document.body.style.width = 'initial'
+                    this.resizeObserver.disconnect()
+                    window.removeEventListener(
+                        'resize',
+                        this.debounceReadingWidth,
+                    )
+                }
+            }
+        }
+    }
+
+    private setReadingWidth() {
+        const sidebar = this.sidebar
+        let currentsidebarWidth = sidebar.offsetWidth
+        let currentWindowWidth = window.innerWidth
+        let readingWidth = currentWindowWidth - currentsidebarWidth - 50 + 'px'
+        document.body.style.width = readingWidth
     }
 
     sortAnnotations: EventHandler<'sortAnnotations'> = ({
         event: { sortingFn },
-    }) => this.options.annotationsCache.sort(sortingFn)
+    }) => this.options.annotationsCache.sortAnnotations(sortingFn)
 
     private async ensureLoggedIn(): Promise<boolean> {
         const {
-            auth,
+            authBG,
             setLoginModalShown,
             setDisplayNameModalShown,
         } = this.options
 
-        const user = await auth.getCurrentUser()
+        const user = await authBG.getCurrentUser()
         if (user != null) {
-            const userProfile = await auth.getUserProfile()
-            if (!userProfile?.displayName?.length) {
-                setDisplayNameModalShown?.(true)
-                this.emitMutation({ showDisplayNameSetupModal: { $set: true } })
-                return false
+            if (!user.displayName?.length) {
+                const userProfile = await authBG.getUserProfile()
+                if (!userProfile?.displayName?.length) {
+                    setDisplayNameModalShown?.(true)
+                    this.emitMutation({
+                        showDisplayNameSetupModal: { $set: true },
+                    })
+                    return false
+                }
             }
 
             setLoginModalShown?.(false)
@@ -332,28 +571,46 @@ export class SidebarContainerLogic extends UILogic<
         return false
     }
 
-    adjustSidebarWidth = (changes) => {
-        let SidebarWidth = changes[SIDEBAR_WIDTH_STORAGE_KEY].newValue.replace(
-            'px',
-            '',
-        )
-        SidebarWidth = parseFloat(SidebarWidth)
-        let windowWidth = window.innerWidth
-        let width = (windowWidth - SidebarWidth - 40).toString()
-        width = width + 'px'
-        document.body.style.width = width
+    adjustSidebarWidth: EventHandler<'adjustSidebarWidth'> = ({ event }) => {
+        this.emitMutation({ sidebarWidth: { $set: event.newWidth } })
+
+        // if (event.isWidthLocked) {
+        //     let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)
+        //     let windowWidth = window.innerWidth
+        //     let width = (windowWidth - sidebarWidth).toString()
+        //     width = width + 'px'
+        //     document.body.style.width = width
+        // }
     }
 
-    show: EventHandler<'show'> = async () => {
-        this.emitMutation({ showState: { $set: 'visible' } })
+    setPopoutsActive: EventHandler<'setPopoutsActive'> = async ({ event }) => {
+        this.emitMutation({
+            popoutsActive: { $set: event },
+        })
     }
 
-    hide: EventHandler<'hide'> = () => {
+    show: EventHandler<'show'> = async ({ event }) => {
+        this.readingViewStorageListener(true)
+        const width =
+            event.existingWidthState != null
+                ? event.existingWidthState
+                : SIDEBAR_WIDTH_STORAGE_KEY
+
+        this.emitMutation({
+            showState: { $set: 'visible' },
+            sidebarWidth: { $set: width },
+        })
+    }
+
+    hide: EventHandler<'hide'> = ({ event, previousState }) => {
+        this.readingViewStorageListener(false)
         this.emitMutation({
             showState: { $set: 'hidden' },
-            activeAnnotationUrl: { $set: null },
+            activeAnnotationId: { $set: null },
+            readingView: { $set: false },
         })
-        document.body.style.width = window.innerWidth.toString() + 'px'
+
+        document.body.style.width = 'initial'
     }
 
     lock: EventHandler<'lock'> = () =>
@@ -362,24 +619,12 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ isLocked: { $set: false } })
 
     lockWidth: EventHandler<'lockWidth'> = () => {
-        getLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY).then((width) => {
-            let SidebarInitialAsInteger = parseFloat(
-                width.toString().replace('px', ''),
-            )
-            let WindowInitialWidth =
-                (window.innerWidth - SidebarInitialAsInteger - 40).toString() +
-                'px'
-            document.body.style.width = WindowInitialWidth
-        })
-
-        browser.storage.onChanged.addListener(this.adjustSidebarWidth)
-
+        // getLocalStorage(SIDEBAR_WIDTH_STORAGE_KEY).then((width) => {
         this.emitMutation({ isWidthLocked: { $set: true } })
     }
 
     unlockWidth: EventHandler<'unlockWidth'> = () => {
-        document.body.style.width = window.innerWidth.toString() + 'px'
-        browser.storage.onChanged.removeListener(this.adjustSidebarWidth)
+        document.body.style.width = '100%'
         this.emitMutation({ isWidthLocked: { $set: false } })
     }
 
@@ -405,6 +650,14 @@ export class SidebarContainerLogic extends UILogic<
         await this.options.copyToClipboard(link)
     }
 
+    setPillVisibility: EventHandler<'setPillVisibility'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            pillVisibility: { $set: event.value },
+        })
+    }
+
     paginateSearch: EventHandler<'paginateSearch'> = async ({
         previousState,
     }) => {
@@ -427,59 +680,40 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        const { annotationsCache, events } = this.options
-
-        if (!isFullUrl(event.pageUrl)) {
+        if (!isFullUrl(event.fullPageUrl)) {
             throw new Error(
                 'Tried to set annotation sidebar with a normalized page URL',
             )
         }
 
-        if (previousState.pageUrl === event.pageUrl) {
+        const hasNetworkActivity = await this.options.pageActivityIndicatorBG.getPageActivityStatus(
+            event.fullPageUrl,
+        )
+
+        this.emitMutation({
+            pageHasNetworkAnnotations: {
+                $set: hasNetworkActivity != 'no-activity',
+            },
+        })
+
+        if (previousState.fullPageUrl === event.fullPageUrl) {
             return
         }
 
         const mutation: UIMutation<SidebarContainerState> = {
-            followedLists: { $set: initNormalizedState() },
-            followedListLoadState: { $set: 'pristine' },
-            followedAnnotations: { $set: {} },
-            pageUrl: { $set: event.pageUrl },
-            users: { $set: {} },
+            fullPageUrl: { $set: event.fullPageUrl },
         }
 
         this.emitMutation(mutation)
+        await this.hydrateAnnotationsCache(event.fullPageUrl, {
+            renderHighlights: event.rerenderHighlights,
+        })
 
-        await Promise.all([
-            executeUITask(this, 'annotationsLoadState', async () => {
-                await annotationsCache.load(event.pageUrl)
-            }),
-            this.processUIEvent('loadFollowedLists', {
-                previousState: this.withMutation(previousState, mutation),
-                event: null,
-            }),
-        ])
-
-        if (event.rerenderHighlights) {
-            events?.emit('renderHighlights', {
-                highlights: annotationsCache.highlights,
-            })
+        if (previousState.activeTab === 'spaces') {
+            await this.loadRemoteAnnototationReferencesForCachedLists(
+                previousState,
+            )
         }
-    }
-
-    resetShareMenuNoteId: EventHandler<'resetShareMenuNoteId'> = ({
-        previousState,
-    }) => {
-        let mutation: UIMutation<SidebarContainerState> = {
-            activeShareMenuNoteId: { $set: undefined },
-            immediatelyShareNotes: { $set: false },
-            confirmPrivatizeNoteArgs: { $set: null },
-            confirmSelectNoteSpaceArgs: { $set: null },
-            ...this.applyStateMutationForAllFollowedLists(previousState, {
-                activeShareMenuAnnotationId: { $set: undefined },
-            }),
-        }
-
-        this.emitMutation(mutation)
     }
 
     setAllNotesShareMenuShown: EventHandler<
@@ -509,96 +743,6 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({
             showAllNotesCopyPaster: { $set: event.shown },
-            activeCopyPasterAnnotationId: { $set: undefined },
-        })
-    }
-
-    setCopyPasterAnnotationId: EventHandler<'setCopyPasterAnnotationId'> = ({
-        event,
-        previousState,
-    }) => {
-        if (event.followedListId != null) {
-            const newId =
-                previousState.followedLists.byId[event.followedListId]
-                    ?.activeCopyPasterAnnotationId === event.id
-                    ? undefined
-                    : event.id
-
-            this.emitMutation({
-                activeCopyPasterAnnotationId: { $set: undefined },
-                showAllNotesCopyPaster: { $set: false },
-                followedLists: {
-                    byId: {
-                        [event.followedListId]: {
-                            activeCopyPasterAnnotationId: { $set: newId },
-                        },
-                    },
-                },
-            })
-            return
-        }
-
-        const newId =
-            previousState.activeCopyPasterAnnotationId === event.id
-                ? undefined
-                : event.id
-
-        this.emitMutation({
-            activeCopyPasterAnnotationId: { $set: newId },
-            showAllNotesCopyPaster: { $set: false },
-        })
-    }
-
-    setTagPickerAnnotationId: EventHandler<'setTagPickerAnnotationId'> = ({
-        event,
-        previousState,
-    }) => {
-        const newId =
-            previousState.activeTagPickerAnnotationId === event.id
-                ? undefined
-                : event.id
-
-        this.emitMutation({
-            activeTagPickerAnnotationId: { $set: newId },
-        })
-    }
-
-    resetTagPickerAnnotationId: EventHandler<
-        'resetTagPickerAnnotationId'
-    > = () => {
-        this.emitMutation({ activeTagPickerAnnotationId: { $set: undefined } })
-    }
-
-    setListPickerAnnotationId: EventHandler<'setListPickerAnnotationId'> = ({
-        event,
-        previousState,
-    }) => {
-        if (event.followedListId != null) {
-            const newId =
-                previousState.followedLists.byId[event.followedListId]
-                    ?.activeListPickerAnnotationId === event.id
-                    ? undefined
-                    : event.id
-
-            this.emitMutation({
-                activeListPickerAnnotationId: { $set: undefined },
-                followedLists: {
-                    byId: {
-                        [event.followedListId]: {
-                            activeListPickerAnnotationId: { $set: newId },
-                        },
-                    },
-                },
-            })
-            return
-        }
-
-        const newId =
-            previousState.activeListPickerAnnotationId === event.id
-                ? undefined
-                : event.id
-        this.emitMutation({
-            activeListPickerAnnotationId: { $set: newId },
         })
     }
 
@@ -607,101 +751,151 @@ export class SidebarContainerLogic extends UILogic<
         previousState: SidebarContainerState,
         mutation: UIMutation<any>,
     ): UIMutation<any> => ({
-        followedLists: {
-            byId: previousState.followedLists.allIds.reduce(
-                (acc, listId) => ({
-                    ...acc,
-                    [listId]: { ...mutation },
-                }),
-                {},
-            ),
-        },
+        // followedLists: {
+        //     byId: previousState.followedLists.allIds.reduce(
+        //         (acc, listId) => ({
+        //             ...acc,
+        //             [listId]: { ...mutation },
+        //         }),
+        //         {},
+        //     ),
+        // },
     })
 
-    resetListPickerAnnotationId: EventHandler<
-        'resetListPickerAnnotationId'
-    > = ({ event, previousState }) => {
-        if (event.id != null) {
-            this.options.focusEditNoteForm(event.id)
-        }
-
-        this.emitMutation({
-            activeListPickerAnnotationId: { $set: undefined },
-            ...this.applyStateMutationForAllFollowedLists(previousState, {
-                activeListPickerAnnotationId: { $set: undefined },
-            }),
-        })
-    }
-
-    resetCopyPasterAnnotationId: EventHandler<
-        'resetCopyPasterAnnotationId'
-    > = ({ previousState }) => {
-        this.emitMutation({
-            showAllNotesCopyPaster: { $set: false },
-            activeCopyPasterAnnotationId: { $set: undefined },
-            ...this.applyStateMutationForAllFollowedLists(previousState, {
-                activeCopyPasterAnnotationId: { $set: undefined },
-            }),
-        })
-    }
-
-    addNewPageComment: EventHandler<'addNewPageComment'> = async ({
+    /* -- START: Annotation card instance events -- */
+    setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
         event,
     }) => {
-        const mutation: UIMutation<SidebarContainerState> = {
-            showCommentBox: { $set: true },
-        }
-
-        if (event.comment?.length) {
-            mutation.commentBox = {
-                ...mutation.commentBox,
-                commentText: { $set: event.comment },
-            }
-        }
-
-        if (event.tags?.length) {
-            mutation.commentBox = {
-                ...mutation.commentBox,
-                tags: { $set: event.tags },
-            }
-        }
-
-        this.emitMutation(mutation)
-        this.options.focusCreateForm()
-    }
-
-    cancelEdit: EventHandler<'cancelEdit'> = ({ event, previousState }) => {
         this.emitMutation({
-            annotationModes: {
-                pageAnnotations: {
-                    [event.annotationUrl]: { $set: 'default' },
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    isCommentEditing: { $set: event.isEditing },
                 },
             },
-            ...this.applyStateMutationForAllFollowedLists(previousState, {
-                annotationModes: {
-                    [event.annotationUrl]: { $set: 'default' },
-                },
-            }),
         })
     }
 
-    changeEditCommentText: EventHandler<'changeEditCommentText'> = ({
-        event,
-    }) => {
+    setAnnotationEditCommentText: EventHandler<
+        'setAnnotationEditCommentText'
+    > = ({ event }) => {
         this.emitMutation({
-            editForms: {
-                [event.annotationUrl]: { commentText: { $set: event.comment } },
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    comment: { $set: event.comment },
+                },
             },
         })
     }
 
-    changeNewPageCommentText: EventHandler<'changeNewPageCommentText'> = ({
+    setAnnotationCommentMode: EventHandler<'setAnnotationCommentMode'> = ({
         event,
     }) => {
         this.emitMutation({
-            commentBox: { commentText: { $set: event.comment } },
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    isCommentTruncated: { $set: event.isTruncated },
+                },
+            },
         })
     }
+
+    setAnnotationCardMode: EventHandler<'setAnnotationCardMode'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    cardMode: { $set: event.mode },
+                },
+            },
+        })
+    }
+
+    editAnnotation: EventHandler<'editAnnotation'> = async ({
+        event,
+        previousState,
+    }) => {
+        const cardId = getAnnotCardInstanceId(event)
+        const {
+            annotationCardInstances: { [cardId]: formData },
+            annotations: {
+                byId: { [event.unifiedAnnotationId]: annotationData },
+            },
+        } = previousState
+
+        if (
+            !formData ||
+            annotationData?.creator?.id !== this.options.currentUser?.id ||
+            (event.shouldShare && !(await this.ensureLoggedIn()))
+        ) {
+            return
+        }
+
+        const now = event.now ?? Date.now()
+        const comment = formData.comment.trim()
+        const hasCoreAnnotChanged = comment !== annotationData.comment
+
+        // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
+        // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
+        //  to make a SAS annotation private protected upon save btn press
+        // TODO: properly update lists state
+        // existing.lists = event.mainBtnPressed
+        //     ? existing.lists
+        //     : this.getAnnotListsAfterShareStateChange({
+        //           previousState,
+        //           annotationIndex,
+        //           keepListsIfUnsharing: event.keepListsIfUnsharing,
+        //           incomingPrivacyState: {
+        //               public: event.shouldShare,
+        //               protected: !!event.isProtected,
+        //           },
+        //       })
+
+        this.emitMutation({
+            annotationCardInstances: {
+                [cardId]: {
+                    isCommentEditing: { $set: false },
+                },
+            },
+            confirmPrivatizeNoteArgs: {
+                $set: null,
+            },
+        })
+
+        const { remoteAnnotationId, savePromise } = await updateAnnotation({
+            annotationsBG: this.options.annotationsBG,
+            contentSharingBG: this.options.contentSharingBG,
+            keepListsIfUnsharing: event.keepListsIfUnsharing,
+            annotationData: {
+                comment: comment !== annotationData.comment ? comment : null,
+                localId: annotationData.localId,
+            },
+            shareOpts: {
+                shouldShare: event.shouldShare,
+                shouldCopyShareLink: event.shouldShare,
+                isBulkShareProtected:
+                    event.isProtected || !!event.keepListsIfUnsharing,
+                skipPrivacyLevelUpdate: event.mainBtnPressed,
+            },
+        })
+
+        this.options.annotationsCache.updateAnnotation(
+            {
+                ...annotationData,
+                comment,
+                remoteId: remoteAnnotationId ?? undefined,
+                privacyLevel: shareOptsToPrivacyLvl({
+                    shouldShare: event.shouldShare,
+                    isBulkShareProtected:
+                        event.isProtected || !!event.keepListsIfUnsharing,
+                }),
+            },
+            { updateLastEditedTimestamp: hasCoreAnnotChanged, now },
+        )
+
+        await savePromise
+    }
+    /* -- END: Annotation card instance events -- */
 
     receiveSharingAccessChange: EventHandler<'receiveSharingAccessChange'> = ({
         event: { sharingAccess },
@@ -709,19 +903,50 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ annotationSharingAccess: { $set: sharingAccess } })
     }
 
-    saveNewPageComment: EventHandler<'saveNewPageComment'> = async ({
+    cancelNewPageNote: EventHandler<'cancelNewPageNote'> = () => {
+        this.emitMutation({
+            commentBox: { $set: INIT_FORM_STATE },
+            showCommentBox: { $set: false },
+        })
+    }
+
+    setNewPageNoteText: EventHandler<'setNewPageNoteText'> = async ({
+        event,
+    }) => {
+        if (event.comment.length) {
+            this.emitMutation({
+                showCommentBox: { $set: true },
+                commentBox: {
+                    commentText: { $set: event.comment },
+                },
+            })
+        }
+
+        this.options.focusCreateForm()
+    }
+
+    saveNewPageNote: EventHandler<'saveNewPageNote'> = async ({
         event,
         previousState,
     }) => {
-        const { commentBox, pageUrl } = previousState
+        const {
+            lists,
+            commentBox,
+            fullPageUrl,
+            selectedListId,
+            activeTab,
+        } = previousState
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
             return
         }
-        const annotationUrl = generateAnnotationUrl({
-            pageUrl,
-            now: () => Date.now(),
-        })
+        const now = event.now ?? Date.now()
+        const annotationId =
+            event.annotationId ??
+            generateAnnotationUrl({
+                pageUrl: fullPageUrl,
+                now: () => now,
+            })
 
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },
@@ -733,531 +958,235 @@ export class SidebarContainerLogic extends UILogic<
                 return
             }
 
-            const nextAnnotation = await this.options.annotationsCache.create(
-                {
-                    url: annotationUrl,
-                    pageUrl,
+            const localListIds = [...commentBox.lists]
+            const maybeAddLocalListIdForCacheList = (
+                unifiedListId?: UnifiedList['unifiedId'],
+            ) => {
+                if (unifiedListId != null) {
+                    const { localId } = lists.byId[unifiedListId]
+                    if (localId != null) {
+                        localListIds.push(localId)
+                    }
+                }
+            }
+            // Adding a new annot in selected space mode should only work on the "Spaces" tab
+            if (activeTab === 'spaces') {
+                maybeAddLocalListIdForCacheList(selectedListId)
+            }
+            maybeAddLocalListIdForCacheList(event.listInstanceId)
+
+            const { remoteAnnotationId, savePromise } = await createAnnotation({
+                annotationData: {
                     comment,
-                    tags: [...commentBox.tags],
-                    lists: [...commentBox.lists],
+                    fullPageUrl,
+                    localListIds,
+                    localId: annotationId,
+                    createdWhen: new Date(now),
                 },
-                {
+                annotationsBG: this.options.annotationsBG,
+                contentSharingBG: this.options.contentSharingBG,
+                shareOpts: {
                     shouldShare: event.shouldShare,
                     shouldCopyShareLink: event.shouldShare,
                     isBulkShareProtected: event.isProtected,
                 },
-            )
-            // check if annotation has lists with remoteId and reload them
-            // for (const listName of nextAnnotation.lists) {
-            //     const list = await this.options.customLists.fetchListByName({
-            //         name: listName,
-            //     })
-            //     if (list.remoteId) {
-            //         // Want to update the list with the new page comment / note, the following isn't enough though
-            //         // await this.processUIEvent('loadFollowedLists', {
-            //         //     previousState: previousState,
-            //         //     event: null,
-            //         // })
-            //     }
-            // }
-        })
-    }
+            })
 
-    cancelNewPageComment: EventHandler<'cancelNewPageComment'> = () => {
-        this.emitMutation({
-            commentBox: { $set: INIT_FORM_STATE },
-            showCommentBox: { $set: false },
-        })
-    }
+            this.options.annotationsCache.addAnnotation({
+                localId: annotationId,
+                remoteId: remoteAnnotationId ?? undefined,
+                normalizedPageUrl: normalizeUrl(fullPageUrl),
+                privacyLevel: shareOptsToPrivacyLvl({
+                    shouldShare: event.shouldShare,
+                    isBulkShareProtected: event.isProtected,
+                }),
+                creator: this.options.currentUser,
+                createdWhen: now,
+                lastEdited: now,
+                localListIds,
+                comment,
+            })
 
-    private createTagsStateUpdater = (args: {
-        added?: string
-        deleted?: string
-    }): ((tags: string[]) => string[]) => {
-        if (args.added) {
-            return (tags) => {
-                const tag = args.added
-                return tags.includes(tag) ? tags : [...tags, tag]
-            }
-        }
-
-        return (tags) => {
-            const index = tags.indexOf(args.deleted)
-            if (index === -1) {
-                return tags
-            }
-
-            return [...tags.slice(0, index), ...tags.slice(index + 1)]
-        }
-    }
-
-    updateTagsForEdit: EventHandler<'updateTagsForEdit'> = async ({
-        event,
-    }) => {
-        const tagsStateUpdater = this.createTagsStateUpdater(event)
-
-        this.emitMutation({
-            editForms: {
-                [event.annotationUrl]: { tags: { $apply: tagsStateUpdater } },
-            },
+            await savePromise
         })
     }
 
     updateListsForAnnotation: EventHandler<
         'updateListsForAnnotation'
-    > = async ({ event, previousState }) => {
+    > = async ({ event }) => {
+        const { annotationsCache, contentSharingBG } = this.options
         this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
-        this.updateAnnotationFollowedLists(event.annotationId, previousState, {
-            add: event.added != null ? [event.added] : [],
-            remove: event.deleted != null ? [event.deleted] : [],
-        })
+        const existing =
+            annotationsCache.annotations.byId[event.unifiedAnnotationId]
+        if (!existing) {
+            console.warn(
+                "Attempted to update lists for annotation that isn't cached:",
+                event,
+                annotationsCache,
+            )
+            return
+        }
+        if (!existing.localId) {
+            console.warn(
+                `Attempted to update lists for annotation that isn't owned:`,
+                event,
+                annotationsCache,
+            )
+            return
+        }
 
-        await this.options.annotationsCache.updateLists({
-            annotationId: event.annotationId,
-            options: event.options,
-            deleted: event.deleted,
-            added: event.added,
-        })
-    }
+        const unifiedListIds = new Set(existing.unifiedListIds)
+        let bgPromise: Promise<{ sharingState: AnnotationSharingState }>
+        if (event.added != null) {
+            const cacheListId = annotationsCache.getListByLocalId(event.added)
+                ?.unifiedId
+            unifiedListIds.add(cacheListId)
+            bgPromise = contentSharingBG.shareAnnotationToSomeLists({
+                annotationUrl: existing.localId,
+                localListIds: [event.added],
+                protectAnnotation: event.options?.protectAnnotation,
+            })
+        } else if (event.deleted != null) {
+            const cacheListId = annotationsCache.getListByLocalId(event.deleted)
+                ?.unifiedId
+            unifiedListIds.delete(cacheListId)
+            bgPromise = contentSharingBG.unshareAnnotationFromList({
+                annotationUrl: existing.localId,
+                localListId: event.deleted,
+            })
+        }
 
-    setEditCommentTagPicker: EventHandler<'setEditCommentTagPicker'> = ({
-        event,
-    }) => {
-        this.emitMutation({
-            editForms: {
-                [event.annotationUrl]: {
-                    isTagInputActive: { $set: event.active },
-                },
+        annotationsCache.updateAnnotation(
+            {
+                comment: existing.comment,
+                remoteId: existing.remoteId,
+                unifiedListIds: [...unifiedListIds],
+                unifiedId: event.unifiedAnnotationId,
+                privacyLevel: event.options?.protectAnnotation
+                    ? AnnotationPrivacyLevels.PROTECTED
+                    : existing.privacyLevel,
             },
-        })
+            { keepListsIfUnsharing: event.options?.protectAnnotation },
+        )
+
+        const { sharingState } = await bgPromise
+
+        // Update again with the calculated lists and privacy lvl from the BG ops (TODO: there's gotta be a nicer way to handle this optimistically in the UI)
+        annotationsCache.updateAnnotation(
+            {
+                comment: existing.comment,
+                remoteId: sharingState.remoteId
+                    ? sharingState.remoteId.toString()
+                    : existing.remoteId,
+                unifiedId: event.unifiedAnnotationId,
+                privacyLevel: sharingState.privacyLevel,
+                unifiedListIds: [
+                    ...sharingState.privateListIds,
+                    ...sharingState.sharedListIds,
+                ]
+                    .map(
+                        (localListId) =>
+                            annotationsCache.getListByLocalId(localListId)
+                                ?.unifiedId,
+                    )
+                    .filter((id) => !!id),
+            },
+            { keepListsIfUnsharing: true },
+        )
     }
 
-    updateNewPageCommentTags: EventHandler<'updateNewPageCommentTags'> = ({
+    setNewPageNoteLists: EventHandler<'setNewPageNoteLists'> = async ({
         event,
+        previousState,
     }) => {
-        this.emitMutation({
-            commentBox: { tags: { $set: event.tags } },
-        })
-    }
-    updateNewPageCommentLists: EventHandler<
-        'updateNewPageCommentLists'
-    > = async ({ event, previousState }) => {
         this.emitMutation({
             commentBox: { lists: { $set: event.lists } },
         })
     }
 
-    private createTagStateDeleteUpdater = (args: { tag: string }) => (
-        tags: string[],
-    ) => {
-        const tagIndex = tags.indexOf(args.tag)
-        if (tagIndex === -1) {
-            return tags
-        }
-
-        tags = [...tags]
-        tags.splice(tagIndex, 1)
-        return tags
-    }
-
-    deleteEditCommentTag: EventHandler<'deleteEditCommentTag'> = ({
-        event,
-    }) => {
-        this.emitMutation({
-            editForms: {
-                [event.annotationUrl]: {
-                    tags: {
-                        $apply: this.createTagStateDeleteUpdater(event),
-                    },
-                },
-            },
-        })
-    }
-
-    setActiveAnnotationUrl: EventHandler<'setActiveAnnotationUrl'> = async ({
-        event,
-    }) => {
-        this.options.events?.emit('highlightAndScroll', {
-            url: event.annotationUrl,
-        })
-        this.emitMutation({
-            activeAnnotationUrl: { $set: event.annotationUrl },
-        })
-    }
-
     goToAnnotationInNewTab: EventHandler<'goToAnnotationInNewTab'> = async ({
         event,
-        previousState,
     }) => {
         this.emitMutation({
-            activeAnnotationUrl: { $set: event.annotationUrl },
+            activeAnnotationId: { $set: event.unifiedAnnotationId },
         })
 
-        const annotation = previousState.annotations.find(
-            (annot) => annot.url === event.annotationUrl,
-        )
-
-        return this.options.annotations.goToAnnotationFromSidebar({
-            url: annotation.pageUrl,
-            annotation,
-        })
-    }
-
-    editAnnotation: EventHandler<'editAnnotation'> = async ({
-        event,
-        previousState,
-    }) => {
-        const {
-            editForms: { [event.annotationUrl]: form },
-        } = previousState
-
-        if (event.shouldShare && !(await this.ensureLoggedIn())) {
-            return
+        const annotation = this.options.annotationsCache.annotations.byId[
+            event.unifiedAnnotationId
+        ]
+        if (!annotation) {
+            throw new Error(
+                `Could not find cached annotation data for ID: ${event.unifiedAnnotationId}`,
+            )
         }
 
-        const comment = form.commentText.trim()
-        const annotationIndex = previousState.annotations.findIndex(
-            (annot) => annot.url === event.annotationUrl,
-        )
-        if (annotationIndex === -1) {
-            return
-        }
-        const existing = previousState.annotations[annotationIndex]
-
-        // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
-        // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
-        //  to make a SAS annotation private protected upon save btn press
-        existing.lists = event.mainBtnPressed
-            ? existing.lists
-            : this.getAnnotListsAfterShareStateChange({
-                  previousState,
-                  annotationIndex,
-                  keepListsIfUnsharing: event.keepListsIfUnsharing,
-                  incomingPrivacyState: {
-                      public: event.shouldShare,
-                      protected: !!event.isProtected,
-                  },
-              })
-
-        this.emitMutation({
-            annotationModes: {
-                [event.context]: {
-                    [event.annotationUrl]: { $set: 'default' },
-                },
-            },
-            editForms: {
-                [event.annotationUrl]: {
-                    $set: { ...INIT_FORM_STATE },
-                },
-            },
-            confirmPrivatizeNoteArgs: {
-                $set: null,
-            },
-            ...this.applyStateMutationForAllFollowedLists(previousState, {
-                annotationModes: {
-                    [event.annotationUrl]: { $set: 'default' },
-                },
-            }),
-        })
-
-        await this.options.annotationsCache.update(
+        return this.options.contentScriptsBG.goToAnnotationFromDashboardSidebar(
             {
-                ...existing,
-                comment,
-                tags: form.tags,
+                fullPageUrl:
+                    this.options.fullPageUrl ??
+                    'https://' + annotation.normalizedPageUrl,
+                annotationCacheId: event.unifiedAnnotationId,
             },
+        )
+    }
+
+    deleteAnnotation: EventHandler<'deleteAnnotation'> = async ({ event }) => {
+        const { annotationsCache, annotationsBG } = this.options
+        const existing =
+            annotationsCache.annotations.byId[event.unifiedAnnotationId]
+        annotationsCache.removeAnnotation({
+            unifiedId: event.unifiedAnnotationId,
+        })
+
+        if (existing?.localId != null) {
+            await annotationsBG.deleteAnnotation(existing.localId)
+        }
+    }
+
+    setActiveAnnotation: EventHandler<'setActiveAnnotation'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            activeAnnotationId: { $set: event.unifiedAnnotationId },
+        })
+
+        const cachedAnnotation = this.options.annotationsCache.annotations.byId[
+            event.unifiedAnnotationId
+        ]
+        if (cachedAnnotation?.selector != null) {
+            this.options.events?.emit('highlightAndScroll', {
+                highlight: cachedAnnotation,
+            })
+        }
+
+        if (!event.mode) {
+            return
+        }
+        const location = previousState.selectedListId ?? undefined
+        const cardId = generateAnnotationCardInstanceId(
             {
-                shouldShare: event.shouldShare,
-                shouldCopyShareLink: event.shouldShare,
-                isBulkShareProtected:
-                    event.isProtected || !!event.keepListsIfUnsharing,
-                skipBackendListUpdateOp: true,
-                keepListsIfUnsharing: event.keepListsIfUnsharing,
-                skipPrivacyLevelUpdate: event.mainBtnPressed,
+                unifiedId: event.unifiedAnnotationId,
             },
-        )
-    }
-
-    deleteAnnotation: EventHandler<'deleteAnnotation'> = async ({
-        event,
-        previousState,
-    }) => {
-        const { annotationsCache } = this.options
-        const annotation = annotationsCache.getAnnotationById(
-            event.annotationUrl,
+            location,
         )
 
-        this.removeAnnotationFromAllFollowedLists(
-            event.annotationUrl,
-            previousState,
-        )
-        await annotationsCache.delete(annotation)
-    }
-
-    private updateAnnotationFollowedLists(
-        localAnnotationId: string,
-        previousState: SidebarContainerState,
-        listUpdates: {
-            add: number[]
-            remove: number[]
-        },
-    ) {
-        const followedAnnotId = this.options.annotationsCache.getAnnotationById(
-            localAnnotationId,
-        )?.remoteId
-
-        if (followedAnnotId == null) {
+        // Likely a highlight for another user's annotation, thus non-existent in "annotations" tab
+        if (previousState.annotationCardInstances[cardId] == null) {
             return
         }
 
-        // Resolve local list IDs to remote (or calc lists to remove/add to, if not explicitly given)
-        const localListIdToRemoteData = (localListId: number) =>
-            this.options.annotationsCache.listData[localListId]
-
-        const addTo = listUpdates.add
-            .map(localListIdToRemoteData)
-            .filter((a) => a != null)
-
-        const removeFrom = listUpdates.remove
-            .map(localListIdToRemoteData)
-            .filter((a) => a != null)
-
-        this.emitMutation({
-            followedLists: {
-                allIds: {
-                    $apply: (ids: string[]): string[] => {
-                        const idSet = new Set(ids)
-                        addTo.forEach((data) => idSet.add(data.remoteId))
-                        removeFrom.forEach((data) => {
-                            if (
-                                previousState.followedLists.byId[data.remoteId]
-                                    ?.sharedAnnotationReferences.length <= 1
-                            ) {
-                                idSet.delete(data.remoteId)
-                            }
-                        })
-                        return [...idSet]
-                    },
-                },
-                byId: {
-                    ...removeFrom.reduce(
-                        (acc, { remoteId }) => ({
-                            ...acc,
-                            ...(previousState.followedLists.byId[remoteId]
-                                ?.sharedAnnotationReferences.length > 1
-                                ? {
-                                      [remoteId]: {
-                                          sharedAnnotationReferences: {
-                                              $apply: (
-                                                  refs: SharedAnnotationReference[],
-                                              ) =>
-                                                  refs.filter(
-                                                      (ref) =>
-                                                          ref.id !==
-                                                          followedAnnotId,
-                                                  ),
-                                          },
-                                      },
-                                  }
-                                : {
-                                      $unset: [remoteId],
-                                  }),
-                        }),
-                        {},
-                    ),
-                    ...addTo.reduce(
-                        (acc, { name, remoteId }) => ({
-                            ...acc,
-                            [remoteId]:
-                                previousState.followedLists.byId[remoteId] !=
-                                null
-                                    ? {
-                                          sharedAnnotationReferences: {
-                                              $push: [
-                                                  {
-                                                      type:
-                                                          'shared-annotation-reference',
-                                                      id: followedAnnotId,
-                                                  },
-                                              ],
-                                          },
-                                      }
-                                    : {
-                                          $set: this.createdFollowedListState({
-                                              name,
-                                              id: remoteId,
-                                              sharedAnnotationReferences: [
-                                                  {
-                                                      type:
-                                                          'shared-annotation-reference',
-                                                      id: followedAnnotId,
-                                                  },
-                                              ],
-                                          }),
-                                      },
-                        }),
-                        {},
-                    ),
-                },
-            },
-        })
-    }
-
-    private removeAnnotationFromAllFollowedLists(
-        localAnnotationId: string,
-        previousState: SidebarContainerState,
-    ) {
-        const followedAnnotId = this.options.annotationsCache.getAnnotationById(
-            localAnnotationId,
-        )?.remoteId
-
-        if (followedAnnotId == null) {
-            return
-        }
-
-        const removeFrom = previousState.followedLists.allIds.filter((listId) =>
-            previousState.followedLists.byId[
-                listId
-            ]?.sharedAnnotationReferences.find(
-                (ref) => ref.id === followedAnnotId,
-            ),
-        )
-
-        this.emitMutation({
-            followedAnnotations: { $unset: [followedAnnotId] },
-            followedLists: {
-                byId: removeFrom.reduce(
-                    (acc, listId) => ({
-                        ...acc,
-                        [listId]: {
-                            sharedAnnotationReferences: {
-                                $apply: (refs: SharedAnnotationReference[]) =>
-                                    refs.filter(
-                                        (ref) => ref.id !== followedAnnotId,
-                                    ),
-                            },
-                        },
-                    }),
-                    {},
-                ),
-            },
-        })
-    }
-
-    shareAnnotation: EventHandler<'shareAnnotation'> = async ({ event }) => {
-        if (!(await this.ensureLoggedIn())) {
-            return
-        }
-
-        const mutation: UIMutation<SidebarContainerState> =
-            event.followedListId != null
-                ? {
-                      followedLists: {
-                          byId: {
-                              [event.followedListId]: {
-                                  activeShareMenuAnnotationId: {
-                                      $set: event.annotationUrl,
-                                  },
-                              },
-                          },
-                      },
-                  }
-                : {
-                      activeShareMenuNoteId: { $set: event.annotationUrl },
-                  }
-
-        if (navigator.platform === 'MacIntel') {
-            const immediateShare =
-                event.mouseEvent.metaKey && event.mouseEvent.altKey
+        if (event.mode === 'edit') {
             this.emitMutation({
-                ...mutation,
-                immediatelyShareNotes: { $set: !!immediateShare },
-            })
-        } else {
-            const immediateShare =
-                event.mouseEvent.ctrlKey && event.mouseEvent.altKey
-            this.emitMutation({
-                ...mutation,
-                immediatelyShareNotes: { $set: !!immediateShare },
-            })
-        }
-
-        await this.setLastSharedAnnotationTimestamp()
-    }
-
-    setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
-        event,
-        previousState,
-    }) => {
-        const previousForm = previousState.editForms[event.annotationUrl]
-        const annotation = previousState.annotations.find(
-            (annot) => annot.url === event.annotationUrl,
-        )
-
-        const mutation: UIMutation<SidebarContainerState> =
-            event.followedListId != null
-                ? {
-                      followedLists: {
-                          byId: {
-                              [event.followedListId]: {
-                                  annotationModes: {
-                                      [event.annotationUrl]: { $set: 'edit' },
-                                  },
-                              },
-                          },
-                      },
-                  }
-                : {
-                      annotationModes: {
-                          [event.context]: {
-                              [event.annotationUrl]: { $set: 'edit' },
-                          },
-                      },
-                  }
-
-        // If there was existing form state, we want to keep that, else use the stored annot data or defaults
-        if (
-            !previousForm ||
-            (!previousForm?.commentText?.length && !previousForm?.tags?.length)
-        ) {
-            mutation.editForms = {
-                [event.annotationUrl]: {
-                    commentText: { $set: annotation.comment ?? '' },
-                    tags: { $set: annotation.tags ?? [] },
-                },
-            }
-        }
-
-        this.emitMutation(mutation)
-    }
-
-    switchAnnotationMode: EventHandler<'switchAnnotationMode'> = ({
-        event,
-        previousState,
-    }) => {
-        if (event.followedListId != null) {
-            this.emitMutation({
-                followedLists: {
-                    byId: {
-                        [event.followedListId]: {
-                            annotationModes: {
-                                [event.annotationUrl]: {
-                                    $set: event.mode,
-                                },
-                            },
-                        },
-                    },
+                annotationCardInstances: {
+                    [cardId]: { isCommentEditing: { $set: true } },
                 },
             })
-        } else {
+        } else if (event.mode === 'edit_spaces') {
             this.emitMutation({
-                annotationModes: {
-                    [event.context]: {
-                        [event.annotationUrl]: {
-                            $set: event.mode,
-                        },
-                    },
+                annotationCardInstances: {
+                    [cardId]: { cardMode: { $set: 'space-picker' } },
                 },
             })
         }
@@ -1273,392 +1202,526 @@ export class SidebarContainerLogic extends UILogic<
         incoming,
     ) => {}
 
-    loadFollowedLists: EventHandler<'loadFollowedLists'> = async ({
-        previousState,
-    }) => {
-        const { customLists, pageUrl, annotationsCache } = this.options
-
-        await executeUITask(this, 'followedListLoadState', async () => {
-            const followedLists = await customLists.fetchFollowedListsWithAnnotations(
-                {
-                    normalizedPageUrl: normalizeUrl(
-                        previousState.pageUrl ?? pageUrl,
-                    ),
-                },
-            )
-
-            // TODO: Make this work (if needed)
-            // const areListsContributable = fromPairs(
-            //     await Promise.all(
-            //         followedLists.map(async (list) => {
-            //             const canWrite = await contentSharing.canWriteToSharedListRemoteId(
-            //                 {
-            //                     remoteId: list.id,
-            //                 },
-            //             )
-            //             return [list.id, canWrite]
-            //         }),
-            //     ),
-            // )
-
-            this.emitMutation({
-                followedLists: {
-                    allIds: {
-                        $set: followedLists.map((list) => list.id),
-                    },
-                    byId: {
-                        $set: fromPairs(
-                            followedLists.map((list) => [
-                                list.id,
-                                this.createdFollowedListState(list),
-                            ]),
-                        ),
-                    },
-                },
-            })
-        })
-    }
-
-    private createdFollowedListState = (
-        list: SharedAnnotationList,
-    ): FollowedListState => {
-        const initAnnotStates = (initValue: any) =>
-            list.sharedAnnotationReferences.reduce((acc, ref) => {
-                const localAnnot = this.options.annotationsCache.getAnnotationByRemoteId(
-                    ref.id,
-                )
-                if (!localAnnot) {
-                    return acc
-                }
-                return {
-                    ...acc,
-                    [localAnnot.url]: initValue,
-                }
-            }, {})
-
-        return {
-            ...list,
-            isExpanded: false,
-            isContributable: false,
-            annotationsLoadState: 'pristine',
-            conversationsLoadState: 'pristine',
-            activeCopyPasterAnnotationId: undefined,
-            activeListPickerAnnotationId: undefined,
-            activeShareMenuAnnotationId: undefined,
-            annotationModes: initAnnotStates('default'),
-            annotationEditForms: initAnnotStates({ ...INIT_FORM_STATE }),
-        }
-    }
-
-    expandMyNotes: EventHandler<'expandMyNotes'> = async ({
-        event,
-        previousState,
-    }) => {
-        const { isExpanded: wasExpanded, annotations } = previousState
-
-        const annotIds = annotations.map((annot) => annot.url as string)
-
-        const mutation: UIMutation<SidebarContainerState> = {
-            isExpanded: { $set: !wasExpanded },
-        }
-        this.emitMutation(mutation)
-
-        // If collapsing, signal to de-render highlights
-        if (wasExpanded) {
-            this.options.events?.emit('removeAnnotationHighlights', {
-                urls: annotIds,
-            })
-            return
-        }
-
-        this.options.events?.emit('renderHighlights', {
-            highlights: annotations
-                .filter((annotation) => annotation?.selector != null)
-                .map((annotation) => ({
-                    url: annotation.url,
-                    selector: annotation.selector,
-                })),
-        })
-    }
-
-    expandSharedSpaces: EventHandler<'expandSharedSpaces'> = async ({
-        event,
-        previousState,
-    }) => {
-        const wasExpanded = previousState.isExpandedSharedSpaces
-        const expandedSharedAnnotationReferences = event.listIds
-            .filter((id) => previousState.followedLists.byId[id].isExpanded)
-            .map(
-                (id) =>
-                    previousState.followedLists.byId[id]
-                        .sharedAnnotationReferences,
-            )
-        const sharedAnnotIds = expandedSharedAnnotationReferences
-            .flat()
-            .map((ref) => ref.id as string)
-
-        const mutation: UIMutation<SidebarContainerState> = {
-            isExpandedSharedSpaces: { $set: !wasExpanded },
-        }
-        this.emitMutation(mutation)
-
-        // If collapsing, signal to de-render highlights
-        if (wasExpanded) {
-            this.options.events?.emit('removeAnnotationHighlights', {
-                urls: sharedAnnotIds,
-            })
-            return
-        }
-        this.options.events?.emit('renderHighlights', {
-            highlights: sharedAnnotIds
-                .filter(
-                    (id) =>
-                        previousState.followedAnnotations[id]?.selector != null,
-                )
-                .map((id) => ({
-                    url: id,
-                    selector: previousState.followedAnnotations[id].selector,
-                })),
-        })
-    }
-
-    private afterToggleListView = async (
-        previousState,
-        mutation,
-        annotationsLoadState,
-        event,
-        followedAnnotIds,
-        shouldRemoveAnnotationHighlights,
-    ) => {
-        // If collapsing, signal to de-render highlights
-        if (shouldRemoveAnnotationHighlights) {
-            this.options.events?.emit('removeAnnotationHighlights', {
-                urls: followedAnnotIds,
-            })
-            return
-        }
-
-        // If annot data yet to be loaded, load it
-        if (annotationsLoadState === 'pristine') {
-            await this.processUIEvent('loadFollowedListNotes', {
-                event,
-                previousState: this.withMutation(previousState, mutation),
-            })
-            return
-        }
-
-        this.options.events?.emit('renderHighlights', {
-            highlights: followedAnnotIds
-                .filter(
-                    (id) =>
-                        previousState.followedAnnotations[id]?.selector != null,
-                )
-                .map((id) => ({
-                    url: id,
-                    selector: previousState.followedAnnotations[id].selector,
-                })),
-        })
-    }
-
-    expandFollowedListNotes: EventHandler<'expandFollowedListNotes'> = async ({
-        event,
-        previousState,
-    }) => {
-        const {
-            sharedAnnotationReferences,
-            isExpanded: wasExpanded,
-            annotationsLoadState,
-        } = previousState.followedLists.byId[event.listId]
-
-        const followedAnnotIds = sharedAnnotationReferences.map(
-            (ref) => ref.id as string,
+    private async loadRemoteAnnototationReferencesForCachedLists(
+        state: SidebarContainerState,
+    ): Promise<void> {
+        const listsWithRemoteAnnots = normalizedStateToArray(
+            this.options.annotationsCache.lists,
+        ).filter(
+            (list) =>
+                list.hasRemoteAnnotationsToLoad &&
+                list.remoteId != null &&
+                state.listInstances[list.unifiedId]?.annotationRefsLoadState ===
+                    'pristine', // Ensure it hasn't already been loaded
         )
 
-        const mutation: UIMutation<SidebarContainerState> = {
-            followedLists: {
-                byId: {
-                    [event.listId]: {
-                        isExpanded: { $set: !wasExpanded },
-                    },
-                },
-            },
-        }
-        this.emitMutation(mutation)
-
-        const shouldRemoveAnnotationHighlights = wasExpanded
-
-        await this.afterToggleListView(
-            previousState,
-            mutation,
-            annotationsLoadState,
-            event,
-            followedAnnotIds,
-            shouldRemoveAnnotationHighlights,
+        const nextState = await this.loadRemoteAnnotationReferencesForSpecificLists(
+            state,
+            listsWithRemoteAnnots,
         )
+        this.renderOpenSpaceInstanceHighlights(nextState)
     }
 
-    toggleIsolatedListView: EventHandler<'toggleIsolatedListView'> = async ({
-        event,
-        previousState,
-    }) => {
-        const {
-            sharedAnnotationReferences,
-            annotationsLoadState,
-        } = previousState.followedLists.byId[event.listId]
-        const isolatedView = previousState.isolatedView
-
-        const followedAnnotIds = sharedAnnotationReferences.map(
-            (ref) => ref.id as string,
-        )
-
-        const mutation: UIMutation<SidebarContainerState> = {
-            isolatedView: { $set: isolatedView ? null : event.listId },
-            followedLists: {
-                byId: {
-                    [event.listId]: {
-                        isExpanded: { $set: isolatedView ? false : true },
-                    },
-                },
-            },
+    private async loadRemoteAnnotationReferencesForSpecificLists(
+        state: SidebarContainerState,
+        lists: UnifiedList[],
+    ): Promise<SidebarContainerState> {
+        let nextState = state
+        if (!lists.length) {
+            return nextState
         }
-        this.emitMutation(mutation)
-
-        const shouldRemoveAnnotationHighlights = isolatedView
-
-        this.afterToggleListView(
-            previousState,
-            mutation,
-            annotationsLoadState,
-            event,
-            followedAnnotIds,
-            shouldRemoveAnnotationHighlights,
-        )
-    }
-
-    loadFollowedListNotes: EventHandler<'loadFollowedListNotes'> = async ({
-        event,
-        previousState,
-    }) => {
-        const {
-            annotations,
-            auth: authBG,
-            annotationsCache,
-            contentConversationsBG,
-        } = this.options
-        const { sharedAnnotationReferences } = previousState.followedLists.byId[
-            event.listId
-        ]
-        this.emitMutation({
-            conversations: {
-                $merge: getInitialAnnotationConversationStates(
-                    sharedAnnotationReferences.map(({ id }) => ({
-                        linkId: id.toString(),
-                    })),
-                    (annotationId) => `${event.listId}:${annotationId}`,
-                ),
-            },
-        })
 
         await executeUITask(
             this,
             (taskState) => ({
-                followedLists: {
-                    byId: {
-                        [event.listId]: {
+                listInstances: fromPairs(
+                    lists.map((list) => [
+                        list.unifiedId,
+                        { annotationRefsLoadState: { $set: taskState } },
+                    ]),
+                ),
+            }),
+            async () => {
+                const annotationRefsByList = await this.options.customListsBG.fetchAnnotationRefsForRemoteListsOnPage(
+                    {
+                        normalizedPageUrl: normalizeUrl(state.fullPageUrl),
+                        sharedListIds: lists.map((list) => list.remoteId!),
+                    },
+                )
+
+                const mutation: UIMutation<
+                    SidebarContainerState['listInstances']
+                > = {}
+
+                for (const { unifiedId, remoteId } of lists) {
+                    mutation[unifiedId] = {
+                        sharedAnnotationReferences: {
+                            $set: annotationRefsByList[remoteId] ?? [],
+                        },
+                    }
+                }
+
+                nextState = this.withMutation(nextState, {
+                    listInstances: mutation,
+                })
+                this.emitMutation({ listInstances: mutation })
+            },
+        )
+        return nextState
+    }
+
+    setIsolatedViewOnSidebarLoad: EventHandler<
+        'setIsolatedViewOnSidebarLoad'
+    > = async ({}) => {
+        this.emitMutation({
+            activeTab: { $set: 'spaces' },
+            loadState: { $set: 'running' },
+        })
+    }
+
+    setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            activeTab: { $set: event.tab },
+        })
+
+        // Don't attempt to re-render highlights on the page if in selected-space mode
+        if (previousState.selectedListId != null || event.tab === 'feed') {
+            return
+        }
+
+        if (event.tab === 'annotations') {
+            this.renderOwnHighlights(previousState)
+        } else if (event.tab === 'spaces') {
+            await this.loadRemoteAnnototationReferencesForCachedLists(
+                previousState,
+            )
+        }
+    }
+
+    private async maybeLoadListRemoteAnnotations(
+        state: SidebarContainerState,
+        unifiedListId: UnifiedList['unifiedId'],
+    ) {
+        const {
+            contentConversationsBG,
+            annotationsCache,
+            annotationsBG,
+        } = this.options
+        const list = state.lists.byId[unifiedListId]
+        const listInstance = state.listInstances[unifiedListId]
+
+        if (
+            !list ||
+            !listInstance ||
+            list.remoteId == null ||
+            listInstance.annotationsLoadState !== 'pristine' // Means already loaded previously
+        ) {
+            return
+        }
+
+        let sharedAnnotationReferences: SharedAnnotationReference[]
+
+        // This first clause covers the case of setting up conversations states for own shared lists, without entries from others
+        if (
+            !list.hasRemoteAnnotationsToLoad ||
+            listInstance.sharedAnnotationReferences == null
+        ) {
+            const sharedAnnotationUnifiedIds = list.unifiedAnnotationIds.filter(
+                (unifiedId) =>
+                    annotationsCache.annotations.byId[unifiedId]?.remoteId !=
+                    null,
+            )
+
+            sharedAnnotationReferences = sharedAnnotationUnifiedIds.map(
+                (unifiedId) => ({
+                    type: 'shared-annotation-reference',
+                    id: annotationsCache.annotations.byId[unifiedId].remoteId,
+                }),
+            )
+
+            this.emitMutation({
+                conversations: {
+                    $merge: fromPairs(
+                        sharedAnnotationUnifiedIds.map((unifiedId) => [
+                            generateAnnotationCardInstanceId(
+                                { unifiedId },
+                                list.unifiedId,
+                            ),
+                            getInitialAnnotationConversationState(),
+                        ]),
+                    ),
+                },
+            })
+        } else {
+            // This clause covers the other cases of setting up convo states for followed and joined lists
+            sharedAnnotationReferences = listInstance.sharedAnnotationReferences
+
+            await executeUITask(
+                this,
+                (taskState) => ({
+                    listInstances: {
+                        [unifiedListId]: {
                             annotationsLoadState: { $set: taskState },
                         },
+                    },
+                }),
+                async () => {
+                    const sharedAnnotations = await annotationsBG.getSharedAnnotations(
+                        {
+                            sharedAnnotationReferences:
+                                listInstance.sharedAnnotationReferences,
+                            withCreatorData: true,
+                        },
+                    )
+
+                    const usersData: SidebarContainerState['users'] = {}
+                    for (const annot of sharedAnnotations) {
+                        if (annot.creator?.user.displayName != null) {
+                            usersData[annot.creatorReference.id] = {
+                                name: annot.creator.user.displayName,
+                                profileImgSrc: annot.creator.profile?.avatarURL,
+                            }
+                        }
+
+                        annotationsCache.addAnnotation(
+                            cacheUtils.reshapeSharedAnnotationForCache(annot, {
+                                extraData: { unifiedListIds: [unifiedListId] },
+                            }),
+                        )
+                    }
+
+                    this.emitMutation({
+                        users: { $merge: usersData },
+                        conversations: {
+                            $merge: getInitialAnnotationConversationStates(
+                                listInstance.sharedAnnotationReferences.map(
+                                    ({ id }) => ({
+                                        linkId: id.toString(),
+                                    }),
+                                ),
+                                (remoteAnnotId) =>
+                                    this.buildConversationId(remoteAnnotId, {
+                                        type: 'shared-list-reference',
+                                        id: list.remoteId,
+                                    }),
+                            ),
+                        },
+                    })
+                },
+            )
+        }
+
+        await this.detectConversationThreads(
+            unifiedListId,
+            list.remoteId,
+            sharedAnnotationReferences,
+        )
+    }
+
+    async detectConversationThreads(
+        unifiedListId: string,
+        remoteListId: string,
+        sharedAnnotationReferences: SharedAnnotationReference[],
+    ) {
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listInstances: {
+                    [unifiedListId]: {
+                        conversationsLoadState: { $set: taskState },
                     },
                 },
             }),
             async () => {
-                const [currentUser, sharedAnnotations] = await Promise.all([
-                    authBG.getCurrentUser(),
-                    annotations.getSharedAnnotations({
-                        sharedAnnotationReferences,
-                        withCreatorData: true,
-                    }),
-                ])
-
-                this.options.events?.emit('renderHighlights', {
-                    highlights: sharedAnnotations
-                        .filter((annot) => annot.selector != null)
-                        .map((annot) => ({
-                            url: annot.reference.id.toString(),
-                            selector: annot.selector,
-                        })),
-                })
-
-                this.emitMutation({
-                    followedAnnotations: {
-                        $merge: fromPairs(
-                            sharedAnnotations.map((annot) => [
-                                annot.reference.id,
-                                {
-                                    id: annot.reference.id,
-                                    body: annot.body,
-                                    comment: annot.comment,
-                                    selector: annot.selector,
-                                    createdWhen: annot.createdWhen,
-                                    updatedWhen: annot.updatedWhen,
-                                    creatorId: annot.creatorReference.id,
-                                    localId:
-                                        annot.creatorReference.id ===
-                                        currentUser.id
-                                            ? annotationsCache.getAnnotationByRemoteId(
-                                                  annot.reference.id,
-                                              )?.url ?? null
-                                            : null,
-                                },
-                            ]),
-                        ),
-                    },
-                    users: {
-                        $merge: fromPairs(
-                            sharedAnnotations.map(
-                                ({ creator, creatorReference }) => [
-                                    creatorReference.id,
-                                    {
-                                        name: creator?.user.displayName,
-                                        profileImgSrc:
-                                            creator?.profile?.avatarURL,
-                                    },
-                                ],
-                            ),
-                        ),
-                    },
-                })
-            },
-        )
-
-        await executeUITask(
-            this,
-            (taskState) => ({
-                followedLists: {
-                    byId: {
-                        [event.listId]: {
-                            conversationsLoadState: { $set: taskState },
-                        },
-                    },
-                },
-            }),
-            () =>
-                detectAnnotationConversationThreads(this as any, {
-                    buildConversationId,
+                await detectAnnotationConversationThreads(this as any, {
+                    buildConversationId: this.buildConversationId,
                     annotationReferences: sharedAnnotationReferences,
                     sharedListReference: {
                         type: 'shared-list-reference',
-                        id: event.listId,
+                        id: remoteListId,
                     },
                     getThreadsForAnnotations: ({
                         annotationReferences,
                         sharedListReference,
                     }) =>
-                        contentConversationsBG.getThreadsForSharedAnnotations({
-                            sharedAnnotationReferences: annotationReferences,
-                            sharedListReference,
-                        }),
-                }),
+                        this.options.contentConversationsBG.getThreadsForSharedAnnotations(
+                            {
+                                sharedAnnotationReferences: annotationReferences,
+                                sharedListReference,
+                            },
+                        ),
+                })
+            },
         )
+    }
+
+    expandListAnnotations: EventHandler<'expandListAnnotations'> = async ({
+        event,
+        previousState,
+    }) => {
+        const listInstanceMutation: UIMutation<SidebarContainerState> = {
+            listInstances: {
+                [event.unifiedListId]: {
+                    isOpen: { $apply: (isOpen) => !isOpen },
+                },
+            },
+        }
+        const nextState = this.withMutation(previousState, listInstanceMutation)
+        this.emitMutation(listInstanceMutation)
+
+        await this.maybeLoadListRemoteAnnotations(
+            previousState,
+            event.unifiedListId,
+        )
+
+        // NOTE: It's important the annots+lists states are gotten from the cache here as the above async call
+        //   can result in new annotations being added to the cache which won't yet update this logic class' state
+        //   (though they cache's state will be up-to-date)
+        this.renderOpenSpaceInstanceHighlights({
+            annotations: this.options.annotationsCache.annotations,
+            lists: this.options.annotationsCache.lists,
+            listInstances: nextState.listInstances,
+        })
+    }
+
+    markFeedAsRead: EventHandler<'markFeedAsRead'> = async () => {
+        // const activityindicator = await this.options.activityIndicatorBG.markActivitiesAsSeen()
+        // await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
+
+        this.emitMutation({
+            hasFeedActivity: { $set: false },
+        })
+    }
+
+    private async setLocallyAvailableSelectedList(
+        state: SidebarContainerState,
+        unifiedListId: UnifiedList['unifiedId'],
+    ) {
+        this.options.events?.emit('setSelectedList', unifiedListId)
+
+        const list = state.lists.byId[unifiedListId]
+        const listInstance = state.listInstances[unifiedListId]
+        if (!list || !listInstance) {
+            console.warn(
+                'setSelectedList: could not find matching list for cache ID:',
+                unifiedListId,
+            )
+            return
+        }
+
+        this.emitMutation({
+            activeTab: { $set: 'spaces' },
+            selectedListId: { $set: unifiedListId },
+        })
+
+        if (list.remoteId != null) {
+            let nextState = state
+            nextState = await this.loadRemoteAnnotationReferencesForSpecificLists(
+                state,
+                [list],
+            )
+
+            await this.maybeLoadListRemoteAnnotations(nextState, unifiedListId)
+        }
+
+        this.options.events?.emit('renderHighlights', {
+            highlights: cacheUtils.getListHighlightsArray(
+                this.options.annotationsCache,
+                unifiedListId,
+            ),
+        })
+    }
+
+    setSelectedList: EventHandler<'setSelectedList'> = async ({
+        event,
+        previousState,
+    }) => {
+        // TODO : this is a hack to stop users clicking on space pills before the followed lists have been loaded
+        //  Because shit breaks down if they're not loaded and everything's too much of a mess to untangle right now.
+        //  Should become much less of a problem once we load followed lists from local DB
+        // if (previousState.followedListLoadState !== 'success') {
+        //     return
+        // }
+
+        if (event.unifiedListId == null) {
+            this.options.events?.emit('setSelectedList', null)
+            this.emitMutation({ selectedListId: { $set: null } })
+            this.renderOpenSpaceInstanceHighlights(previousState)
+            return
+        }
+
+        await this.setLocallyAvailableSelectedList(
+            previousState,
+            event.unifiedListId,
+        )
+    }
+
+    setSelectedListFromWebUI: EventHandler<
+        'setSelectedListFromWebUI'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({
+            activeTab: { $set: 'spaces' },
+        })
+
+        const {
+            annotationsCache,
+            customListsBG,
+            authBG,
+            fullPageUrl,
+        } = this.options
+
+        const cachedList = annotationsCache.getListByRemoteId(
+            event.sharedListId,
+        )
+
+        // If locally available, proceed as usual
+        if (cachedList) {
+            await this.setLocallyAvailableSelectedList(
+                previousState,
+                cachedList.unifiedId,
+            )
+            this.emitMutation({
+                loadState: { $set: 'success' },
+            })
+
+            return
+        }
+
+        if (!fullPageUrl) {
+            throw new Error(
+                'Could not load remote list data for selected list mode without `props.fullPageUrl` being set in sidebar',
+            )
+        }
+
+        // Else we're dealing with a foreign list which we need to load remotely
+        await executeUITask(this, 'foreignSelectedListLoadState', async () => {
+            const sharedList = await customListsBG.fetchSharedListDataWithPageAnnotations(
+                {
+                    remoteListId: event.sharedListId,
+                    normalizedPageUrl: normalizeUrl(fullPageUrl),
+                },
+            )
+            if (!sharedList) {
+                throw new Error(
+                    `Could not load remote list data for selected list mode - ID: ${event.sharedListId}`,
+                )
+            }
+            const unifiedList = annotationsCache.addList({
+                remoteId: event.sharedListId,
+                name: sharedList.title,
+                creator: sharedList.creator,
+                description: sharedList.description,
+                isForeignList: true,
+                hasRemoteAnnotationsToLoad: true,
+                unifiedAnnotationIds: [], // Will be populated soon when annots get cached
+            })
+
+            this.emitMutation({
+                loadState: { $set: 'success' },
+            })
+
+            let sharedAnnotationReferences: SharedAnnotationReference[] = []
+            const sharedAnnotationUnifiedIds: string[] = []
+
+            sharedList.sharedAnnotations.forEach((sharedAnnot) => {
+                sharedAnnotationReferences.push(sharedAnnot.reference)
+                const { unifiedId } = annotationsCache.addAnnotation({
+                    body: sharedAnnot.body,
+                    creator: sharedAnnot.creator,
+                    comment: sharedAnnot.comment,
+                    lastEdited: sharedAnnot.updatedWhen,
+                    createdWhen: sharedAnnot.createdWhen,
+                    selector:
+                        sharedAnnot.selector != null
+                            ? JSON.parse(sharedAnnot.selector)
+                            : undefined,
+                    remoteId: sharedAnnot.reference.id.toString(),
+                    normalizedPageUrl: sharedAnnot.normalizedPageUrl,
+                    unifiedListIds: [unifiedList.unifiedId],
+                    privacyLevel: AnnotationPrivacyLevels.SHARED,
+                    localListIds: [],
+                })
+                sharedAnnotationUnifiedIds.push(unifiedId)
+            })
+
+            this.emitMutation({
+                selectedListId: { $set: unifiedList.unifiedId },
+                // NOTE: this is the only time we're manually mutating the listInstances state outside the cache subscription - maybe there's a "cleaner" way to do this
+                listInstances: {
+                    [unifiedList.unifiedId]: {
+                        annotationRefsLoadState: { $set: 'success' },
+                        conversationsLoadState: { $set: 'success' },
+                        annotationsLoadState: { $set: 'success' },
+                        sharedAnnotationReferences: {
+                            $set: sharedAnnotationReferences,
+                        },
+                    },
+                },
+                conversations: {
+                    $merge: fromPairs(
+                        sharedAnnotationUnifiedIds.map((unifiedId) => [
+                            generateAnnotationCardInstanceId(
+                                { unifiedId },
+                                unifiedList.unifiedId,
+                            ),
+                            getInitialAnnotationConversationState(),
+                        ]),
+                    ),
+                },
+            })
+
+            this.options.events?.emit('renderHighlights', {
+                highlights: cacheUtils.getListHighlightsArray(
+                    this.options.annotationsCache,
+                    unifiedList.unifiedId,
+                ),
+            })
+
+            await this.detectConversationThreads(
+                unifiedList.unifiedId,
+                event.sharedListId,
+                sharedAnnotationReferences,
+            )
+        })
+
+        // const list = previousState.lists.byId[event.unifiedListId]
+        // const listInstance = previousState.listInstances[event.unifiedListId]
+        // if (!list || !listInstance) {
+        //     console.warn(
+        //         'setSelectedList: could not find matching list for cache ID:',
+        //         event.unifiedListId,
+        //     )
+        //     return
+        // }
+
+        // this.emitMutation({
+        //     activeTab: { $set: 'spaces' },
+        //     selectedListId: { $set: event.unifiedListId },
+        // })
+
+        // if (list.remoteId != null) {
+        //     let nextState = previousState
+        //     if (listInstance.annotationRefsLoadState === 'pristine') {
+        //         nextState = await this.loadRemoteAnnotationReferencesForLists(
+        //             previousState,
+        //             [list],
+        //         )
+        //     }
+        //     await this.maybeLoadListRemoteAnnotations(
+        //         nextState,
+        //         event.unifiedListId,
+        //     )
+        // }
+
+        // this.options.events?.emit('renderHighlights', {
+        //     highlights: cacheUtils.getListHighlightsArray(
+        //         this.options.annotationsCache,
+        //         event.unifiedListId,
+        //     ),
+        // })
     }
 
     setAnnotationShareModalShown: EventHandler<
@@ -1684,123 +1747,97 @@ export class SidebarContainerLogic extends UILogic<
     > = ({ event }) => {
         const { annotationsCache } = this.options
 
-        const nextAnnotations = annotationsCache.annotations.map(
-            (annotation) => {
-                const privacyState = getAnnotationPrivacyState(
-                    event[annotation.url].privacyLevel,
-                )
-                const nextAnnotation =
-                    event[annotation.url] == null
-                        ? annotation
-                        : {
-                              ...annotation,
-                              isShared: privacyState.public,
-                              isBulkShareProtected: privacyState.protected,
-                          }
-                return nextAnnotation
-            },
-        )
+        for (const annotation of normalizedStateToArray(
+            annotationsCache.annotations,
+        )) {
+            const sharingState = event[annotation?.localId]
+            if (!sharingState) {
+                continue
+            }
 
-        annotationsCache.setAnnotations(nextAnnotations)
+            const unifiedListIds = [
+                ...sharingState.privateListIds,
+                ...sharingState.sharedListIds,
+            ]
+                .map(
+                    (localListId) =>
+                        annotationsCache.getListByLocalId(localListId)
+                            ?.unifiedId,
+                )
+                .filter((id) => !!id)
+
+            annotationsCache.updateAnnotation({
+                remoteId: sharingState.remoteId
+                    ? sharingState.remoteId.toString()
+                    : undefined,
+                unifiedId: annotation.unifiedId,
+                privacyLevel: sharingState.privacyLevel,
+                unifiedListIds,
+            })
+        }
     }
 
     updateAnnotationShareInfo: EventHandler<
         'updateAnnotationShareInfo'
     > = async ({ previousState, event }) => {
-        const annotationIndex = previousState.annotations.findIndex(
-            (a) => a.url === event.annotationUrl,
-        )
-        if (annotationIndex === -1) {
+        const existing =
+            previousState.annotations.byId[event.unifiedAnnotationId]
+
+        if (existing.privacyLevel === event.privacyLevel) {
             return
         }
-        const privacyState = getAnnotationPrivacyState(event.privacyLevel)
-        const existing = previousState.annotations[annotationIndex]
-        const oldLists = [...existing.lists]
 
-        existing.lists = this.getAnnotListsAfterShareStateChange({
-            previousState,
-            annotationIndex,
-            incomingPrivacyState: privacyState,
-            keepListsIfUnsharing: event.keepListsIfUnsharing,
-        })
-
-        if (!event.keepListsIfUnsharing) {
-            const makingPublic = [
-                AnnotationPrivacyLevels.SHARED,
-                AnnotationPrivacyLevels.SHARED_PROTECTED,
-            ].includes(event.privacyLevel)
-
-            if (makingPublic) {
-                this.updateAnnotationFollowedLists(
-                    event.annotationUrl,
-                    previousState,
-                    {
-                        add: existing.lists.filter(
-                            (listId) => !oldLists.includes(listId),
-                        ),
-                        remove: oldLists.filter(
-                            (listId) => !existing.lists.includes(listId),
-                        ),
-                    },
-                )
-            } else {
-                this.removeAnnotationFromAllFollowedLists(
-                    event.annotationUrl,
-                    previousState,
-                )
-            }
-        }
-
-        await this.options.annotationsCache.update(existing, {
-            isBulkShareProtected:
-                privacyState.protected || !!event.keepListsIfUnsharing,
-            shouldShare: privacyState.public,
-            skipBackendOps: true, // Doing this so as the SingleNoteShareMenu logic will take care of the actual backend updates - we just want UI state updates
-        })
+        this.options.annotationsCache.updateAnnotation(
+            {
+                ...existing,
+                privacyLevel: event.privacyLevel,
+            },
+            { keepListsIfUnsharing: event.keepListsIfUnsharing },
+        )
     }
 
-    private getAnnotListsAfterShareStateChange(params: {
-        previousState: SidebarContainerState
-        annotationIndex: number
-        incomingPrivacyState: AnnotationPrivacyState
-        keepListsIfUnsharing?: boolean
-    }): number[] {
-        const { annotationsCache } = this.options
-        const existing =
-            params.previousState.annotations[params.annotationIndex]
+    // private getAnnotListsAfterShareStateChange(params: {
+    //     previousState: SidebarContainerState
+    //     annotationIndex: number
+    //     incomingPrivacyState: AnnotationPrivacyState
+    //     keepListsIfUnsharing?: boolean
+    // }): number[] {
+    //     const { annotationsCache } = this.options
+    //     const existing =
+    //         params.previousState.annotations[params.annotationIndex]
 
-        const willUnshare =
-            !params.incomingPrivacyState.public &&
-            (existing.isShared || !params.incomingPrivacyState.protected)
-        const selectivelySharedToPrivateProtected =
-            !existing.isShared &&
-            existing.isBulkShareProtected &&
-            !params.incomingPrivacyState.public &&
-            params.incomingPrivacyState.protected
+    //     const willUnshare =
+    //         !params.incomingPrivacyState.public &&
+    //         (existing.isShared || !params.incomingPrivacyState.protected)
+    //     const selectivelySharedToPrivateProtected =
+    //         !existing.isShared &&
+    //         existing.isBulkShareProtected &&
+    //         !params.incomingPrivacyState.public &&
+    //         params.incomingPrivacyState.protected
 
-        // If the note is being made private, we need to remove all shared lists (private remain)
-        if (
-            (willUnshare && !params.keepListsIfUnsharing) ||
-            selectivelySharedToPrivateProtected
-        ) {
-            return existing.lists.filter(
-                (listId) => annotationsCache.listData[listId]?.remoteId == null,
-            )
-        }
-        if (!existing.isShared && params.incomingPrivacyState.public) {
-            const privateLists = params.previousState.annotations[
-                params.annotationIndex
-            ].lists.filter(
-                (listId) => annotationsCache.listData[listId]?.remoteId == null,
-            )
-            return [
-                ...annotationsCache.parentPageSharedListIds,
-                ...privateLists,
-            ]
-        }
+    //     // If the note is being made private, we need to remove all shared lists (private remain)
+    //     if (
+    //         (willUnshare && !params.keepListsIfUnsharing) ||
+    //         selectivelySharedToPrivateProtected
+    //     ) {
+    //         return existing.lists.filter(
+    //             (listId) => annotationsCache.listData[listId]?.remoteId == null,
+    //         )
+    //     }
+    //     if (!existing.isShared && params.incomingPrivacyState.public) {
+    //         const privateLists = params.previousState.annotations[
+    //             params.annotationIndex
+    //         ].lists.filter(
+    //             (listId) => annotationsCache.listData[listId]?.remoteId == null,
+    //         )
+    //         return [
+    //             ...annotationsCache.parentPageSharedListIds,
+    //             ...privateLists,
+    //         ]
+    //     }
 
-        return existing.lists
-    }
+    //     return existing.lists
+    // }
 
     private async setLastSharedAnnotationTimestamp(now = Date.now()) {
         // const lastShared = await this.syncSettings.contentSharing.get(

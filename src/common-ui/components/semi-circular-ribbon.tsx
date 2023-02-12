@@ -1,7 +1,5 @@
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import React, { PureComponent, MouseEventHandler } from 'react'
-import ButtonTooltip from './button-tooltip'
-
-const styles = require('./semi-circular-ribbon.css')
 const pageStyles = require('./result-item.css')
 
 export interface Props {
@@ -12,14 +10,11 @@ export interface Props {
 class SemiCircularRibbon extends PureComponent<Props> {
     render() {
         return (
-            <ButtonTooltip
-                tooltipText="Remove from collection"
-                position="bottom"
-            >
+            <TooltipBox tooltipText="Remove from collection" placement="bottom">
                 <div className={pageStyles.button} onClick={this.props.onClick}>
                     <img src={'/img/removing.svg'} className={pageStyles.img} />
                 </div>
-            </ButtonTooltip>
+            </TooltipBox>
         )
     }
 }

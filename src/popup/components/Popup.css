@@ -1,16 +1,20 @@
 @value colors: '../../common-ui/colors.css';
-@value color4, color11 from colors;
+@value color4,
+color11 from colors;
 
 body {
     margin: 0;
     padding: 8px;
     width: 340px;
     font-size: 12px;
-    background: #fff !important; /* stylelint-disable-line declaration-no-important */
+    background: #fff !important;
+    /* stylelint-disable-line declaration-no-important */
     color: color4;
 
     & * {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Satoshi', sans-serif;
+        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+            'ss04' on, 'liga' off;
     }
 }
 

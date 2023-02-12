@@ -25,15 +25,15 @@ class ProgressBar extends PureComponent<Props> {
 const Container = styled.div``
 
 const Bar = styled.div`
-    background-color: ${(props) => props.theme.colors.backgroundColor};
-    height: 20px;
-    border-radius: 10px;
+    background-color: ${(props) => props.theme.colors.black};
+    height: 10px;
+    border-radius: 3px;
 `
 
 const ProgressBarInside = styled.div<{ width: number }>`
-    height: 20px;
-    background-color: ${(props) => props.theme.colors.purple};
-    border-radius: 10px;
+    height: 10px;
+    background-color: ${(props) => props.theme.colors.prime1};
+    border-radius: 3px;
     width: ${(props) => props.width}%;
 `
 

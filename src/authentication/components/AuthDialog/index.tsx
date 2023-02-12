@@ -5,7 +5,7 @@ import { AuthError } from '@worldbrain/memex-common/lib/authentication/types'
 import SimpleTextInput from '@worldbrain/memex-common/lib/common-ui/components/simple-text-input'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { StatefulUIElement } from 'src/util/ui-logic'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { runInBackground } from 'src/util/webextensionRPC'
@@ -13,7 +13,6 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import Logic from './logic'
 import type { State, Event, Dependencies } from './types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { PrimaryButton } from 'src/common-ui/components/primary-button'
 
 export interface Props extends Dependencies {}
 
@@ -80,8 +79,8 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         />
                                     </TextInputContainer>
                                     <InfoText>
-                                        Name shown on shared Spaces, page links
-                                        and annotations
+                                        Shown on shared Spaces, annotations &
+                                        replies.
                                     </InfoText>
                                 </DisplayNameContainer>
                                 <TextInputContainer>
@@ -109,7 +108,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                 </TextInputContainer>
                                 <TextInputContainer>
                                     <Icon
-                                        filePath={icons.lockFine}
+                                        filePath={icons.lock}
                                         heightAndWidth="20px"
                                         hoverOff
                                     />
@@ -185,7 +184,11 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                             )
                                         }
                                         label={'Sign Up'}
-                                        fontSize={'14px'}
+                                        size={'large'}
+                                        type={'primary'}
+                                        fullWidth
+                                        iconPosition="right"
+                                        icon={'longArrowRight'}
                                     />
                                 </ConfirmContainer>
                                 {this.state.error && (
@@ -232,7 +235,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                 <TextInputContainer>
                                     <>
                                         <Icon
-                                            filePath={icons.lockFine}
+                                            filePath={icons.lock}
                                             heightAndWidth="20px"
                                             hoverOff
                                         />
@@ -286,7 +289,11 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                             )
                                         }
                                         label={'Login'}
-                                        fontSize={'14px'}
+                                        size={'large'}
+                                        type={'primary'}
+                                        fullWidth
+                                        icon={'longArrowRight'}
+                                        iconPosition={'right'}
                                     />
                                 </ConfirmContainer>
                                 {this.state.error && (
@@ -354,8 +361,13 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                                 this.state.email.includes('.')
                                             )
                                         }
-                                        label={'Login'}
-                                        fontSize={'14px'}
+                                        label={'Send Reset Email'}
+                                        fontSize={'16px'}
+                                        fontColor={'black'}
+                                        backgroundColor={'prime1'}
+                                        icon={'longArrowRight'}
+                                        iconSize={'22px'}
+                                        iconPosition={'right'}
                                     />
                                 </ConfirmContainer>
                                 {this.state.error && (
@@ -386,7 +398,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                 //             <Icon
                 //                 filePath={icons.mail}
                 //                 heightAndWidth="34px"
-                //                 color="purple"
+                //                 color="prime1"
                 //                 hoverOff
                 //             />
                 //         </SectionCircle>
@@ -421,7 +433,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                     </>
                 )}
                 {this.state.mode === 'signup' && (
-                    <>
+                    <InfoText>
                         Already have an account?{' '}
                         <ModeSwitch
                             onClick={() =>
@@ -432,7 +444,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                         >
                             Log in
                         </ModeSwitch>
-                    </>
+                    </InfoText>
                 )}
             </Footer>
         )
@@ -483,13 +495,14 @@ const LoadingBox = styled.div`
 `
 
 const AuthErrorMessage = styled.div`
-    background-color: ${(props) => props.theme.colors.warning};
+    background-color: ${(props) => props.theme.colors.warning}10;
     font-size: 14px;
     padding-left: 10px;
     margin-top: 5px;
-    color: white;
-    padding: 20px;
-    border-radius: 8px;
+    color: ${(props) => props.theme.colors.warning};
+    border: 1px solid ${(props) => props.theme.colors.warning};
+    padding: 15px;
+    border-radius: 5px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -521,7 +534,7 @@ const SectionTitle = styled.div`
 `
 
 const InfoTextBig = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
     font-weight: 400;
     text-align: center;
@@ -529,7 +542,7 @@ const InfoTextBig = styled.div`
 
 const ForgotPassword = styled.div`
     white-space: nowrap;
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     cursor: pointer;
     font-weight: 500;
 `
@@ -543,10 +556,9 @@ const DisplayNameContainer = styled.div`
 `
 
 const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.lighterText};
-    font-size: 12px;
-    opacity: 0.7;
-    padding-left: 10px;
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 14px;
+    text-align: center;
 `
 
 const FeatureInfoBox = styled.div`
@@ -558,6 +570,7 @@ const FeatureInfoBox = styled.div`
 `
 
 const ConfirmContainer = styled.div`
+    margin-top: 15px;
     & > div {
         width: 100%;
         border-radius: 8px;
@@ -570,24 +583,28 @@ const TextInputContainer = styled.div`
     grid-gap: 10px;
     align-items: center;
     justify-content: flex-start;
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
-    height: 50px;
+    background: ${(props) => props.theme.colors.greyScale2};
+    height: 44px;
     border-radius: 8px;
-    width: 350px;
     padding: 0 15px;
+    width: 350px;
+    &:focus-within {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+    }
 `
 
 const TextInput = styled(SimpleTextInput)`
     outline: none;
     height: fill-available;
     width: fill-available;
-    color: ${(props) => props.theme.colors.lighterText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 14px;
+    font-weight: 300;
     border: none;
     background: transparent;
 
     &::placeholder {
-        color: ${(props) => props.theme.colors.lighterText};
+        color: ${(props) => props.theme.colors.greyScale5};
     }
 `
 
@@ -595,6 +612,7 @@ const WelcomeContainer = styled.div`
     display: flex;
     justify-content: space-between;
     overflow: hidden;
+    background-color: ${(props) => props.theme.colors.black};
 `
 
 const LeftSide = styled.div`
@@ -603,6 +621,7 @@ const LeftSide = styled.div`
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    background-color: ${(props) => props.theme.colors.black};
 
     @media (max-width: 1000px) {
         width: 100%;
@@ -630,7 +649,7 @@ const Title = styled.div`
 `
 
 const DescriptionText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 18px;
     font-weight: normal;
     margin-bottom: 30px;
@@ -670,7 +689,9 @@ const TitleSmall = styled.div`
 `
 
 const StyledAuthDialog = styled.div`
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -692,27 +713,26 @@ const EmailPasswordLogin = styled.div`
 `
 
 const EmailPasswordError = styled.div`
-    color: white;
+    color: ${(props) => props.theme.colors.warning};
     text-align: center;
 `
 
 const AuthBox = styled(Margin)`
     display: flex;
     justify-content: center;
-    width: 350px;
 `
 
 const Footer = styled.div`
     text-align: center;
     user-select: none;
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     opacity: 0.8;
 `
 const ModeSwitch = styled.span`
     cursor: pointer;
     font-weight: bold;
-    color: ${(props) => props.theme.colors.purple};
+    color: ${(props) => props.theme.colors.prime1};
     font-weight: 14px;
 `
 

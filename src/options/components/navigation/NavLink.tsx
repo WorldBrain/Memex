@@ -7,10 +7,11 @@ import { css } from 'styled-components'
 import { OutLink } from 'src/common-ui/containers'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export type Props = {
     name: String
-    icon: String
+    icon: IconKeys
     pathname: String
     isActive: Boolean
     isExternal: Boolean
@@ -33,10 +34,10 @@ class NavLink extends PureComponent<Props> {
                     >
                         <RouteItemContent>
                             <Icon
-                                filePath={'img/' + this.props.icon}
-                                heightAndWidth="20px"
+                                filePath={this.props.icon}
+                                heightAndWidth="22px"
                                 hoverOff
-                                color={this.props.isActive ? 'purple' : null}
+                                color={this.props.isActive ? 'prime1' : null}
                             />
                             <RouteTitle isActive={this.props.isActive}>
                                 {this.props.name}
@@ -51,6 +52,7 @@ class NavLink extends PureComponent<Props> {
 
 const Container = styled.div`
     width: 100%;
+    margin-bottom: 5px;
     & > a {
         display: flex;
         text-decoration: none;
@@ -62,10 +64,7 @@ const Container = styled.div`
 `
 
 const RouteTitle = styled.div<{ name: string; isActive: boolean }>`
-    color: ${(props) =>
-        props.isActive
-            ? props.theme.colors.darkerText
-            : props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
     font-weight: 400;
     text-align: left;
@@ -95,14 +94,32 @@ const RouteItem = styled.li<{ name: string; isActive: boolean }>`
     margin: 0 10px;
     border-radius: 5px;
 
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+
+    ${(props) =>
+        props.isActive &&
+        css`
+            overflow: scroll;
+            background-color: ${(props) => props.theme.colors.greyScale2};
+
+            &:hover {
+                outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+                cursor: default;
+            }
+        `}
+
     & > a {
         display: flex;
         text-decoration: none;
     }
 
-    &: hover {
-        background-color: ${(props) =>
-            props.theme.colors.backgroundColorDarker};
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+        cursor: pointer;
     }
 
     ${(props) =>

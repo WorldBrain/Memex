@@ -12,13 +12,13 @@ import analytics from 'src/analytics'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from 'src/in-page-ui/background/types'
 import styled from 'styled-components'
-import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 async function writeShortcutState(state: State) {
     await setKeyboardShortcutsState(state)
@@ -125,72 +125,76 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
     }
 
     renderCheckboxes() {
-        return this.props.shortcutsData.map(({ id, name, text, subText }) => {
-            if (
-                this.state[name] &&
-                !(id === 'add-tag-shortcut' && !this.state.shouldShowTagsUIs)
-            ) {
-                return (
-                    <CheckBoxRow>
-                        <Checkbox
-                            key={id}
-                            id={id}
-                            isChecked={this.state[name].enabled}
-                            handleChange={this.handleEnabledToggle}
-                            isDisabled={!this.state.shortcutsEnabled}
-                            name={name}
-                        >
-                            <Title>
-                                {text}{' '}
-                                {subText && <SubText>({subText})</SubText>}
-                            </Title>
-                            <RightBox>
-                                <KeyboardInput
-                                    type="text"
-                                    value={this.state[name].shortcut}
-                                    onKeyDown={this.recordBinding}
-                                    onChange={(e) => e.preventDefault()}
-                                    disabled={!this.state.shortcutsEnabled}
-                                    name={name}
-                                />{' '}
-                            </RightBox>
-                        </Checkbox>
-                    </CheckBoxRow>
-                )
-            }
-        })
+        return this.props.shortcutsData.map(
+            ({ id, name, text, subText }, i) => {
+                if (
+                    this.state[name] &&
+                    !(
+                        id === 'add-tag-shortcut' &&
+                        !this.state.shouldShowTagsUIs
+                    )
+                ) {
+                    const keysArray: [] = this.state[name].shortcut.split('+')
+                    return (
+                        <CheckBoxRow>
+                            <Checkbox
+                                key={id}
+                                id={id}
+                                isChecked={this.state[name].enabled}
+                                handleChange={this.handleEnabledToggle}
+                                isDisabled={!this.state.shortcutsEnabled}
+                                name={name}
+                                label={text.toString()}
+                                zIndex={this.props.shortcutsData.length - i}
+                            >
+                                <RightBox>
+                                    <Title>
+                                        {subText && (
+                                            <SubText>{subText}</SubText>
+                                        )}
+                                    </Title>
+                                    <KeyBoardShortCutBehind>
+                                        <KeyboardShortcuts keys={keysArray} />
+                                    </KeyBoardShortCutBehind>
+                                    <KeyboardInput
+                                        type="text"
+                                        value={this.state[name].shortcut}
+                                        onKeyDown={this.recordBinding}
+                                        onChange={(e) => e.preventDefault()}
+                                        disabled={!this.state.shortcutsEnabled}
+                                        name={name}
+                                    />{' '}
+                                </RightBox>
+                            </Checkbox>
+                        </CheckBoxRow>
+                    )
+                }
+            },
+        )
     }
 
     render() {
         return (
-            <Section>
-                <SectionCircle>
-                    <Icon
-                        filePath={icons.atSign}
-                        heightAndWidth="34px"
-                        color="purple"
-                        hoverOff
-                    />
-                </SectionCircle>
-                <SectionTitle>Keyboard Shortcuts</SectionTitle>
-                <InfoText>
-                    You can also use shift, ctrl, alt, or meta to define
-                    keyboard shortcuts.
-                </InfoText>
+            <SettingSection
+                icon={'command'}
+                title={'Keyboard Shortcuts'}
+                description={
+                    'You can also use shift, ctrl, alt, or meta to define keyboard shortcuts.'
+                }
+            >
                 <Checkbox
                     id="shortcuts-enabled"
                     isChecked={this.state.shortcutsEnabled}
                     handleChange={this.handleEnabledToggle}
                     name="shortcutsEnabled"
-                >
-                    Enable Keyboard Shortcuts
-                </Checkbox>
+                    label={'Enable Keyboard Shortcuts'}
+                />
                 {this.state.shortcutsEnabled && (
                     <CheckBoxContainer>
                         {this.renderCheckboxes()}
                     </CheckBoxContainer>
                 )}
-            </Section>
+            </SettingSection>
         )
     }
 }
@@ -200,6 +204,25 @@ const RightBox = styled.div`
     align-items: center;
     grid-auto-flow: column;
     grid-gap: 10px;
+    flex: 1;
+    justify-content: flex-end;
+    position: relative;
+    height: 40px;
+    padding-right: 130px;
+    color: ${(props) => props.theme.colors.white};
+`
+
+const KeyBoardShortCutBehind = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    height: 40px;
+    width: 120px;
+    top: 0px;
+    right: 0px;
+    border-radius: 8px;
+    background: ${(props) => props.theme.colors.greyScale2};
 `
 
 const Title = styled.span`
@@ -209,66 +232,55 @@ const Title = styled.span`
 `
 
 const SubText = styled.span`
-    color: ${(props) => props.theme.colors.normalText};
+    color: ${(props) => props.theme.colors.white};
     padding-left: 5px;
 `
 
 const CheckBoxContainer = styled.div`
     margin-top: 30px;
-    border-top: 1px solid ${(props) => props.theme.colors.lineGrey};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
     padding-top: 10px;
     cursor: pointer;
 `
 
-const CheckBoxRow = styled.div`
+const CheckBoxRow = styled.div<{
+    zIndex: number
+}>`
     height: 50px;
+    margin-left: -10px;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    z-index: ${(props) => props.zIndex};
+
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+        z-index: ${(props) => props.zIndex};
+    }
 `
 
 const KeyboardInput = styled.input`
-    background: ${(props) => props.theme.colors.backgroundColor};
     height: 40px;
     width: 120px;
     padding: 0 15px;
     align-items: center;
     justify-content: center;
-    color: ${(props) => props.theme.colors.darkerText};
-    border: 1px solid ${(props) => props.theme.colors.lineLightGrey};
+    color: transparent;
     outline: none;
     text-align: center;
-    border-radius: 5px;
-`
+    border-radius: 8px;
+    border: none;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background: transparent;
+    caret-color: transparent;
 
-const Section = styled.div`
-    background: #ffffff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    border-radius: 12px;
-    padding: 50px;
-    margin-bottom: 30px;
-`
-
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.backgroundHighlight};
-    border-radius: 100px;
-    height: 80px;
-    width: 80px;
-    margin-bottom: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 10px;
-`
-
-const InfoText = styled.div`
-    color: ${(props) => props.theme.colors.normalText};
-    font-size: 14px;
-    margin-bottom: 40px;
-    font-weight: 500;
+    &:focus {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+    }
 `
 
 export default KeyboardShortcutsContainer

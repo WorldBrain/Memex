@@ -6,11 +6,10 @@ import { reactEventHandler } from 'src/util/ui-logic'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 import { ThemeProvider } from 'styled-components'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import { tutorialContents, TutorialCardContent } from './tutorial-cards-content'
-import { PrimaryAction } from 'src/common-ui/components/design-library/actions/PrimaryAction'
-import { windowWhen } from 'rxjs/operator/windowWhen'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 // card container (hold cycling logic)
 // card component (holds card content, isEndOfCycle, isStartOfCycle)
@@ -61,54 +60,107 @@ export default class TutorialContainer extends React.Component<Props, State> {
 
     render() {
         return (
-            <TutorialCardContainer
-                top={
-                    this.props.content[this.state.cardIndex].component.props.top
-                }
-                bottom={
-                    this.props.content[this.state.cardIndex].component.props
-                        .bottom
-                }
-                left={
-                    this.props.content[this.state.cardIndex].component.props
-                        .left
-                }
-                right={
-                    this.props.content[this.state.cardIndex].component.props
-                        .right
-                }
-                width={
-                    this.props.content[this.state.cardIndex].component.props
-                        .width
-                }
-                height={
-                    this.props.content[this.state.cardIndex].component.props
-                        .height
-                }
-                screenWidth={this.state.windowSize}
-            >
-                <CardBody>
-                    {this.props.content[this.state.cardIndex].component}
-                </CardBody>
-                <CardFooter>
-                    {this.state.cardIndex > 0 ? (
-                        <BackButton onClick={this.prevCard}>Go Back</BackButton>
-                    ) : (
-                        <div />
+            <>
+                <TutorialCardContainer
+                    top={
+                        this.props.content[this.state.cardIndex].component.props
+                            .top
+                    }
+                    bottom={
+                        this.props.content[this.state.cardIndex].component.props
+                            .bottom
+                    }
+                    left={
+                        this.props.content[this.state.cardIndex].component.props
+                            .left
+                    }
+                    right={
+                        this.props.content[this.state.cardIndex].component.props
+                            .right
+                    }
+                    width={
+                        this.props.content[this.state.cardIndex].component.props
+                            .width
+                    }
+                    height={
+                        this.props.content[this.state.cardIndex].component.props
+                            .height
+                    }
+                    screenWidth={this.state.windowSize}
+                    showHoverArea={
+                        this.props.content[this.state.cardIndex].component.props
+                            .showHoverArea
+                    }
+                    position={
+                        this.props.content[this.state.cardIndex].component.props
+                            .position
+                    }
+                >
+                    <TopArea firstContainer={this.state.cardIndex === 0}>
+                        <CardBody>
+                            {this.props.content[this.state.cardIndex].component}
+                        </CardBody>
+                        <CardFooter>
+                            {this.state.cardIndex > 0 ? (
+                                <PrimaryAction
+                                    onClick={this.prevCard}
+                                    label={'Back'}
+                                    type={'tertiary'}
+                                    size={'medium'}
+                                />
+                            ) : (
+                                <div />
+                            )}
+                            {this.state.cardIndex <
+                            this.props.content.length - 1 ? (
+                                this.state.cardIndex > 0 && (
+                                    <PrimaryAction
+                                        onClick={this.nextCard}
+                                        label={'Next'}
+                                        type={'primary'}
+                                        size={'medium'}
+                                        icon={'longArrowRight'}
+                                        iconPosition={'right'}
+                                        // iconSize={'22px'}
+                                    />
+                                )
+                            ) : (
+                                <PrimaryAction
+                                    label={'Finish'}
+                                    onClick={this.props.finishTutorial}
+                                    type={'primary'}
+                                    size={'medium'}
+                                    icon={'check'}
+                                    iconPosition={'left'}
+                                />
+                            )}
+                        </CardFooter>
+                    </TopArea>
+                    {this.props.content[this.state.cardIndex].component.props
+                        .extraArea && (
+                        <BottomArea>
+                            {
+                                this.props.content[this.state.cardIndex]
+                                    .component.props.extraArea
+                            }
+                        </BottomArea>
                     )}
-                    {this.state.cardIndex < this.props.content.length - 1 ? (
-                        <PrimaryAction
-                            onClick={this.nextCard}
-                            label={'Next Step'}
-                        />
-                    ) : (
-                        <PrimaryAction
-                            label={'Finish'}
-                            onClick={this.props.finishTutorial}
-                        />
-                    )}
-                </CardFooter>
-            </TutorialCardContainer>
+                </TutorialCardContainer>
+                {this.props.content[this.state.cardIndex].component.props
+                    .showHoverArea && (
+                    <HoverArea
+                        id={'HoverArea'}
+                        onMouseEnter={() => (
+                            this.setState({
+                                cardIndex: this.state.cardIndex + 1,
+                            }),
+                            (document.getElementById(
+                                'HoverArea',
+                            ).style.display = 'none')
+                        )}
+                    />
+                )}
+            </>
         )
     }
 }
@@ -117,12 +169,56 @@ export function destroyUIContainer(target) {
     ReactDOM.unmountComponentAtNode(target)
 }
 
-const BackButton = styled.div`
-    font-size: 14px;
-    font-weight: bold;
-    margin-right: 20px;
-    cursor: pointer;
-    color: ${(props) => props.theme.colors.lighterText};
+const HoverArea = styled.div`
+    position: fixed;
+    right: 0px;
+    /* border-bottom-left-radius: 40px;
+    border-top-left-radius: 40px; */
+    top: 120px;
+    right: 0px;
+    width: 30px;
+    height: 420px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border: 1px solid ${(props) => props.theme.colors.prime1};
+    background: ${(props) => props.theme.colors.prime1}60;
+
+    opacity: 0;
+    animation: 3s ease-in-out 0.5s MouseAreaAppear infinite;
+    animation-iteration-count: infinite;
+    display: flex;
+
+    @keyframes MouseAreaAppear {
+        0% {
+            opacity: 0;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+        }
+    }
+`
+
+const BottomArea = styled.div`
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
+    width: 100%;
+`
+
+const TopArea = styled.div<{ firstContainer: boolean }>`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+
+    ${(props) =>
+        props.firstContainer &&
+        css`
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        `}
 `
 
 const TutorialCardContainer = styled.div<{
@@ -136,40 +232,37 @@ const TutorialCardContainer = styled.div<{
 }>`
     top: ${(props) => (props.top ? props.top : null)};
     bottom: ${(props) => (props.bottom ? props.bottom : null)};
-    left: ${(props) =>
-        props.left
-            ? (props.screenWidth - props.width.replace('px', '')) / 2 + 'px'
-            : null};
+    left: auto;
     right: ${(props) => (props.right ? props.right : null)};
-    width: ${(props) => (props.width ? props.width : '300px')};
-    height: ${(props) => (props.height ? props.height : '500px')};
+    width: ${(props) => (props.width ? props.width : '650px')};
+    height: ${(props) => props.height && props.height};
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    justify-content: space-between;
+    align-items: center;
+    justify-content: center;
     position: fixed;
-    background: #ffffff;
+    background-color: ${(props) => props.theme.colors.greyScale1};
     border-radius: 12px;
-    color: black !important;
     font-size: 11px;
     font-weight: 500;
-    line-height: 1.4;
     padding: 3em;
     text-align: center;
+    min-height: 60px;
+    grid-gap: 30px;
 
-    font-family: 'Inter', sans-serif;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
     box-shadow: 0px 4px 15px 5px rgb(0 0 0 / 5%);
-    border: 4px solid ${(props) => props.theme.colors.purple};
-    animation: 1s ease-in-out 0s 1 slideInFromLeft;
+    border: 2px solid ${(props) => props.theme.colors.greyScale3};
+    animation: 0.3s ease-out 0s 1 slideInFromLeft;
 
     @keyframes slideInFromLeft {
         0% {
-            transform: translateX(
-                ${(props) => (props.width ? props.width : '300px')}
-            );
+            opacity: 0;
         }
         100% {
-            transform: translateX(0%);
+            opacity: 1;
         }
     }
 `
@@ -208,6 +301,7 @@ const CardFooter = styled.div`
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    grid-gap: 5px;
 `
 
 const CloseButton = styled.img`
