@@ -37,10 +37,12 @@ async function setupTest(opts: {
 
     await twitterAPI.setupAuth('test-key', 'test-secret')
 
+    const fetch = () => new Error(`Not implemented yet`)
     const processor = new TwitterActionProcessor({
+        fetch: fetch as any,
+        openGraphIOAppId: '',
         captureException: opts.captureException ?? (async () => {}),
         storageManager: serverStorage.manager,
-        twitterAPI,
         storageUtils: await createUploadStorageUtils({
             storageManager: context.storageManager,
             getNow: () => Date.now(),
