@@ -220,9 +220,7 @@ export default class SpacePickerLogic extends UILogic<
                     previousState,
                     event: { entry: previousState.newEntryName },
                 })
-                return
             }
-            currentKeys = currentKeys.filter((key) => key !== event.key)
             this.currentKeysPressed = []
             return
         }
@@ -231,15 +229,10 @@ export default class SpacePickerLogic extends UILogic<
         //     await this.dependencies.onSubmit()
         // }
 
-        if (this.newTabKeys.includes(event.key as KeyEvent)) {
-            if (previousState.newEntryName !== '' && !(this.focusIndex >= 0)) {
-                await this.newEntryPress({
-                    previousState,
-                    event: { entry: previousState.newEntryName },
-                })
-                return
-            }
-
+        if (
+            this.newTabKeys.includes(event.key as KeyEvent) &&
+            previousState.displayEntries.length > 0
+        ) {
             if (previousState.displayEntries[this.focusIndex]) {
                 await this.resultEntryPress({
                     event: {
@@ -247,6 +240,7 @@ export default class SpacePickerLogic extends UILogic<
                     },
                     previousState,
                 })
+                this.currentKeysPressed = []
                 return
             }
         }
