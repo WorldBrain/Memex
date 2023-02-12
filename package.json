@@ -9,6 +9,7 @@
         "build:prod": "npm run build:clean && webpack --env.prod",
         "build:package": "npm run build:clean && webpack --env.prod --env.package",
         "build:package:mv2": "npm run build:clean && MANIFEST_VERSION=2 webpack --env.prod --env.package",
+        "build:package-sentry:mv2": "npm run build:clean && MANIFEST_VERSION=2 webpack --env.prod --env.package --env.sentry",
         "build:package-sentry": "npm run build:clean && webpack --env.prod --env.package --env.sentry",
         "build:clean": "rimraf ./extension",
         "watch": "npm run build:clean && webpack --watch",
