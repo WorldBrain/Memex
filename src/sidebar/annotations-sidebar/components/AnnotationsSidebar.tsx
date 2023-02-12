@@ -425,7 +425,7 @@ export class AnnotationsSidebar extends React.Component<
                 </EmptyMessageContainer>
             )
         } else {
-            listAnnotations = annotationsData.map((annotation) => {
+            listAnnotations = annotationsData.map((annotation, i) => {
                 const annotationCardId = generateAnnotationCardInstanceId(
                     annotation,
                     listData.unifiedId,
@@ -503,8 +503,24 @@ export class AnnotationsSidebar extends React.Component<
                             ? 'footer'
                             : 'hide'
                 }
+
                 return (
-                    <React.Fragment key={annotation.unifiedId}>
+                    <AnnotationBox
+                        key={annotation.unifiedId}
+                        isActive={
+                            this.props.activeAnnotationId ===
+                            annotation.unifiedId
+                        }
+                        zIndex={
+                            this.props.activeShareMenuNoteId ===
+                            annotation.unifiedId
+                                ? 10000
+                                : this.props.annotations.allIds.length - i
+                        }
+                        className={'AnnotationBox'}
+                        id={annotation.unifiedId}
+                        order={i}
+                    >
                         <AnnotationEditable
                             selectedListId={
                                 this.props.annotationsCache.lists.byId[
@@ -574,7 +590,7 @@ export class AnnotationsSidebar extends React.Component<
                                     }
                                 />
                             )}
-                    </React.Fragment>
+                    </AnnotationBox>
                 )
             })
         }
