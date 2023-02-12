@@ -298,7 +298,12 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         })
 
         if (nextAnnotation.privacyLevel >= AnnotationPrivacyLevels.SHARED) {
-            nextAnnotation.unifiedListIds = [...this.pageSharedListIds]
+            nextAnnotation.unifiedListIds = [
+                ...new Set([
+                    ...this.pageSharedListIds,
+                    ...annotation.unifiedListIds,
+                ]),
+            ]
         }
 
         this.annotations.allIds = [
