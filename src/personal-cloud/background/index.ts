@@ -46,6 +46,7 @@ import type { LocalExtensionSettings } from 'src/background-script/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { Runtime } from 'webextension-polyfill'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
@@ -191,6 +192,8 @@ export class PersonalCloudBackground {
     }
 
     async setup() {
+        this.deviceId = await this.options.settingStore.get('deviceId')
+
         this.currentSchemaVersion = getCurrentSchemaVersion(
             this.options.storageManager,
         )
@@ -497,7 +500,7 @@ export class PersonalCloudBackground {
     }
 
     executeAction: ActionExecutor<PersonalCloudAction> = async ({ action }) => {
-        if (!this.deviceId) {
+        if (!this.deviceId || !(await this.options.getUserId())) {
             // console.warn(
             //     'Tried to execute action without deviceId, so pausing the action queue',
             // )
