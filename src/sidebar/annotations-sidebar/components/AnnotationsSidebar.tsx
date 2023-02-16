@@ -1097,8 +1097,10 @@ export class AnnotationsSidebar extends React.Component<
         return this.renderListAnnotations(selectedListId, true)
     }
 
-    isolatedViewNotifVisible = async () =>
+    isolatedViewNotifVisible = async () => {
+        this.setState({ showIsolatedViewNotif: false })
         await setLocalStorage(SHOW_ISOLATED_VIEW_KEY, false)
+    }
 
     private renderFocusModeNotif(listData) {
         if (
@@ -1122,6 +1124,7 @@ export class AnnotationsSidebar extends React.Component<
                             filePath={'removeX'}
                             heightAndWidth={'20px'}
                             color={'greyScale5'}
+                            onClick={() => this.isolatedViewNotifVisible()}
                         />
                     </FocusModeNotifTopBar>
                     <FocusModeNotifExplainer>
@@ -1367,10 +1370,6 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderTopBarSwitcher() {
-        console.log(
-            'has network annotations',
-            this.props.pageHasNetworkAnnotations,
-        )
         return (
             <TopBarContainer>
                 <PrimaryAction
