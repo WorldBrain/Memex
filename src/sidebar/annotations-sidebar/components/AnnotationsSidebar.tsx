@@ -1367,6 +1367,10 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderTopBarSwitcher() {
+        console.log(
+            'has network annotations',
+            this.props.pageHasNetworkAnnotations,
+        )
         return (
             <TopBarContainer>
                 <PrimaryAction

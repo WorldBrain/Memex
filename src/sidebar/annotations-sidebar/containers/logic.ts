@@ -369,15 +369,16 @@ export class SidebarContainerLogic extends UILogic<
                 this.readingViewStorageListener(true)
             }
 
+            const hasNetworkActivity = await pageActivityIndicatorBG.getPageActivityStatus(
+                fullPageUrl,
+            )
+            this.emitMutation({
+                pageHasNetworkAnnotations: {
+                    $set: hasNetworkActivity !== 'no-activity',
+                },
+            })
+
             if (shouldHydrateCacheOnInit && fullPageUrl != null) {
-                const hasNetworkActivity = await pageActivityIndicatorBG.getPageActivityStatus(
-                    fullPageUrl,
-                )
-                this.emitMutation({
-                    pageHasNetworkAnnotations: {
-                        $set: hasNetworkActivity !== 'no-activity',
-                    },
-                })
                 await this.hydrateAnnotationsCache(fullPageUrl, {
                     renderHighlights: true,
                 })
@@ -485,7 +486,6 @@ export class SidebarContainerLogic extends UILogic<
         this.resizeObserver = new ResizeObserver(this.debounceReadingWidth)
 
         if (this.readingViewState['@Sidebar-reading_view']) {
-            console.log('settotrue')
             this.emitMutation({
                 readingView: { $set: true },
             })
@@ -699,6 +699,8 @@ export class SidebarContainerLogic extends UILogic<
         const hasNetworkActivity = await this.options.pageActivityIndicatorBG.getPageActivityStatus(
             event.fullPageUrl,
         )
+
+        console.log('pagehas', hasNetworkActivity)
 
         this.emitMutation({
             pageHasNetworkAnnotations: {
