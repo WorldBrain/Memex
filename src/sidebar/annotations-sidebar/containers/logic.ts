@@ -700,8 +700,6 @@ export class SidebarContainerLogic extends UILogic<
             event.fullPageUrl,
         )
 
-        console.log('pagehas', hasNetworkActivity)
-
         this.emitMutation({
             pageHasNetworkAnnotations: {
                 $set: hasNetworkActivity != 'no-activity',
@@ -1616,20 +1614,43 @@ export class SidebarContainerLogic extends UILogic<
                     normalizedPageUrl: normalizeUrl(fullPageUrl),
                 },
             )
+
             if (!sharedList) {
                 throw new Error(
                     `Could not load remote list data for selected list mode - ID: ${event.sharedListId}`,
                 )
             }
+
             const unifiedList = annotationsCache.addList({
                 remoteId: event.sharedListId,
                 name: sharedList.title,
                 creator: sharedList.creator,
                 description: sharedList.description,
                 isForeignList: true,
-                hasRemoteAnnotationsToLoad: true,
+                hasRemoteAnnotationsToLoad:
+                    sharedList.sharedAnnotations == null ? false : true,
                 unifiedAnnotationIds: [], // Will be populated soon when annots get cached
             })
+
+            if (sharedList.sharedAnnotations == null) {
+                this.emitMutation({
+                    selectedListId: { $set: unifiedList.unifiedId },
+                    // NOTE: this is the only time we're manually mutating the listInstances state outside the cache subscription - maybe there's a "cleaner" way to do this
+                    listInstances: {
+                        [unifiedList.unifiedId]: {
+                            annotationRefsLoadState: { $set: 'success' },
+                            conversationsLoadState: { $set: 'success' },
+                            annotationsLoadState: { $set: 'success' },
+                            sharedAnnotationReferences: {
+                                $set: [],
+                            },
+                        },
+                    },
+                    loadState: { $set: 'success' },
+                })
+
+                return
+            }
 
             this.emitMutation({
                 loadState: { $set: 'success' },
