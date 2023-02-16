@@ -3219,19 +3219,21 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        let listId
+        let editingListId
         if (event.listId == null) {
-            const { editingListId: listId } = previousState.listsSidebar
+            editingListId = previousState.listsSidebar.editingListId
         } else {
-            listId = event.listId
+            editingListId = event.listId
         }
 
-        if (!listId) {
+        console.log('confirmListEdit', previousState.listsSidebar)
+
+        if (!editingListId) {
             throw new Error('No list ID is set for editing')
         }
 
         const { name: oldName } = await this.options.listsBG.fetchListById({
-            id: listId,
+            id: editingListId,
         })
 
         // const oldName = previousState.listsSidebar.listData[listId].name
@@ -3240,7 +3242,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (event.value) {
             newName = event.value
         } else {
-            newName = previousState.listsSidebar.listData[listId].newName
+            newName = previousState.listsSidebar.listData[editingListId].newName
         }
 
         if (newName === oldName) {
@@ -3250,14 +3252,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         const validationResult = validateSpaceName(
             newName,
             previousState.listsSidebar.localLists.allListIds.reduce(
-                (acc, listId) => [
+                (acc, editingListId) => [
                     ...acc,
-                    previousState.listsSidebar.listData[listId],
+                    previousState.listsSidebar.listData[editingListId],
                 ],
                 [],
             ),
             {
-                listIdToSkip: listId,
+                listIdToSkip: editingListId,
             },
         )
 
@@ -3281,7 +3283,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.emitMutation({
                     listsSidebar: {
                         listData: {
-                            [listId]: {
+                            [editingListId]: {
                                 name: { $set: newName },
                                 newName: { $set: newName },
                             },
@@ -3292,7 +3294,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 })
                 await this.options.listsBG.updateListName({
-                    id: listId,
+                    id: editingListId,
                     oldName,
                     newName,
                 })
