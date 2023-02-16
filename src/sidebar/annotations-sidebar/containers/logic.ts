@@ -485,12 +485,18 @@ export class SidebarContainerLogic extends UILogic<
         this.resizeObserver = new ResizeObserver(this.debounceReadingWidth)
 
         if (this.readingViewState['@Sidebar-reading_view']) {
+            console.log('settotrue')
             this.emitMutation({
                 readingView: { $set: true },
             })
             this.resizeObserver.observe(this.sidebar)
             window.addEventListener('resize', this.debounceReadingWidth)
             this.setReadingWidth()
+        }
+        if (!this.readingViewState['@Sidebar-reading_view']) {
+            this.emitMutation({
+                readingView: { $set: false },
+            })
         }
 
         const { storageAPI } = this.options
@@ -590,6 +596,8 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     show: EventHandler<'show'> = async ({ event }) => {
+        this.readingViewState =
+            (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(true)
         const width =
             event.existingWidthState != null
@@ -602,7 +610,9 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    hide: EventHandler<'hide'> = ({ event, previousState }) => {
+    hide: EventHandler<'hide'> = async ({ event, previousState }) => {
+        this.readingViewState =
+            (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(false)
         this.emitMutation({
             showState: { $set: 'hidden' },
