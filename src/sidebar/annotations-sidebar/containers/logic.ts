@@ -1615,6 +1615,10 @@ export class SidebarContainerLogic extends UILogic<
                 },
             )
 
+            // check ownership status of current list for the case that we don't yet have the data synced up and people can start collaborating
+
+            console.log('cachedList', cachedList)
+
             if (!sharedList) {
                 throw new Error(
                     `Could not load remote list data for selected list mode - ID: ${event.sharedListId}`,

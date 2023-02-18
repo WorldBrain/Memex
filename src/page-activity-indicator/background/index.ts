@@ -286,11 +286,15 @@ export class PageActivityIndicatorBackground {
         /** If defined, will constrain the sync to only these followedLists. Else will sync all. */
         forFollowedLists?: Array<Pick<FollowedList, 'sharedList' | 'lastSync'>>
     }): Promise<void> {
+        // addding this timestamp here to fix race condition where the sync finishes after a new item has been added tot he sync entries and therefore is skipped on the next sync
+        const syncStartTimestamp = Date.now() - 10000
+        const now = opts?.now ?? Date.now()
+
         const currentUser = await this.getCurrentUser()
         if (currentUser == null) {
             return
         }
-        const now = opts?.now ?? Date.now()
+
         const { contentSharing } = await this.deps.getServerStorage()
 
         const followedLists =
@@ -408,7 +412,7 @@ export class PageActivityIndicatorBackground {
 
             await this.storage.updateFollowedListLastSync({
                 sharedList: followedList.sharedList,
-                lastSync: now,
+                lastSync: syncStartTimestamp,
             })
         }
     }
