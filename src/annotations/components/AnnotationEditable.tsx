@@ -652,19 +652,21 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
         return (
             <DefaultFooterStyled>
-                <PrimaryAction
-                    onClick={() =>
-                        this.setState({
-                            showShareMenu: true,
-                        })
-                    }
-                    label={shareIconData.label}
-                    icon={shareIconData.icon}
-                    size={'small'}
-                    type={'tertiary'}
-                    innerRef={this.shareButtonRef}
-                    active={this.state.showShareMenu}
-                />
+                <ShareMenuContainer>
+                    <PrimaryAction
+                        onClick={() =>
+                            this.setState({
+                                showShareMenu: true,
+                            })
+                        }
+                        label={shareIconData.label}
+                        icon={shareIconData.icon}
+                        size={'small'}
+                        type={'tertiary'}
+                        innerRef={this.shareButtonRef}
+                        active={this.state.showShareMenu}
+                    />
+                </ShareMenuContainer>
 
                 <DeletionBox>
                     {isDeleting && (
@@ -853,6 +855,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 }
 
+const ShareMenuContainer = styled.div`
+    display: flex;
+    margin-left: 5px;
+`
+
 const HighlightContent = styled.div`
     position: relative;
     width: fill-available;
@@ -990,7 +997,6 @@ const CommentBox = styled.div`
 const DefaultFooterStyled = styled.div`
     display: flex;
     align-items: center;
-    padding-left: 5px;
     justify-content: space-between;
     border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
 `

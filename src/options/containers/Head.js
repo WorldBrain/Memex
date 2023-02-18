@@ -10,12 +10,12 @@ import qs from 'query-string'
  * @param {Object} location Location object passed in from react-router.
  * @param {string} location.pathname
  */
-const renderHeadContent = location => {
+const renderHeadContent = (location) => {
     const showInbox = qs.parse(location.search).showInbox
 
     switch (location.pathname) {
         case '/overview':
-            return <title>{showInbox ? 'Inbox' : '🔍 Results'}</title>
+            return <title>{showInbox ? 'Inbox' : '🔍 Dashboard'}</title>
         case '/tutorial':
             return <title>Settings - Tutorial</title>
         case '/help':
@@ -27,9 +27,9 @@ const renderHeadContent = location => {
         case '/import':
             return <title>Settings - Imports</title>
         case '/blocklist':
-            return <title>Settings - Blacklist</title>
+            return <title>Settings - BlockList</title>
         default:
-            return <title>Settings</title>
+            return <title>Memex</title>
     }
 }
 

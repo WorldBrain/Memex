@@ -369,15 +369,16 @@ export class SidebarContainerLogic extends UILogic<
                 this.readingViewStorageListener(true)
             }
 
+            const hasNetworkActivity = await pageActivityIndicatorBG.getPageActivityStatus(
+                fullPageUrl,
+            )
+            this.emitMutation({
+                pageHasNetworkAnnotations: {
+                    $set: hasNetworkActivity !== 'no-activity',
+                },
+            })
+
             if (shouldHydrateCacheOnInit && fullPageUrl != null) {
-                const hasNetworkActivity = await pageActivityIndicatorBG.getPageActivityStatus(
-                    fullPageUrl,
-                )
-                this.emitMutation({
-                    pageHasNetworkAnnotations: {
-                        $set: hasNetworkActivity !== 'no-activity',
-                    },
-                })
                 await this.hydrateAnnotationsCache(fullPageUrl, {
                     renderHighlights: true,
                 })
@@ -492,6 +493,11 @@ export class SidebarContainerLogic extends UILogic<
             window.addEventListener('resize', this.debounceReadingWidth)
             this.setReadingWidth()
         }
+        if (!this.readingViewState['@Sidebar-reading_view']) {
+            this.emitMutation({
+                readingView: { $set: false },
+            })
+        }
 
         const { storageAPI } = this.options
         if (enable) {
@@ -590,6 +596,8 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     show: EventHandler<'show'> = async ({ event }) => {
+        this.readingViewState =
+            (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(true)
         const width =
             event.existingWidthState != null
@@ -602,7 +610,9 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    hide: EventHandler<'hide'> = ({ event, previousState }) => {
+    hide: EventHandler<'hide'> = async ({ event, previousState }) => {
+        this.readingViewState =
+            (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(false)
         this.emitMutation({
             showState: { $set: 'hidden' },
@@ -1604,20 +1614,47 @@ export class SidebarContainerLogic extends UILogic<
                     normalizedPageUrl: normalizeUrl(fullPageUrl),
                 },
             )
+
+            // check ownership status of current list for the case that we don't yet have the data synced up and people can start collaborating
+
+            console.log('cachedList', cachedList)
+
             if (!sharedList) {
                 throw new Error(
                     `Could not load remote list data for selected list mode - ID: ${event.sharedListId}`,
                 )
             }
+
             const unifiedList = annotationsCache.addList({
                 remoteId: event.sharedListId,
                 name: sharedList.title,
                 creator: sharedList.creator,
                 description: sharedList.description,
                 isForeignList: true,
-                hasRemoteAnnotationsToLoad: true,
+                hasRemoteAnnotationsToLoad:
+                    sharedList.sharedAnnotations == null ? false : true,
                 unifiedAnnotationIds: [], // Will be populated soon when annots get cached
             })
+
+            if (sharedList.sharedAnnotations == null) {
+                this.emitMutation({
+                    selectedListId: { $set: unifiedList.unifiedId },
+                    // NOTE: this is the only time we're manually mutating the listInstances state outside the cache subscription - maybe there's a "cleaner" way to do this
+                    listInstances: {
+                        [unifiedList.unifiedId]: {
+                            annotationRefsLoadState: { $set: 'success' },
+                            conversationsLoadState: { $set: 'success' },
+                            annotationsLoadState: { $set: 'success' },
+                            sharedAnnotationReferences: {
+                                $set: [],
+                            },
+                        },
+                    },
+                    loadState: { $set: 'success' },
+                })
+
+                return
+            }
 
             this.emitMutation({
                 loadState: { $set: 'success' },
