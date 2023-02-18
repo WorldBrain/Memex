@@ -287,7 +287,7 @@ export class PageActivityIndicatorBackground {
         forFollowedLists?: Array<Pick<FollowedList, 'sharedList' | 'lastSync'>>
     }): Promise<void> {
         // addding this timestamp here to fix race condition where the sync finishes after a new item has been added tot he sync entries and therefore is skipped on the next sync
-        const syncStartTimestamp = Date.now() - 10000
+        const syncStartTimestamp = Date.now()
         const now = opts?.now ?? Date.now()
 
         const currentUser = await this.getCurrentUser()
