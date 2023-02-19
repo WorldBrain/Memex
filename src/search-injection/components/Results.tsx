@@ -15,17 +15,14 @@ const Results = (props) => {
                 hideResults={props.hideResults}
                 // searchEngine={props.searchEngine}
             >
-                <UpdateNotifBannerBox>
-                    <UpdateNotifBanner
-                        theme={{
-                            width:
-                                props.position === 'side' && 'fill-available',
-                            position: 'relative',
-                            iconSize: '20px',
-                        }}
-                        location="search"
-                    />
-                </UpdateNotifBannerBox>
+                <UpdateNotifBanner
+                    theme={{
+                        width: props.position === 'side' && 'fill-available',
+                        position: 'relative',
+                        iconSize: '20px',
+                    }}
+                    location="search"
+                />
                 <TopBarArea hideResults={props.hideResults}>
                     <ResultsBox>
                         <TooltipBox
@@ -91,9 +88,7 @@ const Results = (props) => {
     )
 }
 
-const SettingsButtonContainer = styled.div`
-    height: 24px;
-`
+const SettingsButtonContainer = styled.div``
 
 const MemexContainer = styled.div`
     display: flex;
@@ -146,8 +141,8 @@ const TotalCount = styled.div`
 `
 
 const ResultsText = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
-    font-weight: bold;
+    color: ${(props) => props.theme.colors.white};
+    font-weight: 300;
     font-size: 16px;
 `
 
