@@ -53,7 +53,7 @@ const RootContainer = styled.div`
     }
 
     &:hover ${Root} {
-        background: ${(props) => props.theme.colors.greyScale3};
+        background: ${(props) => props.theme.colors.greyScale2};
     }
 `
 
