@@ -1306,10 +1306,11 @@ const ResultsBox = styled.div<{ zIndex: number }>`
     width: fill-available;
     height: 100vh;
     overflow: scroll;
+    overflow-x: hidden;
     padding-bottom: 100px;
     align-items: center;
 
-    &::-webkit-scrollbar {
+    & ::-webkit-scrollbar:horizontal {
         display: none;
     }
 
