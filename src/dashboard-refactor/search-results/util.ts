@@ -1,5 +1,3 @@
-import moment from 'moment'
-
 import type {
     StandardSearchResponse,
     AnnotationsSearchResponse,
@@ -26,6 +24,7 @@ import {
     mergeNormalizedStates,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import { formateCalendarTime } from '@worldbrain/memex-common/lib/utils/date-time'
 
 export const notesTypeToString = (type: NotesType): string => {
     if (type === 'user') {
@@ -48,7 +47,7 @@ export const stringToNotesType = (str: string): NotesType => {
 }
 
 export const formatDayGroupTime = (day: number) =>
-    moment(day).calendar(null, {
+    formateCalendarTime(day, {
         sameDay: '[Today]',
         lastDay: '[Yesterday]',
         lastWeek: '[Last] dddd',

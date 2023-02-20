@@ -1,30 +1,30 @@
 import React, { PureComponent } from 'react'
-import styled, { css } from 'styled-components'
-import moment from 'moment'
+import styled from 'styled-components'
 
-import styles, { fonts } from 'src/dashboard-refactor/styles'
+import { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
 import { RootState } from './types'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
-import { SyncStatusIcon } from './sync-status-icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import type { SyncStatusIconState } from '../types'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { ColorThemeKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import {
+    diffTimestamp,
+    formatTimestamp,
+} from '@worldbrain/memex-common/lib/utils/date-time'
 
 export const timeSinceNowToString = (date: Date | null): string => {
     if (date === null) {
         return 'Never'
     }
+    const timestamp = date.getTime()
 
-    const now = moment(new Date())
-    const dt = moment(date)
-    const seconds = now.diff(dt, 'seconds')
-    const minutes = now.diff(dt, 'minutes')
-    const hours = now.diff(dt, 'hours')
-    const days = now.diff(dt, 'days')
-    const years = now.diff(dt, 'years')
+    const now = Date.now()
+    const seconds = diffTimestamp(now, timestamp, 'seconds')
+    const minutes = diffTimestamp(now, timestamp, 'minutes')
+    const hours = diffTimestamp(now, timestamp, 'hours')
+    const days = diffTimestamp(now, timestamp, 'days')
+    const years = diffTimestamp(now, timestamp, 'years')
 
     if (seconds < 60) {
         return `${seconds} seconds ago`
@@ -48,9 +48,9 @@ export const timeSinceNowToString = (date: Date | null): string => {
         return `${days} days ago`
     }
     if (years < 1) {
-        return dt.format('MMM Do')
+        return formatTimestamp(timestamp, 'MMM Do')
     }
-    return dt.format('ll')
+    return formatTimestamp(timestamp, 'll')
 }
 
 export interface SyncStatusMenuProps extends RootState {
