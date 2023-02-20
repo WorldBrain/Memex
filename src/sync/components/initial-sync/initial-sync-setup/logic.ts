@@ -3,7 +3,6 @@ import TypedEventEmitter from 'typed-emitter'
 import { InitialSyncEvents } from '@worldbrain/storex-sync/lib/integration/initial-sync'
 import { FastSyncEvents } from '@worldbrain/storex-sync/lib/fast-sync'
 import analytics from 'src/analytics'
-import { now } from 'moment'
 
 type SyncSetupState =
     | 'introduction'
@@ -47,7 +46,7 @@ export default class InitialSyncSetupLogic extends UILogic<
     private _started: number
 
     private get runningTime() {
-        return this._started ? now() - this._started : 0
+        return this._started ? Date.now() - this._started : 0
     }
 
     constructor(private dependencies: InitialSyncSetupDependencies) {
@@ -143,7 +142,7 @@ export default class InitialSyncSetupLogic extends UILogic<
         }, 15000)
 
         this.eventEmitter = this.dependencies.getSyncEventEmitter()
-        this._started = now()
+        this._started = Date.now()
         this.registerListeners()
 
         const initSyncMessage = await this.dependencies.getInitialSyncMessage()

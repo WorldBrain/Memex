@@ -1,6 +1,5 @@
 import { createSelector } from 'reselect'
 import pickBy from 'lodash/fp/pickBy'
-import moment from 'moment'
 
 import {
     FILTERS,
@@ -10,6 +9,7 @@ import {
     IMPORT_TYPE_DISPLAY as TYPE_DISPLAY,
     DOWNLOAD_STATUS as DL_STAT,
 } from './constants'
+import { humanizeDuration } from '@worldbrain/memex-common/lib/utils/date-time'
 
 export const imports = (state) => state.imports
 
@@ -170,16 +170,8 @@ export const progressPercent = createSelector(
 )
 
 // Util formatting functions for download time estimates
-const getHours = (time) => Math.floor(time / 3600).toFixed(0)
-const getMins = (time) =>
-    Math.floor((time - getHours(time) * 3600) / 60).toFixed(0)
-const getPaddedMins = (time) =>
-    getMins(time) < 10 ? `0${getMins(time)}` : getMins(time)
 const getTimeEstStr = (time) => {
-    const timeEstimate = `${getHours(time)}:${getPaddedMins(time)}`
-    return timeEstimate === '0:00'
-        ? timeEstimate
-        : moment.duration(timeEstimate).humanize()
+    return humanizeDuration(time)
 }
 const getEstimate = (complete, remaining) => ({
     complete,
