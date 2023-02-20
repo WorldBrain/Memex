@@ -119,7 +119,7 @@ const TopBarArea = styled.div<{ hideResults }>`
         props.hideResults
             ? 'none'
             : '1px solid' + props.theme.colors.greyScale3};
-    height: 50px;
+    min-height: 50px;
     align-items: center;
     display: flex;
     justify-content: space-between;
