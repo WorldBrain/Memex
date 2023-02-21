@@ -286,9 +286,10 @@ export class PageActivityIndicatorBackground {
         /** If defined, will constrain the sync to only these followedLists. Else will sync all. */
         forFollowedLists?: Array<Pick<FollowedList, 'sharedList' | 'lastSync'>>
     }): Promise<void> {
-        // addding this timestamp here to fix race condition where the sync finishes after a new item has been added tot he sync entries and therefore is skipped on the next sync
+        // adding this timestamp here to fix race condition where the sync finishes after a new item has been added tot he sync entries and therefore is skipped on the next sync
         const syncStartTimestamp = Date.now()
         const now = opts?.now ?? Date.now()
+        let shouldUpdateLastSyncTimestamp = false
 
         const currentUser = await this.getCurrentUser()
         if (currentUser == null) {
@@ -317,6 +318,7 @@ export class PageActivityIndicatorBackground {
                     from: followedList.lastSync,
                 },
             )
+            shouldUpdateLastSyncTimestamp = sharedListEntries.length > 0
 
             const sharedAnnotationListEntries = await contentSharing.getAnnotationListEntries(
                 {
@@ -385,6 +387,7 @@ export class PageActivityIndicatorBackground {
                 if (localFollowedListEntry?.hasAnnotationsFromOthers) {
                     continue
                 }
+                shouldUpdateLastSyncTimestamp = true
 
                 await this.storage.updateFollowedListEntryHasAnnotations({
                     normalizedPageUrl: entry.normalizedPageUrl,
@@ -401,6 +404,7 @@ export class PageActivityIndicatorBackground {
                     !sharedAnnotationListEntries[localEntry.normalizedPageUrl]
                         ?.length
                 ) {
+                    shouldUpdateLastSyncTimestamp = true
                     await this.storage.updateFollowedListEntryHasAnnotations({
                         normalizedPageUrl: localEntry.normalizedPageUrl,
                         followedList: localEntry.followedList,
@@ -410,10 +414,12 @@ export class PageActivityIndicatorBackground {
                 }
             }
 
-            await this.storage.updateFollowedListLastSync({
-                sharedList: followedList.sharedList,
-                lastSync: syncStartTimestamp,
-            })
+            if (shouldUpdateLastSyncTimestamp) {
+                await this.storage.updateFollowedListLastSync({
+                    sharedList: followedList.sharedList,
+                    lastSync: syncStartTimestamp,
+                })
+            }
         }
     }
 }
