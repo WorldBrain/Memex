@@ -1518,7 +1518,7 @@ export class DashboardContainer extends StatefulUIElement<
                         <MainContent>
                             {this.state.listsSidebar.showFeed ? (
                                 <FeedContainer>
-                                    <TitleContainer>
+                                    {/* <TitleContainer>
                                         <SectionTitle>
                                             Activity Feed
                                         </SectionTitle>
@@ -1526,7 +1526,7 @@ export class DashboardContainer extends StatefulUIElement<
                                             Updates from Spaces you follow or
                                             conversation you participate in
                                         </SectionDescription>
-                                    </TitleContainer>
+                                    </TitleContainer> */}
                                     <FeedFrame src={this.whichFeed()} />
                                 </FeedContainer>
                             ) : (
@@ -1801,7 +1801,6 @@ const FeedContainer = styled.div`
     flex-direction: column;
     grid-gap: 20px;
     margin-top: 60px;
-    max-width: 800px;
 `
 
 const FeedFrame = styled.iframe`

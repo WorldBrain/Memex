@@ -333,6 +333,7 @@ export default class CustomListBackground {
         const sharedList = await contentSharing.getListByReference(
             listReference,
         )
+
         if (sharedList == null) {
             return null
         }
@@ -345,7 +346,10 @@ export default class CustomListBackground {
         })
 
         if (!annotations) {
-            return null
+            return {
+                ...sharedList,
+                sharedAnnotations: undefined,
+            }
         }
 
         return {

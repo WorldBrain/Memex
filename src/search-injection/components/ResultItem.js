@@ -53,7 +53,7 @@ const RootContainer = styled.div`
     }
 
     &:hover ${Root} {
-        background: ${(props) => props.theme.colors.greyScale3};
+        background: ${(props) => props.theme.colors.greyScale2};
     }
 `
 
@@ -69,7 +69,7 @@ const InfoContainer = styled.div`
 const TagItem = styled.div`
     padding: 2px 8px;
     border-radius: 3px;
-    background-color: ${(props) => props.theme.colors.prime1};
+    background-color: ${(props) => props.theme.colors.greyScale3};
     color: white;
     display: flex;
     align-items: center;

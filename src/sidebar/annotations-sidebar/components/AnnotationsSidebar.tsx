@@ -337,6 +337,8 @@ export class AnnotationsSidebar extends React.Component<
         const listData = this.props.lists.byId[unifiedListId]
         const listInstance = this.props.listInstances[unifiedListId]
 
+        console.log(listInstance)
+
         // TODO: Simplify this confusing condition
         if (
             !(listInstance.isOpen || selectedListMode) ||
@@ -1097,8 +1099,10 @@ export class AnnotationsSidebar extends React.Component<
         return this.renderListAnnotations(selectedListId, true)
     }
 
-    isolatedViewNotifVisible = async () =>
+    isolatedViewNotifVisible = async () => {
+        this.setState({ showIsolatedViewNotif: false })
         await setLocalStorage(SHOW_ISOLATED_VIEW_KEY, false)
+    }
 
     private renderFocusModeNotif(listData) {
         if (
@@ -1122,6 +1126,7 @@ export class AnnotationsSidebar extends React.Component<
                             filePath={'removeX'}
                             heightAndWidth={'20px'}
                             color={'greyScale5'}
+                            onClick={() => this.isolatedViewNotifVisible()}
                         />
                     </FocusModeNotifTopBar>
                     <FocusModeNotifExplainer>

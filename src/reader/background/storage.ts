@@ -5,7 +5,6 @@ import {
 } from '@worldbrain/storex-pattern-modules'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { ReadableData } from 'src/reader/types'
-import { now } from 'moment'
 import Readability from 'readability/Readability'
 import { fetchDOMFromUrl } from 'src/page-analysis/background/fetch-page-data'
 import {
@@ -103,7 +102,7 @@ export default class ReaderStorage extends StorageModule {
             length: article.length,
             fullUrl,
             strategy: 'mozilla/readability',
-            created: now(),
+            created: Date.now(),
         }
 
         await this.operation('createReadable', readableData)

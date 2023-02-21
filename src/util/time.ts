@@ -1,13 +1,20 @@
-import moment from 'moment'
+import {
+    diffTimestamp,
+    formatTimestamp,
+    normalizeTimestamp,
+} from '@worldbrain/memex-common/lib/utils/date-time'
 
 export function formatTime(timestamp, showTime) {
-    const m = moment(timestamp)
-    const inLastSevenDays = moment().diff(m, 'days') <= 7
+    timestamp = normalizeTimestamp(timestamp)
+
+    const inLastSevenDays = diffTimestamp(Date.now(), timestamp, 'days') <= 7
 
     if (showTime) {
         return inLastSevenDays
-            ? `${m.format('ddd HH:mm a ')}`
-            : `${m.format('D/M/YYYY HH:mm a ')}`
+            ? `${formatTimestamp(timestamp, 'ddd HH:mm a ')}`
+            : `${formatTimestamp(timestamp, 'D/M/YYYY HH:mm a ')}`
     }
-    return inLastSevenDays ? m.format('ddd') : m.format('D/M/YYYY')
+    return inLastSevenDays
+        ? formatTimestamp(timestamp, 'ddd')
+        : formatTimestamp(timestamp, 'D/M/YYYY')
 }

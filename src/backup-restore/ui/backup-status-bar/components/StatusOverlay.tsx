@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react'
 import ReactDOM from 'react-dom'
 import browser from 'webextension-polyfill'
-import moment from 'moment'
 import ToggleSwitch from '../../../../common-ui/components/ToggleSwitch'
 import { remoteFunction } from 'src/util/webextensionRPC'
 
@@ -15,6 +14,7 @@ import {
     WhiteSpacer10,
 } from 'src/common-ui/components/design-library/typography'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import { formatTimeFromNow } from '@worldbrain/memex-common/lib/utils/date-time'
 
 interface Props {
     header?: string
@@ -190,9 +190,9 @@ export default class StatusOverlay extends PureComponent<Props> {
                                                     lastBackup !==
                                                         'running' && (
                                                         <b>
-                                                            {moment(
+                                                            {formatTimeFromNow(
                                                                 lastBackup,
-                                                            ).fromNow()}
+                                                            )}
                                                         </b>
                                                     )}
                                             </span>
@@ -208,9 +208,9 @@ export default class StatusOverlay extends PureComponent<Props> {
                                                 <span>Next Backup:</span>
                                                 <span>
                                                     <b>
-                                                        {moment(
+                                                        {formatTimeFromNow(
                                                             nextBackup,
-                                                        ).fromNow()}
+                                                        )}
                                                     </b>
                                                 </span>
                                             </div>

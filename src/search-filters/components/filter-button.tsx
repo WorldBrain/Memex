@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react'
 import OnClickOutside from 'react-onclickoutside'
-import moment from 'moment'
 import classNames from 'classnames'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { formatTimestamp } from '@worldbrain/memex-common/lib/utils/date-time'
 
 const dashboardStyles = require('./filter-button.css')
 const sidebarStyles = require('./filter-button-sidebar.css')
@@ -69,11 +69,13 @@ class FilterButton extends PureComponent<Props, State> {
                 <React.Fragment>
                     <div className={this.styles.dateBox}>
                         <span className={this.styles.detailsFilter}>
-                            {moment(this.props.startDate).format(
+                            {formatTimestamp(
+                                this.props.startDate,
                                 'MMM DD, YYYY',
                             ) +
                                 ' - ' +
-                                moment(this.props.endDate).format(
+                                formatTimestamp(
+                                    this.props.endDate,
                                     'MMM DD, YYYY',
                                 )}
                         </span>

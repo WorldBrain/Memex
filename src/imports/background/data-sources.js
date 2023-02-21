@@ -1,4 +1,3 @@
-import moment from 'moment'
 import browser from 'webextension-polyfill'
 import checkBrowser from '../../util/check-browser'
 import {
@@ -7,6 +6,10 @@ import {
 } from 'src/options/imports/constants'
 import { loadBlob } from 'src/imports/background/utils'
 import { parsePocket, parseNetscape } from './service-parsers'
+import {
+    startOfDay,
+    WEEK_IN_MS,
+} from '@worldbrain/memex-common/lib/utils/date-time'
 
 const getDirNestedCollectionName = (dirNode) => {
     const parentCollectionName = dirNode.collectionName ?? ''
@@ -50,7 +53,7 @@ export default class ImportDataSources {
     _createHistParams = (time) => ({
         ...ImportDataSources.DEF_HIST_PARAMS,
         endTime: time,
-        startTime: moment(time).subtract(1, 'week').valueOf(),
+        startTime: time - WEEK_IN_MS,
     })
 
     /**
@@ -58,16 +61,12 @@ export default class ImportDataSources {
      */
     async *history() {
         // Get all history from browser (last 3 months), filter on existing DB pages
-        const baseTime = moment()
-            .startOf('day')
-            .subtract(ImportDataSources.LOOKBACK_WEEKS, 'weeks')
+        const baseTime =
+            startOfDay(Date.now()) -
+            ImportDataSources.LOOKBACK_WEEKS * WEEK_IN_MS
 
         // Fetch and filter history in week batches to limit space
-        for (
-            let time = moment();
-            time.isSameOrAfter(baseTime);
-            time.subtract(1, 'week')
-        ) {
+        for (let time = Date.now(); time >= baseTime; time -= WEEK_IN_MS) {
             yield this._history.search(this._createHistParams(time.valueOf()))
         }
     }

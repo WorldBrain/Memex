@@ -213,12 +213,30 @@ export class HighlightRenderer implements HighlightRendererInterface {
         }
 
         let anchor
-        if (selection) {
-            anchor = await extractAnchorFromSelection(selection, fullPageUrl)
+        if (selection && selection.anchorNode) {
+            // Fix bug where you can't select Youtube context menu annotations twice
+
+            const selectionItems = selection.anchorNode.childNodes ?? undefined
+            const lastSelectionItem = selectionItems[
+                selectionItems.length - 1
+            ] as HTMLElement
+
+            if (
+                lastSelectionItem &&
+                lastSelectionItem.classList.contains('ytp-popup')
+            ) {
+                anchor = undefined
+            } else {
+                anchor = await extractAnchorFromSelection(
+                    selection,
+                    fullPageUrl,
+                )
+            }
         }
 
-        const body = anchor && anchor.quote
-        const hasSelectedText = anchor.quote ? anchor.quote.length : false
+        const body = anchor ? anchor.quote : undefined
+        const hasSelectedText =
+            anchor && anchor.quote ? anchor.quote.length : false
 
         const localListIds: number[] = []
         if (params.inPageUI.selectedList) {

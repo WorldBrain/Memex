@@ -1,4 +1,3 @@
-import moment from 'moment'
 import React, { Component } from 'react'
 import classNames from 'classnames'
 import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
@@ -17,6 +16,7 @@ import { subscription } from 'src/util/remote-functions-background'
 import styled from 'styled-components'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import { formatTimeFromNow } from '@worldbrain/memex-common/lib/utils/date-time'
 
 const styles = require('../../styles.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
@@ -148,10 +148,10 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                                         <Number>
                                             {this.state.backupTimes
                                                 .lastBackup &&
-                                                moment(
+                                                formatTimeFromNow(
                                                     this.state.backupTimes
                                                         .lastBackup,
-                                                ).fromNow()}
+                                                )}
                                         </Number>
                                         <SubTitle>Last Backup</SubTitle>
                                     </InfoBlock>
@@ -159,10 +159,10 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                                         <Number>
                                             {this.state.backupTimes
                                                 .nextBackup !== 'running'
-                                                ? moment(
+                                                ? formatTimeFromNow(
                                                       this.state.backupTimes
                                                           .nextBackup,
-                                                  ).fromNow()
+                                                  )
                                                 : 'in progress'}
                                         </Number>
                                         <SubTitle>Next Backup</SubTitle>
