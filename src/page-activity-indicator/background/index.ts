@@ -287,8 +287,7 @@ export class PageActivityIndicatorBackground {
         forFollowedLists?: Array<Pick<FollowedList, 'sharedList' | 'lastSync'>>
     }): Promise<void> {
         // adding this timestamp here to fix race condition where the sync finishes after a new item has been added tot he sync entries and therefore is skipped on the next sync
-        const syncStartTimestamp = Date.now()
-        const now = opts?.now ?? Date.now()
+        const timeAtSyncStart = opts?.now ?? Date.now()
         let shouldUpdateLastSyncTimestamp = false
 
         const currentUser = await this.getCurrentUser()
@@ -359,7 +358,7 @@ export class PageActivityIndicatorBackground {
                         normalizedPageUrl: entry.normalizedUrl,
                         followedList: entry.sharedList.id,
                         hasAnnotationsFromOthers,
-                        updatedWhen: now,
+                        updatedWhen: timeAtSyncStart,
                     })
                 }
             }
@@ -392,7 +391,7 @@ export class PageActivityIndicatorBackground {
                 await this.storage.updateFollowedListEntryHasAnnotations({
                     normalizedPageUrl: entry.normalizedPageUrl,
                     followedList: entry.sharedList.id,
-                    updatedWhen: now,
+                    updatedWhen: timeAtSyncStart,
                     hasAnnotationsFromOthers: true,
                 })
             }
@@ -408,7 +407,7 @@ export class PageActivityIndicatorBackground {
                     await this.storage.updateFollowedListEntryHasAnnotations({
                         normalizedPageUrl: localEntry.normalizedPageUrl,
                         followedList: localEntry.followedList,
-                        updatedWhen: now,
+                        updatedWhen: timeAtSyncStart,
                         hasAnnotationsFromOthers: false,
                     })
                 }
@@ -417,7 +416,7 @@ export class PageActivityIndicatorBackground {
             if (shouldUpdateLastSyncTimestamp) {
                 await this.storage.updateFollowedListLastSync({
                     sharedList: followedList.sharedList,
-                    lastSync: syncStartTimestamp,
+                    lastSync: timeAtSyncStart,
                 })
             }
         }
