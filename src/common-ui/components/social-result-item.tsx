@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react'
 import { Props } from './result-item'
-import moment from 'moment'
 import reactStringReplace from 'react-string-replace'
 import ResultItemActions from './result-item-actions'
 import SemiCircularRibbon from './semi-circular-ribbon'
@@ -10,6 +9,10 @@ import {
 } from 'src/social-integration/constants'
 import Link from './link'
 import cx from 'classnames'
+import {
+    formatTimestamp,
+    normalizeTimestamp,
+} from '@worldbrain/memex-common/lib/utils/date-time'
 
 const styles = require('./result-item.css')
 
@@ -114,7 +117,8 @@ class SocialResultItem extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                     {this.renderText()}
                     {this.props.createdAt && (
                         <span className={styles.timeStamp}>
-                            {moment(this.props.createdWhen).format(
+                            {formatTimestamp(
+                                normalizeTimestamp(this.props.createdWhen),
                                 TWEET_DATE_FORMAT,
                             )}
                         </span>

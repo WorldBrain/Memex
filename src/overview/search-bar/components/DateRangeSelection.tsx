@@ -9,6 +9,7 @@ import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/consta
 import './datepicker-overrides.css'
 import DatePickerInput from './datepicker-input'
 import styled from 'styled-components'
+import { formatTimestamp } from '@worldbrain/memex-common/lib/utils/date-time'
 
 export interface DateRangeSelectionProps {
     env?: 'inpage' | 'overview'
@@ -37,10 +38,10 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
 
     state = {
         startDateText: this.props.startDate
-            ? moment(this.props.startDate).format(FORMAT)
+            ? formatTimestamp(this.props.startDate, FORMAT)
             : '',
         endDateText: this.props.endDate
-            ? moment(this.props.endDate).format(FORMAT)
+            ? formatTimestamp(this.props.endDate, FORMAT)
             : '',
     }
 

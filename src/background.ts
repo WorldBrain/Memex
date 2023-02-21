@@ -42,10 +42,15 @@ import {
     SharedListRoleID,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { initFirestoreSyncTriggerListener } from '@worldbrain/memex-common/lib/personal-cloud/backend/utils'
+import delay from './util/delay'
 
 let __debugCounter = 0
+let __BGInitAttemptCounter = 0
+const __maxBGInitRetryAttempts = 20
 
-export async function main() {
+export async function main(): Promise<void> {
+    __debugCounter = 0
+
     const rpcManager = setupRpcConnection({
         sideName: 'background',
         role: 'background',
@@ -125,7 +130,6 @@ export async function main() {
         persistentStorageManager,
         backgroundModules,
     })
-
     await storageManager.finishInitialization()
     await persistentStorageManager.finishInitialization()
     __debugCounter++
@@ -212,13 +216,26 @@ export async function main() {
     __debugCounter++
 }
 
-main().catch((originalError) => {
+const handleError = async (originalError: Error) => {
+    const noMoreAttempts = __BGInitAttemptCounter++ >= __maxBGInitRetryAttempts
+
     const error = new Error(
-        `Error occurred during background script setup: ${originalError.message} - debug counter: ${__debugCounter}`,
+        noMoreAttempts
+            ? `BG INIT LOGIC RETRIES EXHAUSTED: `
+            : `` +
+              `Error occurred during background script setup: ${originalError.message} - debug counter: ${__debugCounter}`,
     )
     if (originalError.stack) {
         error.stack = originalError.stack
     }
     captureException(error)
-    throw originalError
-})
+
+    if (noMoreAttempts) {
+        throw originalError
+    }
+
+    await delay(10000)
+    await main().catch(handleError)
+}
+
+main().catch(handleError)

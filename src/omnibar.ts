@@ -2,7 +2,6 @@ import debounce from 'lodash/fp/debounce'
 import escapeHtml from 'lodash/fp/escape'
 import urlRegex from 'url-regex'
 import qs from 'query-string'
-import moment from 'moment'
 
 import analytics from 'src/analytics'
 import shortUrl from 'src/util/short-url'
@@ -24,6 +23,10 @@ import browser from 'webextension-polyfill'
 import { runInTab } from './util/webextensionRPC'
 import { PageAnalyzerInterface } from './page-analysis/types'
 import { BrowserSettingsStore } from './util/settings'
+import {
+    diffTimestamp,
+    formatTimestamp,
+} from '@worldbrain/memex-common/lib/utils/date-time'
 
 export async function main() {
     const tabManagement = new TabManagementBackground({
@@ -60,15 +63,17 @@ export async function main() {
     })
 
     function formatTime(timestamp, showTime) {
-        const m = moment(timestamp)
-        const inLastSevenDays = moment().diff(m, 'days') <= 7
+        const inLastSevenDays =
+            diffTimestamp(Date.now(), timestamp, 'days') <= 7
 
         if (showTime) {
             return inLastSevenDays
-                ? `🕒 ${m.format('HH:mm a ddd')}`
-                : `🕒 ${m.format('HH:mm a D/M/YYYY')}`
+                ? `🕒 ${formatTimestamp(timestamp, 'HH:mm a ddd')}`
+                : `🕒 ${formatTimestamp(timestamp, 'HH:mm a D/M/YYYY')}`
         }
-        return inLastSevenDays ? m.format('ddd') : m.format('D/M/YYYY')
+        return inLastSevenDays
+            ? formatTimestamp(timestamp, 'ddd')
+            : formatTimestamp(timestamp, 'D/M/YYYY')
     }
 
     function setOmniboxMessage(text) {
