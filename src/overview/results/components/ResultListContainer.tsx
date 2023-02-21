@@ -1,7 +1,6 @@
 import React, { PureComponent, MouseEventHandler, MouseEvent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
 import Waypoint from 'react-waypoint'
-import moment from 'moment'
 import reduce from 'lodash/fp/reduce'
 
 import { selectors as opt } from 'src/options/settings'
@@ -29,6 +28,7 @@ import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-l
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import { formateCalendarTime } from '@worldbrain/memex-common/lib/utils/date-time'
 
 const styles = require('./ResultList.css')
 
@@ -269,7 +269,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
     )
 
     private formatTime(date: number): string {
-        return moment(date).calendar(null, {
+        return formateCalendarTime(date, {
             sameDay: '[Today]',
             lastDay: '[Yesterday]',
             lastWeek: '[Last] dddd',
