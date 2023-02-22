@@ -297,7 +297,7 @@ export async function main(
                     getState: tooltipUtils.getHighlightsState,
                     setState: tooltipUtils.setHighlightsState,
                 },
-                getPageUrl: pageInfo.getFullPageUrl,
+                getFullPageUrl: pageInfo.getFullPageUrl,
             })
             components.ribbon?.resolve()
         },
@@ -551,7 +551,7 @@ class PageInfo {
 
     getFullPageUrl = async () => {
         await this.refreshIfNeeded()
-        return this._identifier.fullUrl
+        return this._href
     }
 
     getPageTitle = () => {

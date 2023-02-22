@@ -325,8 +325,7 @@ describe('SidebarContainerLogic', () => {
             const expectedEvents = []
 
             expect(emittedEvents).toEqual(expectedEvents)
-            expect(annotationsCache.pageSharedListIds).toEqual([])
-            expect(annotationsCache.pageLocalListIds).toEqual([])
+            expect(annotationsCache.pageListIds).toEqual([])
             expect(annotationsCache.lists).toEqual(initNormalizedState())
             expect(annotationsCache.annotations).toEqual(initNormalizedState())
             expect(sidebar.state.listInstances).toEqual({})
@@ -344,15 +343,9 @@ describe('SidebarContainerLogic', () => {
             })
 
             expect(emittedEvents).toEqual(expectedEvents)
-            expect(annotationsCache.pageSharedListIds).toEqual(
+            expect(annotationsCache.pageListIds).toEqual(
                 mapLocalListIdsToUnified(
-                    [DATA.LOCAL_LISTS[0].id],
-                    annotationsCache,
-                ),
-            )
-            expect(annotationsCache.pageLocalListIds).toEqual(
-                mapLocalListIdsToUnified(
-                    [DATA.LOCAL_LISTS[3].id],
+                    [DATA.LOCAL_LISTS[0].id, DATA.LOCAL_LISTS[3].id],
                     annotationsCache,
                 ),
             )
@@ -464,7 +457,7 @@ describe('SidebarContainerLogic', () => {
                         unifiedListIds: mapLocalListIdsToUnified(
                             [
                                 DATA.LOCAL_LISTS[0].id, // NOTE: inherited shared list from parent page
-                                DATA.LOCAL_LISTS[3].id,
+                                // DATA.LOCAL_LISTS[3].id, // This is a parent page list but not shared, so not inherited
                             ],
                             annotationsCache,
                         ),

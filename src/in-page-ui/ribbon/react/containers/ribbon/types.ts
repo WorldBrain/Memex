@@ -18,7 +18,7 @@ interface FlagSetterInterface {
 
 export interface RibbonContainerDependencies {
     currentTab: { id?: number; url?: string }
-    getPageUrl: () => MaybePromise<string>
+    getFullPageUrl: () => MaybePromise<string>
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
     highlighter: HighlightInteractionsInterface
     annotationsManager: AnnotationsManager

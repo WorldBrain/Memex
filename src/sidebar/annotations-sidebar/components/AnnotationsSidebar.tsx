@@ -337,8 +337,6 @@ export class AnnotationsSidebar extends React.Component<
         const listData = this.props.lists.byId[unifiedListId]
         const listInstance = this.props.listInstances[unifiedListId]
 
-        console.log(listInstance)
-
         // TODO: Simplify this confusing condition
         if (
             !(listInstance.isOpen || selectedListMode) ||
@@ -933,10 +931,7 @@ export class AnnotationsSidebar extends React.Component<
             (listData) =>
                 listData.unifiedAnnotationIds.length > 0 ||
                 listData.hasRemoteAnnotationsToLoad ||
-                annotationsCache.pageSharedListIds.includes(
-                    listData.unifiedId,
-                ) ||
-                annotationsCache.pageLocalListIds.includes(listData.unifiedId),
+                annotationsCache.pageListIds.includes(listData.unifiedId),
         )
 
         if (allLists.length > 0) {

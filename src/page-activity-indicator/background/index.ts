@@ -288,7 +288,6 @@ export class PageActivityIndicatorBackground {
     }): Promise<void> {
         // adding this timestamp here to fix race condition where the sync finishes after a new item has been added tot he sync entries and therefore is skipped on the next sync
         const timeAtSyncStart = opts?.now ?? Date.now()
-        let shouldUpdateLastSyncTimestamp = false
 
         const currentUser = await this.getCurrentUser()
         if (currentUser == null) {
@@ -302,6 +301,8 @@ export class PageActivityIndicatorBackground {
             (await this.storage.findAllFollowedLists()).values()
 
         for (const followedList of followedLists) {
+            let shouldUpdateLastSyncTimestamp = false
+
             const listReference: SharedListReference = {
                 type: 'shared-list-reference',
                 id: followedList.sharedList,
