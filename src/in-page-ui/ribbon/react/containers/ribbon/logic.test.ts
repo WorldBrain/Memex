@@ -65,7 +65,7 @@ describe('Ribbon logic', () => {
 
         const ribbonLogic = new RibbonContainerLogic({
             activityIndicatorBG: backgroundModules.activityIndicator,
-            getPageUrl: () => currentTab.normalizedUrl,
+            getFullPageUrl: () => currentTab.normalizedUrl,
             analytics,
             syncSettings,
             setRibbonShouldAutoHide: () => undefined,
@@ -276,7 +276,7 @@ describe('Ribbon logic', () => {
             })
 
         const { ribbon, annotationsCache } = await setupTest(device, {
-            dependencies: { getPageUrl: () => fullPageUrl },
+            dependencies: { getFullPageUrl: () => fullPageUrl },
         })
 
         const expectListEntries = async (listIds: number[]) => {
@@ -827,10 +827,10 @@ describe('Ribbon logic', () => {
         await ribbon.processEvent('toggleBookmark', null)
         expect(ribbon.state.bookmark.isBookmarked).toBe(true)
 
-        expect(ribbon.state.pageUrl).not.toEqual(newURL)
+        expect(ribbon.state.fullPageUrl).not.toEqual(newURL)
         await ribbon.processEvent('hydrateStateFromDB', { url: newURL })
         expect(ribbon.state.bookmark.isBookmarked).toBe(false)
-        expect(ribbon.state.pageUrl).toEqual(newURL)
+        expect(ribbon.state.fullPageUrl).toEqual(newURL)
     })
 
     it('should check whether tags migration is done to signal showing of tags UI on init', async ({

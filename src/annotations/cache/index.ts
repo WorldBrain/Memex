@@ -26,8 +26,7 @@ export interface PageAnnotationCacheDeps {
 }
 
 export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
-    pageLocalListIds: PageAnnotationsCacheInterface['pageLocalListIds'] = []
-    pageSharedListIds: PageAnnotationsCacheInterface['pageSharedListIds'] = []
+    pageListIds: PageAnnotationsCacheInterface['pageListIds'] = []
     annotations: PageAnnotationsCacheInterface['annotations'] = initNormalizedState()
     lists: PageAnnotationsCacheInterface['lists'] = initNormalizedState()
 
@@ -204,26 +203,44 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         if (this.deps.normalizedPageUrl !== normalizedPageUrl) {
             this.deps.normalizedPageUrl = normalizedPageUrl
         }
-        this.pageSharedListIds = []
-        this.pageLocalListIds = []
+        this.pageListIds = []
 
         for (const listId of pageListIds) {
             const listData = this.lists.byId[listId]
-            if (!listData) {
+            if (!listData || this.pageListIds.includes(listId)) {
                 continue
             }
-            if (listData.remoteId != null) {
-                this.pageSharedListIds.push(listData.unifiedId)
-            } else {
-                this.pageLocalListIds.push(listData.unifiedId)
-            }
+            this.pageListIds.push(listId)
         }
-        this.events.emit(
-            'updatedPageData',
-            normalizedPageUrl,
-            this.pageSharedListIds,
-            this.pageLocalListIds,
+        this.events.emit('updatedPageData', normalizedPageUrl, this.pageListIds)
+        this.updateSharedAnnotationsWithSharedPageLists()
+    }
+
+    private get sharedPageListIds(): UnifiedList['unifiedId'][] {
+        return this.pageListIds.filter(
+            (listId) => this.lists.byId[listId]?.remoteId != null,
         )
+    }
+
+    private updateSharedAnnotationsWithSharedPageLists() {
+        let shouldEmitAnnotUpdateEvent = false
+        this.annotations = initNormalizedState({
+            seedData: normalizedStateToArray(this.annotations).map((annot) => {
+                if (annot.privacyLevel < AnnotationPrivacyLevels.SHARED) {
+                    return annot
+                }
+                shouldEmitAnnotUpdateEvent = true
+                return {
+                    ...annot,
+                    unifiedListIds: [...this.sharedPageListIds],
+                }
+            }),
+            getId: (annot) => annot.unifiedId,
+        })
+
+        if (shouldEmitAnnotUpdateEvent) {
+            this.events.emit('newAnnotationsState', this.annotations)
+        }
     }
 
     setAnnotations: PageAnnotationsCacheInterface['setAnnotations'] = (
@@ -300,7 +317,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         if (nextAnnotation.privacyLevel >= AnnotationPrivacyLevels.SHARED) {
             nextAnnotation.unifiedListIds = [
                 ...new Set([
-                    ...this.pageSharedListIds,
+                    ...this.sharedPageListIds,
                     ...annotation.unifiedListIds,
                 ]),
             ]
@@ -366,7 +383,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         ) {
             // Need to inherit parent page's shared lists if sharing
             unifiedListIds = Array.from(
-                new Set([...unifiedListIds, ...this.pageSharedListIds]),
+                new Set([...unifiedListIds, ...this.sharedPageListIds]),
             )
         }
 

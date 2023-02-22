@@ -1,4 +1,5 @@
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { RibbonContainerDependencies } from './types'
 import * as componentTypes from '../../components/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
@@ -39,7 +40,7 @@ type SubcomponentHandlers<
 > = HandlersOf<componentTypes.RibbonSubcomponentProps[Subcomponent]>
 
 export interface RibbonContainerState {
-    pageUrl: string
+    fullPageUrl: string
     loadState: TaskState
     isRibbonEnabled: boolean | null
     isWidthLocked: boolean | null
@@ -127,7 +128,7 @@ export class RibbonContainerLogic extends UILogic<
 
     getInitialState(): RibbonContainerState {
         return {
-            pageUrl: null,
+            fullPageUrl: null,
             loadState: 'pristine',
             areExtraButtonsShown: false,
             areTutorialShown: false,
@@ -166,13 +167,14 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async (incoming) => {
-        const { getPageUrl } = this.dependencies
+        const { getFullPageUrl } = this.dependencies
         await loadInitial<RibbonContainerState>(this, async () => {
-            const [url] = await Promise.all([getPageUrl()])
-            this.emitMutation({
-                pageUrl: { $set: url },
+            const fullPageUrl = await getFullPageUrl()
+            this.emitMutation({ fullPageUrl: { $set: fullPageUrl } })
+            await this.hydrateStateFromDB({
+                ...incoming,
+                event: { url: fullPageUrl },
             })
-            await this.hydrateStateFromDB({ ...incoming, event: { url } })
         })
         this.initLogicResolvable.resolve()
 
@@ -180,8 +182,10 @@ export class RibbonContainerLogic extends UILogic<
         //     .getElementById('memex-sidebar-container')
         //     ?.shadowRoot.getElementById('annotationSidebarContainer')
         this.initReadingViewListeners()
-        const url = await getPageUrl()
-        const bookmark = await this.dependencies.bookmarks.findBookmark(url)
+        const fullPageUrl = await getFullPageUrl()
+        const bookmark = await this.dependencies.bookmarks.findBookmark(
+            fullPageUrl,
+        )
         if (bookmark?.time) {
             this.emitMutation({
                 bookmark: {
@@ -217,7 +221,7 @@ export class RibbonContainerLogic extends UILogic<
         const bookmark = await this.dependencies.bookmarks.findBookmark(url)
 
         this.emitMutation({
-            pageUrl: { $set: url },
+            fullPageUrl: { $set: url },
             pausing: {
                 isPaused: {
                     $set: true,
@@ -412,7 +416,7 @@ export class RibbonContainerLogic extends UILogic<
 
         await this.dependencies.bookmarks.setBookmarkStatusInBrowserIcon(
             true,
-            postInitState.pageUrl,
+            postInitState.fullPageUrl,
         )
 
         const updateState = (isBookmarked) =>
@@ -429,7 +433,7 @@ export class RibbonContainerLogic extends UILogic<
             if (shouldBeBookmarked) {
                 updateState(shouldBeBookmarked)
                 await this.dependencies.bookmarks.addPageBookmark({
-                    fullUrl: postInitState.pageUrl,
+                    fullUrl: postInitState.fullPageUrl,
                     tabId: this.dependencies.currentTab.id,
                 })
             }
@@ -472,7 +476,7 @@ export class RibbonContainerLogic extends UILogic<
 
     saveComment: EventHandler<'saveComment'> = async ({
         event: { shouldShare, isProtected },
-        previousState: { pageUrl, commentBox },
+        previousState: { fullPageUrl, commentBox },
     }) => {
         const comment = commentBox.commentText.trim()
         if (comment.length === 0) {
@@ -482,7 +486,7 @@ export class RibbonContainerLogic extends UILogic<
         this.emitMutation({ commentBox: { showCommentBox: { $set: false } } })
 
         const localAnnotationId = generateAnnotationUrl({
-            pageUrl,
+            pageUrl: fullPageUrl,
             now: () => Date.now(),
         })
 
@@ -501,7 +505,7 @@ export class RibbonContainerLogic extends UILogic<
             contentSharingBG: this.dependencies.contentSharing,
             annotationData: {
                 comment,
-                fullPageUrl: pageUrl,
+                fullPageUrl,
                 localId: localAnnotationId,
                 createdWhen: new Date(now),
             },
@@ -510,7 +514,7 @@ export class RibbonContainerLogic extends UILogic<
             localId: localAnnotationId,
             remoteId: remoteAnnotationId ?? undefined,
             comment,
-            normalizedPageUrl: pageUrl,
+            normalizedPageUrl: normalizeUrl(fullPageUrl),
             unifiedListIds: [],
             lastEdited: now,
             createdWhen: now,
@@ -602,7 +606,7 @@ export class RibbonContainerLogic extends UILogic<
                 : this.dependencies.tags.updateTagForPage({
                       added: event.value.added,
                       deleted: event.value.deleted,
-                      url: previousState.pageUrl,
+                      url: previousState.fullPageUrl,
                       tabId: this.dependencies.currentTab.id,
                   })
 
@@ -658,15 +662,19 @@ export class RibbonContainerLogic extends UILogic<
             lists: { pageListIds: { $set: [...pageListsSet] } },
         })
 
-        // TODO: cache implement
-        // await this.dependencies.annotationsCache.updatePublicAnnotationLists({
-        //     added: event.value.added,
-        //     deleted: event.value.deleted,
-        // })
+        const { annotationsCache } = this.dependencies
+        const unifiedListIds = [...pageListsSet]
+            .map(
+                (localListId) =>
+                    annotationsCache.getListByLocalId(localListId)?.unifiedId,
+            )
+            .filter((id) => id != null)
+        annotationsCache.setPageData(previousState.fullPageUrl, unifiedListIds)
+
         return this.dependencies.customLists.updateListForPage({
             added: event.value.added,
             deleted: event.value.deleted,
-            url: previousState.pageUrl,
+            url: previousState.fullPageUrl,
             tabId: this.dependencies.currentTab.id,
             skipPageIndexing: event.value.skipPageIndexing,
         })
