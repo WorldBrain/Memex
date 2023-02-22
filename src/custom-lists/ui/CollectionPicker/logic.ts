@@ -31,6 +31,7 @@ export interface SpacePickerDependencies {
     filterMode?: boolean
     removeTooltipText?: string
     searchInputPlaceholder?: string
+    onListShare?: (ids: { localListId: number; remoteListId: string }) => void
     onClickOutside?: React.MouseEventHandler
     spacesBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface
@@ -315,6 +316,7 @@ export default class SpacePickerLogic extends UILogic<
             throw new Error('Canot set remote id for list that is not tracked')
         }
 
+        this.dependencies.onListShare(event)
         this.defaultEntries[defaultEntryIndex].remoteId = event.remoteListId
 
         this.emitMutation({

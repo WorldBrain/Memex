@@ -473,6 +473,7 @@ describe('Page annotations cache tests', () => {
         const updatedListA: UnifiedList = {
             ...testLists[0],
             name: 'new list name',
+            remoteId: 'test remote id 1',
         }
         cache.updateList(updatedListA)
         expectedEvents.push({ event: 'updatedList', args: updatedListA })

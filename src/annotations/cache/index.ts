@@ -417,8 +417,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         const nextList: UnifiedList = {
             ...previousList,
-            name: updates.name,
-            description: updates.description,
+            name: updates.name ?? previousList.name,
+            remoteId: updates.remoteId ?? previousList.remoteId,
+            description: updates.description ?? previousList.description,
         }
 
         this.lists = {
@@ -430,6 +431,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
         this.events.emit('updatedList', nextList)
         this.events.emit('newListsState', this.lists)
+
+        // If share status changed, reflect updates in any public annotations
+        if (previousList.remoteId != nextList.remoteId) {
+            this.updateSharedAnnotationsWithSharedPageLists()
+        }
     }
 
     removeAnnotation: PageAnnotationsCacheInterface['removeAnnotation'] = (

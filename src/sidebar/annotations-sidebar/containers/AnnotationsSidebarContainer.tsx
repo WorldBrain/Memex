@@ -41,10 +41,7 @@ import {
     SELECT_SPACE_NEGATIVE_LABEL,
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
-import type {
-    UnifiedAnnotation,
-    UnifiedList,
-} from 'src/annotations/cache/types'
+import type { UnifiedAnnotation } from 'src/annotations/cache/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import * as cacheUtils from 'src/annotations/cache/utils'
@@ -418,6 +415,12 @@ export class AnnotationsSidebarContainer<
                     added: null,
                     deleted: listId,
                     unifiedAnnotationId: params.annotation.unifiedId,
+                }),
+            onListShare: ({ localListId, remoteListId }) =>
+                annotationsCache.updateList({
+                    remoteId: remoteListId,
+                    unifiedId: annotationsCache.getListByLocalId(localListId)
+                        ?.unifiedId,
                 }),
         }
     }

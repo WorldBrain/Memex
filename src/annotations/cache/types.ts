@@ -59,7 +59,8 @@ export interface PageAnnotationsCacheInterface {
         },
     ) => void
     updateList: (
-        updates: Pick<UnifiedList, 'unifiedId' | 'description' | 'name'>,
+        updates: Pick<UnifiedList, 'unifiedId'> &
+            Partial<Pick<UnifiedList, 'remoteId' | 'description' | 'name'>>,
     ) => void
     removeAnnotation: (annotation: Pick<UnifiedAnnotation, 'unifiedId'>) => void
     removeList: (list: Pick<UnifiedList, 'unifiedId'>) => void
