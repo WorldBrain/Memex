@@ -294,21 +294,14 @@ export async function hydrateCache({
         }),
     )
 
-    const followedListsDataforPage = await bgModules.pageActivityIndicator.getPageFollowedLists(
-        args.fullPageUrl,
+    const localPageListIds = await bgModules.customLists.fetchPageLists({
+        url: args.fullPageUrl,
+    })
+    args.cache.setPageData(
+        normalizeUrl(args.fullPageUrl),
+        localPageListIds.map(
+            (localListId) =>
+                args.cache.getListByLocalId(localListId)?.unifiedId,
+        ),
     )
-
-    const remoteListsForPage = Object.entries(followedListsDataforPage).map(
-        (remoteList) =>
-            args.cache.getListByRemoteId(remoteList[1].sharedList.toString())
-                ?.unifiedId,
-    )
-
-    const localListIds = pageLocalListIds.map(
-        (localListId) => args.cache.getListByLocalId(localListId)?.unifiedId,
-    )
-
-    const allIds = [...remoteListsForPage, ...localListIds]
-
-    args.cache.setPageData(normalizeUrl(args.fullPageUrl), allIds)
 }
