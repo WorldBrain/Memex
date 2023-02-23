@@ -931,7 +931,7 @@ export class AnnotationsSidebar extends React.Component<
             (listData) =>
                 listData.unifiedAnnotationIds.length > 0 ||
                 listData.hasRemoteAnnotationsToLoad ||
-                annotationsCache.pageListIds.includes(listData.unifiedId),
+                annotationsCache.pageListIds.has(listData.unifiedId),
         )
 
         if (allLists.length > 0) {

@@ -26,7 +26,7 @@ export interface PageAnnotationCacheDeps {
 }
 
 export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
-    pageListIds: PageAnnotationsCacheInterface['pageListIds'] = []
+    pageListIds: PageAnnotationsCacheInterface['pageListIds'] = new Set()
     annotations: PageAnnotationsCacheInterface['annotations'] = initNormalizedState()
     lists: PageAnnotationsCacheInterface['lists'] = initNormalizedState()
 
@@ -196,6 +196,17 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
     }
 
+    private ensurePageListsSet(
+        unifiedListIds: UnifiedList['unifiedId'][],
+    ): void {
+        for (const listId of unifiedListIds) {
+            if (!this.lists.byId[listId]) {
+                continue
+            }
+            this.pageListIds.add(listId)
+        }
+    }
+
     setPageData: PageAnnotationsCacheInterface['setPageData'] = (
         normalizedPageUrl,
         pageListIds,
@@ -203,21 +214,14 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         if (this.deps.normalizedPageUrl !== normalizedPageUrl) {
             this.deps.normalizedPageUrl = normalizedPageUrl
         }
-        this.pageListIds = []
-
-        for (const listId of pageListIds) {
-            const listData = this.lists.byId[listId]
-            if (!listData || this.pageListIds.includes(listId)) {
-                continue
-            }
-            this.pageListIds.push(listId)
-        }
+        this.pageListIds.clear()
+        this.ensurePageListsSet(pageListIds)
         this.events.emit('updatedPageData', normalizedPageUrl, this.pageListIds)
         this.updateSharedAnnotationsWithSharedPageLists()
     }
 
     private get sharedPageListIds(): UnifiedList['unifiedId'][] {
-        return this.pageListIds.filter(
+        return [...this.pageListIds].filter(
             (listId) => this.lists.byId[listId]?.remoteId != null,
         )
     }
@@ -359,11 +363,21 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             throw new Error('No existing cached annotation found to update')
         }
 
+        let shouldUpdateSiblingAnnots = false
         let unifiedListIds = [...previous.unifiedListIds]
         let privacyLevel = updates.privacyLevel
 
         if (previous.privacyLevel === updates.privacyLevel) {
             unifiedListIds = [...updates.unifiedListIds]
+
+            // If changing a public annot's lists, those shared list changes should cascade to other sibling shared annots
+            if (previous.privacyLevel === AnnotationPrivacyLevels.SHARED) {
+                const sharedListIds = updates.unifiedListIds.filter(
+                    (listId) => this.lists.byId[listId]?.remoteId != null,
+                )
+                this.ensurePageListsSet(sharedListIds)
+                shouldUpdateSiblingAnnots = true
+            }
         } else if (
             previous.privacyLevel !== AnnotationPrivacyLevels.PRIVATE &&
             updates.privacyLevel <= AnnotationPrivacyLevels.PRIVATE
@@ -407,6 +421,10 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
         this.events.emit('updatedAnnotation', next)
         this.events.emit('newAnnotationsState', this.annotations)
+
+        if (shouldUpdateSiblingAnnots) {
+            this.updateSharedAnnotationsWithSharedPageLists()
+        }
     }
 
     updateList: PageAnnotationsCacheInterface['updateList'] = (updates) => {
