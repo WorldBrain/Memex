@@ -97,7 +97,6 @@ export interface AnnotationProps {
     pageUrl?: string
     creatorId?: string | number
     currentUserId?: string | number
-    selectedListId?: number
 }
 
 export interface AnnotationEditableEventProps {
@@ -231,12 +230,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         name: string | JSX.Element
         isShared: boolean
     }> {
-        return this.props.lists
-            .filter((list) => list !== this.props.selectedListId)
-            .map((id) => ({
-                id,
-                ...this.props.getListDetailsById(id),
-            }))
+        return this.props.lists.map((id) => ({
+            id,
+            ...this.props.getListDetailsById(id),
+        }))
     }
 
     private get hasSharedLists(): boolean {
