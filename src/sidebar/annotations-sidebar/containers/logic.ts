@@ -1308,6 +1308,17 @@ export class SidebarContainerLogic extends UILogic<
             await this.loadRemoteAnnototationReferencesForCachedLists(
                 previousState,
             )
+        } else if (event.tab === 'summary') {
+            this.emitMutation({
+                loadState: { $set: 'running' },
+            })
+
+            const summary = `The article debunks the narrative that Jimmy Carter's liberal big-government policies resulted in runaway inflation and that Ronald Reagan defeated inflation, produced economic growth with deregulation and tax cuts, and won the Cold War by forcing the USSR to bankrupt itself. Instead, it highlights that Carter was the one who appointed Paul Volcker as the Fed Chair, who was responsible for tackling inflation and deregulated more industries than Reagan. Reagan did not increase defense spending as much as believed and didn't deregulate much.`
+
+            this.emitMutation({
+                loadState: { $set: 'success' },
+                pageSummary: { $set: summary },
+            })
         }
     }
 

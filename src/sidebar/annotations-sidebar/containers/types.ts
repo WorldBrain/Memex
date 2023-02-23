@@ -85,7 +85,7 @@ export interface EditForms {
     [annotationUrl: string]: EditForm
 }
 
-export type SidebarTab = 'annotations' | 'spaces' | 'feed'
+export type SidebarTab = 'annotations' | 'spaces' | 'feed' | 'summary'
 
 export interface SidebarContainerState extends AnnotationConversationsState {
     loadState: TaskState
@@ -117,6 +117,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     fullPageUrl?: string
     lists: PageAnnotationsCacheInterface['lists']
     annotations: PageAnnotationsCacheInterface['annotations']
+    pageSummary: string
 
     users: {
         [userId: string]: {
