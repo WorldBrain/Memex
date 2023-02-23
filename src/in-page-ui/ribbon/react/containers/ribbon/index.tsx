@@ -119,6 +119,14 @@ export default class RibbonContainer extends StatefulUIElement<
                         isShared: listDetails?.remoteId != null,
                     }
                 }}
+                onListShare={({ localListId, remoteListId }) =>
+                    this.props.annotationsCache.updateList({
+                        remoteId: remoteListId,
+                        unifiedId: this.props.annotationsCache.getListByLocalId(
+                            localListId,
+                        )?.unifiedId,
+                    })
+                }
                 toggleShowExtraButtons={() => {
                     this.processEvent('toggleShowExtraButtons', null)
                 }}

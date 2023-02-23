@@ -465,7 +465,9 @@ export class AnnotationsSidebar extends React.Component<
                     ownAnnotationProps.unifiedId = annotation.unifiedId
                     ownAnnotationProps.lists = cacheUtils.getLocalListIdsForCacheIds(
                         this.props.annotationsCache,
-                        annotation.unifiedListIds,
+                        annotation.unifiedListIds.filter(
+                            (listId) => listId !== unifiedListId,
+                        ),
                     )
                     ownAnnotationProps.comment = annotation.comment
                     ownAnnotationProps.isShared = [
@@ -522,11 +524,6 @@ export class AnnotationsSidebar extends React.Component<
                         order={i}
                     >
                         <AnnotationEditable
-                            selectedListId={
-                                this.props.annotationsCache.lists.byId[
-                                    this.props.selectedListId
-                                ]?.localId
-                            }
                             creatorId={annotation.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             pageUrl={this.props.normalizedPageUrl}
@@ -931,7 +928,7 @@ export class AnnotationsSidebar extends React.Component<
             (listData) =>
                 listData.unifiedAnnotationIds.length > 0 ||
                 listData.hasRemoteAnnotationsToLoad ||
-                annotationsCache.pageListIds.includes(listData.unifiedId),
+                annotationsCache.pageListIds.has(listData.unifiedId),
         )
 
         if (allLists.length > 0) {
@@ -1223,6 +1220,7 @@ export class AnnotationsSidebar extends React.Component<
                 this.annotationEditRefs[annot.unifiedId] = ref
                 const isShared =
                     annot.privacyLevel >= AnnotationPrivacyLevels.SHARED
+
                 return (
                     <AnnotationBox
                         key={annot.unifiedId}
@@ -1241,11 +1239,6 @@ export class AnnotationsSidebar extends React.Component<
                         <AnnotationEditable
                             {...annot}
                             {...this.props}
-                            selectedListId={
-                                this.props.annotationsCache.lists.byId[
-                                    this.props.selectedListId
-                                ]?.localId
-                            }
                             creatorId={annot.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             lists={cacheUtils.getLocalListIdsForCacheIds(
