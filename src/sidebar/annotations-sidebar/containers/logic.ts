@@ -63,6 +63,7 @@ import type { AnnotationSharingState } from 'src/content-sharing/background/type
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { SummarizationService } from '@worldbrain/memex-common/lib/summarization'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { Storage } from 'webextension-polyfill'
 import throttle from 'lodash/throttle'
@@ -1289,6 +1290,8 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    async getPageSummary() {}
+
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
         previousState,
@@ -1313,12 +1316,35 @@ export class SidebarContainerLogic extends UILogic<
                 loadState: { $set: 'running' },
             })
 
-            const summary = `The article debunks the narrative that Jimmy Carter's liberal big-government policies resulted in runaway inflation and that Ronald Reagan defeated inflation, produced economic growth with deregulation and tax cuts, and won the Cold War by forcing the USSR to bankrupt itself. Instead, it highlights that Carter was the one who appointed Paul Volcker as the Fed Chair, who was responsible for tackling inflation and deregulated more industries than Reagan. Reagan did not increase defense spending as much as believed and didn't deregulate much.`
+            const summaryProvider = new SummarizationService()
 
-            this.emitMutation({
-                loadState: { $set: 'success' },
-                pageSummary: { $set: summary },
-            })
+            const response = await summaryProvider.summarize(
+                previousState.fullPageUrl,
+            )
+
+            if (response.status === 'success') {
+                let summaryText = response.choices[0].text
+
+                if (summaryText.startsWith(':')) {
+                    summaryText = summaryText.slice(2)
+                }
+
+                this.emitMutation({
+                    pageSummary: {
+                        $set: summaryText,
+                    },
+                    loadState: { $set: 'success' },
+                })
+                console.log(response.choices[0].text)
+            } else if (response.status === 'prompt-too-long') {
+                this.emitMutation({
+                    loadState: { $set: 'error' },
+                })
+            } else {
+                this.emitMutation({
+                    loadState: { $set: 'error' },
+                })
+            }
         }
     }
 
