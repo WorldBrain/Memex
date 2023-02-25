@@ -1,9 +1,6 @@
 import React from 'react'
 import PropTypes, { string } from 'prop-types'
-import AnimationWrapper from './AnimationWrapper'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import styled, { keyframes, css } from 'styled-components'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const openAnimation = keyframes`
  0% { zoom: 0.8; opacity: 0 }
@@ -15,7 +12,6 @@ const openAnimation = keyframes`
 `
 
 const MemexTooltip = styled.div`
-    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -34,22 +30,14 @@ const MemexTooltip = styled.div`
     background: ${(props) => props.theme.colors.greyScale1};
 `
 
-const Tooltip = ({
-    x = null,
-    y = null,
-    state,
-    tooltipComponent,
-    closeTooltip,
-    openSettings,
-}) => (
+const Tooltip = ({ x = null, y = null, tooltipComponent }) => (
     <MemexTooltip
         left={x}
         top={y}
-        // className={deriveTooltipClass(state)}
         style={{ left: x, top: y }}
         id="memex-tooltip"
     >
-        <AnimationWrapper>{tooltipComponent}</AnimationWrapper>
+        {tooltipComponent}
     </MemexTooltip>
 )
 
@@ -58,28 +46,6 @@ Tooltip.propTypes = {
     y: PropTypes.number,
     state: PropTypes.string.isRequired,
     tooltipComponent: PropTypes.element.isRequired,
-    closeTooltip: PropTypes.func.isRequired,
-    openSettings: PropTypes.func.isRequired,
 }
 
 export default Tooltip
-
-export function _renderButtons({ closeTooltip, state }) {
-    return (
-        <TooltipBox
-            tooltipText="Close. Disable in Toolbar (R)"
-            placement="right"
-        >
-            <Icon
-                filePath={'removeX'}
-                heightAndWidth="20px"
-                color={'greyScale3'}
-            />
-        </TooltipBox>
-    )
-}
-
-_renderButtons.propTypes = {
-    closeTooltip: PropTypes.func.isRequired,
-    state: PropTypes.string,
-}

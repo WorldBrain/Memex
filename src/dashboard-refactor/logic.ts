@@ -3226,8 +3226,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             editingListId = event.listId
         }
 
-        console.log('confirmListEdit', previousState.listsSidebar)
-
         if (!editingListId) {
             throw new Error('No list ID is set for editing')
         }

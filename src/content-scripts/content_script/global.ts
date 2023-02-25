@@ -248,7 +248,6 @@ export async function main(
             fullPageUrl: await pageInfo.getFullPageUrl(),
         }),
     }
-
     const annotationsFunctions = {
         createHighlight: (analyticsEvent?: AnalyticsEvent<'Highlights'>) => (
             shouldShare: boolean,
@@ -344,6 +343,7 @@ export async function main(
         async registerTooltipScript(execute): Promise<void> {
             await execute({
                 inPageUI,
+                summarizeBG,
                 toolbarNotifications,
                 createHighlight: annotationsFunctions.createHighlight({
                     category: 'Highlights',

@@ -1316,7 +1316,6 @@ export class SidebarContainerLogic extends UILogic<
                 },
                 loadState: { $set: 'success' },
             })
-            console.log(response.choices[0].text)
         } else if (response.status === 'prompt-too-long') {
             this.emitMutation({
                 loadState: { $set: 'error' },
@@ -1657,8 +1656,6 @@ export class SidebarContainerLogic extends UILogic<
             )
 
             // check ownership status of current list for the case that we don't yet have the data synced up and people can start collaborating
-
-            console.log('cachedList', cachedList)
 
             if (!sharedList) {
                 throw new Error(

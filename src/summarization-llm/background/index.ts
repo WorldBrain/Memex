@@ -13,6 +13,14 @@ export interface SummarizationInterface {
         | { status: 'prompt-too-long' }
         | { status: 'unknown-error' }
     >
+    getTextSummary: (
+        text,
+        prompt,
+    ) => Promise<
+        | { status: 'success'; choices: { text: string }[] }
+        | { status: 'prompt-too-long' }
+        | { status: 'unknown-error' }
+    >
 }
 
 export default class SummarizeBackground {
@@ -26,6 +34,7 @@ export default class SummarizeBackground {
         // })
         this.remoteFunctions = {
             getPageSummary: (url) => this.getPageSummary(url),
+            getTextSummary: (text, prompt) => this.getTextSummary(text, prompt),
         }
     }
 
@@ -35,8 +44,15 @@ export default class SummarizeBackground {
 
     getPageSummary: SummarizationInterface['getPageSummary'] = async (url) => {
         let newSummary = new SummarizationService()
-        let summary = await newSummary.summarize(url)
-        console.log('arrives here')
+        let summary = await newSummary.summarizeUrl(url)
+        return summary
+    }
+    getTextSummary: SummarizationInterface['getTextSummary'] = async (
+        text,
+        prompt,
+    ) => {
+        let newSummary = new SummarizationService()
+        let summary = await newSummary.summarizeText(text, prompt)
         return summary
     }
 }

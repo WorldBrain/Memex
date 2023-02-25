@@ -1851,6 +1851,7 @@ const BetaButtonInner = styled.div`
     display: flex;
     background: ${(props) => props.theme.colors.black};
     color: #0a4bca;
+    font-weight: bold;
     font-size: 12px;
     letter-spacing: 1px;
     height: 20px;
@@ -1882,7 +1883,7 @@ const SummaryFooter = styled.div`
     align-items: center;
     justify-content: space-between;
     grid-gap: 10px;
-    padding: 0 20px 10px 20px;
+    padding: 20px 20px 10px 20px;
 `
 
 const PoweredBy = styled.div`
