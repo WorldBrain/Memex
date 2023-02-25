@@ -11,14 +11,14 @@ const openAnimation = keyframes`
  100% { padding-bottom: 0px; opacity: 1 } */
 `
 
-const MemexTooltip = styled.div`
+const MemexTooltip = styled.div<{ screenPosition }>`
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
     border-radius: 8px;
     flex-wrap: wrap;
-    position: absolute;
+    position: ${(props) => props.screenPosition};
     background-color: #fff;
     transform: translate(-50%, 50%);
     z-index: 100000;
@@ -30,12 +30,13 @@ const MemexTooltip = styled.div`
     background: ${(props) => props.theme.colors.greyScale1};
 `
 
-const Tooltip = ({ x = null, y = null, tooltipComponent }) => (
+const Tooltip = ({ x = null, y = null, tooltipComponent, screenPosition }) => (
     <MemexTooltip
         left={x}
         top={y}
         style={{ left: x, top: y }}
         id="memex-tooltip"
+        screenPosition={screenPosition}
     >
         {tooltipComponent}
     </MemexTooltip>
@@ -46,6 +47,7 @@ Tooltip.propTypes = {
     y: PropTypes.number,
     state: PropTypes.string.isRequired,
     tooltipComponent: PropTypes.element.isRequired,
+    screenPosition: PropTypes.string,
 }
 
 export default Tooltip

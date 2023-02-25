@@ -258,6 +258,11 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                     >
                         <Tooltip
                             {...position}
+                            screenPosition={
+                                this.state.tooltipState === 'AIinterface'
+                                    ? 'fixed'
+                                    : 'absolute'
+                            }
                             state={tooltipState}
                             tooltipComponent={this.renderTooltipComponent()}
                         />
