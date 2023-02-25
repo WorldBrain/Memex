@@ -1302,7 +1302,6 @@ export class SidebarContainerLogic extends UILogic<
         const summaryProvider = new SummarizationService()
 
         const response = await this.options.summarizeBG.getPageSummary(url)
-        console.log('response', response)
 
         if (response.status === 'success') {
             let summaryText = response.choices[0].text
