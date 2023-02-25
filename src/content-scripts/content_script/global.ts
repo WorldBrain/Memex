@@ -551,7 +551,7 @@ class PageInfo {
 
     getFullPageUrl = async () => {
         await this.refreshIfNeeded()
-        return this._href
+        return this._identifier.fullUrl
     }
 
     getPageTitle = () => {

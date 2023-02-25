@@ -528,7 +528,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                         <ViewAllButton
                             onClick={() =>
                                 window.open(
-                                    'https://tutorials.memex.garden/tutorials',
+                                    'https://links.memex.garden/tutorials',
                                 )
                             }
                         >
