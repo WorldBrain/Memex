@@ -16,6 +16,7 @@ export type InPageUISidebarAction =
     | 'selected_list_mode_from_web_ui'
     | 'show_my_annotations'
     | 'check_sidebar_status'
+    | 'show_page_summary'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'
