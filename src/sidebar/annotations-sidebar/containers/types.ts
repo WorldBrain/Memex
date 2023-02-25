@@ -29,6 +29,7 @@ import type {
 } from 'src/annotations/cache/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
+import type { SummarizationInterface } from 'src/summarization-llm/background/index'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
@@ -53,6 +54,7 @@ export interface SidebarContainerDependencies {
     annotationsCache: PageAnnotationsCacheInterface
 
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
+    summarizeBG: SummarizationInterface
     annotationsBG: AnnotationInterface<'caller'>
     customListsBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface

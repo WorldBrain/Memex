@@ -55,6 +55,7 @@ interface Dependencies {
         | 'personalCloud'
         | 'readwise'
         | 'syncSettings'
+        | 'summarizeBG'
     >
 }
 

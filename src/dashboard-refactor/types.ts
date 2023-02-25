@@ -32,6 +32,7 @@ import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/t
 import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import type { PDFRemoteInterface } from 'src/pdf/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
+import type { SummarizationInterface } from 'src/summarization-llm/background'
 import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
@@ -78,6 +79,7 @@ export interface DashboardDependencies {
     activityIndicatorBG: ActivityIndicatorInterface
     syncSettingsBG: RemoteSyncSettingsInterface
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
+    summarizeBG: SummarizationInterface
     pdfViewerBG: PDFRemoteInterface
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']
