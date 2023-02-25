@@ -725,6 +725,9 @@ export class SidebarContainerLogic extends UILogic<
                 previousState,
             )
         }
+        if (previousState.activeTab === 'summary') {
+            await this.getPageSummary(event.fullPageUrl)
+        }
     }
 
     setAllNotesShareMenuShown: EventHandler<
@@ -1290,7 +1293,39 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    async getPageSummary() {}
+    async getPageSummary(url) {
+        this.emitMutation({
+            loadState: { $set: 'running' },
+        })
+
+        const summaryProvider = new SummarizationService()
+
+        const response = await summaryProvider.summarize(url)
+
+        if (response.status === 'success') {
+            let summaryText = response.choices[0].text
+
+            if (summaryText.startsWith(':')) {
+                summaryText = summaryText.slice(2)
+            }
+
+            this.emitMutation({
+                pageSummary: {
+                    $set: summaryText,
+                },
+                loadState: { $set: 'success' },
+            })
+            console.log(response.choices[0].text)
+        } else if (response.status === 'prompt-too-long') {
+            this.emitMutation({
+                loadState: { $set: 'error' },
+            })
+        } else {
+            this.emitMutation({
+                loadState: { $set: 'error' },
+            })
+        }
+    }
 
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
@@ -1312,39 +1347,7 @@ export class SidebarContainerLogic extends UILogic<
                 previousState,
             )
         } else if (event.tab === 'summary') {
-            this.emitMutation({
-                loadState: { $set: 'running' },
-            })
-
-            const summaryProvider = new SummarizationService()
-
-            const response = await summaryProvider.summarize(
-                previousState.fullPageUrl,
-            )
-
-            if (response.status === 'success') {
-                let summaryText = response.choices[0].text
-
-                if (summaryText.startsWith(':')) {
-                    summaryText = summaryText.slice(2)
-                }
-
-                this.emitMutation({
-                    pageSummary: {
-                        $set: summaryText,
-                    },
-                    loadState: { $set: 'success' },
-                })
-                console.log(response.choices[0].text)
-            } else if (response.status === 'prompt-too-long') {
-                this.emitMutation({
-                    loadState: { $set: 'error' },
-                })
-            } else {
-                this.emitMutation({
-                    loadState: { $set: 'error' },
-                })
-            }
+            await this.getPageSummary(previousState.fullPageUrl)
         }
     }
 
