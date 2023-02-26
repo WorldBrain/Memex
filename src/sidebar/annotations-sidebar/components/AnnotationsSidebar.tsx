@@ -1131,6 +1131,55 @@ export class AnnotationsSidebar extends React.Component<
         }
     }
 
+    private showSummary() {
+        return (
+            <SummarySection>
+                <SummaryContainer>
+                    <SummaryText>{this.props.pageSummary}</SummaryText>
+                    <SummaryFooter>
+                        <RightSideButtons>
+                            <BetaButton>
+                                <BetaButtonInner>BETA</BetaButtonInner>
+                            </BetaButton>
+                            <PrimaryAction
+                                type="tertiary"
+                                size="small"
+                                onClick={() => {
+                                    window.open(
+                                        'https://memex.garden/chatsupport',
+                                        '_blank',
+                                    )
+                                }}
+                                label="Report Bug"
+                            />
+                        </RightSideButtons>
+                        <PoweredBy>
+                            Powered by
+                            <Icon
+                                icon="openAI"
+                                height="18px"
+                                hoverOff
+                                width="70px"
+                            />
+                        </PoweredBy>
+                    </SummaryFooter>
+                </SummaryContainer>
+                {/* {this.state
+                    .summarizeArticleLoadState[
+                    entry.normalizedUrl
+                ] === 'error' && (
+                    <ErrorContainer>
+                        Page could not be
+                        summarised. This
+                        may be because it
+                        is behind a
+                        paywall.
+                    </ErrorContainer>
+                )} */}
+            </SummarySection>
+        )
+    }
+
     private renderResultsBody() {
         const selectedList = this.props.annotationsCache.lists.byId[
             this.props.selectedListId
@@ -1147,6 +1196,14 @@ export class AnnotationsSidebar extends React.Component<
             this.props.foreignSelectedListLoadState === 'running'
         ) {
             return this.renderLoader()
+        }
+
+        if (this.props.activeTab === 'summary') {
+            if (this.props.loadState === 'success') {
+                return this.showSummary()
+            } else {
+                return this.renderLoader()
+            }
         }
 
         if (
@@ -1399,6 +1456,15 @@ export class AnnotationsSidebar extends React.Component<
                             </LoadingBox>
                         )
                     }
+                />
+                <PrimaryAction
+                    onClick={this.props.setActiveTab('summary')}
+                    label={'Summary'}
+                    active={this.props.activeTab === 'summary'}
+                    type={'tertiary'}
+                    size={'medium'}
+                    iconPosition={'right'}
+                    padding={'0px 6px'}
                 />
                 <PrimaryAction
                     onClick={(event) => {
@@ -1758,6 +1824,93 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 }
+const RightSideButtons = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    grid-gap: 10px;
+`
+
+const BetaButton = styled.div`
+    display: flex;
+    background: linear-gradient(
+        90deg,
+        #d9d9d9 0%,
+        #2e73f8 0.01%,
+        #0a4bca 78.86%,
+        #0041be 100%
+    );
+    border-radius: 50px;
+    height: 24px;
+    width: 50px;
+    align-items: center;
+    justify-content: center;
+`
+
+const BetaButtonInner = styled.div`
+    display: flex;
+    background: ${(props) => props.theme.colors.black};
+    color: #0a4bca;
+    font-weight: bold;
+    font-size: 12px;
+    letter-spacing: 1px;
+    height: 20px;
+    width: 46px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50px;
+`
+
+const ErrorContainer = styled.div`
+    display: flex;
+    background: ${(props) => props.theme.colors.warning};
+    color: ${(props) => props.theme.colors.white};
+    font-size: 16px;
+`
+
+const SummaryContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: space-between;
+    grid-gap: 10px;
+    align-items: flex-start;
+`
+
+const SummaryFooter = styled.div`
+    width: fill-available;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    grid-gap: 10px;
+    padding: 20px 20px 10px 20px;
+`
+
+const PoweredBy = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 5px;
+    color: ${(props) => props.theme.colors.greyScale4};
+    font-size: 12px;
+    height: 26px;
+`
+
+const SummarySection = styled.div`
+    display: flex;
+    width: 100%;
+    min-height: 60px;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
+`
+
+const SummaryText = styled.div`
+    padding: 20px 20px 0px 20px;
+    color: ${(props) => props.theme.colors.greyScale7};
+    font-size: 16px;
+    line-height: 24px;
+`
 
 const FocusModeNotifContainer = styled.div`
     display: flex;

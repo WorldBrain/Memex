@@ -63,6 +63,7 @@ import type { AnnotationSharingState } from 'src/content-sharing/background/type
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { SummarizationService } from '@worldbrain/memex-common/lib/summarization'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { Storage } from 'webextension-polyfill'
 import throttle from 'lodash/throttle'
@@ -210,7 +211,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationSharingAccess: 'sharing-allowed',
             readingView: false,
             showAllNotesCopyPaster: false,
-
+            pageSummary: undefined,
             selectedListId: null,
 
             commentBox: { ...INIT_FORM_STATE },
@@ -339,6 +340,7 @@ export class SidebarContainerLogic extends UILogic<
             fullPageUrl,
             storageAPI,
             runtimeAPI,
+            summarizeBG,
         } = this.options
         annotationsCache.events.addListener(
             'newAnnotationsState',
@@ -723,6 +725,9 @@ export class SidebarContainerLogic extends UILogic<
             await this.loadRemoteAnnototationReferencesForCachedLists(
                 previousState,
             )
+        }
+        if (previousState.activeTab === 'summary') {
+            await this.getPageSummary(event.fullPageUrl)
         }
     }
 
@@ -1289,6 +1294,39 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    async getPageSummary(url) {
+        this.emitMutation({
+            loadState: { $set: 'running' },
+        })
+
+        const summaryProvider = new SummarizationService()
+
+        const response = await this.options.summarizeBG.getPageSummary(url)
+
+        if (response.status === 'success') {
+            let summaryText = response.choices[0].text
+
+            if (summaryText.startsWith(':')) {
+                summaryText = summaryText.slice(2)
+            }
+
+            this.emitMutation({
+                pageSummary: {
+                    $set: summaryText,
+                },
+                loadState: { $set: 'success' },
+            })
+        } else if (response.status === 'prompt-too-long') {
+            this.emitMutation({
+                loadState: { $set: 'error' },
+            })
+        } else {
+            this.emitMutation({
+                loadState: { $set: 'error' },
+            })
+        }
+    }
+
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
         previousState,
@@ -1308,6 +1346,8 @@ export class SidebarContainerLogic extends UILogic<
             await this.loadRemoteAnnototationReferencesForCachedLists(
                 previousState,
             )
+        } else if (event.tab === 'summary') {
+            await this.getPageSummary(previousState.fullPageUrl)
         }
     }
 
@@ -1616,8 +1656,6 @@ export class SidebarContainerLogic extends UILogic<
             )
 
             // check ownership status of current list for the case that we don't yet have the data synced up and people can start collaborating
-
-            console.log('cachedList', cachedList)
 
             if (!sharedList) {
                 throw new Error(

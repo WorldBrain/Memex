@@ -11,7 +11,6 @@ export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
     const keys: (keyof BaseKeyboardShortcuts)[] = [
         'addToCollection',
         'addComment',
-        'addTag',
         'toggleSidebar',
         'toggleHighlights',
         'createAnnotation',
@@ -20,6 +19,7 @@ export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
         'createBookmark',
         'openDashboard',
         'shortcutsEnabled',
+        'openToolTipInAIMode',
     ]
 
     const shortcuts: Partial<BaseKeyboardShortcuts> = {}

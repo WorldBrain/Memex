@@ -237,6 +237,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.processEvent('setActiveSidebarTab', {
                 tab: 'annotations',
             })
+        } else if (event.action === 'show_page_summary') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'summary',
+            })
         } else if (event.action === 'check_sidebar_status') {
             return true
         }

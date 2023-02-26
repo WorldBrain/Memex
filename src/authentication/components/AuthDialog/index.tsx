@@ -368,6 +368,8 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         icon={'longArrowRight'}
                                         iconSize={'22px'}
                                         iconPosition={'right'}
+                                        type="primary"
+                                        size="large"
                                     />
                                 </ConfirmContainer>
                                 {this.state.error && (
@@ -390,6 +392,8 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                         onClick={() =>
                             this.processEvent('toggleMode', { mode: 'login' })
                         }
+                        size={'large'}
+                        type={'primary'}
                     />
                 </>
                 // <StyledAuthDialog>

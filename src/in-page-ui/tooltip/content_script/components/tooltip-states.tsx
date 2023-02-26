@@ -5,6 +5,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 const CreateButtons = styled.div`
     display: flex;
@@ -12,6 +13,7 @@ const CreateButtons = styled.div`
     align-items: center;
     justify-content: center;
     padding: 0 8px;
+    height: 34px;
 `
 
 const ButtonDiv = styled.button`
@@ -25,6 +27,10 @@ const ButtonDiv = styled.button`
     height: 24px;
     display: flex;
     align-items: center;
+    flex-direction: row;
+    grid-gap: 5px;
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 14px;
 `
 
 const AnnotationTooltipText = styled.span`
@@ -52,17 +58,18 @@ const TopSection = styled.div`
     align-items: center;
     justify-content: center;
     grid-gap: 5px;
+    color: ${(props) => props.theme.colors.white};
 `
 
 export const InitialComponent = ({
     createHighlight,
     createAnnotation,
     addtoSpace,
+    openAIinterface,
     closeTooltip,
-    state,
     keyboardShortCuts,
 }) => (
-    <CreateButtons>
+    <CreateButtons className="noDrag">
         <ButtonDiv onClick={createHighlight}>
             <TooltipBox
                 tooltipText={
@@ -154,12 +161,48 @@ export const InitialComponent = ({
                 />
             </TooltipBox>
         </ButtonDiv>
+        <TooltipBox
+            tooltipText={
+                <AnnotationTooltipText>
+                    <TopSection>
+                        <strong>Explain & Summarise</strong>
+                    </TopSection>
+                    <SubSection>
+                        <KeyboardShortcuts
+                            size={'small'}
+                            keys={keyboardShortCuts['openToolTipInAIMode']}
+                        />
+                    </SubSection>
+                </AnnotationTooltipText>
+            }
+            placement="bottom"
+        >
+            <PrimaryAction
+                label="Explain"
+                icon={'stars'}
+                onClick={openAIinterface}
+                size="small"
+                type="forth"
+                iconColor="greyScale6"
+                iconSize="18px"
+                fontSize="12px"
+                padding="0px 8px 0 4px"
+            />
+        </TooltipBox>
         <ButtonDiv onClick={closeTooltip}>
             <TooltipBox
                 tooltipText={
                     <AnnotationTooltipText>
-                        <strong>Close Highlighter</strong>
-                        Disable in Settings
+                        <TopSection>
+                            <strong>Hide Tooltip</strong>
+                        </TopSection>
+                        <SubSection>
+                            <KeyboardShortcuts
+                                size="small"
+                                optional={'shift'}
+                            />{' '}
+                            -click to disable
+                        </SubSection>
                     </AnnotationTooltipText>
                 }
                 placement="bottom"
@@ -179,6 +222,7 @@ InitialComponent.propTypes = {
     createHighlight: PropTypes.func.isRequired,
     createAnnotation: PropTypes.func.isRequired,
     closeTooltip: PropTypes.func.isRequired,
+    openAIinterface: PropTypes.func.isRequired,
     state: PropTypes.string,
 }
 

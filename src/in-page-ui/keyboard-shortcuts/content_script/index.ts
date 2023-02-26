@@ -87,6 +87,10 @@ function getShortcutHandlers({
         openDashboard: () =>
             runInBackground<InPageUIInterface<'caller'>>().openDashboard(),
         toggleSidebar: () => inPageUI.toggleSidebar(),
+        openToolTipInAIMode: () =>
+            window.getSelection().toString().length === 0
+                ? inPageUI.showSidebar({ action: 'show_page_summary' })
+                : inPageUI.showTooltip('AImode'),
         toggleHighlights: () => inPageUI.toggleHighlights(),
         createSharedAnnotation: () =>
             annotationFunctions.createAnnotation(true),

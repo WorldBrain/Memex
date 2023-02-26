@@ -1,5 +1,6 @@
 import { UserFeatureOptIn } from 'src/features/background/feature-opt-ins'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import { SummarizationInterface } from 'src/summarization-llm/background'
 import { ToolbarNotificationsInterface } from 'src/toolbar-notification/content_script/types'
 
 export interface TooltipPosition {
@@ -15,6 +16,7 @@ export type TooltipInPageUIInterface = Pick<
 export interface TooltipDependencies extends AnnotationFunctions {
     inPageUI: SharedInPageUIInterface
     toolbarNotifications: ToolbarNotificationsInterface
+    summarizeBG: SummarizationInterface
 }
 
 export interface AnnotationFunctions {
@@ -23,4 +25,7 @@ export interface AnnotationFunctions {
         shouldShare: boolean,
         showSpacePicker?: boolean,
     ): Promise<void>
+}
+export interface ToolTipFunctions {
+    openToolTipInAIMode: () => void
 }

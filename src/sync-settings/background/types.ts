@@ -45,7 +45,6 @@ export interface SyncSettingsByFeature {
         areTagsMigratedToSpaces: boolean
         keyboardShortcuts: {
             shortcutsEnabled: boolean
-            addTagShortcutEnabled: boolean
             addCommentShortcutEnabled: boolean
             openDashboardShortcutEnabled: boolean
             toggleSidebarShortcutEnabled: boolean
@@ -54,7 +53,7 @@ export interface SyncSettingsByFeature {
             addToCollectionShortcutEnabled: boolean
             toggleHighlightsShortcutEnabled: boolean
             createAnnotationShortcutEnabled: boolean
-            addTagShortcut: string
+            openToolTipInAIModeShortcutEnabled: boolean
             addCommentShortcut: string
             openDashboardShortcut: string
             toggleSidebarShortcut: string
@@ -63,6 +62,7 @@ export interface SyncSettingsByFeature {
             addToCollectionShortcut: string
             toggleHighlightsShortcut: string
             createAnnotationShortcut: string
+            openToolTipInAIModeShortcut: string
         }
     }
     readwise: {

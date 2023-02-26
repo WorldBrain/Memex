@@ -183,6 +183,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         // TODO: fix this - could indicate a deeper timing issue
         await this.options.loadComponent(component)
         this._maybeEmitShouldSetUp(component, options)
+        return
     }
 
     async showRibbon(options?: { action?: InPageUIRibbonAction }) {
@@ -236,8 +237,13 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         await this.loadComponent('tooltip')
     }
 
-    async showTooltip() {
-        await this._setState('tooltip', true)
+    async showTooltip(mode?) {
+        if (mode === 'AImode' && !this.componentsSetUp.tooltip) {
+            await this.setupTooltip()
+            await this._setState('tooltip', false, mode)
+        } else {
+            await this._setState('tooltip', true, mode)
+        }
     }
 
     async hideTooltip() {
@@ -272,7 +278,19 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         }
     }
 
-    private async _setState(component: InPageUIComponent, visible: boolean) {
+    private async _setState(
+        component: InPageUIComponent,
+        visible: boolean,
+        mode?: string,
+    ) {
+        if (mode != null) {
+            this.events.emit('stateChanged', {
+                newState: this.componentsShown,
+                changes: { [component]: this.componentsShown[component] },
+                mode: mode,
+            })
+        }
+
         if (this.componentsShown[component] === visible) {
             return
         }
@@ -288,6 +306,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         this.events.emit('stateChanged', {
             newState: this.componentsShown,
             changes: { [component]: this.componentsShown[component] },
+            mode: mode,
         })
     }
 
