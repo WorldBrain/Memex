@@ -228,7 +228,7 @@ const DescriptionText = styled.div`
     font-size: 18px;
     font-weight: 300;
     margin-bottom: 40px;
-    text-align: center;
+    text-align: left;
 `
 
 const RightSide = styled.div`

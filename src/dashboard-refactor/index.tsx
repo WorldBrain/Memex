@@ -97,6 +97,7 @@ export class DashboardContainer extends StatefulUIElement<
         | 'authBG'
         | 'openFeed'
         | 'openCollectionPage'
+        | 'summarizeBG'
     > = {
         analytics,
         copyToClipboard,
@@ -106,6 +107,7 @@ export class DashboardContainer extends StatefulUIElement<
         runtimeAPI: browser.runtime,
         localStorage: browser.storage.local,
         pageActivityIndicatorBG: runInBackground(),
+        summarizeBG: runInBackground(),
         contentConversationsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
         contentScriptsBG: runInBackground(),
@@ -1558,6 +1560,7 @@ export class DashboardContainer extends StatefulUIElement<
                             pageActivityIndicatorBG={
                                 this.props.pageActivityIndicatorBG
                             }
+                            summarizeBG={this.props.summarizeBG}
                             contentConversationsBG={
                                 this.props.contentConversationsBG
                             }

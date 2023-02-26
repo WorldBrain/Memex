@@ -160,6 +160,9 @@ export async function setupTest(
         ) as any,
         tabsAPI: device.browserAPIs.tabs,
         runtimeAPI: device.browserAPIs.runtime,
+        summarizeBG: insertBackgroundFunctionTab(
+            device.backgroundModules.summarizeBG.remoteFunctions,
+        ) as any,
         localStorage: device.browserAPIs.storage.local,
         authBG: device.backgroundModules.auth.remoteFunctions,
         tagsBG: device.backgroundModules.tags.remoteFunctions,

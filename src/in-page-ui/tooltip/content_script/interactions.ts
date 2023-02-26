@@ -2,15 +2,11 @@ import browser from 'webextension-polyfill'
 
 import analytics from 'src/analytics'
 import { delayed, getPositionState } from '../utils'
-import { createAndCopyDirectLink } from '../../../annotations/content_script/interactions'
 import { setupUIContainer, destroyUIContainer } from './components'
-import { remoteFunction } from '../../../util/webextensionRPC'
 import { conditionallyShowHighlightNotification } from '../onboarding-interactions'
 import type { TooltipPosition } from '../types'
 import type { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
 import type { InPageUIRootMount } from 'src/in-page-ui/types'
-
-const openOptionsRPC = remoteFunction('openOptionsTab')
 let mouseupListener = null
 
 export function setupTooltipTrigger(
@@ -54,6 +50,7 @@ let manualOverride = false
 
 interface TooltipInsertDependencies extends TooltipDependencies {
     mount: InPageUIRootMount
+    mode?: 'AImode'
 }
 
 /**
@@ -71,10 +68,9 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
     target = params.mount.rootElement
     showTooltip = await setupUIContainer(params.mount, {
         inPageUI: params.inPageUI,
-        createAndCopyDirectLink,
+        summarizeBG: params.summarizeBG,
         createAnnotation: params.createAnnotation,
         createHighlight: params.createHighlight,
-        openSettings: () => openOptionsRPC('settings'),
         destroyTooltip: async () => {
             analytics.trackEvent({
                 category: 'InPageTooltip',

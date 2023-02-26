@@ -1090,7 +1090,6 @@ const TutorialTitle = styled.div`
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     // @ts-ignore
-    text-fill-color: transparent;
 `
 
 const TutorialButtons = styled.div`

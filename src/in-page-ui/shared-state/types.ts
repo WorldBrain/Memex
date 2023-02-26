@@ -16,6 +16,7 @@ export type InPageUISidebarAction =
     | 'selected_list_mode_from_web_ui'
     | 'show_my_annotations'
     | 'check_sidebar_status'
+    | 'show_page_summary'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'
@@ -46,6 +47,7 @@ export interface SharedInPageUIEvents {
     stateChanged: (event: {
         newState: InPageUIComponentShowState
         changes: Partial<InPageUIComponentShowState>
+        mode?: string
     }) => void
     ribbonAction: (event: { action: InPageUIRibbonAction }) => void
     ribbonUpdate: () => void
@@ -61,6 +63,7 @@ export interface ShouldSetUpOptions {
     keepRibbonHidden?: boolean
     showSidebarOnLoad?: boolean
     showPageActivityIndicator?: boolean
+    openInAIMode?: boolean
 }
 
 export interface SharedInPageUIInterface {
@@ -81,7 +84,7 @@ export interface SharedInPageUIInterface {
     toggleSidebar(): Promise<void>
 
     // Tooltip
-    showTooltip(): Promise<void>
+    showTooltip(mode?: string): Promise<void>
     hideTooltip(): Promise<void>
     setupTooltip(): Promise<void>
     removeTooltip(): Promise<void>

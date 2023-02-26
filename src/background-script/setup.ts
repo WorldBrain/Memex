@@ -68,6 +68,7 @@ import { PageAnalyzerInterface } from 'src/page-analysis/types'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
 import pick from 'lodash/pick'
 import ActivityIndicatorBackground from 'src/activity-indicator/background'
+import SummarizeBackground from 'src/summarization-llm/background'
 import ActivityStreamsBackground from 'src/activity-streams/background'
 import { SyncSettingsBackground } from 'src/sync-settings/background'
 import { AuthServices, Services } from 'src/services/types'
@@ -115,6 +116,7 @@ export interface BackgroundModules {
     // connectivityChecker: ConnectivityCheckerBackground
     pageActivityIndicator: PageActivityIndicatorBackground
     activityIndicator: ActivityIndicatorBackground
+    summarizeBG: SummarizeBackground
     directLinking: DirectLinkingBackground
     pages: PageIndexingBackground
     search: SearchBackground
@@ -424,6 +426,7 @@ export function createBackgroundModules(options: {
         getServerStorage,
         jobScheduler: jobScheduler.scheduler,
     })
+    const summarizeBG = new SummarizeBackground()
 
     // TODO: Maybe move this somewhere more appropriate (personal-cloud module)
     async function createDeviceId(
@@ -637,6 +640,7 @@ export function createBackgroundModules(options: {
             personalCloud,
             notifications,
             pageActivityIndicator,
+            summarizeBG,
         },
     })
 
@@ -654,6 +658,7 @@ export function createBackgroundModules(options: {
         eventLog: new EventLogBackground({ storageManager }),
         activityIndicator,
         pageActivityIndicator,
+        summarizeBG,
         customLists,
         tags,
         bookmarks,
@@ -784,6 +789,7 @@ export async function setupBackgroundModules(
     backgroundModules.directLinking.setupRemoteFunctions()
     backgroundModules.search.setupRemoteFunctions()
     backgroundModules.activityIndicator.setupRemoteFunctions()
+    backgroundModules.summarizeBG.setupRemoteFunctions()
     backgroundModules.eventLog.setupRemoteFunctions()
     backgroundModules.backupModule.setBackendFromStorage()
     backgroundModules.backupModule.setupRemoteFunctions()

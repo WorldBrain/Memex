@@ -112,6 +112,7 @@ const setupLogicHelper = async ({
         authBG: backgroundModules.auth.remoteFunctions,
         subscription: backgroundModules.auth.subscriptionService,
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
+        summarizeBG: backgroundModules.summarizeBG.remoteFunctions,
         customListsBG: backgroundModules.customLists.remoteFunctions,
         contentSharingBG: backgroundModules.contentSharing.remoteFunctions,
         pageActivityIndicatorBG:

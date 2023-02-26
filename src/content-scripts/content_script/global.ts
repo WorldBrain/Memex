@@ -67,6 +67,7 @@ import { UNDO_HISTORY } from 'src/constants'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import { SummarizationInterface } from 'src/summarization-llm/background'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -165,6 +166,7 @@ export async function main(
     // 2. Initialise dependencies required by content scripts
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
+    const summarizeBG = runInBackground<SummarizationInterface>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const contentSharingBG = runInBackground<ContentSharingInterface>()
     const tagsBG = runInBackground<RemoteTagsInterface>()
@@ -246,7 +248,6 @@ export async function main(
             fullPageUrl: await pageInfo.getFullPageUrl(),
         }),
     }
-
     const annotationsFunctions = {
         createHighlight: (analyticsEvent?: AnalyticsEvent<'Highlights'>) => (
             shouldShare: boolean,
@@ -323,6 +324,7 @@ export async function main(
                 highlighter: highlightRenderer,
                 authBG,
                 annotationsBG,
+                summarizeBG,
                 syncSettingsBG,
                 contentSharingBG,
                 pageActivityIndicatorBG,
@@ -341,6 +343,7 @@ export async function main(
         async registerTooltipScript(execute): Promise<void> {
             await execute({
                 inPageUI,
+                summarizeBG,
                 toolbarNotifications,
                 createHighlight: annotationsFunctions.createHighlight({
                     category: 'Highlights',
