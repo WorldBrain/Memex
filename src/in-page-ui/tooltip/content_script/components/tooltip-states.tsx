@@ -58,6 +58,7 @@ const TopSection = styled.div`
     align-items: center;
     justify-content: center;
     grid-gap: 5px;
+    color: ${(props) => props.theme.colors.white};
 `
 
 export const InitialComponent = ({
@@ -66,10 +67,9 @@ export const InitialComponent = ({
     addtoSpace,
     openAIinterface,
     closeTooltip,
-    state,
     keyboardShortCuts,
 }) => (
-    <CreateButtons>
+    <CreateButtons className="noDrag">
         <ButtonDiv onClick={createHighlight}>
             <TooltipBox
                 tooltipText={
@@ -165,17 +165,13 @@ export const InitialComponent = ({
             tooltipText={
                 <AnnotationTooltipText>
                     <TopSection>
-                        <strong>Add to Space</strong>
-                        <KeyboardShortcuts
-                            size={'small'}
-                            keys={
-                                keyboardShortCuts['createAnnotationWithSpace']
-                            }
-                        />
+                        <strong>Explain & Summarise</strong>
                     </TopSection>
                     <SubSection>
-                        <KeyboardShortcuts size="small" optional={'shift'} /> to
-                        share
+                        <KeyboardShortcuts
+                            size={'small'}
+                            keys={keyboardShortCuts['openToolTipInAIMode']}
+                        />
                     </SubSection>
                 </AnnotationTooltipText>
             }
@@ -186,18 +182,27 @@ export const InitialComponent = ({
                 icon={'stars'}
                 onClick={openAIinterface}
                 size="small"
-                type="tertiary"
+                type="forth"
                 iconColor="greyScale6"
-                iconSize="20px"
-                fontSize="14px"
+                iconSize="18px"
+                fontSize="12px"
+                padding="0px 8px 0 4px"
             />
         </TooltipBox>
         <ButtonDiv onClick={closeTooltip}>
             <TooltipBox
                 tooltipText={
                     <AnnotationTooltipText>
-                        <strong>Close Highlighter</strong>
-                        Disable in Settings
+                        <TopSection>
+                            <strong>Hide Tooltip</strong>
+                        </TopSection>
+                        <SubSection>
+                            <KeyboardShortcuts
+                                size="small"
+                                optional={'shift'}
+                            />{' '}
+                            -click to disable
+                        </SubSection>
                     </AnnotationTooltipText>
                 }
                 placement="bottom"

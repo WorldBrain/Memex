@@ -30,7 +30,7 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
             return
         }
         let promptResponse = await this.props.sendAIprompt({
-            prompt: 'Explain me this like I am 5',
+            prompt: 'Explain this to a Second Grader:',
         })
         let summary = promptResponse.choices[0].text
 
@@ -38,10 +38,12 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
             summary = summary.slice(2)
         }
 
-        this.setState({
-            loadingState: 'success',
-            responseText: summary,
-        })
+        if (summary.length > 0) {
+            this.setState({
+                loadingState: 'success',
+                responseText: summary,
+            })
+        }
     }
 
     async newPrompt(prompt: string) {
@@ -58,29 +60,41 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
             summary = summary.slice(2)
         }
 
-        this.setState({
-            loadingState: 'success',
-            responseText: summary,
-        })
+        if (summary.length > 0) {
+            this.setState({
+                loadingState: 'success',
+                responseText: summary,
+            })
+        }
     }
 
     render() {
         return (
             <Container>
-                <SuggestionsButtons>
+                <SuggestionsButtons className="noDrag">
                     <SuggestionsButton
+                        className="noDrag"
                         onClick={() =>
-                            this.newPrompt('Explain me this like I am 5')
+                            this.newPrompt(
+                                'Summarize this for a second-grade student in 2 sentences: ',
+                            )
                         }
                     >
                         Explain me this like I am 5
                     </SuggestionsButton>
                     <SuggestionsButton
-                        onClick={() => this.newPrompt('Summarise this for me')}
+                        className="noDrag"
+                        onClick={() =>
+                            this.newPrompt(
+                                'Summarise this for me in 3 sentences:',
+                            )
+                        }
                     >
                         Summarise this for me
                     </SuggestionsButton>
+
                     <SuggestionsButton
+                        className="noDrag"
                         onClick={() =>
                             this.newPrompt('Explain this differently')
                         }
@@ -89,6 +103,7 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
                     </SuggestionsButton>
                 </SuggestionsButtons>
                 <ResponseArea
+                    className="noDrag"
                     loadingState={this.state.loadingState === 'running'}
                 >
                     {this.state.loadingState === 'running' ? (
@@ -135,11 +150,12 @@ const TextFieldContainer = styled.div`
 `
 
 const ResponseArea = styled.div<{ loadingState: boolean }>`
-    min-height: 150px;
+    min-height: 100px;
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: 10px 20px 20px 20px;
+    margin: 10px 20px 20px 20px;
+    cursor: text;
 
     ${(props) =>
         props.loadingState &&
@@ -147,6 +163,9 @@ const ResponseArea = styled.div<{ loadingState: boolean }>`
             align-items: center;
             justify-content: center;
         `}
+    &:hover {
+        cursor: text;
+    }
 `
 
 const SuggestionsButtons = styled.div`
@@ -201,6 +220,7 @@ const Container = styled.div`
     justify-content: center;
     color: white;
     flex-direction: column;
+    position: relative;
 `
 
 const RightSideButtons = styled.div`
