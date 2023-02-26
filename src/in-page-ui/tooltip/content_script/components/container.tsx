@@ -84,7 +84,6 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         let clickY = e.clientY
 
         if (e.composedPath().includes(this.container)) {
-            console.log('inside')
             return
         } else {
             this.setState({
@@ -257,18 +256,11 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                 return (
                     <AIInterfaceForTooltip
                         sendAIprompt={async (prompt) => {
-                            console.log(
-                                'sent off:' +
-                                    this.state.highlightText
-                                        .replaceAll('\n', '')
-                                        .replaceAll(/[^\w\s.?!]/g, ' '),
-                            )
-
                             const textToSummarize = this.state.highlightText
-                                .replaceAll('\n', '')
-                                .replaceAll(/[^\w\s.?!]/g, ' ')
+                                .replaceAll('\n', ' ')
+                                .replaceAll(/[^\w\s.:?!]/g, ' ')
+                                .replaceAll('  ', ' ')
                                 .trim()
-
                             const response = await this.props.summarizeBG.getTextSummary(
                                 textToSummarize,
                                 prompt.prompt,
