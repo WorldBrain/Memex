@@ -37,7 +37,9 @@ export default class RibbonContainer extends StatefulUIElement<
     }
 
     private get normalizedPageUrl(): string | null {
-        return this.state.pageUrl ? normalizeUrl(this.state.pageUrl) : null
+        return this.state.fullPageUrl
+            ? normalizeUrl(this.state.fullPageUrl)
+            : null
     }
 
     componentDidMount() {
@@ -117,6 +119,14 @@ export default class RibbonContainer extends StatefulUIElement<
                         isShared: listDetails?.remoteId != null,
                     }
                 }}
+                onListShare={({ localListId, remoteListId }) =>
+                    this.props.annotationsCache.updateList({
+                        remoteId: remoteListId,
+                        unifiedId: this.props.annotationsCache.getListByLocalId(
+                            localListId,
+                        )?.unifiedId,
+                    })
+                }
                 toggleShowExtraButtons={() => {
                     this.processEvent('toggleShowExtraButtons', null)
                 }}

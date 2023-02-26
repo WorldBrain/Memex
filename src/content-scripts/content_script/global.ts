@@ -297,7 +297,7 @@ export async function main(
                     getState: tooltipUtils.getHighlightsState,
                     setState: tooltipUtils.setHighlightsState,
                 },
-                getPageUrl: pageInfo.getFullPageUrl,
+                getFullPageUrl: pageInfo.getFullPageUrl,
             })
             components.ribbon?.resolve()
         },

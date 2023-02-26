@@ -1,4 +1,5 @@
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { cloneNormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { PageAnnotationCacheDeps, PageAnnotationsCache } from '.'
 import * as TEST_DATA from './index.test.data'
 import type {
@@ -268,7 +269,7 @@ describe('Page annotations cache tests', () => {
         expect(cache.annotations.byId).toEqual({
             [unifiedIdA]: expect.objectContaining({
                 unifiedId: unifiedIdA,
-                unifiedListIds: pageListIdsA,
+                unifiedListIds: pageListIdsB,
             }),
             [unifiedIdB]: expect.objectContaining({
                 unifiedId: unifiedIdB,
@@ -306,7 +307,7 @@ describe('Page annotations cache tests', () => {
         )
         expectedEvents.push({
             event: 'newAnnotationsState',
-            args: cache.annotations,
+            args: cloneNormalizedState(cache.annotations),
         })
 
         expect(cache.normalizedPageUrl).toEqual(TEST_DATA.NORMALIZED_PAGE_URL_1)
@@ -326,14 +327,19 @@ describe('Page annotations cache tests', () => {
         const { unifiedIds: unifiedIdsB } = cache.setAnnotations(
             reshapeUnifiedAnnotsForCaching(testAnnotations, testLists),
         )
-        cache.setPageData(TEST_DATA.NORMALIZED_PAGE_URL_2, [])
         expectedEvents.push({
             event: 'newAnnotationsState',
-            args: cache.annotations,
+            args: cloneNormalizedState(cache.annotations),
         })
+
+        cache.setPageData(TEST_DATA.NORMALIZED_PAGE_URL_2, [])
         expectedEvents.push({
             event: 'updatedPageData',
             args: TEST_DATA.NORMALIZED_PAGE_URL_2,
+        })
+        expectedEvents.push({
+            event: 'newAnnotationsState',
+            args: cloneNormalizedState(cache.annotations),
         })
 
         expect(cache.normalizedPageUrl).toEqual(TEST_DATA.NORMALIZED_PAGE_URL_2)
@@ -354,6 +360,7 @@ describe('Page annotations cache tests', () => {
             [unifiedIdsB[3]]: {
                 ...testAnnotations[3],
                 unifiedId: unifiedIdsB[3],
+                unifiedListIds: [],
             },
         })
         expect(emittedEvents).toEqual(expectedEvents)
@@ -473,6 +480,7 @@ describe('Page annotations cache tests', () => {
         const updatedListA: UnifiedList = {
             ...testLists[0],
             name: 'new list name',
+            remoteId: 'test remote id 1',
         }
         cache.updateList(updatedListA)
         expectedEvents.push({ event: 'updatedList', args: updatedListA })

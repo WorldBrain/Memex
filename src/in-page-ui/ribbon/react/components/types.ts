@@ -20,6 +20,7 @@ export interface RibbonSubcomponentProps {
     activityIndicator: ActivityIndicatorProps
     spacesBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface
+    onListShare: (ids: { localListId: number; remoteListId: string }) => void
 }
 
 export interface RibbonHighlightsProps {
