@@ -1,4 +1,4 @@
-import { SummarizationService } from '@worldbrain/memex-common/lib/summarization'
+import { SummarizationService } from '@worldbrain/memex-common/lib/summarization/index'
 import * as Raven from 'src/util/raven'
 
 import type { AuthServices, Services } from 'src/services/types'
