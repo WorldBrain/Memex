@@ -1,7 +1,6 @@
 :root {
     /* #f0f0f0 in decimal RGB */
     --highlightColor: var(--defaultHighlightColorCSS);
-    color: #12131b;
 }
 
 .memex-highlight {

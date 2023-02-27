@@ -215,7 +215,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         }
     }
     private openAIinterface: React.MouseEventHandler = async (e) => {
-        let newPositionX = window.innerWidth - 250 - 30
+        let newPositionX = 0
         let newPositionY = 0
 
         this.setState({
@@ -281,7 +281,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                 style={{
                     left:
                         this.state.tooltipState === 'AIinterface'
-                            ? pos.x - 250
+                            ? pos.x + 30
                             : pos.x - 112,
                     top: pos.y + 30,
                 }}
@@ -338,6 +338,7 @@ const ContainerBox = styled.div<{ screenPosition }>`
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 2147483647;
 `
 const openAnimation = keyframes`
  0% { zoom: 0.8; opacity: 0 }
