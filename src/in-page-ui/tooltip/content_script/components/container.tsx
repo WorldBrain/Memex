@@ -84,7 +84,6 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         let clickY = e.clientY
 
         if (e.composedPath().includes(this.container)) {
-            console.log('inside')
             return
         } else {
             this.setState({
@@ -216,7 +215,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         }
     }
     private openAIinterface: React.MouseEventHandler = async (e) => {
-        let newPositionX = window.innerWidth - 250 - 30
+        let newPositionX = 0
         let newPositionY = 0
 
         this.setState({
@@ -257,18 +256,11 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                 return (
                     <AIInterfaceForTooltip
                         sendAIprompt={async (prompt) => {
-                            console.log(
-                                'sent off:' +
-                                    this.state.highlightText
-                                        .replaceAll('\n', '')
-                                        .replaceAll(/[^\w\s.?!]/g, ' '),
-                            )
-
                             const textToSummarize = this.state.highlightText
-                                .replaceAll('\n', '')
-                                .replaceAll(/[^\w\s.?!]/g, ' ')
+                                .replaceAll('\n', ' ')
+                                .replaceAll(/[^\w\s.:?!]/g, ' ')
+                                .replaceAll('  ', ' ')
                                 .trim()
-
                             const response = await this.props.summarizeBG.getTextSummary(
                                 textToSummarize,
                                 prompt.prompt,
@@ -289,7 +281,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                 style={{
                     left:
                         this.state.tooltipState === 'AIinterface'
-                            ? pos.x - 250
+                            ? pos.x + 30
                             : pos.x - 112,
                     top: pos.y + 30,
                 }}
@@ -346,6 +338,7 @@ const ContainerBox = styled.div<{ screenPosition }>`
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 2147483647;
 `
 const openAnimation = keyframes`
  0% { zoom: 0.8; opacity: 0 }

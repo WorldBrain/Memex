@@ -63,7 +63,7 @@ import type { AnnotationSharingState } from 'src/content-sharing/background/type
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { SummarizationService } from '@worldbrain/memex-common/lib/summarization'
+import { SummarizationService } from '@worldbrain/memex-common/lib/summarization/index'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { Storage } from 'webextension-polyfill'
 import throttle from 'lodash/throttle'

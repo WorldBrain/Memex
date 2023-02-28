@@ -450,6 +450,7 @@ const IsolatedViewPill = styled.div<{ pillVisibility: string }>`
     min-width: 50px;
     grid-gap: 10px;
     position: fixed;
+    z-index: 2147483647;
     width: fit-content;
     bottom: 20px;
     right: 20px;

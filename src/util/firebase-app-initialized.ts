@@ -21,10 +21,10 @@ export const getFirebase = () => {
 
         firebase
             .firestore()
-            .settings({ cacheSizeBytes: 1000000 * 10, merge: true })
+            .settings({ cacheSizeBytes: 1000000000000000 * 10, merge: true })
         firebase
             .firestore()
-            .enablePersistence({ synchronizeTabs: false })
+            .enablePersistence({ synchronizeTabs: true })
             .catch((error) => {
                 console.warn(
                     'Could not enable Firestore offline persistence. Reason: ',

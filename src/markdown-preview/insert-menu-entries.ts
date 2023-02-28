@@ -22,7 +22,7 @@ export const annotationMenuItems: MenuItemProps[] = [
 
             const videoId = extractIdFromUrl(document.location.href)
 
-            return `[${humanTimestamp}](https://youtu.be/${videoId}?t=${timestampSecs})`
+            return `[${humanTimestamp}](https://www.youtube.com/watch?v=${videoId}?t=${timestampSecs})`
         },
     },
     {
