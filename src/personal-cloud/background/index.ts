@@ -46,7 +46,6 @@ import type { LocalExtensionSettings } from 'src/background-script/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { Runtime } from 'webextension-polyfill'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
@@ -99,6 +98,7 @@ export class PersonalCloudBackground {
             retryIntervalInMs: PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
             executeAction: this.executeAction,
             preprocessAction: this.preprocessAction,
+            onSetupError: (err) => Raven.captureException(err),
             setTimeout: (job, timeout) => {
                 options.jobScheduler.scheduleJobOnce({
                     name: 'personal-cloud-action-queue-retry',
