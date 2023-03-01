@@ -38,18 +38,18 @@ export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
             return null
         }
 
-        return (
-            <NotifBanner
-                mainText="Memex updated"
-                mainBtnText="See what changed"
-                onCloseBtnClick={() => this.processEvent('hide', null)}
-                onMainBtnClick={() => {
-                    this.processEvent('hide', null)
-                    this.props.openLink(CHANGE_LOG_LINK)
-                }}
-                location={this.props.location}
-                {...this.props}
-            />
-        )
+        // return (
+        //     <NotifBanner
+        //         mainText="Memex updated"
+        //         mainBtnText="See what changed"
+        //         onCloseBtnClick={() => this.processEvent('hide', null)}
+        //         onMainBtnClick={() => {
+        //             this.processEvent('hide', null)
+        //             this.props.openLink(CHANGE_LOG_LINK)
+        //         }}
+        //         location={this.props.location}
+        //         {...this.props}
+        //     />
+        // )
     }
 }
