@@ -38,16 +38,13 @@
     "permissions": [
         "<all_urls>",
         "alarms",
-        "idle",
         "bookmarks",
         "contextMenus",
         "tabs",
         "webNavigation",
         "notifications",
         "unlimitedStorage",
-        "storage",
-        "webRequest",
-        "webRequestBlocking"
+        "storage"
     ],
     "web_accessible_resources": [
         "/lib/pdf.worker.min.js",
