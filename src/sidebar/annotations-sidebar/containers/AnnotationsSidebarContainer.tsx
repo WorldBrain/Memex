@@ -403,13 +403,15 @@ export class AnnotationsSidebarContainer<
                     mainBtnPressed: true,
                 })
             },
-            selectEntry: async (listId, options) =>
+            selectEntry: async (listId, options) => {
+                throw new Error('abc')
                 this.processEvent(getUpdateListsEvent(listId), {
                     added: listId,
                     deleted: null,
                     unifiedAnnotationId: params.annotation.unifiedId,
                     options,
-                }),
+                })
+            },
             unselectEntry: async (listId) =>
                 this.processEvent('updateListsForAnnotation', {
                     added: null,

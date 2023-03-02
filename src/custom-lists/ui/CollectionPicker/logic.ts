@@ -7,6 +7,7 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { actionAllowed } from 'src/util/subscriptions/storage'
 
 export interface SpaceDisplayEntry {
     localId: number
@@ -587,101 +588,126 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry },
         previousState,
     }) => {
-        const { unselectEntry, selectEntry } = this.dependencies
-        let nextState: SpacePickerState
+        const allowed = await actionAllowed()
 
-        // If we're going to unselect it
-        if (previousState.selectedListIds.includes(entry.localId)) {
-            const mutation: UIMutation<SpacePickerState> = {
-                selectedListIds: {
-                    $set: previousState.selectedListIds.filter(
-                        (id) => id !== entry.localId,
-                    ),
-                },
+        if (allowed) {
+            const { unselectEntry, selectEntry } = this.dependencies
+            let nextState: SpacePickerState
+
+            // If we're going to unselect it
+            try {
+                if (previousState.selectedListIds.includes(entry.localId)) {
+                    const mutation: UIMutation<SpacePickerState> = {
+                        selectedListIds: {
+                            $set: previousState.selectedListIds.filter(
+                                (id) => id !== entry.localId,
+                            ),
+                        },
+                    }
+
+                    this.emitMutation(mutation)
+                    nextState = this.withMutation(previousState, mutation)
+
+                    await unselectEntry(entry.localId)
+                } else {
+                    const prevDisplayEntriesIndex = previousState.displayEntries.findIndex(
+                        ({ localId }) => localId === entry.localId,
+                    )
+                    const prevDefaultEntriesIndex = this.defaultEntries.findIndex(
+                        ({ localId }) => localId === entry.localId,
+                    )
+
+                    const mutation: UIMutation<SpacePickerState> = {
+                        selectedListIds: { $push: [entry.localId] },
+                        displayEntries: {
+                            // Reposition selected entry at start of display list
+                            $set: [
+                                previousState.displayEntries[
+                                    prevDisplayEntriesIndex
+                                ],
+                                ...previousState.displayEntries.slice(
+                                    0,
+                                    prevDisplayEntriesIndex,
+                                ),
+                                ...previousState.displayEntries.slice(
+                                    prevDisplayEntriesIndex + 1,
+                                ),
+                            ],
+                        },
+                    }
+
+                    this.emitMutation(mutation)
+                    nextState = this.withMutation(previousState, mutation)
+
+                    // `defaultEntries` is initially only populated with what it gets from suggestions cache. If a search happens
+                    //   and an entry which isn't one of the initial suggestions is pressed, then we need to add it to `defaultEntries`
+                    if (prevDefaultEntriesIndex !== -1) {
+                        this.defaultEntries = [
+                            this.defaultEntries[prevDefaultEntriesIndex],
+                            ...this.defaultEntries.slice(
+                                0,
+                                prevDefaultEntriesIndex,
+                            ),
+                            ...this.defaultEntries.slice(
+                                prevDefaultEntriesIndex + 1,
+                            ),
+                        ]
+                    } else {
+                        this.defaultEntries = [
+                            {
+                                ...previousState.displayEntries[
+                                    prevDisplayEntriesIndex
+                                ],
+                            },
+                            ...this.defaultEntries,
+                        ]
+                    }
+
+                    await selectEntry(entry.localId)
+                }
+            } catch (e) {
+                const mutation: UIMutation<SpacePickerState> = {
+                    selectedListIds: { $set: previousState.selectedListIds },
+                }
+
+                this.emitMutation(mutation)
+                nextState = this.withMutation(previousState, mutation)
+                throw new Error(e)
             }
 
-            this.emitMutation(mutation)
-            nextState = this.withMutation(previousState, mutation)
-
-            await unselectEntry(entry.localId)
-        } else {
-            const prevDisplayEntriesIndex = previousState.displayEntries.findIndex(
-                ({ localId }) => localId === entry.localId,
-            )
-            const prevDefaultEntriesIndex = this.defaultEntries.findIndex(
-                ({ localId }) => localId === entry.localId,
-            )
-
-            const mutation: UIMutation<SpacePickerState> = {
-                selectedListIds: { $push: [entry.localId] },
-                displayEntries: {
-                    // Reposition selected entry at start of display list
-                    $set: [
-                        previousState.displayEntries[prevDisplayEntriesIndex],
-                        ...previousState.displayEntries.slice(
-                            0,
-                            prevDisplayEntriesIndex,
-                        ),
-                        ...previousState.displayEntries.slice(
-                            prevDisplayEntriesIndex + 1,
-                        ),
-                    ],
-                },
-            }
-
-            this.emitMutation(mutation)
-            nextState = this.withMutation(previousState, mutation)
-
-            // `defaultEntries` is initially only populated with what it gets from suggestions cache. If a search happens
-            //   and an entry which isn't one of the initial suggestions is pressed, then we need to add it to `defaultEntries`
-            if (prevDefaultEntriesIndex !== -1) {
-                this.defaultEntries = [
-                    this.defaultEntries[prevDefaultEntriesIndex],
-                    ...this.defaultEntries.slice(0, prevDefaultEntriesIndex),
-                    ...this.defaultEntries.slice(prevDefaultEntriesIndex + 1),
-                ]
-            } else {
-                this.defaultEntries = [
-                    {
-                        ...previousState.displayEntries[
-                            prevDisplayEntriesIndex
-                        ],
-                    },
-                    ...this.defaultEntries,
-                ]
-            }
-
-            await selectEntry(entry.localId)
+            await this.searchInputChanged({
+                event: { query: '' },
+                previousState: nextState,
+            })
         }
-
-        await this.searchInputChanged({
-            event: { query: '' },
-            previousState: nextState,
-        })
     }
 
     resultEntryAllPress: EventHandler<'resultEntryAllPress'> = async ({
         event: { entry },
         previousState,
     }) => {
-        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
-            entry.localId,
-        )
+        const allowed = await actionAllowed()
 
-        const isAlreadySelected = previousState.selectedListIds.includes(
-            entry.localId,
-        )
+        if (allowed) {
+            this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
+                entry.localId,
+            )
 
-        this.emitMutation({
-            selectedListIds: {
-                $set: isAlreadySelected
-                    ? previousState.selectedListIds.filter(
-                          (entryId) => entryId !== entry.localId,
-                      )
-                    : [...previousState.selectedListIds, entry.localId],
-            },
-            allTabsButtonPressed: { $set: entry.localId },
-        } as UIMutation<SpacePickerState>)
+            const isAlreadySelected = previousState.selectedListIds.includes(
+                entry.localId,
+            )
+
+            this.emitMutation({
+                selectedListIds: {
+                    $set: isAlreadySelected
+                        ? previousState.selectedListIds.filter(
+                              (entryId) => entryId !== entry.localId,
+                          )
+                        : [...previousState.selectedListIds, entry.localId],
+                },
+                allTabsButtonPressed: { $set: entry.localId },
+            } as UIMutation<SpacePickerState>)
+        }
     }
 
     private async createAndDisplayNewList(name: string): Promise<number> {
@@ -713,25 +739,33 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry },
         previousState,
     }) => {
-        // NOTE: This is here as the enter press event from the context menu to confirm a space rename
-        //   was also bubbling up into the space menu and being interpretted as a new space confirmation.
-        //   Resulting in both a new space create + existing space rename. This is a hack to prevent that.
-        if (previousState.contextMenuListId != null) {
-            return
-        }
+        const allowed = await actionAllowed()
 
-        entry = this.validateEntry(entry)
-        const listId = await this.createAndDisplayNewList(entry)
-        await this.dependencies.selectEntry(listId)
+        if (allowed) {
+            // NOTE: This is here as the enter press event from the context menu to confirm a space rename
+            //   was also bubbling up into the space menu and being interpretted as a new space confirmation.
+            //   Resulting in both a new space create + existing space rename. This is a hack to prevent that.
+            if (previousState.contextMenuListId != null) {
+                return
+            }
+
+            entry = this.validateEntry(entry)
+            const listId = await this.createAndDisplayNewList(entry)
+            await this.dependencies.selectEntry(listId)
+        }
     }
 
     newEntryAllPress: EventHandler<'newEntryAllPress'> = async ({
         event: { entry },
     }) => {
-        const newId = await this.createAndDisplayNewList(entry)
-        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
-            newId,
-        )
+        const allowed = await actionAllowed()
+
+        if (allowed) {
+            const newId = await this.createAndDisplayNewList(entry)
+            this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
+                newId,
+            )
+        }
     }
 
     resultEntryFocus: EventHandler<'resultEntryFocus'> = ({

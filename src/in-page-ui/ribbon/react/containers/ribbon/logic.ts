@@ -15,6 +15,7 @@ import { Analytics } from 'src/analytics'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import browser from 'webextension-polyfill'
 import { Storage } from 'webextension-polyfill-ts'
+import { actionAllowed } from 'src/util/subscriptions/storage'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -412,34 +413,38 @@ export class RibbonContainerLogic extends UILogic<
     toggleBookmark: EventHandler<'toggleBookmark'> = async ({
         previousState,
     }) => {
-        const postInitState = await this.waitForPostInitState(previousState)
+        const allowed = await actionAllowed()
 
-        await this.dependencies.bookmarks.setBookmarkStatusInBrowserIcon(
-            true,
-            postInitState.fullPageUrl,
-        )
+        if (allowed) {
+            const postInitState = await this.waitForPostInitState(previousState)
 
-        const updateState = (isBookmarked) =>
-            this.emitMutation({
-                bookmark: {
-                    isBookmarked: { $set: isBookmarked },
-                    lastBookmarkTimestamp: { $set: Date.now() },
-                },
-            })
+            await this.dependencies.bookmarks.setBookmarkStatusInBrowserIcon(
+                true,
+                postInitState.fullPageUrl,
+            )
 
-        const shouldBeBookmarked = !postInitState.bookmark.isBookmarked
-
-        try {
-            if (shouldBeBookmarked) {
-                updateState(shouldBeBookmarked)
-                await this.dependencies.bookmarks.addPageBookmark({
-                    fullUrl: postInitState.fullPageUrl,
-                    tabId: this.dependencies.currentTab.id,
+            const updateState = (isBookmarked) =>
+                this.emitMutation({
+                    bookmark: {
+                        isBookmarked: { $set: isBookmarked },
+                        lastBookmarkTimestamp: { $set: Date.now() },
+                    },
                 })
+
+            const shouldBeBookmarked = !postInitState.bookmark.isBookmarked
+
+            try {
+                if (shouldBeBookmarked) {
+                    updateState(shouldBeBookmarked)
+                    await this.dependencies.bookmarks.addPageBookmark({
+                        fullUrl: postInitState.fullPageUrl,
+                        tabId: this.dependencies.currentTab.id,
+                    })
+                }
+            } catch (err) {
+                updateState(!shouldBeBookmarked)
+                throw err
             }
-        } catch (err) {
-            updateState(!shouldBeBookmarked)
-            throw err
         }
     }
 
