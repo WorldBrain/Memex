@@ -304,26 +304,31 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 unifiedId,
             )
 
-            await createAnnotation({
-                annotationData: {
-                    fullPageUrl,
-                    localListIds,
-                    pageTitle: title,
-                    body: annotation.body,
-                    selector: annotation.selector,
-                    comment: annotation.comment,
-                    localId: annotation.url,
-                    createdWhen: now,
-                },
-                shareOpts: {
-                    shouldShare: params.shouldShare,
-                    shouldCopyShareLink: params.shouldShare,
-                },
-                annotationsBG: this.deps.annotationsBG,
-                contentSharingBG: this.deps.contentSharingBG,
-                skipPageIndexing: false,
-            })
-
+            try {
+                await createAnnotation({
+                    annotationData: {
+                        fullPageUrl,
+                        localListIds,
+                        pageTitle: title,
+                        body: annotation.body,
+                        selector: annotation.selector,
+                        comment: annotation.comment,
+                        localId: annotation.url,
+                        createdWhen: now,
+                    },
+                    shareOpts: {
+                        shouldShare: params.shouldShare,
+                        shouldCopyShareLink: params.shouldShare,
+                    },
+                    annotationsBG: this.deps.annotationsBG,
+                    contentSharingBG: this.deps.contentSharingBG,
+                    skipPageIndexing: false,
+                })
+            } catch (err) {
+                console.log('err', err)
+                this.removeAnnotationHighlight(unifiedId)
+                throw err
+            }
             return unifiedId
         } catch (err) {
             this.removeAnnotationHighlight(annotation.url)
