@@ -236,6 +236,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         }
 
         const body = anchor ? anchor.quote : undefined
+
         const hasSelectedText =
             anchor && anchor.quote ? anchor.quote.length : false
 
@@ -326,7 +327,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     skipPageIndexing: false,
                 })
             } catch (err) {
-                console.log('err', err)
                 this.removeAnnotationHighlight(unifiedId)
                 throw err
             }
@@ -345,7 +345,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
         let highlightAnchored = false
         let highlightColor = this.highlightColor
         if (!highlight?.selector?.descriptor?.content) {
-            console.log('no highlight selector descriptor content')
             return
         }
 
@@ -452,12 +451,8 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 )
                 let attempt = 0
 
-                console.log('highlightAnchored', highlightAnchored)
-
                 while (!highlightAnchored && attempt < 10) {
                     attempt++
-
-                    console.log('attempt', attempt)
 
                     highlightAnchored = await this.renderHighlight(
                         highlight,
@@ -470,7 +465,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
                 while (!highlightAnchored && attempt >= 10 && attempt <= 100) {
                     attempt++
-                    console.log('attempt', attempt)
                     highlightAnchored = await this.renderHighlight(
                         highlight,
                         onClick,
