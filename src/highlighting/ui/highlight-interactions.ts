@@ -396,7 +396,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
                 if (highlightedElements && highlightedElements.length > 0) {
                     highlightAnchored = true
-                    Promise.resolve('test')
+                    return true
+                } else {
+                    return false
                 }
             })
 
@@ -412,6 +414,8 @@ export class HighlightRenderer implements HighlightRendererInterface {
         } finally {
             if (highlightAnchored) {
                 return true
+            } else {
+                return false
             }
         }
     }
@@ -448,8 +452,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 )
                 let attempt = 0
 
-                while (highlightAnchored == null && attempt < 10) {
+                console.log('highlightAnchored', highlightAnchored)
+
+                while (!highlightAnchored && attempt < 10) {
                     attempt++
+
+                    console.log('attempt', attempt)
 
                     highlightAnchored = await this.renderHighlight(
                         highlight,
@@ -460,11 +468,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     await delay(500)
                 }
 
-                while (
-                    highlightAnchored == null &&
-                    attempt >= 10 &&
-                    attempt <= 100
-                ) {
+                while (!highlightAnchored && attempt >= 10 && attempt <= 100) {
                     attempt++
                     console.log('attempt', attempt)
                     highlightAnchored = await this.renderHighlight(
