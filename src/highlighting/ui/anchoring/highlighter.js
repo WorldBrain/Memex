@@ -309,6 +309,12 @@ export function highlightRange(range, baseClass, highlightsColor) {
 
         // highlightEl.style['background-color'] = highlightsColor
         highlightEl.className = cssClass
+
+        if (
+            window.location.href.startsWith('https://www.readcube.com/library')
+        ) {
+            highlightEl.classList.add(styles['memex-highlight-transparent'])
+        }
         highlightEl.classList.add(styles['memex-highlight'])
         nodes[0].parentNode.replaceChild(highlightEl, nodes[0])
         nodes.forEach((node) => highlightEl.appendChild(node))

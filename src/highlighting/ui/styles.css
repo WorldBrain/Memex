@@ -9,6 +9,16 @@
     color: #12131b;
     background-color: rgb(var(--highlightColor));
 }
+.memex-highlight-transparent {
+    /* default state */
+    cursor: pointer;
+    color: transparent;
+    background-color: rgb(var(--highlightColor));
+
+    & :hover {
+        color: transparent;
+    }
+}
 
 .selectedHighlight {
     /* prettier-ignore */

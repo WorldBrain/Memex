@@ -30,6 +30,7 @@ import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import { UNDO_HISTORY } from 'src/constants'
 import { getSelectionHtml } from '@worldbrain/memex-common/lib/annotations/utils'
+import delay from 'src/util/delay'
 const styles = require('src/highlighting/ui/styles.css')
 
 const createHighlightClass = ({
@@ -304,26 +305,31 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 unifiedId,
             )
 
-            await createAnnotation({
-                annotationData: {
-                    fullPageUrl,
-                    localListIds,
-                    pageTitle: title,
-                    body: annotation.body,
-                    selector: annotation.selector,
-                    comment: annotation.comment,
-                    localId: annotation.url,
-                    createdWhen: now,
-                },
-                shareOpts: {
-                    shouldShare: params.shouldShare,
-                    shouldCopyShareLink: params.shouldShare,
-                },
-                annotationsBG: this.deps.annotationsBG,
-                contentSharingBG: this.deps.contentSharingBG,
-                skipPageIndexing: false,
-            })
-
+            try {
+                await createAnnotation({
+                    annotationData: {
+                        fullPageUrl,
+                        localListIds,
+                        pageTitle: title,
+                        body: annotation.body,
+                        selector: annotation.selector,
+                        comment: annotation.comment,
+                        localId: annotation.url,
+                        createdWhen: now,
+                    },
+                    shareOpts: {
+                        shouldShare: params.shouldShare,
+                        shouldCopyShareLink: params.shouldShare,
+                    },
+                    annotationsBG: this.deps.annotationsBG,
+                    contentSharingBG: this.deps.contentSharingBG,
+                    skipPageIndexing: false,
+                })
+            } catch (err) {
+                console.log('err', err)
+                this.removeAnnotationHighlight(unifiedId)
+                throw err
+            }
             return unifiedId
         } catch (err) {
             this.removeAnnotationHighlight(annotation.url)
@@ -336,8 +342,10 @@ export class HighlightRenderer implements HighlightRendererInterface {
         onClick,
         temporary = false,
     ) => {
+        let highlightAnchored = false
         let highlightColor = this.highlightColor
         if (!highlight?.selector?.descriptor?.content) {
+            console.log('no highlight selector descriptor content')
             return
         }
 
@@ -385,6 +393,13 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 if (highlightedElements.length) {
                     this.attachEventListenersToNewHighlights(highlight, onClick)
                 }
+
+                if (highlightedElements && highlightedElements.length > 0) {
+                    highlightAnchored = true
+                    return true
+                } else {
+                    return false
+                }
             })
 
             // return highlight
@@ -396,6 +411,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
             // )
             console.error(e)
             // return highlight
+        } finally {
+            if (highlightAnchored) {
+                return true
+            } else {
+                return false
+            }
         }
     }
 
@@ -424,7 +445,40 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
         await Promise.all(
             highlights.map(async (highlight) => {
-                await this.renderHighlight(highlight, onClick, opts?.temp)
+                let highlightAnchored = await this.renderHighlight(
+                    highlight,
+                    onClick,
+                    opts?.temp,
+                )
+                let attempt = 0
+
+                console.log('highlightAnchored', highlightAnchored)
+
+                while (!highlightAnchored && attempt < 10) {
+                    attempt++
+
+                    console.log('attempt', attempt)
+
+                    highlightAnchored = await this.renderHighlight(
+                        highlight,
+                        onClick,
+                        opts?.temp,
+                    )
+
+                    await delay(500)
+                }
+
+                while (!highlightAnchored && attempt >= 10 && attempt <= 100) {
+                    attempt++
+                    console.log('attempt', attempt)
+                    highlightAnchored = await this.renderHighlight(
+                        highlight,
+                        onClick,
+                        opts?.temp,
+                    )
+
+                    await delay(2000)
+                }
             }),
         )
 

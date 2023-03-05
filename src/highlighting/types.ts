@@ -29,7 +29,7 @@ export interface HighlightInteractionsInterface {
         highlight: _UnifiedAnnotation,
         onClick: AnnotationClickHandler,
         temp?: boolean,
-    ) => Promise<void>
+    ) => Promise<void> | Promise<boolean>
     highlightAndScroll: (annotation: _UnifiedAnnotation) => Promise<void>
     attachEventListenersToNewHighlights: (
         highlight: _UnifiedAnnotation,
