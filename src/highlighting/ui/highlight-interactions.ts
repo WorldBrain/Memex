@@ -30,6 +30,7 @@ import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import { UNDO_HISTORY } from 'src/constants'
 import { getSelectionHtml } from '@worldbrain/memex-common/lib/annotations/utils'
+import delay from 'src/util/delay'
 const styles = require('src/highlighting/ui/styles.css')
 
 const createHighlightClass = ({
@@ -341,8 +342,10 @@ export class HighlightRenderer implements HighlightRendererInterface {
         onClick,
         temporary = false,
     ) => {
+        let highlightAnchored = false
         let highlightColor = this.highlightColor
         if (!highlight?.selector?.descriptor?.content) {
+            console.log('no highlight selector descriptor content')
             return
         }
 
@@ -390,6 +393,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 if (highlightedElements.length) {
                     this.attachEventListenersToNewHighlights(highlight, onClick)
                 }
+
+                if (highlightedElements && highlightedElements.length > 0) {
+                    highlightAnchored = true
+                    Promise.resolve('test')
+                }
             })
 
             // return highlight
@@ -401,6 +409,10 @@ export class HighlightRenderer implements HighlightRendererInterface {
             // )
             console.error(e)
             // return highlight
+        } finally {
+            if (highlightAnchored) {
+                return true
+            }
         }
     }
 
@@ -429,7 +441,40 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
         await Promise.all(
             highlights.map(async (highlight) => {
-                await this.renderHighlight(highlight, onClick, opts?.temp)
+                let highlightAnchored = await this.renderHighlight(
+                    highlight,
+                    onClick,
+                    opts?.temp,
+                )
+                let attempt = 0
+
+                while (highlightAnchored == null && attempt < 10) {
+                    attempt++
+
+                    highlightAnchored = await this.renderHighlight(
+                        highlight,
+                        onClick,
+                        opts?.temp,
+                    )
+
+                    await delay(500)
+                }
+
+                while (
+                    highlightAnchored == null &&
+                    attempt >= 10 &&
+                    attempt <= 100
+                ) {
+                    attempt++
+                    console.log('attempt', attempt)
+                    highlightAnchored = await this.renderHighlight(
+                        highlight,
+                        onClick,
+                        opts?.temp,
+                    )
+
+                    await delay(2000)
+                }
             }),
         )
 

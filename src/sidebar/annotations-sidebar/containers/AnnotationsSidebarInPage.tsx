@@ -70,6 +70,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         document.addEventListener('keydown', this.listenToEsc)
         document.addEventListener('mousedown', this.listenToOutsideClick)
         this.setupEventForwarding()
+
+        if (
+            this.props.fullPageUrl.startsWith(
+                'https://www.readcube.com/library/',
+            )
+        ) {
+            document.getElementById('viewer').style.width = 'inherit'
+        }
     }
 
     componentWillUnmount() {
