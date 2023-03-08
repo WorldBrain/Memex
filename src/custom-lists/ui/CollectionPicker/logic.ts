@@ -447,6 +447,9 @@ export default class SpacePickerLogic extends UILogic<
             ]
         }
         await this.dependencies.spacesBG.removeList({ id: event.listId })
+        this.emitMutation({
+            contextMenuListId: { $set: null },
+        })
     }
 
     searchInputChanged: EventHandler<'searchInputChanged'> = async ({
