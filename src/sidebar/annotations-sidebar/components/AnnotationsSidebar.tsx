@@ -1019,6 +1019,27 @@ export class AnnotationsSidebar extends React.Component<
                             </SpaceTypeSectionContainer>
                         ) : undefined}
                     </SpaceTypeSection>
+                    <SpaceTypeSection>
+                        <SpaceTypeSectionHeader>
+                            Tweets{' '}
+                            {/* <SpacesCounter>{joinedLists.length}</SpacesCounter> */}
+                        </SpaceTypeSectionHeader>
+                        {/* {joinedLists.length > 0 ? (
+                            <SpaceTypeSectionContainer>
+                                {joinedLists.map((listData) => {
+                                    let othersAnnotsCount = 0
+                                    const listInstance =
+                                        listInstances[listData.unifiedId]
+
+                                    return this.renderSpacesItem(
+                                        listData,
+                                        listInstance,
+                                        othersAnnotsCount,
+                                    )
+                                })}
+                            </SpaceTypeSectionContainer>
+                        ) : undefined} */}
+                    </SpaceTypeSection>
                 </>
             )
         } else {
