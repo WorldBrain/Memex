@@ -916,22 +916,22 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setShowSubscriptionModal: EventHandler<'setShowSubscriptionModal'> = ({
-        event,
-    }) => {
-        this.emitMutation({
-            modals: {
-                showSubscription: { $set: event.isShown },
-            },
-        })
-    }
-
     setShowNoteShareOnboardingModal: EventHandler<
         'setShowNoteShareOnboardingModal'
     > = ({ event }) => {
         this.emitMutation({
             modals: {
                 showNoteShareOnboarding: { $set: event.isShown },
+            },
+        })
+    }
+
+    setShowSubscriptionModal: EventHandler<'setShowSubscriptionModal'> = ({
+        event,
+    }) => {
+        this.emitMutation({
+            modals: {
+                showSubscription: { $set: event.isShown },
             },
         })
     }

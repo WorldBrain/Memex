@@ -3,10 +3,6 @@ import styled from 'styled-components'
 
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import Modal, { Props as ModalProps } from 'src/common-ui/components/Modal'
-import {
-    SignInScreen,
-    Props as SignInProps,
-} from 'src/authentication/components/SignIn'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
@@ -15,14 +11,16 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 
 export interface Props
     extends Pick<
-            ModalProps,
-            'onClose' | 'requiresExplicitStyles' | 'ignoreReactPortal'
-        >,
-        Pick<SignInProps, 'onSuccess' | 'onFail' | 'redirectTo'> {
+        ModalProps,
+        'onClose' | 'requiresExplicitStyles' | 'ignoreReactPortal'
+    > {
     contentScriptBG?: ContentScriptsInterface<'caller'>
     contentSharingBG?: ContentSharingInterface
     authBG?: AuthRemoteFunctionsInterface
     routeToLoginBtn?: boolean
+    onSuccess?(isNewUser?: boolean): void
+    onFail?(): void
+    redirectTo?: string
 }
 
 export default class LoginModal extends React.PureComponent<Props> {

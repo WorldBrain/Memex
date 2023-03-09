@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { SignInScreen } from 'src/authentication/components/SignIn'
 import {
     LoginButton,
     LoginTitle,
@@ -151,7 +150,7 @@ class Subscribe extends React.Component<Props, State> {
             <div className={styles.instructions}>
                 {' To create an account just type in a new email address'}
             </div>
-            <SignInScreen />
+            {/* <SignInScreen /> */}
         </div>
     )
 
