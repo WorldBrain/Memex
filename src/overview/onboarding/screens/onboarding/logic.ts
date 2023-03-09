@@ -39,6 +39,7 @@ export default class Logic extends UILogic<State, Event> {
         passwordConfirm: '',
         preventOnboardingFlow: false,
         autoLoginState: 'pristine',
+        twitterSignupComplete: false,
     })
 
     async init() {
@@ -190,6 +191,11 @@ export default class Logic extends UILogic<State, Event> {
     }
 
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({ event }) => {
+        if (event.isTwitterSignup) {
+            this.emitMutation({
+                twitterSignupComplete: { $set: true },
+            })
+        }
         this.emitMutation({
             loadState: { $set: 'running' },
         })

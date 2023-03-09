@@ -28,12 +28,13 @@ export interface State {
     passwordMatch: boolean
     preventOnboardingFlow: boolean
     autoLoginState: UITaskState
+    twitterSignupComplete: boolean
 }
 
 export type Event = UIEvent<{
     finishOnboarding: null
     goToSyncStep: null
     goToGuidedTutorial: null
-    onUserLogIn: { newSignUp?: boolean }
+    onUserLogIn: { newSignUp?: boolean; isTwitterSignup?: boolean }
     setAuthDialogMode: { mode: AuthDialogMode }
 }>

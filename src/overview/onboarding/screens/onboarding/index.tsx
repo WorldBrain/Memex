@@ -13,6 +13,8 @@ import AuthDialog from 'src/authentication/components/AuthDialog/index'
 import { runInBackground } from 'src/util/webextensionRPC'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { GUIDED_ONBOARDING_URL } from '../../constants'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 const styles = require('../../components/onboarding-box.css')
 
@@ -57,60 +59,99 @@ export default class OnboardingScreen extends StatefulUIElement<
 
     private renderLoginStep = () => (
         <WelcomeContainer>
-            <LeftSide>
-                {this.state.loadState === 'running' ? (
-                    <LoadingIndicatorBox>
-                        <LoadingIndicator size={40} />
-                        <DescriptionText>
-                            Preparing a smooth ride
-                        </DescriptionText>
-                    </LoadingIndicatorBox>
-                ) : (
-                    <ContentBox>
-                        {this.state.authDialogMode === 'signup' && (
-                            <>
-                                <Title>Welcome to Memex</Title>
-                            </>
-                        )}
-                        {this.state.authDialogMode === 'login' && (
-                            <UserScreenContainer>
-                                <Title>Welcome Back!</Title>
-                            </UserScreenContainer>
-                        )}
-                        {this.state.authDialogMode === 'resetPassword' && (
-                            <UserScreenContainer>
-                                <Title>Reset your password</Title>
-                                <DescriptionText>
-                                    We'll send you an email with reset
-                                    instructions
-                                </DescriptionText>
-                            </UserScreenContainer>
-                        )}
-                        {this.state.authDialogMode ===
-                            'ConfirmResetPassword' && (
-                            <UserScreenContainer>
-                                <Title>Check your Emails</Title>
-                                <DescriptionText>
-                                    Don't forget the spam folder!
-                                </DescriptionText>
-                            </UserScreenContainer>
-                        )}
-                        <AuthDialog
-                            onAuth={({ reason }) => {
-                                this.processEvent('onUserLogIn', {
-                                    newSignUp: reason === 'register',
-                                })
-                            }}
-                            onModeChange={({ mode }) => {
-                                this.processEvent('setAuthDialogMode', {
-                                    mode,
-                                })
-                            }}
+            {!this.state.twitterSignupComplete ? (
+                <TwitterOnboardingContainer>
+                    <TwitterImage />
+                    <TwitterOnboardingContent>
+                        <Icon
+                            icon="twitter"
+                            heightAndWidth="45px"
+                            color="secondary"
                         />
-                    </ContentBox>
-                )}
-            </LeftSide>
-            {this.renderInfoSide()}
+                        <TwitterOnboardingContentBox>
+                            <Title fontSize={'45px'}>
+                                Catching the birds...
+                            </Title>
+                            <TwitterOnboardingSubtext>
+                                We’re analyzing the tweets of the people you
+                                follow on Twitter.
+                                <br /> This may take a few hours and will
+                                complete in the background.
+                                <br />
+                                <br />
+                                Now we’re loading the first tweet to show you
+                                how that looks like in action.
+                            </TwitterOnboardingSubtext>
+                            <PrimaryAction
+                                type="secondary"
+                                size="large"
+                                label={
+                                    <TwitterOnboardingButtonContent>
+                                        <LoadingIndicator size={20} /> Loading
+                                        first Tweet
+                                    </TwitterOnboardingButtonContent>
+                                }
+                                onClick={() => {}}
+                            />
+                        </TwitterOnboardingContentBox>
+                    </TwitterOnboardingContent>
+                </TwitterOnboardingContainer>
+            ) : (
+                <LeftSide>
+                    {this.state.loadState === 'running' ? (
+                        <LoadingIndicatorBox>
+                            <LoadingIndicator size={40} />
+                            <DescriptionText>
+                                Preparing a smooth ride
+                            </DescriptionText>
+                        </LoadingIndicatorBox>
+                    ) : (
+                        <ContentBox>
+                            {this.state.authDialogMode === 'signup' && (
+                                <>
+                                    <Title>Welcome to Memex</Title>
+                                </>
+                            )}
+                            {this.state.authDialogMode === 'login' && (
+                                <UserScreenContainer>
+                                    <Title>Welcome Back!</Title>
+                                </UserScreenContainer>
+                            )}
+                            {this.state.authDialogMode === 'resetPassword' && (
+                                <UserScreenContainer>
+                                    <Title>Reset your password</Title>
+                                    <DescriptionText>
+                                        We'll send you an email with reset
+                                        instructions
+                                    </DescriptionText>
+                                </UserScreenContainer>
+                            )}
+                            {this.state.authDialogMode ===
+                                'ConfirmResetPassword' && (
+                                <UserScreenContainer>
+                                    <Title>Check your Emails</Title>
+                                    <DescriptionText>
+                                        Don't forget the spam folder!
+                                    </DescriptionText>
+                                </UserScreenContainer>
+                            )}
+                            <AuthDialog
+                                onAuth={({ reason }) => {
+                                    this.processEvent('onUserLogIn', {
+                                        newSignUp: reason === 'register',
+                                    })
+                                }}
+                                onModeChange={({ mode }) => {
+                                    this.processEvent('setAuthDialogMode', {
+                                        mode,
+                                    })
+                                }}
+                            />
+                        </ContentBox>
+                    )}
+                </LeftSide>
+            )}
+            {/* {this.renderInfoSide()} */}
         </WelcomeContainer>
     )
 
@@ -118,6 +159,59 @@ export default class OnboardingScreen extends StatefulUIElement<
         return <OnboardingBox>{this.renderLoginStep()}</OnboardingBox>
     }
 }
+
+const TwitterOnboardingButtonContent = styled.div`
+    display: flex;
+    grid-gap: 30px;
+    align-items: center;
+    justify-content: center;
+    margin-left: 15px;
+`
+
+const TwitterOnboardingContentBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    grid-gap: 0px;
+`
+
+const TwitterOnboardingContainer = styled.div`
+    display: flex;
+    height: 100%;
+    width: 100%;
+    grid-gap: 60px;
+    align-items: center;
+`
+
+const TwitterImage = styled.div`
+    display: flex;
+    height: 60%;
+    width: fill-available;
+    background-image: url('img/twitterOnboarding.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: left;
+    flex: 1;
+`
+
+const TwitterOnboardingContent = styled.div`
+    display: flex;
+    width: 100%;
+    height: 60%;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex: 2;
+`
+
+const TwitterOnboardingSubtext = styled.div`
+    display: flex;
+    width: 100%;
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 18px;
+    margin-bottom: 30px;
+`
 
 const LoadingIndicatorBox = styled.div`
     display: flex;
@@ -141,6 +235,10 @@ const WelcomeContainer = styled.div`
     overflow: hidden;
     background-color: ${(props) => props.theme.colors.black};
     height: 100vh;
+    background-image: url('img/welcomeScreenIllustration.svg');
+    background-position: right;
+    background-repeat: no-repeat;
+    background-size: contain;
 `
 
 const openAnimation = keyframes`
@@ -202,12 +300,12 @@ const ContentBox = styled.div`
     border-radius: 20px;
 `
 
-const Title = styled.div`
+const Title = styled.div<{ fontSize?: string }>`
     background: ${(props) => props.theme.colors.headerGradient};
-    font-size: 30px;
+    font-size: ${(props) => props.fontSize ?? '30px'};
     font-weight: 800;
     margin-bottom: 20px;
-    margin-top: 30px;
+    margin-top: 20px;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
