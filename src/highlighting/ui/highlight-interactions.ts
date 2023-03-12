@@ -94,7 +94,7 @@ export type HighlightRendererInterface = HighlightInteractionsInterface & {
 
 export interface HighlightRendererDependencies {}
 export class HighlightRenderer implements HighlightRendererInterface {
-    private observer: MutationObserver
+    private observer: MutationObserver[] = []
     private highlightColor = DEFAULT_HIGHLIGHT_COLOR
     private currentActiveHighlight: UnifiedAnnotation
 
@@ -395,6 +395,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
 
                 if (highlightedElements && highlightedElements.length > 0) {
                     highlightAnchored = true
+                    this.watchForRerenders([highlight], onClick)
                     return true
                 } else {
                     return false
@@ -432,6 +433,8 @@ export class HighlightRenderer implements HighlightRendererInterface {
         } = await browser.storage.local.get({
             [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
         })
+        const pdfViewer = globalThis.PDFViewerApplication?.pdfViewer
+
         this.highlightColor = hexToRgb(highlightsColor).toString()
 
         if (opts?.removeExisting) {
@@ -449,34 +452,42 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     onClick,
                     opts?.temp,
                 )
-                let attempt = 0
 
-                while (!highlightAnchored && attempt < 10) {
-                    attempt++
+                if (!pdfViewer) {
+                    let attempt = 0
+                    while (!highlightAnchored && attempt < 10) {
+                        attempt++
 
-                    highlightAnchored = await this.renderHighlight(
-                        highlight,
-                        onClick,
-                        opts?.temp,
-                    )
+                        highlightAnchored = await this.renderHighlight(
+                            highlight,
+                            onClick,
+                            opts?.temp,
+                        )
 
-                    await delay(500)
-                }
+                        await delay(500)
+                    }
 
-                while (!highlightAnchored && attempt >= 10 && attempt <= 100) {
-                    attempt++
-                    highlightAnchored = await this.renderHighlight(
-                        highlight,
-                        onClick,
-                        opts?.temp,
-                    )
+                    while (
+                        !highlightAnchored &&
+                        attempt >= 10 &&
+                        attempt <= 100
+                    ) {
+                        attempt++
+                        highlightAnchored = await this.renderHighlight(
+                            highlight,
+                            onClick,
+                            opts?.temp,
+                        )
 
-                    await delay(2000)
+                        await delay(2000)
+                    }
                 }
             }),
         )
 
-        this.watchForRerenders(highlights, onClick)
+        if (pdfViewer) {
+            this.watchForRerenders(highlights, onClick)
+        }
     }
 
     // PDFjs viewer un/loads pages as you scroll through larger docs, thus highlights need to be checked and re-rendered
@@ -485,17 +496,30 @@ export class HighlightRenderer implements HighlightRendererInterface {
         onClick: AnnotationClickHandler,
     ) => {
         const pdfViewer = globalThis.PDFViewerApplication?.pdfViewer
-        if (this.observer != null || !pdfViewer) {
-            return
-        }
+        // if (this.observer != null || !pdfViewer) {
+        //     return
+        // }
 
         const rerenderMissingHighlights = async () => {
-            const highlightsToRerender = highlights.filter(
-                (highlight) =>
-                    document.querySelector(
-                        `.${createHighlightClass(highlight)}`,
-                    ) == null,
-            )
+            let highlightsToRerender
+            if (pdfViewer) {
+                highlightsToRerender = highlights.filter(
+                    (highlight) =>
+                        document.querySelector(
+                            `.${createHighlightClass(highlight)}`,
+                        ) == null,
+                )
+            } else {
+                highlightsToRerender = highlights.filter(
+                    (highlight) =>
+                        document.querySelector(
+                            `.${createHighlightClass(highlight)}`,
+                        ) == null ||
+                        document.querySelector(
+                            `.${createHighlightClass(highlight)}`,
+                        ).innerHTML.length === 0,
+                )
+            }
 
             if (highlightsToRerender.length > 0) {
                 await this.renderHighlights(highlightsToRerender, onClick, {
@@ -504,17 +528,33 @@ export class HighlightRenderer implements HighlightRendererInterface {
             }
         }
 
-        this.observer = new MutationObserver(
-            throttle(rerenderMissingHighlights, 300, { leading: true }),
-        )
-
         // TODO: can we limit the scope of what's being observed here?
-        this.observer.observe(pdfViewer.viewer, {
-            attributeFilter: ['data-loaded'],
-            attributes: true,
-            childList: true,
-            subtree: true,
-        })
+
+        if (pdfViewer) {
+            this.observer[1] = new MutationObserver(
+                throttle(rerenderMissingHighlights, 300, { leading: true }),
+            )
+            this.observer[1].observe(pdfViewer.viewer, {
+                attributeFilter: ['data-loaded'],
+                attributes: true,
+                childList: true,
+                subtree: true,
+            })
+        } else {
+            highlights.map((highlight) => {
+                this.observer[highlight.unifiedId] = new MutationObserver(
+                    throttle(rerenderMissingHighlights, 300, { leading: true }),
+                )
+                const highlightElement = document.querySelector(
+                    `.${createHighlightClass(highlight)}`,
+                )
+                this.observer[highlight.unifiedId].observe(highlightElement, {
+                    attributes: false,
+                    childList: true,
+                    subtree: false,
+                })
+            })
+        }
     }
 
     private scrollToHighlight = async ({
@@ -810,6 +850,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const highlights = document.querySelectorAll(
             `.${baseClass}[data-annotation="${unifiedId}"]`,
         )
+        const highlight = highlights.shadowRoot.getElementById(unifiedId)
         highlights.forEach((highlight) => this._removeHighlight(highlight))
     }
 
