@@ -850,7 +850,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
         const highlights = document.querySelectorAll(
             `.${baseClass}[data-annotation="${unifiedId}"]`,
         )
-        const highlight = highlights.shadowRoot.getElementById(unifiedId)
         highlights.forEach((highlight) => this._removeHighlight(highlight))
     }
 
