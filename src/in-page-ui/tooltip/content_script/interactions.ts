@@ -201,18 +201,19 @@ export const conditionallyTriggerTooltip = delayed(
     tooltip. The positioning is based on the user's preferred method. But in the
     case of tooltip popping up before page load, it resorts to text based method
     */
-        const positioning = await getPositionState()
+        // const positioning = await getPositionState()
         let position: TooltipPosition
-        if (positioning === 'text' || !event) {
-            position = calculateTooltipPostion()
-        } else if (positioning === 'mouse' && event) {
-            position = { x: event.pageX, y: event.pageY }
-        }
-
+        // if (positioning === 'text' || !event) {
+        //     position = calculateTooltipPostion()
+        // } else if (positioning === 'mouse' && event) {
+        //     position = calculateTooltipPostion()
+        // }
+        position = calculateTooltipPostion()
         analytics.trackEvent({
             category: 'InPageTooltip',
             action: 'showTooltip',
         })
+        console.log('position', position)
         callback(position)
 
         conditionallyShowHighlightNotification({
@@ -229,7 +230,8 @@ export function calculateTooltipPostion(): TooltipPosition {
     // x = position of element from the left + half of it's width
     const x = boundingRect.left + boundingRect.width / 2
     // y = scroll height from top + pixels from top + height of element - offset
-    const y = window.pageYOffset + boundingRect.top + boundingRect.height - 10
+    const y = window.pageYOffset + boundingRect.top + boundingRect.height
+    console.log(x, y)
     return {
         x,
         y,
