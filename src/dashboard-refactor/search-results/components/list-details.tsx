@@ -275,25 +275,32 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                 <>
                                                     <ActionButtons>
                                                         {this.renderEditButton()}
-                                                        <TooltipBox
-                                                            placement={'bottom'}
-                                                            tooltipText="Open in web view"
-                                                        >
-                                                            <Icon
-                                                                height="22px"
-                                                                padding={'5px'}
-                                                                filePath={
-                                                                    icons.goTo
+                                                        {this.props
+                                                            .remoteLink && (
+                                                            <TooltipBox
+                                                                placement={
+                                                                    'bottom'
                                                                 }
-                                                                onClick={() =>
-                                                                    window.open(
-                                                                        this
-                                                                            .props
-                                                                            .remoteLink,
-                                                                    )
-                                                                }
-                                                            />
-                                                        </TooltipBox>
+                                                                tooltipText="Open in web view"
+                                                            >
+                                                                <Icon
+                                                                    height="22px"
+                                                                    padding={
+                                                                        '5px'
+                                                                    }
+                                                                    filePath={
+                                                                        icons.goTo
+                                                                    }
+                                                                    onClick={() =>
+                                                                        window.open(
+                                                                            this
+                                                                                .props
+                                                                                .remoteLink,
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </TooltipBox>
+                                                        )}
                                                     </ActionButtons>
                                                     {this.props.remoteLink ? (
                                                         <PrimaryAction

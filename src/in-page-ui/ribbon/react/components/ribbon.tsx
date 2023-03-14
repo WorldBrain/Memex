@@ -66,6 +66,7 @@ interface State {
     pickerColor: string
     showPickerSave: boolean
     renderLiveChat: boolean
+    renderChangeLog: boolean
 }
 
 export default class Ribbon extends Component<Props, State> {
@@ -98,6 +99,7 @@ export default class Ribbon extends Component<Props, State> {
         renderFeedback: false,
         pickerColor: DEFAULT_HIGHLIGHT_COLOR,
         renderLiveChat: false,
+        renderChangeLog: false,
     }
 
     constructor(props: Props) {
@@ -389,6 +391,7 @@ export default class Ribbon extends Component<Props, State> {
                         showColorPicker: false,
                         renderFeedback: false,
                         renderLiveChat: false,
+                        renderChangeLog: false,
                     })
                     this.props.toggleShowExtraButtons()
                 }}
@@ -400,7 +403,7 @@ export default class Ribbon extends Component<Props, State> {
                     <FeedbackContainer>
                         <LoadingIndicator size={30} />
                         <FeedFrame
-                            src="https://airtable.com/embed/shrfgVfdHxwggbju8?backgroundColor=red"
+                            src="https://memex.featurebase.app"
                             frameborder="0"
                             onmousewheel=""
                             width="100%"
@@ -414,6 +417,15 @@ export default class Ribbon extends Component<Props, State> {
                             src={
                                 'https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599'
                             }
+                            height={600}
+                            width={500}
+                        />
+                    </ChatBox>
+                ) : this.state.renderChangeLog ? (
+                    <ChatBox>
+                        <LoadingIndicator size={30} />
+                        <ChatFrame
+                            src={'https://memex.featurebase.app/changelog'}
                             height={600}
                             width={500}
                         />
@@ -580,6 +592,7 @@ export default class Ribbon extends Component<Props, State> {
                             />
                             <InfoText>Settings</InfoText>
                         </ExtraButtonRow>
+                        <SupportTitle>Support</SupportTitle>
                         <ExtraButtonRow
                             onClick={() =>
                                 this.setState({
@@ -593,6 +606,20 @@ export default class Ribbon extends Component<Props, State> {
                                 hoverOff
                             />
                             <InfoText>Feature Requests & Bugs</InfoText>
+                        </ExtraButtonRow>
+                        <ExtraButtonRow
+                            onClick={() =>
+                                this.setState({
+                                    renderChangeLog: true,
+                                })
+                            }
+                        >
+                            <Icon
+                                filePath={icons.clock}
+                                heightAndWidth="22px"
+                                hoverOff
+                            />
+                            <InfoText>What's new?</InfoText>
                         </ExtraButtonRow>
                         <ExtraButtonRow
                             onClick={() =>
@@ -1005,6 +1032,12 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 }
+
+const SupportTitle = styled.div`
+    color: ${(props) => props.theme.colors.greyScale4};
+    font-size: 16px;
+    margin: 15px 0 5px 15px;
+`
 
 const ChatBox = styled.div`
     position: relative;

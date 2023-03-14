@@ -151,9 +151,17 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                 shortcut={`${getKeyName({
                                     key: 'mod',
                                 })}+enter`}
-                                description="Private to you, until shared (in bulk)"
+                                description={
+                                    <span>
+                                        Private to you
+                                        <br /> until added to shared Spaces
+                                    </span>
+                                }
                                 onClick={this.handleSetPrivate}
-                                isSelected={!this.props.isShared}
+                                isSelected={
+                                    !this.props.isShared &&
+                                    !this.props.hasSharedLists
+                                }
                             />
                             <SharePrivacyOption
                                 hasProtectedOption
@@ -176,6 +184,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
     }
 
     render() {
+        console.log(this.props.isShared)
         return (
             <>
                 <SaveBtn tabIndex={this.props.tabIndex}>
@@ -198,7 +207,11 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                 filePath={icons.arrowDown}
                                 hoverOff
                             />
-                            {this.props.isShared ? 'Public' : 'Private'}
+                            {this.props.isShared
+                                ? 'Public'
+                                : this.props.hasSharedLists
+                                ? 'Shared'
+                                : 'Private'}
                         </SaveBtnArrow>
                     </TooltipBox>
                     <TooltipBox

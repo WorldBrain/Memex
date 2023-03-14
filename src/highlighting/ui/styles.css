@@ -10,6 +10,17 @@
     background-color: rgb(var(--highlightColor));
 }
 
+.memex-highlight-transparent {
+    /* default state */
+    cursor: pointer;
+    color: transparent;
+    background-color: rgb(var(--highlightColor));
+
+    & :hover {
+        color: transparent;
+    }
+}
+
 .selectedHighlight {
     /* prettier-ignore */
     background-color: rgba(var(--defaultHighlightColorCSS), 0.5);

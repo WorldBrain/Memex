@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.3.12",
+    "version": "3.3.16",
     "homepage": "https://worldbrain.io",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
@@ -97,7 +97,6 @@
         "firebase": "9.9.4",
         "firebase-admin": "^10.0.0",
         "firebase-functions": "^3.16.0",
-        "firebaseui": "^4.2.0",
         "hex-to-rgb": "^1.0.1",
         "history": "^3.2.1",
         "immutability-helper": "^3.0.1",
@@ -130,7 +129,6 @@
         "react-colorful": "^5.6.1",
         "react-datepicker": "^1.6.0",
         "react-dom": "17.0.0-rc.1",
-        "react-firebaseui": "^4.0.0",
         "react-helmet": "^5.2.1",
         "react-html-parser": "^2.0.2",
         "react-markdown": "^5.0.0",

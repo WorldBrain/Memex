@@ -14,7 +14,6 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { Props as ListSidebarItemProps } from './lists-sidebar/components/sidebar-item-with-menu'
 import * as searchResultUtils from './search-results/util'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
-import SubscribeModal from 'src/authentication/components/Subscription/SubscribeModal'
 import Onboarding from 'src/overview/onboarding'
 import { HelpBtn } from 'src/overview/help-btn'
 import FiltersBar from './header/filters-bar'
@@ -1292,17 +1291,17 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (modalsState.showSubscription) {
-            return (
-                <SubscribeModal
-                    onClose={() =>
-                        this.processEvent('setShowSubscriptionModal', {
-                            isShown: false,
-                        })
-                    }
-                />
-            )
-        }
+        // if (modalsState.showSubscription) {
+        //     return (
+        //         <SubscribeModal
+        //             onClose={() =>
+        //                 this.processEvent('setShowSubscriptionModal', {
+        //                     isShown: false,
+        //                 })
+        //             }
+        //         />
+        //     )
+        // }
 
         return null
     }
