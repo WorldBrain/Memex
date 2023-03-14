@@ -12,12 +12,18 @@ export interface State {
     isOpen: boolean
     showChat: boolean
     showFeedbackForm: boolean
+    showChangeLog: boolean
 }
 
 export class HelpBtn extends React.PureComponent<Props, State> {
     private helpButtonRef = React.createRef<HTMLDivElement>()
 
-    state = { isOpen: false, showChat: false, showFeedbackForm: false }
+    state = {
+        isOpen: false,
+        showChat: false,
+        showFeedbackForm: false,
+        showChangeLog: false,
+    }
 
     private handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
         e.preventDefault()
@@ -40,16 +46,21 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                         isOpen: !state.isOpen,
                         showChat: false,
                         showFeedbackForm: false,
+                        showChangeLog: false,
                     }))
                 }
             >
-                {this.state.showChat || this.state.showFeedbackForm ? (
+                {this.state.showChat ||
+                this.state.showFeedbackForm ||
+                this.state.showChangeLog ? (
                     <ChatBox>
                         <LoadingIndicator size={30} />
                         <ChatFrame
                             src={
                                 this.state.showFeedbackForm
-                                    ? 'https://airtable.com/embed/shrfgVfdHxwggbju8?backgroundColor=red'
+                                    ? 'https://memex.featurebase.app'
+                                    : this.state.showChangeLog
+                                    ? 'https://memex.featurebase.app/changelog'
                                     : 'https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599'
                             }
                             height={600}
@@ -76,7 +87,9 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                         </MenuItem>
                         <MenuItem
                             onClick={() =>
-                                window.open('https://tutorials.memex.garden')
+                                window.open(
+                                    'https://tutorials.memex.garden/tutorials',
+                                )
                             }
                         >
                             <Icon
@@ -124,7 +137,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                         </MenuItem>
                         <MenuItem
                             onClick={() =>
-                                window.open('https://worldbrain.io/changelog')
+                                this.setState({ showChangeLog: true })
                             }
                         >
                             <Icon
@@ -132,7 +145,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                                 heightAndWidth="22px"
                                 hoverOff
                             />
-                            Changelog
+                            What's new?
                         </MenuItem>
                         <MenuItem
                             onClick={() =>
@@ -204,7 +217,7 @@ const ChatFrame = styled.iframe`
 const MenuList = styled.div`
     display: flex;
     flex-direction: column;
-    width: 250px;
+    width: 300px;
     padding: 10px;
     position: relative;
     height: 360px;

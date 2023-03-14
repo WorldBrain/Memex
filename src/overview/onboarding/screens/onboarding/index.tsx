@@ -6,22 +6,13 @@ import Logic from './logic'
 import type { State, Event, Dependencies } from './types'
 import OnboardingBox from '../../components/onboarding-box'
 import { OVERVIEW_URL } from 'src/constants'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import * as icons from 'src/common-ui/components/design-library/icons'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 import AuthDialog from 'src/authentication/components/AuthDialog/index'
-import { SignInScreen } from 'src/authentication/components/SignIn'
 
 import { runInBackground } from 'src/util/webextensionRPC'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { GUIDED_ONBOARDING_URL } from '../../constants'
-const ButtonBar = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
 
 const styles = require('../../components/onboarding-box.css')
 

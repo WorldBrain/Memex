@@ -32,7 +32,8 @@ export default function initSentry({
     }
 }
 
-export const context = (cb: () => Promise<void> | void) => raven.context(cb)
+export const context = (cb: () => Promise<void> | Promise<boolean> | void) =>
+    raven.context(cb)
 export const captureException = (error: Error | ErrorEvent | string) =>
     raven.captureException(error)
 export const captureBreadcrumb = (details: any) =>

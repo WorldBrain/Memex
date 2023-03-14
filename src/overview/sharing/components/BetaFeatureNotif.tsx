@@ -10,7 +10,6 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import { SignInScreen } from 'src/authentication/components/SignIn'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
@@ -299,7 +298,7 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
                         To create an account just type in a new email address
                     </TypographyTextNormal>
                     <Margin />
-                    <SignInScreen />
+                    {/* <SignInScreen /> */}
                 </LoginScreenContainer>
             )
         }

@@ -38,6 +38,8 @@ export class UpdateNotifBanner extends StatefulUIElement<Props, State, Event> {
             return null
         }
 
+        return <></>
+
         // return (
         //     <NotifBanner
         //         mainText="Memex updated"
