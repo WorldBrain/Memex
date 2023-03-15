@@ -9,6 +9,7 @@ import {
 export async function upgradePlan(plan) {
     const currentCount = await browser.storage.local.get(COUNTER_STORAGE_KEY)
     const { month } = currentCount[COUNTER_STORAGE_KEY]
+    const { s, c, m } = currentCount[COUNTER_STORAGE_KEY]
 
     let maxCount
     if (plan > 10000) {
@@ -20,7 +21,7 @@ export async function upgradePlan(plan) {
     await browser.storage.local.set({
         [COUNTER_STORAGE_KEY]: {
             s: maxCount,
-            c: 0,
+            c: c,
             m: month,
         },
     })
