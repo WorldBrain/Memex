@@ -39,6 +39,7 @@ export default class Logic extends UILogic<State, Event> {
         currentUser: null,
         passwordResetSent: false,
         subscriptionStatus: null,
+        subscriptionStatusLoading: 'running',
     })
 
     async init() {
