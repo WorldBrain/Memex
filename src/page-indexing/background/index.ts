@@ -49,6 +49,8 @@ import {
 import type { BrowserSettingsStore } from 'src/util/settings'
 import { isUrlSupported } from '../utils'
 
+import { updateCounter } from 'src/util/subscriptions/storage'
+
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
     asOf: number
@@ -620,6 +622,8 @@ export class PageIndexingBackground {
                 fullPageUrl: pageData.fullUrl,
             })
         }
+
+        await updateCounter()
     }
 
     private async _findTabId(fullUrl: string) {
