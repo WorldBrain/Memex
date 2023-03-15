@@ -6,6 +6,7 @@ import {
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import type { Dependencies, State, Event } from './types'
 import delay from 'src/util/delay'
+import { checkStripePlan } from 'src/util/subscriptions/storage'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -37,6 +38,7 @@ export default class Logic extends UILogic<State, Event> {
         passwordConfirm: '',
         currentUser: null,
         passwordResetSent: false,
+        subscriptionStatus: null,
     })
 
     async init() {
@@ -90,5 +92,50 @@ export default class Logic extends UILogic<State, Event> {
         this.dependencies.authBG.sendPasswordResetEmailProcess(
             previousState.currentUser.email,
         )
+    }
+    setSubscriptionStatus: EventHandler<'setSubscriptionStatus'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            subscriptionStatusLoading: {
+                $set: 'running',
+            },
+        })
+        const subscriptionStatusInfo = await checkStripePlan(event.email)
+
+        if (subscriptionStatusInfo.status === 'no-subscription') {
+            this.emitMutation({
+                subscriptionStatus: {
+                    $set: subscriptionStatusInfo.planLimit.toString(),
+                },
+                subscriptionStatusLoading: {
+                    $set: 'success',
+                },
+            })
+        } else if (
+            subscriptionStatusInfo.status === 'active' ||
+            subscriptionStatusInfo.status === 'already-setup'
+        ) {
+            if (subscriptionStatusInfo.planLimit > 10000) {
+                this.emitMutation({
+                    subscriptionStatus: {
+                        $set: 'Unlimited',
+                    },
+                    subscriptionStatusLoading: {
+                        $set: 'success',
+                    },
+                })
+            } else {
+                this.emitMutation({
+                    subscriptionStatus: {
+                        $set: subscriptionStatusInfo.planLimit.toString(),
+                    },
+                    subscriptionStatusLoading: {
+                        $set: 'success',
+                    },
+                })
+            }
+        }
     }
 }

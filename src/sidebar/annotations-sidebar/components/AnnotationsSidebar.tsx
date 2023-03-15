@@ -59,6 +59,8 @@ import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/typ
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import DiscordNotification from '@worldbrain/memex-common/lib/common-ui/components/discord-notification-banner'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { BlockCounterIndicator } from 'src/util/subscriptions/counterIndicator'
+import { countAIrequests } from 'src/util/subscriptions/storage'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -1132,6 +1134,7 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private showSummary() {
+        countAIrequests(window.location.href)
         return (
             <SummarySection>
                 <SummaryContainer>

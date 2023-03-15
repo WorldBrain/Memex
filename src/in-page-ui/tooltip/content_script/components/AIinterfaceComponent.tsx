@@ -5,6 +5,7 @@ import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-fi
 import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import React from 'react'
 import styled, { css } from 'styled-components'
+import { countAIrequests } from 'src/util/subscriptions/storage'
 
 export interface Props {
     sendAIprompt: any
@@ -22,6 +23,15 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
     }
 
     async componentDidMount() {
+        const checkCounter = countAIrequests(window.location.href)
+        if (!checkCounter) {
+            this.setState({
+                loadingState: 'success',
+                responseText:
+                    'You have used up your free AI requests for this page. Please upgrade',
+            })
+            return
+        }
         if (this.props.highlightText.length > 4000) {
             this.setState({
                 loadingState: 'success',
@@ -30,7 +40,7 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
             return
         }
         let promptResponse = await this.props.sendAIprompt({
-            prompt: 'Explain this to a Second Grader:',
+            prompt: 'Summarize the key take-aways from this text: ',
         })
         let summary = promptResponse.choices[0].text
 
@@ -76,17 +86,17 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
                         className="noDrag"
                         onClick={() =>
                             this.newPrompt(
-                                'Summarize this for a second-grade student in 2 sentences: ',
+                                'Summarize the key take-aways from this text: ',
                             )
                         }
                     >
-                        Explain me this like I am 5
+                        The key take-aways
                     </SuggestionsButton>
                     <SuggestionsButton
                         className="noDrag"
                         onClick={() =>
                             this.newPrompt(
-                                'Summarise this for me in 3 sentences:',
+                                'Summarise this for me in 3 sentences: ',
                             )
                         }
                     >
@@ -96,10 +106,12 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
                     <SuggestionsButton
                         className="noDrag"
                         onClick={() =>
-                            this.newPrompt('Explain this differently')
+                            this.newPrompt(
+                                'Explain me this like I am a second grader, but don not be condescending: ',
+                            )
                         }
                     >
-                        Explain this differently
+                        Explain me like I am 5
                     </SuggestionsButton>
                 </SuggestionsButtons>
                 <ResponseArea
