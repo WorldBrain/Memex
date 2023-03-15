@@ -274,7 +274,6 @@ export async function main(
     }
 
     if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
-        console.log('dfdfdfdf')
         const isStaging =
             process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
             process.env.NODE_ENV === 'development'
