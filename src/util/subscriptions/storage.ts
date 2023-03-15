@@ -4,6 +4,7 @@ import {
     COUNTER_STORAGE_KEY,
     DEFAULT_COUNTER_STORAGE_KEY,
     FREE_PLAN_LIMIT,
+    AI_SUMMARY_URLS,
 } from './constants'
 
 export async function upgradePlan(plan) {
@@ -29,6 +30,32 @@ export async function upgradePlan(plan) {
     return
 }
 
+export async function countAIrequests(url) {
+    const currentCount = await browser.storage.local.get(AI_SUMMARY_URLS)
+
+    if (currentCount[AI_SUMMARY_URLS] === undefined) {
+        await updateCounter()
+        const listOfURLs = []
+        listOfURLs.unshift(url)
+        await browser.storage.local.set({
+            [AI_SUMMARY_URLS]: listOfURLs,
+        })
+    } else {
+        const listOfURLs = currentCount[AI_SUMMARY_URLS]
+        if (listOfURLs.some((item) => item === url)) {
+            return
+        } else {
+            actionAllowed()
+            listOfURLs.unshift(url)
+            await updateCounter()
+            await browser.storage.local.set({
+                [AI_SUMMARY_URLS]: listOfURLs,
+            })
+        }
+    }
+
+    return
+}
 export async function updateCounter() {
     const currentCount = await browser.storage.local.get(COUNTER_STORAGE_KEY)
 
@@ -73,6 +100,9 @@ export async function checkStatus() {
                     c: 0,
                     m: currentMonth,
                 },
+            })
+            await browser.storage.local.set({
+                [AI_SUMMARY_URLS]: null,
             })
             return { maxCounter: s, blockCounter: 0 }
         } else {

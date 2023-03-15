@@ -5,6 +5,7 @@ import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-fi
 import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import React from 'react'
 import styled, { css } from 'styled-components'
+import { countAIrequests } from 'src/util/subscriptions/storage'
 
 export interface Props {
     sendAIprompt: any
@@ -22,6 +23,7 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
     }
 
     async componentDidMount() {
+        countAIrequests(window.location.href)
         if (this.props.highlightText.length > 4000) {
             this.setState({
                 loadingState: 'success',
