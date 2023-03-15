@@ -184,7 +184,6 @@ export default class AnnotationSaveBtn extends React.PureComponent<
     }
 
     render() {
-        console.log(this.props.isShared)
         return (
             <>
                 <SaveBtn tabIndex={this.props.tabIndex}>

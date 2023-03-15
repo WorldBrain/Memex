@@ -306,7 +306,6 @@ export async function main(
         setTimeout(() => {
             const elements = document.querySelectorAll('#UpgradeButton')
 
-            console.log(elements)
             for (let element of elements) {
                 const currentHref = element.getAttribute('href')
                 element.setAttribute(

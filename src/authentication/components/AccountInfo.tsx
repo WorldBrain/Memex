@@ -22,6 +22,8 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
+import toInteger from 'lodash/toInteger'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const styles = require('./styles.css')
 
@@ -47,6 +49,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     async componentDidMount() {
         const user = await this.props.authBG.getCurrentUser()
         this.processEvent('getCurrentUser', { currentUser: user })
+        this.processEvent('setSubscriptionStatus', { email: user.email })
     }
 
     constructor(props: Props) {
@@ -54,6 +57,10 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     }
 
     render() {
+        const isStaging =
+            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+            process.env.NODE_ENV === 'development'
+
         return (
             <FullPage>
                 {this.state.currentUser != null ? (
@@ -63,6 +70,71 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                             icon={'personFine'}
                         >
                             <FieldsContainer>
+                                <SubscriptionStatusContainer>
+                                    {this.state.subscriptionStatusLoading ===
+                                        'running' && (
+                                        <LoadingIndicatorBox>
+                                            <LoadingIndicator size={20} />
+                                        </LoadingIndicatorBox>
+                                    )}
+                                    {this.state.subscriptionStatusLoading ===
+                                        'success' && (
+                                        <SubscriptionStatusBox>
+                                            <>
+                                                <strong>Your plan: </strong>
+                                                {
+                                                    this.state
+                                                        .subscriptionStatus
+                                                }{' '}
+                                                unique pages per month
+                                            </>
+                                            {toInteger(
+                                                this.state.subscriptionStatus,
+                                            ) < 100 ? (
+                                                <TooltipBox
+                                                    tooltipText={
+                                                        <span>
+                                                            If page gives you
+                                                            "Page not found",
+                                                            <br /> do a hard
+                                                            reload and/or clear
+                                                            cache
+                                                        </span>
+                                                    }
+                                                    placement={'bottom'}
+                                                >
+                                                    <PrimaryAction
+                                                        label={'Upgrade'}
+                                                        onClick={() => {
+                                                            window.open(
+                                                                isStaging
+                                                                    ? 'https://memex.garden/upgradeStaging'
+                                                                    : 'https://memex.garden/upgrade',
+                                                                '_blank',
+                                                            )
+                                                        }}
+                                                        size={'medium'}
+                                                        type={'secondary'}
+                                                    />
+                                                </TooltipBox>
+                                            ) : (
+                                                <PrimaryAction
+                                                    label={'Manage'}
+                                                    onClick={() => {
+                                                        window.open(
+                                                            isStaging
+                                                                ? 'https://billing.stripe.com/p/login/test_bIY036ggb10LeqYeUU'
+                                                                : 'https://billing.stripe.com/p/login/8wM015dIp6uPdb2288',
+                                                            '_blank',
+                                                        )
+                                                    }}
+                                                    size={'medium'}
+                                                    type={'secondary'}
+                                                />
+                                            )}
+                                        </SubscriptionStatusBox>
+                                    )}
+                                </SubscriptionStatusContainer>
                                 <DisplayNameBox>
                                     <DisplayNameSetup authBG={auth} />
                                 </DisplayNameBox>
@@ -126,6 +198,26 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
         )
     }
 }
+
+const SubscriptionStatusContainer = styled.div`
+    width: 100%;
+`
+const SubscriptionStatusBox = styled.div`
+    display: flex;
+    padding: 15px 15px;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale2};
+
+    & strong {
+        color: ${(props) => props.theme.colors.white};
+        font-weight: 600;
+    }
+`
 
 const ConfirmationMessage = styled.div`
     display: flex;

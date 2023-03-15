@@ -7,6 +7,32 @@ import {
     AI_SUMMARY_URLS,
 } from './constants'
 
+export async function checkStripePlan(email) {
+    const isStaging =
+        process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+        process.env.NODE_ENV === 'development'
+
+    console.log('works', email)
+    const baseUrl = isStaging
+        ? 'https://cloudflare-memex-staging.memex.workers.dev'
+        : 'https://cloudfare-memex.memex.workers.dev'
+    const url = `${baseUrl}` + '/stripe-subscriptions'
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {},
+        body: JSON.stringify({
+            email,
+        }),
+    })
+
+    console.log('response', response)
+    const subscriptionStatus = await response.json()
+
+    console.log('infno', subscriptionStatus)
+    return subscriptionStatus
+}
+
 export async function upgradePlan(plan) {
     const currentCount = await browser.storage.local.get(COUNTER_STORAGE_KEY)
     const { month } = currentCount[COUNTER_STORAGE_KEY]
@@ -45,12 +71,15 @@ export async function countAIrequests(url) {
         if (listOfURLs.some((item) => item === url)) {
             return
         } else {
-            actionAllowed()
-            listOfURLs.unshift(url)
-            await updateCounter()
-            await browser.storage.local.set({
-                [AI_SUMMARY_URLS]: listOfURLs,
-            })
+            if (actionAllowed()) {
+                listOfURLs.unshift(url)
+                await updateCounter()
+                await browser.storage.local.set({
+                    [AI_SUMMARY_URLS]: listOfURLs,
+                })
+            } else {
+                return false
+            }
         }
     }
 

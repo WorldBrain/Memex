@@ -29,6 +29,8 @@ export interface State {
     passwordMatch: boolean
     currentUser: AuthenticatedUser
     passwordResetSent: boolean
+    subscriptionStatus: string
+    subscriptionStatusLoading: UITaskState
 }
 
 export type Event = UIEvent<{
@@ -39,4 +41,7 @@ export type Event = UIEvent<{
     setAuthDialogMode: { mode: AuthDialogMode }
     getCurrentUser: { currentUser: AuthenticatedUser }
     sendPasswordReset: null
+    setSubscriptionStatus: {
+        email: string
+    }
 }>

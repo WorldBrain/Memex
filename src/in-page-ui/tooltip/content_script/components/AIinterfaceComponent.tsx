@@ -23,7 +23,15 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
     }
 
     async componentDidMount() {
-        countAIrequests(window.location.href)
+        const checkCounter = countAIrequests(window.location.href)
+        if (!checkCounter) {
+            this.setState({
+                loadingState: 'success',
+                responseText:
+                    'You have used up your free AI requests for this page. Please upgrade',
+            })
+            return
+        }
         if (this.props.highlightText.length > 4000) {
             this.setState({
                 loadingState: 'success',
