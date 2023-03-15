@@ -294,10 +294,7 @@ export async function main(
         })
 
         const isSubscribed = await response.json()
-
-        console.log(isSubscribed)
         if (isSubscribed.status === 'active') {
-            console.log(isSubscribed)
             if (isSubscribed.planLimit) {
                 await upgradePlan(isSubscribed.planLimit)
             }
