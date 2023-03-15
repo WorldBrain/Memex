@@ -37,6 +37,7 @@ import {
     HIGHLIGHT_COLOR_KEY,
 } from 'src/highlighting/constants'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import { BlockCounterIndicator } from 'src/util/subscriptions/counterIndicator'
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
@@ -952,6 +953,7 @@ export default class Ribbon extends Component<Props, State> {
                                         this.props.sidebar.isSidebarOpen
                                     }
                                 >
+                                    <BlockCounterIndicator />
                                     <Icon
                                         onClick={() =>
                                             this.props.toggleShowExtraButtons()
