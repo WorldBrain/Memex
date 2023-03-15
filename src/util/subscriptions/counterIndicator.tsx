@@ -22,7 +22,7 @@ export class BlockCounterIndicator extends React.Component {
         await browser.storage.local.get(COUNTER_STORAGE_KEY).then((result) => {
             if (
                 result[COUNTER_STORAGE_KEY].s != null &&
-                result[COUNTER_STORAGE_KEY].s != 'u'
+                result[COUNTER_STORAGE_KEY].s < 10000
             ) {
                 this.setState({
                     shouldShow: true,
@@ -53,8 +53,6 @@ export class BlockCounterIndicator extends React.Component {
     }
 
     counterStorageListenerExecution = (changes) => {
-        console.log(changes[COUNTER_STORAGE_KEY]?.newValue)
-
         if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
             this.setState({
                 currentCount: changes[COUNTER_STORAGE_KEY].newValue.c,

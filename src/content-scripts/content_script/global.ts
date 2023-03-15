@@ -68,6 +68,7 @@ import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/t
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import { SummarizationInterface } from 'src/summarization-llm/background'
+import { upgradePlan } from 'src/util/subscriptions/storage'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -80,6 +81,7 @@ export async function main(
     } = {},
 ): Promise<SharedInPageUIState> {
     params.loadRemotely = params.loadRemotely ?? true
+
     const isPdfViewerRunning = params.getContentFingerprints != null
     if (isPdfViewerRunning) {
         setupPdfViewerListeners({
@@ -269,6 +271,54 @@ export async function main(
                 currentUser,
                 shouldShare,
             }),
+    }
+
+    if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
+        console.log('dfdfdfdf')
+        const isStaging =
+            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+            process.env.NODE_ENV === 'development'
+        const email = _currentUser.email
+
+        const baseUrl = isStaging
+            ? 'https://cloudflare-memex-staging.memex.workers.dev'
+            : 'https://cloudfare-memex.memex.workers.dev'
+        const url = `${baseUrl}` + '/stripe-subscriptions'
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {},
+            body: JSON.stringify({
+                email,
+            }),
+        })
+
+        const isSubscribed = await response.json()
+
+        console.log(isSubscribed)
+        if (isSubscribed.status === 'active') {
+            console.log(isSubscribed)
+            if (isSubscribed.planLimit) {
+                await upgradePlan(isSubscribed.planLimit)
+            }
+        }
+    }
+    if (
+        fullPageUrl === 'https://memex.garden/upgradeStaging' ||
+        fullPageUrl === 'https://memex.garden/upgrade'
+    ) {
+        setTimeout(() => {
+            const elements = document.querySelectorAll('#UpgradeButton')
+
+            console.log(elements)
+            for (let element of elements) {
+                const currentHref = element.getAttribute('href')
+                element.setAttribute(
+                    'href',
+                    `${currentHref}?prefilled_email=${_currentUser.email}`,
+                )
+            }
+        }, 300)
     }
 
     // 4. Create a contentScriptRegistry object with functions for each content script
