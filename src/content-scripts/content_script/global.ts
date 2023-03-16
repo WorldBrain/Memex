@@ -303,17 +303,19 @@ export async function main(
         fullPageUrl === 'https://memex.garden/upgradeStaging' ||
         fullPageUrl === 'https://memex.garden/upgrade'
     ) {
-        setTimeout(() => {
+        setInterval(() => {
             const elements = document.querySelectorAll('#UpgradeButton')
 
             for (let element of elements) {
                 const currentHref = element.getAttribute('href')
-                element.setAttribute(
-                    'href',
-                    `${currentHref}?prefilled_email=${_currentUser.email}`,
-                )
+                if (!currentHref.includes('prefilled_email')) {
+                    element.setAttribute(
+                        'href',
+                        `${currentHref}?prefilled_email=${_currentUser.email}`,
+                    )
+                }
             }
-        }, 300)
+        }, 200)
     }
 
     // 4. Create a contentScriptRegistry object with functions for each content script
