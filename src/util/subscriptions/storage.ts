@@ -26,17 +26,15 @@ export async function checkStripePlan(email) {
         }),
     })
 
-    console.log('response', response)
     const subscriptionStatus = await response.json()
 
-    console.log('infno', subscriptionStatus)
     return subscriptionStatus
 }
 
 export async function upgradePlan(plan) {
     const currentCount = await browser.storage.local.get(COUNTER_STORAGE_KEY)
-    const { month } = currentCount[COUNTER_STORAGE_KEY]
-    const { s, c, m } = currentCount[COUNTER_STORAGE_KEY]
+    const currentDate = new Date(Date.now())
+    const currentMonth = currentDate.getMonth()
 
     let maxCount
     if (plan > 10000) {
@@ -45,13 +43,24 @@ export async function upgradePlan(plan) {
         maxCount = plan
     }
 
-    await browser.storage.local.set({
-        [COUNTER_STORAGE_KEY]: {
-            s: maxCount,
-            c: c,
-            m: month,
-        },
-    })
+    if (currentCount[COUNTER_STORAGE_KEY] === undefined) {
+        await browser.storage.local.set({
+            [COUNTER_STORAGE_KEY]: {
+                s: maxCount,
+                c: 0,
+                m: currentMonth,
+            },
+        })
+    } else {
+        const { s, c, m } = currentCount[COUNTER_STORAGE_KEY]
+        await browser.storage.local.set({
+            [COUNTER_STORAGE_KEY]: {
+                s: maxCount,
+                c: c,
+                m: m ? m : currentMonth,
+            },
+        })
+    }
 
     return
 }
@@ -121,7 +130,7 @@ export async function checkStatus() {
     } else {
         const { s, c, m } = currentStatus[COUNTER_STORAGE_KEY]
 
-        let month = m
+        // Resets the counters if the month has changed
         if (currentStatus[COUNTER_STORAGE_KEY].m !== currentMonth) {
             await browser.storage.local.set({
                 [COUNTER_STORAGE_KEY]: {
