@@ -1,28 +1,19 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-import { TypographyInputTitle } from 'src/common-ui/components/design-library/typography'
 import { FullPage } from 'src/common-ui/components/design-library/FullPage'
-import { InputTextField } from 'src/common-ui/components/design-library/form/InputTextField'
-import { AuthContextInterface } from 'src/authentication/background/types'
 import { auth } from 'src/util/remote-functions-background'
-import { withCurrentUser } from 'src/authentication/components/AuthConnector'
-import { connect } from 'react-redux'
-import { show } from 'src/overview/modals/actions'
 import DisplayNameSetup from 'src/overview/sharing/components/DisplayNameSetup'
 import UpdateEmail from 'src/overview/sharing/components/UpdateEmail'
-import PioneerPlanBanner from 'src/common-ui/components/pioneer-plan-banner'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import Logic from './UserScreen/logic'
 import type { State, Event, Dependencies } from './UserScreen/types'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
-import toInteger from 'lodash/toInteger'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const styles = require('./styles.css')
@@ -88,7 +79,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                                 }{' '}
                                                 unique pages per month
                                             </>
-                                            {toInteger(
+                                            {parseFloat(
                                                 this.state.subscriptionStatus,
                                             ) < 100 ? (
                                                 <TooltipBox

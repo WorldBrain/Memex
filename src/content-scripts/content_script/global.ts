@@ -293,7 +293,11 @@ export async function main(
         })
 
         const isSubscribed = await response.json()
-        if (isSubscribed.status === 'active') {
+
+        if (
+            isSubscribed.status === 'active' ||
+            isSubscribed.status === 'already-setup'
+        ) {
             if (isSubscribed.planLimit) {
                 await upgradePlan(isSubscribed.planLimit)
             }
@@ -301,7 +305,9 @@ export async function main(
     }
     if (
         fullPageUrl === 'https://memex.garden/upgradeStaging' ||
-        fullPageUrl === 'https://memex.garden/upgrade'
+        fullPageUrl === 'https://memex.garden/upgrade' ||
+        fullPageUrl === 'https://memex.garden' ||
+        fullPageUrl === 'https://memex.garden/copilot'
     ) {
         setInterval(() => {
             const elements = document.querySelectorAll('#UpgradeButton')
