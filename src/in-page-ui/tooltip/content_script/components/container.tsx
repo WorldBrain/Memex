@@ -322,6 +322,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                         placement="bottom"
                         strategy="absolute"
                         noStyles
+                        instaClose
                     >
                         <Container
                             id="memex-tooltip-container"
