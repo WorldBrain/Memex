@@ -294,7 +294,6 @@ export async function main(
 
         const isSubscribed = await response.json()
 
-        console.log(isSubscribed)
         if (
             isSubscribed.status === 'active' ||
             isSubscribed.status === 'already-setup'
