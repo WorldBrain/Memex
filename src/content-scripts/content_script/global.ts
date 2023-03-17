@@ -306,7 +306,7 @@ export async function main(
     if (
         fullPageUrl === 'https://memex.garden/upgradeStaging' ||
         fullPageUrl === 'https://memex.garden/upgrade' ||
-        fullPageUrl === 'https://memex.garden' ||
+        fullPageUrl === 'https://memex.garden/' ||
         fullPageUrl === 'https://memex.garden/copilot'
     ) {
         setInterval(() => {

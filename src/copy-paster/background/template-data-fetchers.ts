@@ -126,7 +126,10 @@ export function getTemplateDataFetchers({
                     ...acc,
                     [note.url]: {
                         url: note.url,
-                        body: convertHTMLintoMarkdown(note.body),
+                        body:
+                            note.body != null
+                                ? convertHTMLintoMarkdown(note.body)
+                                : '',
                         comment: note.comment,
                         pageUrl: note.pageUrl,
                         createdAt: note.createdWhen,
@@ -289,11 +292,15 @@ export function getTemplateDataFetchers({
 }
 
 function convertHTMLintoMarkdown(html) {
-    let turndownService = new TurndownService({
-        headingStyle: 'atx',
-        hr: '---',
-        codeBlockStyle: 'fenced',
-    })
-    const markdown = turndownService.turndown(html)
-    return markdown
+    if (html) {
+        let turndownService = new TurndownService({
+            headingStyle: 'atx',
+            hr: '---',
+            codeBlockStyle: 'fenced',
+        })
+        const markdown = turndownService.turndown(html)
+        return markdown
+    } else {
+        return
+    }
 }
