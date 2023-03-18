@@ -1904,8 +1904,9 @@ const SummarySection = styled.div`
     width: 100%;
     min-height: 60px;
     justify-content: center;
-    align-items: center;
     border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
+    overflow: scroll;
+    align-items: start;
 `
 
 const SummaryText = styled.div`

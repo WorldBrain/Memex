@@ -248,7 +248,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                         </TitleArea>
                         <Description>
                             Hover over the green area on the right to open the
-                            quick action bar.
+                            Mini-Sidebar.
                         </Description>
                     </ContentArea>
                 </FirstCardContainer>
@@ -282,7 +282,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             />
                         </TitleArea>
                         <Description>
-                            Use the heart icon in the quick action bar or use
+                            Use the heart icon in the Mini-Sidebar or use
                             keyboard shortcuts.
                         </Description>
                     </ContentArea>
@@ -302,7 +302,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                 <CardContainer>
                     <IconBlock>
                         <Icon
-                            filePath={icons.collectionsEmpty}
+                            filePath={icons.plus}
                             heightAndWidth="28px"
                             hoverOff
                             color={'prime1'}
@@ -378,14 +378,14 @@ export const tutorialSteps: TutorialStepContent[] = [
                     </IconBlock>
                     <ContentArea>
                         <TitleArea>
-                            <Title>View your Highlights</Title>
+                            <Title>View Annotations</Title>
                             <KeyboardShortcuts
                                 keys={[getKeyName({ key: 'alt' }), 'Q']}
                             />
                         </TitleArea>
                         <Description>
                             Click on the highlight or open the sidebar via the
-                            quick action ribbon
+                            Mini-Sidebar.
                         </Description>
                     </ContentArea>
                 </CardContainer>
@@ -414,14 +414,14 @@ export const tutorialSteps: TutorialStepContent[] = [
                     <ContentArea>
                         <TitleArea>
                             <Title>
-                                Search everything you saved or annotated
+                                Full-Text search saved pages and annotations
                             </Title>
                             <KeyboardShortcuts
                                 keys={[getKeyName({ key: 'alt' }), 'F']}
                             />
                         </TitleArea>
                         <Description>
-                            Click on the search icon in the Quick Action Ribbon.
+                            Click on the search icon in the Mini-Sidebar
                         </Description>
                     </ContentArea>
                 </CardContainer>
@@ -452,7 +452,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             <Title>Pin Memex to the extension bar</Title>
                         </TitleArea>
                         <Description>
-                            Don't like the Quick Action Ribbon and want to use
+                            Don't like the Mini-Sidebar and want to use
                             something else?
                         </Description>
                     </ContentArea>
