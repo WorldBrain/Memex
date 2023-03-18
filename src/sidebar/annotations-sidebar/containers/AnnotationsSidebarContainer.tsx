@@ -404,7 +404,6 @@ export class AnnotationsSidebarContainer<
                 })
             },
             selectEntry: async (listId, options) => {
-                throw new Error('abc')
                 this.processEvent(getUpdateListsEvent(listId), {
                     added: listId,
                     deleted: null,
