@@ -14,6 +14,7 @@ import { SharedInPageUIEvents } from 'src/in-page-ui/shared-state/types'
 import type {
     TooltipInPageUIInterface,
     AnnotationFunctions,
+    TooltipPosition,
 } from 'src/in-page-ui/tooltip/types'
 import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
@@ -76,7 +77,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             },
         })
 
-        window.addEventListener('mouseup', this.handleClick)
+        // window.addEventListener('mouseup', this.handleClick)
     }
 
     handleClick = (e: MouseEvent) => {
@@ -86,9 +87,9 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         if (e.composedPath().includes(this.container)) {
             return
         } else {
-            this.setState({
-                position: { x: clickX, y: clickY },
-            })
+            // this.setState({
+            //     position: { x: clickX, y: clickY },
+            // })
         }
     }
 
@@ -129,13 +130,31 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         }
     }
 
-    showTooltip = (position) => {
+    calculateTooltipPostion(): TooltipPosition {
+        const range = document.getSelection().getRangeAt(0)
+        const boundingRect = range.getBoundingClientRect()
+        // x = position of element from the left + half of it's width
+        const x = boundingRect.left + boundingRect.width / 2
+        // y = scroll height from top + pixels from top + height of element - offset
+        const y =
+            window.pageYOffset + boundingRect.top + boundingRect.height - 20
+        console.log(x, y)
+        return {
+            x,
+            y,
+        }
+    }
+
+    showTooltip = () => {
         if (!this.state.showTooltip && this.state.tooltipState !== 'running') {
             this.setState({
                 preventClosing: true,
             })
 
             setTimeout(() => {
+                let position = this.calculateTooltipPostion()
+
+                console.log('positionshow', position)
                 this.setState({
                     showTooltip: true,
                     position,
@@ -303,6 +322,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                         placement="bottom"
                         strategy="absolute"
                         noStyles
+                        instaClose
                     >
                         <Container
                             id="memex-tooltip-container"

@@ -40,7 +40,7 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
             return
         }
         let promptResponse = await this.props.sendAIprompt({
-            prompt: 'Explain this to a Second Grader:',
+            prompt: 'Summarize the key take-aways from this text: ',
         })
         let summary = promptResponse.choices[0].text
 
@@ -86,17 +86,17 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
                         className="noDrag"
                         onClick={() =>
                             this.newPrompt(
-                                'Summarize this for a second-grade student in 2 sentences: ',
+                                'Summarize the key take-aways from this text: ',
                             )
                         }
                     >
-                        Explain me this like I am 5
+                        The key take-aways
                     </SuggestionsButton>
                     <SuggestionsButton
                         className="noDrag"
                         onClick={() =>
                             this.newPrompt(
-                                'Summarise this for me in 3 sentences:',
+                                'Summarise this for me in 3 sentences: ',
                             )
                         }
                     >
@@ -106,10 +106,12 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
                     <SuggestionsButton
                         className="noDrag"
                         onClick={() =>
-                            this.newPrompt('Explain this differently')
+                            this.newPrompt(
+                                'Explain me this like I am a second grader, but don not be condescending: ',
+                            )
                         }
                     >
-                        Explain this differently
+                        Explain me like I am 5
                     </SuggestionsButton>
                 </SuggestionsButtons>
                 <ResponseArea

@@ -877,17 +877,21 @@ export default class Ribbon extends Component<Props, State> {
                                                         ? 'prime1'
                                                         : 'greyScale6'
                                                 }
-                                                heightAndWidth="20px"
-                                                filePath={
-                                                    this.props.lists.pageListIds
-                                                        .length > 0
-                                                        ? icons.collectionsFull
-                                                        : icons.collectionsEmpty
-                                                }
+                                                heightAndWidth="22px"
+                                                filePath={'plus'}
                                                 containerRef={
                                                     this.spacePickerRef
                                                 }
                                             />
+                                            {this.props.lists.pageListIds
+                                                .length > 0 && (
+                                                <SpacesCounter>
+                                                    {
+                                                        this.props.lists
+                                                            .pageListIds.length
+                                                    }
+                                                </SpacesCounter>
+                                            )}
                                         </TooltipBox>
                                         {!this.props.sidebar.isSidebarOpen && (
                                             <TooltipBox
@@ -1032,6 +1036,22 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 }
+
+const SpacesCounter = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    height: 14px;
+    font-size: 12px;
+    width: auto;
+    padding: 0 4px;
+    color: ${(props) => props.theme.colors.black};
+    background-color: ${(props) => props.theme.colors.white};
+    border-radius: 30px;
+`
 
 const SupportTitle = styled.div`
     color: ${(props) => props.theme.colors.greyScale4};

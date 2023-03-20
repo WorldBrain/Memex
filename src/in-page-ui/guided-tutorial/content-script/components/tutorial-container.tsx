@@ -256,6 +256,10 @@ const TutorialCardContainer = styled.div<{
     box-shadow: 0px 4px 15px 5px rgb(0 0 0 / 5%);
     border: 2px solid ${(props) => props.theme.colors.greyScale3};
     animation: 0.3s ease-out 0s 1 slideInFromLeft;
+    height: fit-content;
+    max-height: 70%;
+    justify-content: flex-start;
+    overflow: scroll;
 
     @keyframes slideInFromLeft {
         0% {
