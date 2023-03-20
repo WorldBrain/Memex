@@ -21,13 +21,15 @@ import ContentConversationStorage from '@worldbrain/memex-common/lib/content-con
 import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
 import ActivityFollowsStorage from '@worldbrain/memex-common/lib/activity-follows/storage'
 import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
-import { RetroSyncStorage as DiscordRetroSyncStorage } from '@worldbrain/memex-common/lib/discord/queue'
+import { DiscordRetroSyncStorage } from '@worldbrain/memex-common/lib/discord/queue'
 import DiscordStorage from '@worldbrain/memex-common/lib/discord/storage'
 import {
     ChangeWatchMiddleware,
     ChangeWatchMiddlewareSettings,
 } from '@worldbrain/storex-middleware-change-watcher'
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
+import SlackStorage from '@worldbrain/memex-common/lib/slack/storage'
+import { SlackRetroSyncStorage } from '@worldbrain/memex-common/lib/slack/storage/retro-sync'
 
 let shouldLogOperations = false
 
@@ -118,6 +120,14 @@ export function createLazyServerStorage(
                 storageManager,
                 operationExecuter: operationExecuter('discordRetroSync'),
             })
+            const slack = new SlackStorage({
+                storageManager,
+                operationExecuter: operationExecuter('slack'),
+            })
+            const slackRetroSync = new SlackRetroSyncStorage({
+                storageManager,
+                operationExecuter: operationExecuter('slackRetroSync'),
+            })
             const serverStorage: ServerStorage = {
                 manager: storageManager,
                 modules: {
@@ -130,6 +140,8 @@ export function createLazyServerStorage(
                     personalCloud,
                     discordRetroSync,
                     discord,
+                    slackRetroSync,
+                    slack,
                 },
             }
             registerModuleMapCollections(

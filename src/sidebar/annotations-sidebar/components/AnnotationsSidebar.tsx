@@ -1904,16 +1904,18 @@ const SummarySection = styled.div`
     width: 100%;
     min-height: 60px;
     justify-content: center;
-    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
     overflow: scroll;
     align-items: start;
+    height: fill-available;
+    flex: 1;
 `
 
 const SummaryText = styled.div`
     padding: 20px 20px 0px 20px;
     color: ${(props) => props.theme.colors.greyScale7};
     font-size: 16px;
-    line-height: 24px;
+    line-height: 22px;
+    white-space: break-spaces;
 `
 
 const FocusModeNotifContainer = styled.div`

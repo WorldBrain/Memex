@@ -504,9 +504,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                                 hoverOff
                                 color={'prime1'}
                             />
-                            <ActionText>
-                                Personalised Onboarding Call
-                            </ActionText>
+                            <ActionText>15min Onboarding Call</ActionText>
                         </ActionCard>
                         <ActionCard
                             onClick={() =>
