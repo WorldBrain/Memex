@@ -1,5 +1,5 @@
 import { makeId, setupDiscordTestContext } from './event-processor.test-setup'
-import { DISCORD_LIST_USER_ID } from '@worldbrain/memex-common/lib/discord/constants'
+import { DISCORD_LIST_USER_ID } from '@worldbrain/memex-common/lib/chat-bots/constants'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import type { DiscordList } from '@worldbrain/memex-common/lib/discord/types'
 
