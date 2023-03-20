@@ -66,7 +66,7 @@ export async function setupDiscordTestContext(options: {
         channelManager,
         postMessage: async (params: {
             messageId: number
-            discordMessageLink: string
+            messageLink: string
             content: string
             userId?: number
             guildId?: number
@@ -90,7 +90,7 @@ export async function setupDiscordTestContext(options: {
                     username: `User ${params.userId ?? 1}`,
                 },
                 content: params.content,
-                discordMessageLink: params.discordMessageLink,
+                discordMessageLink: params.messageLink,
                 replyTo: repliedToInfo && repliedToInfo.reference,
                 repliedToUser: repliedToInfo && repliedToInfo.author,
             }

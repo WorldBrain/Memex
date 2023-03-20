@@ -1,4 +1,4 @@
-import { createAnnotationFromMessage } from '@worldbrain/memex-common/lib/discord/utils'
+import { createAnnotationFromMessage } from '@worldbrain/memex-common/lib/chat-bots/utils'
 import { setupDiscordTestContext } from './event-processor.test-setup'
 
 const createDiscordLink = (messageId: number) =>
@@ -13,7 +13,7 @@ describe('Discord event processor', () => {
         await context.postMessage({
             messageId: 1,
             content: 'Nothing to see here...',
-            discordMessageLink: createDiscordLink(1),
+            messageLink: createDiscordLink(1),
         })
         await context.assertData({
             users: [],
@@ -29,8 +29,9 @@ describe('Discord event processor', () => {
         })
         const message = {
             messageId: 1,
+            service: 'Discord' as 'Discord',
             content: 'Hey, check this out: https://memex.garden/',
-            discordMessageLink: createDiscordLink(1),
+            messageLink: createDiscordLink(1),
         }
         await context.postMessage(message)
         await context.assertData({
@@ -59,9 +60,10 @@ describe('Discord event processor', () => {
         })
         const message = {
             messageId: 1,
+            service: 'Discord' as 'Discord',
             content:
                 'Hey, check this out: https://memex.garden/ and here it is again: https://memex.garden/ and again: https://memex.garden/',
-            discordMessageLink: createDiscordLink(1),
+            messageLink: createDiscordLink(1),
         }
         await context.postMessage(message)
         await context.assertData({
@@ -91,7 +93,7 @@ describe('Discord event processor', () => {
         const message = {
             messageId: 1,
             content: 'Hey, check this out: https://memex.garden/',
-            discordMessageLink: createDiscordLink(1),
+            messageLink: createDiscordLink(1),
         }
         await context.postMessage(message)
         await context.assertData({
@@ -108,9 +110,10 @@ describe('Discord event processor', () => {
         })
         const message = {
             messageId: 1,
+            service: 'Discord' as 'Discord',
             content:
                 'Hey, check this out: https://memex.garden/. Also interesting: https://notion.so/',
-            discordMessageLink: createDiscordLink(1),
+            messageLink: createDiscordLink(1),
         }
         await context.postMessage(message)
         await context.assertData({
@@ -150,12 +153,13 @@ describe('Discord event processor', () => {
         await context.postMessage({
             content: 'nothing here',
             messageId: 1,
-            discordMessageLink: createDiscordLink(1),
+            messageLink: createDiscordLink(1),
         })
         const linkMessage = {
             messageId: 2,
+            service: 'Discord' as 'Discord',
             content: 'Hey, check this out: https://memex.garden/',
-            discordMessageLink: createDiscordLink(2),
+            messageLink: createDiscordLink(2),
             replyTo: 1,
         }
         await context.postMessage(linkMessage)
@@ -185,13 +189,15 @@ describe('Discord event processor', () => {
         })
         const messageA = {
             messageId: 1,
+            service: 'Discord' as 'Discord',
             content: 'Hey, check this out: https://memex.garden/',
-            discordMessageLink: createDiscordLink(1),
+            messageLink: createDiscordLink(1),
         }
         const messageB = {
             messageId: 2,
+            service: 'Discord' as 'Discord',
             content: 'Hey, this is the same link: https://memex.garden/',
-            discordMessageLink: createDiscordLink(2),
+            messageLink: createDiscordLink(2),
         }
 
         await context.postMessage(messageA)
@@ -254,19 +260,19 @@ describe('Discord event processor', () => {
     //     await context.postMessage({
     //         messageId: 1,
     //         content: 'Hey, check this out: https://memex.garden/',
-    //         discordMessageLink: createDiscordLink(1),
+    //         messageLink: createDiscordLink(1),
     //     })
     //     await context.postMessage({
     //         messageId: 2,
     //         replyTo: 1,
     //         content: `I'm replying to that`,
-    //         discordMessageLink: createDiscordLink(2),
+    //         messageLink: createDiscordLink(2),
     //     })
     //     await context.postMessage({
     //         messageId: 3,
     //         replyTo: 2,
     //         content: `I'm replying to that too!`,
-    //         discordMessageLink: createDiscordLink(3),
+    //         messageLink: createDiscordLink(3),
     //     })
     //     await context.assertData({
     //         users: [1],
@@ -295,19 +301,19 @@ describe('Discord event processor', () => {
     //         messageId: 1,
     //         content:
     //             'Hey, check this out: https://memex.garden/. Also interesting: https://notion.so/',
-    //         discordMessageLink: createDiscordLink(1),
+    //         messageLink: createDiscordLink(1),
     //     })
     //     await context.postMessage({
     //         messageId: 2,
     //         replyTo: 1,
     //         content: `I'm replying to that`,
-    //         discordMessageLink: createDiscordLink(2),
+    //         messageLink: createDiscordLink(2),
     //     })
     //     await context.postMessage({
     //         messageId: 3,
     //         replyTo: 2,
     //         content: `I'm replying to that too!`,
-    //         discordMessageLink: createDiscordLink(3),
+    //         messageLink: createDiscordLink(3),
     //     })
     //     await context.assertData({
     //         users: [1],
@@ -335,19 +341,19 @@ describe('Discord event processor', () => {
     //     await context.postMessage({
     //         messageId: 1,
     //         content: 'Hey, check this out: https://memex.garden/',
-    //         discordMessageLink: createDiscordLink(1),
+    //         messageLink: createDiscordLink(1),
     //     })
     //     await context.postMessage({
     //         channelId: { message: 1 },
     //         messageId: 2,
     //         content: `I'm replying to that`,
-    //         discordMessageLink: createDiscordLink(2),
+    //         messageLink: createDiscordLink(2),
     //     })
     //     await context.postMessage({
     //         channelId: { message: 1 },
     //         messageId: 3,
     //         content: `I'm replying to that too!`,
-    //         discordMessageLink: createDiscordLink(3),
+    //         messageLink: createDiscordLink(3),
     //     })
     //     await context.assertData({
     //         users: [1],
@@ -376,19 +382,19 @@ describe('Discord event processor', () => {
     //         messageId: 1,
     //         content:
     //             'Hey, check this out: https://memex.garden/. Also interesting: https://notion.so/',
-    //         discordMessageLink: createDiscordLink(1),
+    //         messageLink: createDiscordLink(1),
     //     })
     //     await context.postMessage({
     //         channelId: { message: 1 },
     //         messageId: 2,
     //         content: `I'm replying to that`,
-    //         discordMessageLink: createDiscordLink(2),
+    //         messageLink: createDiscordLink(2),
     //     })
     //     await context.postMessage({
     //         channelId: { message: 1 },
     //         messageId: 3,
     //         content: `I'm replying to that too!`,
-    //         discordMessageLink: createDiscordLink(3),
+    //         messageLink: createDiscordLink(3),
     //     })
     //     await context.assertData({
     //         users: [1],
@@ -416,25 +422,25 @@ describe('Discord event processor', () => {
     //     await context.postMessage({
     //         messageId: 1,
     //         content: 'Hey, check this out: https://memex.garden/',
-    //         discordMessageLink: createDiscordLink(1),
+    //         messageLink: createDiscordLink(1),
     //     })
     //     await context.postMessage({
     //         channelId: { message: 1 },
     //         messageId: 2,
     //         content: `I'm replying to that`,
-    //         discordMessageLink: createDiscordLink(2),
+    //         messageLink: createDiscordLink(2),
     //     })
     //     await context.postMessage({
     //         channelId: { message: 1 },
     //         messageId: 3,
     //         content: `Posting https://another.link/, just to confuse you`,
-    //         discordMessageLink: createDiscordLink(3),
+    //         messageLink: createDiscordLink(3),
     //     })
     //     await context.postMessage({
     //         channelId: { message: 1 },
     //         messageId: 4,
     //         content: `This should show up as a reply to both messages`,
-    //         discordMessageLink: createDiscordLink(4),
+    //         messageLink: createDiscordLink(4),
     //     })
     //     await context.assertData({
     //         users: [1],
