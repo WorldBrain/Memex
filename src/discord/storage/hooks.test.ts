@@ -1,5 +1,5 @@
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { DiscordEventActionProcessor } from '@worldbrain/memex-common/lib/discord/storage/hooks'
+import { ChatEventActionProcessor } from '@worldbrain/memex-common/lib/chat-bots/storage-hooks'
 import { createDiscordEventProcessor } from '@worldbrain/memex-common/lib/discord/event-processor'
 import type {
     DiscordEvent,
@@ -37,7 +37,9 @@ async function setupTest(ops: { withDefaultList: boolean }) {
         })
     }
 
-    const actionProcessor = new DiscordEventActionProcessor({
+    const actionProcessor = new ChatEventActionProcessor({
+        chatEventActionCollection: 'discordEventAction',
+        chatEventCollection: 'discordEvent',
         storageManager: serverStorage.manager,
         fetch: setup.fetch,
     })
@@ -53,7 +55,7 @@ async function setupTest(ops: { withDefaultList: boolean }) {
         ) => {
             let error: Error = null
             try {
-                await actionProcessor.processDiscordEventAction(action)
+                await actionProcessor.processChatEventAction(action)
             } catch (err) {
                 error = err
             }
@@ -184,7 +186,7 @@ describe('Discord integration data fetch tests', () => {
             }),
         ])
 
-        await actionProcessor.processDiscordEventAction(discordEventAction)
+        await actionProcessor.processChatEventAction(discordEventAction)
 
         expect(
             await storageManager
@@ -255,7 +257,7 @@ describe('Discord integration data fetch tests', () => {
         ])
         expect(fetchMock.calls().length).toBe(0)
 
-        await actionProcessor.processDiscordEventAction(discordEventActionA)
+        await actionProcessor.processChatEventAction(discordEventActionA)
 
         expect(
             await storageManager
@@ -289,7 +291,7 @@ describe('Discord integration data fetch tests', () => {
             discordEvent: expect.any(Number),
         })
 
-        await actionProcessor.processDiscordEventAction(discordEventActionB)
+        await actionProcessor.processChatEventAction(discordEventActionB)
 
         expect(
             await storageManager
@@ -361,7 +363,7 @@ describe('Discord integration data fetch tests', () => {
         ])
 
         try {
-            await actionProcessor.processDiscordEventAction(discordEventAction)
+            await actionProcessor.processChatEventAction(discordEventAction)
         } catch (err) {}
 
         expect(
