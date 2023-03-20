@@ -32,6 +32,7 @@ export interface SharedInPageUIDependencies {
  */
 export class SharedInPageUIState implements SharedInPageUIInterface {
     contentSharingEvents: TypedRemoteEventEmitter<'contentSharing'>
+    summarisePageEvents: TypedRemoteEventEmitter<'pageSummary'>
     events = new EventEmitter() as TypedEventEmitter<SharedInPageUIEvents>
     componentsShown: InPageUIComponentShowState = {
         ribbon: false,
@@ -71,10 +72,17 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         this.events.on('newListener' as any, this._handleNewListener)
 
         this.contentSharingEvents = getRemoteEventEmitter('contentSharing')
+
         this.contentSharingEvents.on(
             'pageAddedToSharedList',
             this.handlePageAddedToSharedList,
         )
+
+        this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
+
+        // this.summarisePageEvents.on('pageSummary', ({ chunk }) => {
+        //     console.log('chunk', chunk)
+        // })
     }
 
     private handlePageAddedToSharedList: ContentSharingEvents['pageAddedToSharedList'] = async ({

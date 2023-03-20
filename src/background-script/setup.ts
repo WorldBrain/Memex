@@ -426,7 +426,9 @@ export function createBackgroundModules(options: {
         getServerStorage,
         jobScheduler: jobScheduler.scheduler,
     })
-    const summarizeBG = new SummarizeBackground()
+    const summarizeBG = new SummarizeBackground({
+        remoteEventEmitter: createRemoteEventEmitter('pageSummary'),
+    })
 
     // TODO: Maybe move this somewhere more appropriate (personal-cloud module)
     async function createDeviceId(

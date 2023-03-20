@@ -27,6 +27,7 @@ import type { Arguments, default as TypedEventEmitter } from 'typed-emitter'
 import type { AuthRemoteEvents } from 'src/authentication/background/types'
 import type { ContentSharingEvents } from 'src/content-sharing/background/types'
 import type { PersonalCloudBackgroundEvents } from '../personal-cloud/background/types'
+import type { pageSummaryBackgroundEvents } from 'src/summarization-llm/background/types'
 
 export class RpcError extends Error {
     constructor(message: string) {
@@ -351,6 +352,7 @@ export interface RemoteEvents {
     auth: AuthRemoteEvents
     contentSharing: ContentSharingEvents
     personalCloud: PersonalCloudBackgroundEvents
+    pageSummary: pageSummaryBackgroundEvents
 }
 
 function registerRemoteEventForwarder() {
