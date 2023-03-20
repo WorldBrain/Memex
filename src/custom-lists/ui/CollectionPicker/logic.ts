@@ -18,7 +18,7 @@ export interface SpaceDisplayEntry {
 }
 
 export interface SpacePickerDependencies {
-    createNewEntry: (name: string, id?: number) => Promise<number>
+    createNewEntry: (name: string) => Promise<number>
     selectEntry: (
         listId: number,
         options?: { protectAnnotation?: boolean },
@@ -714,10 +714,10 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     private async createAndDisplayNewList(name: string): Promise<number> {
-        const newId = Date.now()
+        const localListId = await this.dependencies.createNewEntry(name)
         const newEntry: SpaceDisplayEntry = {
             name,
-            localId: newId,
+            localId: localListId,
             focused: false,
             remoteId: null,
             createdAt: Date.now(),
@@ -728,14 +728,13 @@ export default class SpacePickerLogic extends UILogic<
         this.emitMutation({
             query: { $set: '' },
             newEntryName: { $set: '' },
-            selectedListIds: { $push: [newId] },
+            selectedListIds: { $push: [localListId] },
             displayEntries: {
                 $set: [...this.defaultEntries],
             },
         } as UIMutation<SpacePickerState>)
         this._updateFocus((this.focusIndex = 0), newEntries)
-        await this.dependencies.createNewEntry(name, newId)
-        return newId
+        return localListId
     }
 
     newEntryPress: EventHandler<'newEntryPress'> = async ({
