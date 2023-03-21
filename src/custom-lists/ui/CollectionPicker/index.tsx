@@ -39,10 +39,9 @@ class SpacePicker extends StatefulUIElement<
     > = {
         spacesBG: collections,
         contentSharingBG: contentSharing,
-        createNewEntry: async (name, id?) =>
+        createNewEntry: async (name) =>
             collections.createCustomList({
                 name,
-                id,
             }),
     }
 
