@@ -168,10 +168,28 @@ describe('Page annotations cache tests', () => {
             ...updatedAnnotationC,
             unifiedListIds: [], // We're making it private, so this shared list should get dropped
         }
+
+        expect(
+            cache.lists.byId[testLists[1].unifiedId].unifiedAnnotationIds,
+        ).toEqual([
+            updatedAnnotationA.unifiedId,
+            updatedAnnotationC.unifiedId,
+            testAnnotations[3].unifiedId,
+        ])
+
         cache.updateAnnotation(updatedAnnotationC, {
             updateLastEditedTimestamp: true,
             now,
         })
+
+        expect(
+            cache.lists.byId[testLists[1].unifiedId].unifiedAnnotationIds,
+        ).toEqual([
+            updatedAnnotationA.unifiedId,
+            // updatedAnnotationB.unifiedId // Ensure ref back to privatized annotation is removed from list
+            testAnnotations[3].unifiedId,
+        ])
+
         expectedEvents.push({
             event: 'updatedAnnotation',
             args: expectedAnnotationC,
