@@ -339,10 +339,10 @@ export class SidebarContainerLogic extends UILogic<
     private setupRemoteEventListeners() {
         this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
 
-        this.summarisePageEvents.on('pageSummary', ({ chunk }) => {
+        this.summarisePageEvents.on('newSummaryChunk', ({ chunk }) => {
             this.emitMutation({
                 loadState: { $set: 'success' },
-                pageSummary: { $set: chunk },
+                pageSummary: { $apply: (prev) => prev + chunk },
             })
         })
     }
@@ -1316,7 +1316,7 @@ export class SidebarContainerLogic extends UILogic<
             loadState: { $set: 'running' },
         })
 
-        await this.options.summarizeBG.getPageSummary(data.fullPageUrl)
+        await this.options.summarizeBG.startPageSummaryStream(data.fullPageUrl)
 
         // const summaryProvider = new SummarizationService()
 

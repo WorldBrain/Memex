@@ -27,7 +27,7 @@ import type { Arguments, default as TypedEventEmitter } from 'typed-emitter'
 import type { AuthRemoteEvents } from 'src/authentication/background/types'
 import type { ContentSharingEvents } from 'src/content-sharing/background/types'
 import type { PersonalCloudBackgroundEvents } from '../personal-cloud/background/types'
-import type { pageSummaryBackgroundEvents } from 'src/summarization-llm/background/types'
+import type { PageSummaryBackgroundEvents } from 'src/summarization-llm/background/types'
 
 export class RpcError extends Error {
     constructor(message: string) {
@@ -287,7 +287,7 @@ const __REMOTE_EVENT_NAME__ = '__REMOTE_EVENT_NAME__'
 // Sending Side, (e.g. background script)
 export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
     moduleName: ModuleName,
-    { broadcastToTabs = false } = {},
+    { broadcastToTabs = false, silenceBroadcastFailures = false } = {},
 ): RemoteEventEmitter<ModuleName> {
     const message = {
         __REMOTE_EVENT__,
@@ -306,13 +306,15 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
                             data: args[0],
                         })
                     } catch (err) {
-                        console.error(
-                            `Remote event emitter "${moduleName}" failed to emit event "${String(
-                                eventName,
-                            )}" to tab ${tabId}:\n\tError message: "${
-                                err.message
-                            }"`,
-                        )
+                        if (!silenceBroadcastFailures) {
+                            console.error(
+                                `Remote event emitter "${moduleName}" failed to emit event "${String(
+                                    eventName,
+                                )}" to tab ${tabId}:\n\tError message: "${
+                                    err.message
+                                }"`,
+                            )
+                        }
                     }
                 }
             },
@@ -352,7 +354,7 @@ export interface RemoteEvents {
     auth: AuthRemoteEvents
     contentSharing: ContentSharingEvents
     personalCloud: PersonalCloudBackgroundEvents
-    pageSummary: pageSummaryBackgroundEvents
+    pageSummary: PageSummaryBackgroundEvents
 }
 
 function registerRemoteEventForwarder() {

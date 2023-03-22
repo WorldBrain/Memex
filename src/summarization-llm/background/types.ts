@@ -1,3 +1,3 @@
-export interface pageSummaryBackgroundEvents {
-    pageSummary(event: { chunk: string }): void
+export interface PageSummaryBackgroundEvents {
+    newSummaryChunk(event: { chunk: string }): void
 }

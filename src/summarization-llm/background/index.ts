@@ -1,15 +1,12 @@
 import { SummarizationService } from '@worldbrain/memex-common/lib/summarization/index'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import type { RemoteEventEmitter } from '../../util/webextensionRPC'
-import {
-    getRemoteEventEmitter,
-    TypedRemoteEventEmitter,
-} from 'src/util/webextensionRPC'
+
 export interface SummarizationInterface {
-    getPageSummary: (url) => Promise<ReadableStream | null>
+    startPageSummaryStream: (url: string) => Promise<void>
     getTextSummary: (
-        text,
-        prompt,
+        text: string,
+        prompt: string,
     ) => Promise<
         | { status: 'success'; choices: { text: string }[] }
         | { status: 'prompt-too-long' }
@@ -27,8 +24,8 @@ export default class SummarizeBackground {
 
     constructor(public options: summarizePageBackgroundOptions) {
         this.remoteFunctions = {
-            getPageSummary: (url) => this.getPageSummary(url),
-            getTextSummary: (text, prompt) => this.getTextSummary(text, prompt),
+            startPageSummaryStream: this.startPageSummaryStream,
+            getTextSummary: this.getTextSummary,
         }
     }
 
@@ -36,14 +33,14 @@ export default class SummarizeBackground {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
-    getPageSummary: SummarizationInterface['getPageSummary'] = async (url) => {
+    startPageSummaryStream: SummarizationInterface['startPageSummaryStream'] = async (
+        url,
+    ) => {
         const newSummary = new SummarizationService()
         console.log('triggered', url)
         const readableStream = await newSummary.summarizeUrl(url)
 
         const reader = readableStream.getReader()
-
-        let fullText = ''
 
         const readChunk = async () => {
             const { done, value } = await reader.read()
@@ -59,20 +56,18 @@ export default class SummarizeBackground {
                 let JSONchunk = JSON.parse(value)
                 let partialText = JSONchunk.t
                 if (partialText != null && partialText.length > 0) {
-                    fullText += partialText
-                    this.options.remoteEventEmitter.emit('pageSummary', {
-                        chunk: fullText,
+                    this.options.remoteEventEmitter.emit('newSummaryChunk', {
+                        chunk: partialText,
                     })
                 }
             } catch (e) {
-                // console.log('fault:', value)
+                console.log('fault:', value)
             }
 
             await readChunk()
         }
 
         await readChunk()
-        return readableStream
     }
 
     getTextSummary: SummarizationInterface['getTextSummary'] = async (

@@ -172,7 +172,10 @@ export function createBackgroundModules(options: {
     generateServerId?: (collectionName: string) => number | string
     createRemoteEventEmitter?<ModuleName extends keyof RemoteEvents>(
         name: ModuleName,
-        options?: { broadcastToTabs?: boolean },
+        options?: {
+            broadcastToTabs?: boolean
+            silenceBroadcastFailures?: boolean
+        },
     ): RemoteEventEmitter<ModuleName>
     getFCMRegistrationToken?: () => Promise<string>
     // NOTE: Currently only used in MV2 builds, allowing us to trigger sync on Firestore changes
@@ -427,7 +430,10 @@ export function createBackgroundModules(options: {
         jobScheduler: jobScheduler.scheduler,
     })
     const summarizeBG = new SummarizeBackground({
-        remoteEventEmitter: createRemoteEventEmitter('pageSummary'),
+        remoteEventEmitter: createRemoteEventEmitter('pageSummary', {
+            broadcastToTabs: true,
+            silenceBroadcastFailures: true,
+        }),
     })
 
     // TODO: Maybe move this somewhere more appropriate (personal-cloud module)
