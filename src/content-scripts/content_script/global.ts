@@ -220,14 +220,8 @@ export async function main(
     const annotationsCache = new PageAnnotationsCache({ normalizedPageUrl })
     window['__annotationsCache'] = annotationsCache
 
-    const pageHasBookMark =
-        (await bookmarks.pageHasBookmark(fullPageUrl)) ?? undefined
-
-    if (pageHasBookMark) {
-        await bookmarks.setBookmarkStatusInBrowserIcon(true, fullPageUrl)
-    } else {
-        await bookmarks.setBookmarkStatusInBrowserIcon(false, fullPageUrl)
-    }
+    const pageHasBookark = await bookmarks.pageHasBookmark(fullPageUrl)
+    await bookmarks.setBookmarkStatusInBrowserIcon(pageHasBookark, fullPageUrl)
 
     const loadCacheDataPromise = hydrateCache({
         fullPageUrl,
@@ -467,6 +461,11 @@ export async function main(
             await inPageUI.removeRibbon()
             await inPageUI.removeTooltip()
             resetKeyboardShortcuts()
+        },
+        handleHistoryStateUpdate: async (tabId) => {
+            await inPageUI.reloadRibbon()
+            highlightRenderer.resetHighlightsStyles()
+            await bookmarks.autoSetBookmarkStatusInBrowserIcon(tabId)
         },
     })
 

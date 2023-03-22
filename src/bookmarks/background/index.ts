@@ -29,9 +29,11 @@ export default class BookmarksBackground {
         this.remoteFunctions = {
             addPageBookmark: this.addPageBookmark,
             delPageBookmark: this.delPageBookmark,
-            pageHasBookmark: this.storage.pageHasBookmark,
             findBookmark: this.storage.findBookmark,
+            pageHasBookmark: this.storage.pageHasBookmark,
             setBookmarkStatusInBrowserIcon: this.setBookmarkStatusInBrowserIcon,
+            autoSetBookmarkStatusInBrowserIcon: this
+                .autoSetBookmarkStatusInBrowserIcon,
         }
     }
     get ROOT_BM() {
@@ -171,29 +173,41 @@ export default class BookmarksBackground {
         })
     }
 
-    setBookmarkStatusInBrowserIcon: BookmarksInterface['setBookmarkStatusInBrowserIcon'] = async (
-        value,
-        pageUrl,
-    ) => {
-        let tabId: number
-        const [activeTab] = await this.options.browserAPIs.tabs.query({
-            active: true,
-        })
-
-        if (activeTab != null && activeTab.url === pageUrl) {
-            tabId = activeTab.id
-        }
-
-        if (value) {
-            await browser.browserAction.setBadgeText({
-                text: '❤️',
-                tabId: activeTab.id,
-            })
+    private async setBookmarkStatus(isSet: boolean, tabId: number) {
+        if (isSet) {
+            await browser.browserAction.setBadgeText({ text: '❤️', tabId })
             await browser.browserAction.setBadgeBackgroundColor({
                 color: 'white',
             })
         } else {
-            await browser.browserAction.setBadgeText({ text: '' })
+            await browser.browserAction.setBadgeText({ text: '', tabId })
         }
+    }
+
+    autoSetBookmarkStatusInBrowserIcon: BookmarksInterface['autoSetBookmarkStatusInBrowserIcon'] = async (
+        tabId,
+    ) => {
+        const tab = await this.options.browserAPIs.tabs.get(tabId)
+        if (tab?.url == null) {
+            return
+        }
+
+        const pageHasBookmark = await this.storage.pageHasBookmark(tab.url)
+        await this.setBookmarkStatus(pageHasBookmark, tabId)
+    }
+
+    setBookmarkStatusInBrowserIcon: BookmarksInterface['setBookmarkStatusInBrowserIcon'] = async (
+        value,
+        pageUrl,
+    ) => {
+        const [activeTab] = await this.options.browserAPIs.tabs.query({
+            active: true,
+        })
+
+        if (activeTab?.url !== pageUrl) {
+            return
+        }
+
+        await this.setBookmarkStatus(value, activeTab.id)
     }
 }
