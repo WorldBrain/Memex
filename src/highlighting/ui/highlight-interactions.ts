@@ -43,7 +43,6 @@ export const extractAnchorFromSelection = async (
     selection: Selection,
     pageUrl: string,
 ): Promise<Anchor> => {
-    const quote2 = selection.toString()
     const quote = getSelectionHtml(selection)
     const descriptor = await anchoring.selectionToDescriptor({ selection })
     return {
@@ -229,8 +228,10 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 ] as HTMLElement
 
                 if (
-                    lastSelectionItem &&
-                    lastSelectionItem.classList.contains('ytp-popup')
+                    (lastSelectionItem &&
+                        lastSelectionItem.classList.contains('ytp-popup')) ||
+                    (selection.toString().length === 0 &&
+                        fullPageUrl.includes('youtube.com/watch'))
                 ) {
                     anchor = undefined
                 } else {

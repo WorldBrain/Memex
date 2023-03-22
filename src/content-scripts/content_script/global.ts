@@ -69,6 +69,7 @@ import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import { SummarizationInterface } from 'src/summarization-llm/background'
 import { upgradePlan } from 'src/util/subscriptions/storage'
+import { sleepPromise } from 'src/util/promises'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -220,14 +221,8 @@ export async function main(
     const annotationsCache = new PageAnnotationsCache({ normalizedPageUrl })
     window['__annotationsCache'] = annotationsCache
 
-    const pageHasBookMark =
-        (await bookmarks.pageHasBookmark(fullPageUrl)) ?? undefined
-
-    if (pageHasBookMark) {
-        await bookmarks.setBookmarkStatusInBrowserIcon(true, fullPageUrl)
-    } else {
-        await bookmarks.setBookmarkStatusInBrowserIcon(false, fullPageUrl)
-    }
+    const pageHasBookark = await bookmarks.pageHasBookmark(fullPageUrl)
+    await bookmarks.setBookmarkStatusInBrowserIcon(pageHasBookark, fullPageUrl)
 
     const loadCacheDataPromise = hydrateCache({
         fullPageUrl,
@@ -427,6 +422,7 @@ export async function main(
     // 5. Registers remote functions that can be used to interact with components
     // in this tab.
     // TODO:(remote-functions) Move these to the inPageUI class too
+
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         ping: async () => true,
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
@@ -467,6 +463,17 @@ export async function main(
             await inPageUI.removeRibbon()
             await inPageUI.removeTooltip()
             resetKeyboardShortcuts()
+        },
+        handleHistoryStateUpdate: async (tabId) => {
+            await inPageUI.reloadRibbon()
+            highlightRenderer.resetHighlightsStyles()
+            await bookmarks.autoSetBookmarkStatusInBrowserIcon(tabId)
+            await sleepPromise(1000)
+            await pageInfo.refreshIfNeeded()
+            const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
+            if (isPageBlacklisted) {
+                await inPageUI.removeRibbon()
+            }
         },
     })
 
@@ -582,6 +589,7 @@ class PageInfo {
         if (window.location.href === this._href) {
             return
         }
+        await sleepPromise(1000)
         this.isPdf = isUrlPDFViewerUrl(window.location.href, {
             runtimeAPI: runtime,
         })
@@ -602,6 +610,7 @@ class PageInfo {
             console.error(`Invalid content identifier`, this._identifier)
             throw new Error(`Got invalid content identifier`)
         }
+
         this._href = window.location.href
     }
 
