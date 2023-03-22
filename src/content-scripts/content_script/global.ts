@@ -69,6 +69,7 @@ import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import { SummarizationInterface } from 'src/summarization-llm/background'
 import { upgradePlan } from 'src/util/subscriptions/storage'
+import { sleepPromise } from 'src/util/promises'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -601,10 +602,17 @@ class PageInfo {
             console.error(`Invalid content identifier`, this._identifier)
             throw new Error(`Got invalid content identifier`)
         }
+
         this._href = window.location.href
+        console.log('pageTitle', this.getPageTitle(), window.location.href)
     }
 
     getFullPageUrl = async () => {
+        await sleepPromise(1000)
+        // if (window.location.href.startsWith('https://www.youtube.com/watch')) {
+        //     await sleepPromise(1000)
+        //     console.log('aftersleep')
+        // }
         await this.refreshIfNeeded()
         return this._identifier.fullUrl
     }
