@@ -422,6 +422,7 @@ export async function main(
     // 5. Registers remote functions that can be used to interact with components
     // in this tab.
     // TODO:(remote-functions) Move these to the inPageUI class too
+
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         ping: async () => true,
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
@@ -467,6 +468,12 @@ export async function main(
             await inPageUI.reloadRibbon()
             highlightRenderer.resetHighlightsStyles()
             await bookmarks.autoSetBookmarkStatusInBrowserIcon(tabId)
+            await sleepPromise(1000)
+            await pageInfo.refreshIfNeeded()
+            const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
+            if (isPageBlacklisted) {
+                await inPageUI.removeRibbon()
+            }
         },
     })
 
@@ -582,6 +589,7 @@ class PageInfo {
         if (window.location.href === this._href) {
             return
         }
+        await sleepPromise(1000)
         this.isPdf = isUrlPDFViewerUrl(window.location.href, {
             runtimeAPI: runtime,
         })
@@ -604,15 +612,9 @@ class PageInfo {
         }
 
         this._href = window.location.href
-        console.log('pageTitle', this.getPageTitle(), window.location.href)
     }
 
     getFullPageUrl = async () => {
-        await sleepPromise(1000)
-        // if (window.location.href.startsWith('https://www.youtube.com/watch')) {
-        //     await sleepPromise(1000)
-        //     console.log('aftersleep')
-        // }
         await this.refreshIfNeeded()
         return this._identifier.fullUrl
     }
