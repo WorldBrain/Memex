@@ -43,7 +43,7 @@ export default class SummarizeBackground {
         for await (const result of this.summarizationService.summarizeUrl(
             fullPageUrl,
         )) {
-            const token = result?.choices?.[0].delta?.content
+            const token = result?.t
             if (token?.length > 0) {
                 this.options.remoteEventEmitter.emitToTab(
                     'newSummaryToken',
