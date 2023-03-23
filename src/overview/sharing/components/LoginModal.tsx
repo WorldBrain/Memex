@@ -53,6 +53,8 @@ export default class LoginModal extends React.PureComponent<Props> {
                         <PrimaryAction
                             onClick={this.handleGoToClick}
                             label={'Next'}
+                            type="primary"
+                            size="medium"
                         />
                     </>
                 ) : (

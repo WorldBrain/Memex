@@ -11,6 +11,7 @@ export interface BookmarksInterface {
     delPageBookmark(args: { url: string }): Promise<any>
     pageHasBookmark(url: string): Promise<boolean>
     findBookmark(url: string): Promise<Bookmark | null>
+    autoSetBookmarkStatusInBrowserIcon(tabId: number): Promise<void>
     setBookmarkStatusInBrowserIcon(
         value: boolean,
         pageUrl: string,

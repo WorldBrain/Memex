@@ -32,6 +32,7 @@ export interface InPageUIContentScriptRemoteInterface
     removeHighlights(): Promise<void>
 
     teardownContentScripts(): Promise<void>
+    handleHistoryStateUpdate(tabId: number): Promise<void>
 
     /**
      * Acts as a way for the BG script to check if the content script is

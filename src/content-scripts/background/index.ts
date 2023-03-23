@@ -1,8 +1,7 @@
-import { ContentScriptsInterface } from './types'
+import type { ContentScriptsInterface } from './types'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
-import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { Tabs, WebNavigation, Runtime, Browser } from 'webextension-polyfill'
-import { getSidebarState } from 'src/sidebar-overlay/utils'
+import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import type { Tabs, Browser } from 'webextension-polyfill'
 import delay from 'src/util/delay'
 import { openPDFInViewer } from 'src/pdf/util'
 
@@ -47,7 +46,10 @@ export class ContentScriptsBackground {
         }
 
         this.options.browserAPIs.webNavigation.onHistoryStateUpdated.addListener(
-            this.handleHistoryStateUpdate,
+            ({ tabId }) =>
+                runInTab<InPageUIContentScriptRemoteInterface>(
+                    tabId,
+                ).handleHistoryStateUpdate(tabId),
         )
     }
 
@@ -184,19 +186,5 @@ export class ContentScriptsBackground {
                 return true
             },
         )
-    }
-
-    private handleHistoryStateUpdate = async ({
-        tabId,
-    }: WebNavigation.OnHistoryStateUpdatedDetailsType) => {
-        const isSidebarEnabled = await getSidebarState()
-        if (!isSidebarEnabled) {
-            return
-        }
-
-        const inPage = runInTab<InPageUIContentScriptRemoteInterface>(tabId)
-
-        await inPage.removeHighlights()
-        await inPage.reloadRibbon()
     }
 }

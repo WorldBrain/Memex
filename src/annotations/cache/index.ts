@@ -180,9 +180,14 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         // Ensure each list gets a ref back to this annot
         unifiedListIds.forEach((unifiedListId) => {
-            this.lists.byId[unifiedListId]?.unifiedAnnotationIds.unshift(
-                unifiedAnnotationId,
-            )
+            const cachedList = this.lists.byId[unifiedListId]
+            if (
+                !cachedList ||
+                cachedList.unifiedAnnotationIds.includes(unifiedAnnotationId)
+            ) {
+                return
+            }
+            cachedList.unifiedAnnotationIds.unshift(unifiedAnnotationId)
         })
 
         return {
@@ -244,6 +249,38 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         if (shouldEmitAnnotUpdateEvent) {
             this.events.emit('newAnnotationsState', this.annotations)
+        }
+    }
+
+    private updateCachedListAnnotationRefsForAnnotationUpdate(
+        prev: Pick<UnifiedAnnotation, 'unifiedListIds' | 'unifiedId'>,
+        next: Pick<UnifiedAnnotation, 'unifiedListIds'>,
+    ): void {
+        // For each removed list, ensure annotation link is removed from cached list
+        const removedListIds = prev.unifiedListIds.filter(
+            (listId) => !next.unifiedListIds.includes(listId),
+        )
+        for (const listId of removedListIds) {
+            const cachedList = this.lists.byId[listId]
+            if (cachedList) {
+                cachedList.unifiedAnnotationIds = cachedList.unifiedAnnotationIds.filter(
+                    (annotId) => annotId !== prev.unifiedId,
+                )
+            }
+        }
+
+        // For each added list, ensure annotation link is added to cached list
+        const addedListIds = next.unifiedListIds.filter(
+            (listId) => !prev.unifiedListIds.includes(listId),
+        )
+        for (const listId of addedListIds) {
+            const cachedList = this.lists.byId[listId]
+            if (
+                cachedList &&
+                !cachedList.unifiedAnnotationIds.includes(prev.unifiedId)
+            ) {
+                cachedList.unifiedAnnotationIds.push(prev.unifiedId)
+            }
         }
     }
 
@@ -364,11 +401,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
 
         let shouldUpdateSiblingAnnots = false
-        let unifiedListIds = [...previous.unifiedListIds]
+        let nextUnifiedListIds = [...previous.unifiedListIds]
         let privacyLevel = updates.privacyLevel
 
         if (previous.privacyLevel === updates.privacyLevel) {
-            unifiedListIds = [...updates.unifiedListIds]
+            nextUnifiedListIds = [...updates.unifiedListIds]
 
             // If changing a public annot's lists, those shared list changes should cascade to other sibling shared annots
             if (previous.privacyLevel === AnnotationPrivacyLevels.SHARED) {
@@ -387,7 +424,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 privacyLevel = AnnotationPrivacyLevels.PROTECTED
             } else {
                 // Keep only private lists
-                unifiedListIds = unifiedListIds.filter(
+                nextUnifiedListIds = nextUnifiedListIds.filter(
                     (listId) => !this.lists.byId[listId]?.remoteId,
                 )
             }
@@ -396,21 +433,23 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             updates.privacyLevel >= AnnotationPrivacyLevels.SHARED
         ) {
             // Need to inherit parent page's shared lists if sharing
-            unifiedListIds = Array.from(
-                new Set([...unifiedListIds, ...this.sharedPageListIds]),
+            nextUnifiedListIds = Array.from(
+                new Set([...nextUnifiedListIds, ...this.sharedPageListIds]),
             )
         }
 
         const next: UnifiedAnnotation = {
             ...previous,
             privacyLevel,
-            unifiedListIds,
+            unifiedListIds: nextUnifiedListIds,
             comment: updates.comment,
             remoteId: updates.remoteId ?? previous.remoteId,
             lastEdited: opts?.updateLastEditedTimestamp
                 ? opts?.now ?? Date.now()
                 : previous.lastEdited,
         }
+
+        this.updateCachedListAnnotationRefsForAnnotationUpdate(previous, next)
 
         this.annotations = {
             ...this.annotations,
