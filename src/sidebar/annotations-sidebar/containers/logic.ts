@@ -216,7 +216,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationSharingAccess: 'sharing-allowed',
             readingView: false,
             showAllNotesCopyPaster: false,
-            pageSummary: undefined,
+            pageSummary: '',
             selectedListId: null,
 
             commentBox: { ...INIT_FORM_STATE },

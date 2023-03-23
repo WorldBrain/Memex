@@ -53,9 +53,12 @@ export default class SummarizeBackground {
             // Read the next chunk:
 
             try {
-                let JSONchunk = JSON.parse(value)
-                let partialText = JSONchunk.t
-                if (partialText != null && partialText.length > 0) {
+                const [_, serializedData] = value.split('data: ') // There's a leading 'data: ' string on all the chunks
+                const deserializedData = JSON.parse(serializedData)
+                const partialText =
+                    deserializedData.choices?.[0]?.delta?.content
+
+                if (partialText?.length > 0) {
                     this.options.remoteEventEmitter.emit('newSummaryChunk', {
                         chunk: partialText,
                     })
