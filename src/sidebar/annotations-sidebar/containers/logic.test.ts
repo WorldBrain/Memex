@@ -33,6 +33,7 @@ import type {
     AnnotationSharingState,
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
+import type { SummarizationInterface } from 'src/summarization-llm/background'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -112,7 +113,8 @@ const setupLogicHelper = async ({
         authBG: backgroundModules.auth.remoteFunctions,
         subscription: backgroundModules.auth.subscriptionService,
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
-        summarizeBG: backgroundModules.summarizeBG.remoteFunctions,
+        summarizeBG: (backgroundModules.summarizeBG
+            .remoteFunctions as unknown) as SummarizationInterface<'caller'>,
         customListsBG: backgroundModules.customLists.remoteFunctions,
         contentSharingBG: backgroundModules.contentSharing.remoteFunctions,
         pageActivityIndicatorBG:

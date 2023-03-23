@@ -67,6 +67,10 @@ import { SummarizationService } from '@worldbrain/memex-common/lib/summarization
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { Storage } from 'webextension-polyfill'
 import throttle from 'lodash/throttle'
+import {
+    getRemoteEventEmitter,
+    TypedRemoteEventEmitter,
+} from 'src/util/webextensionRPC'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -123,6 +127,7 @@ export class SidebarContainerLogic extends UILogic<
     resizeObserver
     sidebar
     readingViewState
+    summarisePageEvents: TypedRemoteEventEmitter<'pageSummary'>
 
     constructor(private options: SidebarLogicOptions) {
         super()
@@ -211,7 +216,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationSharingAccess: 'sharing-allowed',
             readingView: false,
             showAllNotesCopyPaster: false,
-            pageSummary: undefined,
+            pageSummary: '',
             selectedListId: null,
 
             commentBox: { ...INIT_FORM_STATE },
@@ -331,6 +336,20 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    private setupRemoteEventListeners() {
+        this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
+
+        this.summarisePageEvents.on('newSummaryToken', ({ token }) => {
+            this.emitMutation({
+                loadState: { $set: 'success' },
+                pageSummary: { $apply: (prev) => prev + token },
+            })
+        })
+        this.summarisePageEvents.on('startSummaryStream', () => {
+            this.emitMutation({ pageSummary: { $set: '' } })
+        })
+    }
+
     init: EventHandler<'init'> = async ({ previousState }) => {
         const {
             shouldHydrateCacheOnInit,
@@ -350,7 +369,7 @@ export class SidebarContainerLogic extends UILogic<
             'newListsState',
             this.cacheListsSubscription,
         )
-
+        this.setupRemoteEventListeners()
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.cacheAnnotationsSubscription(annotationsCache.annotations)
         this.cacheListsSubscription(annotationsCache.lists)
@@ -727,7 +746,8 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
         if (previousState.activeTab === 'summary') {
-            await this.getPageSummary(event.fullPageUrl)
+            console.log('setPageUrl', event.fullPageUrl)
+            await this.getPageSummary(event)
         }
     }
 
@@ -1294,37 +1314,43 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    async getPageSummary(url) {
+    async getPageSummary(data) {
         this.emitMutation({
             loadState: { $set: 'running' },
         })
 
-        const summaryProvider = new SummarizationService()
+        await this.options.summarizeBG.startPageSummaryStream({
+            fullPageUrl: data.fullPageUrl,
+        })
 
-        const response = await this.options.summarizeBG.getPageSummary(url)
+        // const summaryProvider = new SummarizationService()
 
-        if (response.status === 'success') {
-            let summaryText = response.choices[0].text
+        // const response = await this.options.summarizeBG.getPageSummary(url)
 
-            if (summaryText.startsWith(':')) {
-                summaryText = summaryText.slice(2)
-            }
+        // console.log('response', response)
 
-            this.emitMutation({
-                pageSummary: {
-                    $set: summaryText,
-                },
-                loadState: { $set: 'success' },
-            })
-        } else if (response.status === 'prompt-too-long') {
-            this.emitMutation({
-                loadState: { $set: 'error' },
-            })
-        } else {
-            this.emitMutation({
-                loadState: { $set: 'error' },
-            })
-        }
+        // if (response.status === 'success') {
+        //     let summaryText = response.choices[0].text
+
+        //     if (summaryText.startsWith(':')) {
+        //         summaryText = summaryText.slice(2)
+        //     }
+
+        //     this.emitMutation({
+        //         pageSummary: {
+        //             $set: summaryText,
+        //         },
+        //         loadState: { $set: 'success' },
+        //     })
+        // } else if (response.status === 'prompt-too-long') {
+        //     this.emitMutation({
+        //         loadState: { $set: 'error' },
+        //     })
+        // } else {
+        //     this.emitMutation({
+        //         loadState: { $set: 'error' },
+        //     })
+        // }
     }
 
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
@@ -1347,7 +1373,7 @@ export class SidebarContainerLogic extends UILogic<
                 previousState,
             )
         } else if (event.tab === 'summary') {
-            await this.getPageSummary(previousState.fullPageUrl)
+            await this.getPageSummary(previousState)
         }
     }
 
