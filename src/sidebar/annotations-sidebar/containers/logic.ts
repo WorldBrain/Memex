@@ -339,11 +339,14 @@ export class SidebarContainerLogic extends UILogic<
     private setupRemoteEventListeners() {
         this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
 
-        this.summarisePageEvents.on('newSummaryChunk', ({ chunk }) => {
+        this.summarisePageEvents.on('newSummaryToken', ({ token }) => {
             this.emitMutation({
                 loadState: { $set: 'success' },
-                pageSummary: { $apply: (prev) => prev + chunk },
+                pageSummary: { $apply: (prev) => prev + token },
             })
+        })
+        this.summarisePageEvents.on('startSummaryStream', () => {
+            this.emitMutation({ pageSummary: { $set: '' } })
         })
     }
 

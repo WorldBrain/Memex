@@ -3,7 +3,7 @@ import { makeRemotelyCallable } from 'src/util/webextensionRPC'
 import type { RemoteEventEmitter } from '../../util/webextensionRPC'
 
 export interface SummarizationInterface {
-    startPageSummaryStream: (url: string) => Promise<void>
+    startPageSummaryStream: (fullPageUrl: string) => Promise<void>
     getTextSummary: (
         text: string,
         prompt: string,
@@ -19,8 +19,8 @@ export interface summarizePageBackgroundOptions {
 }
 
 export default class SummarizeBackground {
-    // private service: SummarizationService
     remoteFunctions: SummarizationInterface
+    private summarizationService = new SummarizationService()
 
     constructor(public options: summarizePageBackgroundOptions) {
         this.remoteFunctions = {
@@ -34,51 +34,30 @@ export default class SummarizeBackground {
     }
 
     startPageSummaryStream: SummarizationInterface['startPageSummaryStream'] = async (
-        url,
+        fullPageUrl,
     ) => {
-        const newSummary = new SummarizationService()
-        console.log('triggered', url)
-        const readableStream = await newSummary.summarizeUrl(url)
+        this.options.remoteEventEmitter.emit('startSummaryStream')
 
-        const reader = readableStream.getReader()
-
-        const readChunk = async () => {
-            const { done, value } = await reader.read()
-            if (done) {
-                console.log('Finished reading the stream')
-                return
+        for await (const result of this.summarizationService.summarizeUrl(
+            fullPageUrl,
+        )) {
+            const token = result?.choices?.[0].delta?.content
+            if (token?.length > 0) {
+                this.options.remoteEventEmitter.emit('newSummaryToken', {
+                    token: token,
+                })
             }
-            //console.log('Received chunk:', value)
-            // Do something with the chunk...
-            // Read the next chunk:
-
-            try {
-                const [_, serializedData] = value.split('data: ') // There's a leading 'data: ' string on all the chunks
-                const deserializedData = JSON.parse(serializedData)
-                const partialText =
-                    deserializedData.choices?.[0]?.delta?.content
-
-                if (partialText?.length > 0) {
-                    this.options.remoteEventEmitter.emit('newSummaryChunk', {
-                        chunk: partialText,
-                    })
-                }
-            } catch (e) {
-                console.log('fault:', value)
-            }
-
-            await readChunk()
         }
-
-        await readChunk()
     }
 
     getTextSummary: SummarizationInterface['getTextSummary'] = async (
         text,
         prompt,
     ) => {
-        let newSummary = new SummarizationService()
-        let summary = await newSummary.summarizeText(text, prompt)
+        const summary = await this.summarizationService.summarizeText(
+            text,
+            prompt,
+        )
         return summary
     }
 }

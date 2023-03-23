@@ -1,3 +1,4 @@
 export interface PageSummaryBackgroundEvents {
-    newSummaryChunk(event: { chunk: string }): void
+    startSummaryStream(): void
+    newSummaryToken(event: { token: string }): void
 }
