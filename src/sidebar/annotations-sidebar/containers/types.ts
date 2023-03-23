@@ -54,7 +54,7 @@ export interface SidebarContainerDependencies {
     annotationsCache: PageAnnotationsCacheInterface
 
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
-    summarizeBG: SummarizationInterface
+    summarizeBG: SummarizationInterface<'caller'>
     annotationsBG: AnnotationInterface<'caller'>
     customListsBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface

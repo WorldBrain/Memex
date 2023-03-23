@@ -1319,7 +1319,9 @@ export class SidebarContainerLogic extends UILogic<
             loadState: { $set: 'running' },
         })
 
-        await this.options.summarizeBG.startPageSummaryStream(data.fullPageUrl)
+        await this.options.summarizeBG.startPageSummaryStream({
+            fullPageUrl: data.fullPageUrl,
+        })
 
         // const summaryProvider = new SummarizationService()
 

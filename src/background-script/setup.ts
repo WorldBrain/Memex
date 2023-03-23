@@ -430,10 +430,7 @@ export function createBackgroundModules(options: {
         jobScheduler: jobScheduler.scheduler,
     })
     const summarizeBG = new SummarizeBackground({
-        remoteEventEmitter: createRemoteEventEmitter('pageSummary', {
-            broadcastToTabs: true,
-            silenceBroadcastFailures: true,
-        }),
+        remoteEventEmitter: createRemoteEventEmitter('pageSummary'),
     })
 
     // TODO: Maybe move this somewhere more appropriate (personal-cloud module)

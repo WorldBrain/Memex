@@ -16,18 +16,16 @@ import type {
     AnnotationFunctions,
     TooltipPosition,
 } from 'src/in-page-ui/tooltip/types'
-import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import type { Shortcut } from 'src/in-page-ui/keyboard-shortcuts/types'
 import AIInterfaceForTooltip from './aIinterfaceComponent'
-import { SummarizationInterface } from 'src/summarization-llm/background'
+import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { Rnd } from 'react-rnd'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import debounce from 'lodash/debounce'
 
 export interface Props extends AnnotationFunctions {
     inPageUI: TooltipInPageUIInterface
-    summarizeBG: SummarizationInterface
+    summarizeBG: SummarizationInterface<'caller'>
     onInit: any
     destroyTooltip: any
 }
@@ -281,8 +279,10 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                                 .replaceAll('  ', ' ')
                                 .trim()
                             const response = await this.props.summarizeBG.getTextSummary(
-                                textToSummarize,
-                                prompt.prompt,
+                                {
+                                    text: textToSummarize,
+                                    prompt: prompt.prompt,
+                                },
                             )
                             return response
                         }}
