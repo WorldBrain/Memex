@@ -516,6 +516,7 @@ export class SharingTestHelper {
                 updatedWhen: expect.any(Number),
                 title: this.lists[listId].name,
                 description: null,
+                type: null,
             })),
         )
     }

@@ -219,7 +219,9 @@ export async function setupBackgroundIntegrationTest(
                 useDownloadTranslationLayer:
                     options?.useDownloadTranslationLayer ?? true,
                 getDeviceId: async () =>
-                    backgroundModules.personalCloud.deviceId,
+                    backgroundModules.personalCloud.options.settingStore.get(
+                        'deviceId',
+                    ),
                 clientDeviceType: PersonalDeviceType.DesktopBrowser,
             }),
         contentSharingBackend: new ContentSharingBackend({
@@ -316,7 +318,7 @@ export async function runBackgroundIntegrationTest(
     test: BackgroundIntegrationTest,
     options: BackgroundIntegrationTestSetupOpts = {},
 ) {
-    const testOptions = await test.instantiate({ isSyncTest: false })
+    const testOptions = test.instantiate({ isSyncTest: false })
     const setupOptions: BackgroundIntegrationTestSetupOpts = {
         customMiddleware: [],
         ...options,
