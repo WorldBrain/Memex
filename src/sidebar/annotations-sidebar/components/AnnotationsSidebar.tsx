@@ -1204,7 +1204,7 @@ export class AnnotationsSidebar extends React.Component<
         if (this.props.activeTab === 'summary') {
             if (this.props.loadState === 'success') {
                 return (
-                    <>
+                    <AISidebarContainer>
                         {this.props.selectedTextAIPreview && (
                             <SelectedAITextBox>
                                 <SelectedTextBoxBar />
@@ -1214,11 +1214,11 @@ export class AnnotationsSidebar extends React.Component<
                             </SelectedAITextBox>
                         )}
                         {this.showSummary()}
-                    </>
+                    </AISidebarContainer>
                 )
             } else {
                 return (
-                    <>
+                    <AISidebarContainer>
                         {this.props.selectedTextAIPreview && (
                             <SelectedAITextBox>
                                 <SelectedTextBoxBar />
@@ -1228,7 +1228,7 @@ export class AnnotationsSidebar extends React.Component<
                             </SelectedAITextBox>
                         )}
                         {this.renderLoader()}
-                    </>
+                    </AISidebarContainer>
                 )
             }
         }
@@ -1852,6 +1852,14 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const AISidebarContainer = styled.div`
+    display: flex;
+    height: fill-available;
+    overflow: scroll;
+    display: flex;
+    flex-direction: column;
+`
+
 const SelectedAITextBox = styled.div`
     display: flex;
     padding: 25px 25px 0px 20px;
@@ -1949,7 +1957,6 @@ const SummarySection = styled.div`
     width: 100%;
     min-height: 60px;
     justify-content: center;
-    overflow: scroll;
     align-items: start;
     height: fill-available;
     flex: 1;
