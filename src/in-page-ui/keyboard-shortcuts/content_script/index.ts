@@ -87,13 +87,11 @@ function getShortcutHandlers({
         openDashboard: () =>
             runInBackground<InPageUIInterface<'caller'>>().openDashboard(),
         toggleSidebar: () => inPageUI.toggleSidebar(),
-        askAI: () => {
-            console.log('askAIkeyboard')
+        askAI: () =>
             inPageUI.showSidebar({
                 action: 'show_page_summary',
                 highlightedText: window.getSelection().toString(),
-            })
-        },
+            }),
         // window.getSelection().toString().length === 0
         //     ?
         //     : inPageUI.showTooltip('AImode'),

@@ -267,7 +267,6 @@ export async function main(
                 shouldShare,
             }),
         askAI: () => (highlightedText: string) => {
-            console.log('askAI', highlightedText)
             inPageUI.showSidebar({
                 action: 'show_page_summary',
                 highlightedText: highlightedText,
