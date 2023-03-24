@@ -41,6 +41,7 @@ export interface SidebarActionOptions {
     annotationCacheId?: UnifiedAnnotation['unifiedId']
     annotationData?: IncomingAnnotationData
     annotationSharingAccess?: AnnotationSharingAccess
+    highlightedText?: string
 }
 
 export interface SharedInPageUIEvents {

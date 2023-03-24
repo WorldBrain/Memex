@@ -27,6 +27,7 @@ import type { Arguments, default as TypedEventEmitter } from 'typed-emitter'
 import type { AuthRemoteEvents } from 'src/authentication/background/types'
 import type { ContentSharingEvents } from 'src/content-sharing/background/types'
 import type { PersonalCloudBackgroundEvents } from '../personal-cloud/background/types'
+import type { PageSummaryBackgroundEvents } from 'src/summarization-llm/background/types'
 
 export class RpcError extends Error {
     constructor(message: string) {
@@ -274,6 +275,11 @@ export function fakeRemoteFunctions(functions: {
 }
 
 export interface RemoteEventEmitter<T extends keyof RemoteEvents> {
+    emitToTab<EventName extends keyof RemoteEvents[T]>(
+        eventName: EventName,
+        tabId: number,
+        ...args: Arguments<RemoteEvents[T][EventName]>
+    ): Promise<void>
     emit<EventName extends keyof RemoteEvents[T]>(
         eventName: EventName,
         ...args: Arguments<RemoteEvents[T][EventName]>
@@ -286,42 +292,57 @@ const __REMOTE_EVENT_NAME__ = '__REMOTE_EVENT_NAME__'
 // Sending Side, (e.g. background script)
 export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
     moduleName: ModuleName,
-    { broadcastToTabs = false } = {},
+    { broadcastToTabs = false, silenceBroadcastFailures = false } = {},
 ): RemoteEventEmitter<ModuleName> {
     const message = {
         __REMOTE_EVENT__,
         __REMOTE_EVENT_TYPE__: moduleName,
     }
 
-    if (broadcastToTabs) {
-        return {
-            emit: async (eventName, ...args: any[]) => {
-                const tabs = (await browser.tabs.query({})) ?? []
-                for (const { id: tabId } of tabs) {
-                    try {
-                        await browser.tabs.sendMessage(tabId, {
-                            ...message,
-                            __REMOTE_EVENT_NAME__: eventName,
-                            data: args[0],
-                        })
-                    } catch (err) {
-                        console.error(
-                            `Remote event emitter "${moduleName}" failed to emit event "${String(
-                                eventName,
-                            )}" to tab ${tabId}:\n\tError message: "${
-                                err.message
-                            }"`,
-                        )
-                    }
-                }
-            },
-        }
-    }
+    const emit: RemoteEventEmitter<ModuleName>['emit'] = broadcastToTabs
+        ? async (eventName, ...args) => {
+              const tabs = (await browser.tabs.query({})) ?? []
+              for (const { id: tabId } of tabs) {
+                  try {
+                      await browser.tabs.sendMessage(tabId, {
+                          ...message,
+                          __REMOTE_EVENT_NAME__: eventName,
+                          data: args[0],
+                      })
+                  } catch (err) {
+                      if (!silenceBroadcastFailures) {
+                          console.error(
+                              `Remote event emitter "${moduleName}" failed to emit event "${String(
+                                  eventName,
+                              )}" to tab ${tabId}:\n\tError message: "${
+                                  err.message
+                              }"`,
+                          )
+                      }
+                  }
+              }
+          }
+        : async (eventName, ...args) => {
+              try {
+                  await browser.runtime.sendMessage({
+                      ...message,
+                      __REMOTE_EVENT_NAME__: eventName,
+                      data: args[0],
+                  })
+              } catch (err) {
+                  console.error(
+                      `Remote event emitter "${moduleName}" failed to emit event "${String(
+                          eventName,
+                      )}":\n\tError message: "${err.message}"`,
+                  )
+              }
+          }
 
     return {
-        emit: async (eventName, ...args: any[]) => {
+        emit,
+        emitToTab: async (eventName, tabId, ...args) => {
             try {
-                await browser.runtime.sendMessage({
+                await browser.tabs.sendMessage(tabId, {
                     ...message,
                     __REMOTE_EVENT_NAME__: eventName,
                     data: args[0],
@@ -330,7 +351,7 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
                 console.error(
                     `Remote event emitter "${moduleName}" failed to emit event "${String(
                         eventName,
-                    )}":\n\tError message: "${err.message}"`,
+                    )}" to tab ${tabId}:\n\tError message: "${err.message}"`,
                 )
             }
         },
@@ -351,6 +372,7 @@ export interface RemoteEvents {
     auth: AuthRemoteEvents
     contentSharing: ContentSharingEvents
     personalCloud: PersonalCloudBackgroundEvents
+    pageSummary: PageSummaryBackgroundEvents
 }
 
 function registerRemoteEventForwarder() {

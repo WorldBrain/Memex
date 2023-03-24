@@ -248,6 +248,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         } else if (event.action === 'show_page_summary') {
             await this.processEvent('setActiveSidebarTab', {
                 tab: 'summary',
+                textToProcess: event.highlightedText,
             })
         } else if (event.action === 'check_sidebar_status') {
             return true

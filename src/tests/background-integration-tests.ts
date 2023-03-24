@@ -157,7 +157,7 @@ export async function setupBackgroundIntegrationTest(
         jobScheduler,
         authServices,
         runtimeAPI: browserAPIs.runtime,
-        remoteEmitter: { emit: async () => {} },
+        remoteEmitter: { emit: async () => {}, emitToTab: async () => {} },
         localStorageArea: browserLocalStorage,
         backendFunctions: {
             registerBetaUser: async () => {},

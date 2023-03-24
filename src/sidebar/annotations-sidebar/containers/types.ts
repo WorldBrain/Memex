@@ -54,7 +54,7 @@ export interface SidebarContainerDependencies {
     annotationsCache: PageAnnotationsCacheInterface
 
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
-    summarizeBG: SummarizationInterface
+    summarizeBG: SummarizationInterface<'caller'>
     annotationsBG: AnnotationInterface<'caller'>
     customListsBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface
@@ -96,6 +96,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     secondarySearchState: TaskState
     remoteAnnotationsLoadState: TaskState
     foreignSelectedListLoadState: TaskState
+    selectedTextAIPreview: string
 
     showState: 'visible' | 'hidden'
     isLocked: boolean
@@ -189,7 +190,11 @@ interface SidebarEvents {
     adjustSidebarWidth: { newWidth: string; isWidthLocked?: boolean }
     setPopoutsActive: boolean
 
-    setActiveSidebarTab: { tab: SidebarTab }
+    setActiveSidebarTab: {
+        tab: SidebarTab
+        textToProcess?: string
+        url?: string
+    }
     sortAnnotations: { sortingFn: AnnotationsSorter }
     receiveSharingAccessChange: {
         sharingAccess: AnnotationSharingAccess

@@ -67,7 +67,7 @@ import { UNDO_HISTORY } from 'src/constants'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
-import { SummarizationInterface } from 'src/summarization-llm/background'
+import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { upgradePlan } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 
@@ -169,7 +169,7 @@ export async function main(
     // 2. Initialise dependencies required by content scripts
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
-    const summarizeBG = runInBackground<SummarizationInterface>()
+    const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const contentSharingBG = runInBackground<ContentSharingInterface>()
     const tagsBG = runInBackground<RemoteTagsInterface>()
@@ -266,6 +266,12 @@ export async function main(
                 currentUser,
                 shouldShare,
             }),
+        askAI: () => (highlightedText: string) => {
+            inPageUI.showSidebar({
+                action: 'show_page_summary',
+                highlightedText: highlightedText,
+            })
+        },
     }
 
     if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
@@ -401,6 +407,7 @@ export async function main(
                     category: 'Annotations',
                     action: 'createFromTooltip',
                 }),
+                askAI: annotationsFunctions.askAI(),
             })
             components.tooltip?.resolve()
         },
@@ -457,6 +464,7 @@ export async function main(
             category: 'Annotations',
             action: 'createFromContextMenu',
         }),
+        askAI: annotationsFunctions.askAI(),
         teardownContentScripts: async () => {
             await inPageUI.hideHighlights()
             await inPageUI.hideSidebar()
@@ -489,6 +497,7 @@ export async function main(
             category: 'Annotations',
             action: 'createFromShortcut',
         }),
+        askAI: annotationsFunctions.askAI(),
     })
     const loadContentScript = createContentScriptLoader({
         contentScriptsBG,

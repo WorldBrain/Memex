@@ -79,7 +79,7 @@ export interface DashboardDependencies {
     activityIndicatorBG: ActivityIndicatorInterface
     syncSettingsBG: RemoteSyncSettingsInterface
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
-    summarizeBG: SummarizationInterface
+    summarizeBG: SummarizationInterface<'caller'>
     pdfViewerBG: PDFRemoteInterface
     copyToClipboard: (text: string) => Promise<boolean>
     localStorage: Browser['storage']['local']

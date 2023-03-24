@@ -16,18 +16,16 @@ import type {
     AnnotationFunctions,
     TooltipPosition,
 } from 'src/in-page-ui/tooltip/types'
-import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import type { Shortcut } from 'src/in-page-ui/keyboard-shortcuts/types'
 import AIInterfaceForTooltip from './aIinterfaceComponent'
-import { SummarizationInterface } from 'src/summarization-llm/background'
+import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { Rnd } from 'react-rnd'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import debounce from 'lodash/debounce'
 
 export interface Props extends AnnotationFunctions {
     inPageUI: TooltipInPageUIInterface
-    summarizeBG: SummarizationInterface
+    summarizeBG: SummarizationInterface<'caller'>
     onInit: any
     destroyTooltip: any
 }
@@ -73,7 +71,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                 createHighlight: await getShortCut('createHighlight'),
                 createAnnotation: await getShortCut('createAnnotation'),
                 createAnnotationWithSpace: await getShortCut('addToCollection'),
-                openToolTipInAIMode: await getShortCut('openToolTipInAIMode'),
+                askAI: await getShortCut('askAI'),
             },
         })
 
@@ -234,23 +232,14 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         }
     }
     private openAIinterface: React.MouseEventHandler = async (e) => {
-        let newPositionX = 0
-        let newPositionY = 0
-
         this.setState({
-            tooltipState: 'AIinterface',
-            position: { x: newPositionX, y: newPositionY },
+            highlightText: window.getSelection().toString() ?? '',
         })
-        // this.props.inPageUI.hideTooltip()
-        try {
-            // await this.props.createAnnotation(false, true)
-        } catch (err) {
-            throw err
-        } finally {
-            // // this.setState({ tooltipState: 'pristine' })
-            // window.getSelection().empty()
-            // this.props.inPageUI.hideTooltip()
-        }
+        this.props.inPageUI.hideTooltip()
+        await this.props.inPageUI.showSidebar({
+            action: 'show_page_summary',
+            highlightedText: this.state.highlightText,
+        })
     }
 
     renderTooltipComponent = () => {
@@ -280,9 +269,11 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                                 .replaceAll(/[^\w\s.:?!]/g, ' ')
                                 .replaceAll('  ', ' ')
                                 .trim()
-                            const response = await this.props.summarizeBG.getTextSummary(
-                                textToSummarize,
-                                prompt.prompt,
+                            const response = await this.props.summarizeBG.startPageSummaryStream(
+                                {
+                                    textToProcess: textToSummarize,
+                                    queryPrompt: prompt.prompt,
+                                },
                             )
                             return response
                         }}

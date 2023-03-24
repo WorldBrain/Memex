@@ -1,58 +1,77 @@
 import { SummarizationService } from '@worldbrain/memex-common/lib/summarization/index'
-import * as Raven from 'src/util/raven'
+import { makeRemotelyCallable, RemoteFunction } from 'src/util/webextensionRPC'
+import type { RemoteEventEmitter } from '../../util/webextensionRPC'
 
-import type { AuthServices, Services } from 'src/services/types'
-import { makeRemotelyCallable } from 'src/util/webextensionRPC'
-import type { SyncSettingsStore } from 'src/sync-settings/util'
-
-export interface SummarizationInterface {
-    getPageSummary: (
-        url,
-    ) => Promise<
-        | { status: 'success'; choices: { text: string }[] }
-        | { status: 'prompt-too-long' }
-        | { status: 'unknown-error' }
+export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
+    startPageSummaryStream: RemoteFunction<
+        Role,
+        { fullPageUrl?: string; textToProcess?: string; queryPrompt?: string }
     >
-    getTextSummary: (
-        text,
-        prompt,
-    ) => Promise<
+    getTextSummary: RemoteFunction<
+        Role,
+        {
+            text: string
+            prompt: string
+        },
         | { status: 'success'; choices: { text: string }[] }
         | { status: 'prompt-too-long' }
         | { status: 'unknown-error' }
     >
 }
 
-export default class SummarizeBackground {
-    // private service: SummarizationService
-    remoteFunctions: SummarizationInterface
+export interface summarizePageBackgroundOptions {
+    remoteEventEmitter: RemoteEventEmitter<'pageSummary'>
+}
 
-    constructor() {
-        // }, //     syncSettings: SyncSettingsStore<'activityIndicator'> //     servicesPromise: Promise<Pick<Services, 'activityStreams'>> //     authServices: Pick<AuthServices, 'auth'> // private options: {
-        // options.servicesPromise.then((services) => {
-        //     this.service = new SummarizationService()
-        // })
+export default class SummarizeBackground {
+    remoteFunctions: SummarizationInterface<'provider'>
+    private summarizationService = new SummarizationService()
+
+    constructor(public options: summarizePageBackgroundOptions) {
         this.remoteFunctions = {
-            getPageSummary: (url) => this.getPageSummary(url),
-            getTextSummary: (text, prompt) => this.getTextSummary(text, prompt),
+            startPageSummaryStream: this.startPageSummaryStream,
+            getTextSummary: this.getTextSummary,
         }
     }
 
     setupRemoteFunctions() {
-        makeRemotelyCallable(this.remoteFunctions)
+        makeRemotelyCallable(this.remoteFunctions, { insertExtraArg: true })
     }
 
-    getPageSummary: SummarizationInterface['getPageSummary'] = async (url) => {
-        let newSummary = new SummarizationService()
-        let summary = await newSummary.summarizeUrl(url)
-        return summary
-    }
-    getTextSummary: SummarizationInterface['getTextSummary'] = async (
-        text,
-        prompt,
+    startPageSummaryStream: SummarizationInterface<
+        'provider'
+    >['startPageSummaryStream'] = async (
+        { tab },
+        { fullPageUrl, textToProcess, queryPrompt },
     ) => {
-        let newSummary = new SummarizationService()
-        let summary = await newSummary.summarizeText(text, prompt)
+        console.log('textToprocess', textToProcess)
+        this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
+
+        for await (const result of this.summarizationService.queryAI(
+            fullPageUrl,
+            textToProcess,
+            queryPrompt,
+        )) {
+            const token = result?.t
+            if (token?.length > 0) {
+                this.options.remoteEventEmitter.emitToTab(
+                    'newSummaryToken',
+                    tab.id,
+                    {
+                        token: token,
+                    },
+                )
+            }
+        }
+    }
+
+    getTextSummary: SummarizationInterface<
+        'provider'
+    >['getTextSummary'] = async ({ tab }, { text, prompt }) => {
+        const summary = await this.summarizationService.summarizeText(
+            text,
+            prompt,
+        )
         return summary
     }
 }
