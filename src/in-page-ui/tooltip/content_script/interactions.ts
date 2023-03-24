@@ -71,6 +71,7 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
         summarizeBG: params.summarizeBG,
         createAnnotation: params.createAnnotation,
         createHighlight: params.createHighlight,
+        askAI: params.askAI,
         destroyTooltip: async () => {
             analytics.trackEvent({
                 category: 'InPageTooltip',

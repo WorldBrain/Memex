@@ -53,7 +53,7 @@ export interface SyncSettingsByFeature {
             addToCollectionShortcutEnabled: boolean
             toggleHighlightsShortcutEnabled: boolean
             createAnnotationShortcutEnabled: boolean
-            openToolTipInAIModeShortcutEnabled: boolean
+            askAIShortcutEnabled: boolean
             addCommentShortcut: string
             openDashboardShortcut: string
             toggleSidebarShortcut: string
@@ -62,7 +62,7 @@ export interface SyncSettingsByFeature {
             addToCollectionShortcut: string
             toggleHighlightsShortcut: string
             createAnnotationShortcut: string
-            openToolTipInAIModeShortcut: string
+            askAIShortcut: string
         }
     }
     readwise: {

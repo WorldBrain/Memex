@@ -480,9 +480,9 @@ export class AnnotationsSidebar extends React.Component<
                         listData.remoteId != null
                     ownAnnotationProps.lastEdited = annotation.lastEdited
                     ownAnnotationProps.isEditing =
-                        annotationCard.isCommentEditing
+                        annotationCard?.isCommentEditing ?? undefined
                     ownAnnotationProps.isDeleting =
-                        annotationCard.cardMode === 'delete-confirm'
+                        annotationCard?.cardMode === 'delete-confirm'
                     const editDeps = this.props.bindAnnotationEditProps(
                         annotation,
                         unifiedListId,
@@ -503,7 +503,7 @@ export class AnnotationsSidebar extends React.Component<
                         unifiedListId,
                     )
                     ownAnnotationProps.initShowSpacePicker =
-                        annotationCard.cardMode === 'space-picker'
+                        annotationCard?.cardMode === 'space-picker'
                             ? 'footer'
                             : 'hide'
                 }
@@ -1203,9 +1203,33 @@ export class AnnotationsSidebar extends React.Component<
 
         if (this.props.activeTab === 'summary') {
             if (this.props.loadState === 'success') {
-                return this.showSummary()
+                return (
+                    <>
+                        {this.props.selectedTextAIPreview && (
+                            <SelectedAITextBox>
+                                <SelectedTextBoxBar />
+                                <SelectedAIText>
+                                    {this.props.selectedTextAIPreview}
+                                </SelectedAIText>
+                            </SelectedAITextBox>
+                        )}
+                        {this.showSummary()}
+                    </>
+                )
             } else {
-                return this.renderLoader()
+                return (
+                    <>
+                        {this.props.selectedTextAIPreview && (
+                            <SelectedAITextBox>
+                                <SelectedTextBoxBar />
+                                <SelectedAIText>
+                                    {this.props.selectedTextAIPreview}
+                                </SelectedAIText>
+                            </SelectedAITextBox>
+                        )}
+                        {this.renderLoader()}
+                    </>
+                )
             }
         }
 
@@ -1462,7 +1486,7 @@ export class AnnotationsSidebar extends React.Component<
                 />
                 <PrimaryAction
                     onClick={this.props.setActiveTab('summary')}
-                    label={'Summary'}
+                    label={'Ask'}
                     active={this.props.activeTab === 'summary'}
                     type={'tertiary'}
                     size={'medium'}
@@ -1827,6 +1851,27 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 }
+
+const SelectedAITextBox = styled.div`
+    display: flex;
+    padding: 25px 25px 0px 20px;
+    grid-gap: 10px;
+    align-items: center;
+    justify-content: flex-start;
+`
+
+const SelectedTextBoxBar = styled.div`
+    width: 4px;
+    border-radius: 5px;
+    background-color: ${(props) => props.theme.colors.prime1};
+    height: 100%;
+`
+
+const SelectedAIText = styled.div`
+    color: ${(props) => props.theme.colors.white};
+    flex: 1;
+`
+
 const RightSideButtons = styled.div`
     display: flex;
     align-items: center;
