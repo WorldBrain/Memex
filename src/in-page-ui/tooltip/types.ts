@@ -24,7 +24,8 @@ export interface AnnotationFunctions {
         shouldShare: boolean,
         showSpacePicker?: boolean,
     ): Promise<void>
+    askAI: (textToProcess) => void
 }
 export interface ToolTipFunctions {
-    openToolTipInAIMode: () => void
+    askAI: () => void
 }

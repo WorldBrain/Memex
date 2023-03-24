@@ -266,6 +266,12 @@ export async function main(
                 currentUser,
                 shouldShare,
             }),
+        askAI: () => (highlightedText: string) => {
+            inPageUI.showSidebar({
+                action: 'show_page_summary',
+                highlightedText: highlightedText,
+            })
+        },
     }
 
     if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
@@ -401,6 +407,7 @@ export async function main(
                     category: 'Annotations',
                     action: 'createFromTooltip',
                 }),
+                askAI: annotationsFunctions.askAI(),
             })
             components.tooltip?.resolve()
         },
@@ -457,6 +464,7 @@ export async function main(
             category: 'Annotations',
             action: 'createFromContextMenu',
         }),
+        askAI: annotationsFunctions.askAI(),
         teardownContentScripts: async () => {
             await inPageUI.hideHighlights()
             await inPageUI.hideSidebar()
@@ -489,6 +497,7 @@ export async function main(
             category: 'Annotations',
             action: 'createFromShortcut',
         }),
+        askAI: annotationsFunctions.askAI(),
     })
     const loadContentScript = createContentScriptLoader({
         contentScriptsBG,
