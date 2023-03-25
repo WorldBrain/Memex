@@ -236,6 +236,7 @@ export class SidebarContainerLogic extends UILogic<
             showFiltersSidebar: false,
             showSocialSearch: false,
             shouldShowTagsUIs: false,
+            prompt: undefined,
 
             pageCount: 0,
             noResults: false,
@@ -753,8 +754,10 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
         if (previousState.activeTab === 'summary') {
-            console.log('setPageUrl', event.fullPageUrl)
-            await this.queryAI(event, '')
+            this.emitMutation({
+                prompt: { $set: undefined },
+            })
+            await this.queryAI(event, undefined)
         }
     }
 
@@ -1321,23 +1324,38 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    async queryAI(data, highlightedText) {
+    async queryAI(data, highlightedText, prompt?) {
+        let queryPrompt = prompt ? prompt : undefined
         this.emitMutation({
             selectedTextAIPreview: {
                 $set: highlightedText ? highlightedText : '',
             },
             loadState: { $set: 'running' },
+            prompt: { $set: queryPrompt },
         })
 
         await this.options.summarizeBG.startPageSummaryStream({
             fullPageUrl:
                 data && data.fullPageUrl ? data.fullPageUrl : undefined,
             textToProcess: highlightedText ?? undefined,
-            queryPrompt:
-                data && data.queryPrompt ? data.queryPrompt : undefined,
+            queryPrompt: queryPrompt,
         })
     }
 
+    queryAIwithPrompt: EventHandler<'queryAIwithPrompt'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            prompt: { $set: event.prompt },
+        })
+
+        this.queryAI(
+            previousState,
+            previousState.selectedTextAIPreview ?? '',
+            event.prompt,
+        )
+    }
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
         previousState,
@@ -1359,9 +1377,15 @@ export class SidebarContainerLogic extends UILogic<
             )
         } else if (event.tab === 'summary') {
             if (event.textToProcess) {
-                await this.queryAI(undefined, event.textToProcess)
+                this.emitMutation({
+                    prompt: { $set: '' },
+                })
+                await this.queryAI(undefined, event.textToProcess, undefined)
             } else {
-                await this.queryAI(previousState, undefined)
+                this.emitMutation({
+                    prompt: { $set: '' },
+                })
+                await this.queryAI(previousState, undefined, undefined)
             }
         }
     }

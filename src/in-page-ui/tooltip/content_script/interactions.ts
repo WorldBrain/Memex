@@ -214,7 +214,6 @@ export const conditionallyTriggerTooltip = delayed(
             category: 'InPageTooltip',
             action: 'showTooltip',
         })
-        console.log('position', position)
         callback(position)
 
         conditionallyShowHighlightNotification({
@@ -232,7 +231,6 @@ export function calculateTooltipPostion(): TooltipPosition {
     const x = boundingRect.left + boundingRect.width / 2
     // y = scroll height from top + pixels from top + height of element - offset
     const y = window.pageYOffset + boundingRect.top + boundingRect.height
-    console.log(x, y)
     return {
         x,
         y,

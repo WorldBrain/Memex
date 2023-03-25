@@ -800,6 +800,11 @@ export class AnnotationsSidebarContainer<
                             copyPageLink={(link) => {
                                 this.processEvent('copyNoteLink', { link })
                             }}
+                            queryAIwithPrompt={(prompt) => {
+                                this.processEvent('queryAIwithPrompt', {
+                                    prompt,
+                                })
+                            }}
                             postBulkShareHook={(shareInfo) =>
                                 this.processEvent(
                                     'updateAllAnnotationsShareInfo',

@@ -121,6 +121,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     lists: PageAnnotationsCacheInterface['lists']
     annotations: PageAnnotationsCacheInterface['annotations']
     pageSummary: string
+    prompt: string
 
     users: {
         [userId: string]: {
@@ -194,6 +195,9 @@ interface SidebarEvents {
         tab: SidebarTab
         textToProcess?: string
         url?: string
+    }
+    queryAIwithPrompt: {
+        prompt: string
     }
     sortAnnotations: { sortingFn: AnnotationsSorter }
     receiveSharingAccessChange: {
