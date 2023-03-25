@@ -51,6 +51,29 @@ export class ContentScriptsBackground {
                     tabId,
                 ).handleHistoryStateUpdate(tabId),
         )
+
+        this.options.browserAPIs.runtime.onMessage.addListener(
+            async (message) => {
+                if (message.reloadTab) {
+                    // Get the currently active tab
+                    const tabs = await this.options.browserAPIs.tabs.query({
+                        active: true,
+                        currentWindow: true,
+                    })
+
+                    // Check if the tab matches the domain
+                    if (
+                        tabs.length > 0 &&
+                        tabs[0].url.includes('https://memex.garden')
+                    ) {
+                        // Reload the tab with bypassCache option set to true
+                        await this.options.browserAPIs.tabs.reload(tabs[0].id, {
+                            bypassCache: true,
+                        })
+                    }
+                }
+            },
+        )
     }
 
     setupRemoteFunctions() {
