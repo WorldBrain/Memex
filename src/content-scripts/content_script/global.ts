@@ -70,6 +70,7 @@ import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { upgradePlan } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
+import { browser } from 'webextension-polyfill-ts'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -308,7 +309,8 @@ export async function main(
         fullPageUrl === 'https://memex.garden/upgradeStaging' ||
         fullPageUrl === 'https://memex.garden/upgrade' ||
         fullPageUrl === 'https://memex.garden/' ||
-        fullPageUrl === 'https://memex.garden/copilot'
+        fullPageUrl === 'https://memex.garden/copilot' ||
+        fullPageUrl === 'https://memex.garden/hivemind'
     ) {
         setInterval(() => {
             const elements = document.querySelectorAll('#UpgradeButton')
@@ -323,6 +325,15 @@ export async function main(
                 }
             }
         }, 200)
+    }
+
+    if (
+        fullPageUrl.includes('memex.garden') &&
+        document.body.innerText.includes(
+            'Icons by Smashicons from Flaticons.com',
+        )
+    ) {
+        browser.runtime.sendMessage({ reloadTab: true })
     }
 
     // 4. Create a contentScriptRegistry object with functions for each content script

@@ -44,7 +44,6 @@ export default class SummarizeBackground {
         { tab },
         { fullPageUrl, textToProcess, queryPrompt },
     ) => {
-        console.log('textToprocess', textToProcess)
         this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
 
         for await (const result of this.summarizationService.queryAI(

@@ -136,7 +136,6 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         // y = scroll height from top + pixels from top + height of element - offset
         const y =
             window.pageYOffset + boundingRect.top + boundingRect.height - 20
-        console.log(x, y)
         return {
             x,
             y,
@@ -152,7 +151,6 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             setTimeout(() => {
                 let position = this.calculateTooltipPostion()
 
-                console.log('positionshow', position)
                 this.setState({
                     showTooltip: true,
                     position,
