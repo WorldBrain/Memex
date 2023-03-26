@@ -38,6 +38,8 @@ export default class Logic extends UILogic<State, Event> {
         passwordConfirm: '',
         currentUser: null,
         passwordResetSent: false,
+        AILimit: '',
+        pageLimit: '',
         subscriptionStatus: null,
         subscriptionStatusLoading: 'running',
     })
@@ -107,36 +109,44 @@ export default class Logic extends UILogic<State, Event> {
 
         if (subscriptionStatusInfo.status === 'no-subscription') {
             this.emitMutation({
-                subscriptionStatus: {
-                    $set: subscriptionStatusInfo.planLimit.toString(),
-                },
+                subscriptionStatus: { $set: 'no-subscription' },
                 subscriptionStatusLoading: {
                     $set: 'success',
+                },
+                pageLimit: {
+                    $set:
+                        subscriptionStatusInfo.pageLimit > 10000
+                            ? 'Unlimited'
+                            : subscriptionStatusInfo.pageLimit.toString(),
+                },
+                AILimit: {
+                    $set:
+                        subscriptionStatusInfo.AILimit > 10000
+                            ? 'Unlimited'
+                            : subscriptionStatusInfo.AILimit.toString(),
                 },
             })
         } else if (
             subscriptionStatusInfo.status === 'active' ||
             subscriptionStatusInfo.status === 'already-setup'
         ) {
-            if (subscriptionStatusInfo.planLimit > 10000) {
-                this.emitMutation({
-                    subscriptionStatus: {
-                        $set: 'Unlimited',
-                    },
-                    subscriptionStatusLoading: {
-                        $set: 'success',
-                    },
-                })
-            } else {
-                this.emitMutation({
-                    subscriptionStatus: {
-                        $set: subscriptionStatusInfo.planLimit.toString(),
-                    },
-                    subscriptionStatusLoading: {
-                        $set: 'success',
-                    },
-                })
-            }
+            this.emitMutation({
+                pageLimit: {
+                    $set:
+                        subscriptionStatusInfo.pageLimit > 10000
+                            ? 'Unlimited'
+                            : subscriptionStatusInfo.pageLimit.toString(),
+                },
+                AILimit: {
+                    $set:
+                        subscriptionStatusInfo.AILimit > 10000
+                            ? 'Unlimited'
+                            : subscriptionStatusInfo.AILimit.toString(),
+                },
+                subscriptionStatusLoading: {
+                    $set: 'success',
+                },
+            })
         }
     }
 }

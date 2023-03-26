@@ -10,4 +10,5 @@ export interface SyncSettingsStoreInterface {
     pdfIntegration: SettingStore<SyncSettingsByFeature['pdfIntegration']>
     searchInjection: SettingStore<SyncSettingsByFeature['searchInjection']>
     activityIndicator: SettingStore<SyncSettingsByFeature['activityIndicator']>
+    openAI: SettingStore<SyncSettingsByFeature['openAI']>
 }

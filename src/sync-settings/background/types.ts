@@ -68,6 +68,9 @@ export interface SyncSettingsByFeature {
     readwise: {
         apiKey: string
     }
+    openAI: {
+        apiKey: string
+    }
     inPageUI: {
         ribbonEnabled: boolean
         tooltipEnabled: boolean

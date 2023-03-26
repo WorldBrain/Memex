@@ -37,7 +37,7 @@ import {
     HIGHLIGHT_COLOR_KEY,
 } from 'src/highlighting/constants'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { BlockCounterIndicator } from 'src/util/subscriptions/counterIndicator'
+import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator'
 
 export interface Props extends RibbonSubcomponentProps {
     getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>

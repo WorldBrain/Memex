@@ -805,6 +805,11 @@ export class AnnotationsSidebarContainer<
                                     prompt,
                                 })
                             }}
+                            updatePromptState={(prompt) => {
+                                this.processEvent('updatePromptState', {
+                                    prompt,
+                                })
+                            }}
                             postBulkShareHook={(shareInfo) =>
                                 this.processEvent(
                                     'updateAllAnnotationsShareInfo',

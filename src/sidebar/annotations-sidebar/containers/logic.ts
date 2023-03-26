@@ -71,6 +71,10 @@ import {
     getRemoteEventEmitter,
     TypedRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
+import {
+    AIActionAllowed,
+    updateAICounter,
+} from 'src/util/subscriptions/storage'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -237,6 +241,7 @@ export class SidebarContainerLogic extends UILogic<
             showSocialSearch: false,
             shouldShowTagsUIs: false,
             prompt: undefined,
+            showUpgradeModal: false,
 
             pageCount: 0,
             noResults: false,
@@ -1325,6 +1330,14 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     async queryAI(data, highlightedText, prompt?) {
+        const isUnderLimit = await AIActionAllowed()
+
+        if (!isUnderLimit) {
+            this.emitMutation({
+                showUpgradeModal: { $set: true },
+            })
+            return
+        }
         let queryPrompt = prompt ? prompt : undefined
         this.emitMutation({
             selectedTextAIPreview: {
@@ -1340,6 +1353,7 @@ export class SidebarContainerLogic extends UILogic<
             textToProcess: highlightedText ?? undefined,
             queryPrompt: queryPrompt,
         })
+        await updateAICounter()
     }
 
     queryAIwithPrompt: EventHandler<'queryAIwithPrompt'> = async ({
@@ -1355,6 +1369,14 @@ export class SidebarContainerLogic extends UILogic<
             previousState.selectedTextAIPreview ?? '',
             event.prompt,
         )
+    }
+    updatePromptState: EventHandler<'updatePromptState'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            prompt: { $set: event.prompt },
+        })
     }
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
