@@ -295,19 +295,19 @@ export async function main(
         })
 
         const isSubscribed = await response.json()
+        const pageLimit = isSubscribed.planLimit
+        const AIlimit = isSubscribed.aiQueries
 
         if (
             isSubscribed.status === 'active' ||
             isSubscribed.status === 'already-setup'
         ) {
-            if (isSubscribed.planLimit) {
-                await upgradePlan(isSubscribed.planLimit)
-            }
+            await upgradePlan(pageLimit, AIlimit)
         }
     }
     if (
         fullPageUrl === 'https://memex.garden/upgradeStaging' ||
-        fullPageUrl === 'https://memex.garden/upgrade' ||
+        fullPageUrl === 'https://memex.garden/upgradeNotification' ||
         fullPageUrl === 'https://memex.garden/' ||
         fullPageUrl === 'https://memex.garden/copilot' ||
         fullPageUrl === 'https://memex.garden/hivemind'

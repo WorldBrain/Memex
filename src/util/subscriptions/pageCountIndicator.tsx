@@ -38,7 +38,7 @@ export class BlockCounterIndicator extends React.Component {
 
     private whichCheckOutURL = () => {
         if (process.env.NODE_ENV === 'production') {
-            return 'https://memex.garden/upgrade'
+            return 'https://memex.garden/upgradeNotification'
         } else {
             return 'https://memex.garden/upgradeStaging'
         }

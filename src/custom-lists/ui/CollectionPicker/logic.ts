@@ -7,7 +7,7 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import { actionAllowed } from 'src/util/subscriptions/storage'
+import { pageActionAllowed } from 'src/util/subscriptions/storage'
 
 export interface SpaceDisplayEntry {
     localId: number
@@ -591,7 +591,7 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry },
         previousState,
     }) => {
-        const allowed = await actionAllowed()
+        const allowed = await pageActionAllowed()
 
         if (allowed) {
             const { unselectEntry, selectEntry } = this.dependencies
@@ -689,7 +689,7 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry },
         previousState,
     }) => {
-        const allowed = await actionAllowed()
+        const allowed = await pageActionAllowed()
 
         if (allowed) {
             this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
@@ -741,7 +741,7 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry },
         previousState,
     }) => {
-        const allowed = await actionAllowed()
+        const allowed = await pageActionAllowed()
 
         if (allowed) {
             // NOTE: This is here as the enter press event from the context menu to confirm a space rename
@@ -760,7 +760,7 @@ export default class SpacePickerLogic extends UILogic<
     newEntryAllPress: EventHandler<'newEntryAllPress'> = async ({
         event: { entry },
     }) => {
-        const allowed = await actionAllowed()
+        const allowed = await pageActionAllowed()
 
         if (allowed) {
             const newId = await this.createAndDisplayNewList(entry)

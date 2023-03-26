@@ -29,6 +29,8 @@ export interface State {
     passwordMatch: boolean
     currentUser: AuthenticatedUser
     passwordResetSent: boolean
+    pageLimit: string
+    AILimit: string
     subscriptionStatus: string
     subscriptionStatusLoading: UITaskState
 }

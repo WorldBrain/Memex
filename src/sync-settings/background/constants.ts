@@ -13,6 +13,7 @@ export const FEATURE_PREFIX = {
     DASHBOARD: '@Dashboard-',
     EXTENSION: '@Extension-',
     READWISE: 'readwise.',
+    OPENAI: 'openAI.',
 }
 
 export const SETTING_NAMES: SyncSettingNames = {
@@ -53,6 +54,9 @@ export const SETTING_NAMES: SyncSettingNames = {
             FEATURE_PREFIX.SEARCH_INJECTION + 'searchEnginesEnabled',
     },
     readwise: {
+        apiKey: FEATURE_PREFIX.READWISE + 'apiKey',
+    },
+    openAI: {
         apiKey: FEATURE_PREFIX.READWISE + 'apiKey',
     },
 }

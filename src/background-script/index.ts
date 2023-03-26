@@ -33,6 +33,7 @@ import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/conten
 import { isExtensionTab, isBrowserPageTab } from 'src/tab-management/utils'
 import { captureException } from 'src/util/raven'
 import { browser } from 'webextension-polyfill-ts'
+import { checkStripePlan } from 'src/util/subscriptions/storage'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -56,6 +57,7 @@ interface Dependencies {
         | 'readwise'
         | 'syncSettings'
         | 'summarizeBG'
+        | 'auth'
     >
 }
 
@@ -173,10 +175,21 @@ class BackgroundScript {
                     await this.runQuickAndDirtyMigrations()
                     await setLocalStorage(READ_STORAGE_FLAG, false)
                     await this.handleUnifiedLogic()
+                    await this.checkForSubscriptionStatus()
                     break
                 default:
             }
         })
+    }
+
+    private async checkForSubscriptionStatus() {
+        await this.deps.bgModules.auth.authService
+            .waitForAuthReady()
+            .then(async () => {
+                let currentUser = await this.deps.bgModules.auth.authService.getCurrentUser()
+                let emailAddresse = currentUser.email
+                checkStripePlan(emailAddresse)
+            })
     }
 
     private async ___runTagsMigration() {

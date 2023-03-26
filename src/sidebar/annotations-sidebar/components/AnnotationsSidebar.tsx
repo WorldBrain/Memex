@@ -59,9 +59,9 @@ import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/typ
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import DiscordNotification from '@worldbrain/memex-common/lib/common-ui/components/discord-notification-banner'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { BlockCounterIndicator } from 'src/util/subscriptions/counterIndicator'
-import { countAIrequests } from 'src/util/subscriptions/storage'
+import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -145,6 +145,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     annotationsShareAll: any
     copyPageLink: any
     queryAIwithPrompt: any
+    updatePromptState: any
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
 
@@ -1136,13 +1137,13 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private showSummary() {
-        countAIrequests(window.location.href)
         return (
             <SummarySection>
                 <SummaryContainer>
                     <SummaryText>{this.props.pageSummary}</SummaryText>
                     <SummaryFooter>
                         <RightSideButtons>
+                            <AICounterIndicator />
                             <BetaButton>
                                 <BetaButtonInner>BETA</BetaButtonInner>
                             </BetaButton>
@@ -1205,75 +1206,45 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         if (this.props.activeTab === 'summary') {
-            if (this.props.loadState === 'success') {
-                return (
-                    <AISidebarContainer>
-                        {this.props.selectedTextAIPreview && (
-                            <SelectedAITextBox>
-                                <SelectedTextBoxBar />
-                                <SelectedAIText>
-                                    {this.props.selectedTextAIPreview}
-                                </SelectedAIText>
-                            </SelectedAITextBox>
-                        )}
-                        <QueryContainer>
-                            <TextField
-                                placeholder={
-                                    this.props.prompt ??
-                                    'Summarize this in 2 paragraphs'
+            return (
+                <AISidebarContainer>
+                    {this.props.selectedTextAIPreview && (
+                        <SelectedAITextBox>
+                            <SelectedTextBoxBar />
+                            <SelectedAIText>
+                                {this.props.selectedTextAIPreview}
+                            </SelectedAIText>
+                        </SelectedAITextBox>
+                    )}
+                    <QueryContainer>
+                        <TextField
+                            placeholder={
+                                this.props.prompt ??
+                                'Summarize this in 2 paragraphs'
+                            }
+                            value={this.props.prompt}
+                            icon="openAIicon"
+                            iconSize="18px"
+                            onChange={async (event) => {
+                                await this.props.updatePromptState(
+                                    (event.target as HTMLInputElement).value,
+                                )
+                            }}
+                            onKeyDown={async (event) => {
+                                if (event.key === 'Enter') {
+                                    await this.props.queryAIwithPrompt(
+                                        this.props.prompt,
+                                    )
                                 }
-                                value={this.props.prompt}
-                                icon="openAIicon"
-                                iconSize="18px"
-                                onKeyDown={async (event) => {
-                                    if (event.key === 'Enter') {
-                                        await this.props.queryAIwithPrompt(
-                                            (event.target as HTMLInputElement)
-                                                .value,
-                                        )
-                                    }
-                                }}
-                                height="40px"
-                            />
-                        </QueryContainer>
-                        {this.showSummary()}
-                    </AISidebarContainer>
-                )
-            } else {
-                return (
-                    <AISidebarContainer>
-                        {this.props.selectedTextAIPreview && (
-                            <SelectedAITextBox>
-                                <SelectedTextBoxBar />
-                                <SelectedAIText>
-                                    {this.props.selectedTextAIPreview}
-                                </SelectedAIText>
-                            </SelectedAITextBox>
-                        )}
-                        <QueryContainer>
-                            <TextField
-                                placeholder={
-                                    this.props.prompt ??
-                                    'Summarize this in 2 paragraphs'
-                                }
-                                value={this.props.prompt}
-                                icon="openAIicon"
-                                iconSize="18px"
-                                onKeyDown={async (event) => {
-                                    if (event.key === 'Enter') {
-                                        await this.props.queryAIwithPrompt(
-                                            (event.target as HTMLInputElement)
-                                                .value,
-                                        )
-                                    }
-                                }}
-                                height="40px"
-                            />
-                        </QueryContainer>
-                        {this.renderLoader()}
-                    </AISidebarContainer>
-                )
-            }
+                            }}
+                            height="40px"
+                        />
+                    </QueryContainer>
+                    {this.props.loadState === 'running'
+                        ? this.renderLoader()
+                        : this.showSummary()}
+                </AISidebarContainer>
+            )
         }
 
         if (
@@ -1897,7 +1868,7 @@ export class AnnotationsSidebar extends React.Component<
 
 const QueryContainer = styled.div`
     height: 40px;
-    padding: 10px;
+    padding: 15px;
 `
 
 const AISidebarContainer = styled.div`
@@ -2159,6 +2130,7 @@ const NewAnnotationBoxMyAnnotations = styled.div`
     display: flex;
     margin-bottom: 5px;
     margin-top: 5px;
+    padding: 0 5px;
 `
 
 const OthersAnnotationCounter = styled.div``

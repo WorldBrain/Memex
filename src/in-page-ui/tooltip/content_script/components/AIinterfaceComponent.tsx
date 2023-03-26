@@ -5,7 +5,7 @@ import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-fi
 import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import React from 'react'
 import styled, { css } from 'styled-components'
-import { countAIrequests } from 'src/util/subscriptions/storage'
+import { updateAICounter } from 'src/util/subscriptions/storage'
 
 export interface Props {
     sendAIprompt: any
@@ -23,7 +23,7 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
     }
 
     async componentDidMount() {
-        const checkCounter = countAIrequests(window.location.href)
+        const checkCounter = updateAICounter()
         if (!checkCounter) {
             this.setState({
                 loadingState: 'success',

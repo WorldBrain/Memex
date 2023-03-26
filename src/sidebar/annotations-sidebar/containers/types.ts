@@ -148,6 +148,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showFiltersSidebar: boolean
     showSocialSearch: boolean
     shouldShowTagsUIs: boolean
+    showUpgradeModal: boolean
 
     annotCount?: number
 
@@ -197,6 +198,9 @@ interface SidebarEvents {
         url?: string
     }
     queryAIwithPrompt: {
+        prompt: string
+    }
+    updatePromptState: {
         prompt: string
     }
     sortAnnotations: { sortingFn: AnnotationsSorter }

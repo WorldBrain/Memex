@@ -646,6 +646,7 @@ export function createBackgroundModules(options: {
             notifications,
             pageActivityIndicator,
             summarizeBG,
+            auth,
         },
     })
 
