@@ -3,7 +3,10 @@ import { makeRemotelyCallable, RemoteFunction } from 'src/util/webextensionRPC'
 import type { RemoteEventEmitter } from '../../util/webextensionRPC'
 
 export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
-    startPageSummaryStream: RemoteFunction<Role, { fullPageUrl: string }>
+    startPageSummaryStream: RemoteFunction<
+        Role,
+        { fullPageUrl?: string; textToProcess?: string; queryPrompt?: string }
+    >
     getTextSummary: RemoteFunction<
         Role,
         {
@@ -37,11 +40,16 @@ export default class SummarizeBackground {
 
     startPageSummaryStream: SummarizationInterface<
         'provider'
-    >['startPageSummaryStream'] = async ({ tab }, { fullPageUrl }) => {
+    >['startPageSummaryStream'] = async (
+        { tab },
+        { fullPageUrl, textToProcess, queryPrompt },
+    ) => {
         this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
 
-        for await (const result of this.summarizationService.summarizeUrl(
+        for await (const result of this.summarizationService.queryAI(
             fullPageUrl,
+            textToProcess,
+            queryPrompt,
         )) {
             const token = result?.t
             if (token?.length > 0) {

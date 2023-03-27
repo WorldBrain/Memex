@@ -71,58 +71,64 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                     {this.state.subscriptionStatusLoading ===
                                         'success' && (
                                         <SubscriptionStatusBox>
-                                            <>
-                                                <strong>Your plan: </strong>
-                                                {
-                                                    this.state
-                                                        .subscriptionStatus
-                                                }{' '}
-                                                unique pages per month
-                                            </>
-                                            {parseFloat(
-                                                this.state.subscriptionStatus,
-                                            ) < 100 ? (
-                                                <TooltipBox
-                                                    tooltipText={
-                                                        <span>
-                                                            If page gives you
-                                                            "Page not found",
-                                                            <br /> do a hard
-                                                            reload and/or clear
-                                                            cache
-                                                        </span>
-                                                    }
-                                                    placement={'bottom'}
-                                                >
-                                                    <PrimaryAction
-                                                        label={'Upgrade'}
-                                                        onClick={() => {
-                                                            window.open(
-                                                                isStaging
-                                                                    ? 'https://memex.garden/upgradeStaging'
-                                                                    : 'https://memex.garden/upgrade',
-                                                                '_blank',
-                                                            )
-                                                        }}
-                                                        size={'medium'}
-                                                        type={'secondary'}
-                                                    />
-                                                </TooltipBox>
-                                            ) : (
+                                            <PlanDetailsContainer>
+                                                <PlanTitle>
+                                                    {this.state
+                                                        .subscriptionStatus ===
+                                                    'no-subscription'
+                                                        ? 'Free Plan'
+                                                        : 'Subscription Active'}
+                                                </PlanTitle>
+                                                <PlanDetailsBox>
+                                                    <PlanDetailsRow>
+                                                        <LimitCount>
+                                                            {
+                                                                this.state
+                                                                    .pageLimit
+                                                            }
+                                                        </LimitCount>
+                                                        unique pages per month
+                                                    </PlanDetailsRow>
+                                                    <PlanDetailsRow>
+                                                        <LimitCount>
+                                                            {this.state.AILimit}
+                                                        </LimitCount>
+                                                        AI requests per month
+                                                    </PlanDetailsRow>
+                                                </PlanDetailsBox>{' '}
+                                            </PlanDetailsContainer>
+                                            <SubscriptionActionBox>
                                                 <PrimaryAction
-                                                    label={'Manage'}
+                                                    label={'Upgrade'}
                                                     onClick={() => {
                                                         window.open(
                                                             isStaging
-                                                                ? 'https://billing.stripe.com/p/login/test_bIY036ggb10LeqYeUU'
-                                                                : 'https://billing.stripe.com/p/login/8wM015dIp6uPdb2288',
+                                                                ? 'https://memex.garden/upgradeStaging'
+                                                                : 'https://memex.garden/upgradeNotification',
                                                             '_blank',
                                                         )
                                                     }}
                                                     size={'medium'}
                                                     type={'secondary'}
                                                 />
-                                            )}
+                                                {this.state
+                                                    .subscriptionStatus !==
+                                                    'no-subscription' && (
+                                                    <PrimaryAction
+                                                        label={'Manage'}
+                                                        onClick={() => {
+                                                            window.open(
+                                                                isStaging
+                                                                    ? 'https://billing.stripe.com/p/login/test_bIY036ggb10LeqYeUU'
+                                                                    : 'https://billing.stripe.com/p/login/8wM015dIp6uPdb2288',
+                                                                '_blank',
+                                                            )
+                                                        }}
+                                                        size={'medium'}
+                                                        type={'tertiary'}
+                                                    />
+                                                )}
+                                            </SubscriptionActionBox>
                                         </SubscriptionStatusBox>
                                     )}
                                 </SubscriptionStatusContainer>
@@ -190,8 +196,50 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     }
 }
 
+const SubscriptionActionBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 5px;
+    justify-content: center;
+`
+
+const PlanDetailsContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    grid-gap: 5px;
+`
+
+const PlanTitle = styled.div`
+    font-size: 20px;
+    font-weight: 600;
+    color: ${(props) => props.theme.colors.white};
+`
+
+const PlanDetailsBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 5px;
+    margin-top: 5px;
+`
+
+const PlanDetailsRow = styled.div`
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.greyScale5};
+    grid-gap: 5px;
+`
+
+const LimitCount = styled.div`
+    font-weight: 600;
+    color: ${(props) => props.theme.colors.greyScale6};
+`
+
 const SubscriptionStatusContainer = styled.div`
     width: 100%;
+    display: flex;
+    align-items: flex-start;
 `
 const SubscriptionStatusBox = styled.div`
     display: flex;
@@ -219,10 +267,11 @@ const ConfirmationMessage = styled.div`
 `
 
 const LoadingIndicatorBox = styled.div`
-    padding: 100px 50px;
+    padding: 50px 50px;
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
 `
 
 const FieldsContainer = styled.div`

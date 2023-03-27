@@ -71,7 +71,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                 createHighlight: await getShortCut('createHighlight'),
                 createAnnotation: await getShortCut('createAnnotation'),
                 createAnnotationWithSpace: await getShortCut('addToCollection'),
-                openToolTipInAIMode: await getShortCut('openToolTipInAIMode'),
+                askAI: await getShortCut('askAI'),
             },
         })
 
@@ -136,7 +136,6 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         // y = scroll height from top + pixels from top + height of element - offset
         const y =
             window.pageYOffset + boundingRect.top + boundingRect.height - 20
-        console.log(x, y)
         return {
             x,
             y,
@@ -152,7 +151,6 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             setTimeout(() => {
                 let position = this.calculateTooltipPostion()
 
-                console.log('positionshow', position)
                 this.setState({
                     showTooltip: true,
                     position,
@@ -232,23 +230,14 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         }
     }
     private openAIinterface: React.MouseEventHandler = async (e) => {
-        let newPositionX = 0
-        let newPositionY = 0
-
         this.setState({
-            tooltipState: 'AIinterface',
-            position: { x: newPositionX, y: newPositionY },
+            highlightText: window.getSelection().toString() ?? '',
         })
-        // this.props.inPageUI.hideTooltip()
-        try {
-            // await this.props.createAnnotation(false, true)
-        } catch (err) {
-            throw err
-        } finally {
-            // // this.setState({ tooltipState: 'pristine' })
-            // window.getSelection().empty()
-            // this.props.inPageUI.hideTooltip()
-        }
+        this.props.inPageUI.hideTooltip()
+        await this.props.inPageUI.showSidebar({
+            action: 'show_page_summary',
+            highlightedText: this.state.highlightText,
+        })
     }
 
     renderTooltipComponent = () => {
@@ -278,10 +267,10 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                                 .replaceAll(/[^\w\s.:?!]/g, ' ')
                                 .replaceAll('  ', ' ')
                                 .trim()
-                            const response = await this.props.summarizeBG.getTextSummary(
+                            const response = await this.props.summarizeBG.startPageSummaryStream(
                                 {
-                                    text: textToSummarize,
-                                    prompt: prompt.prompt,
+                                    textToProcess: textToSummarize,
+                                    queryPrompt: prompt.prompt,
                                 },
                             )
                             return response

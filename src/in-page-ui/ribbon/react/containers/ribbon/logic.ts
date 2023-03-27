@@ -15,7 +15,7 @@ import { Analytics } from 'src/analytics'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import browser from 'webextension-polyfill'
 import { Storage } from 'webextension-polyfill-ts'
-import { actionAllowed } from 'src/util/subscriptions/storage'
+import { pageActionAllowed } from 'src/util/subscriptions/storage'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -413,7 +413,7 @@ export class RibbonContainerLogic extends UILogic<
     toggleBookmark: EventHandler<'toggleBookmark'> = async ({
         previousState,
     }) => {
-        const allowed = await actionAllowed()
+        const allowed = await pageActionAllowed()
 
         if (allowed) {
             const postInitState = await this.waitForPostInitState(previousState)

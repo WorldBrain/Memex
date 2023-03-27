@@ -165,12 +165,12 @@ export const InitialComponent = ({
             tooltipText={
                 <AnnotationTooltipText>
                     <TopSection>
-                        <strong>Explain & Summarise</strong>
+                        <strong>Ask & Summarise</strong>
                     </TopSection>
                     <SubSection>
                         <KeyboardShortcuts
                             size={'small'}
-                            keys={keyboardShortCuts['openToolTipInAIMode']}
+                            keys={keyboardShortCuts['askAI']}
                         />
                     </SubSection>
                 </AnnotationTooltipText>
@@ -178,7 +178,7 @@ export const InitialComponent = ({
             placement="bottom"
         >
             <PrimaryAction
-                label="Explain"
+                label="Ask"
                 icon={'stars'}
                 onClick={openAIinterface}
                 size="small"

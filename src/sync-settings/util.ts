@@ -35,6 +35,9 @@ export const createSyncSettingsStore = <
         readwise: new BrowserSettingsStore(args.syncSettingsBG, {
             prefix: FEATURE_PREFIX.READWISE,
         }),
+        openAI: new BrowserSettingsStore(args.syncSettingsBG, {
+            prefix: FEATURE_PREFIX.OPENAI,
+        }),
         searchInjection: new BrowserSettingsStore(args.syncSettingsBG, {
             prefix: FEATURE_PREFIX.SEARCH_INJECTION,
         }),

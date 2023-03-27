@@ -19,7 +19,7 @@ export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
         'createBookmark',
         'openDashboard',
         'shortcutsEnabled',
-        'openToolTipInAIMode',
+        'askAI',
     ]
 
     const shortcuts: Partial<BaseKeyboardShortcuts> = {}

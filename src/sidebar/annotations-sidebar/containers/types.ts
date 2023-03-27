@@ -96,6 +96,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     secondarySearchState: TaskState
     remoteAnnotationsLoadState: TaskState
     foreignSelectedListLoadState: TaskState
+    selectedTextAIPreview: string
 
     showState: 'visible' | 'hidden'
     isLocked: boolean
@@ -120,6 +121,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     lists: PageAnnotationsCacheInterface['lists']
     annotations: PageAnnotationsCacheInterface['annotations']
     pageSummary: string
+    prompt: string
 
     users: {
         [userId: string]: {
@@ -146,6 +148,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showFiltersSidebar: boolean
     showSocialSearch: boolean
     shouldShowTagsUIs: boolean
+    showUpgradeModal: boolean
 
     annotCount?: number
 
@@ -189,7 +192,17 @@ interface SidebarEvents {
     adjustSidebarWidth: { newWidth: string; isWidthLocked?: boolean }
     setPopoutsActive: boolean
 
-    setActiveSidebarTab: { tab: SidebarTab }
+    setActiveSidebarTab: {
+        tab: SidebarTab
+        textToProcess?: string
+        url?: string
+    }
+    queryAIwithPrompt: {
+        prompt: string
+    }
+    updatePromptState: {
+        prompt: string
+    }
     sortAnnotations: { sortingFn: AnnotationsSorter }
     receiveSharingAccessChange: {
         sharingAccess: AnnotationSharingAccess

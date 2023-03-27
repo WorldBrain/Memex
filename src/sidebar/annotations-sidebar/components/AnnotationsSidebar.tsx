@@ -59,8 +59,9 @@ import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/typ
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import DiscordNotification from '@worldbrain/memex-common/lib/common-ui/components/discord-notification-banner'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { BlockCounterIndicator } from 'src/util/subscriptions/counterIndicator'
-import { countAIrequests } from 'src/util/subscriptions/storage'
+import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -143,6 +144,8 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     contentSharing: ContentSharingInterface
     annotationsShareAll: any
     copyPageLink: any
+    queryAIwithPrompt: any
+    updatePromptState: any
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
 
@@ -480,9 +483,9 @@ export class AnnotationsSidebar extends React.Component<
                         listData.remoteId != null
                     ownAnnotationProps.lastEdited = annotation.lastEdited
                     ownAnnotationProps.isEditing =
-                        annotationCard.isCommentEditing
+                        annotationCard?.isCommentEditing ?? undefined
                     ownAnnotationProps.isDeleting =
-                        annotationCard.cardMode === 'delete-confirm'
+                        annotationCard?.cardMode === 'delete-confirm'
                     const editDeps = this.props.bindAnnotationEditProps(
                         annotation,
                         unifiedListId,
@@ -503,7 +506,7 @@ export class AnnotationsSidebar extends React.Component<
                         unifiedListId,
                     )
                     ownAnnotationProps.initShowSpacePicker =
-                        annotationCard.cardMode === 'space-picker'
+                        annotationCard?.cardMode === 'space-picker'
                             ? 'footer'
                             : 'hide'
                 }
@@ -1134,13 +1137,13 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private showSummary() {
-        countAIrequests(window.location.href)
         return (
             <SummarySection>
                 <SummaryContainer>
                     <SummaryText>{this.props.pageSummary}</SummaryText>
                     <SummaryFooter>
                         <RightSideButtons>
+                            <AICounterIndicator />
                             <BetaButton>
                                 <BetaButtonInner>BETA</BetaButtonInner>
                             </BetaButton>
@@ -1195,18 +1198,53 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         if (
-            this.props.isDataLoading ||
-            this.props.foreignSelectedListLoadState === 'running'
+            (this.props.isDataLoading ||
+                this.props.foreignSelectedListLoadState === 'running') &&
+            this.props.activeTab !== 'summary'
         ) {
             return this.renderLoader()
         }
 
         if (this.props.activeTab === 'summary') {
-            if (this.props.loadState === 'success') {
-                return this.showSummary()
-            } else {
-                return this.renderLoader()
-            }
+            return (
+                <AISidebarContainer>
+                    {this.props.selectedTextAIPreview && (
+                        <SelectedAITextBox>
+                            <SelectedTextBoxBar />
+                            <SelectedAIText>
+                                {this.props.selectedTextAIPreview}
+                            </SelectedAIText>
+                        </SelectedAITextBox>
+                    )}
+                    <QueryContainer>
+                        <TextField
+                            placeholder={
+                                this.props.prompt ??
+                                'Summarize this in 2 paragraphs'
+                            }
+                            value={this.props.prompt}
+                            icon="openAIicon"
+                            iconSize="18px"
+                            onChange={async (event) => {
+                                await this.props.updatePromptState(
+                                    (event.target as HTMLInputElement).value,
+                                )
+                            }}
+                            onKeyDown={async (event) => {
+                                if (event.key === 'Enter') {
+                                    await this.props.queryAIwithPrompt(
+                                        this.props.prompt,
+                                    )
+                                }
+                            }}
+                            height="40px"
+                        />
+                    </QueryContainer>
+                    {this.props.loadState === 'running'
+                        ? this.renderLoader()
+                        : this.showSummary()}
+                </AISidebarContainer>
+            )
         }
 
         if (
@@ -1462,7 +1500,7 @@ export class AnnotationsSidebar extends React.Component<
                 />
                 <PrimaryAction
                     onClick={this.props.setActiveTab('summary')}
-                    label={'Summary'}
+                    label={'Ask'}
                     active={this.props.activeTab === 'summary'}
                     type={'tertiary'}
                     size={'medium'}
@@ -1827,6 +1865,41 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 }
+
+const QueryContainer = styled.div`
+    height: 40px;
+    padding: 15px;
+`
+
+const AISidebarContainer = styled.div`
+    display: flex;
+    height: fill-available;
+    overflow: scroll;
+    display: flex;
+    flex-direction: column;
+`
+
+const SelectedAITextBox = styled.div`
+    display: flex;
+    padding: 20px 25px 25px 20px;
+    grid-gap: 10px;
+    align-items: center;
+    justify-content: flex-start;
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
+`
+
+const SelectedTextBoxBar = styled.div`
+    width: 4px;
+    border-radius: 5px;
+    background-color: ${(props) => props.theme.colors.prime1};
+    height: 100%;
+`
+
+const SelectedAIText = styled.div`
+    color: ${(props) => props.theme.colors.white};
+    flex: 1;
+`
+
 const RightSideButtons = styled.div`
     display: flex;
     align-items: center;
@@ -1904,14 +1977,13 @@ const SummarySection = styled.div`
     width: 100%;
     min-height: 60px;
     justify-content: center;
-    overflow: scroll;
     align-items: start;
     height: fill-available;
     flex: 1;
 `
 
 const SummaryText = styled.div`
-    padding: 20px 20px 0px 20px;
+    padding: 0px 20px 0px 20px;
     color: ${(props) => props.theme.colors.greyScale7};
     font-size: 16px;
     line-height: 22px;
@@ -2058,6 +2130,7 @@ const NewAnnotationBoxMyAnnotations = styled.div`
     display: flex;
     margin-bottom: 5px;
     margin-top: 5px;
+    padding: 0 5px;
 `
 
 const OthersAnnotationCounter = styled.div``

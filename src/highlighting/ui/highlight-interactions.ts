@@ -30,7 +30,7 @@ import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import { UNDO_HISTORY } from 'src/constants'
 import { getSelectionHtml } from '@worldbrain/memex-common/lib/annotations/utils'
-import { actionAllowed, updateCounter } from 'src/util/subscriptions/storage'
+import { pageActionAllowed } from 'src/util/subscriptions/storage'
 import delay from 'src/util/delay'
 const styles = require('src/highlighting/ui/styles.css')
 
@@ -194,7 +194,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
     private async _saveAndRenderHighlight(
         params: SaveAndRenderHighlightDeps,
     ): Promise<UnifiedAnnotation['unifiedId'] | null> {
-        const allowed = await actionAllowed()
+        const allowed = await pageActionAllowed()
 
         if (allowed) {
             const selection = params.getSelection()

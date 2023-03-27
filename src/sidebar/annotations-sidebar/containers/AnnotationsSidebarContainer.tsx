@@ -263,7 +263,7 @@ export class AnnotationsSidebarContainer<
         ]
         const unifiedAnnotationId = annotation.unifiedId
         return {
-            comment: annotationCardInstance.comment,
+            comment: annotationCardInstance?.comment,
             onListsBarPickerBtnClick: () =>
                 this.processEvent('setAnnotationCardMode', {
                     instanceLocation,
@@ -799,6 +799,16 @@ export class AnnotationsSidebarContainer<
                             annotationsShareAll={this.props.annotationsBG}
                             copyPageLink={(link) => {
                                 this.processEvent('copyNoteLink', { link })
+                            }}
+                            queryAIwithPrompt={(prompt) => {
+                                this.processEvent('queryAIwithPrompt', {
+                                    prompt,
+                                })
+                            }}
+                            updatePromptState={(prompt) => {
+                                this.processEvent('updatePromptState', {
+                                    prompt,
+                                })
                             }}
                             postBulkShareHook={(shareInfo) =>
                                 this.processEvent(

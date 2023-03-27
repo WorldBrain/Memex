@@ -70,6 +70,7 @@ import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { upgradePlan } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
+import { browser } from 'webextension-polyfill-ts'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -266,6 +267,12 @@ export async function main(
                 currentUser,
                 shouldShare,
             }),
+        askAI: () => (highlightedText: string) => {
+            inPageUI.showSidebar({
+                action: 'show_page_summary',
+                highlightedText: highlightedText,
+            })
+        },
     }
 
     if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
@@ -288,21 +295,22 @@ export async function main(
         })
 
         const isSubscribed = await response.json()
+        const pageLimit = isSubscribed.planLimit
+        const AIlimit = isSubscribed.aiQueries
 
         if (
             isSubscribed.status === 'active' ||
             isSubscribed.status === 'already-setup'
         ) {
-            if (isSubscribed.planLimit) {
-                await upgradePlan(isSubscribed.planLimit)
-            }
+            await upgradePlan(pageLimit, AIlimit)
         }
     }
     if (
         fullPageUrl === 'https://memex.garden/upgradeStaging' ||
-        fullPageUrl === 'https://memex.garden/upgrade' ||
+        fullPageUrl === 'https://memex.garden/upgradeNotification' ||
         fullPageUrl === 'https://memex.garden/' ||
-        fullPageUrl === 'https://memex.garden/copilot'
+        fullPageUrl === 'https://memex.garden/copilot' ||
+        fullPageUrl === 'https://memex.garden/hivemind'
     ) {
         setInterval(() => {
             const elements = document.querySelectorAll('#UpgradeButton')
@@ -317,6 +325,15 @@ export async function main(
                 }
             }
         }, 200)
+    }
+
+    if (
+        fullPageUrl.includes('memex.garden') &&
+        document.body.innerText.includes(
+            'Icons by Smashicons from Flaticons.com',
+        )
+    ) {
+        browser.runtime.sendMessage({ reloadTab: true })
     }
 
     // 4. Create a contentScriptRegistry object with functions for each content script
@@ -401,6 +418,7 @@ export async function main(
                     category: 'Annotations',
                     action: 'createFromTooltip',
                 }),
+                askAI: annotationsFunctions.askAI(),
             })
             components.tooltip?.resolve()
         },
@@ -457,6 +475,7 @@ export async function main(
             category: 'Annotations',
             action: 'createFromContextMenu',
         }),
+        askAI: annotationsFunctions.askAI(),
         teardownContentScripts: async () => {
             await inPageUI.hideHighlights()
             await inPageUI.hideSidebar()
@@ -489,6 +508,7 @@ export async function main(
             category: 'Annotations',
             action: 'createFromShortcut',
         }),
+        askAI: annotationsFunctions.askAI(),
     })
     const loadContentScript = createContentScriptLoader({
         contentScriptsBG,

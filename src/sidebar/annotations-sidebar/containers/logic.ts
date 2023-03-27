@@ -71,6 +71,10 @@ import {
     getRemoteEventEmitter,
     TypedRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
+import {
+    AIActionAllowed,
+    updateAICounter,
+} from 'src/util/subscriptions/storage'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -205,6 +209,7 @@ export class SidebarContainerLogic extends UILogic<
             secondarySearchState: 'pristine',
             remoteAnnotationsLoadState: 'pristine',
             foreignSelectedListLoadState: 'pristine',
+            selectedTextAIPreview: undefined,
 
             users: {},
             pillVisibility: 'unhover',
@@ -235,6 +240,8 @@ export class SidebarContainerLogic extends UILogic<
             showFiltersSidebar: false,
             showSocialSearch: false,
             shouldShowTagsUIs: false,
+            prompt: undefined,
+            showUpgradeModal: false,
 
             pageCount: 0,
             noResults: false,
@@ -339,10 +346,16 @@ export class SidebarContainerLogic extends UILogic<
     private setupRemoteEventListeners() {
         this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
 
+        let isPageSummaryEmpty = true
         this.summarisePageEvents.on('newSummaryToken', ({ token }) => {
+            let newToken = token
+            if (isPageSummaryEmpty) {
+                newToken = newToken.trimStart() // Remove the first two characters
+            }
+            isPageSummaryEmpty = false
             this.emitMutation({
                 loadState: { $set: 'success' },
-                pageSummary: { $apply: (prev) => prev + token },
+                pageSummary: { $apply: (prev) => prev + newToken },
             })
         })
         this.summarisePageEvents.on('startSummaryStream', () => {
@@ -746,8 +759,10 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
         if (previousState.activeTab === 'summary') {
-            console.log('setPageUrl', event.fullPageUrl)
-            await this.getPageSummary(event)
+            this.emitMutation({
+                prompt: { $set: undefined },
+            })
+            await this.queryAI(event, undefined)
         }
     }
 
@@ -1314,45 +1329,55 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    async getPageSummary(data) {
+    async queryAI(data, highlightedText, prompt?) {
+        const isUnderLimit = await AIActionAllowed()
+
+        if (!isUnderLimit) {
+            this.emitMutation({
+                showUpgradeModal: { $set: true },
+            })
+            return
+        }
+        let queryPrompt = prompt ? prompt : undefined
         this.emitMutation({
+            selectedTextAIPreview: {
+                $set: highlightedText ? highlightedText : '',
+            },
             loadState: { $set: 'running' },
+            prompt: { $set: queryPrompt },
         })
 
         await this.options.summarizeBG.startPageSummaryStream({
-            fullPageUrl: data.fullPageUrl,
+            fullPageUrl:
+                data && data.fullPageUrl ? data.fullPageUrl : undefined,
+            textToProcess: highlightedText ?? undefined,
+            queryPrompt: queryPrompt,
         })
-
-        // const summaryProvider = new SummarizationService()
-
-        // const response = await this.options.summarizeBG.getPageSummary(url)
-
-        // console.log('response', response)
-
-        // if (response.status === 'success') {
-        //     let summaryText = response.choices[0].text
-
-        //     if (summaryText.startsWith(':')) {
-        //         summaryText = summaryText.slice(2)
-        //     }
-
-        //     this.emitMutation({
-        //         pageSummary: {
-        //             $set: summaryText,
-        //         },
-        //         loadState: { $set: 'success' },
-        //     })
-        // } else if (response.status === 'prompt-too-long') {
-        //     this.emitMutation({
-        //         loadState: { $set: 'error' },
-        //     })
-        // } else {
-        //     this.emitMutation({
-        //         loadState: { $set: 'error' },
-        //     })
-        // }
+        await updateAICounter()
     }
 
+    queryAIwithPrompt: EventHandler<'queryAIwithPrompt'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            prompt: { $set: event.prompt },
+        })
+
+        this.queryAI(
+            previousState,
+            previousState.selectedTextAIPreview ?? '',
+            event.prompt,
+        )
+    }
+    updatePromptState: EventHandler<'updatePromptState'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            prompt: { $set: event.prompt },
+        })
+    }
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
         previousState,
@@ -1373,7 +1398,17 @@ export class SidebarContainerLogic extends UILogic<
                 previousState,
             )
         } else if (event.tab === 'summary') {
-            await this.getPageSummary(previousState)
+            if (event.textToProcess) {
+                this.emitMutation({
+                    prompt: { $set: '' },
+                })
+                await this.queryAI(undefined, event.textToProcess, undefined)
+            } else {
+                this.emitMutation({
+                    prompt: { $set: '' },
+                })
+                await this.queryAI(previousState, undefined, undefined)
+            }
         }
     }
 
