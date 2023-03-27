@@ -127,10 +127,11 @@ export class SidebarContainerLogic extends UILogic<
      * before the sidebar script had been loaded before, let alone the annotations data.
      */
     annotationsLoadComplete = resolvablePromise()
-    syncSettings: SyncSettingsStore<'contentSharing' | 'extension'>
+    syncSettings: SyncSettingsStore<'contentSharing' | 'extension' | 'openAI'>
     resizeObserver
     sidebar
     readingViewState
+    openAIkey
     summarisePageEvents: TypedRemoteEventEmitter<'pageSummary'>
 
     constructor(private options: SidebarLogicOptions) {
@@ -372,7 +373,6 @@ export class SidebarContainerLogic extends UILogic<
             fullPageUrl,
             storageAPI,
             runtimeAPI,
-            summarizeBG,
         } = this.options
         annotationsCache.events.addListener(
             'newAnnotationsState',
@@ -1330,14 +1330,20 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     async queryAI(data, highlightedText, prompt?) {
-        const isUnderLimit = await AIActionAllowed()
+        const openAIKey = await this.syncSettings.openAI.get('apiKey')
+        const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
 
-        if (!isUnderLimit) {
-            this.emitMutation({
-                showUpgradeModal: { $set: true },
-            })
-            return
+        let canQueryAI = false
+        if (!hasAPIKey) {
+            canQueryAI = await AIActionAllowed()
+            if (!canQueryAI) {
+                this.emitMutation({
+                    showUpgradeModal: { $set: true },
+                })
+                return
+            }
         }
+
         let queryPrompt = prompt ? prompt : undefined
         this.emitMutation({
             selectedTextAIPreview: {
@@ -1352,6 +1358,7 @@ export class SidebarContainerLogic extends UILogic<
                 data && data.fullPageUrl ? data.fullPageUrl : undefined,
             textToProcess: highlightedText ?? undefined,
             queryPrompt: queryPrompt,
+            apiKey: openAIKey ? openAIKey : undefined,
         })
         await updateAICounter()
     }
@@ -1376,6 +1383,13 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({
             prompt: { $set: event.prompt },
+        })
+    }
+    removeSelectedTextAIPreview: EventHandler<
+        'removeSelectedTextAIPreview'
+    > = async () => {
+        this.emitMutation({
+            selectedTextAIPreview: { $set: undefined },
         })
     }
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
