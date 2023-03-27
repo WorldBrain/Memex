@@ -227,8 +227,12 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     selectionItems.length - 1
                 ] as HTMLElement
 
+                console.log('selectionItems', selectionItems)
+                console.log('lastSelectionItem', lastSelectionItem)
+
                 if (
                     (lastSelectionItem &&
+                        lastSelectionItem.classList &&
                         lastSelectionItem.classList.contains('ytp-popup')) ||
                     (selection.toString().length === 0 &&
                         fullPageUrl.includes('youtube.com/watch'))
