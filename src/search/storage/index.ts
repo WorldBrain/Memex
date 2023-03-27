@@ -10,7 +10,7 @@ export const initErrHandler = <T>(defReturnVal: T = null) => (
 ) => {
     if (
         err.message === 'Data fetch failed' ||
-        (err.name === Dexie.errnames.OpenFailedError &&
+        (err.name === Dexie.errnames.OpenFailed &&
             err.message.includes('createObjectStore'))
     ) {
         return defReturnVal
