@@ -52,6 +52,7 @@ async function setupTest(options: {
         directLinking,
     } = setup.backgroundModules
     setup.authService.setUser(TEST_USER)
+    personalCloud.options.settingStore.set('deviceId', 11)
     personalCloud.actionQueue.forceQueueSkip = true
     await personalCloud.setup()
     await personalCloud.startSync()

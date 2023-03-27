@@ -18,7 +18,6 @@ import AnnotationEditable, {
     Props as AnnotationEditableProps,
 } from 'src/annotations/components/HoverControlledAnnotationEditable'
 import type _AnnotationEditable from 'src/annotations/components/AnnotationEditable'
-import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
 import type { AnnotationCardInstanceLocation, SidebarTheme } from '../types'
@@ -59,9 +58,7 @@ import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/typ
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import DiscordNotification from '@worldbrain/memex-common/lib/common-ui/components/discord-notification-banner'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -94,6 +91,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     shareButtonRef: React.RefObject<HTMLDivElement>
     spacePickerButtonRef: React.RefObject<HTMLDivElement>
     activeShareMenuNoteId: string
+    renderAICounter: () => JSX.Element
     renderShareMenuForAnnotation: (
         instanceLocation: AnnotationCardInstanceLocation,
     ) => (id: string) => JSX.Element
@@ -1143,7 +1141,7 @@ export class AnnotationsSidebar extends React.Component<
                     <SummaryText>{this.props.pageSummary}</SummaryText>
                     <SummaryFooter>
                         <RightSideButtons>
-                            <AICounterIndicator />
+                            {this.props.renderAICounter()}
                             <BetaButton>
                                 <BetaButtonInner>BETA</BetaButtonInner>
                             </BetaButton>

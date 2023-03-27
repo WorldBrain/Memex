@@ -1,14 +1,13 @@
 export * from '@worldbrain/memex-common/lib/content-sharing/client-storage/types'
 import type {
-    ListSharingServiceInterface,
     ListKeysServiceInterface,
     AnnotationSharingServiceInterface,
+    SharedListData,
 } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export interface ContentSharingInterface
-    extends ListSharingServiceInterface,
-        Pick<
+    extends Pick<
             ListKeysServiceInterface,
             | 'deleteKeyLink'
             | 'getExistingKeyLinksForList'
@@ -23,6 +22,10 @@ export interface ContentSharingInterface
             | 'getAnnotationSharingState'
             | 'getAnnotationSharingStates'
         > {
+    shareList(params: {
+        localListId: number
+    }): Promise<Omit<SharedListData, 'annotationSharingStatesPromise'>>
+
     shareAnnotations(options: {
         annotationUrls: string[]
         shareToLists?: boolean

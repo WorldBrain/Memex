@@ -50,6 +50,7 @@ import type { AnnotationCardInstanceLocation } from '../types'
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/lib/common-ui/components/block-content'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -563,6 +564,10 @@ export class AnnotationsSidebarContainer<
         )
     }
 
+    private renderAICounter = () => (
+        <AICounterIndicator syncSettingsBG={this.props.syncSettingsBG} />
+    )
+
     protected renderTopBanner() {
         return null
     }
@@ -855,6 +860,7 @@ export class AnnotationsSidebarContainer<
                                 this.state.cacheLoadState === 'running'
                             }
                             theme={this.props.theme}
+                            renderAICounter={this.renderAICounter}
                             renderCopyPasterForAnnotation={
                                 this.renderCopyPasterManagerForAnnotation
                             }
