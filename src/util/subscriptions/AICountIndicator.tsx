@@ -1,49 +1,49 @@
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { props } from 'lodash/fp'
 import React from 'react'
 import styled, { css } from 'styled-components'
-import browser from 'webextension-polyfill'
+import browser, { Storage } from 'webextension-polyfill'
 import { COUNTER_STORAGE_KEY, DEFAULT_COUNTER_STORAGE_KEY } from './constants'
 
-export class AICounterIndicator extends React.Component {
-    state = {
-        currentCount: undefined,
-        totalCount: undefined,
+export interface Props {}
+
+interface State {
+    currentCount: number
+    totalCount: number
+    shouldShow: boolean
+    showTooltip: boolean
+}
+
+export class AICounterIndicator extends React.Component<Props, State> {
+    state: State = {
+        currentCount: DEFAULT_COUNTER_STORAGE_KEY.cQ,
+        totalCount: DEFAULT_COUNTER_STORAGE_KEY.sQ,
         shouldShow: false,
         showTooltip: false,
     }
 
     private tooltipButtonRef = React.createRef<HTMLDivElement>()
 
+    private get leftOverBlocks(): number {
+        return this.state.totalCount - this.state.currentCount
+    }
+
     async componentDidMount() {
-        await browser.storage.local.get(COUNTER_STORAGE_KEY).then((result) => {
-            if (
-                result[COUNTER_STORAGE_KEY].sQ != null &&
-                result[COUNTER_STORAGE_KEY].sQ < 10000
-            ) {
-                this.setState({
-                    shouldShow: true,
-                    totalCount: parseInt(result[COUNTER_STORAGE_KEY].sQ),
-                    currentCount: result[COUNTER_STORAGE_KEY].cQ,
-                })
-                browser.storage.onChanged.addListener((changes) =>
-                    this.counterStorageListenerExecution(changes),
-                )
-            } else {
-                this.setState({
-                    shouldShow: true,
-                    totalCount: DEFAULT_COUNTER_STORAGE_KEY.sQ,
-                    currentCount: DEFAULT_COUNTER_STORAGE_KEY.cQ,
-                })
-                browser.storage.onChanged.addListener((changes) =>
-                    this.counterStorageListenerExecution(changes),
-                )
-            }
-        })
+        const result = await browser.storage.local.get(COUNTER_STORAGE_KEY)
+        if (
+            result[COUNTER_STORAGE_KEY].sQ != null &&
+            result[COUNTER_STORAGE_KEY].sQ < 10000
+        ) {
+            this.setState({
+                totalCount: parseInt(result[COUNTER_STORAGE_KEY].sQ),
+                currentCount: result[COUNTER_STORAGE_KEY].cQ,
+            })
+        }
+
+        this.setState({ shouldShow: true })
+        browser.storage.onChanged.addListener(this.counterStorageListener)
+
         // await browser.storage.local.get(OPEN_AI_API_KEY).then((result) => {
         //     if (
         //         result[OPEN_AI_API_KEY].sQ != null &&
@@ -71,13 +71,15 @@ export class AICounterIndicator extends React.Component {
 
     async componentWillUnmount() {
         if (this.state.shouldShow) {
-            browser.storage.onChanged.removeListener((changes) =>
-                this.counterStorageListenerExecution(changes),
+            browser.storage.onChanged.removeListener(
+                this.counterStorageListener,
             )
         }
     }
 
-    counterStorageListenerExecution = (changes) => {
+    private counterStorageListener = (
+        changes: Record<string, Storage.StorageChange>,
+    ) => {
         if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
             this.setState({
                 currentCount: changes[COUNTER_STORAGE_KEY].newValue.cQ,
@@ -88,7 +90,7 @@ export class AICounterIndicator extends React.Component {
         return undefined
     }
 
-    renderTooltip = (leftOverBlocks) => {
+    renderTooltip = () => {
         return (
             <PopoutBox
                 placement="top-start"
@@ -100,8 +102,8 @@ export class AICounterIndicator extends React.Component {
                     <InfoTooltipTitleArea>
                         <InfoTooltipTitleBox>
                             <InfoTooltipTitle>
-                                You have <strong>{leftOverBlocks}</strong> AI
-                                requests left
+                                You have <strong>{this.leftOverBlocks}</strong>{' '}
+                                AI requests left
                             </InfoTooltipTitle>
                             <InfoTooltipSubTitle>
                                 Resets on the 1st of every month
@@ -126,11 +128,8 @@ export class AICounterIndicator extends React.Component {
 
     render() {
         const progressPercentNumber =
-            (100 -
-                (this.state.currentCount / parseInt(this.state.totalCount)) *
-                    100) *
+            (100 - (this.state.currentCount / this.state.totalCount) * 100) *
             3.6
-        const leftOverBlocks = this.state.totalCount - this.state.currentCount
 
         if (!this.state.shouldShow) {
             return null
@@ -141,8 +140,8 @@ export class AICounterIndicator extends React.Component {
                     tooltipText={
                         <TooltipTextContainer>
                             <TooltipTextTop>
-                                You have <strong>{leftOverBlocks}</strong> pages
-                                left
+                                You have <strong>{this.leftOverBlocks}</strong>{' '}
+                                pages left
                             </TooltipTextTop>
                             <TooltipTextBottom>
                                 Click for more info
@@ -155,10 +154,9 @@ export class AICounterIndicator extends React.Component {
                         ref={this.tooltipButtonRef}
                         onClick={() => this.setState({ showTooltip: true })}
                     >
-                        <InnerContainer> {leftOverBlocks}</InnerContainer>
+                        <InnerContainer> {this.leftOverBlocks}</InnerContainer>
                     </CounterContainer>
-                    {this.state.showTooltip &&
-                        this.renderTooltip(leftOverBlocks)}
+                    {this.state.showTooltip && this.renderTooltip()}
                 </TooltipBox>
             )
         }
