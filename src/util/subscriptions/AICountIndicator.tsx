@@ -1,5 +1,7 @@
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import React from 'react'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
@@ -20,6 +22,8 @@ interface State {
     totalCount: number
     shouldShow: boolean
     showTooltip: boolean
+    openAIKey: string
+    showSaveButton: boolean
 }
 
 export class AICounterIndicator extends React.Component<Props, State> {
@@ -31,6 +35,8 @@ export class AICounterIndicator extends React.Component<Props, State> {
         totalCount: DEFAULT_COUNTER_STORAGE_KEY.sQ,
         shouldShow: false,
         showTooltip: false,
+        openAIKey: '',
+        showSaveButton: false,
     }
 
     constructor(props: Props) {
@@ -46,10 +52,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
 
     async componentDidMount() {
         const result = await browser.storage.local.get(COUNTER_STORAGE_KEY)
-        if (
-            result[COUNTER_STORAGE_KEY].sQ != null &&
-            result[COUNTER_STORAGE_KEY].sQ < 10000
-        ) {
+        if (result[COUNTER_STORAGE_KEY].sQ != null) {
             this.setState({
                 totalCount: parseInt(result[COUNTER_STORAGE_KEY].sQ),
                 currentCount: result[COUNTER_STORAGE_KEY].cQ,
@@ -58,6 +61,18 @@ export class AICounterIndicator extends React.Component<Props, State> {
 
         this.setState({ shouldShow: true })
         browser.storage.onChanged.addListener(this.counterStorageListener)
+        const openAIKey = await this.syncSettings.openAI.get('apiKey')
+
+        if (openAIKey) {
+            this.setState({
+                openAIKey: openAIKey,
+            })
+        } else {
+            await this.syncSettings.openAI.set('apiKey', '')
+            this.setState({
+                openAIKey: openAIKey,
+            })
+        }
 
         // await browser.storage.local.get(OPEN_AI_API_KEY).then((result) => {
         //     if (
@@ -114,28 +129,120 @@ export class AICounterIndicator extends React.Component<Props, State> {
                 offsetX={10}
             >
                 <InfoTooltipContainer>
-                    <InfoTooltipTitleArea>
-                        <InfoTooltipTitleBox>
-                            <InfoTooltipTitle>
-                                You have <strong>{this.leftOverBlocks}</strong>{' '}
-                                AI requests left
-                            </InfoTooltipTitle>
-                            <InfoTooltipSubTitle>
-                                Resets on the 1st of every month
-                            </InfoTooltipSubTitle>
-                        </InfoTooltipTitleBox>
-                        <PrimaryAction
-                            label="Upgrade"
-                            icon={'longArrowRight'}
-                            padding="0px 5px 0 10px"
-                            onClick={() => {
-                                window.open(this.whichCheckOutURL(), '_blank')
-                            }}
-                            size="medium"
-                            type="primary"
-                            iconPosition="right"
-                        />
-                    </InfoTooltipTitleArea>
+                    {this.state.openAIKey.length === 0 && (
+                        <>
+                            <InfoTooltipTitleArea>
+                                <InfoTooltipTitleBox>
+                                    <InfoTooltipTitle>
+                                        You have{' '}
+                                        <strong>{this.leftOverBlocks}</strong>{' '}
+                                        AI requests left
+                                    </InfoTooltipTitle>
+                                    <InfoTooltipSubTitle>
+                                        Resets on the 1st of every month
+                                    </InfoTooltipSubTitle>
+                                </InfoTooltipTitleBox>
+                                <PrimaryAction
+                                    label="Upgrade"
+                                    icon={'longArrowRight'}
+                                    padding="0px 5px 0 10px"
+                                    onClick={() => {
+                                        window.open(
+                                            this.whichCheckOutURL(),
+                                            '_blank',
+                                        )
+                                    }}
+                                    size="medium"
+                                    type="primary"
+                                    iconPosition="right"
+                                />
+                            </InfoTooltipTitleArea>
+                            <ORBox>- or - </ORBox>
+                        </>
+                    )}
+                    <OpenAIKeyContainer>
+                        <OpenAIKeyTitle>OpenAI API Key</OpenAIKeyTitle>
+                        <OpenAIKeySubTitle>
+                            Add your own API key to get unlimited AI requests.
+                        </OpenAIKeySubTitle>
+                        <KeyBox>
+                            <TextField
+                                placeholder={
+                                    this.state.openAIKey.length > 0
+                                        ? this.state.openAIKey
+                                        : 'Enter API Key'
+                                }
+                                value={this.state.openAIKey}
+                                onChange={(e) => {
+                                    this.setState({
+                                        openAIKey: (e.target as HTMLInputElement)
+                                            .value,
+                                        showSaveButton: true,
+                                    })
+                                }}
+                                onKeyDown={async (e) => {
+                                    if (e.key === 'Enter') {
+                                        await this.syncSettings.openAI.set(
+                                            'apiKey',
+                                            this.state.openAIKey,
+                                        )
+                                        this.setState({
+                                            showSaveButton: false,
+                                        })
+                                    }
+                                }}
+                            />
+                            {this.state.showSaveButton && (
+                                <PrimaryAction
+                                    onClick={async () => {
+                                        await this.syncSettings.openAI.set(
+                                            'apiKey',
+                                            this.state.openAIKey,
+                                        )
+                                        this.setState({
+                                            showSaveButton: false,
+                                        })
+                                    }}
+                                    label="Save"
+                                    type="secondary"
+                                    size="medium"
+                                />
+                            )}
+                        </KeyBox>
+                        {/* <ModelSwitchBox>
+                            <ModelSwitchTitle>
+                                Model to use for queries
+                            </ModelSwitchTitle>
+                            <ModelButton
+                                isActive={this.state.selectedModel === 'GPT-4'}
+                                onClick={() => {
+                                    this.setState({
+                                        selectedModel: 'GPT-4',
+                                    })
+                                    this.props.syncSettingsBG.openAI.set(
+                                        'openAIkey',
+                                        this.state.openAIKey,
+                                    )
+                                }}
+                            >
+                                GPT-4
+                            </ModelButton>
+                            <ModelButton
+                                isActive={this.state.selectedModel === 'GPT-4'}
+                                onClick={() => {
+                                    this.setState({
+                                        selectedModel: 'GPT-4',
+                                    })
+                                    this.props.syncSettingsBG.openAI.set(
+                                        'openAIkey',
+                                        this.state.openAIKey,
+                                    )
+                                }}
+                            >
+                                GPT-3.5
+                            </ModelButton>
+                        </ModelSwitchBox> */}
+                    </OpenAIKeyContainer>
                 </InfoTooltipContainer>
             </PopoutBox>
         )
@@ -149,9 +256,10 @@ export class AICounterIndicator extends React.Component<Props, State> {
         if (!this.state.shouldShow) {
             return null
         } else {
-            return (
+            return this.state.totalCount < 10000 &&
+                this.state.openAIKey.length === 0 ? (
                 <TooltipBox
-                    placement="right"
+                    placement="top"
                     tooltipText={
                         <TooltipTextContainer>
                             <TooltipTextTop>
@@ -173,10 +281,60 @@ export class AICounterIndicator extends React.Component<Props, State> {
                     </CounterContainer>
                     {this.state.showTooltip && this.renderTooltip()}
                 </TooltipBox>
+            ) : (
+                <TooltipBox
+                    placement="top"
+                    tooltipText={
+                        <TooltipTextContainer>
+                            <TooltipTextTop>Change your API key</TooltipTextTop>
+                        </TooltipTextContainer>
+                    }
+                >
+                    <Icon
+                        icon="settings"
+                        heightAndWidth="22px"
+                        onClick={() => this.setState({ showTooltip: true })}
+                        containerRef={this.tooltipButtonRef}
+                    />
+                    {this.state.showTooltip && this.renderTooltip()}
+                </TooltipBox>
             )
         }
     }
 }
+
+const ORBox = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 16px;
+`
+
+const OpenAIKeyContainer = styled.div``
+
+const OpenAIKeyTitle = styled.div`
+    font-weight: bold;
+    color: ${(props) => props.theme.colors.white};
+    font-size: 16px;
+    margin-bottom: 5px;
+`
+
+const OpenAIKeySubTitle = styled.div`
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 14px;
+    margin-bottom: 10px;
+`
+
+const KeyBox = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    align-items: center;
+`
+
+const ModelSwitchBox = styled.div``
+
+const ModelSwitchTitle = styled.div``
+
+const ModelButton = styled.div``
+
 const TooltipTextTop = styled.div`
     display: flex;
     grid-gap: 3px;
@@ -258,6 +416,7 @@ const InfoTooltipContainer = styled.div`
     justify-content: flex-start;
     height: fit-content;
     grid-gap: 20px;
+    width: 250px;
 `
 
 const InfoTooltipTitleArea = styled.div`

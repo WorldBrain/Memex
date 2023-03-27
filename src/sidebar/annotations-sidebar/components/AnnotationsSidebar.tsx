@@ -153,6 +153,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     getYoutubePlayer?(): YoutubePlayer
     clickFeedActivityIndicator?: () => void
     hasFeedActivity?: boolean
+    removeSelectedTextAIPreview?: () => void
     // editableProps: EditableItemProps
 }
 
@@ -170,6 +171,7 @@ interface AnnotationsSidebarState {
     othersOrOwnAnnotationsState: {
         [unifiedId: string]: 'othersAnnotations' | 'ownAnnotations' | 'all'
     }
+    showAIhighlight: boolean
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -198,6 +200,7 @@ export class AnnotationsSidebar extends React.Component<
         showSortDropDown: false,
         linkCopyState: false,
         othersOrOwnAnnotationsState: {},
+        showAIhighlight: false,
     }
 
     async componentDidMount() {
@@ -1139,34 +1142,6 @@ export class AnnotationsSidebar extends React.Component<
             <SummarySection>
                 <SummaryContainer>
                     <SummaryText>{this.props.pageSummary}</SummaryText>
-                    <SummaryFooter>
-                        <RightSideButtons>
-                            {this.props.renderAICounter()}
-                            <BetaButton>
-                                <BetaButtonInner>BETA</BetaButtonInner>
-                            </BetaButton>
-                            <PrimaryAction
-                                type="tertiary"
-                                size="small"
-                                onClick={() => {
-                                    window.open(
-                                        'https://memex.garden/chatsupport',
-                                        '_blank',
-                                    )
-                                }}
-                                label="Report Bug"
-                            />
-                        </RightSideButtons>
-                        <PoweredBy>
-                            Powered by
-                            <Icon
-                                icon="openAI"
-                                height="18px"
-                                hoverOff
-                                width="70px"
-                            />
-                        </PoweredBy>
-                    </SummaryFooter>
                 </SummaryContainer>
                 {/* {this.state
                     .summarizeArticleLoadState[
@@ -1208,10 +1183,48 @@ export class AnnotationsSidebar extends React.Component<
                 <AISidebarContainer>
                     {this.props.selectedTextAIPreview && (
                         <SelectedAITextBox>
-                            <SelectedTextBoxBar />
-                            <SelectedAIText>
-                                {this.props.selectedTextAIPreview}
-                            </SelectedAIText>
+                            <SelectedAITextHeader>
+                                <PrimaryAction
+                                    icon={
+                                        this.state.showAIhighlight
+                                            ? 'compress'
+                                            : 'expand'
+                                    }
+                                    onClick={() =>
+                                        this.setState({
+                                            showAIhighlight: !this.state
+                                                .showAIhighlight,
+                                        })
+                                    }
+                                    type="tertiary"
+                                    size="small"
+                                    label={
+                                        this.state.showAIhighlight
+                                            ? 'Hide'
+                                            : 'Show All'
+                                    }
+                                />
+                                <PrimaryAction
+                                    icon={'removeX'}
+                                    onClick={() =>
+                                        this.props.removeSelectedTextAIPreview()
+                                    }
+                                    type="tertiary"
+                                    size="small"
+                                    label={'Reset'}
+                                />
+                            </SelectedAITextHeader>
+                            <SelectedAITextContainer
+                                fullHeight={this.state.showAIhighlight}
+                            >
+                                <SelectedTextBoxBar />
+                                <SelectedAIText>
+                                    {this.props.selectedTextAIPreview}
+                                </SelectedAIText>
+                                {!this.state.showAIhighlight && (
+                                    <BlurContainer />
+                                )}
+                            </SelectedAITextContainer>
                         </SelectedAITextBox>
                     )}
                     <QueryContainer>
@@ -1241,6 +1254,35 @@ export class AnnotationsSidebar extends React.Component<
                     {this.props.loadState === 'running'
                         ? this.renderLoader()
                         : this.showSummary()}
+
+                    <SummaryFooter>
+                        <RightSideButtons>
+                            {this.props.renderAICounter()}
+                            <BetaButton>
+                                <BetaButtonInner>BETA</BetaButtonInner>
+                            </BetaButton>
+                            <PrimaryAction
+                                type="tertiary"
+                                size="small"
+                                onClick={() => {
+                                    window.open(
+                                        'https://memex.garden/chatsupport',
+                                        '_blank',
+                                    )
+                                }}
+                                label="Report Bug"
+                            />
+                        </RightSideButtons>
+                        <PoweredBy>
+                            Powered by
+                            <Icon
+                                icon="openAI"
+                                height="18px"
+                                hoverOff
+                                width="70px"
+                            />
+                        </PoweredBy>
+                    </SummaryFooter>
                 </AISidebarContainer>
             )
         }
@@ -1864,6 +1906,42 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const SelectedAITextHeader = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    margin-right: -30px;
+`
+
+const SelectedAITextContainer = styled.div<{
+    fullHeight?: boolean
+}>`
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    grid-gap: 10px;
+    height: 100px;
+    overflow: hidden;
+
+    ${(props) =>
+        props.fullHeight &&
+        css`
+            height: fit-content;
+        `}
+`
+
+const BlurContainer = styled.div`
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        ${(props) => props.theme.colors.black}00 0%,
+        ${(props) => props.theme.colors.black} 100%
+    );
+`
+
 const QueryContainer = styled.div`
     height: 40px;
     padding: 15px;
@@ -1879,10 +1957,10 @@ const AISidebarContainer = styled.div`
 
 const SelectedAITextBox = styled.div`
     display: flex;
-    padding: 20px 25px 25px 20px;
-    grid-gap: 10px;
+    padding: 5px 25px 25px 20px;
     align-items: center;
     justify-content: flex-start;
+    flex-direction: column;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 
@@ -1949,6 +2027,7 @@ const SummaryContainer = styled.div`
     justify-content: space-between;
     grid-gap: 10px;
     align-items: flex-start;
+    min-height: 60px;
 `
 
 const SummaryFooter = styled.div`
@@ -1973,7 +2052,6 @@ const PoweredBy = styled.div`
 const SummarySection = styled.div`
     display: flex;
     width: 100%;
-    min-height: 60px;
     justify-content: center;
     align-items: start;
     height: fill-available;

@@ -227,9 +227,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
                     selectionItems.length - 1
                 ] as HTMLElement
 
-                console.log('selectionItems', selectionItems)
-                console.log('lastSelectionItem', lastSelectionItem)
-
                 if (
                     (lastSelectionItem &&
                         lastSelectionItem.classList &&

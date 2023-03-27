@@ -200,6 +200,7 @@ interface SidebarEvents {
     queryAIwithPrompt: {
         prompt: string
     }
+    removeSelectedTextAIPreview: null
     updatePromptState: {
         prompt: string
     }

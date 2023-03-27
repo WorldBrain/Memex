@@ -1,11 +1,20 @@
 import { SummarizationService } from '@worldbrain/memex-common/lib/summarization/index'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
 import { makeRemotelyCallable, RemoteFunction } from 'src/util/webextensionRPC'
 import type { RemoteEventEmitter } from '../../util/webextensionRPC'
 
 export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
     startPageSummaryStream: RemoteFunction<
         Role,
-        { fullPageUrl?: string; textToProcess?: string; queryPrompt?: string }
+        {
+            fullPageUrl?: string
+            textToProcess?: string
+            queryPrompt?: string
+            apiKey?: string
+        }
     >
     getTextSummary: RemoteFunction<
         Role,
@@ -42,7 +51,7 @@ export default class SummarizeBackground {
         'provider'
     >['startPageSummaryStream'] = async (
         { tab },
-        { fullPageUrl, textToProcess, queryPrompt },
+        { fullPageUrl, textToProcess, queryPrompt, apiKey },
     ) => {
         this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
 
@@ -50,6 +59,7 @@ export default class SummarizeBackground {
             fullPageUrl,
             textToProcess,
             queryPrompt,
+            apiKey,
         )) {
             const token = result?.t
             if (token?.length > 0) {

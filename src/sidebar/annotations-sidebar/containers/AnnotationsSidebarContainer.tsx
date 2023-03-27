@@ -810,6 +810,12 @@ export class AnnotationsSidebarContainer<
                                     prompt,
                                 })
                             }}
+                            removeSelectedTextAIPreview={() => {
+                                this.processEvent(
+                                    'removeSelectedTextAIPreview',
+                                    null,
+                                )
+                            }}
                             updatePromptState={(prompt) => {
                                 this.processEvent('updatePromptState', {
                                     prompt,
