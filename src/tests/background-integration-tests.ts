@@ -132,6 +132,7 @@ export async function setupBackgroundIntegrationTest(
         runtime: {
             getURL: () => '',
             onStartup: { addListener: () => {} },
+            onMessage: { addListener: () => {} },
             onMessageExternal: { addListener: () => {} },
         },
         extension: {
