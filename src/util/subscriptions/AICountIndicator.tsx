@@ -2,11 +2,18 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import React from 'react'
+import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import {
+    createSyncSettingsStore,
+    SyncSettingsStore,
+} from 'src/sync-settings/util'
 import styled, { css } from 'styled-components'
 import browser, { Storage } from 'webextension-polyfill'
 import { COUNTER_STORAGE_KEY, DEFAULT_COUNTER_STORAGE_KEY } from './constants'
 
-export interface Props {}
+export interface Props {
+    syncSettingsBG: RemoteSyncSettingsInterface
+}
 
 interface State {
     currentCount: number
@@ -16,6 +23,9 @@ interface State {
 }
 
 export class AICounterIndicator extends React.Component<Props, State> {
+    private tooltipButtonRef = React.createRef<HTMLDivElement>()
+    private syncSettings: SyncSettingsStore<'openAI'>
+
     state: State = {
         currentCount: DEFAULT_COUNTER_STORAGE_KEY.cQ,
         totalCount: DEFAULT_COUNTER_STORAGE_KEY.sQ,
@@ -23,7 +33,12 @@ export class AICounterIndicator extends React.Component<Props, State> {
         showTooltip: false,
     }
 
-    private tooltipButtonRef = React.createRef<HTMLDivElement>()
+    constructor(props: Props) {
+        super(props)
+        this.syncSettings = createSyncSettingsStore({
+            syncSettingsBG: props.syncSettingsBG,
+        })
+    }
 
     private get leftOverBlocks(): number {
         return this.state.totalCount - this.state.currentCount
