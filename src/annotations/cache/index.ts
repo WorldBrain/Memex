@@ -486,6 +486,13 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             description: updates.description ?? previousList.description,
         }
 
+        if (previousList.remoteId !== nextList.remoteId) {
+            this.remoteListIdsToCacheIds.set(
+                nextList.remoteId,
+                nextList.unifiedId,
+            )
+        }
+
         this.lists = {
             ...this.lists,
             byId: {
@@ -531,6 +538,12 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             throw new Error('No existing cached list found to remove')
         }
 
+        if (previousList.remoteId != null) {
+            this.remoteListIdsToCacheIds.delete(previousList.remoteId)
+        }
+        if (previousList.localId != null) {
+            this.localListIdsToCacheIds.delete(previousList.localId)
+        }
         this.lists.allIds = this.lists.allIds.filter(
             (unifiedListId) => unifiedListId !== list.unifiedId,
         )
