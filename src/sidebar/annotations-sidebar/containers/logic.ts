@@ -1332,7 +1332,9 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     async queryAI(data, highlightedText, prompt?) {
-        const articleLengthTooMuch = document.body.innerText.length > 50000
+        const articleLengthTooMuch =
+            document.body.innerText.length > 50000 &&
+            !data.fullPageUrl.startsWith('https://www.youtube.com/watch')
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
         const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
 
@@ -1364,7 +1366,7 @@ export class SidebarContainerLogic extends UILogic<
             return
         } else {
             this.emitMutation({
-                showLengthError: { $set: true },
+                showLengthError: { $set: false },
             })
         }
 
