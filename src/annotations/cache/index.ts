@@ -438,6 +438,13 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             )
         }
 
+        if (previous.remoteId !== updates.remoteId) {
+            this.remoteAnnotIdsToCacheIds.set(
+                updates.remoteId,
+                previous.unifiedId,
+            )
+        }
+
         const next: UnifiedAnnotation = {
             ...previous,
             privacyLevel,
@@ -495,18 +502,24 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
     }
 
-    removeAnnotation: PageAnnotationsCacheInterface['removeAnnotation'] = (
-        annotation,
-    ) => {
-        const previousAnnotation = this.annotations.byId[annotation.unifiedId]
+    removeAnnotation: PageAnnotationsCacheInterface['removeAnnotation'] = ({
+        unifiedId,
+    }) => {
+        const previousAnnotation = this.annotations.byId[unifiedId]
         if (!previousAnnotation) {
             throw new Error('No existing cached annotation found to remove')
         }
 
+        if (previousAnnotation.remoteId != null) {
+            this.remoteAnnotIdsToCacheIds.delete(previousAnnotation.remoteId)
+        }
+        if (previousAnnotation.localId != null) {
+            this.localAnnotIdsToCacheIds.delete(previousAnnotation.localId)
+        }
+        delete this.annotations.byId[previousAnnotation.unifiedId]
         this.annotations.allIds = this.annotations.allIds.filter(
-            (unifiedAnnotId) => unifiedAnnotId !== annotation.unifiedId,
+            (id) => id !== unifiedId,
         )
-        delete this.annotations.byId[annotation.unifiedId]
 
         this.events.emit('removedAnnotation', previousAnnotation)
         this.events.emit('newAnnotationsState', this.annotations)

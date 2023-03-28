@@ -648,4 +648,68 @@ describe('Page annotations cache tests', () => {
         expect(cache.getListByLocalId(1231231233123)).toEqual(null)
         expect(cache.getListByRemoteId('I dont exist')).toEqual(null)
     })
+
+    it('should update "remote ID -> cached ID" reverse annot index upon add, delete, and remoteId update', () => {
+        const { cache, emittedEvents } = setupTest()
+        const testAnnotations = TEST_DATA.ANNOTATIONS()
+        const testLists = TEST_DATA.LISTS()
+
+        delete testAnnotations[1].remoteId
+
+        cache.setLists(testLists)
+
+        expect([...cache['remoteAnnotIdsToCacheIds']]).toEqual([])
+
+        const { unifiedId: idA } = cache.addAnnotation(
+            reshapeUnifiedAnnotForCaching(testAnnotations[0], testLists),
+        )
+        const { unifiedId: idB } = cache.addAnnotation(
+            reshapeUnifiedAnnotForCaching(testAnnotations[1], testLists),
+        )
+        const { unifiedId: idC } = cache.addAnnotation(
+            reshapeUnifiedAnnotForCaching(testAnnotations[2], testLists),
+        )
+
+        expect([...cache['remoteAnnotIdsToCacheIds']]).toEqual([
+            [testAnnotations[2].remoteId, idC],
+        ])
+
+        const remoteIdA = 'test-remote-id-a'
+        const remoteIdB = 'test-remote-id-b'
+
+        cache.updateAnnotation({
+            ...testAnnotations[0],
+            unifiedId: idA,
+            remoteId: remoteIdA,
+        })
+        expect([...cache['remoteAnnotIdsToCacheIds']]).toEqual([
+            [testAnnotations[2].remoteId, idC],
+            [remoteIdA, idA],
+        ])
+
+        cache.updateAnnotation({
+            ...testAnnotations[1],
+            unifiedId: idB,
+            remoteId: remoteIdB,
+        })
+        expect([...cache['remoteAnnotIdsToCacheIds']]).toEqual([
+            [testAnnotations[2].remoteId, idC],
+            [remoteIdA, idA],
+            [remoteIdB, idB],
+        ])
+
+        cache.removeAnnotation({ unifiedId: idA })
+        expect([...cache['remoteAnnotIdsToCacheIds']]).toEqual([
+            [testAnnotations[2].remoteId, idC],
+            [remoteIdB, idB],
+        ])
+
+        cache.removeAnnotation({ unifiedId: idC })
+        expect([...cache['remoteAnnotIdsToCacheIds']]).toEqual([
+            [remoteIdB, idB],
+        ])
+
+        cache.removeAnnotation({ unifiedId: idB })
+        expect([...cache['remoteAnnotIdsToCacheIds']]).toEqual([])
+    })
 })
