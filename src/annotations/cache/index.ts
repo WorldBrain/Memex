@@ -17,6 +17,7 @@ import {
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-comparison'
 
 export interface PageAnnotationCacheDeps {
     normalizedPageUrl: string
@@ -130,6 +131,19 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         if (list.remoteId != null) {
             this.remoteListIdsToCacheIds.set(list.remoteId, unifiedId)
         }
+
+        // Ensure each annot gets a ref back to this list
+        list.unifiedAnnotationIds.forEach((unifiedAnnotId) => {
+            const cachedAnnot = this.annotations.byId[unifiedAnnotId]
+            if (
+                !cachedAnnot ||
+                cachedAnnot.unifiedListIds.includes(unifiedId)
+            ) {
+                return
+            }
+            cachedAnnot.unifiedListIds.unshift(unifiedId)
+        })
+
         return { ...list, unifiedId }
     }
 
@@ -235,14 +249,24 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         let shouldEmitAnnotUpdateEvent = false
         this.annotations = initNormalizedState({
             seedData: normalizedStateToArray(this.annotations).map((annot) => {
-                if (annot.privacyLevel < AnnotationPrivacyLevels.SHARED) {
+                const nextUnifiedListIds = Array.from(
+                    new Set([
+                        ...this.sharedPageListIds,
+                        ...annot.unifiedListIds,
+                    ]),
+                )
+                if (
+                    annot.privacyLevel < AnnotationPrivacyLevels.SHARED ||
+                    areArrayContentsEqual(
+                        annot.unifiedListIds,
+                        nextUnifiedListIds,
+                    )
+                ) {
                     return annot
                 }
+
                 shouldEmitAnnotUpdateEvent = true
-                return {
-                    ...annot,
-                    unifiedListIds: [...this.sharedPageListIds],
-                }
+                return { ...annot, unifiedListIds: nextUnifiedListIds }
             }),
             getId: (annot) => annot.unifiedId,
         })

@@ -108,13 +108,15 @@ export class AnnotationsSidebarContainer<
         })
     }
 
-    private createNewList = async (name: string) => {
+    private createNewList = (
+        annotationId?: UnifiedAnnotation['unifiedId'],
+    ) => async (name: string) => {
         const listId = Date.now()
 
         this.props.annotationsCache.addList({
             name,
             localId: listId,
-            unifiedAnnotationIds: [],
+            unifiedAnnotationIds: annotationId ? [annotationId] : [],
             hasRemoteAnnotationsToLoad: false,
             creator: this.props.currentUser,
         })
@@ -122,6 +124,7 @@ export class AnnotationsSidebarContainer<
             name: name,
             id: listId,
         })
+
         return listId
     }
 
@@ -332,7 +335,7 @@ export class AnnotationsSidebarContainer<
                     ),
                 }),
             getListDetailsById: this.getListDetailsById,
-            createNewList: this.createNewList,
+            createNewList: this.createNewList(),
             contentSharingBG,
             spacesBG: customListsBG,
             comment: this.state.commentBox.commentText,
@@ -359,13 +362,6 @@ export class AnnotationsSidebarContainer<
             customListsBG: customLists,
             contentSharingBG: contentSharing,
         } = this.props
-        const cardId = generateAnnotationCardInstanceId(
-            params.annotation,
-            params.instanceLocation,
-        )
-        const annotationCardInstance = this.state.annotationCardInstances[
-            cardId
-        ]
         // This is to show confirmation modal if the annotation is public and the user is trying to add it to a shared space
         const getUpdateListsEvent = (listId: number) =>
             [
@@ -380,30 +376,12 @@ export class AnnotationsSidebarContainer<
         return {
             spacesBG: customLists,
             contentSharingBG: contentSharing,
-            createNewEntry: this.createNewList,
+            createNewEntry: this.createNewList(params.annotation.unifiedId),
             initialSelectedListIds: () =>
                 cacheUtils.getLocalListIdsForCacheIds(
                     annotationsCache,
                     params.annotation.unifiedListIds,
                 ),
-            onSubmit: async () => {
-                if (!annotationCardInstance.isCommentEditing) {
-                    return
-                }
-                await this.processEvent('editAnnotation', {
-                    unifiedAnnotationId: params.annotation.unifiedId,
-                    instanceLocation: params.instanceLocation,
-                    shouldShare: [
-                        AnnotationPrivacyLevels.SHARED,
-                        AnnotationPrivacyLevels.SHARED_PROTECTED,
-                    ].includes(params.annotation.privacyLevel),
-                    isProtected: [
-                        AnnotationPrivacyLevels.PROTECTED,
-                        AnnotationPrivacyLevels.SHARED_PROTECTED,
-                    ].includes(params.annotation.privacyLevel),
-                    mainBtnPressed: true,
-                })
-            },
             selectEntry: async (listId, options) => {
                 this.processEvent(getUpdateListsEvent(listId), {
                     added: listId,
