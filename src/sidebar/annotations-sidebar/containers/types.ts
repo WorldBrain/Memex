@@ -97,6 +97,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     remoteAnnotationsLoadState: TaskState
     foreignSelectedListLoadState: TaskState
     selectedTextAIPreview: string
+    queryMode: string
 
     showState: 'visible' | 'hidden'
     isLocked: boolean
@@ -151,6 +152,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showUpgradeModal: boolean
 
     annotCount?: number
+    showLengthError?: boolean
 
     // Search result props
     shouldShowCount: boolean
@@ -199,6 +201,9 @@ interface SidebarEvents {
     }
     queryAIwithPrompt: {
         prompt: string
+    }
+    setQueryMode: {
+        mode: string
     }
     removeSelectedTextAIPreview: null
     updatePromptState: {

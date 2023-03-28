@@ -810,6 +810,11 @@ export class AnnotationsSidebarContainer<
                                     prompt,
                                 })
                             }}
+                            setQueryMode={(mode) => {
+                                this.processEvent('setQueryMode', {
+                                    mode,
+                                })
+                            }}
                             removeSelectedTextAIPreview={() => {
                                 this.processEvent(
                                     'removeSelectedTextAIPreview',

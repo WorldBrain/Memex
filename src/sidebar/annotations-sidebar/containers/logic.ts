@@ -264,6 +264,8 @@ export class SidebarContainerLogic extends UILogic<
             activeShareMenuNoteId: undefined,
             immediatelyShareNotes: false,
             pageHasNetworkAnnotations: false,
+            queryMode: 'summarize',
+            showLengthError: false,
         }
     }
 
@@ -1330,6 +1332,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     async queryAI(data, highlightedText, prompt?) {
+        const articleLengthTooMuch = document.body.innerText.length > 50000
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
         const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
 
@@ -1353,6 +1356,18 @@ export class SidebarContainerLogic extends UILogic<
             prompt: { $set: queryPrompt },
         })
 
+        if (!highlightedText && articleLengthTooMuch) {
+            this.emitMutation({
+                showLengthError: { $set: true },
+                loadState: { $set: 'success' },
+            })
+            return
+        } else {
+            this.emitMutation({
+                showLengthError: { $set: true },
+            })
+        }
+
         await this.options.summarizeBG.startPageSummaryStream({
             fullPageUrl:
                 data && data.fullPageUrl ? data.fullPageUrl : undefined,
@@ -1371,11 +1386,24 @@ export class SidebarContainerLogic extends UILogic<
             prompt: { $set: event.prompt },
         })
 
-        this.queryAI(
-            previousState,
-            previousState.selectedTextAIPreview ?? '',
-            event.prompt,
-        )
+        if (previousState.queryMode === 'question') {
+            this.queryAI(
+                undefined,
+                previousState.selectedTextAIPreview ?? '',
+                event.prompt,
+            )
+        } else {
+            this.queryAI(
+                previousState,
+                previousState.selectedTextAIPreview ?? '',
+                event.prompt,
+            )
+        }
+    }
+    setQueryMode: EventHandler<'setQueryMode'> = async ({ event }) => {
+        this.emitMutation({
+            queryMode: { $set: event.mode },
+        })
     }
     updatePromptState: EventHandler<'updatePromptState'> = async ({
         event,
