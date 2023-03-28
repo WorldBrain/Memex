@@ -17,6 +17,7 @@ import {
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-comparison'
 
 export interface PageAnnotationCacheDeps {
     normalizedPageUrl: string
@@ -130,6 +131,19 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         if (list.remoteId != null) {
             this.remoteListIdsToCacheIds.set(list.remoteId, unifiedId)
         }
+
+        // Ensure each annot gets a ref back to this list
+        list.unifiedAnnotationIds.forEach((unifiedAnnotId) => {
+            const cachedAnnot = this.annotations.byId[unifiedAnnotId]
+            if (
+                !cachedAnnot ||
+                cachedAnnot.unifiedListIds.includes(unifiedId)
+            ) {
+                return
+            }
+            cachedAnnot.unifiedListIds.unshift(unifiedId)
+        })
+
         return { ...list, unifiedId }
     }
 
@@ -235,14 +249,24 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         let shouldEmitAnnotUpdateEvent = false
         this.annotations = initNormalizedState({
             seedData: normalizedStateToArray(this.annotations).map((annot) => {
-                if (annot.privacyLevel < AnnotationPrivacyLevels.SHARED) {
+                const nextUnifiedListIds = Array.from(
+                    new Set([
+                        ...this.sharedPageListIds,
+                        ...annot.unifiedListIds,
+                    ]),
+                )
+                if (
+                    annot.privacyLevel < AnnotationPrivacyLevels.SHARED ||
+                    areArrayContentsEqual(
+                        annot.unifiedListIds,
+                        nextUnifiedListIds,
+                    )
+                ) {
                     return annot
                 }
+
                 shouldEmitAnnotUpdateEvent = true
-                return {
-                    ...annot,
-                    unifiedListIds: [...this.sharedPageListIds],
-                }
+                return { ...annot, unifiedListIds: nextUnifiedListIds }
             }),
             getId: (annot) => annot.unifiedId,
         })
@@ -438,6 +462,13 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             )
         }
 
+        if (previous.remoteId !== updates.remoteId) {
+            this.remoteAnnotIdsToCacheIds.set(
+                updates.remoteId,
+                previous.unifiedId,
+            )
+        }
+
         const next: UnifiedAnnotation = {
             ...previous,
             privacyLevel,
@@ -479,6 +510,13 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             description: updates.description ?? previousList.description,
         }
 
+        if (previousList.remoteId !== nextList.remoteId) {
+            this.remoteListIdsToCacheIds.set(
+                nextList.remoteId,
+                nextList.unifiedId,
+            )
+        }
+
         this.lists = {
             ...this.lists,
             byId: {
@@ -495,18 +533,24 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
     }
 
-    removeAnnotation: PageAnnotationsCacheInterface['removeAnnotation'] = (
-        annotation,
-    ) => {
-        const previousAnnotation = this.annotations.byId[annotation.unifiedId]
+    removeAnnotation: PageAnnotationsCacheInterface['removeAnnotation'] = ({
+        unifiedId,
+    }) => {
+        const previousAnnotation = this.annotations.byId[unifiedId]
         if (!previousAnnotation) {
             throw new Error('No existing cached annotation found to remove')
         }
 
+        if (previousAnnotation.remoteId != null) {
+            this.remoteAnnotIdsToCacheIds.delete(previousAnnotation.remoteId)
+        }
+        if (previousAnnotation.localId != null) {
+            this.localAnnotIdsToCacheIds.delete(previousAnnotation.localId)
+        }
+        delete this.annotations.byId[previousAnnotation.unifiedId]
         this.annotations.allIds = this.annotations.allIds.filter(
-            (unifiedAnnotId) => unifiedAnnotId !== annotation.unifiedId,
+            (id) => id !== unifiedId,
         )
-        delete this.annotations.byId[annotation.unifiedId]
 
         this.events.emit('removedAnnotation', previousAnnotation)
         this.events.emit('newAnnotationsState', this.annotations)
@@ -518,6 +562,12 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             throw new Error('No existing cached list found to remove')
         }
 
+        if (previousList.remoteId != null) {
+            this.remoteListIdsToCacheIds.delete(previousList.remoteId)
+        }
+        if (previousList.localId != null) {
+            this.localListIdsToCacheIds.delete(previousList.localId)
+        }
         this.lists.allIds = this.lists.allIds.filter(
             (unifiedListId) => unifiedListId !== list.unifiedId,
         )

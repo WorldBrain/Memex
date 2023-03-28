@@ -143,6 +143,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     annotationsShareAll: any
     copyPageLink: any
     queryAIwithPrompt: any
+    setQueryMode: (mode) => void
     updatePromptState: any
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
@@ -1141,6 +1142,13 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <SummarySection>
                 <SummaryContainer>
+                    {this.props.showLengthError &&
+                        this.props.queryMode === 'summarize' && (
+                            <ErrorContainer>
+                                This article is too big. Consider summarising
+                                per paragraph for better quality.
+                            </ErrorContainer>
+                        )}
                     <SummaryText>{this.props.pageSummary}</SummaryText>
                 </SummaryContainer>
                 {/* {this.state
@@ -1247,14 +1255,57 @@ export class AnnotationsSidebar extends React.Component<
                                         this.props.prompt,
                                     )
                                 }
+                                event.stopPropagation()
                             }}
                             height="40px"
                         />
                     </QueryContainer>
+                    <OptionsContainer>
+                        Mode
+                        <TooltipBox
+                            tooltipText={
+                                <>
+                                    Good for summarising content and less good
+                                    in answering factual questions about it.
+                                    Consider summarising per paragraph for
+                                    better quality.
+                                </>
+                            }
+                            placement="bottom"
+                            width="150px"
+                        >
+                            <SelectionPill
+                                onClick={() =>
+                                    this.props.setQueryMode('summarize')
+                                }
+                                selected={this.props.queryMode === 'summarize'}
+                            >
+                                Summarisation
+                            </SelectionPill>
+                        </TooltipBox>
+                        <TooltipBox
+                            tooltipText={
+                                <>
+                                    This mode is ideal for general questions{' '}
+                                    that are not specific to this page
+                                </>
+                            }
+                            placement="bottom"
+                            width="150px"
+                        >
+                            <SelectionPill
+                                onClick={() =>
+                                    this.props.setQueryMode('question')
+                                }
+                                selected={this.props.queryMode === 'question'}
+                            >
+                                General Question
+                            </SelectionPill>
+                        </TooltipBox>
+                    </OptionsContainer>
                     {this.props.loadState === 'running'
                         ? this.renderLoader()
                         : this.showSummary()}
-
                     <SummaryFooter>
                         <RightSideButtons>
                             {this.props.renderAICounter()}
@@ -1906,6 +1957,35 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const OptionsContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: ${(props) => props.theme.colors.greyScale4};
+    padding: 0 10px 10px 20px;
+    font-size: 12px;
+    grid-gap: 10px;
+    z-index: 100;
+`
+
+const SelectionPill = styled.div<{ selected: boolean }>`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    color: ${(props) => props.theme.colors.greyScale6};
+    border-radius: 20px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    cursor: pointer;
+    font-size: 10px;
+
+    ${(props) =>
+        props.selected &&
+        css`
+            background: ${(props) => props.theme.colors.greyScale2};
+        `}
+`
+
 const SelectedAITextHeader = styled.div`
     display: flex;
     align-items: center;
@@ -1921,7 +2001,9 @@ const SelectedAITextContainer = styled.div<{
     display: flex;
     flex-direction: row;
     grid-gap: 10px;
-    height: 100px;
+    min-height: 30px;
+    width: 100%;
+    max-height: 100px;
     overflow: hidden;
 
     ${(props) =>
@@ -1974,6 +2056,7 @@ const SelectedTextBoxBar = styled.div`
 const SelectedAIText = styled.div`
     color: ${(props) => props.theme.colors.white};
     flex: 1;
+    white-space: break-spaces;
 `
 
 const RightSideButtons = styled.div`
@@ -2015,9 +2098,15 @@ const BetaButtonInner = styled.div`
 
 const ErrorContainer = styled.div`
     display: flex;
-    background: ${(props) => props.theme.colors.warning};
-    color: ${(props) => props.theme.colors.white};
+    background: ${(props) => props.theme.colors.warning}40;
+    color: ${(props) => props.theme.colors.greyScale7};
     font-size: 16px;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 `
 
 const SummaryContainer = styled.div`

@@ -187,8 +187,10 @@ class BackgroundScript {
             .waitForAuthReady()
             .then(async () => {
                 let currentUser = await this.deps.bgModules.auth.authService.getCurrentUser()
-                let emailAddresse = currentUser.email
-                checkStripePlan(emailAddresse)
+                if (currentUser) {
+                    let emailAddresse = currentUser.email
+                    checkStripePlan(emailAddresse)
+                }
             })
     }
 
