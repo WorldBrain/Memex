@@ -495,7 +495,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
             }),
         )
 
-        if (pdfViewer) {
+        if (
+            highlights.length > 0 &&
+            pdfViewer &&
+            !opts?.dontWatchForRerenders
+        ) {
             this.watchForRerenders(highlights, onClick)
         }
     }
@@ -506,9 +510,10 @@ export class HighlightRenderer implements HighlightRendererInterface {
         onClick: AnnotationClickHandler,
     ) => {
         const pdfViewer = globalThis.PDFViewerApplication?.pdfViewer
-        // if (this.observer != null || !pdfViewer) {
-        //     return
-        // }
+
+        if (!pdfViewer) {
+            return
+        }
 
         const rerenderMissingHighlights = async () => {
             let highlightsToRerender
@@ -534,6 +539,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
             if (highlightsToRerender.length > 0) {
                 await this.renderHighlights(highlightsToRerender, onClick, {
                     removeExisting: false,
+                    dontWatchForRerenders: true,
                 })
             }
         }
