@@ -23,7 +23,11 @@ export interface HighlightInteractionsInterface {
     renderHighlights: (
         highlights: _UnifiedAnnotation[],
         onClick: AnnotationClickHandler,
-        opts?: { temp?: boolean; removeExisting?: boolean },
+        opts?: {
+            temp?: boolean
+            removeExisting?: boolean
+            dontWatchForRerenders?: boolean
+        },
     ) => Promise<void>
     renderHighlight: (
         highlight: _UnifiedAnnotation,
