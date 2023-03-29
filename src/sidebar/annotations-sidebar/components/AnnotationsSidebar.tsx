@@ -1273,9 +1273,12 @@ export class AnnotationsSidebar extends React.Component<
                             width="150px"
                         >
                             <SelectionPill
-                                onClick={() =>
+                                onClick={async () => {
                                     this.props.setQueryMode('glanceSummary')
-                                }
+                                    await this.props.queryAIwithPrompt(
+                                        this.props.prompt,
+                                    )
+                                }}
                                 selected={
                                     this.props.queryMode === 'glanceSummary'
                                 }
@@ -1294,9 +1297,12 @@ export class AnnotationsSidebar extends React.Component<
                             width="150px"
                         >
                             <SelectionPill
-                                onClick={() =>
+                                onClick={async () => {
                                     this.props.setQueryMode('summarize')
-                                }
+                                    await this.props.queryAIwithPrompt(
+                                        this.props.prompt,
+                                    )
+                                }}
                                 selected={this.props.queryMode === 'summarize'}
                             >
                                 Full Page
@@ -2028,6 +2034,7 @@ const SelectedAITextContainer = styled.div<{
     ${(props) =>
         props.fullHeight &&
         css`
+            max-height: unset;
             height: fit-content;
         `}
 `
