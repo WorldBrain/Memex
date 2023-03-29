@@ -764,7 +764,6 @@ export class SidebarContainerLogic extends UILogic<
             this.emitMutation({
                 prompt: { $set: undefined },
             })
-            console.log('is here')
             await this.queryAI(
                 event.fullPageUrl,
                 undefined,
@@ -1348,7 +1347,7 @@ export class SidebarContainerLogic extends UILogic<
         textAsAlternative?: string,
     ) {
         const isPagePDF =
-            fullPageUrl && fullPageUrl.endsWith('/pdfjs/viewer.html?file=blob')
+            fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?file=blob')
         const maxLength = 50000
         const articleLengthTooMuch =
             ((textAsAlternative && textAsAlternative.length > maxLength) ||
@@ -1428,8 +1427,6 @@ export class SidebarContainerLogic extends UILogic<
         if (isPagePDF) {
             fullTextToProcess = document.body.innerText
         }
-
-        console.log('pagepdf', isPagePDF)
 
         if (previousState.queryMode === 'question') {
             this.queryAI(
