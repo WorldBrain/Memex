@@ -59,6 +59,8 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     private generateAnnotationId = (): string =>
         (this.annotationIdCounter++).toString()
     private generateListId = (): string => (this.listIdCounter++).toString()
+    private isListShared = (listId: UnifiedList['unifiedId']): boolean =>
+        this.lists.byId[listId]?.remoteId != null
 
     getLastAssignedAnnotationId = (): string =>
         (this.annotationIdCounter - 1).toString()
@@ -240,9 +242,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     }
 
     private get sharedPageListIds(): UnifiedList['unifiedId'][] {
-        return [...this.pageListIds].filter(
-            (listId) => this.lists.byId[listId]?.remoteId != null,
-        )
+        return [...this.pageListIds].filter(this.isListShared)
     }
 
     private updateSharedAnnotationsWithSharedPageLists() {
@@ -252,7 +252,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 const nextUnifiedListIds = Array.from(
                     new Set([
                         ...this.sharedPageListIds,
-                        ...annot.unifiedListIds,
+                        ...annot.unifiedListIds.filter(
+                            (listId) => !this.isListShared(listId),
+                        ),
                     ]),
                 )
                 if (
@@ -434,7 +436,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             // If changing a public annot's lists, those shared list changes should cascade to other sibling shared annots
             if (previous.privacyLevel === AnnotationPrivacyLevels.SHARED) {
                 const sharedListIds = updates.unifiedListIds.filter(
-                    (listId) => this.lists.byId[listId]?.remoteId != null,
+                    this.isListShared,
                 )
                 this.ensurePageListsSet(sharedListIds)
                 shouldUpdateSiblingAnnots = true
@@ -449,7 +451,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             } else {
                 // Keep only private lists
                 nextUnifiedListIds = nextUnifiedListIds.filter(
-                    (listId) => !this.lists.byId[listId]?.remoteId,
+                    (listId) => !this.isListShared(listId),
                 )
             }
         } else if (

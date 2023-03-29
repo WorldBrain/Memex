@@ -355,10 +355,6 @@ describe('Page annotations cache tests', () => {
             event: 'updatedPageData',
             args: TEST_DATA.NORMALIZED_PAGE_URL_2,
         })
-        expectedEvents.push({
-            event: 'newAnnotationsState',
-            args: cloneNormalizedState(cache.annotations),
-        })
 
         expect(cache.normalizedPageUrl).toEqual(TEST_DATA.NORMALIZED_PAGE_URL_2)
         expect(cache.annotations.allIds).toEqual(unifiedIdsB)
@@ -378,7 +374,6 @@ describe('Page annotations cache tests', () => {
             [unifiedIdsB[3]]: {
                 ...testAnnotations[3],
                 unifiedId: unifiedIdsB[3],
-                unifiedListIds: [],
             },
         })
         expect(emittedEvents).toEqual(expectedEvents)
