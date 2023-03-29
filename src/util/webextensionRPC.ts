@@ -167,7 +167,9 @@ export function runInTabViaBg<T extends object>(tabId): T {
     })
 }
 
-// @depreciated - Don't call this function directly. Instead use the above typesafe version runInBackground
+/**
+ * @depreciated - Don't call this function directly. Instead use the typesafe versions `runInBackground` or `runInTab`
+ */
 export function remoteFunction(
     funcName: string,
     { tabId }: { tabId?: number } = {},

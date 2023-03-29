@@ -40,7 +40,6 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator'
 
 export interface Props extends RibbonSubcomponentProps {
-    getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
     setRef?: (el: HTMLElement) => void
     isExpanded: boolean
     isRibbonEnabled: boolean
@@ -76,9 +75,6 @@ export default class Ribbon extends Component<Props, State> {
 
     private keyboardShortcuts: BaseKeyboardShortcuts
     private shortcutsData: Map<string, ShortcutElData>
-    private openOverviewTabRPC
-    private openOptionsTabRPC
-    getFeedInfo
     settingsButtonRef
     private annotationCreateRef // TODO: Figure out how to properly type refs to onClickOutside HOCs
 
@@ -110,11 +106,6 @@ export default class Ribbon extends Component<Props, State> {
                 ShortcutElData,
             ][],
         )
-        this.openOverviewTabRPC = this.props.getRemoteFunction(
-            'openOverviewTab',
-        )
-        this.openOptionsTabRPC = this.props.getRemoteFunction('openOptionsTab')
-        this.getFeedInfo = this.props.getRemoteFunction('getFeedInfo')
 
         this.settingsButtonRef = createRef<HTMLDivElement>()
     }
@@ -159,17 +150,6 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     focusCreateForm = () => this.annotationCreateRef?.getInstance()?.focus()
-
-    private handleSearchEnterPress: KeyboardEventHandler<HTMLInputElement> = (
-        event,
-    ) => {
-        const queryFilters = extractQueryFilters(this.props.search.searchValue)
-        const queryParams = qs.stringify(queryFilters)
-
-        this.openOverviewTabRPC(queryParams)
-        this.props.search.setShowSearchBox(false)
-        this.props.search.setSearchValue('')
-    }
 
     private handleCommentIconBtnClick = (event) => {
         if (event.shiftKey) {
@@ -264,7 +244,9 @@ export default class Ribbon extends Component<Props, State> {
             >
                 <QuickTutorial
                     getKeyboardShortcutsState={getKeyboardShortcutsState}
-                    onSettingsClick={() => this.openOptionsTabRPC('settings')}
+                    onSettingsClick={() =>
+                        this.props.bgScriptBG.openOptionsTab('settings')
+                    }
                 />
             </PopoutBox>
         )
@@ -450,7 +432,9 @@ export default class Ribbon extends Component<Props, State> {
                                 >
                                     <Icon
                                         onClick={() =>
-                                            this.openOptionsTabRPC('blocklist')
+                                            this.props.bgScriptBG.openOptionsTab(
+                                                'blocklist',
+                                            )
                                         }
                                         filePath={'settings'}
                                         heightAndWidth={'18px'}
@@ -583,7 +567,9 @@ export default class Ribbon extends Component<Props, State> {
                             <InfoText>Tutorials</InfoText>
                         </ExtraButtonRow>
                         <ExtraButtonRow
-                            onClick={() => this.openOptionsTabRPC('settings')}
+                            onClick={() =>
+                                this.props.bgScriptBG.openOptionsTab('settings')
+                            }
                         >
                             <Icon
                                 filePath={icons.settings}
@@ -936,7 +922,7 @@ export default class Ribbon extends Component<Props, State> {
                                         >
                                             <Icon
                                                 onClick={() =>
-                                                    this.openOverviewTabRPC()
+                                                    this.props.bgScriptBG.openOverviewTab()
                                                 }
                                                 color={'greyScale6'}
                                                 heightAndWidth="20px"

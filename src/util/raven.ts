@@ -1,6 +1,8 @@
 import * as AllRaven from 'raven-js'
 import createRavenMiddleware from 'raven-for-redux'
 
+const extUrlPattern = /^(chrome|moz)-extension:\/\//
+
 // Issue with the export being a default but something with our tsconfig; TODO
 const raven = AllRaven['default']
 let sentryEnabled = true // TODO: Set this based on user preference
@@ -20,6 +22,8 @@ export default function initSentry({
         raven
             .config(process.env.SENTRY_DSN, {
                 shouldSendCallback: () => sentryEnabled,
+                whitelistUrls: [extUrlPattern],
+                includePaths: [extUrlPattern],
             })
             .install()
 

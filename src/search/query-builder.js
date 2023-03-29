@@ -66,7 +66,11 @@ class QueryBuilder {
             lists: [...this.lists],
             isBadTerm: this.isBadTerm,
             // Can't do a terms exclusion without some terms already defined
-            isInvalidSearch: this.queryExclude.size && !this.query.size,
+            isInvalidSearch:
+                this.queryExclude.size &&
+                !this.query.size &&
+                !this.endDate &&
+                !this.startDate,
         }
     }
 

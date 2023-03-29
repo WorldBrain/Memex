@@ -2,7 +2,6 @@ import kebabCase from 'lodash/kebabCase'
 import type { Browser } from 'webextension-polyfill'
 import { UAParser } from 'ua-parser-js'
 import StorageManager from '@worldbrain/storex'
-import { updateOrCreate } from '@worldbrain/storex/lib/utils'
 import NotificationBackground from 'src/notifications/background'
 import SocialBackground from 'src/social-integration/background'
 import DirectLinkingBackground from 'src/annotations/background'
@@ -31,15 +30,12 @@ import {
     setImportStateManager,
     ImportStateManager,
 } from 'src/imports/background/state-manager'
-import transformPageHTML from 'src/util/transform-page-html'
 import { setupImportBackgroundModule } from 'src/imports/background'
 import BackgroundScript from '.'
 import { setupNotificationClickListener } from 'src/util/notifications'
 import { StorageChangesManager } from 'src/util/storage-changes'
 import { AuthBackground } from 'src/authentication/background'
-// import { FeatureOptIns } from 'src/features/background/feature-opt-ins'
 import { FeaturesBeta } from 'src/features/background/feature-beta'
-// import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
 import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import { combineSearchIndex } from 'src/search/search-index'
@@ -84,7 +80,6 @@ import { PersonalCloudBackground } from 'src/personal-cloud/background'
 import {
     PersonalCloudBackend,
     PersonalCloudService,
-    PersonalCloudClientStorageType,
     SyncTriggerSetup,
     PersonalCloudDeviceId,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
@@ -96,8 +91,6 @@ import type {
 import { authChanges } from '@worldbrain/memex-common/lib/authentication/utils'
 import FirebasePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firebase'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
-import { StoredContentType } from 'src/page-indexing/background/types'
-import transformPageText from 'src/util/transform-page-text'
 import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
 import type { ReadwiseSettings } from 'src/readwise-integration/background/types/settings'
 import type { LocalExtensionSettings } from './types'
@@ -106,7 +99,9 @@ import { createSyncSettingsStore } from 'src/sync-settings/util'
 import DeprecatedStorageModules from './deprecated-storage-modules'
 import { PageActivityIndicatorBackground } from 'src/page-activity-indicator/background'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { handleIncomingData } from 'src/personal-cloud/background/handle-incoming-data'
 
+import omnibar from 'src/omnibar'
 export interface BackgroundModules {
     auth: AuthBackground
     analytics: AnalyticsBackground
@@ -201,6 +196,8 @@ export function createBackgroundModules(options: {
         storageManager,
         localBrowserStorage: options.browserAPIs.storage.local,
     })
+
+    omnibar
 
     const syncSettingsStore = createSyncSettingsStore({
         syncSettingsBG: syncSettings,
@@ -517,82 +514,12 @@ export function createBackgroundModules(options: {
         localExtSettingStore,
         getUserId: getCurrentUserId,
         authChanges: authChangeGenerator,
-        // TODO: Move this somewhere more appropriate (personal-cloud module)
-        writeIncomingData: async (params) => {
-            const incomingStorageManager =
-                params.storageType === PersonalCloudClientStorageType.Persistent
-                    ? options.persistentStorageManager
-                    : options.storageManager
-
-            // Add any newly created lists to the list suggestion cache
-            if (
-                params.collection === 'customLists' &&
-                params.updates.id != null
-            ) {
-                const existingList = await options.storageManager.backend.operation(
-                    'findObject',
-                    params.collection,
-                    { id: params.updates.id },
-                )
-
-                if (existingList == null) {
-                    await customLists.updateListSuggestionsCache({
-                        added: params.updates.id,
-                    })
-                }
-            }
-
-            // WARNING: Keep in mind this skips all storage middleware
-            await updateOrCreate({
-                ...params,
-                storageManager: incomingStorageManager,
-                executeOperation: (...args: any[]) => {
-                    return (incomingStorageManager.backend.operation as any)(
-                        ...args,
-                    )
-                },
-            })
-
-            // For any new incoming followedList, manually pull followedListEntries
-            if (
-                params.collection === 'followedList' &&
-                params.updates.sharedList != null
-            ) {
-                await pageActivityIndicator.syncFollowedListEntries({
-                    forFollowedLists: [
-                        { sharedList: params.updates.sharedList },
-                    ],
-                })
-            }
-
-            if (params.collection === 'docContent') {
-                const { normalizedUrl, storedContentType } = params.where ?? {}
-                const { content } = params.updates
-                if (!normalizedUrl || !content) {
-                    console.warn(
-                        `Got an incoming page, but it didn't include a URL and a body`,
-                    )
-                    return
-                }
-
-                const processed =
-                    storedContentType === StoredContentType.HtmlBody
-                        ? transformPageHTML({
-                              html: content,
-                          }).text
-                        : transformPageText({
-                              text: (content.pageTexts ?? []).join(' '),
-                          }).text
-                await storageManager.backend.operation(
-                    'updateObjects',
-                    'pages',
-                    {
-                        url: normalizedUrl,
-                    },
-                    { text: processed },
-                )
-            }
-        },
+        writeIncomingData: handleIncomingData({
+            customListsBG: customLists,
+            pageActivityIndicatorBG: pageActivityIndicator,
+            persistentStorageManager: options.persistentStorageManager,
+            storageManager: options.storageManager,
+        }),
     })
 
     const contentSharing = new ContentSharingBackground({

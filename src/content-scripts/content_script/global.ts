@@ -71,6 +71,7 @@ import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { upgradePlan } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import { browser } from 'webextension-polyfill-ts'
+import initSentry from 'src/util/raven'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -82,6 +83,7 @@ export async function main(
         getContentFingerprints?: GetContentFingerprints
     } = {},
 ): Promise<SharedInPageUIState> {
+    initSentry({})
     params.loadRemotely = params.loadRemotely ?? true
 
     const isPdfViewerRunning = params.getContentFingerprints != null
@@ -345,15 +347,15 @@ export async function main(
                 inPageUI,
                 currentUser,
                 annotationsManager,
-                getRemoteFunction: remoteFunction,
                 highlighter: highlightRenderer,
                 annotations: annotationsBG,
                 annotationsCache,
                 tags: tagsBG,
                 customLists: collectionsBG,
+                bgScriptBG,
                 activityIndicatorBG: runInBackground(),
                 contentSharing: contentSharingBG,
-                bookmarks: runInBackground(),
+                bookmarks,
                 syncSettings: createSyncSettingsStore({ syncSettingsBG }),
                 tooltip: {
                     getState: tooltipUtils.getTooltipState,
