@@ -145,31 +145,50 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     updateQueryStringParameter(key, value) {
         // Get the current URL of the page
+        if (value != null && value.length > 0) {
+            const url = window.location.href
+
+            let regex = new RegExp(`(${key}=)[^&]+`)
+            let match = url.match(regex)
+
+            let updatedUrl = url
+            if (match) {
+                // update the query parameter value
+                let updatedParam = `${key}=${value}`
+
+                // replace the old query parameter with the updated one
+                updatedUrl = url.replace(match[0], updatedParam)
+            } else {
+                if (!url.includes('?')) {
+                    // add the query parameter to the URL
+                    updatedUrl = `${url}?${key}=${value}`
+                } else {
+                    // add the query parameter to the URL
+                    updatedUrl = `${url}&${key}=${value}`
+                }
+            }
+            // Replace the current URL with the new one
+            window.location.replace(updatedUrl)
+        }
+    }
+    removeQueryString(key) {
+        // Get the current URL of the page
         const url = window.location.href
 
-        let regex = new RegExp(`(${key}=)[^&]+`)
-        let match = url.match(regex)
+        // Regular expression to match the query parameter key and its value
+        const regex = new RegExp('([?&])' + key + '=([^&]*)')
 
-        let updatedUrl = url
-        if (match) {
-            // update the query parameter value
-            let updatedParam = `${key}=${value}`
+        // Remove the query parameter from the URL
+        const updatedUrl = url.replace(regex, (match, p1) => {
+            return p1 === '?' ? '?' : ''
+        })
 
-            // replace the old query parameter with the updated one
-            updatedUrl = url.replace(match[0], updatedParam)
-        } else {
-            if (!url.includes('?')) {
-                // add the query parameter to the URL
-                updatedUrl = `${url}?${key}=${value}`
-            } else {
-                // add the query parameter to the URL
-                updatedUrl = `${url}&${key}=${value}`
-            }
-        }
+        // If the last character is a '?', remove it
+        const cleanUrl = updatedUrl.replace(/[?]$/, '')
+
         // Replace the current URL with the new one
-        window.location.replace(updatedUrl)
+        window.history.replaceState({}, '', cleanUrl)
     }
-
     getInitialState(): State {
         const searchQuery = this.getQueryStringParameter('query')
         const spacesQuery = this.getQueryStringParameter('spaces')
@@ -187,11 +206,21 @@ export class DashboardLogic extends UILogic<State, Events> {
             spacesArray = [spacesQuery]
         }
 
-        let openFilterBarOnLoad = !!(
-            (spacesQuery && spacesArray.length > 1) ||
-            from ||
-            to
+        let openFilterBarOnLoad
+        console.log(
+            'spacesQuery',
+            spacesQuery,
+            spacesArray.length > 1,
+            fromQuery,
+            toQuery,
         )
+        if ((spacesQuery && spacesArray.length > 1) || fromQuery || toQuery) {
+            openFilterBarOnLoad = true
+        } else {
+            openFilterBarOnLoad = false
+        }
+
+        console.log('openFilterBarOnLoad', openFilterBarOnLoad)
 
         return {
             currentUser: null,
@@ -2568,6 +2597,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 event: null,
                 previousState,
             })
+        } else {
+            this.emitMutation({
+                searchFilters: { searchFiltersOpen: { $set: true } },
+            })
         }
     }
 
@@ -2867,13 +2900,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        this.updateQueryStringParameter('spaces', '')
-        this.updateQueryStringParameter('from', '')
-        this.updateQueryStringParameter('to', '')
+        this.removeQueryString('spaces')
+        this.removeQueryString('from')
+        this.removeQueryString('to')
 
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { $set: this.getInitialState().searchFilters },
             listsSidebar: { selectedListId: { $set: undefined } },
+        })
+        this.emitMutation({
+            searchFilters: { searchFiltersOpen: { $set: false } },
         })
     }
 
