@@ -125,7 +125,6 @@ export default class Ribbon extends Component<Props, State> {
         this.setState({
             updatesAvailable: !updatesAvailable[READ_STORAGE_FLAG],
         })
-        console.log('updatesAvailable', this.state.updatesAvailable)
     }
 
     async setUpdateFlagToRead() {
