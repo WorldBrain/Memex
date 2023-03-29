@@ -1265,10 +1265,29 @@ export class AnnotationsSidebar extends React.Component<
                         <TooltipBox
                             tooltipText={
                                 <>
-                                    Good for summarising content and less good
-                                    in answering factual questions about it.
-                                    Consider summarising per paragraph for
-                                    better quality.
+                                    Just takes the first few paragraphs for the
+                                    summary. Much faster.
+                                </>
+                            }
+                            placement="bottom"
+                            width="150px"
+                        >
+                            <SelectionPill
+                                onClick={() =>
+                                    this.props.setQueryMode('glanceSummary')
+                                }
+                                selected={
+                                    this.props.queryMode === 'glanceSummary'
+                                }
+                            >
+                                Quick Glance
+                            </SelectionPill>
+                        </TooltipBox>
+                        <TooltipBox
+                            tooltipText={
+                                <>
+                                    Takes in the whole article or video. Much
+                                    slower.
                                 </>
                             }
                             placement="bottom"
@@ -1280,7 +1299,7 @@ export class AnnotationsSidebar extends React.Component<
                                 }
                                 selected={this.props.queryMode === 'summarize'}
                             >
-                                Summarisation
+                                Full Page
                             </SelectionPill>
                         </TooltipBox>
                         <TooltipBox

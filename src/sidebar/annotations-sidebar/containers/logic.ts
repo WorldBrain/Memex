@@ -264,7 +264,7 @@ export class SidebarContainerLogic extends UILogic<
             activeShareMenuNoteId: undefined,
             immediatelyShareNotes: false,
             pageHasNetworkAnnotations: false,
-            queryMode: 'summarize',
+            queryMode: 'glanceSummary',
             showLengthError: false,
         }
     }
@@ -1331,10 +1331,17 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    async queryAI(data, highlightedText, prompt?) {
+    async queryAI(
+        fullPageUrl,
+        highlightedText,
+        prompt?,
+        shortSummary?: boolean,
+        previousState?: SidebarContainerState,
+    ) {
         const articleLengthTooMuch =
             document.body.innerText.length > 50000 &&
-            !data.fullPageUrl.startsWith('https://www.youtube.com/watch')
+            !fullPageUrl.startsWith('https://www.youtube.com/watch') &&
+            previousState.queryMode === 'summarize'
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
         const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
 
@@ -1371,11 +1378,11 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         await this.options.summarizeBG.startPageSummaryStream({
-            fullPageUrl:
-                data && data.fullPageUrl ? data.fullPageUrl : undefined,
+            fullPageUrl: fullPageUrl && fullPageUrl ? fullPageUrl : undefined,
             textToProcess: highlightedText ?? undefined,
             queryPrompt: queryPrompt,
             apiKey: openAIKey ? openAIKey : undefined,
+            shortSummary: shortSummary,
         })
         await updateAICounter()
     }
@@ -1393,12 +1400,24 @@ export class SidebarContainerLogic extends UILogic<
                 undefined,
                 previousState.selectedTextAIPreview ?? '',
                 event.prompt,
+                undefined,
+                previousState,
+            )
+        } else if (previousState.queryMode === 'summarize') {
+            this.queryAI(
+                previousState,
+                previousState.selectedTextAIPreview ?? '',
+                event.prompt,
+                undefined,
+                previousState,
             )
         } else {
             this.queryAI(
                 previousState,
                 previousState.selectedTextAIPreview ?? '',
                 event.prompt,
+                true,
+                previousState,
             )
         }
     }
@@ -1446,12 +1465,24 @@ export class SidebarContainerLogic extends UILogic<
                 this.emitMutation({
                     prompt: { $set: '' },
                 })
-                await this.queryAI(undefined, event.textToProcess, undefined)
+                await this.queryAI(
+                    undefined,
+                    event.textToProcess,
+                    undefined,
+                    undefined,
+                    previousState,
+                )
             } else {
                 this.emitMutation({
                     prompt: { $set: '' },
                 })
-                await this.queryAI(previousState, undefined, undefined)
+                await this.queryAI(
+                    previousState.fullPageUrl,
+                    undefined,
+                    undefined,
+                    previousState.queryMode === 'glanceSummary' ? true : false,
+                    previousState,
+                )
             }
         }
     }

@@ -14,6 +14,7 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
             textToProcess?: string
             queryPrompt?: string
             apiKey?: string
+            shortSummary?: boolean
         }
     >
     getTextSummary: RemoteFunction<
@@ -51,7 +52,7 @@ export default class SummarizeBackground {
         'provider'
     >['startPageSummaryStream'] = async (
         { tab },
-        { fullPageUrl, textToProcess, queryPrompt, apiKey },
+        { fullPageUrl, textToProcess, queryPrompt, apiKey, shortSummary },
     ) => {
         this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
 
@@ -60,6 +61,8 @@ export default class SummarizeBackground {
             textToProcess,
             queryPrompt,
             apiKey,
+            undefined,
+            shortSummary,
         )) {
             const token = result?.t
             if (token?.length > 0) {
