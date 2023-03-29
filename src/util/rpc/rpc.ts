@@ -314,7 +314,7 @@ export class PortBasedRPCManager {
             throw new Error(
                 `Could not get a port to ${this.getPortIdForTab(
                     tabId,
-                )} (when trying to call [${name}]`,
+                )} (when trying to call [${name}] )`,
             )
         }
         return port

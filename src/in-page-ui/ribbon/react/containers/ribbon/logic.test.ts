@@ -77,7 +77,7 @@ describe('Ribbon logic', () => {
             currentTab,
             highlighter,
             annotationsManager,
-            getRemoteFunction: () => async () => {},
+            bgScriptBG: backgroundModules.bgScript['remoteFunctions'],
             bookmarks: backgroundModules.bookmarks.remoteFunctions,
             tags: backgroundModules.tags.remoteFunctions,
             contentSharing: backgroundModules.contentSharing.remoteFunctions,
