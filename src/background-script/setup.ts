@@ -106,7 +106,7 @@ import { createSyncSettingsStore } from 'src/sync-settings/util'
 import DeprecatedStorageModules from './deprecated-storage-modules'
 import { PageActivityIndicatorBackground } from 'src/page-activity-indicator/background'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-
+import omnibar from 'src/omnibar'
 export interface BackgroundModules {
     auth: AuthBackground
     analytics: AnalyticsBackground
@@ -201,6 +201,8 @@ export function createBackgroundModules(options: {
         storageManager,
         localBrowserStorage: options.browserAPIs.storage.local,
     })
+
+    omnibar
 
     const syncSettingsStore = createSyncSettingsStore({
         syncSettingsBG: syncSettings,

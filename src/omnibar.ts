@@ -211,4 +211,4 @@ export async function main() {
     globalThis['browser'].omnibox.onInputEntered.addListener(acceptInput)
 }
 
-main()
+export default main()

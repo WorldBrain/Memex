@@ -122,7 +122,64 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    getQueryStringParameter(parameterName) {
+        // Get the current URL of the page
+        const url = window.location.href
+
+        // Check if the URL has a query string
+        const queryStringIndex = url.indexOf('?')
+        if (queryStringIndex === -1) {
+            return null // No query string found
+        }
+
+        // Split the query string into key-value pairs
+        const queryString = url.substring(queryStringIndex + 1)
+        const queryParams = new URLSearchParams(queryString)
+
+        // Get the value of the specified parameter
+        return queryParams.get(parameterName)
+    }
+
+    updateQueryStringParameter(key, value) {
+        // Get the current URL of the page
+        const url = window.location.href
+
+        let regex = new RegExp(`(${key}=)[^&]+`)
+        let match = url.match(regex)
+
+        let updatedUrl = url
+        if (match) {
+            // update the query parameter value
+            let updatedParam = `${key}=${value}`
+
+            // replace the old query parameter with the updated one
+            updatedUrl = url.replace(match[0], updatedParam)
+        } else {
+            if (!url.includes('?')) {
+                // add the query parameter to the URL
+                updatedUrl = `${url}?${key}=${value}`
+            } else {
+                // add the query parameter to the URL
+                updatedUrl = `${url}&${key}=${value}`
+            }
+        }
+        // Replace the current URL with the new one
+        window.location.replace(updatedUrl)
+    }
+
     getInitialState(): State {
+        const searchQuery = this.getQueryStringParameter('query')
+        const spacesQuery = this.getQueryStringParameter('spaces')
+        let spacesArray
+
+        if (spacesQuery && spacesQuery.includes(',')) {
+            spacesArray = spacesQuery.split(',')
+        } else {
+            spacesArray = [spacesQuery]
+        }
+
+        let selectedListId
+
         return {
             currentUser: null,
             loadState: 'pristine',
@@ -174,7 +231,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 clearInboxLoadState: 'pristine',
             },
             searchFilters: {
-                searchQuery: '',
+                searchQuery: searchQuery ?? '',
                 domainsExcluded: [],
                 domainsIncluded: [],
                 isDateFilterActive: false,
@@ -182,7 +239,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isDomainFilterActive: false,
                 isTagFilterActive: false,
                 searchFiltersOpen: false,
-                spacesIncluded: [],
+                spacesIncluded: spacesArray.length > 1 ? spacesArray : [],
                 tagsExcluded: [],
                 tagsIncluded: [],
                 dateFromInput: '',
@@ -223,7 +280,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     allListIds: [],
                     filteredListIds: null,
                 },
-                selectedListId: undefined,
+                selectedListId: selectedListId,
                 showFeed: false,
             },
             syncMenu: {
@@ -237,12 +294,26 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         this.setupRemoteEventListeners()
+        const spacesQuery = this.getQueryStringParameter('spaces')
+        let spacesArray = spacesQuery && [spacesQuery]
 
         await loadInitial(this, async () => {
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
             await this.runSearch(nextState)
             const localListsResult = await this.loadLocalListsData(nextState)
+            if (spacesArray.length === 1) {
+                this.mutateAndTriggerSearch(previousState, {
+                    listsSidebar: {
+                        selectedListId: { $set: parseFloat(spacesArray[0]) },
+                    },
+                })
+                this.emitMutation({
+                    listsSidebar: {
+                        selectedListId: { $set: parseFloat(spacesArray[0]) },
+                    },
+                })
+            }
             nextState = localListsResult.nextState
             await this.loadRemoteListsData(
                 nextState,
@@ -2448,6 +2519,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        this.updateQueryStringParameter('query', event.query)
+
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { searchQuery: { $set: event.query } },
         })
@@ -2568,6 +2641,15 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        this.updateQueryStringParameter(
+            'spaces',
+            previousState.searchFilters.spacesIncluded.length > 0
+                ? previousState.searchFilters.spacesIncluded +
+                      ',' +
+                      event.spaceId
+                : event.spaceId,
+        )
+
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: {
                 spacesIncluded: { $push: [event.spaceId] },
@@ -2960,6 +3042,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             previousState.listsSidebar.selectedListId === event.listId
                 ? undefined
                 : event.listId
+
+        this.updateQueryStringParameter('spaces', listIdToSet)
 
         await this.mutateAndTriggerSearch(previousState, {
             listsSidebar: { selectedListId: { $set: listIdToSet } },
