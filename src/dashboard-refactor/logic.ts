@@ -6,6 +6,8 @@ import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { formatTimestamp } from '@worldbrain/memex-common/lib/utils/date-time'
+import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/constants'
 
 import { haveArraysChanged } from 'src/util/have-tags-changed'
 import {
@@ -170,6 +172,12 @@ export class DashboardLogic extends UILogic<State, Events> {
     getInitialState(): State {
         const searchQuery = this.getQueryStringParameter('query')
         const spacesQuery = this.getQueryStringParameter('spaces')
+        const fromQuery = this.getQueryStringParameter('from')
+        const from = formatTimestamp(parseFloat(fromQuery), FORMAT)
+        const toQuery = this.getQueryStringParameter('to')
+
+        const to = formatTimestamp(parseFloat(toQuery), FORMAT)
+
         let spacesArray
 
         if (spacesQuery && spacesQuery.includes(',')) {
@@ -178,7 +186,13 @@ export class DashboardLogic extends UILogic<State, Events> {
             spacesArray = [spacesQuery]
         }
 
-        let selectedListId
+        let openFilterBarOnLoad = !!(
+            (spacesQuery && spacesArray.length > 1) ||
+            from ||
+            to
+        )
+
+        console.log('to', to)
 
         return {
             currentUser: null,
@@ -238,12 +252,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isSpaceFilterActive: false,
                 isDomainFilterActive: false,
                 isTagFilterActive: false,
-                searchFiltersOpen: false,
+                searchFiltersOpen: openFilterBarOnLoad ? true : false,
                 spacesIncluded: spacesArray.length > 1 ? spacesArray : [],
                 tagsExcluded: [],
                 tagsIncluded: [],
-                dateFromInput: '',
-                dateToInput: '',
+                dateFromInput: fromQuery ? from : null,
+                dateToInput: toQuery ? to : null,
                 limit: PAGE_SIZE,
                 skip: 0,
             },
@@ -280,7 +294,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     allListIds: [],
                     filteredListIds: null,
                 },
-                selectedListId: selectedListId,
+                selectedListId: null,
                 showFeed: false,
             },
             syncMenu: {
@@ -295,6 +309,8 @@ export class DashboardLogic extends UILogic<State, Events> {
     init: EventHandler<'init'> = async ({ previousState }) => {
         this.setupRemoteEventListeners()
         const spacesQuery = this.getQueryStringParameter('spaces')
+        const from = this.getQueryStringParameter('from')
+        const to = this.getQueryStringParameter('to')
         let spacesArray = spacesQuery && [spacesQuery]
 
         await loadInitial(this, async () => {
@@ -311,6 +327,14 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.emitMutation({
                     listsSidebar: {
                         selectedListId: { $set: parseFloat(spacesArray[0]) },
+                    },
+                })
+            }
+            if (from || to) {
+                await this.mutateAndTriggerSearch(previousState, {
+                    searchFilters: {
+                        dateFrom: { $set: from ? parseFloat(from) : undefined },
+                        dateTo: { $set: to ? parseFloat(to) : undefined },
                     },
                 })
             }
@@ -2530,11 +2554,19 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        this.emitMutation({
-            searchFilters: { searchFiltersOpen: { $set: event.isOpen } },
-        })
+        if (event.isOpen) {
+            this.emitMutation({
+                searchFilters: { searchFiltersOpen: { $set: event.isOpen } },
+            })
+        }
 
-        if (!event.isOpen) {
+        console.log('test', previousState.searchFilters.searchFiltersOpen)
+
+        if (previousState.searchFilters.searchFiltersOpen) {
+            console.log('test2')
+            this.emitMutation({
+                searchFilters: { searchFiltersOpen: { $set: false } },
+            })
             await this.processUIEvent('resetFilters', {
                 event: null,
                 previousState,
@@ -2597,6 +2629,8 @@ export class DashboardLogic extends UILogic<State, Events> {
     setDateFromInputValue: EventHandler<'setDateFromInputValue'> = async ({
         event,
     }) => {
+        this.updateQueryStringParameter('from', event.value)
+
         this.emitMutation({
             searchFilters: { dateFromInput: { $set: event.value } },
         })
@@ -2605,6 +2639,8 @@ export class DashboardLogic extends UILogic<State, Events> {
     setDateToInputValue: EventHandler<'setDateToInputValue'> = async ({
         event,
     }) => {
+        this.updateQueryStringParameter('to', event.value)
+
         this.emitMutation({
             searchFilters: { dateToInput: { $set: event.value } },
         })
@@ -2614,12 +2650,15 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        this.updateQueryStringParameter('from', event.value)
+
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { dateFrom: { $set: event.value } },
         })
     }
 
     setDateTo: EventHandler<'setDateTo'> = async ({ event, previousState }) => {
+        this.updateQueryStringParameter('to', event.value)
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { dateTo: { $set: event.value } },
         })
@@ -2825,6 +2864,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        this.updateQueryStringParameter('spaces', '')
+        this.updateQueryStringParameter('from', '')
+        this.updateQueryStringParameter('to', '')
+
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { $set: this.getInitialState().searchFilters },
             listsSidebar: { selectedListId: { $set: undefined } },
