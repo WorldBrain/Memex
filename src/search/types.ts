@@ -109,6 +109,8 @@ export interface SearchIndex {
         domainsExclude?: string[]
         tags?: any[]
         lists?: any[]
+        endDate?: number
+        startDate?: number
         [key: string]: any
     }) => Promise<{
         docs: any[]

@@ -8,6 +8,7 @@ import { RootState as State, DashboardDependencies, Events } from './types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { formatTimestamp } from '@worldbrain/memex-common/lib/utils/date-time'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/constants'
+import chrono from 'chrono-node'
 
 import { haveArraysChanged } from 'src/util/have-tags-changed'
 import {
@@ -192,8 +193,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             to
         )
 
-        console.log('to', to)
-
         return {
             currentUser: null,
             loadState: 'pristine',
@@ -316,9 +315,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         await loadInitial(this, async () => {
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
-            await this.runSearch(nextState)
+
             const localListsResult = await this.loadLocalListsData(nextState)
-            if (spacesArray.length === 1) {
+            if (spacesArray && spacesArray.length === 1) {
                 this.mutateAndTriggerSearch(previousState, {
                     listsSidebar: {
                         selectedListId: { $set: parseFloat(spacesArray[0]) },
@@ -329,14 +328,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                         selectedListId: { $set: parseFloat(spacesArray[0]) },
                     },
                 })
-            }
-            if (from || to) {
+            } else if ((from && from.length) || (to && to.length)) {
                 await this.mutateAndTriggerSearch(previousState, {
                     searchFilters: {
                         dateFrom: { $set: from ? parseFloat(from) : undefined },
                         dateTo: { $set: to ? parseFloat(to) : undefined },
                     },
                 })
+            } else {
+                await this.runSearch(nextState)
             }
             nextState = localListsResult.nextState
             await this.loadRemoteListsData(
@@ -2560,10 +2560,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             })
         }
 
-        console.log('test', previousState.searchFilters.searchFiltersOpen)
-
         if (previousState.searchFilters.searchFiltersOpen) {
-            console.log('test2')
             this.emitMutation({
                 searchFilters: { searchFiltersOpen: { $set: false } },
             })
@@ -2629,7 +2626,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     setDateFromInputValue: EventHandler<'setDateFromInputValue'> = async ({
         event,
     }) => {
-        this.updateQueryStringParameter('from', event.value)
+        this.updateQueryStringParameter(
+            'from',
+            chrono.parseDate(event.value).getTime(),
+        )
 
         this.emitMutation({
             searchFilters: { dateFromInput: { $set: event.value } },
@@ -2639,7 +2639,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     setDateToInputValue: EventHandler<'setDateToInputValue'> = async ({
         event,
     }) => {
-        this.updateQueryStringParameter('to', event.value)
+        this.updateQueryStringParameter(
+            'to',
+            chrono.parseDate(event.value).getTime(),
+        )
 
         this.emitMutation({
             searchFilters: { dateToInput: { $set: event.value } },

@@ -1,14 +1,14 @@
 import chrono from 'chrono-node'
 
-const BEFORE_REGEX = /before:[''"](.+)['"]/i
-const AFTER_REGEX = /after:['"](.+)['"]/i
+const BEFORE_REGEX = /to:[''"](.+)['"]/i
+const AFTER_REGEX = /from:['"](.+)['"]/i
 
 /**
  * @typedef QueryFilters
  * @type {Object}
  * @property {string} query The non-date-filter search terms.
- * @property {number} [startDate] Number of ms representing the start of filter time.
- * @property {number} [endDate] Number of ms representing the end of filter time.
+ * @property {number} [from] Number of ms representing the start of filter time.
+ * @property {number} [to] Number of ms representing the end of filter time.
  */
 
 /**
@@ -21,15 +21,15 @@ export default function extractTimeFiltersFromQuery(query) {
     const matchedBefore = query.match(BEFORE_REGEX)
     const matchedAfter = query.match(AFTER_REGEX)
 
-    let startDate
-    let endDate
+    let from
+    let to
     if (matchedBefore) {
         const parsedDate = chrono.parseDate(matchedBefore[1])
-        endDate = parsedDate && parsedDate.getTime()
+        to = parsedDate && parsedDate.getTime()
     }
     if (matchedAfter) {
         const parsedDate = chrono.parseDate(matchedAfter[1])
-        startDate = parsedDate && parsedDate.getTime()
+        from = parsedDate && parsedDate.getTime()
     }
 
     const extractedQuery = query
@@ -38,8 +38,8 @@ export default function extractTimeFiltersFromQuery(query) {
         .trim()
 
     return {
-        startDate,
-        endDate,
+        from,
+        to,
         query: extractedQuery,
     }
 }
@@ -51,18 +51,18 @@ export default function extractTimeFiltersFromQuery(query) {
  * @param {QueryFilters} The extracted query parameters.
  * @returns {string}
  */
-export function queryFiltersDisplay({ startDate, endDate, query }) {
+export function queryFiltersDisplay({ from, to, query }) {
     let val = ''
 
     if (query && query.length) {
         val += 'T'
     }
 
-    if (startDate) {
+    if (from) {
         val += ' SD'
     }
 
-    if (endDate) {
+    if (to) {
         val += ' ED'
     }
 

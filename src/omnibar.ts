@@ -117,20 +117,21 @@ export async function main() {
 
         const queryFilters = extractTimeFiltersFromQuery(query)
 
-        const searchResults = await searchIndex.search({
-            ...queryFilters,
-            limit: 5,
-        } as any)
+        let searchResults
 
-        analytics.trackEvent({
-            category: 'Search',
-            action:
-                searchResults.totalCount > 0
-                    ? 'successViaOmnibar'
-                    : 'failViaOmnibar',
-            name: queryFiltersDisplay(queryFilters),
-            value: searchResults.totalCount,
-        })
+        if (queryFilters.to || queryFilters.from) {
+            searchResults = await searchIndex.search({
+                endDate: queryFilters.to ? queryFilters.to : undefined,
+                startDate: queryFilters.from ? queryFilters.from : undefined,
+                query: queryFilters.query ? queryFilters.query : undefined,
+                limit: 5,
+            } as any)
+        } else {
+            searchResults = await searchIndex.search({
+                ...queryFilters,
+                limit: 5,
+            } as any)
+        }
 
         // A subsequent search could have already started and finished while we
         // were busy searching, so we ensure we do not overwrite its results.
@@ -151,6 +152,8 @@ export async function main() {
             )
         } else if (searchResults.docs.length === 0) {
             setOmniboxMessage('No results found for this query.')
+        } else if (searchResults.totalCount == null) {
+            setOmniboxMessage('Found more results - press ENTER to view ALL .')
         } else {
             setOmniboxMessage(
                 `Found ${searchResults.totalCount} pages - press ENTER for ALL results`,
@@ -158,7 +161,7 @@ export async function main() {
         }
 
         const suggestions = searchResults.docs.map(
-            pageToSuggestion(queryFilters.startDate || queryFilters.endDate),
+            pageToSuggestion(queryFilters.from || queryFilters.to),
         )
 
         suggest(suggestions)

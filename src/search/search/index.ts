@@ -17,11 +17,17 @@ export const search = (getDb: DBGet) => async ({
     domainsExclude = [],
     tags = [],
     lists = [],
+    endDate,
+    startDate,
     ...restParams
 }) => {
     const db = await getDb()
     // Extract query terms via QueryBuilder (may change)
-    const { isBadTerm, isInvalidSearch, ...qbParams } = new QueryBuilder()
+    const {
+        isBadTerm,
+        isInvalidSearch,
+        ...qbParams
+    } = new QueryBuilder()
         .searchTerm(query)
         .filterDomains(domains)
         .filterExcDomains(domainsExclude)
@@ -49,6 +55,8 @@ export const search = (getDb: DBGet) => async ({
     }
 
     const params = {
+        startDate,
+        endDate,
         ...restParams,
         bookmarks: showOnlyBookmarks,
         ...qbParams,
@@ -80,7 +88,7 @@ export const search = (getDb: DBGet) => async ({
 }
 
 // WARNING: Inefficient; goes through entire table
-export const getMatchingPageCount = (getDb: DBGet) => async pattern => {
+export const getMatchingPageCount = (getDb: DBGet) => async (pattern) => {
     const db = await getDb()
 
     return db
