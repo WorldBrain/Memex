@@ -10,6 +10,7 @@ import type { MaybePromise } from 'src/util/types'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 interface FlagSetterInterface {
     getState(): Promise<boolean>
@@ -19,7 +20,6 @@ interface FlagSetterInterface {
 export interface RibbonContainerDependencies {
     currentTab: { id?: number; url?: string }
     getFullPageUrl: () => MaybePromise<string>
-    getRemoteFunction: (name: string) => (...args: any[]) => Promise<any>
     highlighter: HighlightInteractionsInterface
     annotationsManager: AnnotationsManager
     setSidebarEnabled: (value: boolean) => Promise<void>
@@ -31,6 +31,7 @@ export interface RibbonContainerDependencies {
     contentSharing: ContentSharingInterface
     annotations: AnnotationInterface<'caller'>
     annotationsCache: PageAnnotationsCacheInterface
+    bgScriptBG: RemoteBGScriptInterface
     tooltip: FlagSetterInterface
     highlights: FlagSetterInterface
     syncSettings: SyncSettingsStore<'extension'>

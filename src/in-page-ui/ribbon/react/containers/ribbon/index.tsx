@@ -107,6 +107,7 @@ export default class RibbonContainer extends StatefulUIElement<
         return (
             <Ribbon
                 contentSharingBG={this.props.contentSharing}
+                bgScriptBG={this.props.bgScriptBG}
                 spacesBG={this.props.customLists}
                 ref={this.ribbonRef}
                 setRef={this.props.setRef}
@@ -140,7 +141,6 @@ export default class RibbonContainer extends StatefulUIElement<
                     this.processEvent('toggleFeed', null)
                 }}
                 isExpanded={this.props.state === 'visible'}
-                getRemoteFunction={this.props.getRemoteFunction}
                 // annotationsManager={this.props.annotationsManager}
                 highlighter={this.props.highlighter}
                 isRibbonEnabled={this.state.isRibbonEnabled}

@@ -6,6 +6,7 @@ import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPick
 import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface RibbonSubcomponentProps {
     highlights: RibbonHighlightsProps
@@ -20,6 +21,7 @@ export interface RibbonSubcomponentProps {
     activityIndicator: ActivityIndicatorProps
     spacesBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface
+    bgScriptBG: RemoteBGScriptInterface
     onListShare: (ids: { localListId: number; remoteListId: string }) => void
 }
 
