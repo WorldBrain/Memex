@@ -2505,7 +2505,7 @@ const FollowedListNotesContainer = styled(Margin)<{ key: number }>`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    height: fill-available;
+    height: 100%;
     z-index: ${(props) => 1000 - props.key};
 `
 
@@ -2522,7 +2522,7 @@ const AnnotationContainer = styled(Margin)`
     /* padding-bottom: 500px;
     overflow-y: scroll;
     overflow-x: visible; */
-    height: fill-available;
+    height: 100%;
     overflow: scroll;
     padding-bottom: 100px;
     flex: 1;
@@ -2836,6 +2836,7 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
     width: fill-available;
     display: flex;
     flex-direction: column;
+    height: 100%;
 
     &::-webkit-scrollbar {
         display: none;
