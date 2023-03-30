@@ -1308,7 +1308,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
         css`
             display: flex;
             box-shadow: none;
-            height: fill-available;
+            height: 100%;
             top: 0px;
             width: 28px;
             justify-content: space-between;
