@@ -26,7 +26,7 @@ class Ribbon extends React.Component {
     render() {
         return (
             <SettingSection
-                title={'Quick Action Sidebar'}
+                title={'Mini Sidebar'}
                 description={
                     ' Show a sidebar with the key interaction when hovering to the right of the screen.'
                 }

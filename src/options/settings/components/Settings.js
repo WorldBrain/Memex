@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import SearchInjection from './SearchInjectionContainer'
 // import IndexingPrefs from './IndexingPrefsContainer'
 import Tooltip from './Tooltip'
+import BookmarkSync from './BookmarkSync'
 import Ribbon from './Ribbon'
 import KeyboardShortcutsContainer from './keyboard-shortcuts-container'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -22,6 +23,7 @@ export default () => (
                 tabs.
             </InformationBlock>
             <KeyboardShortcutsContainer />
+            <BookmarkSync />
             <SearchInjection />
             <Tooltip />
             <Ribbon />

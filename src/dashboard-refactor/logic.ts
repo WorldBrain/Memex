@@ -207,20 +207,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         let openFilterBarOnLoad
-        console.log(
-            'spacesQuery',
-            spacesQuery,
-            spacesArray.length > 1,
-            fromQuery,
-            toQuery,
-        )
         if ((spacesQuery && spacesArray.length > 1) || fromQuery || toQuery) {
             openFilterBarOnLoad = true
         } else {
             openFilterBarOnLoad = false
         }
-
-        console.log('openFilterBarOnLoad', openFilterBarOnLoad)
 
         return {
             currentUser: null,

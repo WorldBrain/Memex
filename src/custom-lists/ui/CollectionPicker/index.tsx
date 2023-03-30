@@ -274,9 +274,6 @@ class SpacePicker extends StatefulUIElement<
             return
         }
 
-        console.log(this.props.contentSharingBG)
-        console.log(list.remoteId)
-
         return (
             <SpaceContextMenu
                 loadOwnershipData
