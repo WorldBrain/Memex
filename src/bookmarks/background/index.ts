@@ -9,6 +9,9 @@ import pick from 'lodash/pick'
 import { Analytics } from 'src/analytics/types'
 import checkBrowser from '../../util/check-browser'
 import browser from 'webextension-polyfill'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+
+const BOOKMARK_SYNC_STORAGE_NAME = 'memex:settings:bookmarkSync'
 
 export default class BookmarksBackground {
     storage: BookmarksStorage
@@ -18,7 +21,7 @@ export default class BookmarksBackground {
         private options: {
             storageManager: Storex
             pages: PageIndexingBackground
-            browserAPIs: Pick<Browser, 'bookmarks' | 'tabs'>
+            browserAPIs: Pick<Browser, 'bookmarks' | 'tabs' | 'storage'>
             analytics: Analytics
         },
     ) {
@@ -42,13 +45,31 @@ export default class BookmarksBackground {
         }
     }
 
-    setupBookmarkListeners() {
-        // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
-        this.options.browserAPIs.bookmarks.onCreated.addListener(
-            this.handleBookmarkCreation.bind(this),
-        )
-        this.options.browserAPIs.bookmarks.onRemoved.addListener(
-            this.handleBookmarkRemoval.bind(this),
+    async setupBookmarkListeners() {
+        const shouldSetup = await getLocalStorage(BOOKMARK_SYNC_STORAGE_NAME)
+
+        if (shouldSetup) {
+            // Handle any new browser bookmark actions (bookmark mananger or bookmark btn in URL bar)
+            this.options.browserAPIs.bookmarks.onCreated.addListener(
+                this.handleBookmarkCreation.bind(this),
+            )
+            this.options.browserAPIs.bookmarks.onRemoved.addListener(
+                this.handleBookmarkRemoval.bind(this),
+            )
+        }
+
+        this.options.browserAPIs.storage.onChanged.addListener(
+            (changes, area) => {
+                if (changes[BOOKMARK_SYNC_STORAGE_NAME].newValue === true) {
+                    this.options.browserAPIs.bookmarks.onCreated.addListener(
+                        this.handleBookmarkCreation.bind(this),
+                    )
+                } else {
+                    this.options.browserAPIs.bookmarks.onCreated.removeListener(
+                        this.handleBookmarkCreation.bind(this),
+                    )
+                }
+            },
         )
     }
 
@@ -154,8 +175,9 @@ export default class BookmarksBackground {
     }
 
     async handleBookmarkCreation(id: string, node: Bookmarks.BookmarkTreeNode) {
+        const shouldSave = await getLocalStorage(BOOKMARK_SYNC_STORAGE_NAME)
         // Created folders won't have `url`; ignore these
-        if (!node.url) {
+        if (!node.url || !shouldSave) {
             return
         }
 

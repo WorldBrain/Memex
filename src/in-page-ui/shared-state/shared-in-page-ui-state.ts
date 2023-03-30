@@ -79,10 +79,6 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         )
 
         this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
-
-        // this.summarisePageEvents.on('pageSummary', ({ chunk }) => {
-        //     console.log('chunk', chunk)
-        // })
     }
 
     private handlePageAddedToSharedList: ContentSharingEvents['pageAddedToSharedList'] = async ({
