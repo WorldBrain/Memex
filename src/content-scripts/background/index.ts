@@ -22,6 +22,7 @@ export class ContentScriptsBackground {
                 .goToAnnotationFromDashboardSidebar,
             openPageWithSidebarInSelectedListMode: this
                 .openPageWithSidebarInSelectedListMode,
+            reloadTab: this.reloadTab,
             openPdfInViewer: this.openPdfInViewer,
             injectContentScriptComponent: this.injectContentScriptComponent,
             getCurrentTab: async ({ tab }) => ({
@@ -50,29 +51,6 @@ export class ContentScriptsBackground {
                 runInTab<InPageUIContentScriptRemoteInterface>(
                     tabId,
                 ).handleHistoryStateUpdate(tabId),
-        )
-
-        this.options.browserAPIs.runtime.onMessage.addListener(
-            async (message) => {
-                if (message.reloadTab) {
-                    // Get the currently active tab
-                    const tabs = await this.options.browserAPIs.tabs.query({
-                        active: true,
-                        currentWindow: true,
-                    })
-
-                    // Check if the tab matches the domain
-                    if (
-                        tabs.length > 0 &&
-                        tabs[0].url.includes('https://memex.garden')
-                    ) {
-                        // Reload the tab with bypassCache option set to true
-                        await this.options.browserAPIs.tabs.reload(tabs[0].id, {
-                            bypassCache: true,
-                        })
-                    }
-                }
-            },
         )
     }
 
@@ -141,6 +119,13 @@ export class ContentScriptsBackground {
         }
 
         browserAPIs.tabs.onUpdated.addListener(listener)
+    }
+
+    reloadTab: ContentScriptsInterface<'provider'>['reloadTab'] = async (
+        { tab },
+        { bypassCache },
+    ) => {
+        await this.options.browserAPIs.tabs.reload(tab.id, { bypassCache })
     }
 
     openPdfInViewer: ContentScriptsInterface<

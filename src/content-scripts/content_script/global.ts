@@ -335,7 +335,7 @@ export async function main(
             'Icons by Smashicons from Flaticons.com',
         )
     ) {
-        browser.runtime.sendMessage({ reloadTab: true })
+        await contentScriptsBG.reloadTab({ bypassCache: true })
     }
 
     // 4. Create a contentScriptRegistry object with functions for each content script
