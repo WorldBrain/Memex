@@ -48,10 +48,6 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     }
 
     render() {
-        const isStaging =
-            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-            process.env.NODE_ENV === 'development'
-
         return (
             <FullPage>
                 {this.state.currentUser != null ? (
