@@ -82,7 +82,7 @@ export const macLogo = browser.runtime.getURL('/img/apple_logo.svg')
 export const mail = browser.runtime.getURL('/img/mail.svg')
 export const mediumLogo = browser.runtime.getURL('/img/medium-logo.svg')
 export const memexLogoGrey = browser.runtime.getURL('/img/memexLogoGrey.svg')
-export const multiEdit = browser.runtime.getURL('/img/multiEdit.svg')
+export const multiEdit = browser.runtime.getURL('/img/multiEdits.svg')
 export const newFeed = null
 export const numberedListIcon = browser.runtime.getURL(
     '/img/numberedListIcon.svg',

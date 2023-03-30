@@ -274,6 +274,9 @@ class SpacePicker extends StatefulUIElement<
             return
         }
 
+        console.log(this.props.contentSharingBG)
+        console.log(list.remoteId)
+
         return (
             <SpaceContextMenu
                 loadOwnershipData
@@ -315,6 +318,14 @@ class SpacePicker extends StatefulUIElement<
             (l) => l.localId === this.state.contextMenuListId,
         )
 
+        const isStaging =
+            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+            process.env.NODE_ENV === 'development'
+
+        const baseUrl = isStaging
+            ? 'https://staging.memex.social/c/'
+            : 'https://memex.social/c/'
+
         if (this.state.loadingSuggestions === 'running') {
             return (
                 <LoadingBox>
@@ -342,6 +353,18 @@ class SpacePicker extends StatefulUIElement<
                                     )
                                 }
                             />
+                            {list.remoteId != null && (
+                                <PrimaryAction
+                                    type="secondary"
+                                    size="small"
+                                    label="Open Space"
+                                    icon="goTo"
+                                    onClick={async () =>
+                                        window.open(baseUrl + list.remoteId)
+                                    }
+                                    padding={'3px 6px'}
+                                />
+                            )}
                         </PrimaryActionBox>
                         {this.renderSpaceContextMenu()}
                     </>
@@ -422,9 +445,12 @@ const SearchContainer = styled.div`
 `
 
 const PrimaryActionBox = styled.div`
-    padding: 2px 0px 5px 0px;
+    padding: 2px 5px 5px 5px;
     margin-bottom: 5px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 `
 
 const EntryListHeader = styled.div`

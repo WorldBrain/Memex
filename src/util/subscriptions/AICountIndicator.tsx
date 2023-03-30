@@ -266,7 +266,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
             return null
         } else {
             return this.state.totalCount < 10000 &&
-                this.state.openAIKey.length === 0 ? (
+                this.state.openAIKey?.length === 0 ? (
                 <TooltipBox
                     placement="top"
                     tooltipText={
