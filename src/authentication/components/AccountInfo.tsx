@@ -104,7 +104,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                                         window.open(
                                                             isStaging
                                                                 ? 'https://memex.garden/upgradeStaging'
-                                                                : 'https://memex.garden/upgradeNotification',
+                                                                : 'https://memex.garden/upgrade',
                                                             '_blank',
                                                         )
                                                     }}
