@@ -264,7 +264,7 @@ export class SidebarContainerLogic extends UILogic<
             activeShareMenuNoteId: undefined,
             immediatelyShareNotes: false,
             pageHasNetworkAnnotations: false,
-            queryMode: 'summarize',
+            queryMode: 'glanceSummary',
             showLengthError: false,
         }
     }
@@ -764,7 +764,14 @@ export class SidebarContainerLogic extends UILogic<
             this.emitMutation({
                 prompt: { $set: undefined },
             })
-            await this.queryAI(event, undefined)
+            await this.queryAI(
+                event.fullPageUrl,
+                undefined,
+                undefined,
+                true,
+                previousState,
+                undefined,
+            )
         }
     }
 
@@ -1331,10 +1338,22 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    async queryAI(data, highlightedText, prompt?) {
+    async queryAI(
+        fullPageUrl,
+        highlightedText,
+        prompt?,
+        shortSummary?: boolean,
+        previousState?: SidebarContainerState,
+        textAsAlternative?: string,
+    ) {
+        const isPagePDF =
+            fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?file=blob')
+        const maxLength = 50000
         const articleLengthTooMuch =
-            document.body.innerText.length > 50000 &&
-            !data.fullPageUrl.startsWith('https://www.youtube.com/watch')
+            ((textAsAlternative && textAsAlternative.length > maxLength) ||
+                document.body.innerText.length > maxLength) &&
+            !fullPageUrl?.startsWith('https://www.youtube.com/watch') &&
+            previousState.queryMode === 'summarize'
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
         const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
 
@@ -1358,7 +1377,10 @@ export class SidebarContainerLogic extends UILogic<
             prompt: { $set: queryPrompt },
         })
 
-        if (!highlightedText && articleLengthTooMuch) {
+        if (
+            (!highlightedText && articleLengthTooMuch) ||
+            (textAsAlternative && articleLengthTooMuch)
+        ) {
             this.emitMutation({
                 showLengthError: { $set: true },
                 loadState: { $set: 'success' },
@@ -1370,12 +1392,22 @@ export class SidebarContainerLogic extends UILogic<
             })
         }
 
+        let textToAnalyse = textAsAlternative
+            ? textAsAlternative
+            : highlightedText
+            ? highlightedText
+            : undefined
+
         await this.options.summarizeBG.startPageSummaryStream({
-            fullPageUrl:
-                data && data.fullPageUrl ? data.fullPageUrl : undefined,
-            textToProcess: highlightedText ?? undefined,
+            fullPageUrl: isPagePDF
+                ? undefined
+                : fullPageUrl && fullPageUrl
+                ? fullPageUrl
+                : undefined,
+            textToProcess: textToAnalyse,
             queryPrompt: queryPrompt,
             apiKey: openAIKey ? openAIKey : undefined,
+            shortSummary: shortSummary,
         })
         await updateAICounter()
     }
@@ -1388,17 +1420,40 @@ export class SidebarContainerLogic extends UILogic<
             prompt: { $set: event.prompt },
         })
 
+        let isPagePDF = window.location.href.includes(
+            '/pdfjs/viewer.html?file=blob',
+        )
+        let fullTextToProcess
+        if (isPagePDF) {
+            fullTextToProcess = document.body.innerText
+        }
+
         if (previousState.queryMode === 'question') {
             this.queryAI(
                 undefined,
-                previousState.selectedTextAIPreview ?? '',
-                event.prompt,
-            )
-        } else {
-            this.queryAI(
+                undefined,
+                event.prompt ? event.prompt : previousState.prompt,
+                false,
                 previousState,
+                undefined,
+            )
+        } else if (previousState.queryMode === 'summarize') {
+            this.queryAI(
+                isPagePDF ? undefined : previousState.fullPageUrl,
                 previousState.selectedTextAIPreview ?? '',
-                event.prompt,
+                event.prompt ? event.prompt : previousState.prompt,
+                false,
+                previousState,
+                isPagePDF ? fullTextToProcess : undefined,
+            )
+        } else if (previousState.queryMode === 'glanceSummary') {
+            this.queryAI(
+                isPagePDF ? undefined : previousState.fullPageUrl,
+                previousState.selectedTextAIPreview ?? '',
+                event.prompt ? event.prompt : previousState.prompt,
+                true,
+                previousState,
+                isPagePDF ? fullTextToProcess : undefined,
             )
         }
     }
@@ -1442,16 +1497,36 @@ export class SidebarContainerLogic extends UILogic<
                 previousState,
             )
         } else if (event.tab === 'summary') {
+            let isPagePDF = window.location.href.includes(
+                '/pdfjs/viewer.html?file=blob',
+            )
+            let fullTextToProcess
+            if (isPagePDF) {
+                fullTextToProcess = document.body.innerText
+            }
             if (event.textToProcess) {
                 this.emitMutation({
                     prompt: { $set: '' },
                 })
-                await this.queryAI(undefined, event.textToProcess, undefined)
+                await this.queryAI(
+                    undefined,
+                    event.textToProcess,
+                    undefined,
+                    undefined,
+                    previousState,
+                )
             } else {
                 this.emitMutation({
                     prompt: { $set: '' },
                 })
-                await this.queryAI(previousState, undefined, undefined)
+                await this.queryAI(
+                    isPagePDF ? undefined : previousState.fullPageUrl,
+                    undefined,
+                    undefined,
+                    previousState.queryMode === 'glanceSummary' ? true : false,
+                    previousState,
+                    isPagePDF ? fullTextToProcess : undefined,
+                )
             }
         }
     }

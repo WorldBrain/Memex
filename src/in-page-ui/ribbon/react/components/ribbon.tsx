@@ -38,6 +38,7 @@ import {
 } from 'src/highlighting/constants'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator'
+import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -66,6 +67,7 @@ interface State {
     showPickerSave: boolean
     renderLiveChat: boolean
     renderChangeLog: boolean
+    updatesAvailable: boolean
 }
 
 export default class Ribbon extends Component<Props, State> {
@@ -96,6 +98,7 @@ export default class Ribbon extends Component<Props, State> {
         pickerColor: DEFAULT_HIGHLIGHT_COLOR,
         renderLiveChat: false,
         renderChangeLog: false,
+        updatesAvailable: false,
     }
 
     constructor(props: Props) {
@@ -114,6 +117,18 @@ export default class Ribbon extends Component<Props, State> {
         this.keyboardShortcuts = await getKeyboardShortcutsState()
         this.setState(() => ({ shortcutsReady: true }))
         await this.initialiseHighlightColor()
+
+        const updatesAvailable = await browser.storage.local.get(
+            READ_STORAGE_FLAG,
+        )
+
+        this.setState({
+            updatesAvailable: !updatesAvailable[READ_STORAGE_FLAG],
+        })
+    }
+
+    async setUpdateFlagToRead() {
+        await browser.storage.local.set({ [READ_STORAGE_FLAG]: true })
     }
 
     async initialiseHighlightColor() {
@@ -594,11 +609,13 @@ export default class Ribbon extends Component<Props, State> {
                             <InfoText>Feature Requests & Bugs</InfoText>
                         </ExtraButtonRow>
                         <ExtraButtonRow
-                            onClick={() =>
+                            onClick={async () => {
                                 this.setState({
                                     renderChangeLog: true,
+                                    updatesAvailable: false,
                                 })
-                            }
+                                await this.setUpdateFlagToRead()
+                            }}
                         >
                             <Icon
                                 filePath={icons.clock}
@@ -606,6 +623,11 @@ export default class Ribbon extends Component<Props, State> {
                                 hoverOff
                             />
                             <InfoText>What's new?</InfoText>
+                            {this.state.updatesAvailable && (
+                                <UpdateAvailablePill>
+                                    New Updates
+                                </UpdateAvailablePill>
+                            )}
                         </ExtraButtonRow>
                         <ExtraButtonRow
                             onClick={() =>
@@ -944,15 +966,26 @@ export default class Ribbon extends Component<Props, State> {
                                     }
                                 >
                                     <BlockCounterIndicator />
-                                    <Icon
-                                        onClick={() =>
-                                            this.props.toggleShowExtraButtons()
-                                        }
-                                        color={'greyScale5'}
-                                        heightAndWidth="22px"
-                                        filePath={icons.settings}
-                                        containerRef={this.settingsButtonRef}
-                                    />
+                                    <TooltipBox
+                                        tooltipText={<span>Settings</span>}
+                                        placement={'left'}
+                                        offsetX={10}
+                                    >
+                                        <Icon
+                                            onClick={() =>
+                                                this.props.toggleShowExtraButtons()
+                                            }
+                                            color={'greyScale5'}
+                                            heightAndWidth="22px"
+                                            filePath={icons.settings}
+                                            containerRef={
+                                                this.settingsButtonRef
+                                            }
+                                        />
+                                        {this.state.updatesAvailable && (
+                                            <UpdateAvailableDot />
+                                        )}
+                                    </TooltipBox>
                                     <TooltipBox
                                         tooltipText={
                                             <span>
@@ -1022,6 +1055,27 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 }
+
+const UpdateAvailablePill = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    color: ${(props) => props.theme.colors.black};
+    background-color: ${(props) => props.theme.colors.prime2};
+    border-radius: 30px;
+    font-size: 12px;
+`
+
+const UpdateAvailableDot = styled.div`
+    position: absolute;
+    background-color: ${(props) => props.theme.colors.prime2};
+    border-radius: 30px;
+    height: 12px;
+    width: 12px;
+    bottom: -2px;
+    right: -2px;
+`
 
 const SpacesCounter = styled.div`
     display: flex;

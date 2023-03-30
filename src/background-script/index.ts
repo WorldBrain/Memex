@@ -25,8 +25,11 @@ import type {
     OpenTabParams,
 } from './types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
-import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
-import { setLocalStorage } from 'src/util/storage'
+import {
+    READ_STORAGE_FLAG,
+    LAST_UPDATE_TIME_STAMP,
+} from 'src/common-ui/containers/UpdateNotifBanner/constants'
+import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { MISSING_PDF_QUERY_PARAM } from 'src/dashboard-refactor/constants'
 import type { BackgroundModules } from './setup'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
@@ -173,13 +176,41 @@ class BackgroundScript {
                     break
                 case 'update':
                     await this.runQuickAndDirtyMigrations()
-                    await setLocalStorage(READ_STORAGE_FLAG, false)
+                    await this.checkForUpdates()
                     await this.handleUnifiedLogic()
                     await this.checkForSubscriptionStatus()
                     break
                 default:
             }
         })
+    }
+
+    private async checkForUpdates() {
+        const isStaging =
+            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+            process.env.NODE_ENV === 'development'
+        const baseUrl = isStaging
+            ? 'https://cloudflare-memex-staging.memex.workers.dev'
+            : 'https://cloudfare-memex.memex.workers.dev'
+        const url = `${baseUrl}/checkForUpdates`
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        })
+
+        const responseJSON = await response.json()
+        const hasUpdate = parseFloat(responseJSON.hasUpdate)
+        const lastUpdateTimeStamp = await getLocalStorage(
+            LAST_UPDATE_TIME_STAMP,
+        )
+        if (
+            hasUpdate > lastUpdateTimeStamp ||
+            (hasUpdate && !lastUpdateTimeStamp)
+        ) {
+            await setLocalStorage(READ_STORAGE_FLAG, false)
+            await setLocalStorage(LAST_UPDATE_TIME_STAMP, hasUpdate)
+        }
     }
 
     private async checkForSubscriptionStatus() {
