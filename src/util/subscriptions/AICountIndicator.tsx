@@ -135,37 +135,43 @@ export class AICounterIndicator extends React.Component<Props, State> {
                 offsetX={10}
             >
                 <InfoTooltipContainer>
-                    {this.state.openAIKey.length === 0 && (
-                        <>
-                            <InfoTooltipTitleArea>
-                                <InfoTooltipTitleBox>
-                                    <InfoTooltipTitle>
-                                        You have{' '}
-                                        <strong>{this.leftOverBlocks}</strong>{' '}
-                                        AI requests left
-                                    </InfoTooltipTitle>
-                                    <InfoTooltipSubTitle>
-                                        Resets on the 1st of every month
-                                    </InfoTooltipSubTitle>
-                                </InfoTooltipTitleBox>
-                                <PrimaryAction
-                                    label="Upgrade"
-                                    icon={'longArrowRight'}
-                                    padding="0px 5px 0 10px"
-                                    onClick={() => {
-                                        window.open(
-                                            this.whichCheckOutURL(),
-                                            '_blank',
-                                        )
-                                    }}
-                                    size="medium"
-                                    type="primary"
-                                    iconPosition="right"
-                                />
-                            </InfoTooltipTitleArea>
-                            {this.state.allowForKey && <ORBox>- or - </ORBox>}
-                        </>
-                    )}
+                    {(this.state.openAIKey == null ||
+                        this.state.openAIKey?.length === 0) &&
+                        this.state.totalCount < 10000 && (
+                            <>
+                                <InfoTooltipTitleArea>
+                                    <InfoTooltipTitleBox>
+                                        <InfoTooltipTitle>
+                                            You have{' '}
+                                            <strong>
+                                                {this.leftOverBlocks}
+                                            </strong>{' '}
+                                            AI requests left
+                                        </InfoTooltipTitle>
+                                        <InfoTooltipSubTitle>
+                                            Resets on the 1st of every month
+                                        </InfoTooltipSubTitle>
+                                    </InfoTooltipTitleBox>
+                                    <PrimaryAction
+                                        label="Upgrade"
+                                        icon={'longArrowRight'}
+                                        padding="0px 5px 0 10px"
+                                        onClick={() => {
+                                            window.open(
+                                                this.whichCheckOutURL(),
+                                                '_blank',
+                                            )
+                                        }}
+                                        size="medium"
+                                        type="primary"
+                                        iconPosition="right"
+                                    />
+                                </InfoTooltipTitleArea>
+                                {this.state.allowForKey && (
+                                    <ORBox>- or - </ORBox>
+                                )}
+                            </>
+                        )}
                     {this.state.allowForKey && (
                         <OpenAIKeyContainer>
                             <OpenAIKeyTitle>OpenAI API Key</OpenAIKeyTitle>
@@ -176,7 +182,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                             <KeyBox>
                                 <TextField
                                     placeholder={
-                                        this.state.openAIKey.length > 0
+                                        this.state.openAIKey?.length > 0
                                             ? this.state.openAIKey
                                             : 'Enter API Key'
                                     }
