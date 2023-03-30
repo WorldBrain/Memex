@@ -145,7 +145,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     updateQueryStringParameter(key, value) {
         // Get the current URL of the page
-        if (value != null && value.length > 0) {
+        if (value != null) {
             const url = window.location.href
 
             let regex = new RegExp(`(${key}=)[^&]+`)
@@ -344,9 +344,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         await loadInitial(this, async () => {
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
-
-            const localListsResult = await this.loadLocalListsData(nextState)
+            let localListsResult
             if (spacesArray && spacesArray.length === 1) {
+                localListsResult = await this.loadLocalListsData(nextState)
                 this.mutateAndTriggerSearch(previousState, {
                     listsSidebar: {
                         selectedListId: { $set: parseFloat(spacesArray[0]) },
@@ -366,6 +366,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 })
             } else {
                 await this.runSearch(nextState)
+                localListsResult = await this.loadLocalListsData(nextState)
             }
             nextState = localListsResult.nextState
             await this.loadRemoteListsData(
