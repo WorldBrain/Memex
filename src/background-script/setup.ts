@@ -81,15 +81,12 @@ import {
     PersonalCloudBackend,
     PersonalCloudService,
     SyncTriggerSetup,
-    PersonalCloudDeviceId,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { BrowserSettingsStore } from 'src/util/settings'
-import type {
-    AuthChanges,
-    LocalPersonalCloudSettings,
-} from 'src/personal-cloud/background/types'
-import { authChanges } from '@worldbrain/memex-common/lib/authentication/utils'
+import type { LocalPersonalCloudSettings } from 'src/personal-cloud/background/types'
+import { authChangesGeneratorFactory } from '@worldbrain/memex-common/lib/authentication/utils'
 import FirebasePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firebase'
+import { deviceIdCreatorFactory } from '@worldbrain/memex-common/lib/personal-cloud/storage/device-id'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
 import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
 import type { ReadwiseSettings } from 'src/readwise-integration/background/types/settings'
@@ -430,50 +427,24 @@ export function createBackgroundModules(options: {
         remoteEventEmitter: createRemoteEventEmitter('pageSummary'),
     })
 
-    // TODO: Maybe move this somewhere more appropriate (personal-cloud module)
-    async function createDeviceId(
-        userId: string,
-    ): Promise<PersonalCloudDeviceId> {
-        const uaParser = new UAParser(options.userAgentString)
-        const serverStorage = await options.getServerStorage()
-        const device = await serverStorage.modules.personalCloud.createDeviceInfo(
-            {
-                userId,
-                device: {
-                    type: PersonalDeviceType.DesktopBrowser,
-                    product: PersonalDeviceProduct.Extension,
-                    browser: kebabCase(uaParser.getBrowser().name),
-                    os: kebabCase(uaParser.getOS().name),
-                },
-            },
-        )
-        return device.id
-    }
+    const uaParser = new UAParser(options.userAgentString)
+    const createDeviceId = deviceIdCreatorFactory({
+        getServerStorage,
+        personalDeviceInfo: {
+            type: PersonalDeviceType.DesktopBrowser,
+            product: PersonalDeviceProduct.Extension,
+            browser: kebabCase(uaParser.getBrowser().name),
+            os: kebabCase(uaParser.getOS().name),
+        },
+    })
 
-    async function* authChangeGenerator(): AsyncIterableIterator<AuthChanges> {
-        for await (const nextUser of authChanges(auth.authService)) {
-            if (nextUser == null) {
-                yield { nextUser, deviceId: null }
-            } else {
-                const existingDeviceID = await personalCloudSettingStore.get(
-                    'deviceId',
-                )
-                let deviceId: PersonalCloudDeviceId | null = existingDeviceID
-                if (!existingDeviceID) {
-                    const userId = nextUser.id
-                    if (userId) {
-                        const newDeviceId = await createDeviceId(userId)
-                        await personalCloudSettingStore.set(
-                            'deviceId',
-                            newDeviceId,
-                        )
-                        deviceId = newDeviceId
-                    }
-                }
-                yield { nextUser, deviceId }
-            }
-        }
-    }
+    const authChangesGenerator = authChangesGeneratorFactory({
+        createDeviceId,
+        authService: auth.authService,
+        getDeviceId: () => personalCloudSettingStore.get('deviceId'),
+        setDeviceId: (deviceId) =>
+            personalCloudSettingStore.set('deviceId', deviceId),
+    })
 
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
         storageManager,
@@ -500,7 +471,7 @@ export function createBackgroundModules(options: {
                 ),
                 getCurrentSchemaVersion: () =>
                     getCurrentSchemaVersion(options.storageManager),
-                authChanges: authChangeGenerator,
+                authChanges: authChangesGenerator,
                 getLastUpdateProcessedTime: () =>
                     personalCloudSettingStore.get('lastSeen'),
                 // NOTE: this is for retrospective collection sync, which is currently unused in the extension
@@ -513,7 +484,7 @@ export function createBackgroundModules(options: {
         settingStore: personalCloudSettingStore,
         localExtSettingStore,
         getUserId: getCurrentUserId,
-        authChanges: authChangeGenerator,
+        authChanges: authChangesGenerator,
         writeIncomingData: handleIncomingData({
             customListsBG: customLists,
             pageActivityIndicatorBG: pageActivityIndicator,

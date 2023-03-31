@@ -1,4 +1,3 @@
-import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import type {
     PersonalCloudUpdatePushBatch,
     PersonalCloudClientInstruction,
@@ -46,13 +45,3 @@ export interface PersonalCloudStats {
     pendingDownloads: number
     pendingUploads: number
 }
-
-export type AuthChanges =
-    | {
-          nextUser: AuthenticatedUser
-          deviceId: PersonalCloudDeviceId
-      }
-    | {
-          nextUser: null
-          deviceId: null
-      }
