@@ -22,6 +22,7 @@ export type PageAnalyzer = (args: {
     fetch?: typeof fetch
     includeContent?: 'metadata-only' | 'metadata-with-full-text'
     includeFavIcon?: boolean
+    url?: string
 }) => Promise<PageAnalysis>
 
 /**
@@ -30,10 +31,12 @@ export type PageAnalyzer = (args: {
  * CONTEXT: This needs to be called on a tab that is ready to be indexed.
  */
 const analysePage: PageAnalyzer = async (options) => {
-    const { tabId } = options
+    const { tabId, url } = options
     options.includeFavIcon = options.includeFavIcon ?? true
 
     const extracted = await extractPageContent(options)
+
+    console.log('extracted', extracted)
     const { content, rawContent } = extracted
     const favIconURI =
         options.includeFavIcon && extracted.rawContent.type !== 'pdf'
@@ -55,6 +58,7 @@ async function extractPageContent(options: {
     tabManagement: Pick<TabManagementBackground, 'extractRawPageContent'>
     fetch?: typeof fetch
     includeContent?: 'metadata-only' | 'metadata-with-full-text'
+    url?: string
 }): Promise<
     | {
           content: PageContent
@@ -64,25 +68,60 @@ async function extractPageContent(options: {
       }
     | undefined
 > {
+    let content
+    let rawContent
+    let pdfMetadata
+    let pdfPageTexts
+
     if (!options.includeContent) {
         return
     }
 
-    const rawContent = await options.tabManagement.extractRawPageContent(
+    const ytVideoUrlPattern = /^.*(?:(?:youtu.be\/)|(?:v\/)|(?:\/u\/\w\/)|(?:embed\/)|(?:watch\?))\??(?:v=)?([^#&?]*).*/
+    const [, videoId] = options.url.match(ytVideoUrlPattern) ?? []
+
+    rawContent = await options.tabManagement.extractRawPageContent(
         options.tabId,
     )
     if (!rawContent) {
         throw new Error(`Could extract raw page content`)
     }
 
-    const content = await extractPageMetadataFromRawContent(rawContent, options)
-    if (options.includeContent === 'metadata-with-full-text') {
-        content.fullText = await getPageFullText(rawContent, content)
+    content = await extractPageMetadataFromRawContent(rawContent, options)
+
+    if (videoId) {
+        const isStaging =
+            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+            process.env.NODE_ENV === 'development'
+
+        const baseUrl = isStaging
+            ? 'https://cloudflare-memex-staging.memex.workers.dev'
+            : 'https://cloudfare-memex.memex.workers.dev'
+
+        const normalisedYoutubeURL =
+            'https://www.youtube.com/watch?v=' + videoId
+
+        const response = await fetch(baseUrl + '/youtube-transcripts', {
+            method: 'POST',
+            body: JSON.stringify({
+                originalUrl: normalisedYoutubeURL,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+        })
+
+        let responseContent = await response.text()
+
+        content.fullText =
+            content.fullText + JSON.parse(responseContent).transcriptText
+    } else {
+        if (options.includeContent === 'metadata-with-full-text') {
+            content.fullText = await getPageFullText(rawContent, content)
+        }
+        pdfMetadata = content.pdfMetadata
+        pdfPageTexts = content.pdfPageTexts
+        delete content.pdfMetadata
+        delete content.pdfPageTexts
     }
-    const pdfMetadata = content.pdfMetadata
-    const pdfPageTexts = content.pdfPageTexts
-    delete content.pdfMetadata
-    delete content.pdfPageTexts
     return { content, rawContent, pdfMetadata, pdfPageTexts }
 }
 

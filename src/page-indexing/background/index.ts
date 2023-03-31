@@ -516,6 +516,7 @@ export class PageIndexingBackground {
                 ? 'metadata-only'
                 : 'metadata-with-full-text',
             includeFavIcon,
+            url: props.fullUrl,
         })
 
         const pageData = await pipeline({
