@@ -25,7 +25,6 @@ import {
     LocalPersonalCloudSettings,
     PersonalCloudRemoteInterface,
     PersonalCloudStats,
-    AuthChanges,
 } from './types'
 import {
     PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
@@ -46,6 +45,7 @@ import type { LocalExtensionSettings } from 'src/background-script/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { Runtime } from 'webextension-polyfill'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
+import type { AuthChange } from '@worldbrain/memex-common/lib/authentication/types'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
@@ -55,7 +55,7 @@ export interface PersonalCloudBackgroundOptions {
     persistentStorageManager: StorageManager
     remoteEventEmitter: RemoteEventEmitter<'personalCloud'>
     getUserId(): Promise<string | number | null>
-    authChanges(): AsyncIterableIterator<AuthChanges>
+    authChanges(): AsyncIterableIterator<AuthChange>
     settingStore: SettingStore<LocalPersonalCloudSettings>
     localExtSettingStore: SettingStore<LocalExtensionSettings>
     writeIncomingData(params: {

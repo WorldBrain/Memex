@@ -98,7 +98,9 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                         >
                             <AuthDialog
                                 onAuth={() => {
-                                    window.location.reload()
+                                    setTimeout(() => {
+                                        window.location.reload()
+                                    }, 1000)
                                 }}
                                 onModeChange={({ mode }) => {
                                     this.processEvent('setAuthDialogMode', {
