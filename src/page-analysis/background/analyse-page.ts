@@ -35,8 +35,6 @@ const analysePage: PageAnalyzer = async (options) => {
     options.includeFavIcon = options.includeFavIcon ?? true
 
     const extracted = await extractPageContent(options)
-
-    console.log('extracted', extracted)
     const { content, rawContent } = extracted
     const favIconURI =
         options.includeFavIcon && extracted.rawContent.type !== 'pdf'
