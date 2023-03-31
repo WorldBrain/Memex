@@ -123,8 +123,6 @@ async function extractPageContent(options: {
             content.fullText =
                 content.fullText + JSON.parse(responseContent).transcriptText
         }
-
-        console.log(content.fullText)
     }
     return { content, rawContent, pdfMetadata, pdfPageTexts }
 }
