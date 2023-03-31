@@ -132,6 +132,7 @@ export class SidebarContainerLogic extends UILogic<
     sidebar
     readingViewState
     openAIkey
+    showState
     summarisePageEvents: TypedRemoteEventEmitter<'pageSummary'>
 
     constructor(private options: SidebarLogicOptions) {
@@ -558,6 +559,10 @@ export class SidebarContainerLogic extends UILogic<
                     window.addEventListener('resize', this.debounceReadingWidth)
                 } else {
                     document.body.style.width = 'initial'
+
+                    if (document.body.offsetWidth === 0) {
+                        document.body.style.width = '100%'
+                    }
                     this.resizeObserver.disconnect()
                     window.removeEventListener(
                         'resize',
@@ -569,11 +574,14 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     private setReadingWidth() {
-        const sidebar = this.sidebar
-        let currentsidebarWidth = sidebar.offsetWidth
-        let currentWindowWidth = window.innerWidth
-        let readingWidth = currentWindowWidth - currentsidebarWidth - 50 + 'px'
-        document.body.style.width = readingWidth
+        if (this.showState === 'visible') {
+            const sidebar = this.sidebar
+            let currentsidebarWidth = sidebar.offsetWidth
+            let currentWindowWidth = window.innerWidth
+            let readingWidth =
+                currentWindowWidth - currentsidebarWidth - 50 + 'px'
+            document.body.style.width = readingWidth
+        }
     }
 
     sortAnnotations: EventHandler<'sortAnnotations'> = ({
@@ -640,6 +648,7 @@ export class SidebarContainerLogic extends UILogic<
                 ? event.existingWidthState
                 : SIDEBAR_WIDTH_STORAGE_KEY
 
+        this.showState = 'visible'
         this.emitMutation({
             showState: { $set: 'visible' },
             sidebarWidth: { $set: width },
@@ -647,6 +656,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     hide: EventHandler<'hide'> = async ({ event, previousState }) => {
+        this.showState = 'hidden'
         this.readingViewState =
             (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(false)
@@ -657,6 +667,10 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         document.body.style.width = 'initial'
+
+        if (document.body.offsetWidth === 0) {
+            document.body.style.width = '100%'
+        }
     }
 
     lock: EventHandler<'lock'> = () =>
