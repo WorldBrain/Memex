@@ -60,14 +60,16 @@ export default class BookmarksBackground {
 
         this.options.browserAPIs.storage.onChanged.addListener(
             (changes, area) => {
-                if (changes[BOOKMARK_SYNC_STORAGE_NAME].newValue === true) {
-                    this.options.browserAPIs.bookmarks.onCreated.addListener(
-                        this.handleBookmarkCreation.bind(this),
-                    )
-                } else {
-                    this.options.browserAPIs.bookmarks.onCreated.removeListener(
-                        this.handleBookmarkCreation.bind(this),
-                    )
+                if (changes[BOOKMARK_SYNC_STORAGE_NAME] != null) {
+                    if (changes[BOOKMARK_SYNC_STORAGE_NAME].newValue === true) {
+                        this.options.browserAPIs.bookmarks.onCreated.addListener(
+                            this.handleBookmarkCreation.bind(this),
+                        )
+                    } else {
+                        this.options.browserAPIs.bookmarks.onCreated.removeListener(
+                            this.handleBookmarkCreation.bind(this),
+                        )
+                    }
                 }
             },
         )
