@@ -91,7 +91,7 @@ export default class BookmarksBackground {
         }
 
         if (!params.skipIndexing) {
-            const { success } = await this.options.pages.indexPage(
+            await this.options.pages.indexPage(
                 {
                     fullUrl,
                     tabId: params.tabId,
@@ -99,11 +99,6 @@ export default class BookmarksBackground {
                 },
                 { addInboxEntryOnCreate: true },
             )
-            if (!success) {
-                throw new Error(
-                    `PAGE INDEXING: Page indexing failed on bookmarking attempt - ${params.fullUrl}`,
-                )
-            }
         }
 
         await this.storage.createBookmarkIfNeeded(fullUrl, params.timestamp)

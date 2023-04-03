@@ -606,12 +606,11 @@ export class PageIndexingBackground {
     indexPage = async (
         props: PageCreationProps,
         opts: PageCreationOpts = {},
-    ): Promise<{ success: boolean }> => {
+    ) => {
         const pageData = await this._getPageData(props)
         if (!pageData) {
-            return { success: false }
+            return
         }
-
         await this.createOrUpdatePage(pageData, opts)
 
         if (props.visitTime) {
@@ -626,7 +625,6 @@ export class PageIndexingBackground {
         }
 
         await updatePageCounter()
-        return { success: true }
     }
 
     private async _findTabId(fullUrl: string) {
