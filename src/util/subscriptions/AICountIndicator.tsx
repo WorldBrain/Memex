@@ -24,7 +24,6 @@ interface State {
     showTooltip: boolean
     openAIKey: string
     showSaveButton: boolean
-    allowForKey: boolean
 }
 
 export class AICounterIndicator extends React.Component<Props, State> {
@@ -38,7 +37,6 @@ export class AICounterIndicator extends React.Component<Props, State> {
         showTooltip: false,
         openAIKey: '',
         showSaveButton: false,
-        allowForKey: false,
     }
 
     constructor(props: Props) {
@@ -59,10 +57,6 @@ export class AICounterIndicator extends React.Component<Props, State> {
                 totalCount: parseInt(result[COUNTER_STORAGE_KEY].sQ),
                 currentCount: result[COUNTER_STORAGE_KEY].cQ,
             })
-        }
-
-        if (result[COUNTER_STORAGE_KEY].s > 10000) {
-            this.setState({ allowForKey: true })
         }
 
         this.setState({ shouldShow: true })
@@ -172,58 +166,56 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                 )}
                             </>
                         )}
-                    {this.state.allowForKey && (
-                        <OpenAIKeyContainer>
-                            <OpenAIKeyTitle>OpenAI API Key</OpenAIKeyTitle>
-                            <OpenAIKeySubTitle>
-                                Add your own API key to get unlimited AI
-                                requests.
-                            </OpenAIKeySubTitle>
-                            <KeyBox>
-                                <TextField
-                                    placeholder={
-                                        this.state.openAIKey?.length > 0
-                                            ? this.state.openAIKey
-                                            : 'Enter API Key'
-                                    }
-                                    value={this.state.openAIKey}
-                                    onChange={(e) => {
+                    <OpenAIKeyContainer>
+                        <OpenAIKeyTitle>OpenAI API Key</OpenAIKeyTitle>
+                        <OpenAIKeySubTitle>
+                            Add your own API key to get unlimited AI requests.
+                        </OpenAIKeySubTitle>
+                        <KeyBox>
+                            <TextField
+                                placeholder={
+                                    this.state.openAIKey?.length > 0
+                                        ? this.state.openAIKey
+                                        : 'Enter API Key'
+                                }
+                                value={this.state.openAIKey}
+                                onChange={(e) => {
+                                    this.setState({
+                                        openAIKey: (e.target as HTMLInputElement)
+                                            .value,
+                                        showSaveButton: true,
+                                    })
+                                }}
+                                onKeyDown={async (e) => {
+                                    if (e.key === 'Enter') {
+                                        await this.syncSettings.openAI.set(
+                                            'apiKey',
+                                            this.state.openAIKey,
+                                        )
                                         this.setState({
-                                            openAIKey: (e.target as HTMLInputElement)
-                                                .value,
-                                            showSaveButton: true,
+                                            showSaveButton: false,
+                                        })
+                                    }
+                                }}
+                            />
+                            {this.state.showSaveButton && (
+                                <PrimaryAction
+                                    onClick={async () => {
+                                        await this.syncSettings.openAI.set(
+                                            'apiKey',
+                                            this.state.openAIKey,
+                                        )
+                                        this.setState({
+                                            showSaveButton: false,
                                         })
                                     }}
-                                    onKeyDown={async (e) => {
-                                        if (e.key === 'Enter') {
-                                            await this.syncSettings.openAI.set(
-                                                'apiKey',
-                                                this.state.openAIKey,
-                                            )
-                                            this.setState({
-                                                showSaveButton: false,
-                                            })
-                                        }
-                                    }}
+                                    label="Save"
+                                    type="secondary"
+                                    size="medium"
                                 />
-                                {this.state.showSaveButton && (
-                                    <PrimaryAction
-                                        onClick={async () => {
-                                            await this.syncSettings.openAI.set(
-                                                'apiKey',
-                                                this.state.openAIKey,
-                                            )
-                                            this.setState({
-                                                showSaveButton: false,
-                                            })
-                                        }}
-                                        label="Save"
-                                        type="secondary"
-                                        size="medium"
-                                    />
-                                )}
-                            </KeyBox>
-                            {/* <ModelSwitchBox>
+                            )}
+                        </KeyBox>
+                        {/* <ModelSwitchBox>
                             <ModelSwitchTitle>
                                 Model to use for queries
                             </ModelSwitchTitle>
@@ -256,8 +248,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                 GPT-3.5
                             </ModelButton>
                         </ModelSwitchBox> */}
-                        </OpenAIKeyContainer>
-                    )}
+                    </OpenAIKeyContainer>
                 </InfoTooltipContainer>
             </PopoutBox>
         )
