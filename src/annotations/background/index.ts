@@ -278,7 +278,7 @@ export default class DirectLinkingBackground {
         const pageTitle = toCreate.title == null ? tab.title : toCreate.title
 
         if (!skipPageIndexing) {
-            await this.options.pages.indexPage(
+            const { success } = await this.options.pages.indexPage(
                 {
                     fullUrl: fullPageUrl,
                     visitTime: '$now',
@@ -286,6 +286,11 @@ export default class DirectLinkingBackground {
                 },
                 { addInboxEntryOnCreate: true },
             )
+            if (!success) {
+                throw new Error(
+                    `PAGE INDEXING: Page indexing failed on annotation attempt - ${fullPageUrl}`,
+                )
+            }
         }
 
         const annotationUrl =

@@ -564,31 +564,36 @@ export default class CustomListBackground {
         },
     ): Promise<{ object: PageListEntry }> => {
         const { id } = params
-        const url =
+        const fullPageUrl =
             'contentIdentifier' in params
                 ? params.contentIdentifier?.fullUrl
                 : params.url
 
-        if (!isFullUrl(url)) {
+        if (!isFullUrl(fullPageUrl)) {
             throw new Error(
                 'Tried to insert page to list with a normalized, instead of a full URL',
             )
         }
 
         if (!params.skipPageIndexing) {
-            await this.options.pages.indexPage(
+            const { success } = await this.options.pages.indexPage(
                 {
                     tabId: params.tabId,
-                    fullUrl: url,
+                    fullUrl: fullPageUrl,
                     visitTime: !params.suppressVisitCreation
                         ? '$now'
                         : undefined,
                 },
                 { addInboxEntryOnCreate: !params.suppressInboxEntry },
             )
+            if (!success) {
+                throw new Error(
+                    `PAGE INDEXING: Page indexing failed on list insertion attempt - ${fullPageUrl}`,
+                )
+            }
         }
 
-        const pageUrl = normalizeUrl(url)
+        const pageUrl = normalizeUrl(fullPageUrl)
         const existing = await this.storage.fetchListEntry(id, pageUrl)
         if (existing != null) {
             return { object: existing }
@@ -597,7 +602,7 @@ export default class CustomListBackground {
         const retVal = await this.storage.insertPageToList({
             pageUrl,
             listId: id,
-            fullUrl: url,
+            fullUrl: fullPageUrl,
         })
 
         this.options.analytics.trackEvent({
