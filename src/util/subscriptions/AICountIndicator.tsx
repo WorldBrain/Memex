@@ -161,9 +161,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                         iconPosition="right"
                                     />
                                 </InfoTooltipTitleArea>
-                                {this.state.allowForKey && (
-                                    <ORBox>- or - </ORBox>
-                                )}
+                                <ORBox>- or - </ORBox>
                             </>
                         )}
                     <OpenAIKeyContainer>
