@@ -87,6 +87,14 @@ async function extractPageContent(options: {
 
     content = await extractPageMetadataFromRawContent(rawContent, options)
 
+    if (options.includeContent === 'metadata-with-full-text') {
+        content.fullText = await getPageFullText(rawContent, content)
+    }
+    pdfMetadata = content.pdfMetadata
+    pdfPageTexts = content.pdfPageTexts
+    delete content.pdfMetadata
+    delete content.pdfPageTexts
+
     if (videoId) {
         const isStaging =
             process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
@@ -109,16 +117,12 @@ async function extractPageContent(options: {
 
         let responseContent = await response.text()
 
-        content.fullText =
-            content.fullText + JSON.parse(responseContent).transcriptText
-    } else {
-        if (options.includeContent === 'metadata-with-full-text') {
-            content.fullText = await getPageFullText(rawContent, content)
+        let transcriptText = JSON.parse(responseContent).transcriptText
+
+        if (transcriptText != null) {
+            content.fullText =
+                content.fullText + JSON.parse(responseContent).transcriptText
         }
-        pdfMetadata = content.pdfMetadata
-        pdfPageTexts = content.pdfPageTexts
-        delete content.pdfMetadata
-        delete content.pdfPageTexts
     }
     return { content, rawContent, pdfMetadata, pdfPageTexts }
 }

@@ -277,6 +277,8 @@ export async function main(
         },
     }
 
+    injectYoutubeContextMenu(annotationsFunctions)
+
     if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
         const isStaging =
             process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
@@ -558,8 +560,7 @@ export async function main(
             showPageActivityIndicator: pageActivityStatus !== 'no-activity',
         })
     }
-
-    injectYoutubeContextMenu(annotationsFunctions)
+    injectYoutubeButtonMenu(annotationsFunctions)
     setupWebUIActions({ contentScriptsBG, bgScriptBG, pageActivityIndicatorBG })
     return inPageUI
 }
@@ -673,6 +674,17 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
     })
 
     observer.observe(document, config)
+}
+export function injectYoutubeButtonMenu(annotationsFunctions: any) {
+    const icon = runtime.getURL('/img/memex-icon.svg')
+    const panel = document.getElementsByClassName('ytp-time-display')[0]
+    const newEntry = document.createElement('div')
+    newEntry.setAttribute('class', 'ytp-menuitem')
+    newEntry.onclick = () =>
+        annotationsFunctions.createAnnotation()(false, false)
+    newEntry.innerHTML = `<div class="ytp-menuitem-icon"><img src=${icon} style="height: 23px; padding-left: 2px; display: flex; width: auto"/></div><div class="ytp-menuitem-label" style="white-space: nowrap">Add Note with Memex</div>`
+    newEntry.style.height = '48px'
+    panel.parentNode.insertBefore(newEntry, panel.nextSibling)
 }
 
 export function setupWebUIActions(args: {
