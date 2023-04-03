@@ -61,7 +61,7 @@ export async function maybeIndexTabs(
     for (const [fullUrl, tabId] of tabIdsByUrls) {
         let error = false
         try {
-            const { success } = await options.createPage(
+            await options.createPage(
                 {
                     tabId,
                     fullUrl,
@@ -70,11 +70,6 @@ export async function maybeIndexTabs(
                 },
                 { addInboxEntryOnCreate: true },
             )
-            if (!success) {
-                throw new Error(
-                    `PAGE INDEXING: Page indexing failed on bulk list insertion attempt - ${fullUrl}`,
-                )
-            }
         } catch (err) {
             error = true
             Raven.captureException(err)
