@@ -320,12 +320,10 @@ export async function main(
         fullPageUrl === 'https://memex.garden/copilot' ||
         fullPageUrl === 'https://memex.garden/hivemind'
     ) {
-        console.log('running')
         setInterval(() => {
             const elements = document.querySelectorAll('#UpgradeButton')
 
             for (let element of elements) {
-                console.log(element)
                 const currentHref = element.getAttribute('href')
                 if (!currentHref.includes('prefilled_email')) {
                     element.setAttribute(
