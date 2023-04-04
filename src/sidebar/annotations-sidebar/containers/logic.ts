@@ -397,6 +397,7 @@ export class SidebarContainerLogic extends UILogic<
         // this.readingViewStorageListener(true)
 
         await loadInitial<SidebarContainerState>(this, async () => {
+            this.showState = initialState ?? 'hidden'
             this.emitMutation({
                 showState: { $set: initialState ?? 'hidden' },
                 loadState: { $set: 'running' },
@@ -554,6 +555,8 @@ export class SidebarContainerLogic extends UILogic<
                     readingView: { $set: key[1].newValue },
                 })
                 if (key[1].newValue) {
+                    this.showState = 'visible'
+                    console.log('reading view enabled')
                     this.setReadingWidth()
                     this.resizeObserver.observe(this.sidebar)
                     window.addEventListener('resize', this.debounceReadingWidth)
@@ -574,12 +577,16 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     private setReadingWidth() {
+        console.log('showState', this.showState)
         if (this.showState === 'visible') {
             const sidebar = this.sidebar
+            console.log('sidebar', sidebar.offsetWidth)
             let currentsidebarWidth = sidebar.offsetWidth
             let currentWindowWidth = window.innerWidth
             let readingWidth =
                 currentWindowWidth - currentsidebarWidth - 50 + 'px'
+
+            console.log('sidebar', readingWidth)
             document.body.style.width = readingWidth
         }
     }
@@ -640,6 +647,8 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     show: EventHandler<'show'> = async ({ event }) => {
+        console.log('show')
+        this.showState = 'visible'
         this.readingViewState =
             (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(true)
@@ -648,7 +657,6 @@ export class SidebarContainerLogic extends UILogic<
                 ? event.existingWidthState
                 : SIDEBAR_WIDTH_STORAGE_KEY
 
-        this.showState = 'visible'
         this.emitMutation({
             showState: { $set: 'visible' },
             sidebarWidth: { $set: width },
