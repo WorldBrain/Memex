@@ -3,7 +3,7 @@ import styled, { keyframes } from 'styled-components'
 
 import { conditionallyRemoveOnboardingSelectOption } from '../../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
-import { SharedInPageUIEvents } from 'src/in-page-ui/shared-state/types'
+import type { SharedInPageUIEvents } from 'src/in-page-ui/shared-state/types'
 import type {
     TooltipInPageUIInterface,
     AnnotationFunctions,
@@ -98,23 +98,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             return
         }
 
-        if (event.changes.tooltip != null) {
-            if (event.mode === 'AImode') {
-                this.setState({
-                    highlightText: window.getSelection().toString() ?? '',
-                })
-                let newPositionX = window.innerWidth / 2
-                let newPositionY = window.innerHeight / 2 - 300
-                this.setState({
-                    showTooltip: true,
-                    tooltipState: 'AIinterface',
-                    position: { x: newPositionX, y: newPositionY },
-                    removeAfterUse: !event.changes.tooltip ? true : false,
-                })
-            }
-        }
-
-        if (!event.newState.tooltip && event.mode == null) {
+        if (!event.newState.tooltip) {
             this.setState({
                 showTooltip: false,
                 position: {},

@@ -48,7 +48,6 @@ export interface SharedInPageUIEvents {
     stateChanged: (event: {
         newState: InPageUIComponentShowState
         changes: Partial<InPageUIComponentShowState>
-        mode?: string
     }) => void
     ribbonAction: (event: { action: InPageUIRibbonAction }) => void
     ribbonUpdate: () => void
