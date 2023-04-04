@@ -277,7 +277,10 @@ export async function main(
         },
     }
 
-    injectYoutubeContextMenu(annotationsFunctions)
+    if (window.location.hostname === 'www.youtube.com') {
+        injectYoutubeButtonMenu(annotationsFunctions)
+        injectYoutubeContextMenu(annotationsFunctions)
+    }
 
     if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
         const isStaging =
@@ -312,6 +315,7 @@ export async function main(
     if (
         fullPageUrl === 'https://memex.garden/upgradeStaging' ||
         fullPageUrl === 'https://memex.garden/upgradeNotification' ||
+        fullPageUrl === 'https://memex.garden/upgrade' ||
         fullPageUrl === 'https://memex.garden/' ||
         fullPageUrl === 'https://memex.garden/copilot' ||
         fullPageUrl === 'https://memex.garden/hivemind'
@@ -560,7 +564,7 @@ export async function main(
             showPageActivityIndicator: pageActivityStatus !== 'no-activity',
         })
     }
-    injectYoutubeButtonMenu(annotationsFunctions)
+
     setupWebUIActions({ contentScriptsBG, bgScriptBG, pageActivityIndicatorBG })
     return inPageUI
 }
