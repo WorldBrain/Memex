@@ -15,7 +15,6 @@ export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
         'toggleHighlights',
         'createAnnotation',
         'createHighlight',
-        'link',
         'createBookmark',
         'openDashboard',
         'shortcutsEnabled',

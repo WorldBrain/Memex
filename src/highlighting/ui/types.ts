@@ -1,4 +1,4 @@
-import { Annotation } from './types/api'
+import type { Annotation } from './types/api'
 
 export type AnnotationClickHandler = (params: {
     unifiedAnnotationId: string

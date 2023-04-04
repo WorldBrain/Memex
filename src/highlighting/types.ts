@@ -32,7 +32,10 @@ export interface HighlightInteractionsInterface {
     renderHighlight: (
         highlight: _UnifiedAnnotation,
         onClick: AnnotationClickHandler,
-        temp?: boolean,
+        opts?: {
+            temp?: boolean
+            isPdf?: boolean
+        },
     ) => Promise<void> | Promise<boolean>
     highlightAndScroll: (annotation: _UnifiedAnnotation) => Promise<void>
     removeTempHighlights: () => void
@@ -58,4 +61,11 @@ export interface SaveAndRenderHighlightDeps {
     showSpacePicker?: boolean
     currentUser?: UserReference
     shouldShare?: boolean
+    isPdf?: boolean
+}
+
+export interface UndoHistoryEntry {
+    url: string
+    type: 'annotation' | 'pagelistEntry'
+    id: string
 }

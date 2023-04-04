@@ -1,10 +1,9 @@
-import browser from 'webextension-polyfill'
 import throttle from 'lodash/throttle'
-import hexToRgb from 'hex-to-rgb'
 
 import type {
     Anchor,
     HighlightElement,
+    UndoHistoryEntry,
     SaveAndRenderHighlightDeps,
     HighlightInteractionsInterface,
     _UnifiedAnnotation as UnifiedAnnotation,
@@ -20,12 +19,9 @@ import {
 import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
-import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
+import { DEFAULT_HIGHLIGHT_COLOR } from '../constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
-import { UNDO_HISTORY } from 'src/constants'
-import { pageActionAllowed } from 'src/util/subscriptions/storage'
 import delay from 'src/util/delay'
-import { isUrlPDFViewerUrl } from 'src/pdf/util'
 const styles = require('src/highlighting/ui/styles.css')
 
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
@@ -39,27 +35,13 @@ const createHighlightClass = ({
 }: Pick<UnifiedAnnotation, 'unifiedId'>): string =>
     `memex-cache-highlight-${unifiedId}`
 
-export const extractAnchorFromSelection = async (
-    selection: Selection,
-    pageUrl: string,
-): Promise<Anchor> => {
-    const quote = getSelectionHtml(selection)
-    const isPdf = isUrlPDFViewerUrl(window.location.href, {
-        runtimeAPI: browser.runtime,
-    })
-    const descriptor = await anchoring.selectionToDescriptor({
-        selection,
-        isPdf,
-    })
-    return {
-        quote,
-        descriptor,
-    }
-}
-
 export interface HighlightRendererDeps {
     annotationsBG: AnnotationInterface<'caller'>
     contentSharingBG: ContentSharingInterface
+    getUndoHistory: () => Promise<UndoHistoryEntry[]>
+    setUndoHistory: (history: UndoHistoryEntry[]) => Promise<void>
+    getHighlightColorRGB: () => Promise<string>
+    onHighlightColorChange: (cb: (nextColor: string) => void) => void
 }
 
 export class HighlightRenderer implements HighlightInteractionsInterface {
@@ -70,10 +52,8 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
     constructor(private deps: HighlightRendererDeps) {
         document.addEventListener('click', this.handleOutsideHighlightClick)
 
-        browser.storage.onChanged.addListener((changes) => {
-            if (changes[HIGHLIGHT_COLOR_KEY]?.newValue != null) {
-                this.highlightColor = changes[HIGHLIGHT_COLOR_KEY].newValue
-            }
+        deps.onHighlightColorChange((nextColor) => {
+            this.highlightColor = nextColor
         })
     }
 
@@ -114,28 +94,6 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
         }
     }
 
-    private createUndoHistoryEntry = async (
-        url: string,
-        type: 'annotation' | 'pagelistEntry',
-        id: string,
-    ) => {
-        let undoHistory = await browser.storage.local.get(`${UNDO_HISTORY}`)
-
-        undoHistory = undoHistory[`${UNDO_HISTORY}`]
-
-        if (undoHistory == null) {
-            undoHistory = []
-        }
-
-        const undoEntry = { url: url, type: type, id: id }
-
-        undoHistory.unshift(undoEntry)
-
-        await globalThis['browser'].storage.local.set({
-            [UNDO_HISTORY]: undoHistory,
-        })
-    }
-
     saveAndRenderHighlight: HighlightInteractionsInterface['saveAndRenderHighlight'] = async (
         params,
     ) => {
@@ -145,163 +103,167 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
     private async _saveAndRenderHighlight(
         params: SaveAndRenderHighlightDeps,
     ): Promise<UnifiedAnnotation['unifiedId'] | null> {
-        const allowed = await pageActionAllowed()
+        const selection = params.getSelection()
+        const { fullPageUrl, title } = await params.getFullPageUrlAndTitle()
 
-        if (allowed) {
-            const selection = params.getSelection()
-            const { fullPageUrl, title } = await params.getFullPageUrlAndTitle()
+        // TODO: simplify conditions related to timestamp + annot data. Quite difficult to work thru and reason about. i.e., bug prone
+        // Enable support for any kind of HTML 5 video using annotation keyboard shortcuts to make notes without opening the sidebar and notes field first
+        let videoTimeStampForComment: string | null
+        const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
 
-            // TODO: simplify conditions related to timestamp + annot data. Quite difficult to work thru and reason about. i.e., bug prone
-            // Enable support for any kind of HTML 5 video using annotation keyboard shortcuts to make notes without opening the sidebar and notes field first
-            let videoTimeStampForComment: string | null
-            const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
+        if (videoURLWithTime != null) {
+            videoTimeStampForComment = `<a class="youtubeTimestamp" href="${videoURLWithTime}">${humanTimestamp}</a>`
+        }
 
-            if (videoURLWithTime != null) {
-                videoTimeStampForComment = `<a class="youtubeTimestamp" href="${videoURLWithTime}">${humanTimestamp}</a>`
-            }
+        if (
+            (!selection || selection.isCollapsed) &&
+            videoTimeStampForComment == null
+        ) {
+            return null
+        }
+
+        let anchor: Anchor
+
+        if (selection && selection.anchorNode) {
+            // Fix bug where you can't select Youtube context menu annotations twice
+            const selectionItems = selection.anchorNode.childNodes ?? undefined
+            const lastSelectionItem = selectionItems[
+                selectionItems.length - 1
+            ] as HTMLElement
 
             if (
-                (!selection || selection.isCollapsed) &&
-                videoTimeStampForComment == null
+                (lastSelectionItem &&
+                    lastSelectionItem.classList &&
+                    lastSelectionItem.classList.contains('ytp-popup')) ||
+                (selection.toString().length === 0 &&
+                    fullPageUrl.includes('youtube.com/watch'))
             ) {
-                return null
-            }
-
-            let anchor
-
-            if (selection && selection.anchorNode) {
-                // Fix bug where you can't select Youtube context menu annotations twice
-
-                const selectionItems =
-                    selection.anchorNode.childNodes ?? undefined
-                const lastSelectionItem = selectionItems[
-                    selectionItems.length - 1
-                ] as HTMLElement
-
-                if (
-                    (lastSelectionItem &&
-                        lastSelectionItem.classList &&
-                        lastSelectionItem.classList.contains('ytp-popup')) ||
-                    (selection.toString().length === 0 &&
-                        fullPageUrl.includes('youtube.com/watch'))
-                ) {
-                    anchor = undefined
-                } else {
-                    anchor = await extractAnchorFromSelection(
-                        selection,
-                        fullPageUrl,
-                    )
-                }
-            }
-
-            const body = anchor ? anchor.quote : undefined
-            const hasSelectedText =
-                anchor && anchor.quote ? anchor.quote.length : false
-
-            const localListIds: number[] = []
-            if (params.inPageUI.selectedList) {
-                const selectedList =
-                    params.annotationsCache.lists.byId[
-                        params.inPageUI.selectedList
-                    ]
-                if (selectedList.localId != null) {
-                    localListIds.push(selectedList.localId)
-                }
-            }
-
-            const now = new Date()
-            const annotation: Annotation &
-                Required<Pick<Annotation, 'createdWhen' | 'lastEdited'>> = {
-                url: generateAnnotationUrl({
-                    pageUrl: fullPageUrl,
-                    now: () => Date.now(),
-                }),
-                body: hasSelectedText ? body : undefined,
-                pageUrl: fullPageUrl,
-                tags: [],
-                lists: localListIds,
-                comment: hasSelectedText
-                    ? ''
-                    : videoTimeStampForComment
-                    ? videoTimeStampForComment
-                    : undefined,
-                selector: hasSelectedText
-                    ? anchor
-                    : videoTimeStampForComment && undefined,
-                pageTitle: title,
-                createdWhen: now,
-                lastEdited: now,
-            }
-
-            try {
-                const cacheAnnotation = reshapeAnnotationForCache(annotation, {
-                    extraData: {
-                        creator: params.currentUser,
-                        privacyLevel: shareOptsToPrivacyLvl({
-                            shouldShare: params.shouldShare,
-                        }),
-                    },
+                anchor = undefined
+            } else {
+                const quote = getSelectionHtml(selection)
+                const descriptor = await anchoring.selectionToDescriptor({
+                    isPdf: params.isPdf,
+                    selection,
                 })
-                const { unifiedId } = params.annotationsCache.addAnnotation(
-                    cacheAnnotation,
-                )
-
-                window.getSelection().empty()
-
-                await this.renderHighlight(
-                    { ...cacheAnnotation, unifiedId },
-                    ({ openInEdit, unifiedAnnotationId }) => {
-                        params.inPageUI.showSidebar({
-                            annotationCacheId: unifiedAnnotationId,
-                            action: openInEdit
-                                ? 'edit_annotation'
-                                : 'show_annotation',
-                        })
-                    },
-                )
-
-                await this.createUndoHistoryEntry(
-                    window.location.href,
-                    'annotation',
-                    unifiedId,
-                )
-
-                try {
-                    await createAnnotation({
-                        annotationData: {
-                            fullPageUrl,
-                            localListIds,
-                            pageTitle: title,
-                            body: annotation.body,
-                            selector: annotation.selector,
-                            comment: annotation.comment,
-                            localId: annotation.url,
-                            createdWhen: now,
-                        },
-                        shareOpts: {
-                            shouldShare: params.shouldShare,
-                            shouldCopyShareLink: params.shouldShare,
-                        },
-                        annotationsBG: this.deps.annotationsBG,
-                        contentSharingBG: this.deps.contentSharingBG,
-                        skipPageIndexing: false,
-                    })
-                } catch (err) {
-                    this.removeAnnotationHighlight(unifiedId)
-                    throw err
-                }
-                return unifiedId
-            } catch (err) {
-                this.removeAnnotationHighlight(annotation.url)
-                throw err
+                anchor = { quote, descriptor }
             }
         }
+
+        const body = anchor ? anchor.quote : undefined
+        const hasSelectedText =
+            anchor && anchor.quote ? anchor.quote.length : false
+
+        const localListIds: number[] = []
+        if (params.inPageUI.selectedList) {
+            const selectedList =
+                params.annotationsCache.lists.byId[params.inPageUI.selectedList]
+            if (selectedList.localId != null) {
+                localListIds.push(selectedList.localId)
+            }
+        }
+
+        const now = new Date()
+        const annotation: Annotation &
+            Required<Pick<Annotation, 'createdWhen' | 'lastEdited'>> = {
+            url: generateAnnotationUrl({
+                pageUrl: fullPageUrl,
+                now: () => Date.now(),
+            }),
+            body: hasSelectedText ? body : undefined,
+            pageUrl: fullPageUrl,
+            tags: [],
+            lists: localListIds,
+            comment: hasSelectedText
+                ? ''
+                : videoTimeStampForComment
+                ? videoTimeStampForComment
+                : undefined,
+            selector: hasSelectedText
+                ? anchor
+                : videoTimeStampForComment && undefined,
+            pageTitle: title,
+            createdWhen: now,
+            lastEdited: now,
+        }
+
+        try {
+            const cacheAnnotation = reshapeAnnotationForCache(annotation, {
+                extraData: {
+                    creator: params.currentUser,
+                    privacyLevel: shareOptsToPrivacyLvl({
+                        shouldShare: params.shouldShare,
+                    }),
+                },
+            })
+            const { unifiedId } = params.annotationsCache.addAnnotation(
+                cacheAnnotation,
+            )
+
+            window.getSelection().empty()
+
+            await this.renderHighlight(
+                { ...cacheAnnotation, unifiedId },
+                ({ openInEdit, unifiedAnnotationId }) => {
+                    params.inPageUI.showSidebar({
+                        annotationCacheId: unifiedAnnotationId,
+                        action: openInEdit
+                            ? 'edit_annotation'
+                            : 'show_annotation',
+                    })
+                },
+            )
+
+            await this.createUndoHistoryEntry(
+                window.location.href,
+                'annotation',
+                unifiedId,
+            )
+
+            try {
+                await createAnnotation({
+                    annotationData: {
+                        fullPageUrl,
+                        localListIds,
+                        pageTitle: title,
+                        body: annotation.body,
+                        selector: annotation.selector,
+                        comment: annotation.comment,
+                        localId: annotation.url,
+                        createdWhen: now,
+                    },
+                    shareOpts: {
+                        shouldShare: params.shouldShare,
+                        shouldCopyShareLink: params.shouldShare,
+                    },
+                    annotationsBG: this.deps.annotationsBG,
+                    contentSharingBG: this.deps.contentSharingBG,
+                    skipPageIndexing: false,
+                })
+            } catch (err) {
+                this.removeAnnotationHighlight(unifiedId)
+                throw err
+            }
+            return unifiedId
+        } catch (err) {
+            this.removeAnnotationHighlight(annotation.url)
+            throw err
+        }
+    }
+
+    private createUndoHistoryEntry = async (
+        url: string,
+        type: 'annotation' | 'pagelistEntry',
+        id: string,
+    ) => {
+        const undoHistory = await this.deps.getUndoHistory()
+        undoHistory.unshift({ url, type, id })
+        await this.deps.setUndoHistory(undoHistory)
     }
 
     renderHighlight: HighlightInteractionsInterface['renderHighlight'] = async (
         highlight,
         onClick,
-        temporary = false,
+        { isPdf } = {},
     ) => {
         let highlightAnchored = false
         let highlightColor = this.highlightColor
@@ -309,9 +271,6 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
             return
         }
 
-        const isPdf = isUrlPDFViewerUrl(window.location.href, {
-            runtimeAPI: browser.runtime,
-        })
         const baseClass = styles['memex-highlight']
 
         try {
@@ -392,14 +351,8 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
         onClick,
         opts,
     ) => {
-        const {
-            [HIGHLIGHT_COLOR_KEY]: highlightsColor,
-        } = await browser.storage.local.get({
-            [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
-        })
         const pdfViewer = globalThis.PDFViewerApplication?.pdfViewer
-
-        this.highlightColor = hexToRgb(highlightsColor).toString()
+        this.highlightColor = await this.deps.getHighlightColorRGB()
 
         if (opts?.removeExisting) {
             this.removeAllHighlights()
@@ -414,7 +367,7 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
                 let highlightAnchored = await this.renderHighlight(
                     highlight,
                     onClick,
-                    opts?.temp,
+                    opts,
                 )
 
                 if (!pdfViewer) {
@@ -425,7 +378,7 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
                         highlightAnchored = await this.renderHighlight(
                             highlight,
                             onClick,
-                            opts?.temp,
+                            opts,
                         )
 
                         await delay(500)
@@ -440,7 +393,7 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
                         highlightAnchored = await this.renderHighlight(
                             highlight,
                             onClick,
-                            opts?.temp,
+                            opts,
                         )
 
                         await delay(2000)

@@ -1,5 +1,6 @@
 import 'core-js'
 import { EventEmitter } from 'events'
+import hexToRgb from 'hex-to-rgb'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
 import {
@@ -68,10 +69,14 @@ import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/t
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
-import { upgradePlan } from 'src/util/subscriptions/storage'
+import { pageActionAllowed, upgradePlan } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import { browser } from 'webextension-polyfill-ts'
 import initSentry from 'src/util/raven'
+import {
+    DEFAULT_HIGHLIGHT_COLOR,
+    HIGHLIGHT_COLOR_KEY,
+} from 'src/highlighting/constants'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -191,6 +196,27 @@ export async function main(
     const highlightRenderer = new HighlightRenderer({
         annotationsBG,
         contentSharingBG,
+        getUndoHistory: async () => {
+            const storage = await browser.storage.local.get(UNDO_HISTORY)
+            return storage[UNDO_HISTORY] ?? []
+        },
+        setUndoHistory: async (undoHistory) =>
+            browser.storage.local.set({
+                [UNDO_HISTORY]: undoHistory,
+            }),
+        getHighlightColorRGB: async () => {
+            const storage = await browser.storage.local.get(HIGHLIGHT_COLOR_KEY)
+            return hexToRgb(
+                storage[HIGHLIGHT_COLOR_KEY] ?? DEFAULT_HIGHLIGHT_COLOR,
+            )
+        },
+        onHighlightColorChange: (cb) => {
+            browser.storage.onChanged.addListener((changes) => {
+                if (changes[HIGHLIGHT_COLOR_KEY]?.newValue != null) {
+                    cb(changes[HIGHLIGHT_COLOR_KEY].newValue)
+                }
+            })
+        },
     })
     const sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
@@ -249,26 +275,33 @@ export async function main(
         }),
     }
     const annotationsFunctions = {
-        createHighlight: (analyticsEvent?: AnalyticsEvent<'Highlights'>) => (
-            shouldShare: boolean,
-        ) =>
-            highlightRenderer.saveAndRenderHighlight({
+        createHighlight: (
+            analyticsEvent?: AnalyticsEvent<'Highlights'>,
+        ) => async (shouldShare: boolean) => {
+            if (!(await pageActionAllowed())) {
+                return
+            }
+            await highlightRenderer.saveAndRenderHighlight({
                 ...annotationFunctionsParams,
                 analyticsEvent,
                 currentUser,
                 shouldShare,
-            }),
-        createAnnotation: (analyticsEvent?: AnalyticsEvent<'Annotations'>) => (
-            shouldShare: boolean,
-            showSpacePicker?: boolean,
-        ) =>
-            highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
+            })
+        },
+        createAnnotation: (
+            analyticsEvent?: AnalyticsEvent<'Annotations'>,
+        ) => async (shouldShare: boolean, showSpacePicker?: boolean) => {
+            if (!(await pageActionAllowed())) {
+                return
+            }
+            await highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
                 ...annotationFunctionsParams,
                 showSpacePicker,
                 analyticsEvent,
                 currentUser,
                 shouldShare,
-            }),
+            })
+        },
         askAI: () => (highlightedText: string) =>
             inPageUI.showSidebar({
                 action: 'show_page_summary',
