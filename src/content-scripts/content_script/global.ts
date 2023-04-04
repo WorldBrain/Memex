@@ -136,7 +136,7 @@ export async function main(
                     ])
                     return
                 } else {
-                    highlightRenderer.undoHighlight(lastAction.id)
+                    highlightRenderer.removeAnnotationHighlight(lastAction.id)
                     lastActions.shift()
                     await globalThis['browser'].storage.local.set({
                         [`${UNDO_HISTORY}`]: lastActions,

@@ -17,21 +17,22 @@ import {
     generateAnnotationUrl,
     shareOptsToPrivacyLvl,
 } from 'src/annotations/utils'
-import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import { UNDO_HISTORY } from 'src/constants'
-import { getSelectionHtml } from '@worldbrain/memex-common/lib/annotations/utils'
-import * as anchoring from '@worldbrain/memex-common/lib/annotations'
-import { highlightRange } from '@worldbrain/memex-common/lib/annotations/anchoring/highlighter'
-import { findPage as findPdfPage } from '@worldbrain/memex-common/lib/annotations/anchoring/pdf.js'
 import { pageActionAllowed } from 'src/util/subscriptions/storage'
 import delay from 'src/util/delay'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 const styles = require('src/highlighting/ui/styles.css')
+
+import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
+import { getSelectionHtml } from '@worldbrain/memex-common/lib/annotations/utils'
+import * as anchoring from '@worldbrain/memex-common/lib/annotations'
+import { highlightRange } from '@worldbrain/memex-common/lib/annotations/anchoring/highlighter'
+import { findPage as findPdfPage } from '@worldbrain/memex-common/lib/annotations/anchoring/pdf.js'
 
 const createHighlightClass = ({
     unifiedId,
@@ -56,17 +57,12 @@ export const extractAnchorFromSelection = async (
     }
 }
 
-export type HighlightRendererInterface = HighlightInteractionsInterface & {
-    undoHighlight: (uniqueUrl: string) => void
-    undoAllHighlights: () => void
-}
-
 export interface HighlightRendererDeps {
     annotationsBG: AnnotationInterface<'caller'>
     contentSharingBG: ContentSharingInterface
 }
 
-export class HighlightRenderer implements HighlightRendererInterface {
+export class HighlightRenderer implements HighlightInteractionsInterface {
     private observer: MutationObserver[] = []
     private highlightColor = DEFAULT_HIGHLIGHT_COLOR
     private currentActiveHighlight: UnifiedAnnotation
@@ -118,7 +114,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         }
     }
 
-    createUndoHistoryEntry = async (
+    private createUndoHistoryEntry = async (
         url: string,
         type: 'annotation' | 'pagelistEntry',
         id: string,
@@ -602,9 +598,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
      * Attaches event listeners to the highlights for hovering/focusing on the
      * annotation in sidebar.
      */
-    attachEventListenersToNewHighlights: HighlightInteractionsInterface['attachEventListenersToNewHighlights'] = (
-        highlight,
-        openSidebar,
+    private attachEventListenersToNewHighlights = (
+        highlight: UnifiedAnnotation,
+        openSidebar: AnnotationClickHandler,
     ) => {
         const newHighlights = document.querySelectorAll(
             `.${styles['memex-highlight']}:not([data-annotation])`,
@@ -683,17 +679,15 @@ export class HighlightRenderer implements HighlightRendererInterface {
         prevHighlights.forEach((highlight) => this._removeHighlight(highlight))
     }
 
-    removeTempHighlights = () => {
+    removeTempHighlights: HighlightInteractionsInterface['removeTempHighlights'] = () => {
         this.removeHighlights(styles['memex-highlight-tmp'])
     }
 
-    removeAllHighlights = () => {
+    private removeAllHighlights = () => {
         this.removeHighlights(styles['memex-highlight'])
     }
 
-    hoverOverHighlight: HighlightInteractionsInterface['hoverOverHighlight'] = ({
-        unifiedId,
-    }) => {
+    private hoverOverHighlight = ({ unifiedId }: UnifiedAnnotation) => {
         // Make the current annotation as a "medium" highlight.
         const baseClass = styles['memex-highlight']
         const highlights = document.querySelectorAll(
@@ -715,9 +709,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
     /**
      * Removes the medium class from all the highlights making them light.
      */
-    removeHoveredHighlights: HighlightInteractionsInterface['removeHoveredHighlights'] = ({
-        unifiedId,
-    }) => {
+    private removeHoveredHighlights = ({ unifiedId }: UnifiedAnnotation) => {
         const baseClass = styles['memex-highlight']
         const highlights = document.querySelectorAll(
             `.${baseClass}[data-annotation="${unifiedId}"]`,
@@ -737,9 +729,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
     /**
      * Makes the highlight a dark highlight.
      */
-    selectHighlight: HighlightInteractionsInterface['selectHighlight'] = (
-        annotation,
-    ) => {
+    private selectHighlight = (annotation: UnifiedAnnotation) => {
         this.currentActiveHighlight = annotation
         const highlights = document.querySelectorAll(
             `[data-annotation="${annotation.unifiedId}"]`,
@@ -755,9 +745,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
         })
     }
 
-    removeSelectedHighlights: HighlightInteractionsInterface['removeSelectedHighlights'] = ({
-        unifiedId,
-    }) => {
+    private removeSelectedHighlights = ({ unifiedId }: UnifiedAnnotation) => {
         const highlights = document.querySelectorAll(
             `[data-annotation="${unifiedId}"]`,
         )
@@ -777,7 +765,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
     /**
      * Return highlights to normal state
      */
-    resetHighlightsStyles = () => {
+    resetHighlightsStyles: HighlightInteractionsInterface['resetHighlightsStyles'] = () => {
         const highlights = document.querySelectorAll(`[data-annotation]`)
         highlights.forEach((highlight: HTMLElement) => {
             if (
@@ -799,13 +787,11 @@ export class HighlightRenderer implements HighlightRendererInterface {
         })
     }
 
-    undoAllHighlights = this.resetHighlightsStyles
-
     /**
      * Unwraps the `memex-highlight` element from the highlight,
      * resetting the DOM Text to how it was.
      */
-    _removeHighlight = (highlight: Element) => {
+    private _removeHighlight = (highlight: Element) => {
         const parent = highlight.parentNode
         while (highlight.firstChild) {
             parent.insertBefore(highlight.firstChild, highlight)
@@ -813,19 +799,16 @@ export class HighlightRenderer implements HighlightRendererInterface {
         parent.removeChild(highlight)
     }
 
-    removeAnnotationHighlights = (unifiedIds: string[]) =>
-        unifiedIds.forEach(this.removeAnnotationHighlight)
-
     /**
      * Removes the highlights of a given annotation.
      */
-    removeAnnotationHighlight = (unifiedId: string) => {
+    removeAnnotationHighlight: HighlightInteractionsInterface['removeAnnotationHighlight'] = (
+        unifiedId,
+    ) => {
         const baseClass = styles['memex-highlight']
         const highlights = document.querySelectorAll(
             `.${baseClass}[data-annotation="${unifiedId}"]`,
         )
         highlights.forEach((highlight) => this._removeHighlight(highlight))
     }
-
-    undoHighlight = this.removeAnnotationHighlight
 }

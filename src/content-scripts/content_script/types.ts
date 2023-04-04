@@ -4,7 +4,7 @@ import type { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
 import type { Props as SidebarContainerDependencies } from 'src/sidebar/annotations-sidebar/containers/AnnotationsSidebarInPage'
 import type AnnotationsManager from 'src/annotations/annotations-manager'
 import type { AnnotationInterface } from 'src/annotations/background/types'
-import type { HighlightRendererInterface } from 'src/highlighting/ui/highlight-interactions'
+import type { HighlightInteractionsInterface } from 'src/highlighting/types'
 import type { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
@@ -38,7 +38,7 @@ export type RibbonScriptMain = (
 
 export interface HighlightDependencies {
     inPageUI: SharedInPageUIInterface
-    highlightRenderer: HighlightRendererInterface
+    highlightRenderer: HighlightInteractionsInterface
     annotationsManager: AnnotationsManager
     annotations: AnnotationInterface<'caller'>
     annotationsCache: PageAnnotationsCacheInterface

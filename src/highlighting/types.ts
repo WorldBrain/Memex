@@ -35,20 +35,9 @@ export interface HighlightInteractionsInterface {
         temp?: boolean,
     ) => Promise<void> | Promise<boolean>
     highlightAndScroll: (annotation: _UnifiedAnnotation) => Promise<void>
-    attachEventListenersToNewHighlights: (
-        highlight: _UnifiedAnnotation,
-        openSidebar: AnnotationClickHandler,
-    ) => void
-    removeHoveredHighlights: (annotation: _UnifiedAnnotation) => void
     removeTempHighlights: () => void
-    hoverOverHighlight: (highlight: _UnifiedAnnotation) => void
-    selectHighlight: (highlight: _UnifiedAnnotation) => void
-    removeSelectedHighlights: (highlight: _UnifiedAnnotation) => void
     resetHighlightsStyles: () => void
-    // sortAnnotationsByPosition: (annotations: Annotation[]) => Annotation[]
-    _removeHighlight: (highlight: Element) => void
     removeAnnotationHighlight: (url: string) => void
-    removeAnnotationHighlights: (urls: string[]) => void
     saveAndRenderHighlight: (
         params: SaveAndRenderHighlightDeps,
     ) => Promise<void>
