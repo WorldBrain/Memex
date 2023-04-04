@@ -1,4 +1,6 @@
-import analytics from 'src/analytics'
+import browser from 'webextension-polyfill'
+import throttle from 'lodash/throttle'
+import hexToRgb from 'hex-to-rgb'
 
 import type {
     Anchor,
@@ -9,29 +11,26 @@ import type {
 } from 'src/highlighting/types'
 import type { AnnotationClickHandler } from 'src/highlighting/ui/types'
 import { retryUntil } from 'src/util/retry-until'
-import { descriptorToRange } from './anchoring/index'
 import * as Raven from 'src/util/raven'
 import type { Annotation } from 'src/annotations/types'
-import * as anchoring from 'src/highlighting/ui/anchoring'
 import {
     generateAnnotationUrl,
     shareOptsToPrivacyLvl,
 } from 'src/annotations/utils'
-import { highlightRange } from 'src/highlighting/ui/anchoring/highlighter'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
-import browser from 'webextension-polyfill'
-import { findPage as findPdfPage } from 'src/highlighting/ui/anchoring/anchoring/pdf.js'
-import throttle from 'lodash/throttle'
-import hexToRgb from 'hex-to-rgb'
 import { DEFAULT_HIGHLIGHT_COLOR, HIGHLIGHT_COLOR_KEY } from '../constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import { UNDO_HISTORY } from 'src/constants'
 import { getSelectionHtml } from '@worldbrain/memex-common/lib/annotations/utils'
+import * as anchoring from '@worldbrain/memex-common/lib/annotations'
+import { highlightRange } from '@worldbrain/memex-common/lib/annotations/anchoring/highlighter'
+import { findPage as findPdfPage } from '@worldbrain/memex-common/lib/annotations/anchoring/pdf.js'
 import { pageActionAllowed } from 'src/util/subscriptions/storage'
 import delay from 'src/util/delay'
+import { isUrlPDFViewerUrl } from 'src/pdf/util'
 const styles = require('src/highlighting/ui/styles.css')
 
 const createHighlightClass = ({
@@ -44,7 +43,13 @@ export const extractAnchorFromSelection = async (
     pageUrl: string,
 ): Promise<Anchor> => {
     const quote = getSelectionHtml(selection)
-    const descriptor = await anchoring.selectionToDescriptor({ selection })
+    const isPdf = isUrlPDFViewerUrl(window.location.href, {
+        runtimeAPI: browser.runtime,
+    })
+    const descriptor = await anchoring.selectionToDescriptor({
+        selection,
+        isPdf,
+    })
     return {
         quote,
         descriptor,
@@ -56,17 +61,17 @@ export type HighlightRendererInterface = HighlightInteractionsInterface & {
     undoAllHighlights: () => void
 }
 
+export interface HighlightRendererDeps {
+    annotationsBG: AnnotationInterface<'caller'>
+    contentSharingBG: ContentSharingInterface
+}
+
 export class HighlightRenderer implements HighlightRendererInterface {
     private observer: MutationObserver[] = []
     private highlightColor = DEFAULT_HIGHLIGHT_COLOR
     private currentActiveHighlight: UnifiedAnnotation
 
-    constructor(
-        private deps: {
-            annotationsBG: AnnotationInterface<'caller'>
-            contentSharingBG: ContentSharingInterface
-        },
-    ) {
+    constructor(private deps: HighlightRendererDeps) {
         document.addEventListener('click', this.handleOutsideHighlightClick)
 
         browser.storage.onChanged.addListener((changes) => {
@@ -99,12 +104,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
     saveAndRenderHighlightAndEditInSidebar: HighlightInteractionsInterface['saveAndRenderHighlightAndEditInSidebar'] = async (
         params,
     ) => {
-        analytics.trackEvent(
-            params.analyticsEvent ?? {
-                category: 'Annotations',
-                action: 'create',
-            },
-        )
         const annotationCacheId = await this._saveAndRenderHighlight(params)
 
         if (annotationCacheId) {
@@ -144,13 +143,6 @@ export class HighlightRenderer implements HighlightRendererInterface {
     saveAndRenderHighlight: HighlightInteractionsInterface['saveAndRenderHighlight'] = async (
         params,
     ) => {
-        analytics.trackEvent(
-            params.analyticsEvent ?? {
-                category: 'Highlights',
-                action: 'create',
-            },
-        )
-
         await this._saveAndRenderHighlight(params)
     }
 
@@ -321,6 +313,9 @@ export class HighlightRenderer implements HighlightRendererInterface {
             return
         }
 
+        const isPdf = isUrlPDFViewerUrl(window.location.href, {
+            runtimeAPI: browser.runtime,
+        })
         const baseClass = styles['memex-highlight']
 
         try {
@@ -335,7 +330,7 @@ export class HighlightRenderer implements HighlightRendererInterface {
                 })
 
                 const range = await retryUntil(
-                    () => descriptorToRange({ descriptor }),
+                    () => anchoring.descriptorToRange({ descriptor, isPdf }),
                     (range) => range !== null,
                     {
                         intervalMiliseconds: 1000,
