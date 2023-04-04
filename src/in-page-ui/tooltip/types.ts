@@ -19,13 +19,10 @@ export interface TooltipDependencies extends AnnotationFunctions {
 }
 
 export interface AnnotationFunctions {
+    askAI(textToProcess: string): Promise<void>
     createHighlight(shouldShare: boolean): Promise<void>
     createAnnotation(
         shouldShare: boolean,
         showSpacePicker?: boolean,
     ): Promise<void>
-    askAI: (textToProcess) => void
-}
-export interface ToolTipFunctions {
-    askAI: () => void
 }

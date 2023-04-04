@@ -56,43 +56,6 @@ export type HighlightRendererInterface = HighlightInteractionsInterface & {
     undoAllHighlights: () => void
 }
 
-// // TODO: (sidebar-refactor) move to somewhere more highlight content script related
-// export const renderAnnotationCacheChanges = ({
-//     cacheChanges,
-//     onClickHighlight,
-//     renderer,
-// }: {
-//     cacheChanges: AnnotationCacheChangeEvents
-//     onClickHighlight: AnnotationClickHandler
-//     renderer: HighlightRenderInterface
-// }) => {
-//     const onRollback = (annotations) => {
-//         renderer.undoAllHighlights()
-//         renderer.renderHighlights(
-//             annotations as Highlight[],
-//             onClickHighlight,
-//             false,
-//         )
-//     }
-//     const onCreated = (annotation) => {
-//         renderer.renderHighlight(annotation, onClickHighlight)
-//     }
-//     const onDeleted = (annotation) => {
-//         renderer.undoHighlight(annotation.url)
-//     }
-
-//     cacheChanges.on('rollback', onRollback)
-//     cacheChanges.on('created', onCreated)
-//     cacheChanges.on('deleted', onDeleted)
-
-//     return () => {
-//         cacheChanges.removeListener('rollback', onRollback)
-//         cacheChanges.removeListener('created', onCreated)
-//         cacheChanges.removeListener('deleted', onDeleted)
-//     }
-// }
-
-export interface HighlightRendererDependencies {}
 export class HighlightRenderer implements HighlightRendererInterface {
     private observer: MutationObserver[] = []
     private highlightColor = DEFAULT_HIGHLIGHT_COLOR

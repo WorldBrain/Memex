@@ -1,12 +1,5 @@
 import React from 'react'
 import styled, { keyframes } from 'styled-components'
-import {
-    // CopiedComponent,
-    // CreatingLinkComponent,
-    // DoneComponent,
-    // ErrorComponent,
-    InitialComponent,
-} from './tooltip-states'
 
 import { conditionallyRemoveOnboardingSelectOption } from '../../onboarding-interactions'
 import { STAGES } from 'src/overview/onboarding/constants'
@@ -22,6 +15,7 @@ import AIInterfaceForTooltip from './aIinterfaceComponent'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { Rnd } from 'react-rnd'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { Tooltip } from '@worldbrain/memex-common/lib/in-page-ui/tooltip/tooltip'
 
 export interface Props extends AnnotationFunctions {
     inPageUI: TooltipInPageUIInterface
@@ -35,7 +29,7 @@ interface TooltipContainerState {
     showingCloseMessage?: boolean
     position: { x: number; y: number } | {}
     tooltipState: 'copied' | 'running' | 'pristine' | 'done' | 'AIinterface'
-    keyboardShortCuts: {}
+    keyboardShortcuts?: { [key: string]: string[] }
     highlightText: string
     removeAfterUse: boolean
     preventClosing: boolean
@@ -55,7 +49,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         showTooltip: false,
         position: {},
         tooltipState: 'copied',
-        keyboardShortCuts: undefined,
+        keyboardShortcuts: undefined,
         highlightText: '',
         removeAfterUse: false,
         preventClosing: true,
@@ -67,7 +61,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         this.props.inPageUI.events?.on('stateChanged', this.handleUIStateChange)
         this.props.onInit(this.showTooltip)
         this.setState({
-            keyboardShortCuts: {
+            keyboardShortcuts: {
                 createHighlight: await getShortCut('createHighlight'),
                 createAnnotation: await getShortCut('createAnnotation'),
                 createAnnotationWithSpace: await getShortCut('addToCollection'),
@@ -218,7 +212,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         }
     }
 
-    private addtoSpace: React.MouseEventHandler = async (e) => {
+    private addToSpace: React.MouseEventHandler = async (e) => {
         try {
             await this.props.createAnnotation(false, true)
         } catch (err) {
@@ -229,7 +223,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             this.props.inPageUI.hideTooltip()
         }
     }
-    private openAIinterface: React.MouseEventHandler = async (e) => {
+    private openAIInterface: React.MouseEventHandler = async (e) => {
         this.setState({
             highlightText: window.getSelection().toString() ?? '',
         })
@@ -243,16 +237,15 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
     renderTooltipComponent = () => {
         switch (this.state.tooltipState) {
             case 'pristine':
-                if (this.state.keyboardShortCuts != null) {
+                if (this.state.keyboardShortcuts != null) {
                     return (
-                        <InitialComponent
-                            createHighlight={this.createHighlight}
+                        <Tooltip
+                            keyboardShortcuts={this.state.keyboardShortcuts}
                             createAnnotation={this.createAnnotation}
-                            addtoSpace={this.addtoSpace}
-                            openAIinterface={this.openAIinterface}
+                            createHighlight={this.createHighlight}
+                            openAIInterface={this.openAIInterface}
                             closeTooltip={this.closeTooltip}
-                            state={this.state.tooltipState}
-                            keyboardShortCuts={this.state.keyboardShortCuts}
+                            addToSpace={this.addToSpace}
                         />
                     )
                 } else {
@@ -341,7 +334,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
 
 export default TooltipContainer
 
-const ContainerBox = styled.div<{ screenPosition }>`
+const ContainerBox = styled.div<{ screenPosition: string }>`
     position: ${(props) => props.screenPosition};
     width: 224px;
     display: flex;
@@ -349,6 +342,7 @@ const ContainerBox = styled.div<{ screenPosition }>`
     justify-content: center;
     z-index: 2147483647;
 `
+
 const openAnimation = keyframes`
  0% { zoom: 0.8; opacity: 0 }
  80% { zoom: 1.05; opacity: 0.8 }
