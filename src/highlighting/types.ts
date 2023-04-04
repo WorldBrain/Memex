@@ -1,7 +1,6 @@
 export type { Anchor } from '@worldbrain/memex-common/lib/annotations/types'
 import type { UnifiedAnnotation } from 'src/annotations/cache/types'
 import type { Annotation } from 'src/annotations/types'
-import type { AnnotationClickHandler } from './ui/types'
 import type { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import type { AnalyticsEvent } from 'src/analytics/types'
@@ -18,6 +17,12 @@ export type Highlight = Pick<Annotation, 'url' | 'selector'> & {
 }
 
 export type HighlightElement = HTMLElement
+
+export type AnnotationClickHandler = (params: {
+    unifiedAnnotationId: string
+    openInEdit?: boolean
+    annotation?: Annotation
+}) => void
 
 export interface HighlightInteractionsInterface {
     renderHighlights: (

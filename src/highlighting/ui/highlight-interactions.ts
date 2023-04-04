@@ -4,31 +4,33 @@ import type {
     Anchor,
     HighlightElement,
     UndoHistoryEntry,
+    AnnotationClickHandler,
     SaveAndRenderHighlightDeps,
     HighlightInteractionsInterface,
     _UnifiedAnnotation as UnifiedAnnotation,
 } from 'src/highlighting/types'
-import type { AnnotationClickHandler } from 'src/highlighting/ui/types'
-import { retryUntil } from 'src/util/retry-until'
-import * as Raven from 'src/util/raven'
+const styles = require('src/highlighting/ui/styles.css')
+
+import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
+import { retryUntil } from '@worldbrain/memex-common/lib/utils/retry-until'
+import delay from '@worldbrain/memex-common/lib/utils/delay'
+import { getSelectionHtml } from '@worldbrain/memex-common/lib/annotations/utils'
+import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
+import * as anchoring from '@worldbrain/memex-common/lib/annotations'
+import { highlightRange } from '@worldbrain/memex-common/lib/annotations/anchoring/highlighter'
+import { findPage as findPdfPage } from '@worldbrain/memex-common/lib/annotations/anchoring/pdf.js'
+
+// TODO: These are all very ext-specific, either data model or BG modules.
+//   Probably needs to be abstracted out to higher level OR types reshaped to be more generic
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { Annotation } from 'src/annotations/types'
 import {
     generateAnnotationUrl,
     shareOptsToPrivacyLvl,
 } from 'src/annotations/utils'
 import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
-import type { AnnotationInterface } from 'src/annotations/background/types'
-import { DEFAULT_HIGHLIGHT_COLOR } from '../constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
-import delay from 'src/util/delay'
-const styles = require('src/highlighting/ui/styles.css')
-
-import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
-import { getSelectionHtml } from '@worldbrain/memex-common/lib/annotations/utils'
-import * as anchoring from '@worldbrain/memex-common/lib/annotations'
-import { highlightRange } from '@worldbrain/memex-common/lib/annotations/anchoring/highlighter'
-import { findPage as findPdfPage } from '@worldbrain/memex-common/lib/annotations/anchoring/pdf.js'
 
 const createHighlightClass = ({
     unifiedId,
@@ -38,6 +40,7 @@ const createHighlightClass = ({
 export interface HighlightRendererDeps {
     annotationsBG: AnnotationInterface<'caller'>
     contentSharingBG: ContentSharingInterface
+    captureException: (err: Error) => void
     getUndoHistory: () => Promise<UndoHistoryEntry[]>
     setUndoHistory: (history: UndoHistoryEntry[]) => Promise<void>
     getHighlightColorRGB: () => Promise<string>
@@ -275,65 +278,50 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
 
         try {
             let highlightedElements = [] as HighlightElement[]
-            await Raven.context(async () => {
-                const descriptor = highlight.selector.descriptor
+            const descriptor = highlight.selector.descriptor
 
-                Raven.captureBreadcrumb({
-                    message: 'annotation-selector-received',
-                    category: 'annotations',
-                    data: highlight,
-                })
+            const range = await retryUntil(
+                () => anchoring.descriptorToRange({ descriptor, isPdf }),
+                (range) => range !== null,
+                {
+                    intervalMiliseconds: 1000,
+                    timeoutMiliseconds: 5000,
+                },
+            )
 
-                const range = await retryUntil(
-                    () => anchoring.descriptorToRange({ descriptor, isPdf }),
-                    (range) => range !== null,
-                    {
-                        intervalMiliseconds: 1000,
-                        timeoutMiliseconds: 5000,
-                    },
+            highlightedElements = highlightRange(
+                range,
+                baseClass,
+                highlightColor,
+            )
+            // markRange({ range, cssClass: baseClass })
+
+            for (let highlightEl of highlightedElements) {
+                highlightEl.classList.add(createHighlightClass(highlight))
+                highlightEl.style.setProperty(
+                    '--defaultHighlightColorCSS',
+                    this.highlightColor,
                 )
 
-                highlightedElements = highlightRange(
-                    range,
-                    baseClass,
-                    highlightColor,
-                )
-                // markRange({ range, cssClass: baseClass })
-
-                for (let highlightEl of highlightedElements) {
-                    highlightEl.classList.add(createHighlightClass(highlight))
-                    highlightEl.style.setProperty(
-                        '--defaultHighlightColorCSS',
-                        this.highlightColor,
-                    )
-
-                    if (highlightEl.parentNode.nodeName === 'A') {
-                        highlightEl.style['color'] = '#3366cc'
-                    }
+                if (highlightEl.parentNode.nodeName === 'A') {
+                    highlightEl.style['color'] = '#3366cc'
                 }
+            }
 
-                if (highlightedElements.length) {
-                    this.attachEventListenersToNewHighlights(highlight, onClick)
-                }
+            if (highlightedElements.length) {
+                this.attachEventListenersToNewHighlights(highlight, onClick)
+            }
 
-                if (highlightedElements && highlightedElements.length > 0) {
-                    highlightAnchored = true
-                    this.watchForRerenders([highlight], onClick)
-                    return true
-                } else {
-                    return false
-                }
-            })
-
-            // return highlight
+            if (highlightedElements && highlightedElements.length > 0) {
+                highlightAnchored = true
+                this.watchForRerenders([highlight], onClick)
+                return true
+            } else {
+                return false
+            }
         } catch (e) {
-            Raven.captureException(e)
-            // console.error(
-            //     'MEMEX: Error during annotation anchoring/highlighting:',
-            //     e,
-            // )
+            this.deps.captureException(e)
             console.error(e)
-            // return highlight
         } finally {
             if (highlightAnchored) {
                 return true

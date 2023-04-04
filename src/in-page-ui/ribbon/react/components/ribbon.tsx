@@ -32,10 +32,8 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { HexColorPicker } from 'react-colorful'
-import {
-    DEFAULT_HIGHLIGHT_COLOR,
-    HIGHLIGHT_COLOR_KEY,
-} from 'src/highlighting/constants'
+import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
+import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'

@@ -72,11 +72,9 @@ import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { pageActionAllowed, upgradePlan } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import { browser } from 'webextension-polyfill-ts'
-import initSentry from 'src/util/raven'
-import {
-    DEFAULT_HIGHLIGHT_COLOR,
-    HIGHLIGHT_COLOR_KEY,
-} from 'src/highlighting/constants'
+import initSentry, { captureException } from 'src/util/raven'
+import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
+import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -196,6 +194,7 @@ export async function main(
     const highlightRenderer = new HighlightRenderer({
         annotationsBG,
         contentSharingBG,
+        captureException,
         getUndoHistory: async () => {
             const storage = await browser.storage.local.get(UNDO_HISTORY)
             return storage[UNDO_HISTORY] ?? []
