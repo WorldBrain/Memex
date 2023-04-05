@@ -30,7 +30,6 @@ import {
 } from 'src/in-page-ui/keyboard-shortcuts/content_script'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-import { HighlightRenderer } from 'src/highlighting/ui/highlight-interactions'
 import type { RemoteTagsInterface } from 'src/tags/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
@@ -81,7 +80,8 @@ import {
     shareOptsToPrivacyLvl,
 } from 'src/annotations/utils'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
-import type { SaveAndRenderHighlightDeps } from 'src/highlighting/types'
+import type { SaveAndRenderHighlightDeps } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
+import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation

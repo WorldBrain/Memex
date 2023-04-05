@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components'
 import ReactDOM from 'react-dom'
 
 import { theme } from 'src/common-ui/components/design-library/theme'
-import type { HighlightInteractionsInterface } from 'src/highlighting/types'
+import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import type {
@@ -30,7 +30,7 @@ import browser from 'webextension-polyfill'
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
     inPageUI: SharedInPageUIInterface
-    highlighter: HighlightInteractionsInterface
+    highlighter: HighlightRendererInterface
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
