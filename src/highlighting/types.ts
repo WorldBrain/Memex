@@ -1,32 +1,21 @@
-export type { Anchor } from '@worldbrain/memex-common/lib/annotations/types'
-import type { UnifiedAnnotation } from 'src/annotations/cache/types'
-import type { Annotation } from 'src/annotations/types'
+import type { Anchor } from '@worldbrain/memex-common/lib/annotations/types'
 import type { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
-import type { AnalyticsEvent } from 'src/analytics/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-
-export type _UnifiedAnnotation = Pick<
-    UnifiedAnnotation,
-    'unifiedId' | 'selector'
->
-
-export type Highlight = Pick<Annotation, 'url' | 'selector'> & {
-    temporary?: boolean
-    domElements?: HighlightElement[]
-}
-
-export type HighlightElement = HTMLElement
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export type AnnotationClickHandler = (params: {
-    unifiedAnnotationId: string
+    annotationId: AutoPk
     openInEdit?: boolean
-    annotation?: Annotation
 }) => void
+
+export interface RenderableAnnotation {
+    id: AutoPk
+    selector?: Anchor
+}
 
 export interface HighlightInteractionsInterface {
     renderHighlights: (
-        highlights: _UnifiedAnnotation[],
+        highlights: RenderableAnnotation[],
         onClick: AnnotationClickHandler,
         opts?: {
             temp?: boolean
@@ -35,17 +24,19 @@ export interface HighlightInteractionsInterface {
         },
     ) => Promise<void>
     renderHighlight: (
-        highlight: _UnifiedAnnotation,
+        highlight: RenderableAnnotation,
         onClick: AnnotationClickHandler,
         opts?: {
             temp?: boolean
             isPdf?: boolean
         },
-    ) => Promise<void> | Promise<boolean>
-    highlightAndScroll: (annotation: _UnifiedAnnotation) => Promise<void>
+    ) => Promise<boolean>
+    highlightAndScroll: (annotation: RenderableAnnotation) => Promise<void>
     removeTempHighlights: () => void
     resetHighlightsStyles: () => void
-    removeAnnotationHighlight: (url: string) => void
+    removeAnnotationHighlight: (
+        annotation: Pick<RenderableAnnotation, 'id'>,
+    ) => void
     saveAndRenderHighlight: (
         params: SaveAndRenderHighlightDeps,
     ) => Promise<void>
@@ -55,13 +46,8 @@ export interface HighlightInteractionsInterface {
 }
 
 export interface SaveAndRenderHighlightDeps {
-    getFullPageUrlAndTitle: () => Promise<{
-        fullPageUrl: string
-        title: string
-    }>
+    getFullPageUrl: () => Promise<string>
     getSelection: () => Selection
-    annotationsCache: PageAnnotationsCacheInterface
-    analyticsEvent?: AnalyticsEvent
     inPageUI: SharedInPageUIInterface
     showSpacePicker?: boolean
     currentUser?: UserReference
@@ -71,6 +57,8 @@ export interface SaveAndRenderHighlightDeps {
 
 export interface UndoHistoryEntry {
     url: string
+    id: AutoPk
     type: 'annotation' | 'pagelistEntry'
-    id: string
 }
+
+export type { Anchor }

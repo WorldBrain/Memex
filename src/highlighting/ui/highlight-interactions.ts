@@ -2,15 +2,12 @@ import throttle from 'lodash/throttle'
 
 import type {
     Anchor,
-    HighlightElement,
     UndoHistoryEntry,
+    RenderableAnnotation,
     AnnotationClickHandler,
     SaveAndRenderHighlightDeps,
     HighlightInteractionsInterface,
-    _UnifiedAnnotation as UnifiedAnnotation,
 } from 'src/highlighting/types'
-const styles = require('src/highlighting/ui/styles.css')
-
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { retryUntil } from '@worldbrain/memex-common/lib/utils/retry-until'
 import delay from '@worldbrain/memex-common/lib/utils/delay'
@@ -19,38 +16,28 @@ import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotation
 import * as anchoring from '@worldbrain/memex-common/lib/annotations'
 import { highlightRange } from '@worldbrain/memex-common/lib/annotations/anchoring/highlighter'
 import { findPage as findPdfPage } from '@worldbrain/memex-common/lib/annotations/anchoring/pdf.js'
+import type { AnnotationCreateData } from '@worldbrain/memex-common/lib/annotations/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+const styles = require('src/highlighting/ui/styles.css')
 
-// TODO: These are all very ext-specific, either data model or BG modules.
-//   Probably needs to be abstracted out to higher level OR types reshaped to be more generic
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
-import type { AnnotationInterface } from 'src/annotations/background/types'
-import type { Annotation } from 'src/annotations/types'
-import {
-    generateAnnotationUrl,
-    shareOptsToPrivacyLvl,
-} from 'src/annotations/utils'
-import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
-import { createAnnotation } from 'src/annotations/annotation-save-logic'
-
-const createHighlightClass = ({
-    unifiedId,
-}: Pick<UnifiedAnnotation, 'unifiedId'>): string =>
-    `memex-cache-highlight-${unifiedId}`
+const createHighlightClass = ({ id }: RenderableAnnotation): string =>
+    `memex-highlight-${id}`
 
 export interface HighlightRendererDeps {
-    annotationsBG: AnnotationInterface<'caller'>
-    contentSharingBG: ContentSharingInterface
     captureException: (err: Error) => void
     getUndoHistory: () => Promise<UndoHistoryEntry[]>
     setUndoHistory: (history: UndoHistoryEntry[]) => Promise<void>
     getHighlightColorRGB: () => Promise<string>
     onHighlightColorChange: (cb: (nextColor: string) => void) => void
+    scheduleAnnotationCreation: (
+        annotationData: AnnotationCreateData,
+    ) => { annotationId: AutoPk; createPromise: Promise<void> }
 }
 
 export class HighlightRenderer implements HighlightInteractionsInterface {
     private observer: MutationObserver[] = []
     private highlightColor = DEFAULT_HIGHLIGHT_COLOR
-    private currentActiveHighlight: UnifiedAnnotation
+    private activeHighlight: RenderableAnnotation
 
     constructor(private deps: HighlightRendererDeps) {
         document.addEventListener('click', this.handleOutsideHighlightClick)
@@ -75,19 +62,19 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
             }
         }
 
-        if (this.currentActiveHighlight != null) {
-            this.removeSelectedHighlights(this.currentActiveHighlight)
+        if (this.activeHighlight != null) {
+            this.removeSelectedHighlights(this.activeHighlight)
         }
     }
 
     saveAndRenderHighlightAndEditInSidebar: HighlightInteractionsInterface['saveAndRenderHighlightAndEditInSidebar'] = async (
         params,
     ) => {
-        const annotationCacheId = await this._saveAndRenderHighlight(params)
+        const annotationId = await this._saveAndRenderHighlight(params)
 
-        if (annotationCacheId) {
+        if (annotationId) {
             await params.inPageUI.showSidebar({
-                annotationCacheId,
+                annotationCacheId: annotationId.toString(),
                 action: params.showSpacePicker
                     ? 'edit_annotation_spaces'
                     : 'edit_annotation',
@@ -105,9 +92,9 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
 
     private async _saveAndRenderHighlight(
         params: SaveAndRenderHighlightDeps,
-    ): Promise<UnifiedAnnotation['unifiedId'] | null> {
+    ): Promise<AutoPk | null> {
         const selection = params.getSelection()
-        const { fullPageUrl, title } = await params.getFullPageUrlAndTitle()
+        const fullPageUrl = await params.getFullPageUrl()
 
         // TODO: simplify conditions related to timestamp + annot data. Quite difficult to work thru and reason about. i.e., bug prone
         // Enable support for any kind of HTML 5 video using annotation keyboard shortcuts to make notes without opening the sidebar and notes field first
@@ -152,63 +139,42 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
             }
         }
 
+        const now = new Date()
+
+        // TODO: Clean up all these conditions surrounding selector, body, comment fields
         const body = anchor ? anchor.quote : undefined
         const hasSelectedText =
             anchor && anchor.quote ? anchor.quote.length : false
+        const selector = hasSelectedText
+            ? anchor
+            : videoTimeStampForComment && undefined
 
-        const localListIds: number[] = []
-        if (params.inPageUI.selectedList) {
-            const selectedList =
-                params.annotationsCache.lists.byId[params.inPageUI.selectedList]
-            if (selectedList.localId != null) {
-                localListIds.push(selectedList.localId)
-            }
-        }
-
-        const now = new Date()
-        const annotation: Annotation &
-            Required<Pick<Annotation, 'createdWhen' | 'lastEdited'>> = {
-            url: generateAnnotationUrl({
-                pageUrl: fullPageUrl,
-                now: () => Date.now(),
-            }),
+        const {
+            annotationId,
+            createPromise,
+        } = this.deps.scheduleAnnotationCreation({
+            fullPageUrl,
             body: hasSelectedText ? body : undefined,
-            pageUrl: fullPageUrl,
-            tags: [],
-            lists: localListIds,
             comment: hasSelectedText
                 ? ''
                 : videoTimeStampForComment
                 ? videoTimeStampForComment
                 : undefined,
-            selector: hasSelectedText
-                ? anchor
-                : videoTimeStampForComment && undefined,
-            pageTitle: title,
-            createdWhen: now,
-            lastEdited: now,
-        }
+            selector,
+            shouldShare: params.shouldShare,
+            creator: params.currentUser,
+            createdWhen: now.getTime(),
+            updatedWhen: now.getTime(),
+        })
 
         try {
-            const cacheAnnotation = reshapeAnnotationForCache(annotation, {
-                extraData: {
-                    creator: params.currentUser,
-                    privacyLevel: shareOptsToPrivacyLvl({
-                        shouldShare: params.shouldShare,
-                    }),
-                },
-            })
-            const { unifiedId } = params.annotationsCache.addAnnotation(
-                cacheAnnotation,
-            )
-
             window.getSelection().empty()
 
             await this.renderHighlight(
-                { ...cacheAnnotation, unifiedId },
-                ({ openInEdit, unifiedAnnotationId }) => {
+                { id: annotationId, selector },
+                ({ openInEdit, annotationId }) => {
                     params.inPageUI.showSidebar({
-                        annotationCacheId: unifiedAnnotationId,
+                        annotationCacheId: annotationId.toString(),
                         action: openInEdit
                             ? 'edit_annotation'
                             : 'show_annotation',
@@ -219,36 +185,13 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
             await this.createUndoHistoryEntry(
                 window.location.href,
                 'annotation',
-                unifiedId,
+                annotationId,
             )
 
-            try {
-                await createAnnotation({
-                    annotationData: {
-                        fullPageUrl,
-                        localListIds,
-                        pageTitle: title,
-                        body: annotation.body,
-                        selector: annotation.selector,
-                        comment: annotation.comment,
-                        localId: annotation.url,
-                        createdWhen: now,
-                    },
-                    shareOpts: {
-                        shouldShare: params.shouldShare,
-                        shouldCopyShareLink: params.shouldShare,
-                    },
-                    annotationsBG: this.deps.annotationsBG,
-                    contentSharingBG: this.deps.contentSharingBG,
-                    skipPageIndexing: false,
-                })
-            } catch (err) {
-                this.removeAnnotationHighlight(unifiedId)
-                throw err
-            }
-            return unifiedId
+            await createPromise
+            return annotationId
         } catch (err) {
-            this.removeAnnotationHighlight(annotation.url)
+            this.removeAnnotationHighlight({ id: annotationId })
             throw err
         }
     }
@@ -256,7 +199,7 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
     private createUndoHistoryEntry = async (
         url: string,
         type: 'annotation' | 'pagelistEntry',
-        id: string,
+        id: AutoPk,
     ) => {
         const undoHistory = await this.deps.getUndoHistory()
         undoHistory.unshift({ url, type, id })
@@ -268,16 +211,15 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
         onClick,
         { isPdf } = {},
     ) => {
-        let highlightAnchored = false
-        let highlightColor = this.highlightColor
+        let wasHighlightAnchored = false
+        const highlightColor = this.highlightColor
         if (!highlight?.selector?.descriptor?.content) {
-            return
+            return false
         }
 
         const baseClass = styles['memex-highlight']
 
         try {
-            let highlightedElements = [] as HighlightElement[]
             const descriptor = highlight.selector.descriptor
 
             const range = await retryUntil(
@@ -289,7 +231,7 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
                 },
             )
 
-            highlightedElements = highlightRange(
+            const highlightedElements = highlightRange(
                 range,
                 baseClass,
                 highlightColor,
@@ -309,25 +251,21 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
             }
 
             if (highlightedElements.length) {
-                this.attachEventListenersToNewHighlights(highlight, onClick)
+                this.attachMouseEventListenersToNewHighlights(
+                    highlight,
+                    onClick,
+                )
             }
 
             if (highlightedElements && highlightedElements.length > 0) {
-                highlightAnchored = true
+                wasHighlightAnchored = true
                 this.watchForRerenders([highlight], onClick)
-                return true
-            } else {
-                return false
             }
         } catch (e) {
             this.deps.captureException(e)
             console.error(e)
         } finally {
-            if (highlightAnchored) {
-                return true
-            } else {
-                return false
-            }
+            return wasHighlightAnchored
         }
     }
 
@@ -401,7 +339,7 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
 
     // PDFjs viewer un/loads pages as you scroll through larger docs, thus highlights need to be checked and re-rendered
     private watchForRerenders = (
-        highlights: UnifiedAnnotation[],
+        highlights: RenderableAnnotation[],
         onClick: AnnotationClickHandler,
     ) => {
         const pdfViewer = globalThis.PDFViewerApplication?.pdfViewer
@@ -453,13 +391,13 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
             })
         } else {
             highlights.map((highlight) => {
-                this.observer[highlight.unifiedId] = new MutationObserver(
+                this.observer[highlight.id] = new MutationObserver(
                     throttle(rerenderMissingHighlights, 300, { leading: true }),
                 )
                 const highlightElement = document.querySelector(
                     `.${createHighlightClass(highlight)}`,
                 )
-                this.observer[highlight.unifiedId].observe(highlightElement, {
+                this.observer[highlight.id].observe(highlightElement, {
                     attributes: false,
                     childList: true,
                     subtree: false,
@@ -469,12 +407,12 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
     }
 
     private scrollToHighlight = async ({
-        unifiedId,
+        id,
         selector,
-    }: UnifiedAnnotation) => {
+    }: RenderableAnnotation) => {
         const baseClass = styles['memex-highlight']
         const $highlight = document.querySelector(
-            `.${baseClass}[data-annotation="${unifiedId}"]`,
+            `.${baseClass}[data-annotation="${id}"]`,
         ) as HTMLElement
 
         if ($highlight) {
@@ -503,11 +441,11 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
     /**
      * Scrolls the annotation card into ivew of the given annotation on the current page.
      */
-    private scrollCardIntoView = ({ unifiedId }: UnifiedAnnotation) => {
+    private scrollCardIntoView = ({ id }: RenderableAnnotation) => {
         const baseClass = 'AnnotationBox'
         const highlights = document.getElementById('memex-sidebar-container')
 
-        const highlight = highlights.shadowRoot.getElementById(unifiedId)
+        const highlight = highlights.shadowRoot.getElementById(id.toString())
 
         highlight?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 
@@ -528,8 +466,8 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
     ) => {
         this.removeSelectedHighlights(annotation)
         this.resetHighlightsStyles()
-        if (this.currentActiveHighlight) {
-            this.removeSelectedHighlights(this.currentActiveHighlight)
+        if (this.activeHighlight) {
+            this.removeSelectedHighlights(this.activeHighlight)
         }
         this.selectHighlight(annotation)
         await this.scrollToHighlight(annotation)
@@ -539,17 +477,17 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
      * Attaches event listeners to the highlights for hovering/focusing on the
      * annotation in sidebar.
      */
-    private attachEventListenersToNewHighlights = (
-        highlight: UnifiedAnnotation,
-        openSidebar: AnnotationClickHandler,
+    private attachMouseEventListenersToNewHighlights = (
+        highlight: RenderableAnnotation,
+        onClick: AnnotationClickHandler,
     ) => {
         const newHighlights = document.querySelectorAll(
             `.${styles['memex-highlight']}:not([data-annotation])`,
         )
 
         newHighlights.forEach((highlightEl: HTMLElement) => {
-            this.currentActiveHighlight = highlight
-            highlightEl.dataset.annotation = highlight.unifiedId
+            this.activeHighlight = highlight
+            highlightEl.dataset.annotation = highlight.id.toString()
 
             if (highlightEl.parentNode.nodeName === 'A') {
                 highlightEl.style['color'] = '#3366cc'
@@ -569,8 +507,8 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
                 if (!(e.target as HTMLElement).dataset.annotation) {
                     return
                 }
-                openSidebar({
-                    unifiedAnnotationId: highlight.unifiedId,
+                onClick({
+                    annotationId: highlight.id,
                     openInEdit: e.getModifierState('Shift'),
                 })
                 // make sure to remove all other selections before selecting the new one
@@ -585,7 +523,7 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
                 if (
                     !(e.target as HTMLElement).dataset?.annotation ||
                     (e.target as HTMLElement).dataset?.annotation ===
-                        this.currentActiveHighlight?.unifiedId
+                        this.activeHighlight?.id
                 ) {
                     return
                 }
@@ -601,7 +539,7 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
                 if (
                     !(e.target as HTMLElement).dataset?.annotation ||
                     (e.target as HTMLElement).dataset?.annotation ===
-                        this.currentActiveHighlight?.unifiedId
+                        this.activeHighlight?.id
                 ) {
                     return
                 }
@@ -628,11 +566,11 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
         this.removeHighlights(styles['memex-highlight'])
     }
 
-    private hoverOverHighlight = ({ unifiedId }: UnifiedAnnotation) => {
+    private hoverOverHighlight = ({ id }: RenderableAnnotation) => {
         // Make the current annotation as a "medium" highlight.
         const baseClass = styles['memex-highlight']
         const highlights = document.querySelectorAll(
-            `.${baseClass}[data-annotation="${unifiedId}"]`,
+            `.${baseClass}[data-annotation="${id}"]`,
         )
 
         highlights.forEach((highlight: HTMLElement) => {
@@ -650,10 +588,10 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
     /**
      * Removes the medium class from all the highlights making them light.
      */
-    private removeHoveredHighlights = ({ unifiedId }: UnifiedAnnotation) => {
+    private removeHoveredHighlights = ({ id }: RenderableAnnotation) => {
         const baseClass = styles['memex-highlight']
         const highlights = document.querySelectorAll(
-            `.${baseClass}[data-annotation="${unifiedId}"]`,
+            `.${baseClass}[data-annotation="${id}"]`,
         )
         highlights.forEach((highlight: HTMLElement) => {
             if (!highlight.classList.contains(styles['selectedHighlight'])) {
@@ -670,10 +608,10 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
     /**
      * Makes the highlight a dark highlight.
      */
-    private selectHighlight = (annotation: UnifiedAnnotation) => {
-        this.currentActiveHighlight = annotation
+    private selectHighlight = (annotation: RenderableAnnotation) => {
+        this.activeHighlight = annotation
         const highlights = document.querySelectorAll(
-            `[data-annotation="${annotation.unifiedId}"]`,
+            `[data-annotation="${annotation.id}"]`,
         )
 
         highlights.forEach((highlight: HTMLElement) => {
@@ -686,9 +624,9 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
         })
     }
 
-    private removeSelectedHighlights = ({ unifiedId }: UnifiedAnnotation) => {
+    private removeSelectedHighlights = ({ id }: RenderableAnnotation) => {
         const highlights = document.querySelectorAll(
-            `[data-annotation="${unifiedId}"]`,
+            `[data-annotation="${id}"]`,
         )
         highlights.forEach((highlight: HTMLElement) => {
             if (highlight.classList.contains(styles['selectedHighlight'])) {
@@ -701,7 +639,7 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
                 // highlight.style['border-bottom'] = 'unset'
             }
         })
-        this.currentActiveHighlight = null
+        this.activeHighlight = null
     }
     /**
      * Return highlights to normal state
@@ -711,7 +649,7 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
         highlights.forEach((highlight: HTMLElement) => {
             if (
                 highlight.getAttribute('data-annotation') ===
-                this.currentActiveHighlight?.unifiedId
+                this.activeHighlight?.id
             ) {
                 highlight.classList.remove(styles['selectedHighlight'])
                 highlight.style.setProperty(
@@ -743,12 +681,12 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
     /**
      * Removes the highlights of a given annotation.
      */
-    removeAnnotationHighlight: HighlightInteractionsInterface['removeAnnotationHighlight'] = (
-        unifiedId,
-    ) => {
+    removeAnnotationHighlight: HighlightInteractionsInterface['removeAnnotationHighlight'] = ({
+        id,
+    }) => {
         const baseClass = styles['memex-highlight']
         const highlights = document.querySelectorAll(
-            `.${baseClass}[data-annotation="${unifiedId}"]`,
+            `.${baseClass}[data-annotation="${id}"]`,
         )
         highlights.forEach((highlight) => this._removeHighlight(highlight))
     }
