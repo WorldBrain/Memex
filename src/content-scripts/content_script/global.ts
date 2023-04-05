@@ -680,10 +680,18 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
     observer.observe(document, config)
 }
 export function injectYoutubeButtonMenu(annotationsFunctions: any) {
+    const existingMemexButtons = document.getElementsByClassName(
+        'memex-youtube-buttons',
+    )
+    if (existingMemexButtons.length > 0) {
+        existingMemexButtons[0].remove()
+    }
+
     const icon = runtime.getURL('/img/memex-icon.svg')
     const panel = document.getElementsByClassName('ytp-time-display')[0]
     const memexButtons = document.createElement('div')
     const memexIcon = document.createElement('img')
+    memexButtons.setAttribute('class', 'memex-youtube-buttons')
     memexIcon.src = icon
     memexButtons.appendChild(memexIcon)
     memexIcon.style.height = '20px'
