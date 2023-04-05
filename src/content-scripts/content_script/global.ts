@@ -707,7 +707,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     annotateButton.setAttribute('class', 'ytp-menuitem')
     annotateButton.onclick = () =>
         annotationsFunctions.createAnnotation()(false, false)
-    annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
+    annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
     annotateButton.style.display = 'flex'
 
     const summarizeButton = document.createElement('div')
@@ -716,7 +716,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     memexButtons.appendChild(summarizeButton)
     summarizeButton.setAttribute('class', 'ytp-menuitem')
     summarizeButton.onclick = () => annotationsFunctions.askAI()(false, false)
-    summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
+    summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
     summarizeButton.style.display = 'flex'
     panel.parentNode.insertBefore(memexButtons, panel.nextSibling)
 }
