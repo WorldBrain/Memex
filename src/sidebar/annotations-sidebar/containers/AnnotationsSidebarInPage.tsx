@@ -155,12 +155,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         sidebarEvents.on('renderHighlight', ({ highlight }) =>
             highlighter.renderHighlight(
                 { id: highlight.unifiedId, selector: highlight.selector },
-                () => {
+                () =>
                     inPageUI.showSidebar({
                         annotationCacheId: highlight.unifiedId,
                         action: 'show_annotation',
-                    })
-                },
+                    }),
             ),
         )
         sidebarEvents.on('renderHighlights', async ({ highlights }) => {

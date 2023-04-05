@@ -321,8 +321,12 @@ export async function main(
     })
 
     const annotationFunctionsParams: SaveAndRenderHighlightDeps = {
-        inPageUI,
         currentUser,
+        onClick: ({ annotationId, openInEdit }) =>
+            inPageUI.showSidebar({
+                annotationCacheId: annotationId.toString(),
+                action: openInEdit ? 'edit_annotation' : 'show_annotation',
+            }),
         getSelection: () => document.getSelection(),
         getFullPageUrl: async () => pageInfo.getFullPageUrl(),
     }
@@ -345,12 +349,25 @@ export async function main(
             if (!(await pageActionAllowed())) {
                 return
             }
-            await highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
-                ...annotationFunctionsParams,
-                isPdf: pageInfo.isPdf,
-                showSpacePicker,
-                shouldShare,
-            })
+            const annotationId = await highlightRenderer.saveAndRenderHighlight(
+                {
+                    ...annotationFunctionsParams,
+                    isPdf: pageInfo.isPdf,
+                    shouldShare,
+                },
+            )
+            await inPageUI.showSidebar(
+                annotationId
+                    ? {
+                          annotationCacheId: annotationId.toString(),
+                          action: showSpacePicker
+                              ? 'edit_annotation_spaces'
+                              : 'edit_annotation',
+                      }
+                    : {
+                          action: 'comment',
+                      },
+            )
         },
         askAI: () => (highlightedText: string) =>
             inPageUI.showSidebar({

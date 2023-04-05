@@ -1,12 +1,11 @@
 import type { Anchor } from '@worldbrain/memex-common/lib/annotations/types'
-import type { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export type AnnotationClickHandler = (params: {
     annotationId: AutoPk
     openInEdit?: boolean
-}) => void
+}) => Promise<void>
 
 export interface RenderableAnnotation {
     id: AutoPk
@@ -39,17 +38,13 @@ export interface HighlightInteractionsInterface {
     ) => void
     saveAndRenderHighlight: (
         params: SaveAndRenderHighlightDeps,
-    ) => Promise<void>
-    saveAndRenderHighlightAndEditInSidebar: (
-        params: SaveAndRenderHighlightDeps,
-    ) => Promise<void>
+    ) => Promise<AutoPk | null>
 }
 
 export interface SaveAndRenderHighlightDeps {
     getFullPageUrl: () => Promise<string>
     getSelection: () => Selection
-    inPageUI: SharedInPageUIInterface
-    showSpacePicker?: boolean
+    onClick: AnnotationClickHandler
     currentUser?: UserReference
     shouldShare?: boolean
     isPdf?: boolean

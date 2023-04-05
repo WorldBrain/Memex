@@ -5,7 +5,6 @@ import type {
     UndoHistoryEntry,
     RenderableAnnotation,
     AnnotationClickHandler,
-    SaveAndRenderHighlightDeps,
     HighlightInteractionsInterface,
 } from 'src/highlighting/types'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
@@ -67,32 +66,9 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
         }
     }
 
-    saveAndRenderHighlightAndEditInSidebar: HighlightInteractionsInterface['saveAndRenderHighlightAndEditInSidebar'] = async (
-        params,
-    ) => {
-        const annotationId = await this._saveAndRenderHighlight(params)
-
-        if (annotationId) {
-            await params.inPageUI.showSidebar({
-                annotationCacheId: annotationId.toString(),
-                action: params.showSpacePicker
-                    ? 'edit_annotation_spaces'
-                    : 'edit_annotation',
-            })
-        } else {
-            await params.inPageUI.showSidebar({ action: 'comment' })
-        }
-    }
-
     saveAndRenderHighlight: HighlightInteractionsInterface['saveAndRenderHighlight'] = async (
         params,
     ) => {
-        await this._saveAndRenderHighlight(params)
-    }
-
-    private async _saveAndRenderHighlight(
-        params: SaveAndRenderHighlightDeps,
-    ): Promise<AutoPk | null> {
         const selection = params.getSelection()
         const fullPageUrl = await params.getFullPageUrl()
 
@@ -172,14 +148,7 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
 
             await this.renderHighlight(
                 { id: annotationId, selector },
-                ({ openInEdit, annotationId }) => {
-                    params.inPageUI.showSidebar({
-                        annotationCacheId: annotationId.toString(),
-                        action: openInEdit
-                            ? 'edit_annotation'
-                            : 'show_annotation',
-                    })
-                },
+                params.onClick,
             )
 
             await this.createUndoHistoryEntry(
@@ -507,14 +476,14 @@ export class HighlightRenderer implements HighlightInteractionsInterface {
                 if (!(e.target as HTMLElement).dataset.annotation) {
                     return
                 }
-                onClick({
-                    annotationId: highlight.id,
-                    openInEdit: e.getModifierState('Shift'),
-                })
                 // make sure to remove all other selections before selecting the new one
                 this.resetHighlightsStyles()
                 this.selectHighlight(highlight)
                 this.scrollCardIntoView(highlight)
+                await onClick({
+                    annotationId: highlight.id,
+                    openInEdit: e.getModifierState('Shift'),
+                })
             }
 
             highlightEl.addEventListener('click', clickListener, false)
