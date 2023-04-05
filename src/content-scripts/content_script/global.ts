@@ -685,7 +685,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     )
 
     if (YTchapterContainer.length > 0) {
-        let container = YTchapterContainer[0]
+        let container = YTchapterContainer[0] as HTMLElement
         container.style.display = 'flex'
         container.style.flex = '1'
         container.style.width = '250px'
