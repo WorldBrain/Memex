@@ -680,15 +680,45 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
     observer.observe(document, config)
 }
 export function injectYoutubeButtonMenu(annotationsFunctions: any) {
+    const existingMemexButtons = document.getElementsByClassName(
+        'memex-youtube-buttons',
+    )
+    if (existingMemexButtons.length > 0) {
+        existingMemexButtons[0].remove()
+    }
+
     const icon = runtime.getURL('/img/memex-icon.svg')
     const panel = document.getElementsByClassName('ytp-time-display')[0]
-    const newEntry = document.createElement('div')
-    newEntry.setAttribute('class', 'ytp-menuitem')
-    newEntry.onclick = () =>
+    const memexButtons = document.createElement('div')
+    const memexIcon = document.createElement('img')
+    memexButtons.setAttribute('class', 'memex-youtube-buttons')
+    memexIcon.src = icon
+    memexButtons.appendChild(memexIcon)
+    memexIcon.style.height = '20px'
+    memexIcon.style.margin = '0 5px 0 10px'
+    memexButtons.style.display = 'flex'
+    memexButtons.style.alignItems = 'center'
+    memexButtons.style.margin = '5px'
+    memexButtons.style.borderRadius = '6px'
+    memexButtons.style.border = '1px solid #3E3F47'
+    memexButtons.style.overflow = 'hidden'
+
+    const annotateButton = document.createElement('div')
+    annotateButton.setAttribute('class', 'ytp-menuitem')
+    annotateButton.onclick = () =>
         annotationsFunctions.createAnnotation()(false, false)
-    newEntry.innerHTML = `<div class="ytp-menuitem-icon"><img src=${icon} style="height: 23px; padding-left: 2px; display: flex; width: auto"/></div><div class="ytp-menuitem-label" style="white-space: nowrap">Add Note with Memex</div>`
-    newEntry.style.height = '48px'
-    panel.parentNode.insertBefore(newEntry, panel.nextSibling)
+    annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
+    annotateButton.style.display = 'flex'
+
+    const summarizeButton = document.createElement('div')
+
+    memexButtons.appendChild(annotateButton)
+    memexButtons.appendChild(summarizeButton)
+    summarizeButton.setAttribute('class', 'ytp-menuitem')
+    summarizeButton.onclick = () => annotationsFunctions.askAI()(false, false)
+    summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
+    summarizeButton.style.display = 'flex'
+    panel.parentNode.insertBefore(memexButtons, panel.nextSibling)
 }
 
 export function setupWebUIActions(args: {
