@@ -3,10 +3,16 @@ import browser from 'webextension-polyfill'
 import analytics from 'src/analytics'
 import { delayed, getPositionState } from '../utils'
 import { setupUIContainer, destroyUIContainer } from './components'
-import { conditionallyShowHighlightNotification } from '../onboarding-interactions'
+import {
+    conditionallyRemoveOnboardingSelectOption,
+    conditionallyShowHighlightNotification,
+} from '../onboarding-interactions'
 import type { TooltipPosition } from '../types'
 import type { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
 import type { InPageUIRootMount } from 'src/in-page-ui/types'
+import { STAGES } from 'src/overview/onboarding/constants'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import type { Shortcut } from 'src/in-page-ui/keyboard-shortcuts/types'
 let mouseupListener = null
 
 export function setupTooltipTrigger(
@@ -68,9 +74,25 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
     showTooltip = await setupUIContainer(params.mount, {
         inPageUI: params.inPageUI,
         summarizeBG: params.summarizeBG,
-        createAnnotation: params.createAnnotation,
+        createAnnotation: async (...args) => {
+            await params.createAnnotation(...args)
+            await conditionallyRemoveOnboardingSelectOption(
+                STAGES.annotation.annotationCreated,
+            )
+        },
         createHighlight: params.createHighlight,
         askAI: params.askAI,
+        getKBShortcuts: async () => {
+            const state = await getKeyboardShortcutsState()
+            const shortcutToKeyStrs = ({ shortcut }: Shortcut): string[] =>
+                shortcut.split('+')
+            return {
+                createAnnotation: shortcutToKeyStrs(state.createAnnotation),
+                createHighlight: shortcutToKeyStrs(state.createHighlight),
+                addToCollection: shortcutToKeyStrs(state.addToCollection),
+                askAI: shortcutToKeyStrs(state.askAI),
+            }
+        },
         destroyTooltip: async () => {
             analytics.trackEvent({
                 category: 'InPageTooltip',

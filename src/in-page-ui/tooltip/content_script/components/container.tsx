@@ -1,87 +1,51 @@
 import React from 'react'
 import styled, { keyframes } from 'styled-components'
 
-import { conditionallyRemoveOnboardingSelectOption } from '../../onboarding-interactions'
-import { STAGES } from 'src/overview/onboarding/constants'
 import type { SharedInPageUIEvents } from 'src/in-page-ui/shared-state/types'
 import type {
     TooltipInPageUIInterface,
     AnnotationFunctions,
     TooltipPosition,
 } from 'src/in-page-ui/tooltip/types'
-import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import type { Shortcut } from 'src/in-page-ui/keyboard-shortcuts/types'
 import AIInterfaceForTooltip from './aIinterfaceComponent'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { Rnd } from 'react-rnd'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { Tooltip } from '@worldbrain/memex-common/lib/in-page-ui/tooltip/tooltip'
+import type { TooltipKBShortcuts } from '@worldbrain/memex-common/lib/in-page-ui/tooltip/types'
 
 export interface Props extends AnnotationFunctions {
-    inPageUI: TooltipInPageUIInterface
+    getKBShortcuts: () => Promise<TooltipKBShortcuts>
     summarizeBG: SummarizationInterface<'caller'>
-    onInit: any
+    inPageUI: TooltipInPageUIInterface
     destroyTooltip: any
+    onInit: any
 }
 
 interface TooltipContainerState {
-    showTooltip: boolean
-    showingCloseMessage?: boolean
     position: { x: number; y: number } | {}
     tooltipState: 'copied' | 'running' | 'pristine' | 'done' | 'AIinterface'
-    keyboardShortcuts?: { [key: string]: string[] }
+    keyboardShortcuts?: TooltipKBShortcuts
     highlightText: string
-    removeAfterUse: boolean
+    showTooltip: boolean
     preventClosing: boolean
-}
-
-async function getShortCut(name: string) {
-    let keyboardShortcuts = await getKeyboardShortcutsState()
-    const short: Shortcut = keyboardShortcuts[name]
-
-    let shortcut = short.shortcut.split('+')
-
-    return shortcut
 }
 
 class TooltipContainer extends React.Component<Props, TooltipContainerState> {
     state: TooltipContainerState = {
-        showTooltip: false,
         position: {},
         tooltipState: 'copied',
-        keyboardShortcuts: undefined,
         highlightText: '',
-        removeAfterUse: false,
+        showTooltip: false,
         preventClosing: true,
     }
-
-    private container = document.getElementById('memex-tooltip-container')
 
     async componentDidMount() {
         this.props.inPageUI.events?.on('stateChanged', this.handleUIStateChange)
         this.props.onInit(this.showTooltip)
-        this.setState({
-            keyboardShortcuts: {
-                createHighlight: await getShortCut('createHighlight'),
-                createAnnotation: await getShortCut('createAnnotation'),
-                createAnnotationWithSpace: await getShortCut('addToCollection'),
-                askAI: await getShortCut('askAI'),
-            },
-        })
-
-        // window.addEventListener('mouseup', this.handleClick)
-    }
-
-    handleClick = (e: MouseEvent) => {
-        let clickX = e.clientX
-        let clickY = e.clientY
-
-        if (e.composedPath().includes(this.container)) {
-            return
-        } else {
-            // this.setState({
-            //     position: { x: clickX, y: clickY },
-            // })
+        if (this.props.getKBShortcuts) {
+            const keyboardShortcuts = await this.props.getKBShortcuts()
+            this.setState({ keyboardShortcuts })
         }
     }
 
@@ -90,10 +54,11 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             'stateChanged',
             this.handleUIStateChange,
         )
-        window.removeEventListener('mouseUp', this.handleClick)
     }
 
-    handleUIStateChange: SharedInPageUIEvents['stateChanged'] = (event) => {
+    private handleUIStateChange: SharedInPageUIEvents['stateChanged'] = (
+        event,
+    ) => {
         if (!('tooltip' in event.changes)) {
             return
         }
@@ -106,7 +71,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         }
     }
 
-    calculateTooltipPostion(): TooltipPosition {
+    private calculateTooltipPostion(): TooltipPosition {
         const range = document.getSelection().getRangeAt(0)
         const boundingRect = range.getBoundingClientRect()
         // x = position of element from the left + half of it's width
@@ -120,18 +85,16 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         }
     }
 
-    showTooltip = () => {
+    private showTooltip = () => {
         if (!this.state.showTooltip && this.state.tooltipState !== 'running') {
             this.setState({
                 preventClosing: true,
             })
 
             setTimeout(() => {
-                let position = this.calculateTooltipPostion()
-
                 this.setState({
                     showTooltip: true,
-                    position,
+                    position: this.calculateTooltipPostion(),
                     tooltipState: 'pristine',
                     preventClosing: true,
                     highlightText: window.getSelection().toString() ?? '',
@@ -145,23 +108,11 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         }
     }
 
-    handleClickOutside = async () => {
-        this.props.inPageUI.hideTooltip()
-        // Remove onboarding select option notification if it's present
-        await conditionallyRemoveOnboardingSelectOption(
-            STAGES.annotation.notifiedHighlightText,
-        )
-    }
-
-    closeTooltip = (event, options = { disable: false }) => {
+    private closeTooltip: React.MouseEventHandler = (event) => {
         event.preventDefault()
         event.stopPropagation()
 
         this.props.inPageUI.removeTooltip()
-    }
-
-    showCloseMessage() {
-        this.setState({ showingCloseMessage: true })
     }
 
     private createAnnotation: React.MouseEventHandler = async (e) => {
@@ -170,10 +121,6 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
 
         try {
             await this.props.createAnnotation(e.shiftKey)
-            // Remove onboarding select option notification if it's present
-            await conditionallyRemoveOnboardingSelectOption(
-                STAGES.annotation.annotationCreated,
-            )
         } catch (err) {
             throw err
         } finally {
@@ -218,7 +165,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         })
     }
 
-    renderTooltipComponent = () => {
+    private renderTooltipComponent = () => {
         switch (this.state.tooltipState) {
             case 'pristine':
                 if (this.state.keyboardShortcuts != null) {
@@ -279,11 +226,10 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             >
                 {showTooltip ? (
                     <PopoutBox
-                        closeComponent={() => {
-                            !this.state.preventClosing &&
-                                (this.state.removeAfterUse
-                                    ? this.props.inPageUI.removeTooltip()
-                                    : this.props.inPageUI.hideTooltip())
+                        closeComponent={async () => {
+                            if (!this.state.preventClosing) {
+                                await this.props.inPageUI.hideTooltip()
+                            }
                         }}
                         placement="bottom"
                         strategy="absolute"
