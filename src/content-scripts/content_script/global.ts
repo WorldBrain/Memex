@@ -1,5 +1,6 @@
 import 'core-js'
 import { EventEmitter } from 'events'
+import hexToRgb from 'hex-to-rgb'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
 import {
@@ -29,7 +30,6 @@ import {
 } from 'src/in-page-ui/keyboard-shortcuts/content_script'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-import { HighlightRenderer } from 'src/highlighting/ui/highlight-interactions'
 import type { RemoteTagsInterface } from 'src/tags/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import ToolbarNotifications from 'src/toolbar-notification/content_script'
@@ -68,10 +68,20 @@ import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/t
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
-import { upgradePlan } from 'src/util/subscriptions/storage'
+import { pageActionAllowed, upgradePlan } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import { browser } from 'webextension-polyfill-ts'
-import initSentry from 'src/util/raven'
+import initSentry, { captureException } from 'src/util/raven'
+import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
+import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
+import { createAnnotation } from 'src/annotations/annotation-save-logic'
+import {
+    generateAnnotationUrl,
+    shareOptsToPrivacyLvl,
+} from 'src/annotations/utils'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import type { SaveAndRenderHighlightDeps } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
+import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -136,7 +146,7 @@ export async function main(
                     ])
                     return
                 } else {
-                    highlightRenderer.undoHighlight(lastAction.id)
+                    highlightRenderer.removeAnnotationHighlight(lastAction.id)
                     lastActions.shift()
                     await globalThis['browser'].storage.local.set({
                         [`${UNDO_HISTORY}`]: lastActions,
@@ -189,8 +199,79 @@ export async function main(
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
     const highlightRenderer = new HighlightRenderer({
-        annotationsBG,
-        contentSharingBG,
+        captureException,
+        getUndoHistory: async () => {
+            const storage = await browser.storage.local.get(UNDO_HISTORY)
+            return storage[UNDO_HISTORY] ?? []
+        },
+        setUndoHistory: async (undoHistory) =>
+            browser.storage.local.set({
+                [UNDO_HISTORY]: undoHistory,
+            }),
+        getHighlightColorRGB: async () => {
+            const storage = await browser.storage.local.get(HIGHLIGHT_COLOR_KEY)
+            return hexToRgb(
+                storage[HIGHLIGHT_COLOR_KEY] ?? DEFAULT_HIGHLIGHT_COLOR,
+            )
+        },
+        onHighlightColorChange: (cb) => {
+            browser.storage.onChanged.addListener((changes) => {
+                if (changes[HIGHLIGHT_COLOR_KEY]?.newValue != null) {
+                    cb(changes[HIGHLIGHT_COLOR_KEY].newValue)
+                }
+            })
+        },
+        scheduleAnnotationCreation: (data) => {
+            const localId = generateAnnotationUrl({
+                pageUrl: data.fullPageUrl,
+                now: () => data.createdWhen,
+            })
+
+            const localListIds: number[] = []
+            if (inPageUI.selectedList) {
+                const selectedList =
+                    annotationsCache.lists.byId[inPageUI.selectedList]
+                if (selectedList.localId != null) {
+                    localListIds.push(selectedList.localId)
+                }
+            }
+
+            const { unifiedId } = annotationsCache.addAnnotation({
+                localId,
+                localListIds,
+                body: data.body,
+                comment: data.comment,
+                creator: data.creator,
+                selector: data.selector,
+                lastEdited: data.updatedWhen,
+                createdWhen: data.createdWhen,
+                privacyLevel: shareOptsToPrivacyLvl(data),
+                normalizedPageUrl: normalizeUrl(data.fullPageUrl),
+            })
+
+            const createPromise = (async () => {
+                await createAnnotation({
+                    shareOpts: {
+                        shouldShare: data.shouldShare,
+                        shouldCopyShareLink: data.shouldShare,
+                    },
+                    annotationsBG,
+                    contentSharingBG,
+                    skipPageIndexing: false,
+                    annotationData: {
+                        localId,
+                        localListIds,
+                        body: data.body,
+                        comment: data.comment,
+                        selector: data.selector,
+                        fullPageUrl: data.fullPageUrl,
+                        pageTitle: pageInfo.getPageTitle(),
+                        createdWhen: new Date(data.createdWhen),
+                    },
+                })
+            })()
+            return { annotationId: unifiedId, createPromise }
+        },
     })
     const sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
@@ -239,42 +320,60 @@ export async function main(
         },
     })
 
-    const annotationFunctionsParams = {
-        inPageUI,
-        annotationsCache,
+    const annotationFunctionsParams: SaveAndRenderHighlightDeps = {
+        currentUser,
+        onClick: ({ annotationId, openInEdit }) =>
+            inPageUI.showSidebar({
+                annotationCacheId: annotationId.toString(),
+                action: openInEdit ? 'edit_annotation' : 'show_annotation',
+            }),
         getSelection: () => document.getSelection(),
-        getFullPageUrlAndTitle: async () => ({
-            title: pageInfo.getPageTitle(),
-            fullPageUrl: await pageInfo.getFullPageUrl(),
-        }),
+        getFullPageUrl: async () => pageInfo.getFullPageUrl(),
     }
     const annotationsFunctions = {
-        createHighlight: (analyticsEvent?: AnalyticsEvent<'Highlights'>) => (
-            shouldShare: boolean,
-        ) =>
-            highlightRenderer.saveAndRenderHighlight({
+        createHighlight: (
+            analyticsEvent?: AnalyticsEvent<'Highlights'>,
+        ) => async (shouldShare: boolean) => {
+            if (!(await pageActionAllowed())) {
+                return
+            }
+            await highlightRenderer.saveAndRenderHighlight({
                 ...annotationFunctionsParams,
-                analyticsEvent,
-                currentUser,
+                isPdf: pageInfo.isPdf,
                 shouldShare,
-            }),
-        createAnnotation: (analyticsEvent?: AnalyticsEvent<'Annotations'>) => (
-            shouldShare: boolean,
-            showSpacePicker?: boolean,
-        ) =>
-            highlightRenderer.saveAndRenderHighlightAndEditInSidebar({
-                ...annotationFunctionsParams,
-                showSpacePicker,
-                analyticsEvent,
-                currentUser,
-                shouldShare,
-            }),
-        askAI: () => (highlightedText: string) => {
+            })
+        },
+        createAnnotation: (
+            analyticsEvent?: AnalyticsEvent<'Annotations'>,
+        ) => async (shouldShare: boolean, showSpacePicker?: boolean) => {
+            if (!(await pageActionAllowed())) {
+                return
+            }
+            const annotationId = await highlightRenderer.saveAndRenderHighlight(
+                {
+                    ...annotationFunctionsParams,
+                    isPdf: pageInfo.isPdf,
+                    shouldShare,
+                },
+            )
+            await inPageUI.showSidebar(
+                annotationId
+                    ? {
+                          annotationCacheId: annotationId.toString(),
+                          action: showSpacePicker
+                              ? 'edit_annotation_spaces'
+                              : 'edit_annotation',
+                      }
+                    : {
+                          action: 'comment',
+                      },
+            )
+        },
+        askAI: () => (highlightedText: string) =>
             inPageUI.showSidebar({
                 action: 'show_page_summary',
                 highlightedText: highlightedText,
-            })
-        },
+            }),
     }
 
     if (window.location.hostname === 'www.youtube.com') {
@@ -472,7 +571,10 @@ export async function main(
                 )
                 return
             }
-            await highlightRenderer.highlightAndScroll(unifiedAnnotation)
+            await highlightRenderer.highlightAndScroll({
+                id: unifiedAnnotation.unifiedId,
+                selector: unifiedAnnotation.selector,
+            })
         },
         createHighlight: annotationsFunctions.createHighlight({
             category: 'Highlights',
@@ -610,7 +712,11 @@ class PageInfo {
 
     constructor(
         public options?: { getContentFingerprints?: GetContentFingerprints },
-    ) {}
+    ) {
+        this.isPdf = isUrlPDFViewerUrl(window.location.href, {
+            runtimeAPI: runtime,
+        })
+    }
 
     async refreshIfNeeded() {
         if (window.location.href === this._href) {

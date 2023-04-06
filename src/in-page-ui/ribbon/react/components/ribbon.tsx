@@ -1,10 +1,8 @@
 import React, { Component, createRef, KeyboardEventHandler } from 'react'
-import qs from 'query-string'
 import styled, { createGlobalStyle, css, keyframes } from 'styled-components'
 import browser from 'webextension-polyfill'
 
 import moment from 'moment'
-import extractQueryFilters from 'src/util/nlp-time-filter'
 import {
     shortcuts,
     ShortcutElData,
@@ -14,11 +12,10 @@ import type {
     Shortcut,
     BaseKeyboardShortcuts,
 } from 'src/in-page-ui/keyboard-shortcuts/types'
-import { HighlightInteractionsInterface } from 'src/highlighting/types'
-import { RibbonSubcomponentProps, RibbonHighlightsProps } from './types'
+import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
+import { RibbonSubcomponentProps } from './types'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import AnnotationCreate from 'src/annotations/components/AnnotationCreate'
-import BlurredSidebarOverlay from 'src/in-page-ui/sidebar/react/components/blurred-overlay'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -32,10 +29,8 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { HexColorPicker } from 'react-colorful'
-import {
-    DEFAULT_HIGHLIGHT_COLOR,
-    HIGHLIGHT_COLOR_KEY,
-} from 'src/highlighting/constants'
+import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
+import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
@@ -52,7 +47,7 @@ export interface Props extends RibbonSubcomponentProps {
     toggleShowTutorial: () => void
     handleRibbonToggle: () => void
     handleRemoveRibbon: () => void
-    highlighter: Pick<HighlightInteractionsInterface, 'resetHighlightsStyles'>
+    highlighter: Pick<HighlightRendererInterface, 'resetHighlightsStyles'>
     hideOnMouseLeave?: boolean
     toggleFeed: () => void
     showFeed: boolean

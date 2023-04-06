@@ -50,7 +50,6 @@ let manualOverride = false
 
 interface TooltipInsertDependencies extends TooltipDependencies {
     mount: InPageUIRootMount
-    mode?: 'AImode'
 }
 
 /**

@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components'
 import ReactDOM from 'react-dom'
 
 import { theme } from 'src/common-ui/components/design-library/theme'
-import type { HighlightInteractionsInterface } from 'src/highlighting/types'
+import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import type {
@@ -30,7 +30,7 @@ import browser from 'webextension-polyfill'
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
     inPageUI: SharedInPageUIInterface
-    highlighter: HighlightInteractionsInterface
+    highlighter: HighlightRendererInterface
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
@@ -147,22 +147,30 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         //     highlighter.removeAnnotationHighlights(urls),
         // )
         sidebarEvents.on('highlightAndScroll', async ({ highlight }) => {
-            await highlighter.highlightAndScroll(highlight)
+            await highlighter.highlightAndScroll({
+                id: highlight.unifiedId,
+                selector: highlight.selector,
+            })
         })
         sidebarEvents.on('renderHighlight', ({ highlight }) =>
-            highlighter.renderHighlight(highlight, () => {
-                inPageUI.showSidebar({
-                    annotationCacheId: highlight.unifiedId,
-                    action: 'show_annotation',
-                })
-            }),
+            highlighter.renderHighlight(
+                { id: highlight.unifiedId, selector: highlight.selector },
+                () =>
+                    inPageUI.showSidebar({
+                        annotationCacheId: highlight.unifiedId,
+                        action: 'show_annotation',
+                    }),
+            ),
         )
         sidebarEvents.on('renderHighlights', async ({ highlights }) => {
             await highlighter.renderHighlights(
-                highlights,
-                ({ unifiedAnnotationId }) =>
+                highlights.map((h) => ({
+                    id: h.unifiedId,
+                    selector: h.selector,
+                })),
+                ({ annotationId }) =>
                     inPageUI.showSidebar({
-                        annotationCacheId: unifiedAnnotationId,
+                        annotationCacheId: annotationId.toString(),
                         action: 'show_annotation',
                     }),
                 { removeExisting: true },
@@ -299,9 +307,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             ...boundProps,
             onDeleteConfirm: (e) => {
                 boundProps.onDeleteConfirm(e)
-                this.props.highlighter.removeAnnotationHighlight(
-                    annotation.unifiedId,
-                )
+                this.props.highlighter.removeAnnotationHighlight({
+                    id: annotation.unifiedId,
+                })
             },
         }
     }

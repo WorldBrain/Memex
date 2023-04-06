@@ -1,4 +1,4 @@
-import type { HighlightInteractionsInterface } from 'src/highlighting/types'
+import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 import type AnnotationsManager from 'src/annotations/annotations-manager'
 import type { BookmarksInterface } from 'src/bookmarks/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
@@ -20,7 +20,7 @@ interface FlagSetterInterface {
 export interface RibbonContainerDependencies {
     currentTab: { id?: number; url?: string }
     getFullPageUrl: () => MaybePromise<string>
-    highlighter: HighlightInteractionsInterface
+    highlighter: HighlightRendererInterface
     annotationsManager: AnnotationsManager
     setSidebarEnabled: (value: boolean) => Promise<void>
     getSidebarEnabled: () => Promise<boolean>

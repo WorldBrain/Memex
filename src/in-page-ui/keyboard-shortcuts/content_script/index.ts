@@ -1,7 +1,6 @@
 import Mousetrap from 'mousetrap'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { userSelectedText } from 'src/in-page-ui/tooltip/content_script/interactions'
-import { createAndCopyDirectLink } from 'src/annotations/content_script/interactions'
 import type { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
 import type { KeyboardShortcuts, Shortcut } from '../types'
 import type { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
@@ -101,10 +100,5 @@ function getShortcutHandlers({
         createSharedHighlight: () => annotationFunctions.createHighlight(true),
         createHighlight: () => annotationFunctions.createHighlight(false),
         createAnnotation: () => annotationFunctions.createAnnotation(false),
-        link: async () => {
-            if (userSelectedText()) {
-                await createAndCopyDirectLink()
-            }
-        },
     }
 }
