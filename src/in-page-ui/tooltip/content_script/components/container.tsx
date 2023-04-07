@@ -7,7 +7,6 @@ import type {
     AnnotationFunctions,
     TooltipPosition,
 } from 'src/in-page-ui/tooltip/types'
-import AIInterfaceForTooltip from './aIinterfaceComponent'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { Rnd } from 'react-rnd'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
@@ -23,8 +22,7 @@ export interface Props extends AnnotationFunctions {
 }
 
 interface TooltipContainerState {
-    position: { x: number; y: number } | {}
-    tooltipState: 'copied' | 'running' | 'pristine' | 'done' | 'AIinterface'
+    position: { x: number; y: number } | null
     keyboardShortcuts?: TooltipKBShortcuts
     highlightText: string
     showTooltip: boolean
@@ -33,8 +31,7 @@ interface TooltipContainerState {
 
 class TooltipContainer extends React.Component<Props, TooltipContainerState> {
     state: TooltipContainerState = {
-        position: {},
-        tooltipState: 'copied',
+        position: null,
         highlightText: '',
         showTooltip: false,
         preventClosing: true,
@@ -66,7 +63,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         if (!event.newState.tooltip) {
             this.setState({
                 showTooltip: false,
-                position: {},
+                position: null,
             })
         }
     }
@@ -86,7 +83,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
     }
 
     private showTooltip = () => {
-        if (!this.state.showTooltip && this.state.tooltipState !== 'running') {
+        if (!this.state.showTooltip) {
             this.setState({
                 preventClosing: true,
             })
@@ -95,7 +92,6 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                 this.setState({
                     showTooltip: true,
                     position: this.calculateTooltipPostion(),
-                    tooltipState: 'pristine',
                     preventClosing: true,
                     highlightText: window.getSelection().toString() ?? '',
                 })
@@ -125,20 +121,17 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             throw err
         } finally {
             window.getSelection().empty()
-            // this.setState({ tooltipState: 'pristine' })
             this.props.inPageUI.hideTooltip()
         }
     }
 
     private createHighlight: React.MouseEventHandler = async (e) => {
-        // this.setState({ tooltipState: 'running' })
         try {
             await this.props.createHighlight(e.shiftKey)
         } catch (err) {
             throw err
         } finally {
             window.getSelection().empty()
-            // this.setState({ tooltipState: 'pristine' })
             this.props.inPageUI.hideTooltip()
         }
     }
@@ -149,7 +142,6 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         } catch (err) {
             throw err
         } finally {
-            // this.setState({ tooltipState: 'pristine' })
             window.getSelection().empty()
             this.props.inPageUI.hideTooltip()
         }
@@ -165,64 +157,17 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         })
     }
 
-    private renderTooltipComponent = () => {
-        switch (this.state.tooltipState) {
-            case 'pristine':
-                if (this.state.keyboardShortcuts != null) {
-                    return (
-                        <Tooltip
-                            keyboardShortcuts={this.state.keyboardShortcuts}
-                            createAnnotation={this.createAnnotation}
-                            createHighlight={this.createHighlight}
-                            openAIInterface={this.openAIInterface}
-                            closeTooltip={this.closeTooltip}
-                            addToSpace={this.addToSpace}
-                        />
-                    )
-                } else {
-                    return undefined
-                }
-            case 'AIinterface':
-                return (
-                    <AIInterfaceForTooltip
-                        sendAIprompt={async (prompt) => {
-                            const textToSummarize = this.state.highlightText
-                                .replaceAll('\n', ' ')
-                                .replaceAll(/[^\w\s.:?!]/g, ' ')
-                                .replaceAll('  ', ' ')
-                                .trim()
-                            const response = await this.props.summarizeBG.startPageSummaryStream(
-                                {
-                                    textToProcess: textToSummarize,
-                                    queryPrompt: prompt.prompt,
-                                },
-                            )
-                            return response
-                        }}
-                        highlightText={this.state.highlightText}
-                    />
-                )
-        }
-    }
-
     render() {
-        const { showTooltip, position, tooltipState } = this.state
-        const pos = { ...position }
+        const { showTooltip, position, keyboardShortcuts } = this.state
         return (
             <ContainerBox
-                style={{
-                    left:
-                        this.state.tooltipState === 'AIinterface'
-                            ? pos.x + 30
-                            : pos.x - 112,
-                    top: pos.y + 30,
-                }}
-                className="memex-tooltip-container"
-                screenPosition={
-                    this.state.tooltipState === 'AIinterface'
-                        ? 'fixed'
-                        : 'absolute'
+                style={
+                    position != null
+                        ? { top: position.y + 30, left: position.x - 112 }
+                        : {}
                 }
+                className="memex-tooltip-container"
+                screenPosition="absolute"
             >
                 {showTooltip ? (
                     <PopoutBox
@@ -244,16 +189,20 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                             }}
                             onDragFinish={(e, d) => {
                                 this.setState({
-                                    position: {
-                                        x: e.x,
-                                        y: e.y,
-                                    },
+                                    position: { x: e.x, y: e.y },
                                 })
                             }}
                             enableResizing={false}
                             cancel=".noDrag"
                         >
-                            {this.renderTooltipComponent()}
+                            <Tooltip
+                                keyboardShortcuts={keyboardShortcuts}
+                                createAnnotation={this.createAnnotation}
+                                createHighlight={this.createHighlight}
+                                openAIInterface={this.openAIInterface}
+                                closeTooltip={this.closeTooltip}
+                                addToSpace={this.addToSpace}
+                            />
                         </Container>
                     </PopoutBox>
                 ) : null}
