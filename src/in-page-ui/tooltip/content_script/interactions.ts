@@ -7,7 +7,7 @@ import {
     conditionallyRemoveOnboardingSelectOption,
     conditionallyShowHighlightNotification,
 } from '../onboarding-interactions'
-import type { TooltipPosition } from '../types'
+import type { TooltipPosition } from '@worldbrain/memex-common/lib/in-page-ui/tooltip/types'
 import type { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
 import type { InPageUIRootMount } from 'src/in-page-ui/types'
 import { STAGES } from 'src/overview/onboarding/constants'

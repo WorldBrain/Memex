@@ -2,7 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
 
-import TooltipContainer, { Props } from './container'
+import TooltipContainer, {
+    Props,
+} from '@worldbrain/memex-common/lib/in-page-ui/tooltip/container'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import type { InPageUIRootMount } from 'src/in-page-ui/types'
 

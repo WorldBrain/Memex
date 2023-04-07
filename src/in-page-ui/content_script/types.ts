@@ -2,7 +2,7 @@ import type {
     InPageUIRibbonAction,
     SidebarActionOptions,
 } from '../shared-state/types'
-import type { AnnotationFunctions } from 'src/in-page-ui/tooltip/types'
+import type { AnnotationFunctions } from '@worldbrain/memex-common/lib/in-page-ui/types'
 import type { ExtractedPDFData } from 'src/page-analysis/background/content-extraction/types'
 import type { UnifiedAnnotation } from 'src/annotations/cache/types'
 
