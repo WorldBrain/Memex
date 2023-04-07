@@ -492,15 +492,16 @@ export async function main(
             resetKeyboardShortcuts()
         },
         handleHistoryStateUpdate: async (tabId) => {
-            await inPageUI.reloadRibbon()
+            const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
+            if (isPageBlacklisted || !isSidebarEnabled) {
+                await inPageUI.removeRibbon()
+            } else {
+                await inPageUI.reloadRibbon()
+            }
             highlightRenderer.resetHighlightsStyles()
             await bookmarks.autoSetBookmarkStatusInBrowserIcon(tabId)
             await sleepPromise(1000)
             await pageInfo.refreshIfNeeded()
-            const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
-            if (isPageBlacklisted) {
-                await inPageUI.removeRibbon()
-            }
         },
     })
 
