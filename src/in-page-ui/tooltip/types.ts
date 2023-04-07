@@ -1,5 +1,4 @@
 import type { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import type { SummarizationInterface } from 'src/summarization-llm/background'
 import type { ToolbarNotificationsInterface } from 'src/toolbar-notification/content_script/types'
 
 export interface TooltipPosition {
@@ -15,7 +14,6 @@ export type TooltipInPageUIInterface = Pick<
 export interface TooltipDependencies extends AnnotationFunctions {
     inPageUI: SharedInPageUIInterface
     toolbarNotifications: ToolbarNotificationsInterface
-    summarizeBG: SummarizationInterface<'caller'>
 }
 
 export interface AnnotationFunctions {

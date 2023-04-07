@@ -241,7 +241,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         await this.loadComponent('tooltip')
     }
 
-    async showTooltip(mode?) {
+    async showTooltip() {
         await this._setState('tooltip', true)
     }
 

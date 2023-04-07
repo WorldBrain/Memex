@@ -1,13 +1,10 @@
 import React from 'react'
 import styled, { keyframes } from 'styled-components'
 
-import type { SharedInPageUIEvents } from 'src/in-page-ui/shared-state/types'
 import type {
-    TooltipInPageUIInterface,
     AnnotationFunctions,
     TooltipPosition,
 } from 'src/in-page-ui/tooltip/types'
-import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { Rnd } from 'react-rnd'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { Tooltip } from '@worldbrain/memex-common/lib/in-page-ui/tooltip/tooltip'
@@ -15,16 +12,15 @@ import type { TooltipKBShortcuts } from '@worldbrain/memex-common/lib/in-page-ui
 
 export interface Props extends AnnotationFunctions {
     getKBShortcuts: () => Promise<TooltipKBShortcuts>
-    summarizeBG: SummarizationInterface<'caller'>
-    inPageUI: TooltipInPageUIInterface
-    destroyTooltip: any
-    onInit: any
+    onExternalDestroy?: (cb: () => void) => void
+    onTooltipClose?: () => Promise<void>
+    onTooltipHide?: () => Promise<void>
+    onTooltipInit?: (cb: () => void) => void
 }
 
 interface TooltipContainerState {
     position: { x: number; y: number } | null
     keyboardShortcuts?: TooltipKBShortcuts
-    highlightText: string
     showTooltip: boolean
     preventClosing: boolean
 }
@@ -32,39 +28,19 @@ interface TooltipContainerState {
 class TooltipContainer extends React.Component<Props, TooltipContainerState> {
     state: TooltipContainerState = {
         position: null,
-        highlightText: '',
         showTooltip: false,
         preventClosing: true,
     }
 
     async componentDidMount() {
-        this.props.inPageUI.events?.on('stateChanged', this.handleUIStateChange)
-        this.props.onInit(this.showTooltip)
+        this.props.onTooltipInit?.(this.showTooltip)
+        this.props.onExternalDestroy?.(() =>
+            this.setState({ showTooltip: false, position: null }),
+        )
+
         if (this.props.getKBShortcuts) {
             const keyboardShortcuts = await this.props.getKBShortcuts()
             this.setState({ keyboardShortcuts })
-        }
-    }
-
-    componentWillUnmount() {
-        this.props.inPageUI.events?.removeListener(
-            'stateChanged',
-            this.handleUIStateChange,
-        )
-    }
-
-    private handleUIStateChange: SharedInPageUIEvents['stateChanged'] = (
-        event,
-    ) => {
-        if (!('tooltip' in event.changes)) {
-            return
-        }
-
-        if (!event.newState.tooltip) {
-            this.setState({
-                showTooltip: false,
-                position: null,
-            })
         }
     }
 
@@ -91,9 +67,8 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             setTimeout(() => {
                 this.setState({
                     showTooltip: true,
-                    position: this.calculateTooltipPostion(),
                     preventClosing: true,
-                    highlightText: window.getSelection().toString() ?? '',
+                    position: this.calculateTooltipPostion(),
                 })
             }, 200)
             setTimeout(() => {
@@ -104,11 +79,17 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
         }
     }
 
-    private closeTooltip: React.MouseEventHandler = (event) => {
+    private closeTooltip: React.MouseEventHandler = async (event) => {
         event.preventDefault()
         event.stopPropagation()
 
-        this.props.inPageUI.removeTooltip()
+        this.setState({ showTooltip: false })
+        await this.props.onTooltipClose?.()
+    }
+
+    private hideTooltip = async () => {
+        this.setState({ showTooltip: false })
+        await this.props.onTooltipHide?.()
     }
 
     private createAnnotation: React.MouseEventHandler = async (e) => {
@@ -121,7 +102,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             throw err
         } finally {
             window.getSelection().empty()
-            this.props.inPageUI.hideTooltip()
+            await this.hideTooltip()
         }
     }
 
@@ -132,7 +113,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             throw err
         } finally {
             window.getSelection().empty()
-            this.props.inPageUI.hideTooltip()
+            await this.hideTooltip()
         }
     }
 
@@ -143,18 +124,13 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
             throw err
         } finally {
             window.getSelection().empty()
-            this.props.inPageUI.hideTooltip()
+            await this.hideTooltip()
         }
     }
+
     private openAIInterface: React.MouseEventHandler = async (e) => {
-        this.setState({
-            highlightText: window.getSelection().toString() ?? '',
-        })
-        this.props.inPageUI.hideTooltip()
-        await this.props.inPageUI.showSidebar({
-            action: 'show_page_summary',
-            highlightedText: this.state.highlightText,
-        })
+        const highlightText = window.getSelection().toString() ?? ''
+        await Promise.all([this.hideTooltip(), this.props.askAI(highlightText)])
     }
 
     render() {
@@ -173,7 +149,7 @@ class TooltipContainer extends React.Component<Props, TooltipContainerState> {
                     <PopoutBox
                         closeComponent={async () => {
                             if (!this.state.preventClosing) {
-                                await this.props.inPageUI.hideTooltip()
+                                await this.hideTooltip()
                             }
                         }}
                         placement="bottom"

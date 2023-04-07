@@ -372,7 +372,7 @@ export async function main(
         askAI: () => (highlightedText: string) =>
             inPageUI.showSidebar({
                 action: 'show_page_summary',
-                highlightedText: highlightedText,
+                highlightedText,
             }),
     }
 
@@ -515,7 +515,6 @@ export async function main(
         async registerTooltipScript(execute): Promise<void> {
             await execute({
                 inPageUI,
-                summarizeBG,
                 toolbarNotifications,
                 createHighlight: annotationsFunctions.createHighlight({
                     category: 'Highlights',

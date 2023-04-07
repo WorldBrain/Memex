@@ -8,14 +8,14 @@ import type { InPageUIRootMount } from 'src/in-page-ui/types'
 
 export function setupUIContainer(
     mount: InPageUIRootMount,
-    params: Omit<Props, 'onInit'>,
+    params: Omit<Props, 'onTooltipInit'>,
 ): Promise<() => void> {
     return new Promise(async (resolve) => {
         ReactDOM.render(
             <StyleSheetManager target={mount.shadowRoot as any}>
                 <ThemeProvider theme={theme}>
                     <TooltipContainer
-                        onInit={(showTooltip) => resolve(showTooltip)}
+                        onTooltipInit={(showTooltip) => resolve(showTooltip)}
                         {...params}
                     />
                 </ThemeProvider>

@@ -84,7 +84,7 @@ export interface SharedInPageUIInterface {
     toggleSidebar(): Promise<void>
 
     // Tooltip
-    showTooltip(mode?: string): Promise<void>
+    showTooltip(): Promise<void>
     hideTooltip(): Promise<void>
     setupTooltip(): Promise<void>
     removeTooltip(): Promise<void>
