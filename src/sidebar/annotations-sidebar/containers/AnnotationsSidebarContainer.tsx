@@ -683,7 +683,6 @@ export class AnnotationsSidebarContainer<
                     sidebarContext={this.props.sidebarContext}
                     isShown={this.state.showState}
                 >
-                    {this.renderTopSideBar()}
                     <Rnd
                         style={style}
                         default={{
