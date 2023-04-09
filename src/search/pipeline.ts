@@ -49,14 +49,14 @@ const pipeline: PagePipeline = ({
 
     // Throw error if no searchable content; we don't really want to index these (for now) so allow callers
     //  to handle (probably by ignoring)
-    if (
-        rejectNoContent &&
-        (content == null || !content.fullText || !content.fullText.length)
-    ) {
-        return Promise.reject(
-            new PipelineError('Page has no searchable content'),
-        )
-    }
+    // if (
+    //     rejectNoContent &&
+    //     (content == null || !content.fullText || !content.fullText.length)
+    // ) {
+    //     return Promise.reject(
+    //         new PipelineError('Page has no searchable content'),
+    //     )
+    // }
 
     // Extract all terms out of processed content
     const terms = [...extractTerms(content.fullText)]
