@@ -2,103 +2,62 @@ import debounce from 'lodash/fp/debounce'
 import escapeHtml from 'lodash/fp/escape'
 import urlRegex from 'url-regex'
 import qs from 'query-string'
-
-import analytics from 'src/analytics'
+import type { Browser } from 'webextension-polyfill'
 import shortUrl from 'src/util/short-url'
-import extractTimeFiltersFromQuery, {
-    queryFiltersDisplay,
-} from 'src/util/nlp-time-filter'
+import extractTimeFiltersFromQuery from 'src/util/nlp-time-filter'
 import { OVERVIEW_URL } from './constants'
 import checkBrowser from './util/check-browser'
 import { conditionallySkipToTimeFilter } from './overview/onboarding/utils'
-import { combineSearchIndex } from './search/search-index'
-import { getDb } from './search'
-import initStorex from './search/memex-storex'
-import { createPersistentStorageManager } from 'src/storage/persistent-storage'
-import BookmarksStorage from './bookmarks/background/storage'
-import { registerModuleMapCollections } from '@worldbrain/storex-pattern-modules'
-import { PageIndexingBackground } from './page-indexing/background'
-import TabManagementBackground from './tab-management/background'
-import browser from 'webextension-polyfill'
-import { runInTab } from './util/webextensionRPC'
-import { PageAnalyzerInterface } from './page-analysis/types'
-import { BrowserSettingsStore } from './util/settings'
 import {
     diffTimestamp,
     formatTimestamp,
 } from '@worldbrain/memex-common/lib/utils/date-time'
+import type { BackgroundModules } from './background-script/setup'
 
-export async function main() {
-    const tabManagement = new TabManagementBackground({
-        manifestVersion: '3',
-        browserAPIs: browser,
-        extractRawPageContent: (tabId) =>
-            runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
-    })
-    const storageManager = initStorex()
-    const bookmarksStorage = new BookmarksStorage({ storageManager })
-    const pages = new PageIndexingBackground({
-        tabManagement,
-        storageManager,
-        getNow: () => Date.now(),
-        createInboxEntry: () => undefined,
-        persistentStorageManager: createPersistentStorageManager({
-            idbImplementation: {
-                factory: self.indexedDB,
-                range: self.IDBKeyRange,
-            },
-        }),
-        pageIndexingSettingsStore: new BrowserSettingsStore(
-            browser.storage.local,
-            { prefix: 'pageIndexing.' },
-        ),
-    })
-    registerModuleMapCollections(storageManager.registry, {
-        pages: pages.storage,
-        bookmarks: bookmarksStorage,
-    })
-    await storageManager.finishInitialization()
-    const searchIndex = combineSearchIndex({
-        getDb,
-    })
+export interface OmnibarDeps {
+    browserAPIs: Pick<Browser, 'tabs' | 'omnibox'>
+    bgModules: Pick<BackgroundModules, 'search'>
+}
 
-    function formatTime(timestamp, showTime) {
-        const inLastSevenDays =
-            diffTimestamp(Date.now(), timestamp, 'days') <= 7
+function formatTime(timestamp, showTime) {
+    const inLastSevenDays = diffTimestamp(Date.now(), timestamp, 'days') <= 7
 
-        if (showTime) {
-            return inLastSevenDays
-                ? `🕒 ${formatTimestamp(timestamp, 'HH:mm a ddd')}`
-                : `🕒 ${formatTimestamp(timestamp, 'HH:mm a D/M/YYYY')}`
-        }
+    if (showTime) {
         return inLastSevenDays
-            ? formatTimestamp(timestamp, 'ddd')
-            : formatTimestamp(timestamp, 'D/M/YYYY')
+            ? `🕒 ${formatTimestamp(timestamp, 'HH:mm a ddd')}`
+            : `🕒 ${formatTimestamp(timestamp, 'HH:mm a D/M/YYYY')}`
     }
+    return inLastSevenDays
+        ? formatTimestamp(timestamp, 'ddd')
+        : formatTimestamp(timestamp, 'D/M/YYYY')
+}
 
-    function setOmniboxMessage(text) {
-        globalThis['browser'].omnibox.setDefaultSuggestion({
-            description: text,
+const pageToSuggestion = (timeFilterApplied) => (doc) => {
+    const url = escapeHtml(shortUrl(doc.url))
+    const title = escapeHtml(doc.title)
+    const time = formatTime(doc.displayTime, timeFilterApplied)
+
+    return {
+        content: doc.url,
+        description:
+            checkBrowser() === 'firefox'
+                ? `${url} ${title} - ${time}`
+                : `<url>${url}</url> <dim>${title}</dim> - ${time}`,
+    }
+}
+
+export async function setupOmnibar(deps: OmnibarDeps) {
+    const setOmniboxMessage = (description: string): void =>
+        deps.browserAPIs.omnibox.setDefaultSuggestion({
+            description,
         })
-    }
 
-    const pageToSuggestion = (timeFilterApplied) => (doc) => {
-        const url = escapeHtml(shortUrl(doc.url))
-        const title = escapeHtml(doc.title)
-        const time = formatTime(doc.displayTime, timeFilterApplied)
-
-        return {
-            content: doc.url,
-            description:
-                checkBrowser() === 'firefox'
-                    ? `${url} ${title} - ${time}`
-                    : `<url>${url}</url> <dim>${title}</dim> - ${time}`,
-        }
-    }
-
-    let currentQuery
-    let latestResolvedQuery
-    async function makeSuggestion(query, suggest) {
+    let currentQuery: string
+    let latestResolvedQuery: string
+    async function makeSuggestion(
+        query: string,
+        suggest: (entries: any[]) => void,
+    ) {
         currentQuery = query
 
         // Show no suggestions if there is no query.
@@ -120,14 +79,14 @@ export async function main() {
         let searchResults
 
         if (queryFilters.to || queryFilters.from) {
-            searchResults = await searchIndex.search({
+            searchResults = await deps.bgModules.search.searchIndex.search({
                 endDate: queryFilters.to ? queryFilters.to : undefined,
                 startDate: queryFilters.from ? queryFilters.from : undefined,
                 query: queryFilters.query ? queryFilters.query : undefined,
                 limit: 5,
             } as any)
         } else {
-            searchResults = await searchIndex.search({
+            searchResults = await deps.bgModules.search.searchIndex.search({
                 ...queryFilters,
                 limit: 5,
             } as any)
@@ -188,17 +147,17 @@ export async function main() {
 
         switch (disposition) {
             case 'currentTab':
-                globalThis['browser'].tabs.update({
+                deps.browserAPIs.tabs.update({
                     url,
                 })
                 break
             case 'newForegroundTab':
-                globalThis['browser'].tabs.create({
+                deps.browserAPIs.tabs.create({
                     url,
                 })
                 break
             case 'newBackgroundTab':
-                globalThis['browser'].tabs.create({
+                deps.browserAPIs.tabs.create({
                     url,
                     active: false,
                 })
@@ -208,10 +167,8 @@ export async function main() {
         }
     }
 
-    globalThis['browser'].omnibox.onInputChanged.addListener(
+    deps.browserAPIs.omnibox.onInputChanged.addListener(
         debounce(500)(makeSuggestion),
     )
-    globalThis['browser'].omnibox.onInputEntered.addListener(acceptInput)
+    deps.browserAPIs.omnibox.onInputEntered.addListener(acceptInput)
 }
-
-export default main()
