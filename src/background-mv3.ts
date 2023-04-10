@@ -35,6 +35,7 @@ import type {
 } from '@worldbrain/storex-backend-dexie'
 import type { PushMessagePayload } from '@worldbrain/memex-common/lib/push-messaging/types'
 import PushMessagingClient from './push-messaging/background'
+import { setupOmnibar } from 'src/omnibar'
 
 // This is here so the correct Service Worker `self` context is available. Maybe there's a better way to set this via tsconfig.
 declare var self: ServiceWorkerGlobalScope & {
@@ -149,6 +150,10 @@ async function main() {
     await persistentStorageManager.finishInitialization()
 
     setStorex(storageManager)
+    setupOmnibar({
+        browserAPIs: browser,
+        bgModules: backgroundModules,
+    })
 
     setupRemoteFunctionsImplementations({
         auth: backgroundModules.auth.remoteFunctions,

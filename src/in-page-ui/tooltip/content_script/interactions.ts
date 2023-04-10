@@ -3,10 +3,17 @@ import browser from 'webextension-polyfill'
 import analytics from 'src/analytics'
 import { delayed, getPositionState } from '../utils'
 import { setupUIContainer, destroyUIContainer } from './components'
-import { conditionallyShowHighlightNotification } from '../onboarding-interactions'
-import type { TooltipPosition } from '../types'
+import {
+    conditionallyRemoveOnboardingSelectOption,
+    conditionallyShowHighlightNotification,
+} from '../onboarding-interactions'
+import type { TooltipPosition } from '@worldbrain/memex-common/lib/in-page-ui/tooltip/types'
 import type { TooltipDependencies } from 'src/in-page-ui/tooltip/types'
 import type { InPageUIRootMount } from 'src/in-page-ui/types'
+import { STAGES } from 'src/overview/onboarding/constants'
+import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
+import type { Shortcut } from 'src/in-page-ui/keyboard-shortcuts/types'
+import type { SharedInPageUIEvents } from 'src/in-page-ui/shared-state/types'
 let mouseupListener = null
 
 export function setupTooltipTrigger(
@@ -48,9 +55,10 @@ let showTooltip = null
 /* Denotes whether the user inserted/removed tooltip themselves. */
 let manualOverride = false
 
+let removeTooltipStateChangeListener: () => void
+
 interface TooltipInsertDependencies extends TooltipDependencies {
     mount: InPageUIRootMount
-    mode?: 'AImode'
 }
 
 /**
@@ -67,27 +75,50 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
 
     target = params.mount.rootElement
     showTooltip = await setupUIContainer(params.mount, {
-        inPageUI: params.inPageUI,
-        summarizeBG: params.summarizeBG,
-        createAnnotation: params.createAnnotation,
+        createAnnotation: async (...args) => {
+            await params.createAnnotation(...args)
+            await conditionallyRemoveOnboardingSelectOption(
+                STAGES.annotation.annotationCreated,
+            )
+        },
         createHighlight: params.createHighlight,
         askAI: params.askAI,
-        destroyTooltip: async () => {
-            analytics.trackEvent({
-                category: 'InPageTooltip',
-                action: 'closeTooltip',
-            })
-            manualOverride = true
-            removeTooltip()
-
-            const closeMessageShown = await _getCloseMessageShown()
-            if (!closeMessageShown) {
-                params.toolbarNotifications.showToolbarNotification(
-                    'tooltip-first-close',
-                    {},
-                )
-                _setCloseMessageShown()
+        getKBShortcuts: async () => {
+            const state = await getKeyboardShortcutsState()
+            const shortcutToKeyStrs = ({ shortcut }: Shortcut): string[] =>
+                shortcut.split('+')
+            return {
+                createAnnotation: shortcutToKeyStrs(state.createAnnotation),
+                createHighlight: shortcutToKeyStrs(state.createHighlight),
+                addToCollection: shortcutToKeyStrs(state.addToCollection),
+                askAI: shortcutToKeyStrs(state.askAI),
             }
+        },
+        onTooltipHide: () => params.inPageUI.hideTooltip(),
+        onTooltipClose: () => params.inPageUI.removeTooltip(),
+        onExternalDestroy: (destroyTooltip) => {
+            const handleUIStateChange: SharedInPageUIEvents['stateChanged'] = (
+                event,
+            ) => {
+                if (!('tooltip' in event.changes)) {
+                    return
+                }
+
+                if (!event.newState.tooltip) {
+                    analytics.trackEvent({
+                        category: 'InPageTooltip',
+                        action: 'closeTooltip',
+                    })
+                    destroyTooltip()
+                }
+            }
+
+            params.inPageUI.events?.on('stateChanged', handleUIStateChange)
+            removeTooltipStateChangeListener = () =>
+                params.inPageUI.events?.removeListener(
+                    'stateChanged',
+                    handleUIStateChange,
+                )
         },
     })
 
@@ -106,6 +137,8 @@ export const removeTooltip = (options?: { override?: boolean }) => {
     if (!target) {
         return
     }
+
+    removeTooltipStateChangeListener?.()
     destroyTooltipTrigger()
     destroyUIContainer(target)
     target.remove()

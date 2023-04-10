@@ -1,11 +1,6 @@
 import type { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import type { SummarizationInterface } from 'src/summarization-llm/background'
 import type { ToolbarNotificationsInterface } from 'src/toolbar-notification/content_script/types'
-
-export interface TooltipPosition {
-    x: number
-    y: number
-}
+import type { AnnotationFunctions } from '@worldbrain/memex-common/lib/in-page-ui/types'
 
 export type TooltipInPageUIInterface = Pick<
     SharedInPageUIInterface,
@@ -15,17 +10,4 @@ export type TooltipInPageUIInterface = Pick<
 export interface TooltipDependencies extends AnnotationFunctions {
     inPageUI: SharedInPageUIInterface
     toolbarNotifications: ToolbarNotificationsInterface
-    summarizeBG: SummarizationInterface<'caller'>
-}
-
-export interface AnnotationFunctions {
-    createHighlight(shouldShare: boolean): Promise<void>
-    createAnnotation(
-        shouldShare: boolean,
-        showSpacePicker?: boolean,
-    ): Promise<void>
-    askAI: (textToProcess) => void
-}
-export interface ToolTipFunctions {
-    askAI: () => void
 }

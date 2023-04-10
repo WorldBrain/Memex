@@ -48,7 +48,6 @@ export interface SharedInPageUIEvents {
     stateChanged: (event: {
         newState: InPageUIComponentShowState
         changes: Partial<InPageUIComponentShowState>
-        mode?: string
     }) => void
     ribbonAction: (event: { action: InPageUIRibbonAction }) => void
     ribbonUpdate: () => void
@@ -85,7 +84,7 @@ export interface SharedInPageUIInterface {
     toggleSidebar(): Promise<void>
 
     // Tooltip
-    showTooltip(mode?: string): Promise<void>
+    showTooltip(): Promise<void>
     hideTooltip(): Promise<void>
     setupTooltip(): Promise<void>
     removeTooltip(): Promise<void>

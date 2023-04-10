@@ -30,11 +30,14 @@ export const main: HighlightsScriptMain = async (options) => {
 
 const showHighlights = async (options: HighlightDependencies) => {
     await options.highlightRenderer.renderHighlights(
-        options.annotationsCache.getAnnotationsArray(),
-        ({ unifiedAnnotationId, openInEdit }) =>
+        options.annotationsCache.getAnnotationsArray().map((annot) => ({
+            id: annot.unifiedId,
+            selector: annot.selector,
+        })),
+        ({ annotationId, openInEdit }) =>
             options.inPageUI.showSidebar({
                 action: openInEdit ? 'edit_annotation' : 'show_annotation',
-                annotationCacheId: unifiedAnnotationId,
+                annotationCacheId: annotationId.toString(),
             }),
         { removeExisting: true },
     )

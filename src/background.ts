@@ -42,6 +42,7 @@ import {
     SharedListRoleID,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { initFirestoreSyncTriggerListener } from '@worldbrain/memex-common/lib/personal-cloud/backend/utils'
+import { setupOmnibar } from 'src/omnibar'
 import delay from './util/delay'
 
 let __debugCounter = 0
@@ -156,6 +157,11 @@ export async function main(): Promise<void> {
     __debugCounter++
 
     setStorex(storageManager)
+
+    setupOmnibar({
+        bgModules: backgroundModules,
+        browserAPIs: browser,
+    })
 
     // Gradually moving all remote function registrations here
     setupRemoteFunctionsImplementations({

@@ -91,7 +91,12 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
 
     const cssModules = {
         test: /\.css$/,
-        include: path.resolve(context, './src'),
+        include: [
+            path.resolve(context, './src'),
+            ...Object.values(externalTsModules).map((mod) =>
+                path.resolve(context, `./external/${mod}`),
+            ),
+        ],
         use: [styleLoader, cssModulesLoader, postcssLoader],
     }
 

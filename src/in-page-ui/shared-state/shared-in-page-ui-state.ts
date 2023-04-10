@@ -241,13 +241,8 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         await this.loadComponent('tooltip')
     }
 
-    async showTooltip(mode?) {
-        if (mode === 'AImode' && !this.componentsSetUp.tooltip) {
-            await this.setupTooltip()
-            await this._setState('tooltip', false, mode)
-        } else {
-            await this._setState('tooltip', true, mode)
-        }
+    async showTooltip() {
+        await this._setState('tooltip', true)
     }
 
     async hideTooltip() {
@@ -282,19 +277,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         }
     }
 
-    private async _setState(
-        component: InPageUIComponent,
-        visible: boolean,
-        mode?: string,
-    ) {
-        if (mode != null) {
-            this.events.emit('stateChanged', {
-                newState: this.componentsShown,
-                changes: { [component]: this.componentsShown[component] },
-                mode: mode,
-            })
-        }
-
+    private async _setState(component: InPageUIComponent, visible: boolean) {
         if (this.componentsShown[component] === visible) {
             return
         }
@@ -310,7 +293,6 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         this.events.emit('stateChanged', {
             newState: this.componentsShown,
             changes: { [component]: this.componentsShown[component] },
-            mode: mode,
         })
     }
 
