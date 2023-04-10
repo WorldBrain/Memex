@@ -75,9 +75,7 @@ export async function createAnnotation({
                         .replace(/\\\[/g, '[')
                         .replace(/\\\]/g, ']')
                         .replace(/\\\(/g, '(')
-                        .replace(/\\\)/g, ')')
-                        .replace(/\    \n/g, '')
-                        .replace(/\*   /g, ' * '),
+                        .replace(/\\\)/g, ')'),
                     body: annotationData.body,
                 },
                 { skipPageIndexing },
