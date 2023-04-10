@@ -4,6 +4,7 @@ import expect from 'expect'
 import fetchMock from 'fetch-mock'
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
+import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import {
     createBackgroundModules,
     registerBackgroundModuleCollections,
@@ -24,7 +25,6 @@ import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fe
 import { FakeAnalytics } from 'src/analytics/mock'
 import AnalyticsManager from 'src/analytics/analytics'
 import { setStorageMiddleware } from 'src/storage/middleware'
-import { JobDefinition } from 'src/job-scheduler/background/types'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill'
@@ -226,6 +226,7 @@ export async function setupBackgroundIntegrationTest(
                 clientDeviceType: PersonalDeviceType.DesktopBrowser,
             }),
         contentSharingBackend: new ContentSharingBackend({
+            normalizeUrl,
             storageManager: serverStorage.manager,
             storageModules: serverStorage.modules,
             getCurrentUserId: async () =>
