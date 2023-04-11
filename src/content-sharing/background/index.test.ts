@@ -2160,18 +2160,18 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 }
 
                                 const {
-                                    link,
+                                    link: linkA,
                                 } = await contentSharing.options.backend.createPageLink(
                                     { fullPageUrl },
                                 )
 
                                 // Shared cloud DB data
-                                const sharedListData: Array<
+                                const sharedListDataA: Array<
                                     SharedList & { id: AutoPk }
                                 > = await manager
                                     .collection('sharedList')
                                     .findAllObjects({})
-                                const sharedPageData: Array<
+                                const sharedPageDataA: Array<
                                     SharedPageInfo & { id: AutoPk }
                                 > = await manager
                                     .collection('sharedPageInfo')
@@ -2179,11 +2179,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 // prettier-ignore
                                 {
-                                expect(link).toEqual(getSinglePageShareUrl({
-                                    remoteListId: sharedListData[0].id,
-                                    remotePageInfoId: sharedPageData[0].id,
+                                expect(linkA).toEqual(getSinglePageShareUrl({
+                                    remoteListId: sharedListDataA[0].id,
+                                    remotePageInfoId: sharedPageDataA[0].id,
                                }))
-                                expect(sharedListData).toEqual([
+                                expect(sharedListDataA).toEqual([
                                     {
                                         id: expect.anything(),
                                         type: 'page-link',
@@ -2199,12 +2199,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         creator: userId,
                                         originalUrl: fullPageUrl,
                                         normalizedUrl: normalizedPageUrl,
-                                        sharedList: sharedListData[0].id,
+                                        sharedList: sharedListDataA[0].id,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
                                 ])
-                                expect(sharedPageData).toEqual([
+                                expect(sharedPageDataA).toEqual([
                                     {
                                         id: expect.anything(),
                                         creator: userId,
@@ -2221,7 +2221,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         id: expect.anything(),
                                         disabled: false,
                                         roleID: SharedListRoleID.ReadWrite,
-                                        sharedList: sharedListData[0].id,
+                                        sharedList: sharedListDataA[0].id,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -2230,7 +2230,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         user: userId,
                                         roleID: SharedListRoleID.ReadWrite,
-                                        sharedList: sharedListData[0].id,
+                                        sharedList: sharedListDataA[0].id,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -2238,24 +2238,28 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 }
 
                                 // Personal cloud DB data
-                                const personalMetadata: Array<
+                                const personalMetadataA: Array<
                                     PersonalContentMetadata & { id: AutoPk }
                                 > = await manager
                                     .collection('personalContentMetadata')
                                     .findAllObjects({})
-                                const personalListData: Array<
+                                const personalListsA: Array<
                                     PersonalList & { id: AutoPk }
                                 > = await manager
                                     .collection('personalList')
                                     .findAllObjects({})
+                                const personalLocatorsA = await manager
+                                    .collection('personalContentLocator')
+                                    .findAllObjects({})
 
                                 // prettier-ignore
                                 {
-                                expect(personalListData).toEqual([
+                                expect(personalListsA).toEqual([
                                     {
                                         id: expect.anything(),
                                         localId: expect.anything(), // TODO: Can we expect an actual value?
                                         name: listTitle,
+                                        type: 'page-link',
                                         isDeletable: true,
                                         isNestable: true,
                                         user: userId,
@@ -2264,7 +2268,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         updatedWhen: expect.anything(),
                                     }
                                 ])
-                                expect(personalMetadata).toEqual([
+                                expect(personalMetadataA).toEqual([
                                     {
                                         id: expect.anything(),
                                         canonicalUrl: fullPageUrl,
@@ -2277,10 +2281,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         updatedWhen: expect.anything(),
                                     }
                                 ])
-                                expect(await manager.collection('personalContentLocator').findAllObjects({})).toEqual([
+                                expect(personalLocatorsA).toEqual([
                                     {
                                         id: expect.anything(),
-                                        personalContentMetadata: personalMetadata[0].id,
+                                        personalContentMetadata: personalMetadataA[0].id,
                                         format: ContentLocatorFormat.HTML,
                                         originalLocation: fullPageUrl,
                                         location: normalizedPageUrl,
@@ -2302,8 +2306,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await manager.collection('personalListEntry').findAllObjects({})).toEqual([
                                     {
                                         id: expect.anything(),
-                                        personalList: personalListData[0].id,
-                                        personalContentMetadata: personalMetadata[0].id,
+                                        personalList: personalListsA[0].id,
+                                        personalContentMetadata: personalMetadataA[0].id,
                                         user: userId,
                                         createdByDevice: null,
                                         createdWhen: expect.anything(),
@@ -2313,8 +2317,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await manager.collection('personalListShare').findAllObjects({})).toEqual([
                                     {
                                         id: expect.anything(),
-                                        personalList: personalListData[0].id,
-                                        remoteId: sharedListData[0].id,
+                                        personalList: personalListsA[0].id,
+                                        remoteId: sharedListDataA[0].id,
                                         user: userId,
                                         createdByDevice: null,
                                         createdWhen: expect.anything(),
@@ -2324,7 +2328,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await manager.collection('personalFollowedList').findAllObjects({})).toEqual([
                                     {
                                         id: expect.anything(),
-                                        sharedList: sharedListData[0].id,
+                                        sharedList: sharedListDataA[0].id,
                                         user: userId,
                                         createdByDevice: null,
                                         createdWhen: expect.anything(),
@@ -2354,8 +2358,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         {
                                             id: expect.anything(), // TODO: Can we predict this?
                                             name: listTitle,
-                                            nameTerms: null,
-                                            searchableName: null,
                                             isDeletable: true,
                                             isNestable: true,
                                             createdAt: expect.anything()
@@ -2372,15 +2374,27 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([
                                         {
                                             localId: expect.anything(),
-                                            remoteId: sharedListData[0].id,
+                                            remoteId: sharedListDataA[0].id,
                                         }
                                     ])
                                     expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([
                                         {
-                                            sharedList: sharedListData[0].id,
+                                            sharedList: sharedListDataA[0].id,
                                             creator: userId,
                                             name: listTitle,
-                                            lastSync: undefined,
+                                            lastSync: expect.anything(),
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('followedListEntry').findAllObjects({})).toEqual([
+                                        {
+                                            id: expect.anything(),
+                                            followedList: expect.anything(),
+                                            entryTitle: '',
+                                            creator: userId,
+                                            normalizedPageUrl,
+                                            hasAnnotationsFromOthers: false,
+                                            createdWhen: expect.anything(),
+                                            updatedWhen: expect.anything(),
                                         }
                                     ])
                                     expect(await setup.storageManager.collection('pages').findAllObjects({})).toEqual([
@@ -2388,20 +2402,63 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             url: normalizedPageUrl,
                                             fullUrl: fullPageUrl,
                                             canonicalUrl: fullPageUrl,
-                                            fullTitle: pageTitle,
+                                            // fullTitle: pageTitle,
                                             domain: 'memex.garden',
                                             hostname: 'memex.garden',
-                                            description: null,
-                                            lang: null,
                                             text: '',
-                                            terms: expect.anything(),
                                             urlTerms: expect.anything(),
-                                            titleTerms: expect.anything(),
-
+                                            // titleTerms: expect.anything(),
                                         }
                                     ])
                                     expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
                                 }
+
+                                // Try it once more to assert that sharedPageInfo+personalContentMetadata+personalContentLocator isn't recreated
+                                const {
+                                    link: linkB,
+                                } = await contentSharing.options.backend.createPageLink(
+                                    { fullPageUrl },
+                                )
+
+                                // Shared cloud DB data
+                                const sharedListDataB: Array<
+                                    SharedList & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedList')
+                                    .findAllObjects({})
+                                const sharedPageDataB: Array<
+                                    SharedPageInfo & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedPageInfo')
+                                    .findAllObjects({})
+                                const personalListsB = await manager
+                                    .collection('personalList')
+                                    .findAllObjects({})
+                                const personalMetadataB = await manager
+                                    .collection('personalContentMetadata')
+                                    .findAllObjects({})
+                                const personalLocatorsB = await manager
+                                    .collection('personalContentLocator')
+                                    .findAllObjects({})
+
+                                expect(linkB).toEqual(
+                                    getSinglePageShareUrl({
+                                        remoteListId: sharedListDataB[1].id,
+                                        remotePageInfoId: sharedPageDataA[0].id,
+                                    }),
+                                )
+
+                                expect(sharedListDataA.length).toBe(1)
+                                expect(sharedListDataB.length).toBe(2) // There should be a new list, but same page
+                                expect(sharedPageDataA.length).toBe(1)
+                                expect(sharedPageDataB.length).toBe(1)
+
+                                expect(personalListsA.length).toBe(1)
+                                expect(personalListsB.length).toBe(2)
+                                expect(personalMetadataA.length).toBe(1)
+                                expect(personalMetadataB.length).toBe(1)
+                                expect(personalLocatorsA.length).toBe(1)
+                                expect(personalLocatorsB.length).toBe(1)
                             },
                         },
                     ],
