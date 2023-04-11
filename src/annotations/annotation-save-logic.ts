@@ -141,9 +141,7 @@ export async function updateAnnotation({
                         .replace(/\\\[/g, '[')
                         .replace(/\\\]/g, ']')
                         .replace(/\\\(/g, '(')
-                        .replace(/\\\)/g, ')')
-                        .replace(/\    \n/g, '')
-                        .replace(/\*   /g, ' * '),
+                        .replace(/\\\)/g, ')'),
                 )
             }
 
