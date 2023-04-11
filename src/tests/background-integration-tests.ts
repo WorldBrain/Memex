@@ -226,12 +226,20 @@ export async function setupBackgroundIntegrationTest(
                 clientDeviceType: PersonalDeviceType.DesktopBrowser,
             }),
         contentSharingBackend: new ContentSharingBackend({
+            fetch,
             normalizeUrl,
             storageManager: serverStorage.manager,
             storageModules: serverStorage.modules,
+            getConfig: () => ({ content_sharing: {} }),
             getCurrentUserId: async () =>
                 (await auth.authService.getCurrentUser()).id,
             services: { pushMessaging: pushMessagingService },
+            captureException: async (err) => {
+                console.warn(
+                    'Got error in content sharing backend',
+                    err.message,
+                )
+            },
         }),
         generateServerId: () => nextServerId++,
     })
