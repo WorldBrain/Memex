@@ -18,6 +18,7 @@ import { SharingTestHelper } from './index.tests'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import {
     SharedList,
+    SharedListEntry,
     SharedListRoleID,
     SharedPageInfo,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
@@ -2179,12 +2180,17 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 > = await manager
                                     .collection('sharedPageInfo')
                                     .findAllObjects({})
+                                const sharedListEntryDataA: Array<
+                                    SharedListEntry & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedListEntry')
+                                    .findAllObjects({})
 
                                 // prettier-ignore
                                 {
                                 expect(linkA).toEqual(getSinglePageShareUrl({
                                     remoteListId: sharedListDataA[0].id,
-                                    remotePageInfoId: sharedPageDataA[0].id,
+                                    remoteListEntryId: sharedListEntryDataA[0].id,
                                }))
                                 expect(sharedListDataA).toEqual([
                                     {
@@ -2196,7 +2202,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         updatedWhen: expect.anything(),
                                     }
                                 ])
-                                expect(await manager.collection('sharedListEntry').findAllObjects({})).toEqual([
+                                expect(sharedListEntryDataA).toEqual([
                                     {
                                         id: expect.anything(),
                                         creator: userId,
@@ -2458,6 +2464,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 > = await manager
                                     .collection('sharedPageInfo')
                                     .findAllObjects({})
+                                const sharedListEntryDataB: Array<
+                                    SharedListEntry & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedListEntry')
+                                    .findAllObjects({})
                                 const personalListsB = await manager
                                     .collection('personalList')
                                     .findAllObjects({})
@@ -2474,7 +2485,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(linkB).toEqual(
                                     getSinglePageShareUrl({
                                         remoteListId: sharedListDataB[1].id,
-                                        remotePageInfoId: sharedPageDataA[0].id,
+                                        remoteListEntryId:
+                                            sharedListEntryDataB[1].id,
                                     }),
                                 )
 
@@ -2482,6 +2494,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(sharedListDataB.length).toBe(2) // There should be a new list, but same page
                                 expect(sharedPageDataA.length).toBe(1)
                                 expect(sharedPageDataB.length).toBe(1)
+                                expect(sharedListEntryDataA.length).toBe(1)
+                                expect(sharedListEntryDataB.length).toBe(2)
 
                                 expect(personalListsA.length).toBe(1)
                                 expect(personalListsB.length).toBe(2)
