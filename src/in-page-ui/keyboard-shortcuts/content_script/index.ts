@@ -56,6 +56,8 @@ function prepareShortcutHandler(handler: () => Promise<void>) {
         return handler().catch((err) => {
             if (err instanceof RpcError) {
                 resetKeyboardShortcuts()
+            } else {
+                throw err
             }
         })
     }
