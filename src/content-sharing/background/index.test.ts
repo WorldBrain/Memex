@@ -26,6 +26,7 @@ import { indexTestFingerprintedPdf } from 'src/page-indexing/background/index.te
 import { createPageLinkListTitle } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type {
+    PersonalContentLocator,
     PersonalContentMetadata,
     PersonalList,
 } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
@@ -2145,6 +2146,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await manager.collection('personalListShare').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('personalFollowedList').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('personalContentMetadata').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalContentRead').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('personalContentLocator').findAllObjects({})).toEqual([])
                                 }
 
@@ -2156,6 +2158,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('pages').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('visits').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
                                 }
 
@@ -2197,6 +2200,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         creator: userId,
+                                        entryTitle: pageTitle,
                                         originalUrl: fullPageUrl,
                                         normalizedUrl: normalizedPageUrl,
                                         sharedList: sharedListDataA[0].id,
@@ -2248,7 +2252,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 > = await manager
                                     .collection('personalList')
                                     .findAllObjects({})
-                                const personalLocatorsA = await manager
+                                const personalReadsA = await manager
+                                    .collection('personalContentRead')
+                                    .findAllObjects({})
+                                const personalLocatorsA: Array<
+                                    PersonalContentLocator & { id: AutoPk }
+                                > = await manager
                                     .collection('personalContentLocator')
                                     .findAllObjects({})
 
@@ -2275,6 +2284,18 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         title: pageTitle,
                                         lang: null,
                                         description: null,
+                                        user: userId,
+                                        createdByDevice: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(personalReadsA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        personalContentLocator: personalLocatorsA[0].id,
+                                        readWhen: expect.any(Number),
                                         user: userId,
                                         createdByDevice: null,
                                         createdWhen: expect.anything(),
@@ -2410,6 +2431,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             // titleTerms: expect.anything(),
                                         }
                                     ])
+                                    expect(await setup.storageManager.collection('visits').findAllObjects({})).toEqual([
+                                        {
+                                            url: normalizedPageUrl,
+                                            time: expect.any(Number)
+                                        }
+                                    ])
                                     expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
                                 }
 
@@ -2437,6 +2464,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 const personalMetadataB = await manager
                                     .collection('personalContentMetadata')
                                     .findAllObjects({})
+                                const personalReadsB = await manager
+                                    .collection('personalContentRead')
+                                    .findAllObjects({})
                                 const personalLocatorsB = await manager
                                     .collection('personalContentLocator')
                                     .findAllObjects({})
@@ -2457,6 +2487,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(personalListsB.length).toBe(2)
                                 expect(personalMetadataA.length).toBe(1)
                                 expect(personalMetadataB.length).toBe(1)
+                                expect(personalReadsA.length).toBe(1)
+                                expect(personalReadsB.length).toBe(2)
                                 expect(personalLocatorsA.length).toBe(1)
                                 expect(personalLocatorsB.length).toBe(1)
                             },
