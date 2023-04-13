@@ -2137,6 +2137,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('sharedListKey').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('sharedListRole').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListRoleByUser').findAllObjects({})).toEqual([])
                                 }
 
                                 // Personal cloud DB data
@@ -2237,6 +2238,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     }
                                 ])
                                 expect(await manager.collection('sharedListRole').findAllObjects({})).toEqual([
+                                    {
+                                        user: userId,
+                                        roleID: SharedListRoleID.ReadWrite,
+                                        sharedList: sharedListDataA[0].id,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('sharedListRoleByUser').findAllObjects({})).toEqual([
                                     {
                                         user: userId,
                                         roleID: SharedListRoleID.ReadWrite,
