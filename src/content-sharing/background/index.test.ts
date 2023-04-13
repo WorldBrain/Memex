@@ -2240,7 +2240,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await manager.collection('sharedListRole').findAllObjects({})).toEqual([
                                     {
                                         user: userId,
-                                        roleID: SharedListRoleID.ReadWrite,
+                                        roleID: SharedListRoleID.Owner,
                                         sharedList: sharedListDataA[0].id,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
@@ -2249,7 +2249,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await manager.collection('sharedListRoleByUser').findAllObjects({})).toEqual([
                                     {
                                         user: userId,
-                                        roleID: SharedListRoleID.ReadWrite,
+                                        roleID: SharedListRoleID.Owner,
                                         sharedList: sharedListDataA[0].id,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
