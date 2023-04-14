@@ -558,11 +558,12 @@ export class SidebarContainerLogic extends UILogic<
                     this.showState = 'visible'
                     console.log('reading view enabled')
                     this.setReadingWidth()
+                    document.body.style.position = 'relative'
                     this.resizeObserver.observe(this.sidebar)
                     window.addEventListener('resize', this.debounceReadingWidth)
                 } else {
                     document.body.style.width = 'initial'
-
+                    document.body.style.position = 'initial'
                     if (document.body.offsetWidth === 0) {
                         document.body.style.width = '100%'
                     }
@@ -577,10 +578,9 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     private setReadingWidth() {
-        console.log('showState', this.showState)
         if (this.showState === 'visible') {
+            document.body.style.position = 'relative'
             const sidebar = this.sidebar
-            console.log('sidebar', sidebar.offsetWidth)
             let currentsidebarWidth = sidebar.offsetWidth
             let currentWindowWidth = window.innerWidth
             let readingWidth =
@@ -647,11 +647,11 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     show: EventHandler<'show'> = async ({ event }) => {
-        console.log('show')
         this.showState = 'visible'
         this.readingViewState =
             (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(true)
+        document.body.style.position = 'relative'
         const width =
             event.existingWidthState != null
                 ? event.existingWidthState
@@ -665,6 +665,7 @@ export class SidebarContainerLogic extends UILogic<
 
     hide: EventHandler<'hide'> = async ({ event, previousState }) => {
         this.showState = 'hidden'
+        document.body.style.position = 'initial'
         this.readingViewState =
             (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(false)
