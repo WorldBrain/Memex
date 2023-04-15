@@ -385,7 +385,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             nextAnnotation.unifiedListIds = [
                 ...new Set([
                     ...this.sharedPageListIds,
-                    ...annotation.unifiedListIds,
+                    ...nextAnnotation.unifiedListIds,
                 ]),
             ]
         }

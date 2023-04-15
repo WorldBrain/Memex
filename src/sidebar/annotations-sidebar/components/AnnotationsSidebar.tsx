@@ -1260,74 +1260,80 @@ export class AnnotationsSidebar extends React.Component<
                             height="40px"
                         />
                     </QueryContainer>
-                    <OptionsContainer>
-                        Mode
-                        <TooltipBox
-                            tooltipText={
-                                <>
-                                    Just takes the first few paragraphs for the
-                                    summary. Much faster.
-                                </>
-                            }
-                            placement="bottom"
-                            width="150px"
-                        >
-                            <SelectionPill
-                                onClick={async () => {
-                                    this.props.setQueryMode('glanceSummary')
-                                    await this.props.queryAIwithPrompt(
-                                        this.props.prompt,
-                                    )
-                                }}
-                                selected={
-                                    this.props.queryMode === 'glanceSummary'
+                    {!this.props.selectedTextAIPreview && (
+                        <OptionsContainer>
+                            Mode
+                            <TooltipBox
+                                tooltipText={
+                                    <>
+                                        Just takes the first few paragraphs for
+                                        the summary. Much faster.
+                                    </>
                                 }
+                                placement="bottom"
+                                width="150px"
                             >
-                                Quick Glance
-                            </SelectionPill>
-                        </TooltipBox>
-                        <TooltipBox
-                            tooltipText={
-                                <>
-                                    Takes in the whole article or video. Much
-                                    slower.
-                                </>
-                            }
-                            placement="bottom"
-                            width="150px"
-                        >
-                            <SelectionPill
-                                onClick={async () => {
-                                    this.props.setQueryMode('summarize')
-                                    await this.props.queryAIwithPrompt(
-                                        this.props.prompt,
-                                    )
-                                }}
-                                selected={this.props.queryMode === 'summarize'}
-                            >
-                                Full Page
-                            </SelectionPill>
-                        </TooltipBox>
-                        <TooltipBox
-                            tooltipText={
-                                <>
-                                    This mode is ideal for general questions{' '}
-                                    that are not specific to this page
-                                </>
-                            }
-                            placement="bottom"
-                            width="150px"
-                        >
-                            <SelectionPill
-                                onClick={() =>
-                                    this.props.setQueryMode('question')
+                                <SelectionPill
+                                    onClick={async () => {
+                                        this.props.setQueryMode('glanceSummary')
+                                        await this.props.queryAIwithPrompt(
+                                            this.props.prompt,
+                                        )
+                                    }}
+                                    selected={
+                                        this.props.queryMode === 'glanceSummary'
+                                    }
+                                >
+                                    Quick Glance
+                                </SelectionPill>
+                            </TooltipBox>
+                            <TooltipBox
+                                tooltipText={
+                                    <>
+                                        Takes in the whole article or video.
+                                        Much slower.
+                                    </>
                                 }
-                                selected={this.props.queryMode === 'question'}
+                                placement="bottom"
+                                width="150px"
                             >
-                                General Question
-                            </SelectionPill>
-                        </TooltipBox>
-                    </OptionsContainer>
+                                <SelectionPill
+                                    onClick={async () => {
+                                        this.props.setQueryMode('summarize')
+                                        await this.props.queryAIwithPrompt(
+                                            this.props.prompt,
+                                        )
+                                    }}
+                                    selected={
+                                        this.props.queryMode === 'summarize'
+                                    }
+                                >
+                                    Full Page
+                                </SelectionPill>
+                            </TooltipBox>
+                            <TooltipBox
+                                tooltipText={
+                                    <>
+                                        This mode is ideal for general questions{' '}
+                                        that are not specific to this page
+                                    </>
+                                }
+                                placement="bottom"
+                                width="150px"
+                            >
+                                <SelectionPill
+                                    onClick={() =>
+                                        this.props.setQueryMode('question')
+                                    }
+                                    selected={
+                                        this.props.queryMode === 'question'
+                                    }
+                                >
+                                    General Question
+                                </SelectionPill>
+                            </TooltipBox>
+                        </OptionsContainer>
+                    )}
                     {this.props.loadState === 'running'
                         ? this.renderLoader()
                         : this.showSummary()}
