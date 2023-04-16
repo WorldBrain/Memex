@@ -558,7 +558,13 @@ export class SidebarContainerLogic extends UILogic<
                     this.showState = 'visible'
                     console.log('reading view enabled')
                     this.setReadingWidth()
-                    document.body.style.position = 'relative'
+                    if (
+                        !window.location.href.startsWith(
+                            'https://www.youtube.com',
+                        )
+                    ) {
+                        document.body.style.position = 'relative'
+                    }
                     this.resizeObserver.observe(this.sidebar)
                     window.addEventListener('resize', this.debounceReadingWidth)
                 } else {
@@ -579,7 +585,9 @@ export class SidebarContainerLogic extends UILogic<
 
     private setReadingWidth() {
         if (this.showState === 'visible') {
-            document.body.style.position = 'relative'
+            if (!window.location.href.startsWith('https://www.youtube.com')) {
+                document.body.style.position = 'relative'
+            }
             const sidebar = this.sidebar
             let currentsidebarWidth = sidebar.offsetWidth
             let currentWindowWidth = window.innerWidth
@@ -651,7 +659,9 @@ export class SidebarContainerLogic extends UILogic<
         this.readingViewState =
             (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(true)
-        document.body.style.position = 'relative'
+        if (!window.location.href.startsWith('https://www.youtube.com')) {
+            document.body.style.position = 'relative'
+        }
         const width =
             event.existingWidthState != null
                 ? event.existingWidthState
