@@ -2067,6 +2067,11 @@ const AISidebarContainer = styled.div`
     overflow: scroll;
     display: flex;
     flex-direction: column;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    scrollbar-width: none;
 `
 
 const SelectedAITextBox = styled.div`

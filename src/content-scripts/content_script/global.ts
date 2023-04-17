@@ -377,9 +377,63 @@ export async function main(
     }
 
     if (window.location.hostname === 'www.youtube.com') {
-        injectYoutubeButtonMenu(annotationsFunctions)
-        injectYoutubeContextMenu(annotationsFunctions)
+        const below = document.querySelector('#below')
+        const player = document.querySelector('#player')
+
+        if (below) {
+            injectYoutubeButtonMenu(annotationsFunctions)
+            console.log('belowalready')
+        }
+        if (player) {
+            injectYoutubeContextMenu(annotationsFunctions)
+            console.log('playeralready')
+        }
+
+        if (!below || !player) {
+            // Create a new MutationObserver instance
+            const observer = new MutationObserver(function (
+                mutationsList,
+                observer,
+            ) {
+                mutationsList.forEach(function (mutation) {
+                    mutation.addedNodes.forEach((node) => {
+                        // Check if the added node is an HTMLElement
+                        if (node instanceof HTMLElement) {
+                            // Check if the "player" element is in the added node or its descendants
+                            const playerElement = node.querySelector('#player')
+                            if (playerElement) {
+                                console.log('player')
+                                injectYoutubeContextMenu(annotationsFunctions)
+
+                                if (below && player) {
+                                    observer.disconnect()
+                                }
+                            }
+
+                            // Check if the "below" element is in the added node or its descendants
+                            const belowElement = node.querySelector('#below')
+                            if (belowElement) {
+                                console.log('below')
+                                injectYoutubeButtonMenu(annotationsFunctions)
+
+                                if (below && player) {
+                                    observer.disconnect()
+                                }
+                            }
+                        }
+                    })
+                })
+            })
+
+            // Start observing mutations to the document body
+            observer.observe(document.body, { childList: true, subtree: true })
+        }
     }
+
+    // if (window.location.hostname === 'www.youtube.com') {
+    //     injectYoutubeButtonMenu(annotationsFunctions)
+    //     injectYoutubeContextMenu(annotationsFunctions)
+    // }
 
     if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
         const isStaging =
@@ -808,17 +862,38 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     const panel = document.getElementsByClassName('ytp-time-display')[0]
     // Memex Button Container
     const memexButtons = document.createElement('div')
+    // Create a <style> element
+    const style = document.createElement('style')
+
+    // Add your CSS as a string
+    style.textContent = `
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            scrollbar-width: none;
+        }
+        `
+
+    // Assuming `memexButtons` is your DOM element
+
+    document.head.appendChild(style)
+
     memexButtons.style.display = 'flex'
     memexButtons.style.alignItems = 'center'
     memexButtons.style.margin = '5px'
     memexButtons.style.borderRadius = '6px'
     memexButtons.style.border = '1px solid #3E3F47'
     memexButtons.style.overflow = 'hidden'
+    memexButtons.style.overflowX = 'scroll'
+    memexButtons.style.backgroundColor = '#12131B80'
+
     // MemexIconDisplay
     const memexIcon = document.createElement('img')
-    memexButtons.setAttribute('class', 'memex-youtube-buttons')
+    memexButtons.setAttribute('class', 'memex-youtube-buttons no-scrollbar')
     memexIcon.src = icon
     memexButtons.appendChild(memexIcon)
+
     memexIcon.style.height = '20px'
     memexIcon.style.margin = '0 5px 0 10px'
 
@@ -827,23 +902,44 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     annotateButton.setAttribute('class', 'ytp-menuitem')
     annotateButton.onclick = () =>
         annotationsFunctions.createAnnotation()(false, false)
-    annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
     annotateButton.style.display = 'flex'
 
     // Summarize Button
     const summarizeButton = document.createElement('div')
     summarizeButton.setAttribute('class', 'ytp-menuitem')
     summarizeButton.onclick = () => annotationsFunctions.askAI()(false, false)
-    summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
     summarizeButton.style.display = 'flex'
 
     // Appending the right buttons
     memexButtons.appendChild(annotateButton)
     memexButtons.appendChild(summarizeButton)
-    if (YTchapterContainer.length > 0) {
-        YTchapterContainer[0].insertAdjacentElement('afterend', memexButtons)
+
+    const leftControls = document.getElementsByClassName('ytp-left-controls')[0]
+
+    if (leftControls.clientWidth < 500) {
+        const aboveFold = document.getElementById('below')
+        aboveFold.insertAdjacentElement('afterbegin', memexButtons)
+        const elements = document.getElementsByClassName('ytp-menuitem')
+
+        for (var i = 0; i < elements.length; i++) {
+            ;(elements[i] as HTMLElement).style.height = '30px'
+        }
+        memexButtons.style.color = '#f4f4f4'
+        summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 10px;padding: 0px 5px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
+        annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 10px;padding: 0px 5px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
+        memexButtons.style.width = 'fit-content'
+        memexIcon.style.height = '16px'
     } else {
-        panel.parentNode.insertBefore(memexButtons, panel.nextSibling)
+        annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
+        summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
+        if (YTchapterContainer.length > 0) {
+            YTchapterContainer[0].insertAdjacentElement(
+                'afterend',
+                memexButtons,
+            )
+        } else {
+            panel.parentNode.insertBefore(memexButtons, panel.nextSibling)
+        }
     }
 }
 

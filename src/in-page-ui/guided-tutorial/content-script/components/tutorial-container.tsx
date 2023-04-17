@@ -261,6 +261,11 @@ const TutorialCardContainer = styled.div<{
     justify-content: flex-start;
     overflow: scroll;
 
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    scrollbar-width: none;
+
     @keyframes slideInFromLeft {
         0% {
             opacity: 0;
