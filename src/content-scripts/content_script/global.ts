@@ -655,7 +655,7 @@ export async function main(
             }
             highlightRenderer.resetHighlightsStyles()
             await bookmarks.autoSetBookmarkStatusInBrowserIcon(tabId)
-            await sleepPromise(1000)
+            await sleepPromise(500)
             await pageInfo.refreshIfNeeded()
         },
     })
@@ -776,7 +776,7 @@ class PageInfo {
         if (window.location.href === this._href) {
             return
         }
-        await sleepPromise(1000)
+        await sleepPromise(500)
         this.isPdf = isUrlPDFViewerUrl(window.location.href, {
             runtimeAPI: runtime,
         })
