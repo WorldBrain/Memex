@@ -77,6 +77,11 @@ const FirstCardContainer = styled.div`
     flex-direction: column;
     grid-gap: 16px;
 
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    scrollbar-width: none;
+
     & * {
         align-items: center !important;
         display: flex;
