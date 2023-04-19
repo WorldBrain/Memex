@@ -666,9 +666,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 </ShareMenuContainer>
 
                 <DeletionBox>
-                    {isDeleting && (
-                        <DeleteConfirmStyled>Really?</DeleteConfirmStyled>
-                    )}
                     <SaveActionBar>
                         <BtnContainerStyled>
                             <Icon
