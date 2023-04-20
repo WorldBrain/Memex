@@ -373,10 +373,10 @@ export async function main(
                       },
             )
         },
-        askAI: () => (selection: Selection) =>
+        askAI: () => (highlightedText: string) =>
             inPageUI.showSidebar({
                 action: 'show_page_summary',
-                highlightedText: selection.toString().trim(),
+                highlightedText,
             }),
     }
 
