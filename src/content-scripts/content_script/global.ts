@@ -333,7 +333,7 @@ export async function main(
     const annotationsFunctions = {
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
-        ) => async (shouldShare: boolean) => {
+        ) => async (selection: Selection, shouldShare: boolean) => {
             if (!(await pageActionAllowed())) {
                 return
             }
@@ -345,7 +345,11 @@ export async function main(
         },
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
-        ) => async (shouldShare: boolean, showSpacePicker?: boolean) => {
+        ) => async (
+            selection: Selection,
+            shouldShare: boolean,
+            showSpacePicker?: boolean,
+        ) => {
             if (!(await pageActionAllowed())) {
                 return
             }
@@ -369,10 +373,10 @@ export async function main(
                       },
             )
         },
-        askAI: () => (highlightedText: string) =>
+        askAI: () => (selection: Selection) =>
             inPageUI.showSidebar({
                 action: 'show_page_summary',
-                highlightedText,
+                highlightedText: selection.toString().trim(),
             }),
     }
 
@@ -575,16 +579,12 @@ export async function main(
                 selector: unifiedAnnotation.selector,
             })
         },
-        createHighlight: annotationsFunctions.createHighlight({
-            category: 'Highlights',
-            action: 'createFromContextMenu',
-        }),
+        createHighlight: (shouldShare) =>
+            annotationsFunctions.createHighlight({
+                category: 'Highlights',
+                action: 'createFromContextMenu',
+            })(window.getSelection(), shouldShare),
         removeHighlights: async () => highlightRenderer.resetHighlightsStyles(),
-        createAnnotation: annotationsFunctions.createAnnotation({
-            category: 'Annotations',
-            action: 'createFromContextMenu',
-        }),
-        askAI: annotationsFunctions.askAI(),
         teardownContentScripts: async () => {
             await inPageUI.hideHighlights()
             await inPageUI.hideSidebar()
