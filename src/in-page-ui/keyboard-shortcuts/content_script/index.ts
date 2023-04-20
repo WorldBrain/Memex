@@ -72,14 +72,22 @@ function getShortcutHandlers({
         addTag: () => inPageUI.showRibbon({ action: 'tag' }),
         addToCollection: async () => {
             if (userSelectedText()) {
-                await annotationFunctions.createAnnotation(false, true)
+                await annotationFunctions.createAnnotation(
+                    window.getSelection(),
+                    false,
+                    true,
+                )
             } else {
                 await inPageUI.showRibbon({ action: 'list' })
             }
         },
         createSharedAnnotationAndAddToCollection: async () => {
             if (userSelectedText()) {
-                await annotationFunctions.createAnnotation(true, true)
+                await annotationFunctions.createAnnotation(
+                    window.getSelection(),
+                    true,
+                    true,
+                )
             } else {
                 await inPageUI.showRibbon({ action: 'list' })
             }
@@ -98,9 +106,12 @@ function getShortcutHandlers({
         //     : inPageUI.showTooltip('AImode'),
         toggleHighlights: () => inPageUI.toggleHighlights(),
         createSharedAnnotation: () =>
-            annotationFunctions.createAnnotation(true),
-        createSharedHighlight: () => annotationFunctions.createHighlight(true),
-        createHighlight: () => annotationFunctions.createHighlight(false),
-        createAnnotation: () => annotationFunctions.createAnnotation(false),
+            annotationFunctions.createAnnotation(window.getSelection(), true),
+        createSharedHighlight: () =>
+            annotationFunctions.createHighlight(window.getSelection(), true),
+        createHighlight: () =>
+            annotationFunctions.createHighlight(window.getSelection(), false),
+        createAnnotation: () =>
+            annotationFunctions.createAnnotation(window.getSelection(), false),
     }
 }

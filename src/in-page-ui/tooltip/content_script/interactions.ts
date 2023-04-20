@@ -75,6 +75,7 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
 
     target = params.mount.rootElement
     showTooltip = await setupUIContainer(params.mount, {
+        getWindow: () => window,
         createAnnotation: async (...args) => {
             await params.createAnnotation(...args)
             await conditionallyRemoveOnboardingSelectOption(
