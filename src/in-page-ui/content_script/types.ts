@@ -2,12 +2,10 @@ import type {
     InPageUIRibbonAction,
     SidebarActionOptions,
 } from '../shared-state/types'
-import type { AnnotationFunctions } from '@worldbrain/memex-common/lib/in-page-ui/types'
 import type { ExtractedPDFData } from 'src/page-analysis/background/content-extraction/types'
 import type { UnifiedAnnotation } from 'src/annotations/cache/types'
 
-export interface InPageUIContentScriptRemoteInterface
-    extends AnnotationFunctions {
+export interface InPageUIContentScriptRemoteInterface {
     showSidebar(options?: SidebarActionOptions): Promise<void>
 
     // Ribbon
@@ -30,6 +28,7 @@ export interface InPageUIContentScriptRemoteInterface
         annotationCacheId: UnifiedAnnotation['unifiedId'],
     ): Promise<void>
     removeHighlights(): Promise<void>
+    createHighlight(shouldShare: boolean): Promise<void>
 
     teardownContentScripts(): Promise<void>
     handleHistoryStateUpdate(tabId: number): Promise<void>

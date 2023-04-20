@@ -95,9 +95,4 @@ export class InPageUIBackground {
         runInTab<InPageUIContentScriptRemoteInterface>(tabId).createHighlight(
             false,
         )
-
-    private createAnnotationInTab = (tabId: number) =>
-        runInTab<InPageUIContentScriptRemoteInterface>(tabId).createAnnotation(
-            false,
-        )
 }

@@ -15,11 +15,28 @@ import { createLazyMemoryServerStorage } from 'src/storage/server'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SharingTestHelper } from './index.tests'
-import ContentSharingBackground from '.'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import {
+    SharedList,
+    SharedListEntry,
+    SharedListRoleID,
+    SharedPageInfo,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
 import { maybeInt } from '@worldbrain/memex-common/lib/utils/conversion'
 import { indexTestFingerprintedPdf } from 'src/page-indexing/background/index.tests'
+import { createPageLinkListTitle } from '@worldbrain/memex-common/lib/content-sharing/utils'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import type {
+    PersonalContentLocator,
+    PersonalContentMetadata,
+    PersonalList,
+} from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
+import {
+    ContentLocatorFormat,
+    ContentLocatorType,
+    LocationSchemeType,
+} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import { getSinglePageShareUrl } from '../utils'
 
 async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
     setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
@@ -2077,6 +2094,427 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         remoteId: listReference.id.toString(),
                                     },
                                 ])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should created shared list, entry, page info, key, role + all corresponding personal cloud data when a user creates a shareable page link for a standard web page',
+            { skipConflictTests: true, skipSyncTests: true },
+            () => {
+                const testData: TestData = {}
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const {
+                                    contentSharing,
+                                    personalCloud,
+                                } = await setupTest({
+                                    setup,
+                                    testData,
+                                })
+
+                                const {
+                                    manager,
+                                } = await setup.getServerStorage()
+                                const listTitle = createPageLinkListTitle()
+                                const pageTitle = null // TODO: Do we fetch page titles?
+                                const fullPageUrl = 'https://memex.garden'
+                                const normalizedPageUrl = 'memex.garden'
+                                const userId = TEST_USER.id
+
+                                // Shared cloud DB data
+                                // prettier-ignore
+                                {
+                                expect(await manager.collection('sharedList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListEntry').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedPageInfo').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListKey').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListRole').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListRoleByUser').findAllObjects({})).toEqual([])
+                                }
+
+                                // Personal cloud DB data
+                                // prettier-ignore
+                                {
+                                expect(await manager.collection('personalList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalListEntry').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalListShare').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalFollowedList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalContentMetadata').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalContentRead').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalContentLocator').findAllObjects({})).toEqual([])
+                                }
+
+                                // Local DB data
+                                // prettier-ignore
+                                {
+                                expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('pages').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('visits').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
+                                }
+
+                                const {
+                                    link: linkA,
+                                } = await contentSharing.options.backend.createPageLink(
+                                    { fullPageUrl },
+                                )
+
+                                // Shared cloud DB data
+                                const sharedListDataA: Array<
+                                    SharedList & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedList')
+                                    .findAllObjects({})
+                                const sharedPageDataA: Array<
+                                    SharedPageInfo & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedPageInfo')
+                                    .findAllObjects({})
+                                const sharedListEntryDataA: Array<
+                                    SharedListEntry & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedListEntry')
+                                    .findAllObjects({})
+
+                                // prettier-ignore
+                                {
+                                expect(linkA).toEqual(getSinglePageShareUrl({
+                                    remoteListId: sharedListDataA[0].id,
+                                    remoteListEntryId: sharedListEntryDataA[0].id,
+                               }))
+                                expect(sharedListDataA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        type: 'page-link',
+                                        creator: userId,
+                                        title: listTitle,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(sharedListEntryDataA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: userId,
+                                        entryTitle: pageTitle,
+                                        originalUrl: fullPageUrl,
+                                        normalizedUrl: normalizedPageUrl,
+                                        sharedList: sharedListDataA[0].id,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(sharedPageDataA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: userId,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                        normalizedUrl: normalizedPageUrl,
+                                        originalUrl: fullPageUrl,
+                                        fullTitle: pageTitle
+                                    }
+                                ])
+                                expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListKey').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        disabled: false,
+                                        roleID: SharedListRoleID.ReadWrite,
+                                        sharedList: sharedListDataA[0].id,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('sharedListRole').findAllObjects({})).toEqual([
+                                    {
+                                        user: userId,
+                                        roleID: SharedListRoleID.Owner,
+                                        sharedList: sharedListDataA[0].id,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('sharedListRoleByUser').findAllObjects({})).toEqual([
+                                    {
+                                        user: userId,
+                                        roleID: SharedListRoleID.Owner,
+                                        sharedList: sharedListDataA[0].id,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                }
+
+                                // Personal cloud DB data
+                                const personalMetadataA: Array<
+                                    PersonalContentMetadata & { id: AutoPk }
+                                > = await manager
+                                    .collection('personalContentMetadata')
+                                    .findAllObjects({})
+                                const personalListsA: Array<
+                                    PersonalList & { id: AutoPk }
+                                > = await manager
+                                    .collection('personalList')
+                                    .findAllObjects({})
+                                const personalReadsA = await manager
+                                    .collection('personalContentRead')
+                                    .findAllObjects({})
+                                const personalLocatorsA: Array<
+                                    PersonalContentLocator & { id: AutoPk }
+                                > = await manager
+                                    .collection('personalContentLocator')
+                                    .findAllObjects({})
+
+                                // prettier-ignore
+                                {
+                                expect(personalListsA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        localId: expect.anything(), // TODO: Can we expect an actual value?
+                                        name: listTitle,
+                                        type: 'page-link',
+                                        isDeletable: true,
+                                        isNestable: true,
+                                        user: userId,
+                                        createdByDevice: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(personalMetadataA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        canonicalUrl: fullPageUrl,
+                                        title: pageTitle,
+                                        lang: null,
+                                        description: null,
+                                        user: userId,
+                                        createdByDevice: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(personalReadsA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        personalContentLocator: personalLocatorsA[0].id,
+                                        readWhen: expect.any(Number),
+                                        user: userId,
+                                        createdByDevice: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(personalLocatorsA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        format: ContentLocatorFormat.HTML,
+                                        originalLocation: fullPageUrl,
+                                        location: normalizedPageUrl,
+                                        locationScheme: LocationSchemeType.NormalizedUrlV1,
+                                        locationType: ContentLocatorType.Remote,
+                                        primary: true,
+                                        valid: true,
+                                        version: 0,
+                                        lastVisited: expect.anything(),
+                                        localId: null,
+                                        contentSize: null,
+                                        fingerprint: null,
+                                        user: userId,
+                                        createdByDevice: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('personalListEntry').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        personalList: personalListsA[0].id,
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        user: userId,
+                                        createdByDevice: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('personalListShare').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        personalList: personalListsA[0].id,
+                                        remoteId: sharedListDataA[0].id,
+                                        user: userId,
+                                        createdByDevice: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('personalFollowedList').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        sharedList: sharedListDataA[0].id,
+                                        user: userId,
+                                        createdByDevice: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                }
+
+                                // Local DB data
+                                // prettier-ignore
+                                {
+                                expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('pages').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
+                                }
+
+                                await personalCloud.integrateAllUpdates()
+                                await personalCloud.waitForSync()
+
+                                // Re-check local DB data post-sync
+                                // prettier-ignore
+                                {
+                                    expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([
+                                        {
+                                            id: expect.anything(), // TODO: Can we predict this?
+                                            name: listTitle,
+                                            isDeletable: true,
+                                            isNestable: true,
+                                            createdAt: expect.anything()
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([
+                                        {
+                                            listId: expect.anything(),
+                                            pageUrl: normalizedPageUrl,
+                                            fullUrl: fullPageUrl,
+                                            createdAt: expect.anything(),
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([
+                                        {
+                                            localId: expect.anything(),
+                                            remoteId: sharedListDataA[0].id,
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([
+                                        {
+                                            sharedList: sharedListDataA[0].id,
+                                            creator: userId,
+                                            name: listTitle,
+                                            lastSync: expect.anything(),
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('followedListEntry').findAllObjects({})).toEqual([
+                                        {
+                                            id: expect.anything(),
+                                            followedList: expect.anything(),
+                                            entryTitle: '',
+                                            creator: userId,
+                                            normalizedPageUrl,
+                                            hasAnnotationsFromOthers: false,
+                                            createdWhen: expect.anything(),
+                                            updatedWhen: expect.anything(),
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('pages').findAllObjects({})).toEqual([
+                                        {
+                                            url: normalizedPageUrl,
+                                            fullUrl: fullPageUrl,
+                                            canonicalUrl: fullPageUrl,
+                                            // fullTitle: pageTitle,
+                                            domain: 'memex.garden',
+                                            hostname: 'memex.garden',
+                                            text: '',
+                                            urlTerms: expect.anything(),
+                                            // titleTerms: expect.anything(),
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('visits').findAllObjects({})).toEqual([
+                                        {
+                                            url: normalizedPageUrl,
+                                            time: expect.any(Number)
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
+                                }
+
+                                // Try it once more to assert that sharedPageInfo+personalContentMetadata+personalContentLocator isn't recreated
+                                const {
+                                    link: linkB,
+                                } = await contentSharing.options.backend.createPageLink(
+                                    { fullPageUrl },
+                                )
+
+                                // Shared cloud DB data
+                                const sharedListDataB: Array<
+                                    SharedList & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedList')
+                                    .findAllObjects({})
+                                const sharedPageDataB: Array<
+                                    SharedPageInfo & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedPageInfo')
+                                    .findAllObjects({})
+                                const sharedListEntryDataB: Array<
+                                    SharedListEntry & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedListEntry')
+                                    .findAllObjects({})
+                                const personalListsB = await manager
+                                    .collection('personalList')
+                                    .findAllObjects({})
+                                const personalMetadataB = await manager
+                                    .collection('personalContentMetadata')
+                                    .findAllObjects({})
+                                const personalReadsB = await manager
+                                    .collection('personalContentRead')
+                                    .findAllObjects({})
+                                const personalLocatorsB = await manager
+                                    .collection('personalContentLocator')
+                                    .findAllObjects({})
+
+                                expect(linkB).toEqual(
+                                    getSinglePageShareUrl({
+                                        remoteListId: sharedListDataB[1].id,
+                                        remoteListEntryId:
+                                            sharedListEntryDataB[1].id,
+                                    }),
+                                )
+
+                                expect(sharedListDataA.length).toBe(1)
+                                expect(sharedListDataB.length).toBe(2) // There should be a new list, but same page
+                                expect(sharedPageDataA.length).toBe(1)
+                                expect(sharedPageDataB.length).toBe(1)
+                                expect(sharedListEntryDataA.length).toBe(1)
+                                expect(sharedListEntryDataB.length).toBe(2)
+
+                                expect(personalListsA.length).toBe(1)
+                                expect(personalListsB.length).toBe(2)
+                                expect(personalMetadataA.length).toBe(1)
+                                expect(personalMetadataB.length).toBe(1)
+                                expect(personalReadsA.length).toBe(1)
+                                expect(personalReadsB.length).toBe(2)
+                                expect(personalLocatorsA.length).toBe(1)
+                                expect(personalLocatorsB.length).toBe(1)
                             },
                         },
                     ],
