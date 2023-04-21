@@ -1362,15 +1362,6 @@ export class SidebarContainerLogic extends UILogic<
         return nextState
     }
 
-    setIsolatedViewOnSidebarLoad: EventHandler<
-        'setIsolatedViewOnSidebarLoad'
-    > = async ({}) => {
-        this.emitMutation({
-            activeTab: { $set: 'spaces' },
-            loadState: { $set: 'running' },
-        })
-    }
-
     async queryAI(
         fullPageUrl,
         highlightedText,
@@ -1490,11 +1481,13 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
     }
+
     setQueryMode: EventHandler<'setQueryMode'> = async ({ event }) => {
         this.emitMutation({
             queryMode: { $set: event.mode },
         })
     }
+
     updatePromptState: EventHandler<'updatePromptState'> = async ({
         event,
         previousState,
@@ -1503,6 +1496,7 @@ export class SidebarContainerLogic extends UILogic<
             prompt: { $set: event.prompt },
         })
     }
+
     removeSelectedTextAIPreview: EventHandler<
         'removeSelectedTextAIPreview'
     > = async () => {
@@ -1510,21 +1504,30 @@ export class SidebarContainerLogic extends UILogic<
             selectedTextAIPreview: { $set: undefined },
         })
     }
+
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
         previousState,
     }) => {
-        this.emitMutation({
-            activeTab: { $set: event.tab },
-        })
+        this.emitMutation({ activeTab: { $set: event.tab } })
 
-        // Don't attempt to re-render highlights on the page if in selected-space mode
-        if (previousState.selectedListId != null || event.tab === 'feed') {
-            return
-        }
+        // Ensure in-page selectedList state only applies when the spaces tab is active
+        const returningToSelectedListMode =
+            previousState.selectedListId != null && event.tab === 'spaces'
+        this.options.events?.emit(
+            'setSelectedList',
+            returningToSelectedListMode ? previousState.selectedListId : null,
+        )
 
         if (event.tab === 'annotations') {
             this.renderOwnHighlights(previousState)
+        } else if (returningToSelectedListMode) {
+            this.options.events?.emit('renderHighlights', {
+                highlights: cacheUtils.getListHighlightsArray(
+                    this.options.annotationsCache,
+                    previousState.selectedListId,
+                ),
+            })
         } else if (event.tab === 'spaces') {
             await this.loadRemoteAnnototationReferencesForCachedLists(
                 previousState,
@@ -1827,6 +1830,10 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event, previousState }) => {
         this.emitMutation({
             activeTab: { $set: 'spaces' },
+            loadState: { $set: 'running' },
+        })
+        await this.options.storageAPI.local.set({
+            '@Sidebar-reading_view': true,
         })
 
         const {
