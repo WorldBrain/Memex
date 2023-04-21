@@ -807,7 +807,8 @@ export class AnnotationsSidebar extends React.Component<
                                     placement={'bottom-end'}
                                 >
                                     <TotalAnnotationsCounter>
-                                        {listData.hasRemoteAnnotationsToLoad ? (
+                                        {this.props
+                                            .pageHasNetworkAnnotations ? (
                                             <PageActivityIndicator active />
                                         ) : undefined}
                                     </TotalAnnotationsCounter>

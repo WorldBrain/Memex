@@ -386,11 +386,10 @@ export async function main(
 
         if (below) {
             injectYoutubeButtonMenu(annotationsFunctions)
-            console.log('belowalready')
         }
         if (player) {
+            injectYoutubeButtonMenu(annotationsFunctions)
             injectYoutubeContextMenu(annotationsFunctions)
-            console.log('playeralready')
         }
 
         if (!below || !player) {
@@ -404,10 +403,9 @@ export async function main(
                         // Check if the added node is an HTMLElement
                         if (node instanceof HTMLElement) {
                             // Check if the "player" element is in the added node or its descendants
-                            const playerElement = node.querySelector('#player')
-                            if (playerElement) {
-                                console.log('player')
+                            if (node.querySelector('#player')) {
                                 injectYoutubeContextMenu(annotationsFunctions)
+                                injectYoutubeButtonMenu(annotationsFunctions)
 
                                 if (below && player) {
                                     observer.disconnect()
@@ -415,9 +413,7 @@ export async function main(
                             }
 
                             // Check if the "below" element is in the added node or its descendants
-                            const belowElement = node.querySelector('#below')
-                            if (belowElement) {
-                                console.log('below')
+                            if (node.querySelector('#below')) {
                                 injectYoutubeButtonMenu(annotationsFunctions)
 
                                 if (below && player) {
@@ -711,13 +707,14 @@ export async function main(
         fullPageUrl,
     )
 
-    if (
-        (isSidebarEnabled && !isPageBlacklisted) ||
-        pageActivityStatus !== 'no-activity'
-    ) {
+    const hasActivity =
+        pageActivityStatus !== 'no-activity' &&
+        pageActivityStatus !== 'no-annotations'
+
+    if ((isSidebarEnabled && !isPageBlacklisted) || hasActivity) {
         await inPageUI.loadComponent('ribbon', {
             keepRibbonHidden: !isSidebarEnabled,
-            showPageActivityIndicator: pageActivityStatus !== 'no-activity',
+            showPageActivityIndicator: hasActivity,
         })
     }
 

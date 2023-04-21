@@ -410,9 +410,14 @@ export class SidebarContainerLogic extends UILogic<
             const hasNetworkActivity = await pageActivityIndicatorBG.getPageActivityStatus(
                 fullPageUrl,
             )
+
+            const hasActivity =
+                hasNetworkActivity !== 'no-activity' &&
+                hasNetworkActivity !== 'no-annotations'
+
             this.emitMutation({
                 pageHasNetworkAnnotations: {
-                    $set: hasNetworkActivity !== 'no-activity',
+                    $set: hasActivity,
                 },
             })
 
@@ -556,7 +561,6 @@ export class SidebarContainerLogic extends UILogic<
                 })
                 if (key[1].newValue) {
                     this.showState = 'visible'
-                    console.log('reading view enabled')
                     this.setReadingWidth()
                     if (
                         !window.location.href.startsWith(
@@ -594,7 +598,6 @@ export class SidebarContainerLogic extends UILogic<
             let readingWidth =
                 currentWindowWidth - currentsidebarWidth - 50 + 'px'
 
-            console.log('sidebar', readingWidth)
             document.body.style.width = readingWidth
         }
     }
