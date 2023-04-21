@@ -227,10 +227,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 comment: event.annotationData?.commentText ?? '',
             })
         } else if (event.action === 'selected_list_mode_from_web_ui') {
-            await this.processEvent('setIsolatedViewOnSidebarLoad', null)
-            await browser.storage.local.set({
-                '@Sidebar-reading_view': true,
-            })
             await this.processEvent('setSelectedListFromWebUI', {
                 sharedListId: event.sharedListId,
             })

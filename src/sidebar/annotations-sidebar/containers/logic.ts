@@ -1362,15 +1362,6 @@ export class SidebarContainerLogic extends UILogic<
         return nextState
     }
 
-    setIsolatedViewOnSidebarLoad: EventHandler<
-        'setIsolatedViewOnSidebarLoad'
-    > = async ({}) => {
-        this.emitMutation({
-            activeTab: { $set: 'spaces' },
-            loadState: { $set: 'running' },
-        })
-    }
-
     async queryAI(
         fullPageUrl,
         highlightedText,
@@ -1827,6 +1818,10 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event, previousState }) => {
         this.emitMutation({
             activeTab: { $set: 'spaces' },
+            loadState: { $set: 'running' },
+        })
+        await this.options.storageAPI.local.set({
+            '@Sidebar-reading_view': true,
         })
 
         const {

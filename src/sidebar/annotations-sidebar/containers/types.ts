@@ -213,7 +213,6 @@ interface SidebarEvents {
     receiveSharingAccessChange: {
         sharingAccess: AnnotationSharingAccess
     }
-    setIsolatedViewOnSidebarLoad: null
 
     // New page note box
     setNewPageNoteText: { comment: string }
