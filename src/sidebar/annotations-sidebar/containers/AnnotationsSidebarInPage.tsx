@@ -443,7 +443,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         if (
             this.state.selectedListId != null &&
             this.state.showState === 'hidden' &&
-            this.state.fullPageUrl != null
+            this.state.fullPageUrl != null &&
+            this.state.activeTab === 'spaces'
         ) {
             return this.renderSelectedListPill()
         }

@@ -572,10 +572,16 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.activeTab).toEqual('annotations')
 
             await sidebar.processEvent('setActiveSidebarTab', { tab: 'spaces' })
-            expectedEvents.push({
-                event: 'renderHighlights',
-                args: { highlights: [] },
-            })
+            expectedEvents.push(
+                {
+                    event: 'setSelectedList',
+                    args: null,
+                },
+                {
+                    event: 'renderHighlights',
+                    args: { highlights: [] },
+                },
+            )
 
             expect(sidebar.state.activeTab).toEqual('spaces')
             expect(emittedEvents).toEqual(expectedEvents)
@@ -617,14 +623,20 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('setActiveSidebarTab', {
                 tab: 'annotations',
             })
-            expectedEvents.push({
-                event: 'renderHighlights',
-                args: {
-                    highlights: cacheUtils.getHighlightAnnotationsArray(
-                        annotationsCache,
-                    ),
+            expectedEvents.push(
+                {
+                    event: 'setSelectedList',
+                    args: null,
                 },
-            })
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: cacheUtils.getHighlightAnnotationsArray(
+                            annotationsCache,
+                        ),
+                    },
+                },
+            )
 
             expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.activeTab).toEqual('annotations')
@@ -637,10 +649,16 @@ describe('SidebarContainerLogic', () => {
             }) as any
 
             await sidebar.processEvent('setActiveSidebarTab', { tab: 'spaces' })
-            expectedEvents.push({
-                event: 'renderHighlights',
-                args: { highlights: [] },
-            })
+            expectedEvents.push(
+                {
+                    event: 'setSelectedList',
+                    args: null,
+                },
+                {
+                    event: 'renderHighlights',
+                    args: { highlights: [] },
+                },
+            )
 
             expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.activeTab).toEqual('spaces')
@@ -713,12 +731,18 @@ describe('SidebarContainerLogic', () => {
             await sidebar.processEvent('setActiveSidebarTab', {
                 tab: 'spaces',
             })
-            expectedEvents.push({
-                event: 'renderHighlights',
-                args: {
-                    highlights: [],
+            expectedEvents.push(
+                {
+                    event: 'setSelectedList',
+                    args: null,
                 },
-            })
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: [],
+                    },
+                },
+            )
 
             expect(emittedEvents).toEqual(expectedEvents)
             expect(sidebar.state.listInstances).toEqual({
