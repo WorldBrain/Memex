@@ -339,7 +339,7 @@ export class RibbonContainerLogic extends UILogic<
         return latestState
     }
 
-    toggleFeed: EventHandler<'toggleFeed'> = ({ previousState }) => {
+    toggleFeed: EventHandler<'toggleFeed'> = async ({ previousState }) => {
         this.dependencies.setRibbonShouldAutoHide(previousState.showFeed)
         const mutation: UIMutation<RibbonContainerState> = {
             showFeed: { $set: !previousState.showFeed },
@@ -348,6 +348,7 @@ export class RibbonContainerLogic extends UILogic<
         }
 
         if (!previousState.showFeed) {
+            await this.dependencies.activityIndicatorBG.markActivitiesAsSeen()
             mutation.commentBox = { showCommentBox: { $set: false } }
             mutation.tagging = { showTagsPicker: { $set: false } }
             mutation.lists = { showListsPicker: { $set: false } }
