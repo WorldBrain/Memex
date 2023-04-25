@@ -328,7 +328,7 @@ describe('SidebarContainerLogic', () => {
             const expectedEvents = []
 
             expect(emittedEvents).toEqual(expectedEvents)
-            expect(annotationsCache.pageListIds).toEqual([])
+            expect(annotationsCache.pageListIds).toEqual(new Map())
             expect(annotationsCache.lists).toEqual(initNormalizedState())
             expect(annotationsCache.annotations).toEqual(initNormalizedState())
             expect(sidebar.state.listInstances).toEqual({})
@@ -347,10 +347,20 @@ describe('SidebarContainerLogic', () => {
 
             expect(emittedEvents).toEqual(expectedEvents)
             expect(annotationsCache.pageListIds).toEqual(
-                mapLocalListIdsToUnified(
-                    [DATA.LOCAL_LISTS[0].id, DATA.LOCAL_LISTS[3].id],
-                    annotationsCache,
-                ),
+                new Map([
+                    [
+                        normalizeUrl(DATA.TAB_URL_1),
+                        new Set(
+                            mapLocalListIdsToUnified(
+                                [
+                                    DATA.LOCAL_LISTS[0].id,
+                                    DATA.LOCAL_LISTS[3].id,
+                                ],
+                                annotationsCache,
+                            ),
+                        ),
+                    ],
+                ]),
             )
             expect(Object.values(annotationsCache.lists.byId)).toEqual([
                 cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[0], {
@@ -460,7 +470,7 @@ describe('SidebarContainerLogic', () => {
                         unifiedListIds: mapLocalListIdsToUnified(
                             [
                                 DATA.LOCAL_LISTS[0].id, // NOTE: inherited shared list from parent page
-                                // DATA.LOCAL_LISTS[3].id, // This is a parent page list but not shared, so not inherited
+                                DATA.LOCAL_LISTS[3].id,
                             ],
                             annotationsCache,
                         ),
