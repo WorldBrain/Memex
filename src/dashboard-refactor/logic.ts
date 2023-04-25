@@ -48,6 +48,8 @@ import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/cons
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
 import { openPDFInViewer } from 'src/pdf/util'
+import { hydrateCacheForDashboard } from 'src/annotations/cache/utils'
+import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -100,6 +102,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.syncSettings = createSyncSettingsStore({
             syncSettingsBG: options.syncSettingsBG,
         })
+        window['__annotationsCache'] = options.annotationsCache
     }
 
     private setupRemoteEventListeners() {
@@ -189,6 +192,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         // Replace the current URL with the new one
         window.history.replaceState({}, '', cleanUrl)
     }
+
     getInitialState(): State {
         const searchQuery = this.getQueryStringParameter('query')
         const spacesQuery = this.getQueryStringParameter('spaces')
@@ -198,7 +202,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         const to = formatTimestamp(parseFloat(toQuery), FORMAT)
 
-        let spacesArray
+        let spacesArray: any[] // TODO: this type should be string[]
 
         if (spacesQuery && spacesQuery.includes(',')) {
             spacesArray = spacesQuery.split(',')
@@ -206,7 +210,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             spacesArray = [spacesQuery]
         }
 
-        let openFilterBarOnLoad
+        let openFilterBarOnLoad: boolean
         if ((spacesQuery && spacesArray.length > 1) || fromQuery || toQuery) {
             openFilterBarOnLoad = true
         } else {
@@ -325,25 +329,50 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
+    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
+        nextLists,
+    ) => {
+        this.emitMutation({})
+    }
+
+    private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] = (
+        nextAnnotations,
+    ) => {}
+
     init: EventHandler<'init'> = async ({ previousState }) => {
+        const { annotationsCache } = this.options
         this.setupRemoteEventListeners()
         const spacesQuery = this.getQueryStringParameter('spaces')
         const from = this.getQueryStringParameter('from')
         const to = this.getQueryStringParameter('to')
         let spacesArray = spacesQuery && [spacesQuery]
 
+        annotationsCache.events.addListener(
+            'newAnnotationsState',
+            this.cacheAnnotationsSubscription,
+        )
+        annotationsCache.events.addListener(
+            'newListsState',
+            this.cacheListsSubscription,
+        )
+
         await loadInitial(this, async () => {
+            await hydrateCacheForDashboard({
+                cache: annotationsCache,
+                bgModules: {
+                    customLists: this.options.listsBG,
+                    annotations: this.options.annotationsBG,
+                    contentSharing: this.options.contentShareBG,
+                    pageActivityIndicator: this.options.pageActivityIndicatorBG,
+                },
+            })
+
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
             let localListsResult
             if (spacesArray && spacesArray.length === 1) {
                 localListsResult = await this.loadLocalListsData(nextState)
                 this.mutateAndTriggerSearch(previousState, {
-                    listsSidebar: {
-                        selectedListId: { $set: parseFloat(spacesArray[0]) },
-                    },
-                })
-                this.emitMutation({
                     listsSidebar: {
                         selectedListId: { $set: parseFloat(spacesArray[0]) },
                     },
@@ -372,6 +401,14 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     cleanup: EventHandler<'cleanup'> = async ({}) => {
         this.personalCloudEvents.removeAllListeners()
+        this.options.annotationsCache.events.removeListener(
+            'newAnnotationsState',
+            this.cacheAnnotationsSubscription,
+        )
+        this.options.annotationsCache.events.removeListener(
+            'newListsState',
+            this.cacheListsSubscription,
+        )
     }
 
     /* START - Misc helper methods */
@@ -3489,13 +3526,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        if (previousState.listsSidebar.editingListId !== event.listId) {
-            this.emitMutation({
-                listsSidebar: {
-                    editingListId: { $set: event.listId },
-                },
-            })
-        }
+        this.emitMutation({
+            listsSidebar: {
+                editingListId: { $set: event.listId },
+            },
+        })
     }
 
     setShowMoreMenuListId: EventHandler<'setShowMoreMenuListId'> = async ({

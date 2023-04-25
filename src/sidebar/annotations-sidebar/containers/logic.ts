@@ -45,6 +45,7 @@ import {
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { resolvablePromise } from 'src/util/promises'
 import type {
+    PageAnnotationsCacheEvents,
     PageAnnotationsCacheInterface,
     UnifiedAnnotation,
     UnifiedList,
@@ -293,7 +294,7 @@ export class SidebarContainerLogic extends UILogic<
         opts: { renderHighlights: boolean },
     ) {
         await executeUITask(this, 'cacheLoadState', async () => {
-            await cacheUtils.hydrateCache({
+            await cacheUtils.hydrateCacheForSidebar({
                 fullPageUrl,
                 user: this.options.currentUser,
                 cache: this.options.annotationsCache,
@@ -456,8 +457,8 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    private cacheListsSubscription = (
-        nextLists: PageAnnotationsCacheInterface['lists'],
+    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
+        nextLists,
     ) => {
         this.emitMutation({
             lists: { $set: nextLists },
@@ -472,8 +473,8 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    private cacheAnnotationsSubscription = (
-        nextAnnotations: PageAnnotationsCacheInterface['annotations'],
+    private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] = (
+        nextAnnotations,
     ) => {
         this.emitMutation({
             noteCreateState: { $set: 'success' },
