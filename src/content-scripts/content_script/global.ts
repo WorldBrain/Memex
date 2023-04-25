@@ -302,7 +302,7 @@ export async function main(
         : undefined
     const fullPageUrl = await pageInfo.getFullPageUrl()
     const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
-    const annotationsCache = new PageAnnotationsCache({ normalizedPageUrl })
+    const annotationsCache = new PageAnnotationsCache({})
     window['__annotationsCache'] = annotationsCache
 
     const pageHasBookark = await bookmarks.pageHasBookmark(fullPageUrl)

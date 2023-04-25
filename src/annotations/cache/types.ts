@@ -74,7 +74,6 @@ export interface PageAnnotationsCacheInterface {
     getListByRemoteId: (remoteId: string) => UnifiedList | null
 
     readonly isEmpty: boolean
-    readonly normalizedPageUrl: string
     readonly events: TypedEventEmitter<PageAnnotationsCacheEvents>
     readonly annotations: NormalizedState<UnifiedAnnotation>
     readonly lists: NormalizedState<UnifiedList>

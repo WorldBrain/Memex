@@ -151,7 +151,7 @@ export async function setupTest(
     const logic = new DashboardLogic({
         location,
         analytics,
-        annotationsCache: new PageAnnotationsCache({ normalizedPageUrl: '' }),
+        annotationsCache: new PageAnnotationsCache({}),
         annotationsBG: insertBackgroundFunctionTab(
             device.backgroundModules.directLinking.remoteFunctions,
         ) as any,

@@ -82,9 +82,7 @@ const setupLogicHelper = async ({
         device.backgroundModules.directLinking.remoteFunctions,
     ) as any
 
-    const annotationsCache = new PageAnnotationsCache({
-        normalizedPageUrl: normalizeUrl(fullPageUrl),
-    })
+    const annotationsCache = new PageAnnotationsCache({})
 
     const emittedEvents: Array<{ event: string; args: any }> = []
     const fakeEmitter = {

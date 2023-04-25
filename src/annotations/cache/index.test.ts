@@ -35,7 +35,6 @@ function setupTest(deps: Partial<PageAnnotationCacheDeps> = {}) {
     const emittedEvents: EmittedEvent[] = []
     const cache = new PageAnnotationsCache({
         sortingFn: () => 0,
-        normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
         events: {
             emit: (event: keyof PageAnnotationsCacheEvents, args: any) =>
                 emittedEvents.push({ event, args }),
@@ -238,9 +237,7 @@ describe('Page annotations cache tests', () => {
     })
 
     it('should set public annotations to inherit the lists of their parent page upon adding', () => {
-        const { cache } = setupTest({
-            normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
-        })
+        const { cache } = setupTest({})
         const testAnnotations = TEST_DATA.ANNOTATIONS()
         const testLists = TEST_DATA.LISTS()
 
@@ -302,9 +299,7 @@ describe('Page annotations cache tests', () => {
     })
 
     it('should be able to reset page URL and annotations in the cache', () => {
-        const { cache, emittedEvents } = setupTest({
-            normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
-        })
+        const { cache, emittedEvents } = setupTest({})
         const expectedEvents: EmittedEvent[] = []
         const testAnnotations = TEST_DATA.ANNOTATIONS()
         const testLists = TEST_DATA.LISTS()
@@ -312,7 +307,6 @@ describe('Page annotations cache tests', () => {
         cache.setLists(testLists)
         expectedEvents.push({ event: 'newListsState', args: cache.lists })
 
-        expect(cache.normalizedPageUrl).toEqual(TEST_DATA.NORMALIZED_PAGE_URL_1)
         expect(cache.annotations.allIds).toEqual([])
         expect(cache.annotations.byId).toEqual({})
         expect(emittedEvents).toEqual(expectedEvents)
@@ -328,7 +322,6 @@ describe('Page annotations cache tests', () => {
             args: cloneNormalizedState(cache.annotations),
         })
 
-        expect(cache.normalizedPageUrl).toEqual(TEST_DATA.NORMALIZED_PAGE_URL_1)
         expect(cache.annotations.allIds).toEqual(unifiedIdsA)
         expect(cache.annotations.byId).toEqual({
             [unifiedIdsA[0]]: {
@@ -356,7 +349,6 @@ describe('Page annotations cache tests', () => {
             args: TEST_DATA.NORMALIZED_PAGE_URL_2,
         })
 
-        expect(cache.normalizedPageUrl).toEqual(TEST_DATA.NORMALIZED_PAGE_URL_2)
         expect(cache.annotations.allIds).toEqual(unifiedIdsB)
         expect(cache.annotations.byId).toEqual({
             [unifiedIdsB[0]]: {
@@ -380,9 +372,7 @@ describe('Page annotations cache tests', () => {
     })
 
     it('should not properly resolve local list IDs to cache IDs (for annotations) if lists not yet cached', () => {
-        const { cache } = setupTest({
-            normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
-        })
+        const { cache } = setupTest({})
         const testAnnotations = TEST_DATA.ANNOTATIONS()
         const testLists = TEST_DATA.LISTS()
 

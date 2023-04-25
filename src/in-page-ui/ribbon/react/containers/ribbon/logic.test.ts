@@ -55,9 +55,7 @@ describe('Ribbon logic', () => {
         let globalTooltipState = false
         let globalHighlightsState = false
         const analytics = new FakeAnalytics()
-        const annotationsCache = new PageAnnotationsCache({
-            normalizedPageUrl: currentTab.normalizedUrl,
-        })
+        const annotationsCache = new PageAnnotationsCache({})
 
         const syncSettings = createSyncSettingsStore({
             syncSettingsBG: backgroundModules.syncSettings,

@@ -20,7 +20,6 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-comparison'
 
 export interface PageAnnotationCacheDeps {
-    normalizedPageUrl: string
     sortingFn?: AnnotationsSorter
     events?: TypedEventEmitter<PageAnnotationsCacheEvents>
     debug?: boolean
@@ -67,10 +66,6 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     getLastAssignedListId = (): string => (this.listIdCounter - 1).toString()
     get isEmpty(): PageAnnotationsCacheInterface['isEmpty'] {
         return this.annotations.allIds.length === 0
-    }
-
-    get normalizedPageUrl(): PageAnnotationsCacheInterface['normalizedPageUrl'] {
-        return this.deps.normalizedPageUrl
     }
 
     get events(): PageAnnotationsCacheInterface['events'] {
@@ -235,9 +230,6 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         normalizedPageUrl,
         listIds,
     ) => {
-        if (this.deps.normalizedPageUrl !== normalizedPageUrl) {
-            this.deps.normalizedPageUrl = normalizedPageUrl
-        }
         if (this.pageListIds.has(normalizedPageUrl)) {
             this.pageListIds.get(normalizedPageUrl).clear()
         }
