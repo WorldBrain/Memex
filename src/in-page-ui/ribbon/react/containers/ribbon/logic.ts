@@ -48,6 +48,7 @@ export interface RibbonContainerState {
     areExtraButtonsShown: boolean
     areTutorialShown: boolean
     showFeed: boolean
+    showRemoveMenu: boolean
     highlights: ValuesOf<componentTypes.RibbonHighlightsProps>
     tooltip: ValuesOf<componentTypes.RibbonTooltipProps>
     // sidebar: ValuesOf<componentTypes.RibbonSidebarProps>
@@ -66,6 +67,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleRibbon: null
         highlightAnnotations: null
         toggleShowExtraButtons: null
+        toggleRemoveMenu: boolean | null
         toggleShowTutorial: null
         toggleFeed: null
         toggleReadingView: null
@@ -136,6 +138,7 @@ export class RibbonContainerLogic extends UILogic<
             showFeed: false,
             isWidthLocked: false,
             isRibbonEnabled: null,
+            showRemoveMenu: false,
             highlights: {
                 areHighlightsEnabled: false,
             },
@@ -344,6 +347,7 @@ export class RibbonContainerLogic extends UILogic<
         const mutation: UIMutation<RibbonContainerState> = {
             showFeed: { $set: !previousState.showFeed },
             areExtraButtonsShown: { $set: false },
+            showRemoveMenu: { $set: false },
             areTutorialShown: { $set: false },
         }
 
@@ -377,6 +381,27 @@ export class RibbonContainerLogic extends UILogic<
 
         this.emitMutation(mutation)
     }
+    toggleRemoveMenu: EventHandler<'toggleRemoveMenu'> = ({
+        previousState,
+        event,
+    }) => {
+        const mutation: UIMutation<RibbonContainerState> = {
+            showRemoveMenu: {
+                $set: event != null ? event : !previousState.showRemoveMenu,
+            },
+            areExtraButtonsShown: { $set: false },
+            areTutorialShown: { $set: false },
+            showFeed: { $set: false },
+        }
+
+        if (!previousState.showRemoveMenu) {
+            mutation.commentBox = { showCommentBox: { $set: false } }
+            mutation.tagging = { showTagsPicker: { $set: false } }
+            mutation.lists = { showListsPicker: { $set: false } }
+        }
+
+        this.emitMutation(mutation)
+    }
 
     toggleShowTutorial: EventHandler<'toggleShowTutorial'> = ({
         previousState,
@@ -387,6 +412,7 @@ export class RibbonContainerLogic extends UILogic<
         const mutation: UIMutation<RibbonContainerState> = {
             areTutorialShown: { $set: !previousState.areTutorialShown },
             areExtraButtonsShown: { $set: false },
+            showRemoveMenu: { $set: false },
             showFeed: { $set: false },
         }
 
@@ -465,6 +491,7 @@ export class RibbonContainerLogic extends UILogic<
                       lists: { showListsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
                       areExtraButtonsShown: { $set: false },
+                      showRemoveMenu: { $set: false },
                       areTutorialShown: { $set: false },
                       showFeed: { $set: false },
                   }
@@ -583,6 +610,7 @@ export class RibbonContainerLogic extends UILogic<
                       lists: { showListsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
                       areExtraButtonsShown: { $set: false },
+                      showRemoveMenu: { $set: false },
                       areTutorialShown: { $set: false },
                   }
                 : {}
@@ -704,6 +732,7 @@ export class RibbonContainerLogic extends UILogic<
                       tagging: { showTagsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
                       areExtraButtonsShown: { $set: false },
+                      showRemoveMenu: { $set: false },
                       areTutorialShown: { $set: false },
                       showFeed: { $set: false },
                   }
@@ -723,6 +752,7 @@ export class RibbonContainerLogic extends UILogic<
                       tagging: { showTagsPicker: { $set: false } },
                       lists: { showListsPicker: { $set: false } },
                       areExtraButtonsShown: { $set: false },
+                      showRemoveMenu: { $set: false },
                       areTutorialShown: { $set: false },
                   }
                 : {}

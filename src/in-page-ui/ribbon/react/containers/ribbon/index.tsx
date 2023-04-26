@@ -56,6 +56,12 @@ export default class RibbonContainer extends StatefulUIElement<
     }
 
     componentDidUpdate(prevProps: RibbonContainerProps) {
+        if (
+            !this.props.inPageUI.componentsShown.ribbon &&
+            this.state.showRemoveMenu
+        ) {
+            this.processEvent('toggleRemoveMenu', false)
+        }
         const { currentTab } = this.props
 
         if (currentTab.url !== prevProps.currentTab.url) {
@@ -131,10 +137,14 @@ export default class RibbonContainer extends StatefulUIElement<
                 toggleShowExtraButtons={() => {
                     this.processEvent('toggleShowExtraButtons', null)
                 }}
+                toggleRemoveMenu={() => {
+                    this.processEvent('toggleRemoveMenu', null)
+                }}
                 toggleShowTutorial={() => {
                     this.processEvent('toggleShowTutorial', null)
                 }}
                 showExtraButtons={this.state.areExtraButtonsShown}
+                showRemoveMenu={this.state.showRemoveMenu}
                 showTutorial={this.state.areTutorialShown}
                 showFeed={this.state.showFeed}
                 toggleFeed={() => {

@@ -275,6 +275,10 @@ export async function main(
     })
     const sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
+    const isSidebarEnabled =
+        (await sidebarUtils.getSidebarState()) &&
+        (pageInfo.isPdf ? isPdfViewerRunning : true)
+
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
     const inPageUI = new SharedInPageUIState({
@@ -305,7 +309,14 @@ export async function main(
     const annotationsCache = new PageAnnotationsCache({ normalizedPageUrl })
     window['__annotationsCache'] = annotationsCache
 
-    const pageHasBookark = await bookmarks.pageHasBookmark(fullPageUrl)
+    const pageHasBookark =
+        (await bookmarks.pageHasBookmark(fullPageUrl)) ||
+        (await collectionsBG
+            .fetchPageLists({ url: fullPageUrl })
+            .then((lists) => lists.length > 0)) ||
+        (await annotationsBG
+            .getAllAnnotationsByUrl({ url: fullPageUrl })
+            .then((annotations) => annotations.length > 0))
     await bookmarks.setBookmarkStatusInBrowserIcon(pageHasBookark, fullPageUrl)
 
     const loadCacheDataPromise = hydrateCache({
@@ -700,9 +711,6 @@ export async function main(
     }
 
     const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
-    const isSidebarEnabled =
-        (await sidebarUtils.getSidebarState()) &&
-        (pageInfo.isPdf ? isPdfViewerRunning : true)
     const pageActivityStatus = await pageActivityIndicatorBG.getPageActivityStatus(
         fullPageUrl,
     )
