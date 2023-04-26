@@ -112,6 +112,7 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
+                annotations={this.props.annotationsCache}
                 contentSharingBG={this.props.contentSharing}
                 bgScriptBG={this.props.bgScriptBG}
                 spacesBG={this.props.customLists}

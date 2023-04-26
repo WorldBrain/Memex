@@ -62,8 +62,8 @@ class CollectionsButton extends PureComponent<Props> {
                 <Icon
                     filePath={
                         this.props.pageListsIds.length > 0
-                            ? icons.collectionsFull
-                            : icons.collectionsEmpty
+                            ? icons.plus
+                            : icons.plus
                     }
                     heightAndWidth="22px"
                     hoverOff

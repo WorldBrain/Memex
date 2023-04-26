@@ -281,7 +281,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                     </IconBlock>
                     <ContentArea>
                         <TitleArea>
-                            <Title>Bookmark this Page</Title>
+                            <Title>Quick Save Page</Title>
                             <KeyboardShortcuts
                                 keys={[getKeyName({ key: 'alt' }), 'S']}
                             />

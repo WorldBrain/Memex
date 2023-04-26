@@ -56,6 +56,7 @@ export interface RibbonContainerState {
     bookmark: ValuesOf<componentTypes.RibbonBookmarkProps>
     tagging: ValuesOf<componentTypes.RibbonTaggingProps>
     lists: ValuesOf<componentTypes.RibbonListsProps>
+    annotations: number
     search: ValuesOf<componentTypes.RibbonSearchProps>
     pausing: ValuesOf<componentTypes.RibbonPausingProps>
 }
@@ -160,6 +161,7 @@ export class RibbonContainerLogic extends UILogic<
                 showListsPicker: false,
                 pageListIds: [],
             },
+            annotations: null,
             search: {
                 showSearchBox: false,
                 searchValue: '',
@@ -221,6 +223,8 @@ export class RibbonContainerLogic extends UILogic<
         const lists = await this.dependencies.customLists.fetchPageLists({
             url,
         })
+        const annotations = await this.dependencies.annotationsCache.annotations
+            .allIds.length
 
         const bookmark = await this.dependencies.bookmarks.findBookmark(url)
 
@@ -254,6 +258,7 @@ export class RibbonContainerLogic extends UILogic<
                 },
             },
             lists: { pageListIds: { $set: lists } },
+            annotations: { $set: annotations },
         })
     }
 

@@ -963,6 +963,18 @@ export default class Ribbon extends Component<Props, State> {
                                                         this.sidebarButtonRef
                                                     }
                                                 />
+                                                {this.props.annotations
+                                                    .annotations.allIds.length >
+                                                    0 && (
+                                                    <SpacesCounter>
+                                                        {
+                                                            this.props
+                                                                .annotations
+                                                                .annotations
+                                                                .allIds.length
+                                                        }
+                                                    </SpacesCounter>
+                                                )}
                                             </TooltipBox>
                                         )}
                                         <TooltipBox
