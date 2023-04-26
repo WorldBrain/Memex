@@ -11,7 +11,6 @@ import ListsSidebarContainer from './lists-sidebar'
 import SearchResultsContainer from './search-results'
 import HeaderContainer from './header'
 import { runInBackground } from 'src/util/webextensionRPC'
-import { Props as ListSidebarItemProps } from './lists-sidebar/components/sidebar-item-with-menu'
 import * as searchResultUtils from './search-results/util'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 import Onboarding from 'src/overview/onboarding'
@@ -56,6 +55,9 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { createYoutubeServiceOptions } from '@worldbrain/memex-common/lib/services/youtube/library'
+import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import * as cacheUtils from 'src/annotations/cache/utils'
+import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 export interface Props extends DashboardDependencies {}
 
@@ -212,84 +214,6 @@ export class DashboardContainer extends StatefulUIElement<
         await this.props.listsBG.createCustomList({ name: name, id: listId })
 
         return listId
-    }
-
-    private listsStateToProps = (
-        listIds: number[],
-        source: ListSource,
-    ): ListSidebarItemProps[] => {
-        const { listsSidebar } = this.state
-
-        if (listIds == null) {
-            return undefined
-        }
-
-        return listIds.map((listId) => ({
-            source,
-            listId,
-            listData: listsSidebar.listData[listId],
-            name: listsSidebar.listData[listId].name,
-            isEditing: listsSidebar.editingListId === listId,
-            isCollaborative:
-                source === 'followed-lists'
-                    ? false
-                    : listsSidebar.listData[listId].remoteId != null,
-            isMenuDisplayed:
-                source === 'followed-lists'
-                    ? false
-                    : listsSidebar.showMoreMenuListId === listId,
-            selectedState: {
-                isSelected: listsSidebar.selectedListId === listId,
-                onSelection:
-                    source === 'followed-lists'
-                        ? () =>
-                              this.props.openCollectionPage(
-                                  listsSidebar.listData[listId].remoteId,
-                              )
-                        : () =>
-                              this.processEvent('setSelectedListId', {
-                                  listId: listsSidebar.listData[listId].id,
-                              }),
-            },
-            editableProps: {
-                changeListName: (value) =>
-                    this.processEvent('changeListName', { value }),
-                onCancelClick: () => this.processEvent('cancelListEdit', null),
-                cancelListEdit: () => this.processEvent('cancelListEdit', null),
-                onConfirmClick: (value) =>
-                    this.processEvent('confirmListEdit', { value }),
-                initValue: listsSidebar.listData[listId].name,
-                errorMessage: listsSidebar.editListErrorMessage,
-            },
-            onMoreActionClick:
-                source !== 'followed-lists' &&
-                listsSidebar.listData[listId].isOwnedList
-                    ? () =>
-                          this.processEvent('setShowMoreMenuListId', {
-                              listId: listsSidebar.listData[listId].id,
-                          })
-                    : undefined,
-            onRenameClick: () =>
-                this.processEvent('setEditingListId', { listId }),
-            onDeleteClick: (e) => {
-                e.stopPropagation()
-                this.processEvent('setDeletingListId', { listId })
-            },
-            onSpaceShare: (remoteListId) =>
-                this.processEvent('setListRemoteId', {
-                    localListId: listId,
-                    remoteListId,
-                }),
-            services: {
-                ...this.props.services,
-                contentSharing: this.props.contentShareBG,
-            },
-            shareList: async () => {
-                await this.processEvent('shareList', {
-                    listId,
-                })
-            },
-        }))
     }
 
     private renderFiltersBar() {
@@ -460,6 +384,7 @@ export class DashboardContainer extends StatefulUIElement<
                         />
                     ),
                     searchQuery: searchFilters.searchQuery,
+                    isSidebarLocked: listsSidebar.isSidebarLocked,
                     searchFiltersOpen: searchFilters.searchFiltersOpen,
                     onSearchFiltersOpen: () =>
                         this.processEvent('setSearchFiltersOpen', {
@@ -469,25 +394,6 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setSearchQuery', { query }),
                     onInputClear: () =>
                         this.processEvent('setSearchQuery', { query: '' }),
-                }}
-                sidebarLockedState={{
-                    isSidebarLocked: listsSidebar.isSidebarLocked ?? undefined,
-                    toggleSidebarLockedState: () => {
-                        this.processEvent('setSidebarLocked', {
-                            isLocked: !listsSidebar.isSidebarLocked,
-                        })
-                    },
-                }}
-                sidebarToggleHoverState={{
-                    isHovered: listsSidebar.isSidebarToggleHovered,
-                    onHoverEnter: () =>
-                        this.processEvent('setSidebarToggleHovered', {
-                            isHovered: true,
-                        }),
-                    onHoverLeave: () =>
-                        this.processEvent('setSidebarToggleHovered', {
-                            isHovered: false,
-                        }),
                 }}
                 selectedListName={
                     listsSidebar.listData[listsSidebar.selectedListId]?.name
@@ -519,115 +425,120 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private renderListsSidebar() {
-        const { listsSidebar } = this.state
+        const { listsSidebar, currentUser } = this.state
 
-        const lockedState = {
-            isSidebarLocked: listsSidebar.isSidebarLocked,
-            toggleSidebarLockedState: () => {
-                this.processEvent('setSidebarLocked', {
-                    isLocked: !listsSidebar.isSidebarLocked,
-                })
-                // this.processEvent('calculateMainContentWidth', {
-                //     spaceSidebarWidth: !listsSidebar.isSidebarLocked
-                //         ? '250px'
-                //         : '0px',
-                // })
-            },
-        }
+        const allLists = normalizedStateToArray(listsSidebar.lists)
+        const userReference: UserReference = currentUser
+            ? { type: 'user-reference', id: currentUser.id }
+            : undefined
+
+        const ownListsData = allLists.filter(
+            (list) =>
+                cacheUtils.deriveListOwnershipStatus(list, userReference) ===
+                'Creator',
+        )
+        const followedListsData = allLists.filter(
+            (list) =>
+                cacheUtils.deriveListOwnershipStatus(list, userReference) ===
+                    'Follower' && !list.isForeignList,
+        )
+        const joinedListsData = allLists.filter(
+            (list) =>
+                cacheUtils.deriveListOwnershipStatus(list, userReference) ===
+                'Contributor',
+        )
 
         return (
             <ListsSidebarContainer
                 {...listsSidebar}
                 spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
-                lockedState={lockedState}
-                openFeedUrl={() =>
-                    this.processEvent('clickFeedActivityIndicator', null)
+                openRemoteListPage={(remoteListId) =>
+                    this.props.openCollectionPage(remoteListId)
                 }
                 switchToFeed={() => this.processEvent('switchToFeed', null)}
                 onAllSavedSelection={() =>
                     this.processEvent('setSelectedListId', { listId: null })
                 }
-                isAllSavedSelected={null}
                 onListSelection={(listId) => {
                     this.processEvent('setSelectedListId', { listId })
                 }}
-                peekState={{
-                    isSidebarPeeking: listsSidebar.isSidebarPeeking,
-                    setSidebarPeekState: (isPeeking) => () =>
-                        this.processEvent('setSidebarPeeking', {
-                            isPeeking,
-                        }),
-                }}
+                onConfirmAddList={(value) =>
+                    this.processEvent('confirmListCreate', { value })
+                }
+                onCancelAddList={() =>
+                    this.processEvent('cancelListCreate', null)
+                }
+                setSidebarPeekState={(isPeeking) => () =>
+                    this.processEvent('setSidebarPeeking', {
+                        isPeeking,
+                    })}
                 searchBarProps={{
                     searchQuery: listsSidebar.searchQuery,
-                    sidebarLockedState: lockedState,
+                    isSidebarLocked: listsSidebar.isSidebarLocked,
                     onCreateNew: (value) =>
                         this.processEvent('confirmListCreate', { value }),
                     onSearchQueryChange: (query) =>
                         this.processEvent('setListQueryValue', { query }),
                     onInputClear: () =>
                         this.processEvent('setListQueryValue', { query: '' }),
-                    localLists: this.listsStateToProps(
-                        listsSidebar.localLists.filteredListIds ?? undefined,
-                        'local-lists',
-                    ),
+                    areLocalListsEmpty:
+                        listsSidebar.localLists.filteredListIds.length === 0,
                 }}
-                listsGroups={[
-                    {
-                        ...listsSidebar.localLists,
-                        title: 'My Spaces',
-                        onAddBtnClick: (event) => {
-                            event.preventDefault()
-                            event.stopPropagation()
-                            this.processEvent('setAddListInputShown', {
-                                isShown: !listsSidebar.localLists
-                                    .isAddInputShown,
-                            })
-                        },
-                        confirmAddNewList: (value) =>
-                            this.processEvent('confirmListCreate', { value }),
-                        cancelAddNewList: (shouldSave) =>
-                            this.processEvent('cancelListCreate', null),
-                        onExpandBtnClick: () =>
-                            this.processEvent('setLocalListsExpanded', {
-                                isExpanded: !listsSidebar.localLists.isExpanded,
-                            }),
-                        listsArray: this.listsStateToProps(
-                            listsSidebar.localLists.filteredListIds ??
-                                undefined,
-                            'local-lists',
-                        ),
+                ownListsGroup={{
+                    isExpanded: listsSidebar.localLists.isExpanded,
+                    loadingState: listsSidebar.listLoadState,
+                    title: 'My Spaces',
+                    listData: ownListsData,
+                    onAddBtnClick: (event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        this.processEvent('setAddListInputShown', {
+                            isShown: !listsSidebar.localLists.isAddInputShown,
+                        })
                     },
-                    {
-                        ...listsSidebar.followedLists,
-                        title: 'Followed Spaces',
-                        onExpandBtnClick: () =>
-                            this.processEvent('setFollowedListsExpanded', {
-                                isExpanded: !listsSidebar.followedLists
-                                    .isExpanded,
-                            }),
-                        listsArray: this.listsStateToProps(
-                            listsSidebar.followedLists.filteredListIds ??
-                                undefined,
-                            'followed-lists',
-                        ),
+                    onExpandBtnClick: () =>
+                        this.processEvent('setLocalListsExpanded', {
+                            isExpanded: !listsSidebar.localLists.isExpanded,
+                        }),
+                }}
+                followedListsGroup={{
+                    isExpanded: listsSidebar.followedLists.isExpanded,
+                    loadingState: listsSidebar.listLoadState,
+                    title: 'Followed Spaces',
+                    listData: followedListsData,
+                    onExpandBtnClick: () =>
+                        this.processEvent('setFollowedListsExpanded', {
+                            isExpanded: !listsSidebar.followedLists.isExpanded,
+                        }),
+                }}
+                joinedListsGroup={{
+                    isExpanded: listsSidebar.joinedLists.isExpanded,
+                    loadingState: listsSidebar.listLoadState,
+                    title: 'Joined Spaces',
+                    onExpandBtnClick: () => {
+                        this.processEvent('setJoinedListsExpanded', {
+                            isExpanded: !listsSidebar.joinedLists.isExpanded,
+                        })
                     },
-                    {
-                        ...listsSidebar.joinedLists,
-                        title: 'Joined Spaces',
-                        onExpandBtnClick: () => {
-                            this.processEvent('setJoinedListsExpanded', {
-                                isExpanded: !listsSidebar.joinedLists
-                                    .isExpanded,
-                            })
-                        },
-                        listsArray: this.listsStateToProps(
-                            listsSidebar.joinedLists.filteredListIds ??
-                                undefined,
-                            'joined-lists',
-                        ),
-                    },
-                ]}
+                    listData: joinedListsData,
+                }}
+                initContextMenuBtnProps={(listId) => ({
+                    loadOwnershipData: true,
+                    spacesBG: this.props.listsBG,
+                    contentSharingBG: this.props.contentShareBG,
+                    onCancelEdit: () =>
+                        this.processEvent('cancelListEdit', null),
+                    onConfirmEdit: (value) =>
+                        this.processEvent('confirmListEdit', { value, listId }),
+                    changeListName: (value) =>
+                        this.processEvent('changeListName', { value, listId }),
+                    onDeleteSpaceConfirm: () =>
+                        this.processEvent('confirmListDelete', { listId }),
+                    toggleMenu: () =>
+                        this.processEvent('setShowMoreMenuListId', { listId }),
+                    onSpaceShare: () =>
+                        this.processEvent('shareList', { listId }),
+                })}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () => {
                         this.processEvent('setDragOverListId', { listId })
@@ -642,6 +553,7 @@ export class DashboardContainer extends StatefulUIElement<
                             dataTransfer,
                         })
                     },
+                    canReceiveDroppedItems: true,
                     isDraggedOver: listId === listsSidebar.dragOverListId,
                     wasPageDropped:
                         listsSidebar.listData[listId]?.wasPageDropped,
@@ -1382,32 +1294,6 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        const lockedState = {
-            isSidebarLocked: listsSidebar.isSidebarLocked,
-            toggleSidebarLockedState: () => {
-                this.processEvent('setSidebarLocked', {
-                    isLocked: !listsSidebar.isSidebarLocked,
-                })
-                // this.processEvent('calculateMainContentWidth', {
-                //     spaceSidebarWidth: !listsSidebar.isSidebarLocked
-                //         ? '250px'
-                //         : '0px',
-                // })
-            },
-        }
-
-        const sidebarToggleHoverState = {
-            isHovered: listsSidebar.isSidebarToggleHovered,
-            onHoverEnter: () =>
-                this.processEvent('setSidebarToggleHovered', {
-                    isHovered: true,
-                }),
-            onHoverLeave: () =>
-                this.processEvent('setSidebarToggleHovered', {
-                    isHovered: false,
-                }),
-        }
-
         const style = {
             display:
                 !listsSidebar.isSidebarPeeking && !listsSidebar.isSidebarLocked
@@ -1430,8 +1316,29 @@ export class DashboardContainer extends StatefulUIElement<
                     <SidebarHeaderContainer>
                         <SidebarToggleBox>
                             <SidebarToggle
-                                sidebarLockedState={lockedState}
-                                hoverState={sidebarToggleHoverState}
+                                isSidebarLocked={listsSidebar.isSidebarLocked}
+                                toggleSidebarLockedState={() =>
+                                    this.processEvent('setSidebarLocked', {
+                                        isLocked: !listsSidebar.isSidebarLocked,
+                                    })
+                                }
+                                isHovered={listsSidebar.isSidebarToggleHovered}
+                                onHoverEnter={() =>
+                                    this.processEvent(
+                                        'setSidebarToggleHovered',
+                                        {
+                                            isHovered: true,
+                                        },
+                                    )
+                                }
+                                onHoverLeave={() =>
+                                    this.processEvent(
+                                        'setSidebarToggleHovered',
+                                        {
+                                            isHovered: false,
+                                        },
+                                    )
+                                }
                             />
                             <ActivityIndicator
                                 hasActivities={listsSidebar.hasFeedActivity}

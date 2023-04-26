@@ -1,222 +1,216 @@
 import React, { PureComponent } from 'react'
-import styled, { css } from 'styled-components'
+import styled, { createGlobalStyle } from 'styled-components'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-
-import { SidebarLockedState, SidebarPeekState } from './types'
+import { fonts } from 'src/dashboard-refactor/styles'
 import ListsSidebarGroup, {
-    ListsSidebarGroupProps,
+    Props as SidebarGroupProps,
 } from './components/sidebar-group'
 import ListsSidebarSearchBar, {
     ListsSidebarSearchBarProps,
 } from './components/search-bar'
+import SpaceContextMenuBtn, {
+    Props as SpaceContextMenuBtnProps,
+} from './components/space-context-menu-btn'
+import DropTargetSidebarItem from './components/drop-target-sidebar-item'
+import FollowedListSidebarItem from './components/followed-list-sidebar-item'
+import StaticSidebarItem from './components/static-sidebar-item'
+import SidebarItemInput from './components/sidebar-editable-item'
 import Margin from '../components/Margin'
-import ListsSidebarItem, {
-    Props as ListsSidebarItemProps,
-} from './components/sidebar-item-with-menu'
-import { DropReceivingState } from '../types'
-import ListsSidebarEditableItem from './components/sidebar-editable-item'
-import { createGlobalStyle } from 'styled-components'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-export interface ListsSidebarProps {
-    openFeedUrl: () => void
+import type { RootState as ListsSidebarState } from './types'
+import type { DropReceivingState } from '../types'
+import type { UnifiedList } from 'src/annotations/cache/types'
+
+type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
+    listData: UnifiedList[]
+}
+
+export interface ListsSidebarProps extends ListsSidebarState {
     switchToFeed: () => void
-    onListSelection: (id: number) => void
-    isAllSavedSelected?: boolean
-    onAllSavedSelection: (id: number) => void
-    hasFeedActivity?: boolean
-    inboxUnreadCount: number
-    selectedListId?: number
-    addListErrorMessage: string | null
-    lockedState: SidebarLockedState
-    peekState: SidebarPeekState
+    onListSelection: (id: string) => void
+    openRemoteListPage: (remoteListId: string) => void
+    onCancelAddList: () => void
+    onConfirmAddList: (value: string) => void
+    onAllSavedSelection: () => void
+    setSidebarPeekState: (isPeeking: boolean) => () => void
+    initDropReceivingState: (listId: string) => DropReceivingState
+    initContextMenuBtnProps: (
+        listId: string,
+    ) => Omit<
+        SpaceContextMenuBtnProps,
+        | 'isMenuDisplayed'
+        | 'errorMessage'
+        | 'localListId'
+        | 'remoteListId'
+        | 'spaceName'
+    >
     searchBarProps: ListsSidebarSearchBarProps
-    listsGroups: ListsSidebarGroupProps[]
-    initDropReceivingState: (listId: number) => DropReceivingState
-    spaceSidebarWidth: number
+    ownListsGroup: ListGroup
+    joinedListsGroup: ListGroup
+    followedListsGroup: ListGroup
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
-    private renderLists = (
-        lists: ListsSidebarItemProps[],
-        canReceiveDroppedItems: boolean,
-    ) =>
-        lists.map((listObj, i) => (
-            <ListsSidebarItem
-                key={i}
-                dropReceivingState={{
-                    ...this.props.initDropReceivingState(listObj.listId),
-                    canReceiveDroppedItems,
-                }}
-                selectedListId={this.props.selectedListId}
-                {...listObj}
-            />
-        ))
-
-    private SidebarContainer = React.createRef()
-
-    private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
-        window.location.hash = '#/' + route
-    }
-
     render() {
-        const {
-            lockedState: { isSidebarLocked },
-            peekState: { isSidebarPeeking },
-            addListErrorMessage,
-            searchBarProps,
-            listsGroups,
-        } = this.props
-
         return (
             <Container
                 onMouseOver={
-                    !this.props.lockedState.isSidebarLocked &&
-                    this.props.peekState.setSidebarPeekState(true)
+                    !this.props.isSidebarLocked &&
+                    this.props.setSidebarPeekState(true)
                 }
                 spaceSidebarWidth={this.props.spaceSidebarWidth}
             >
                 <GlobalStyle />
                 <SidebarInnerContent>
                     <TopGroup>
-                        {this.renderLists(
-                            [
-                                {
-                                    name: 'Activity Feed',
-                                    listId: SPECIAL_LIST_IDS.INBOX + 2,
-                                    hasActivity: this.props.hasFeedActivity,
-                                    selectedState: {
-                                        isSelected:
-                                            this.props.selectedListId ===
-                                            SPECIAL_LIST_IDS.INBOX + 2,
-                                        onSelection: this.props.switchToFeed,
-                                    },
-                                },
-                            ],
-                            false,
-                        )}
-                        {this.renderLists(
-                            [
-                                {
-                                    name: 'All Saved',
-                                    listId: -1,
-                                    selectedState: {
-                                        isSelected:
-                                            this.props.selectedListId == null ||
-                                            this.props.selectedListId === -1,
-                                        onSelection: this.props
-                                            .onAllSavedSelection,
-                                    },
-                                },
-                                {
-                                    name: 'Inbox',
-                                    listId: SPECIAL_LIST_IDS.INBOX,
-                                    newItemsCount: this.props.inboxUnreadCount,
-                                    selectedState: {
-                                        isSelected:
-                                            this.props.selectedListId ===
-                                            SPECIAL_LIST_IDS.INBOX,
-                                        onSelection: this.props.onListSelection,
-                                    },
-                                },
-                                {
-                                    name: 'From Mobile',
-                                    listId: SPECIAL_LIST_IDS.MOBILE,
-                                    selectedState: {
-                                        isSelected:
-                                            this.props.selectedListId ===
-                                            SPECIAL_LIST_IDS.MOBILE,
-                                        onSelection: this.props.onListSelection,
-                                    },
-                                },
-                            ],
-                            false,
-                        )}
+                        <StaticSidebarItem
+                            icon="feed"
+                            name="Activity Feed"
+                            isSelected={
+                                this.props.selectedListId ===
+                                SPECIAL_LIST_IDS.INBOX + 2
+                            }
+                            onClick={this.props.switchToFeed}
+                            renderRightSideIcon={
+                                this.props.hasFeedActivity
+                                    ? () => <ActivityBeacon />
+                                    : null
+                            }
+                        />
+                        <StaticSidebarItem
+                            icon="heartEmpty"
+                            name="All Saved"
+                            isSelected={
+                                this.props.selectedListId == null ||
+                                this.props.selectedListId === -1
+                            }
+                            onClick={this.props.onAllSavedSelection}
+                        />
+                        <StaticSidebarItem
+                            icon="arrowDown"
+                            name="Inbox"
+                            isSelected={
+                                this.props.selectedListId ==
+                                SPECIAL_LIST_IDS.INBOX
+                            }
+                            onClick={() =>
+                                this.props.onListSelection(
+                                    SPECIAL_LIST_IDS.INBOX,
+                                )
+                            }
+                            renderRightSideIcon={
+                                this.props.inboxUnreadCount > 0
+                                    ? () => (
+                                          <NewItemsCount>
+                                              <NewItemsCountInnerDiv>
+                                                  {this.props.inboxUnreadCount}
+                                              </NewItemsCountInnerDiv>
+                                          </NewItemsCount>
+                                      )
+                                    : null
+                            }
+                        />
+                        <StaticSidebarItem
+                            icon="phone"
+                            name="From Mobile"
+                            isSelected={
+                                this.props.selectedListId ==
+                                SPECIAL_LIST_IDS.MOBILE
+                            }
+                            onClick={() =>
+                                this.props.onListSelection(
+                                    SPECIAL_LIST_IDS.MOBILE,
+                                )
+                            }
+                        />
                     </TopGroup>
                     <Separator />
                     <Margin top="10px">
-                        <ListsSidebarSearchBar {...searchBarProps} />
+                        <ListsSidebarSearchBar {...this.props.searchBarProps} />
                     </Margin>
-                    {listsGroups.map((group, i) => (
-                        <>
-                            <ListsSidebarGroup {...group}>
-                                {group.isAddInputShown && (
-                                    <ListsSidebarEditableItem
-                                        onConfirmClick={group.confirmAddNewList}
-                                        onCancelClick={group.cancelAddNewList}
-                                        errorMessage={addListErrorMessage}
+                    <ListsSidebarGroup
+                        {...this.props.ownListsGroup}
+                        listsCount={this.props.ownListsGroup.listData.length}
+                    >
+                        {this.props.localLists.isAddInputShown && (
+                            <SidebarItemInput
+                                onCancelClick={this.props.onCancelAddList}
+                                onConfirmClick={this.props.onConfirmAddList}
+                                errorMessage={this.props.addListErrorMessage}
+                            />
+                        )}
+                        {this.props.ownListsGroup.listData.map((list) => (
+                            <DropTargetSidebarItem
+                                key={list.unifiedId}
+                                name={list.name}
+                                isSelected={
+                                    this.props.selectedListId === list.unifiedId
+                                }
+                                onClick={() =>
+                                    this.props.onListSelection(list.unifiedId)
+                                }
+                                dropReceivingState={this.props.initDropReceivingState(
+                                    list.unifiedId,
+                                )}
+                                isCollaborative={list.remoteId != null}
+                                renderRightSideIcon={() => (
+                                    <SpaceContextMenuBtn
+                                        {...this.props.initContextMenuBtnProps(
+                                            list.unifiedId,
+                                        )}
+                                        isMenuDisplayed={
+                                            this.props.showMoreMenuListId ===
+                                            list.unifiedId
+                                        }
+                                        errorMessage={
+                                            this.props.editListErrorMessage
+                                        }
+                                        localListId={list.localId!}
+                                        remoteListId={list.remoteId ?? null}
+                                        spaceName={list.name}
                                     />
                                 )}
-                                {group.listsArray != null ? (
-                                    group.title === 'My Spaces' &&
-                                    group.listsArray.length === 0 ? (
-                                        !(
-                                            !group.isAddInputShown &&
-                                            searchBarProps.searchQuery.length >
-                                                0 && (
-                                                <NoCollectionsMessage
-                                                    onClick={
-                                                        group.onAddBtnClick
-                                                    }
-                                                >
-                                                    <SectionCircle>
-                                                        <Icon
-                                                            filePath={'plus'}
-                                                            heightAndWidth="14px"
-                                                            color="prime1"
-                                                            hoverOff
-                                                        />
-                                                    </SectionCircle>
-                                                    <InfoText>
-                                                        Create your
-                                                        <Link>first Space</Link>
-                                                    </InfoText>
-                                                </NoCollectionsMessage>
-                                            )
-                                        )
-                                    ) : (
-                                        <>
-                                            {group.title ===
-                                                'Followed Spaces' &&
-                                            group.listsArray != null &&
-                                            group.listsArray.length === 0 &&
-                                            searchBarProps.searchQuery
-                                                .length === 0 ? (
-                                                <NoCollectionsMessage
-                                                    onClick={() =>
-                                                        window.open(
-                                                            'https://links.memex.garden/follow-first-space',
-                                                        )
-                                                    }
-                                                >
-                                                    <SectionCircle>
-                                                        <Icon
-                                                            filePath={
-                                                                'heartEmpty'
-                                                            }
-                                                            heightAndWidth="14px"
-                                                            color="prime1"
-                                                            hoverOff
-                                                        />
-                                                    </SectionCircle>
-                                                    <InfoText>
-                                                        Follow your
-                                                        <Link>first Space</Link>
-                                                    </InfoText>
-                                                </NoCollectionsMessage>
-                                            ) : (
-                                                this.renderLists(
-                                                    group.listsArray ??
-                                                        undefined,
-                                                    true,
-                                                )
-                                            )}
-                                        </>
+                            />
+                        ))}
+                    </ListsSidebarGroup>
+                    <ListsSidebarGroup
+                        {...this.props.followedListsGroup}
+                        listsCount={
+                            this.props.followedListsGroup.listData.length
+                        }
+                    >
+                        {this.props.followedListsGroup.listData.map((list) => (
+                            <FollowedListSidebarItem
+                                key={list.unifiedId}
+                                name={list.name}
+                                onClick={() =>
+                                    this.props.openRemoteListPage(
+                                        list.remoteId!,
                                     )
-                                ) : undefined}
-                            </ListsSidebarGroup>
-                            <Separator />
-                        </>
-                    ))}
+                                }
+                            />
+                        ))}
+                    </ListsSidebarGroup>
+                    <ListsSidebarGroup
+                        {...this.props.joinedListsGroup}
+                        listsCount={this.props.joinedListsGroup.listData.length}
+                    >
+                        {this.props.joinedListsGroup.listData.map((list) => (
+                            <DropTargetSidebarItem
+                                key={list.unifiedId}
+                                name={list.name}
+                                isSelected={
+                                    this.props.selectedListId === list.unifiedId
+                                }
+                                onClick={() =>
+                                    this.props.onListSelection(list.unifiedId)
+                                }
+                                dropReceivingState={this.props.initDropReceivingState(
+                                    list.unifiedId,
+                                )}
+                                isCollaborative
+                            />
+                        ))}
+                    </ListsSidebarGroup>
                 </SidebarInnerContent>
             </Container>
         )
@@ -330,4 +324,35 @@ const TopGroup = styled.div`
     display: flex;
     flex-direction: column;
     padding: 10px 0px;
+`
+
+const ActivityBeacon = styled.div`
+    width: 14px;
+    height: 14px;
+    border-radius: 20px;
+    background-color: ${(props) => props.theme.colors.prime1};
+`
+
+const NewItemsCount = styled.div`
+    width: fit-content;
+    min-width: 20px;
+    height: 14px;
+    border-radius: 30px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    background-color: ${(props) => props.theme.colors.prime1};
+    padding: 2px 4px;
+    color: ${(props) => props.theme.colors.black};
+    text-align: center;
+    font-weight: 500;
+    justify-content: center;
+`
+
+const NewItemsCountInnerDiv = styled.div`
+    font-family: ${fonts.primary.name};
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 14px;
+    padding: 2px 0px;
 `

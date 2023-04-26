@@ -29,9 +29,9 @@ describe('Dashboard Refactor misc logic', () => {
             { listId: listIds[0], description: testDescription },
         )
 
-        expect(
-            searchResults.state.listsSidebar.localLists.loadingState,
-        ).toEqual('pristine')
+        expect(searchResults.state.listsSidebar.listLoadState).toEqual(
+            'pristine',
+        )
         expect(searchResults.state.listsSidebar.listData).toEqual({})
         expect(
             searchResults.state.listsSidebar.localLists.filteredListIds,
@@ -42,9 +42,9 @@ describe('Dashboard Refactor misc logic', () => {
 
         await searchResults.processEvent('init', null)
 
-        expect(
-            searchResults.state.listsSidebar.localLists.loadingState,
-        ).toEqual('success')
+        expect(searchResults.state.listsSidebar.listLoadState).toEqual(
+            'success',
+        )
         expect(searchResults.state.listsSidebar.listData).toEqual({
             [listIds[0]]: expect.objectContaining({
                 id: listIds[0],
@@ -140,18 +140,18 @@ describe('Dashboard Refactor misc logic', () => {
         ])
 
         expect(searchResults.state.listsSidebar.listData).toEqual({})
-        expect(
-            searchResults.state.listsSidebar.localLists.loadingState,
-        ).toEqual('pristine')
+        expect(searchResults.state.listsSidebar.listLoadState).toEqual(
+            'pristine',
+        )
         expect(
             searchResults.state.listsSidebar.localLists.filteredListIds,
         ).toEqual([])
         expect(searchResults.state.listsSidebar.localLists.allListIds).toEqual(
             [],
         )
-        expect(
-            searchResults.state.listsSidebar.followedLists.loadingState,
-        ).toEqual('pristine')
+        expect(searchResults.state.listsSidebar.listLoadState).toEqual(
+            'pristine',
+        )
         expect(
             searchResults.state.listsSidebar.followedLists.filteredListIds,
         ).toEqual([])
@@ -179,18 +179,18 @@ describe('Dashboard Refactor misc logic', () => {
                 isJoinedList: false,
             },
         })
-        expect(
-            searchResults.state.listsSidebar.localLists.loadingState,
-        ).toEqual('success')
+        expect(searchResults.state.listsSidebar.listLoadState).toEqual(
+            'success',
+        )
         expect(
             searchResults.state.listsSidebar.localLists.filteredListIds,
         ).toEqual([123])
         expect(searchResults.state.listsSidebar.localLists.allListIds).toEqual([
             123,
         ])
-        expect(
-            searchResults.state.listsSidebar.followedLists.loadingState,
-        ).toEqual('success')
+        expect(searchResults.state.listsSidebar.listLoadState).toEqual(
+            'success',
+        )
         expect(
             searchResults.state.listsSidebar.followedLists.filteredListIds,
         ).toEqual([sharedListCData.createdWhen])

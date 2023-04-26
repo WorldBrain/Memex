@@ -90,9 +90,7 @@ describe('Dashboard lists sidebar logic', () => {
             overrideSearchTrigger: true,
         })
 
-        expect(searchResults.state.listsSidebar.selectedListId).toEqual(
-            undefined,
-        )
+        expect(searchResults.state.listsSidebar.selectedListId).toEqual(null)
         expect(searchResults.logic['searchTriggeredCount']).toBe(0)
 
         await searchResults.processEvent('setSelectedListId', { listId: 123 })
@@ -169,7 +167,7 @@ describe('Dashboard lists sidebar logic', () => {
         expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
 
         expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
-        // await searchResults.processEvent('setEditingListId', { listId: 123 })
+        await searchResults.processEvent('setEditingListId', { listId: 123 })
         // expect(searchResults.state.listsSidebar.showMoreMenuListId).toEqual(123)
         // expect(searchResults.state.listsSidebar.editingListId).toEqual(123)
 

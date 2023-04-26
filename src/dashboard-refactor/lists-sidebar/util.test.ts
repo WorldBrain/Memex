@@ -40,20 +40,17 @@ const testData: ListsState = {
         allListIds: [4, 5],
         filteredListIds: [4, 5],
         isExpanded: true,
-        loadingState: 'pristine',
     },
     localLists: {
         allListIds: [0, 1, 2, 3, 6, 7],
         filteredListIds: [0, 1, 2, 3, 6, 7],
         isExpanded: true,
-        loadingState: 'pristine',
         isAddInputShown: true,
     },
     joinedLists: {
         allListIds: [0, 1, 2, 3, 6, 7],
         filteredListIds: [0, 1, 2, 3, 6, 7],
         isExpanded: true,
-        loadingState: 'pristine',
     },
 }
 

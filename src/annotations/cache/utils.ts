@@ -345,3 +345,22 @@ function hydrateCacheLists(
 
     args.cache.setLists(listsToCache)
 }
+
+export function deriveListOwnershipStatus(
+    listData: UnifiedList,
+    currentUser?: UserReference,
+): 'Creator' | 'Follower' | 'Contributor' {
+    if (listData.remoteId != null && listData.localId == null) {
+        return 'Follower'
+    }
+
+    if (
+        listData.remoteId != null &&
+        listData.localId != null &&
+        listData.creator?.id !== currentUser?.id
+    ) {
+        return 'Contributor'
+    }
+
+    return 'Creator'
+}

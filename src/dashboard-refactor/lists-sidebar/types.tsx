@@ -1,18 +1,7 @@
-import { UIEvent } from 'ui-logic-core'
-
-import { ListsSidebarSearchBarProps } from './components/search-bar'
-import { ListsSidebarGroupProps } from './components/sidebar-group'
-import { TaskState } from 'ui-logic-core/lib/types'
-
-export interface SidebarLockedState {
-    toggleSidebarLockedState(): void
-    isSidebarLocked: boolean
-}
-
-export interface SidebarPeekState {
-    setSidebarPeekState: (isPeeking: boolean) => () => void
-    isSidebarPeeking: boolean
-}
+import type { UIEvent } from 'ui-logic-core'
+import type { ListsSidebarSearchBarProps } from './components/search-bar'
+import type { TaskState } from 'ui-logic-core/lib/types'
+import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
 export interface ListData {
     id: number
@@ -25,11 +14,10 @@ export interface ListData {
     wasPageDropped?: boolean
 }
 
-export interface ListGroupCommon
-    extends Pick<ListsSidebarGroupProps, 'loadingState'> {
+export interface ListGroupCommon {
     isExpanded: boolean
-    allListIds: number[]
-    filteredListIds: number[] | null
+    allListIds: string[]
+    filteredListIds: string[] | null
 }
 
 export interface FollowedListGroup extends ListGroupCommon {}
@@ -38,31 +26,33 @@ export interface LocalListGroup extends ListGroupCommon {
     isAddInputShown: boolean
 }
 
-export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
-    Pick<SidebarPeekState, 'isSidebarPeeking'> &
-    Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
-        listData: { [id: number]: ListData }
-        followedLists: FollowedListGroup
-        localLists: LocalListGroup
-        joinedLists: ListGroupCommon
-        spaceSidebarWidth: number
+export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
+    lists: PageAnnotationsCacheInterface['lists']
+    listData: { [id: number]: ListData }
+    followedLists: FollowedListGroup
+    localLists: LocalListGroup
+    joinedLists: ListGroupCommon
+    spaceSidebarWidth: number
 
-        inboxUnreadCount: number
-        dragOverListId?: number
-        editingListId?: number
-        selectedListId?: number
-        showMoreMenuListId?: number
-        isSidebarToggleHovered?: boolean
-        hasFeedActivity: boolean
-        addListErrorMessage: string | null
-        editListErrorMessage: string | null
+    inboxUnreadCount: number
+    dragOverListId?: string
+    editingListId?: string
+    selectedListId?: string
+    showMoreMenuListId?: string
+    isSidebarToggleHovered?: boolean
+    hasFeedActivity: boolean
+    isSidebarLocked: boolean
+    isSidebarPeeking: boolean
+    addListErrorMessage: string | null
+    editListErrorMessage: string | null
 
-        listDeleteState: TaskState
-        listCreateState: TaskState
-        listEditState: TaskState
-        listShareLoadingState: TaskState
-        showFeed?: boolean
-    }
+    listLoadState: TaskState
+    listEditState: TaskState
+    listDeleteState: TaskState
+    listCreateState: TaskState
+    listShareLoadingState: TaskState
+    showFeed?: boolean
+}
 
 export type Events = UIEvent<{
     setSidebarLocked: { isLocked: boolean }

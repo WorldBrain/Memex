@@ -10,7 +10,6 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 
 export interface Props extends Omit<SpaceContextMenuProps, 'copyToClipboard'> {
     isMenuDisplayed: boolean
-    cancelListEdit: () => void
     toggleMenu: React.MouseEventHandler
 }
 
@@ -38,7 +37,7 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
                 offsetY={-10}
                 closeComponent={(e) => {
                     this.toggleMenu(e)
-                    this.props.cancelListEdit()
+                    this.props.onCancelEdit()
                 }}
                 strategy={'fixed'}
                 width={'300px'}

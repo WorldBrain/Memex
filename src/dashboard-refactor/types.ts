@@ -108,17 +108,6 @@ export interface SearchResultTextPart {
     match: boolean
 }
 
-export interface HoverState {
-    onHoverEnter(id: number): void
-    onHoverLeave(id: number): void
-    isHovered: boolean
-}
-
-export interface SelectedState {
-    onSelection(id: number, isActive?: boolean): void
-    isSelected: boolean
-}
-
 export interface DashboardModalsState {
     shareListId?: number
     showLogin?: boolean
