@@ -1072,7 +1072,7 @@ export default class Ribbon extends Component<Props, State> {
 }
 
 const SupportContainer = styled.div`
-    max-height: 500px;
+    max-height: 600px;
     height: fit-content;
     overflow: scroll;
 
