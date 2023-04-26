@@ -1018,7 +1018,7 @@ export default class Ribbon extends Component<Props, State> {
                                                 this.tutorialButtonRef
                                             }
                                         />
-                                        {!this.state.updatesAvailable && (
+                                        {this.state.updatesAvailable && (
                                             <UpdateAvailableDot />
                                         )}
                                     </TooltipBox>
@@ -1171,11 +1171,6 @@ const UpperArea = styled.div`
     grid-gap: 8px;
 `
 
-const ButtonPositioning = styled.div`
-    position: absolute;
-    right: 15px;
-`
-
 const PickerButtonTopBar = styled.div`
     display: flex;
     justify-content: space-between;
@@ -1184,10 +1179,6 @@ const PickerButtonTopBar = styled.div`
     margin-left: -7px;
 `
 
-const ExtraButtonContainer = styled.div`
-    padding: 10px;
-    width: 300px;
-`
 const ColorPickerContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -1366,7 +1357,8 @@ const ExtraButtonRow = styled.div`
     width: fill-available;
     cursor: pointer;
     border-radius: 3px;
-    padding: 0 15px;
+    padding: 0 10px;
+    margin: 0 -5px;
     position: relative;
 
     &:hover {
