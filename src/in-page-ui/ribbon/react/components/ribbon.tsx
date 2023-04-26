@@ -685,13 +685,9 @@ export default class Ribbon extends Component<Props, State> {
                             hoverOff
                         />
                         {this.props.isRibbonEnabled ? (
-                            <InfoText>
-                                Disable Action Sidebar on all pages
-                            </InfoText>
+                            <InfoText>Disable Sidebar on all pages</InfoText>
                         ) : (
-                            <InfoText>
-                                Enable Action Sidebar on all pages
-                            </InfoText>
+                            <InfoText>Enable Sidebar on all pages</InfoText>
                         )}
                     </ExtraButtonRow>
                 </RemoveMenuContainer>
