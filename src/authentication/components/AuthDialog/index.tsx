@@ -480,13 +480,15 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
     }
 
     render() {
-        return this.state.saveState === 'running' ? (
-            <LoadingBox>
-                <LoadingIndicator />
-            </LoadingBox>
-        ) : (
-            <ContentBox>{this.renderAuthForm()}</ContentBox>
-        )
+        if (this.state.saveState === 'running') {
+            return (
+                <LoadingBox>
+                    <LoadingIndicator />
+                </LoadingBox>
+            )
+        } else {
+            return <ContentBox>{this.renderAuthForm()}</ContentBox>
+        }
     }
 }
 

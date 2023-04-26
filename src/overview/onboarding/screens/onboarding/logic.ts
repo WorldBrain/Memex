@@ -174,18 +174,24 @@ export default class Logic extends UILogic<State, Event> {
             loadState: { $set: 'running' },
         })
 
-        this.syncPromise = executeUITask(this, 'syncState', async () =>
-            this.dependencies.personalCloudBG.enableCloudSyncForNewInstall(),
-        )
+        if ((await this.dependencies.authBG.getCurrentUser()) != null) {
+            this.syncPromise = executeUITask(this, 'syncState', async () =>
+                this.dependencies.personalCloudBG.enableCloudSyncForNewInstall(),
+            )
 
-        if (this.hasLinkToOpen) {
-            await this.openLinkIfAvailable()
-            window.close()
-        } else {
-            this.dependencies.navToDashboard()
-            if (newSignUp) {
-                this.dependencies.navToGuidedTutorial()
+            if (this.hasLinkToOpen) {
+                await this.openLinkIfAvailable()
+                window.close()
+            } else {
+                this.dependencies.navToDashboard()
+                if (newSignUp) {
+                    this.dependencies.navToGuidedTutorial()
+                }
             }
+        } else {
+            this.emitMutation({
+                loadState: { $set: 'error' },
+            })
         }
     }
 

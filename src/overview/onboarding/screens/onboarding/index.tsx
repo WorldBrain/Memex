@@ -109,6 +109,11 @@ export default class OnboardingScreen extends StatefulUIElement<
                         />
                     </ContentBox>
                 )}
+                {this.state.loadState === 'error' && (
+                    <AuthErrorMessage>
+                        This account does not exist or the password is wrong.
+                    </AuthErrorMessage>
+                )}
             </LeftSide>
             {this.renderInfoSide()}
         </WelcomeContainer>
@@ -118,6 +123,20 @@ export default class OnboardingScreen extends StatefulUIElement<
         return <OnboardingBox>{this.renderLoginStep()}</OnboardingBox>
     }
 }
+
+const AuthErrorMessage = styled.div`
+    background-color: ${(props) => props.theme.colors.warning}10;
+    font-size: 14px;
+    padding-left: 10px;
+    margin-top: 5px;
+    color: ${(props) => props.theme.colors.warning};
+    border: 1px solid ${(props) => props.theme.colors.warning};
+    padding: 15px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
 
 const LoadingIndicatorBox = styled.div`
     display: flex;
