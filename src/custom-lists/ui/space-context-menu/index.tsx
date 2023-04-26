@@ -1,27 +1,23 @@
 import React from 'react'
-import styled, { css, keyframes } from 'styled-components'
+import styled, { css } from 'styled-components'
 import Logic, { Dependencies, State, Event } from './logic'
-import { fonts } from 'src/dashboard-refactor/styles'
-import colors from 'src/dashboard-refactor/colors'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import * as icons from 'src/common-ui/components/design-library/icons'
 import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
-import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { StatefulUIElement } from 'src/util/ui-logic'
-import EditableMenuItem, {
-    Props as EditableMenuItemProps,
-} from 'src/dashboard-refactor/lists-sidebar/components/editable-menu-item'
 import { getListShareUrl } from 'src/content-sharing/utils'
 
 export interface Props extends Dependencies {
-    editableProps: Omit<EditableMenuItemProps, 'nameValue' | 'onNameChange'>
-    onDeleteSpaceConfirm?: React.MouseEventHandler
+    onConfirmEdit: (value: string) => void
+    changeListName?: (value: string) => void
+    onCancelEdit: () => void
     onDeleteSpaceIntent?: React.MouseEventHandler
+    onDeleteSpaceConfirm?: React.MouseEventHandler
 }
 
 // NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
@@ -53,6 +49,38 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         if (remoteListId != null) {
             window.open(getListShareUrl({ remoteListId }))
         }
+    }
+
+    private handleNameChange: React.KeyboardEventHandler = (event) => {
+        const name = (event.target as HTMLInputElement).value
+        this.processEvent('updateSpaceName', { name })
+        this.props.changeListName?.(name)
+    }
+
+    private handleNameEditInputKeyDown: React.KeyboardEventHandler = (e) => {
+        // Allow escape keydown to bubble up to close the sidebar only if no input state
+
+        const listName = this.state.nameValue.trim()
+
+        if (e.key === 'Escape') {
+            if (listName.length) {
+                e.stopPropagation()
+            }
+            this.props.onCancelEdit()
+            return
+        }
+
+        if (e.key === 'Enter') {
+            if (listName.length) {
+                this.processEvent('setShowSaveBtn', { show: false })
+                e.preventDefault()
+                e.stopPropagation()
+                this.props.onConfirmEdit(listName)
+            }
+        }
+
+        // If we don't have this, events will bubble up into the page!
+        e.stopPropagation()
     }
 
     private renderShareLinks() {
@@ -217,18 +245,25 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
 
                 <SectionTitle>Edit Space</SectionTitle>
                 <EditArea>
-                    <EditableMenuItem
-                        {...this.props.editableProps}
-                        confirmWithEnter={() => {
-                            this.setState({
-                                showSaveButton: false,
-                            })
+                    <Container
+                        onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
                         }}
-                        onNameChange={(name) =>
-                            this.processEvent('updateSpaceName', { name })
-                        }
-                        nameValue={this.state.nameValue}
-                    />
+                    >
+                        <EditableListTitle
+                            onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                            }}
+                            onChange={this.handleNameChange}
+                            value={this.state.nameValue}
+                            onKeyDown={this.handleNameEditInputKeyDown}
+                        />
+                    </Container>
+                    {this.props.errorMessage && (
+                        <ErrMsg>{this.props.errorMessage}</ErrMsg>
+                    )}
                 </EditArea>
                 <ButtonBox>
                     <PrimaryAction
@@ -245,10 +280,10 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                 color="prime1"
                                 heightAndWidth="24px"
                                 onClick={() => {
-                                    this.setState({
-                                        showSaveButton: false,
+                                    this.processEvent('setShowSaveBtn', {
+                                        show: false,
                                     })
-                                    this.props.editableProps.onConfirmClick(
+                                    this.props.onConfirmEdit(
                                         this.state.nameValue,
                                     )
                                 }}
@@ -495,4 +530,37 @@ const PermissionText = styled.span<{
         css`
             padding-left: 0px;
         `}
+`
+
+const EditableListTitle = styled(TextField)`
+    padding: 2px 10px;
+    border-radius: 5px;
+    outline: none;
+    flex: 2;
+    display: flex;
+    min-width: 50px;
+    margin-right: 0px;
+    font-size: 14px;
+    height: 40px;
+    outline: none;
+    border: none;
+    width: fill-available;
+`
+
+const ErrMsg = styled.div`
+    color: red;
+    width: 100%;
+    text-align: center;
+    margin-top: -5px;
+    margin-bottom: 5px;
+`
+
+const Container = styled.div`
+    height: 40px;
+    width: fill-available;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    background-color: transparent;
 `

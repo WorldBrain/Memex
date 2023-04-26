@@ -4,13 +4,13 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import type { TaskState } from 'ui-logic-core/lib/types'
 import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export interface Dependencies {
     contentSharingBG: ContentSharingInterface
     spacesBG: RemoteCollectionsInterface
     localListId: number
     remoteListId: string | null
+    errorMessage: string | null
     spaceName: string
     loadOwnershipData?: boolean
     onSpaceShare?: (remoteListId: string) => void
@@ -21,6 +21,7 @@ export type Event = UIEvent<{
     shareSpace: null
     deleteSpace: null
     cancelDeleteSpace: null
+    setShowSaveBtn: { show: boolean }
     updateSpaceName: { name: string }
     copyInviteLink: { linkIndex: number }
 }>
@@ -171,6 +172,10 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             nameValue: { $set: event.name },
             showSaveButton: { $set: true },
         })
+    }
+
+    setShowSaveBtn: EventHandler<'setShowSaveBtn'> = async ({ event }) => {
+        this.emitMutation({ showSaveButton: { $set: event.show } })
     }
 
     copyInviteLink: EventHandler<'copyInviteLink'> = async ({
