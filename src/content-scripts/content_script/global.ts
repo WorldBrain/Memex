@@ -82,6 +82,7 @@ import {
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import type { SaveAndRenderHighlightDeps } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
+import { isSidebarOpen } from 'src/overview/sidebar-left/selectors'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -616,6 +617,9 @@ export async function main(
             }
             if (window.location.hostname === 'www.youtube.com') {
                 loadYoutubeButtons(annotationsFunctions)
+            }
+            if (isSidebarOpen) {
+                await inPageUI.showSidebar()
             }
             highlightRenderer.resetHighlightsStyles()
             await bookmarks.autoSetBookmarkStatusInBrowserIcon(tabId)
