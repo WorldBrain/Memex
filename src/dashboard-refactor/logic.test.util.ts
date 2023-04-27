@@ -147,11 +147,13 @@ export async function setupTest(
             displayName: TEST_USER.displayName,
         })
     }
+    const annotationsCache = new PageAnnotationsCache({})
 
     const logic = new DashboardLogic({
         location,
+        history,
         analytics,
-        annotationsCache: new PageAnnotationsCache({}),
+        annotationsCache,
         annotationsBG: insertBackgroundFunctionTab(
             device.backgroundModules.directLinking.remoteFunctions,
         ) as any,
@@ -212,7 +214,7 @@ export async function setupTest(
         await args.seedData(searchResults, device)
     }
 
-    return { searchResults, logic, analytics }
+    return { searchResults, logic, analytics, annotationsCache }
 }
 
 const getPrivacyLevel = (isShared, isBulkShareProtected) => {

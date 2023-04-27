@@ -136,14 +136,14 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private getURLSearchParams(): URLSearchParams | null {
+    private getURLSearchParams(): URLSearchParams {
         // Get the current URL of the page
-        const url = window.location.href
+        const url = this.options.location.href
 
         // Check if the URL has a query string
         const queryStringIndex = url.indexOf('?')
         if (queryStringIndex === -1) {
-            return null // No query string found
+            return new URLSearchParams() // No query string found
         }
 
         // Split the query string into key-value pairs
@@ -155,7 +155,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     private updateQueryStringParameter(key: string, value: string) {
         // Get the current URL of the page
         if (value != null) {
-            const url = window.location.href
+            const url = this.options.location.href
 
             let regex = new RegExp(`(${key}=)[^&]+`)
             let match = url.match(regex)
@@ -176,13 +176,16 @@ export class DashboardLogic extends UILogic<State, Events> {
                     updatedUrl = `${url}&${key}=${value}`
                 }
             }
-            // Replace the current URL with the new one
-            window.location.replace(updatedUrl)
+            if (process.env.NODE_ENV !== 'test') {
+                // Replace the current URL with the new one
+                this.options.location.replace(updatedUrl)
+            }
         }
     }
-    removeQueryString(key) {
+
+    private removeQueryString(key) {
         // Get the current URL of the page
-        const url = window.location.href
+        const url = this.options.location.href
 
         // Regular expression to match the query parameter key and its value
         const regex = new RegExp('([?&])' + key + '=([^&]*)')
@@ -196,7 +199,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         const cleanUrl = updatedUrl.replace(/[?]$/, '')
 
         // Replace the current URL with the new one
-        window.history.replaceState({}, '', cleanUrl)
+        this.options.history.replaceState({}, '', cleanUrl)
     }
 
     getInitialState(): State {

@@ -82,6 +82,7 @@ export class DashboardContainer extends StatefulUIElement<
         | 'copyToClipboard'
         | 'document'
         | 'location'
+        | 'history'
         | 'tabsAPI'
         | 'runtimeAPI'
         | 'localStorage'
@@ -107,6 +108,7 @@ export class DashboardContainer extends StatefulUIElement<
         copyToClipboard,
         document: window.document,
         location: window.location,
+        history: window.history,
         tabsAPI: browser.tabs,
         runtimeAPI: browser.runtime,
         localStorage: browser.storage.local,
