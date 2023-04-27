@@ -705,7 +705,7 @@ export default class Ribbon extends Component<Props, State> {
         this.timer = setTimeout(() => {
             // Do something here, like show a tooltip or reveal additional information
             this.props.toggleRemoveMenu()
-        }, 400)
+        }, 200)
     }
 
     handleMouseLeave() {

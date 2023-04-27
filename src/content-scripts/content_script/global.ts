@@ -392,53 +392,7 @@ export async function main(
     }
 
     if (window.location.hostname === 'www.youtube.com') {
-        const below = document.querySelector('#below')
-        const player = document.querySelector('#player')
-
-        if (below) {
-            injectYoutubeButtonMenu(annotationsFunctions)
-        }
-        if (player) {
-            injectYoutubeButtonMenu(annotationsFunctions)
-            injectYoutubeContextMenu(annotationsFunctions)
-        }
-
-        if (!below || !player) {
-            // Create a new MutationObserver instance
-            const observer = new MutationObserver(function (
-                mutationsList,
-                observer,
-            ) {
-                mutationsList.forEach(function (mutation) {
-                    mutation.addedNodes.forEach((node) => {
-                        // Check if the added node is an HTMLElement
-                        if (node instanceof HTMLElement) {
-                            // Check if the "player" element is in the added node or its descendants
-                            if (node.querySelector('#player')) {
-                                injectYoutubeContextMenu(annotationsFunctions)
-                                injectYoutubeButtonMenu(annotationsFunctions)
-
-                                if (below && player) {
-                                    observer.disconnect()
-                                }
-                            }
-
-                            // Check if the "below" element is in the added node or its descendants
-                            if (node.querySelector('#below')) {
-                                injectYoutubeButtonMenu(annotationsFunctions)
-
-                                if (below && player) {
-                                    observer.disconnect()
-                                }
-                            }
-                        }
-                    })
-                })
-            })
-
-            // Start observing mutations to the document body
-            observer.observe(document.body, { childList: true, subtree: true })
-        }
+        loadYoutubeButtons(annotationsFunctions)
     }
 
     // if (window.location.hostname === 'www.youtube.com') {
@@ -660,6 +614,9 @@ export async function main(
             } else {
                 await inPageUI.reloadRibbon()
             }
+            if (window.location.hostname === 'www.youtube.com') {
+                loadYoutubeButtons(annotationsFunctions)
+            }
             highlightRenderer.resetHighlightsStyles()
             await bookmarks.autoSetBookmarkStatusInBrowserIcon(tabId)
             await sleepPromise(500)
@@ -818,6 +775,56 @@ class PageInfo {
     getNormalizedPageUrl = async () => {
         await this.refreshIfNeeded()
         return this._identifier.normalizedUrl
+    }
+}
+
+export function loadYoutubeButtons(annotationsFunctions) {
+    const below = document.querySelector('#below')
+    const player = document.querySelector('#player')
+
+    if (below) {
+        injectYoutubeButtonMenu(annotationsFunctions)
+    }
+    if (player) {
+        injectYoutubeButtonMenu(annotationsFunctions)
+        injectYoutubeContextMenu(annotationsFunctions)
+    }
+
+    if (!below || !player) {
+        // Create a new MutationObserver instance
+        const observer = new MutationObserver(function (
+            mutationsList,
+            observer,
+        ) {
+            mutationsList.forEach(function (mutation) {
+                mutation.addedNodes.forEach((node) => {
+                    // Check if the added node is an HTMLElement
+                    if (node instanceof HTMLElement) {
+                        // Check if the "player" element is in the added node or its descendants
+                        if (node.querySelector('#player')) {
+                            injectYoutubeContextMenu(annotationsFunctions)
+                            injectYoutubeButtonMenu(annotationsFunctions)
+
+                            if (below && player) {
+                                observer.disconnect()
+                            }
+                        }
+
+                        // Check if the "below" element is in the added node or its descendants
+                        if (node.querySelector('#below')) {
+                            injectYoutubeButtonMenu(annotationsFunctions)
+
+                            if (below && player) {
+                                observer.disconnect()
+                            }
+                        }
+                    }
+                })
+            })
+        })
+
+        // Start observing mutations to the document body
+        observer.observe(document.body, { childList: true, subtree: true })
     }
 }
 
