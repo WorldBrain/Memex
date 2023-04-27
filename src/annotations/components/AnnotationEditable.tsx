@@ -86,6 +86,7 @@ export interface AnnotationProps {
     getListDetailsById: ListDetailsGetter
     renderListsPickerForAnnotation?: (
         unifiedId: UnifiedAnnotation['unifiedId'],
+        closePicker: () => void,
     ) => JSX.Element
     renderCopyPasterForAnnotation?: (
         unifiedId: UnifiedAnnotation['unifiedId'],
@@ -714,6 +715,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             >
                 {this.props.renderListsPickerForAnnotation(
                     this.props.unifiedId,
+                    () =>
+                        this.setState({
+                            showSpacePicker: 'hide',
+                        }),
                 )}
             </PopoutBox>
         )

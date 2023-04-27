@@ -99,6 +99,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         instanceLocation: AnnotationCardInstanceLocation,
     ) => (
         id: string,
+        closePicker?: () => void,
         referenceElement?: React.RefObject<HTMLDivElement>,
     ) => JSX.Element
 

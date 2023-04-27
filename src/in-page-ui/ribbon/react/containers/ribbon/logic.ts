@@ -16,6 +16,7 @@ import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import browser from 'webextension-polyfill'
 import { Storage } from 'webextension-polyfill-ts'
 import { pageActionAllowed } from 'src/util/subscriptions/storage'
+import { sleepPromise } from 'src/util/promises'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -729,6 +730,8 @@ export class RibbonContainerLogic extends UILogic<
         event,
     }) => {
         await this.initLogicResolvable
+
+        await sleepPromise(80)
         this.dependencies.setRibbonShouldAutoHide(!event.value)
         const extra: UIMutation<RibbonContainerState> =
             event.value === true

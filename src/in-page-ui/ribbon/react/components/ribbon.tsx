@@ -705,7 +705,7 @@ export default class Ribbon extends Component<Props, State> {
         this.timer = setTimeout(() => {
             // Do something here, like show a tooltip or reveal additional information
             this.props.toggleRemoveMenu()
-        }, 400)
+        }, 200)
     }
 
     handleMouseLeave() {
@@ -1072,7 +1072,7 @@ export default class Ribbon extends Component<Props, State> {
 }
 
 const SupportContainer = styled.div`
-    max-height: 500px;
+    max-height: 600px;
     height: fit-content;
     overflow: scroll;
 

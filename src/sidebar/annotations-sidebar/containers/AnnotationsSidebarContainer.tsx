@@ -425,7 +425,10 @@ export class AnnotationsSidebarContainer<
 
     private renderListPickerForAnnotation = (
         instanceLocation: AnnotationCardInstanceLocation,
-    ) => (unifiedId: UnifiedAnnotation['unifiedId']) => {
+    ) => (
+        unifiedId: UnifiedAnnotation['unifiedId'],
+        closePicker: () => void,
+    ) => {
         const annotation = this.props.annotationsCache.annotations.byId[
             unifiedId
         ]
@@ -436,6 +439,7 @@ export class AnnotationsSidebarContainer<
                     instanceLocation,
                     showExternalConfirmations: true,
                 })}
+                closePicker={closePicker}
             />
         )
     }
