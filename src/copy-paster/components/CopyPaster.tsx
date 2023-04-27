@@ -31,6 +31,7 @@ interface CopyPasterProps {
     onTitleChange: (title: string) => void
     onCodeChange: (code: string) => void
     onSetIsFavourite: (id: number, isFavourite: boolean) => void
+    onOutputFormatChange: (format: string) => void
 
     onClickOutside?: React.MouseEventHandler
 }
@@ -59,6 +60,9 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
                         onClickDelete={() => this.props.onClickDelete()}
                         onClickHowto={this.props.onClickHowto}
                         onTitleChange={(s) => this.props.onTitleChange(s)}
+                        onOutputFormatChange={(format) =>
+                            this.props.onOutputFormatChange(format)
+                        }
                         onCodeChange={(s) => this.props.onCodeChange(s)}
                     />
                 ) : (

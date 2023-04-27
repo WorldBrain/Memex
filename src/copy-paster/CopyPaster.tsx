@@ -6,6 +6,9 @@ import CopyPaster from './components/CopyPaster'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import * as Raven from 'src/util/raven'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+const { richTextFromMarkdown } = require('@contentful/rich-text-from-markdown')
+import TurndownService from 'turndown'
+import MarkdownIt from 'markdown-it'
 
 interface State {
     isLoading: boolean
@@ -14,6 +17,13 @@ interface State {
     isNew: boolean
 }
 
+const turndownService = new TurndownService({
+    headingStyle: 'atx',
+    hr: '---',
+    codeBlockStyle: 'fenced',
+    bulletListMarker: '-',
+})
+const md = new MarkdownIt()
 export interface Props {
     initTemplates?: Template[]
     onClickOutside: React.MouseEventHandler
@@ -30,6 +40,7 @@ export default class CopyPasterContainer extends React.PureComponent<
         title: '',
         code: '',
         isFavourite: false,
+        outputFormat: 'markdown',
     }
 
     private copyPasterBG: RemoteCopyPasterInterface
@@ -81,6 +92,18 @@ export default class CopyPasterContainer extends React.PureComponent<
         })
         await this.syncTemplates()
     }
+    private handleTemplateFormatChange = async (
+        id: number,
+        outputFormat: string,
+    ) => {
+        const template = this.findTemplateForId(id)
+
+        await this.copyPasterBG.updateTemplate({
+            ...template,
+            outputFormat,
+        })
+        await this.syncTemplates()
+    }
 
     private handleTemplateDelete = async () => {
         // NOTE: delete btn only appears in edit view, hence `state.tmpTemplate.id`
@@ -92,12 +115,51 @@ export default class CopyPasterContainer extends React.PureComponent<
         await this.syncTemplates()
     }
 
+    async copyRichTextToClipboard(html) {
+        // Create a hidden content-editable div
+        const hiddenDiv = document.createElement('div')
+
+        hiddenDiv.contentEditable = 'true'
+        hiddenDiv.style.position = 'absolute'
+        hiddenDiv.style.left = '-9999px'
+        hiddenDiv.innerHTML = html
+
+        // Append the hidden div to the body
+        document.body.appendChild(hiddenDiv)
+
+        // Select the content of the hidden div
+        const range = document.createRange()
+        range.selectNodeContents(hiddenDiv)
+        const selection = window.getSelection()
+        selection.removeAllRanges()
+        selection.addRange(range)
+
+        // Copy the selected content to the clipboard
+        document.execCommand('copy')
+
+        // Remove the hidden div from the body
+        document.body.removeChild(hiddenDiv)
+    }
+
     private handleTemplateCopy = async (id: number) => {
         this.setState({ isLoading: true })
 
         try {
             const rendered = await this.props.renderTemplate(id)
-            await copyToClipboard(rendered)
+            const item = this.state.templates.find((item) => item.id === id)
+
+            if (item) {
+                if (
+                    item.outputFormat === 'markdown' ||
+                    item.outputFormat == null
+                ) {
+                    await copyToClipboard(rendered)
+                }
+                if (item.outputFormat === 'richText') {
+                    const htmlString = md.render(rendered)
+                    await this.copyRichTextToClipboard(htmlString)
+                }
+            }
         } catch (err) {
             console.error('Something went really bad copying:', err.message)
             Raven.captureException(err)
@@ -161,6 +223,14 @@ export default class CopyPasterContainer extends React.PureComponent<
                         tmpTemplate: {
                             ...state.tmpTemplate,
                             title,
+                        },
+                    }))
+                }}
+                onOutputFormatChange={(outputFormat) => {
+                    this.setState((state) => ({
+                        tmpTemplate: {
+                            ...state.tmpTemplate,
+                            outputFormat,
                         },
                     }))
                 }}

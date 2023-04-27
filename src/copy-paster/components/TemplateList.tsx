@@ -133,7 +133,9 @@ class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
             <TemplateRow
                 key={template.id}
                 template={template}
-                onClick={() => this.props.onClick(template.id)}
+                onClick={() => {
+                    this.props.onClick(template.id)
+                }}
                 onClickSetIsFavourite={(isFavourite) =>
                     this.props.onClickSetIsFavourite(template.id, isFavourite)
                 }

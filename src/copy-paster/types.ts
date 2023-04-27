@@ -3,6 +3,7 @@ export interface Template {
     title: string
     code: string
     isFavourite: boolean
+    outputFormat: string
 }
 
 export type TemplateDoc = {

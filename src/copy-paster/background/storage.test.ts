@@ -18,6 +18,7 @@ describe('Copy-paster template storage tests', () => {
             title: 'template test',
             code: '',
             isFavourite: false,
+            outputFormat: 'markdown',
         }
 
         const id = await copyPaster.createTemplate(newTemplate)
@@ -34,6 +35,7 @@ describe('Copy-paster template storage tests', () => {
             title: 'template test',
             code: '',
             isFavourite: false,
+            outputFormat: 'markdown',
         })
 
         await copyPaster.updateTemplate({
@@ -41,6 +43,7 @@ describe('Copy-paster template storage tests', () => {
             title: 'test 2',
             code: '',
             isFavourite: false,
+            outputFormat: 'markdown',
         })
 
         const result = await copyPaster.findTemplate({ id })
@@ -61,6 +64,7 @@ describe('Copy-paster template storage tests', () => {
             title: 'template test',
             code: '',
             isFavourite: false,
+            outputFormat: 'markdown',
         })
 
         result = await copyPaster.findAllTemplates()
