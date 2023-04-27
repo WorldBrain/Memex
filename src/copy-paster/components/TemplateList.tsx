@@ -56,6 +56,13 @@ const Center = styled.div`
     grid-gap: 10px;
 `
 
+const Title = styled.div`
+    display: flex;
+    color: ${(props) => props.theme.colors.white};
+    font-size: 16px;
+    font-weight: 600;
+`
+
 const ContentBlock = styled.div`
     padding: 5px 10px 10px 10px;
     max-height: 300px;
@@ -147,6 +154,7 @@ class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
 
 interface TemplateListProps {
     isLoading?: boolean
+    copySuccess?: boolean
     templates: Template[]
 
     onClickSetIsFavourite: (id: number, isFavourite: boolean) => void
@@ -158,6 +166,19 @@ interface TemplateListProps {
 
 export default class TemplateList extends PureComponent<TemplateListProps> {
     render() {
+        if (this.props.copySuccess) {
+            return (
+                <Center>
+                    <Icon
+                        filePath="checkRound"
+                        heightAndWidth="30px"
+                        hoverOff
+                    />
+                    <Title>Copied to Clipboard</Title>
+                </Center>
+            )
+        }
+
         if (this.props.isLoading) {
             return (
                 <Center>

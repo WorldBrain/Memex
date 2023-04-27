@@ -12,6 +12,7 @@ import MarkdownIt from 'markdown-it'
 
 interface State {
     isLoading: boolean
+    copySuccess: boolean
     templates: Template[]
     tmpTemplate: Template | undefined
     isNew: boolean
@@ -55,6 +56,7 @@ export default class CopyPasterContainer extends React.PureComponent<
         tmpTemplate: undefined,
         templates: this.props.initTemplates ?? [],
         isNew: undefined,
+        copySuccess: false,
     }
 
     async componentDidMount() {
@@ -168,7 +170,8 @@ export default class CopyPasterContainer extends React.PureComponent<
                 category: 'TextExporter',
                 action: 'copyToClipboard',
             })
-            this.setState({ isLoading: false })
+            this.setState({ isLoading: false, copySuccess: true })
+            setTimeout(() => this.setState({ copySuccess: false }), 3000)
         }
     }
 
@@ -191,6 +194,7 @@ export default class CopyPasterContainer extends React.PureComponent<
                 isNew={this.state.isNew}
                 templates={this.state.templates}
                 isLoading={this.state.isLoading}
+                copySuccess={this.state.copySuccess}
                 onClick={this.handleTemplateCopy}
                 onClickSave={this.handleTemplateSave}
                 onClickDelete={this.handleTemplateDelete}
