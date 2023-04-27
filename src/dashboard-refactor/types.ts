@@ -109,13 +109,13 @@ export interface SearchResultTextPart {
 }
 
 export interface DashboardModalsState {
-    shareListId?: number
+    shareListId?: string
     showLogin?: boolean
     showSubscription?: boolean
     showDisplayNameSetup?: boolean
     showNoteShareOnboarding?: boolean
 
-    deletingListId?: number
+    deletingListId?: string
     deletingPageArgs?: PageEventArgs
     deletingNoteArgs?: NoteDataEventArgs
 
@@ -124,13 +124,13 @@ export interface DashboardModalsState {
 }
 
 export type DashboardModalsEvents = UIEvent<{
-    setShareListId: { listId?: number }
+    setShareListId: { listId?: string }
     setShowLoginModal: { isShown: boolean }
     setShowSubscriptionModal: { isShown: boolean }
     setShowDisplayNameSetupModal: { isShown: boolean }
     setShowNoteShareOnboardingModal: { isShown: boolean }
 
-    setDeletingListId: { listId: number }
+    setDeletingListId: { listId: string }
     setDeletingPageArgs: PageEventArgs
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null

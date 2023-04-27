@@ -1,106 +1,83 @@
-import { filterListsByQuery, ListsState } from './util'
+import type { UnifiedList } from 'src/annotations/cache/types'
+import { filterListsByQuery } from './util'
 
-const testData: ListsState = {
-    listData: {
-        [0]: {
-            id: 0,
-            name: 'test-0',
-        },
-        [1]: {
-            id: 1,
-            name: 'test-1',
-        },
-        [2]: {
-            id: 2,
-            name: 'test-2',
-        },
-        [3]: {
-            id: 3,
-            name: 'test-3',
-        },
-        [4]: {
-            id: 4,
-            name: 'test-4',
-        },
-        [5]: {
-            id: 5,
-            name: 'test-5',
-        },
-
-        [6]: {
-            id: 6,
-            name: 'elephant',
-        },
-        [7]: {
-            id: 7,
-            name: 'elevator',
-        },
+const testData: Pick<UnifiedList, 'unifiedId' | 'name'>[] = [
+    {
+        unifiedId: '0',
+        name: 'test-0',
     },
-    followedLists: {
-        allListIds: [4, 5],
-        filteredListIds: [4, 5],
-        isExpanded: true,
+    {
+        unifiedId: '1',
+        name: 'test-1',
     },
-    localLists: {
-        allListIds: [0, 1, 2, 3, 6, 7],
-        filteredListIds: [0, 1, 2, 3, 6, 7],
-        isExpanded: true,
-        isAddInputShown: true,
+    {
+        unifiedId: '2',
+        name: 'test-2',
     },
-    joinedLists: {
-        allListIds: [0, 1, 2, 3, 6, 7],
-        filteredListIds: [0, 1, 2, 3, 6, 7],
-        isExpanded: true,
+    {
+        unifiedId: '3',
+        name: 'test-3',
     },
-}
+    {
+        unifiedId: '4',
+        name: 'test-4',
+    },
+    {
+        unifiedId: '5',
+        name: 'test-5',
+    },
+    {
+        unifiedId: '6',
+        name: 'elephant',
+    },
+    {
+        unifiedId: '7',
+        name: 'elevator',
+    },
+]
 
 describe('dashboard list sidebar util tests', () => {
     it('should be able to filter lists by name query', () => {
-        const testLocalListIds = [0, 1, 2, 3]
-
-        expect(filterListsByQuery('tes', testData)).toEqual({
-            localListIds: testLocalListIds,
-            followedListIds: testData.followedLists.allListIds,
-        })
-        expect(filterListsByQuery('test', testData)).toEqual({
-            localListIds: testLocalListIds,
-            followedListIds: testData.followedLists.allListIds,
-        })
-        expect(filterListsByQuery('test-', testData)).toEqual({
-            localListIds: testLocalListIds,
-            followedListIds: testData.followedLists.allListIds,
-        })
-        expect(filterListsByQuery('test-5', testData)).toEqual({
-            localListIds: [],
-            followedListIds: [5],
-        })
-        expect(filterListsByQuery('test-1', testData)).toEqual({
-            localListIds: [1],
-            followedListIds: [],
-        })
-        expect(filterListsByQuery('ele', testData)).toEqual({
-            localListIds: [6, 7],
-            followedListIds: [],
-        })
-        expect(filterListsByQuery('elE', testData)).toEqual({
-            localListIds: [6, 7],
-            followedListIds: [],
-        })
-        expect(filterListsByQuery('ELE', testData)).toEqual({
-            localListIds: [6, 7],
-            followedListIds: [],
-        })
-        expect(filterListsByQuery('elev', testData)).toEqual({
-            localListIds: [7],
-            followedListIds: [],
-        })
-        expect(filterListsByQuery('eleph', testData)).toEqual({
-            localListIds: [6],
-            followedListIds: [],
-        })
-        expect(filterListsByQuery('eleeeee', testData)).toEqual({
-            localListIds: [],
-            followedListIds: [],
-        })
+        expect(filterListsByQuery('tes', testData)).toEqual([
+            testData[0],
+            testData[1],
+            testData[2],
+            testData[3],
+            testData[4],
+            testData[5],
+        ])
+        expect(filterListsByQuery('test', testData)).toEqual([
+            testData[0],
+            testData[1],
+            testData[2],
+            testData[3],
+            testData[4],
+            testData[5],
+        ])
+        expect(filterListsByQuery('test-', testData)).toEqual([
+            testData[0],
+            testData[1],
+            testData[2],
+            testData[3],
+            testData[4],
+            testData[5],
+        ])
+        expect(filterListsByQuery('test-5', testData)).toEqual([testData[5]])
+        expect(filterListsByQuery('test-1', testData)).toEqual([testData[1]])
+        expect(filterListsByQuery('ele', testData)).toEqual([
+            testData[6],
+            testData[7],
+        ])
+        expect(filterListsByQuery('elE', testData)).toEqual([
+            testData[6],
+            testData[7],
+        ])
+        expect(filterListsByQuery('ELE', testData)).toEqual([
+            testData[6],
+            testData[7],
+        ])
+        expect(filterListsByQuery('elev', testData)).toEqual([testData[7]])
+        expect(filterListsByQuery('eleph', testData)).toEqual([testData[6]])
+        expect(filterListsByQuery('eleeeee', testData)).toEqual([])
     })
 })

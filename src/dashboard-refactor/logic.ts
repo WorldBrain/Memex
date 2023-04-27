@@ -18,19 +18,23 @@ import {
     MISSING_PDF_QUERY_PARAM,
 } from 'src/dashboard-refactor/constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
-import { ListData } from './lists-sidebar/types'
 import {
     updatePickerValues,
     stateToSearchParams,
     flattenNestedResults,
+    getListData,
 } from './util'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import {
+    SPECIAL_LIST_IDS,
+    SPECIAL_LIST_NAMES,
+} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { NoResultsType } from './search-results/types'
 import { filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
 import {
     initNormalizedState,
     mergeNormalizedStates,
+    normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import {
     getRemoteEventEmitter,
@@ -53,6 +57,7 @@ import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
 import { openPDFInViewer } from 'src/pdf/util'
 import { hydrateCacheForDashboard } from 'src/annotations/cache/utils'
 import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
+import type { AnnotationsSearchResponse } from 'src/search/background/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -131,7 +136,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    getQueryStringParameter(parameterName) {
+    private getURLSearchParams(): URLSearchParams | null {
         // Get the current URL of the page
         const url = window.location.href
 
@@ -143,13 +148,11 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         // Split the query string into key-value pairs
         const queryString = url.substring(queryStringIndex + 1)
-        const queryParams = new URLSearchParams(queryString)
-
-        // Get the value of the specified parameter
-        return queryParams.get(parameterName)
+        return new URLSearchParams(queryString)
     }
 
-    updateQueryStringParameter(key, value) {
+    // TODO: Update this to use the URLSearchParams API rather than string manipulation
+    private updateQueryStringParameter(key: string, value: string) {
         // Get the current URL of the page
         if (value != null) {
             const url = window.location.href
@@ -197,11 +200,12 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     getInitialState(): State {
-        const searchQuery = this.getQueryStringParameter('query')
-        const spacesQuery = this.getQueryStringParameter('spaces')
-        const fromQuery = this.getQueryStringParameter('from')
+        const urlSearchParams = this.getURLSearchParams()
+        const searchQuery = urlSearchParams.get('query')
+        const spacesQuery = urlSearchParams.get('spaces')
+        const fromQuery = urlSearchParams.get('from')
         const from = formatTimestamp(parseFloat(fromQuery), FORMAT)
-        const toQuery = this.getQueryStringParameter('to')
+        const toQuery = urlSearchParams.get('to')
 
         const to = formatTimestamp(parseFloat(toQuery), FORMAT)
 
@@ -302,23 +306,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                 inboxUnreadCount: 0,
                 searchQuery: '',
                 lists: initNormalizedState(),
-                listData: {},
-                followedLists: {
-                    isExpanded: false,
-                    allListIds: [],
-                    filteredListIds: null,
-                },
-                joinedLists: {
-                    isExpanded: false,
-                    allListIds: [],
-                    filteredListIds: null,
-                },
-                localLists: {
-                    isAddInputShown: false,
-                    isExpanded: true,
-                    allListIds: [],
-                    filteredListIds: null,
-                },
+                filteredListIds: [],
+                isAddListInputShown: false,
+                areLocalListsExpanded: true,
+                areFollowedListsExpanded: true,
+                areJoinedListsExpanded: true,
                 selectedListId: null,
                 showFeed: false,
             },
@@ -344,9 +336,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     init: EventHandler<'init'> = async ({ previousState }) => {
         const { annotationsCache } = this.options
         this.setupRemoteEventListeners()
-        const spacesQuery = this.getQueryStringParameter('spaces')
-        const from = this.getQueryStringParameter('from')
-        const to = this.getQueryStringParameter('to')
+        const searchParams = this.getURLSearchParams()
+        const spacesQuery = searchParams.get('spaces')
+        const from = searchParams.get('from')
+        const to = searchParams.get('to')
         let spacesArray = spacesQuery && [spacesQuery]
 
         annotationsCache.events.addListener(
@@ -380,13 +373,18 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
-            let localListsResult
+
             if (spacesArray && spacesArray.length === 1) {
-                this.mutateAndTriggerSearch(previousState, {
-                    listsSidebar: {
-                        selectedListId: { $set: parseFloat(spacesArray[0]) },
-                    },
-                })
+                const listData = this.options.annotationsCache.getListByLocalId(
+                    parseFloat(spacesArray[0]),
+                )
+                if (listData) {
+                    this.mutateAndTriggerSearch(previousState, {
+                        listsSidebar: {
+                            selectedListId: { $set: listData.unifiedId },
+                        },
+                    })
+                }
             } else if ((from && from.length) || (to && to.length)) {
                 await this.mutateAndTriggerSearch(previousState, {
                     searchFilters: {
@@ -397,7 +395,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             } else {
                 await this.runSearch(nextState)
             }
-            nextState = localListsResult.nextState
             await this.getFeedActivityStatus()
             await this.getInboxUnreadCount()
         })
@@ -863,8 +860,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                         !pageData.allIds.length
                     ) {
                         if (
-                            previousState.listsSidebar.selectedListId ===
-                            SPECIAL_LIST_IDS.MOBILE
+                            previousState.listsSidebar.selectedListId != null &&
+                            getListData(
+                                previousState.listsSidebar.selectedListId,
+                                previousState,
+                                { mustBeLocal: true, source: 'search' },
+                            ).localId === SPECIAL_LIST_IDS.MOBILE
                         ) {
                             noResultsType = previousState.searchResults
                                 .showMobileAppAd
@@ -932,7 +933,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     private searchPages = async (state: State) => {
         const result = await this.options.searchBG.searchPages(
-            stateToSearchParams(state),
+            stateToSearchParams(state, this.options.annotationsCache),
         )
 
         if (state.searchResults.searchType === 'events') {
@@ -944,7 +945,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         return {
-            ...utils.pageSearchResultToState(result),
+            ...utils.pageSearchResultToState(
+                result,
+                this.options.annotationsCache,
+            ),
             resultsExhausted: result.resultsExhausted,
             searchTermsInvalid: result.isBadTerm,
         }
@@ -952,7 +956,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     private searchPDFs = async (state: State) => {
         let result = await this.options.searchBG.searchPages(
-            stateToSearchParams(state),
+            stateToSearchParams(state, this.options.annotationsCache),
         )
 
         const pdfResults = result.docs.filter((x) => x.url.endsWith('.pdf'))
@@ -964,7 +968,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         return {
-            ...utils.pageSearchResultToState(result),
+            ...utils.pageSearchResultToState(
+                result,
+                this.options.annotationsCache,
+            ),
             resultsExhausted: result.resultsExhausted,
             searchTermsInvalid: result.isBadTerm,
         }
@@ -972,11 +979,14 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     private searchNotes = async (state: State) => {
         const result = await this.options.searchBG.searchAnnotations(
-            stateToSearchParams(state),
+            stateToSearchParams(state, this.options.annotationsCache),
         )
 
         return {
-            ...utils.annotationSearchResultToState(result),
+            ...utils.annotationSearchResultToState(
+                result as AnnotationsSearchResponse,
+                this.options.annotationsCache,
+            ),
             resultsExhausted: result.resultsExhausted,
             searchTermsInvalid: result.isBadTerm,
         }
@@ -1030,21 +1040,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
-                const remoteListId = await this.options.contentShareBG.getRemoteListId(
-                    { localListId: listId },
-                )
-
                 this.emitMutation({
                     modals: {
                         shareListId: { $set: listId },
                     },
                     listsSidebar: {
                         showMoreMenuListId: { $set: undefined },
-                        listData: {
-                            [listId]: {
-                                remoteId: { $set: remoteListId ?? undefined },
-                            },
-                        },
                     },
                 })
             },
@@ -1092,7 +1093,10 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     /* START - search result event handlers */
     setPageSearchResult: EventHandler<'setPageSearchResult'> = ({ event }) => {
-        const state = utils.pageSearchResultToState(event.result)
+        const state = utils.pageSearchResultToState(
+            event.result,
+            this.options.annotationsCache,
+        )
         this.emitMutation({
             searchResults: {
                 results: { $set: state.results },
@@ -1105,7 +1109,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     setAnnotationSearchResult: EventHandler<'setAnnotationSearchResult'> = ({
         event,
     }) => {
-        const state = utils.annotationSearchResultToState(event.result)
+        const state = utils.annotationSearchResultToState(
+            event.result,
+            this.options.annotationsCache,
+        )
         this.emitMutation({
             searchResults: {
                 results: { $set: state.results },
@@ -1139,9 +1146,13 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const listData = getListData(
+            event.added ?? event.deleted,
+            previousState,
+            { mustBeLocal: true, source: 'setPageLists' },
+        )
         const removingSharedList =
-            previousState.listsSidebar.listData[event.added ?? event.deleted]
-                ?.remoteId != null && event.added == null
+            event.deleted != null && listData.remoteId != null
 
         const noteDataMutation: UIMutation<
             State['searchResults']['noteData']['byId']
@@ -1175,8 +1186,8 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         await this.options.listsBG.updateListForPage({
             url: event.fullPageUrl,
-            added: event.added,
-            deleted: event.deleted,
+            added: event.added && listData.localId,
+            deleted: event.deleted && listData.localId,
             skipPageIndexing: true,
         })
     }
@@ -1278,21 +1289,27 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     removePageFromList: EventHandler<'removePageFromList'> = async ({
         event,
-        previousState: {
-            listsSidebar: { selectedListId: listId },
-            searchResults: { results, pageData },
-        },
+        previousState,
     }) => {
-        if (listId == null) {
+        if (previousState.listsSidebar.selectedListId == null) {
             throw new Error('No list is currently filtered to remove page from')
         }
+        const listData = getListData(
+            previousState.listsSidebar.selectedListId,
+            previousState,
+            { mustBeLocal: true, source: 'removePageFromList' },
+        )
         const filterOutPage = (ids: string[]) =>
             ids.filter((id) => id !== event.pageId)
 
         const mutation: UIMutation<State['searchResults']> = {
             pageData: {
                 byId: { $unset: [event.pageId] },
-                allIds: { $set: filterOutPage(pageData.allIds) },
+                allIds: {
+                    $set: filterOutPage(
+                        previousState.searchResults.pageData.allIds,
+                    ),
+                },
             },
         }
 
@@ -1303,7 +1320,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                         byId: { $unset: [event.pageId] },
                         allIds: {
                             $set: filterOutPage(
-                                results[PAGE_SEARCH_DUMMY_DAY].pages.allIds,
+                                previousState.searchResults.results[
+                                    PAGE_SEARCH_DUMMY_DAY
+                                ].pages.allIds,
                             ),
                         },
                     },
@@ -1311,14 +1330,14 @@ export class DashboardLogic extends UILogic<State, Events> {
             }
         } else {
             mutation.results = removeAllResultOccurrencesOfPage(
-                results,
+                previousState.searchResults.results,
                 event.pageId,
             )
         }
         this.emitMutation({
             searchResults: mutation,
             listsSidebar:
-                listId === SPECIAL_LIST_IDS.INBOX
+                listData.localId === SPECIAL_LIST_IDS.INBOX
                     ? {
                           inboxUnreadCount: { $apply: (count) => count - 1 },
                       }
@@ -1326,7 +1345,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
 
         await this.options.listsBG.removePageFromList({
-            id: listId,
+            id: listData.localId,
             url: event.pageId,
         })
     }
@@ -1806,6 +1825,12 @@ export class DashboardLogic extends UILogic<State, Events> {
             previousState.searchResults.results[event.day].pages.byId[
                 event.pageId
             ].newNoteForm
+        const listsToAdd = formState.lists.map((listId) =>
+            getListData(listId, previousState, {
+                mustBeLocal: true,
+                source: 'savePageNewNote',
+            }),
+        )
 
         await executeUITask(
             this,
@@ -1819,9 +1844,9 @@ export class DashboardLogic extends UILogic<State, Events> {
 
                 const { savePromise } = await createAnnotation({
                     annotationData: {
-                        fullPageUrl: event.fullPageUrl,
                         comment: formState.inputValue,
-                        localListIds: formState.lists,
+                        fullPageUrl: event.fullPageUrl,
+                        localListIds: listsToAdd.map((list) => list.localId),
                     },
                     shareOpts: {
                         shouldShare: event.shouldShare,
@@ -2147,9 +2172,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         const noteData = previousState.searchResults.noteData.byId[event.noteId]
         const pageData =
             previousState.searchResults.pageData.byId[noteData.pageUrl]
-        const isSharedList =
-            previousState.listsSidebar.listData[event.added ?? event.deleted]
-                ?.remoteId != null
+        const listData = getListData(
+            event.added ?? event.deleted,
+            previousState,
+            { mustBeLocal: true, source: 'setNoteLists' },
+        )
+        const isSharedList = listData?.remoteId != null
 
         let remoteFn: () => Promise<any>
 
@@ -2160,7 +2188,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             remoteFn = () =>
                 contentShareBG.shareAnnotationToSomeLists({
                     annotationUrl: event.noteId,
-                    localListIds: [event.added],
+                    localListIds: [listData.localId],
                     protectAnnotation: event.protectAnnotation,
                 })
             noteListIds.add(event.added)
@@ -2169,7 +2197,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             remoteFn = () =>
                 contentShareBG.unshareAnnotationFromList({
                     annotationUrl: event.noteId,
-                    localListId: event.deleted,
+                    localListId: listData.localId,
                 })
             noteListIds.delete(event.deleted)
             pageListIds.delete(event.deleted)
@@ -2272,11 +2300,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         const pageData =
             params.previousState.searchResults.pageData.byId[existing.pageUrl]
 
-        const hasSharedLists = existing.lists.some(
-            (listId) =>
-                params.previousState.listsSidebar.listData[listId]?.remoteId !=
-                null,
-        )
         const willUnshare =
             !params.incomingPrivacyState.public &&
             (existing.isShared || !params.incomingPrivacyState.protected)
@@ -2293,8 +2316,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         ) {
             return existing.lists.filter(
                 (listId) =>
-                    params.previousState.listsSidebar.listData[listId]
-                        ?.remoteId == null,
+                    getListData(listId, params.previousState)?.remoteId == null,
             )
         } else if (willUnshare && params.keepListsIfUnsharing) {
             return [...new Set([...pageData.lists, ...existing.lists])]
@@ -2715,7 +2737,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        this.updateQueryStringParameter('from', event.value)
+        this.updateQueryStringParameter('from', event.value.toString())
 
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { dateFrom: { $set: event.value } },
@@ -2723,7 +2745,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     setDateTo: EventHandler<'setDateTo'> = async ({ event, previousState }) => {
-        this.updateQueryStringParameter('to', event.value)
+        this.updateQueryStringParameter('to', event.value.toString())
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { dateTo: { $set: event.value } },
         })
@@ -2751,7 +2773,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 ? previousState.searchFilters.spacesIncluded +
                       ',' +
                       event.spaceId
-                : event.spaceId,
+                : event.spaceId.toString(),
         )
 
         await this.mutateAndTriggerSearch(previousState, {
@@ -2985,40 +3007,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const filteredListIds = filterListsByQuery(
+        const filteredLists = filterListsByQuery(
             event.query,
-            previousState.listsSidebar,
+            normalizedStateToArray(previousState.listsSidebar.lists),
         )
 
         this.emitMutation({
             listsSidebar: {
                 searchQuery: { $set: event.query },
-                localLists: {
-                    filteredListIds: { $set: filteredListIds.localListIds },
-                    isExpanded: {
-                        $set:
-                            filteredListIds.localListIds.length > 0
-                                ? true
-                                : false,
-                    },
-                },
-                followedLists: {
-                    filteredListIds: { $set: filteredListIds.followedListIds },
-                    isExpanded: {
-                        $set:
-                            filteredListIds.followedListIds.length > 0
-                                ? true
-                                : false,
-                    },
-                },
-                joinedLists: {
-                    filteredListIds: { $set: filteredListIds.joinedListIds },
-                    isExpanded: {
-                        $set:
-                            filteredListIds.joinedListIds.length > 0
-                                ? true
-                                : false,
-                    },
+                filteredListIds: {
+                    $set: filteredLists.map((list) => list.unifiedId),
                 },
             },
         })
@@ -3029,10 +3027,8 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         this.emitMutation({
             listsSidebar: {
-                localLists: {
-                    isAddInputShown: { $set: event.isShown },
-                    isExpanded: { $set: event.isShown && true },
-                },
+                isAddListInputShown: { $set: event.isShown },
+                areLocalListsExpanded: { $set: event.isShown },
             },
         })
     }
@@ -3041,9 +3037,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             listsSidebar: {
                 addListErrorMessage: { $set: null },
-                localLists: {
-                    isAddInputShown: { $set: false },
-                },
+                isAddListInputShown: { $set: false },
             },
         })
     }
@@ -3055,13 +3049,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         const newListName = event.value.trim()
         const validationResult = validateSpaceName(
             newListName,
-            previousState.listsSidebar.localLists.allListIds.reduce(
-                (acc, listId) => [
-                    ...acc,
-                    previousState.listsSidebar.listData[listId],
-                ],
-                [],
-            ),
+            normalizedStateToArray(previousState.listsSidebar.lists)
+                .filter((list) => list.localId != null)
+                .map((list) => ({ id: list.unifiedId, name: list.name })),
         )
 
         if (validationResult.valid === false) {
@@ -3081,33 +3071,32 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listCreateState: { $set: taskState } },
             }),
             async () => {
-                const listId = Date.now()
+                const localListId = Date.now()
+                const { unifiedId } = this.options.annotationsCache.addList({
+                    name: newListName,
+                    localId: localListId,
+                    unifiedAnnotationIds: [],
+                    hasRemoteAnnotationsToLoad: false,
+                    creator:
+                        previousState.currentUser != null
+                            ? {
+                                  type: 'user-reference',
+                                  id: previousState.currentUser.id,
+                              }
+                            : undefined,
+                })
 
                 this.emitMutation({
                     listsSidebar: {
-                        localLists: {
-                            isAddInputShown: { $set: false },
-                            filteredListIds: { $unshift: [listId] },
-                            allListIds: { $push: [listId] },
-                            isExpanded: { $set: true },
-                        },
-                        listData: {
-                            [listId]: {
-                                $set: {
-                                    id: listId,
-                                    name: newListName,
-                                    isOwnedList: true,
-                                },
-                            },
-                        },
-                        addListErrorMessage: {
-                            $set: null,
-                        },
+                        isAddListInputShown: { $set: false },
+                        filteredListIds: { $unshift: [unifiedId] },
+                        areLocalListsExpanded: { $set: true },
+                        addListErrorMessage: { $set: null },
                     },
                 })
                 await this.options.listsBG.createCustomList({
                     name: newListName,
-                    id: listId,
+                    id: localListId,
                 })
             },
         )
@@ -3118,10 +3107,8 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         this.emitMutation({
             listsSidebar: {
-                localLists: {
-                    isExpanded: { $set: event.isExpanded },
-                    isAddInputShown: { $set: !event.isExpanded && false },
-                },
+                areLocalListsExpanded: { $set: event.isExpanded },
+                isAddListInputShown: { $set: !event.isExpanded && false },
             },
         })
     }
@@ -3131,16 +3118,17 @@ export class DashboardLogic extends UILogic<State, Events> {
     > = async ({ event }) => {
         this.emitMutation({
             listsSidebar: {
-                followedLists: { isExpanded: { $set: event.isExpanded } },
+                areFollowedListsExpanded: { $set: event.isExpanded },
             },
         })
     }
+
     setJoinedListsExpanded: EventHandler<'setJoinedListsExpanded'> = async ({
         event,
     }) => {
         this.emitMutation({
             listsSidebar: {
-                joinedLists: { isExpanded: { $set: event.isExpanded } },
+                areJoinedListsExpanded: { $set: event.isExpanded },
             },
         })
     }
@@ -3171,6 +3159,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     dropPageOnListItem: EventHandler<'dropPageOnListItem'> = async ({
         event,
+        previousState,
     }) => {
         const { fullPageUrl, normalizedPageUrl } = JSON.parse(
             event.dataTransfer.getData('text/plain'),
@@ -3180,23 +3169,24 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
+        const listData = getListData(event.listId, previousState, {
+            mustBeLocal: true,
+            source: 'dropPageOnListItem',
+        })
+
         this.options.analytics.trackEvent({
             category: 'Collections',
             action: 'addPageViaDragAndDrop',
         })
 
-        await this.options.listsBG.insertPageToList({
-            id: event.listId,
-            url: fullPageUrl,
-            skipPageIndexing: true,
-        })
-
         this.emitMutation({
             listsSidebar: {
                 dragOverListId: { $set: undefined },
-                listData: {
-                    [event.listId]: {
-                        wasPageDropped: { $set: true },
+                lists: {
+                    byId: {
+                        [event.listId]: {
+                            wasPageDropped: { $set: true },
+                        },
                     },
                 },
             },
@@ -3205,7 +3195,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     byId: {
                         [normalizedPageUrl]: {
                             lists: {
-                                $apply: (lists: number[]) =>
+                                $apply: (lists: string[]) =>
                                     lists.includes(event.listId)
                                         ? lists
                                         : [...lists, event.listId],
@@ -3216,19 +3206,29 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
 
-        setTimeout(
-            () =>
-                this.emitMutation({
-                    listsSidebar: {
-                        listData: {
-                            [event.listId]: {
-                                wasPageDropped: { $set: false },
+        await Promise.all([
+            this.options.listsBG.insertPageToList({
+                id: listData.localId!,
+                url: fullPageUrl,
+                skipPageIndexing: true,
+            }),
+            new Promise<void>((resolve) =>
+                setTimeout(() => {
+                    this.emitMutation({
+                        listsSidebar: {
+                            lists: {
+                                byId: {
+                                    [event.listId]: {
+                                        wasPageDropped: { $set: false },
+                                    },
+                                },
                             },
                         },
-                    },
-                }),
-            2000,
-        )
+                    })
+                    resolve()
+                }, 2000),
+            ),
+        ])
     }
 
     clickPageResult: EventHandler<'clickPageResult'> = async ({
@@ -3286,20 +3286,20 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        this.emitMutation({
-            listsSidebar: {
-                listData: {
-                    [event.localListId]: {
-                        remoteId: { $set: event.remoteListId },
-                    },
-                },
-            },
+        // Should trigger state update on `newListsState` cache event
+        this.options.annotationsCache.updateList({
+            unifiedId: event.listId,
+            remoteId: event.remoteListId,
         })
     }
 
     shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
+        const listData = getListData(event.listId, previousState, {
+            mustBeLocal: true,
+            source: 'shareList',
+        })
         const { remoteListId } = await this.options.contentShareBG.shareList({
-            localListId: event.listId,
+            localListId: listData.localId!,
         })
 
         const memberAnnotParentPageIds = new Set<string>()
@@ -3341,102 +3341,25 @@ export class DashboardLogic extends UILogic<State, Events> {
             }
         }
 
-        this.emitMutation({
-            searchResults: mutation,
-            listsSidebar: {
-                listData: {
-                    [event.listId]: {
-                        remoteId: { $set: remoteListId },
-                    },
-                },
-            },
+        // Should trigger state update on `newListsState` cache event
+        this.options.annotationsCache.updateList({
+            unifiedId: event.listId,
+            remoteId: remoteListId,
         })
-    }
 
-    changeListName: EventHandler<'changeListName'> = async ({
-        event,
-        previousState,
-    }) => {
-        let listId
-        if (event.listId == null) {
-            const { editingListId: listId } = previousState.listsSidebar
-        } else {
-            listId = event.listId
-        }
-
-        if (!listId) {
-            throw new Error('No list ID is set for editing')
-        }
-        const oldName = previousState.listsSidebar.listData[listId]?.name ?? ''
-        const newName = event.value.trim()
-
-        if (newName === oldName) {
-            return
-        }
-        const validationResult = validateSpaceName(
-            newName,
-            previousState.listsSidebar.localLists.allListIds.reduce(
-                (acc, listId) => [
-                    ...acc,
-                    previousState.listsSidebar.listData[listId],
-                ],
-                [],
-            ),
-            {
-                listIdToSkip: listId,
-            },
-        )
-
-        if (validationResult.valid === false) {
-            this.emitMutation({
-                listsSidebar: {
-                    editListErrorMessage: {
-                        $set: validationResult.reason,
-                    },
-                },
-            })
-            return
-        }
-
-        this.emitMutation({
-            listsSidebar: {
-                editListErrorMessage: { $set: null },
-                listData: {
-                    [listId]: {
-                        newName: { $set: newName },
-                    },
-                },
-            },
-        })
+        this.emitMutation({ searchResults: mutation })
     }
 
     confirmListEdit: EventHandler<'confirmListEdit'> = async ({
         event,
         previousState,
     }) => {
-        let editingListId
-        if (event.listId == null) {
-            editingListId = previousState.listsSidebar.editingListId
-        } else {
-            editingListId = event.listId
-        }
-
-        if (!editingListId) {
-            throw new Error('No list ID is set for editing')
-        }
-
-        const { name: oldName } = await this.options.listsBG.fetchListById({
-            id: editingListId,
+        const listData = getListData(event.listId, previousState, {
+            mustBeLocal: true,
+            source: 'confirmListEdit',
         })
-
-        // const oldName = previousState.listsSidebar.listData[listId].name
-
-        let newName
-        if (event.value) {
-            newName = event.value
-        } else {
-            newName = previousState.listsSidebar.listData[editingListId].newName
-        }
+        const oldName = listData.name
+        const newName = event.value.trim()
 
         if (newName === oldName) {
             return
@@ -3444,15 +3367,11 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         const validationResult = validateSpaceName(
             newName,
-            previousState.listsSidebar.localLists.allListIds.reduce(
-                (acc, editingListId) => [
-                    ...acc,
-                    previousState.listsSidebar.listData[editingListId],
-                ],
-                [],
-            ),
+            normalizedStateToArray(previousState.listsSidebar.lists)
+                .filter((list) => list.localId != null)
+                .map((list) => ({ id: list.unifiedId, name: list.name })),
             {
-                listIdToSkip: editingListId,
+                listIdToSkip: event.listId,
             },
         )
 
@@ -3473,21 +3392,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listEditState: { $set: taskState } },
             }),
             async () => {
+                this.options.annotationsCache.updateList({
+                    unifiedId: event.listId,
+                    name: newName,
+                })
                 this.emitMutation({
-                    listsSidebar: {
-                        listData: {
-                            [editingListId]: {
-                                name: { $set: newName },
-                                newName: { $set: newName },
-                            },
-                        },
-                        editListErrorMessage: {
-                            $set: null,
-                        },
-                    },
+                    listsSidebar: { editListErrorMessage: { $set: null } },
                 })
                 await this.options.listsBG.updateListName({
-                    id: editingListId,
+                    id: listData.localId,
                     oldName,
                     newName,
                 })
@@ -3495,24 +3408,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
-    cancelListEdit: EventHandler<'cancelListEdit'> = async ({
-        previousState,
-    }) => {
-        const { editingListId: listId } = previousState.listsSidebar
-
-        if (!listId) {
-            throw new Error('No list ID is set for editing')
-        }
-        const { name: oldName } = await this.options.listsBG.fetchListById({
-            id: listId,
-        })
-
-        // reseet name to name in db
-        await this.changeListName({
-            event: { value: oldName },
-            previousState,
-        })
-
+    cancelListEdit: EventHandler<'cancelListEdit'> = async ({}) => {
         this.emitMutation({
             listsSidebar: {
                 editListErrorMessage: { $set: null },
@@ -3550,56 +3446,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setLocalLists: EventHandler<'setLocalLists'> = async ({ event }) => {
-        const listIds: number[] = []
-        const listDataById = {}
-
-        for (const list of event.lists) {
-            listIds.push(list.id)
-            listDataById[list.id] = list
-        }
-
-        this.emitMutation({
-            listsSidebar: {
-                listData: { $merge: listDataById },
-                localLists: {
-                    filteredListIds: { $set: listIds },
-                    allListIds: { $set: listIds },
-                },
-            },
-        })
-    }
-
-    setFollowedLists: EventHandler<'setFollowedLists'> = async ({ event }) => {
-        const listIds: number[] = []
-        const listDataById = {}
-
-        for (const list of event.lists) {
-            listIds.push(list.id)
-            listDataById[list.id] = list
-        }
-
-        this.emitMutation({
-            listsSidebar: {
-                listData: { $merge: listDataById },
-                followedLists: {
-                    filteredListIds: { $set: listIds },
-                    allListIds: { $set: listIds },
-                },
-            },
-        })
-    }
-
     setDeletingListId: EventHandler<'setDeletingListId'> = async ({
         event,
     }) => {
         this.emitMutation({
-            modals: {
-                deletingListId: { $set: event.listId },
-            },
-            listsSidebar: {
-                showMoreMenuListId: { $set: undefined },
-            },
+            modals: { deletingListId: { $set: event.listId } },
+            listsSidebar: { showMoreMenuListId: { $set: undefined } },
         })
     }
 
@@ -3610,20 +3462,19 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (!selectedListId) {
             throw new Error('No selected list ID set to update description')
         }
+        const listData = getListData(selectedListId, previousState, {
+            mustBeLocal: true,
+            source: 'updateSelectedListDescription',
+        })
 
-        this.emitMutation({
-            listsSidebar: {
-                listData: {
-                    [selectedListId]: {
-                        description: { $set: event.description },
-                    },
-                },
-            },
+        this.options.annotationsCache.updateList({
+            unifiedId: selectedListId,
+            description: event.description,
         })
 
         await this.options.listsBG.updateListDescription({
             description: event.description,
-            listId: selectedListId,
+            listId: listData.localId!,
         })
     }
 
@@ -3636,18 +3487,16 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     confirmListDelete: EventHandler<'confirmListDelete'> = async ({
-        event,
         previousState,
     }) => {
         const listId = previousState.modals.deletingListId
-        // TODO: support for non-local lists
-        const localListIds = previousState.listsSidebar.localLists.filteredListIds.filter(
-            (id) => id !== listId,
-        )
-
         if (!listId) {
             throw new Error('No list ID is set for deletion')
         }
+        const listData = getListData(listId, previousState, {
+            mustBeLocal: true,
+            source: 'confirmListDelete',
+        })
 
         await executeUITask(
             this,
@@ -3655,60 +3504,27 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listDeleteState: { $set: taskState } },
             }),
             async () => {
-                await this.options.listsBG.removeList({ id: listId })
-
+                this.options.annotationsCache.removeList({ unifiedId: listId })
                 this.emitMutation({
-                    modals: {
-                        deletingListId: { $set: undefined },
-                    },
-                    listsSidebar: {
-                        localLists: {
-                            filteredListIds: { $set: localListIds },
-                            allListIds: { $set: localListIds },
-                        },
-                        listData: { $unset: [listId] },
-                        selectedListId: { $set: undefined },
-                    },
+                    modals: { deletingListId: { $set: undefined } },
+                    listsSidebar: { selectedListId: { $set: undefined } },
                 })
+                await this.options.listsBG.removeList({ id: listData.localId! })
             },
         )
     }
 
-    clickFeedActivityIndicator: EventHandler<
-        'clickFeedActivityIndicator'
-    > = async ({ previousState }) => {
+    switchToFeed: EventHandler<'switchToFeed'> = async ({ previousState }) => {
         if (!(await this.ensureLoggedIn())) {
             return
         }
 
-        // this.options.openFeed()
-
-        if (previousState.listsSidebar.hasFeedActivity) {
-            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
-            this.emitMutation({
-                listsSidebar: { hasFeedActivity: { $set: false } },
-            })
-        }
-    }
-
-    switchToFeed: EventHandler<'switchToFeed'> = async ({ previousState }) => {
         this.emitMutation({
             listsSidebar: {
                 showFeed: { $set: true },
-                selectedListId: { $set: SPECIAL_LIST_IDS.INBOX + 2 },
+                selectedListId: { $set: SPECIAL_LIST_NAMES.FEED },
             },
         })
-        if (!(await this.ensureLoggedIn())) {
-            this.emitMutation({
-                listsSidebar: {
-                    showFeed: { $set: false },
-                    selectedListId: {
-                        $set: previousState.listsSidebar.selectedListId,
-                    },
-                },
-            })
-            return
-        }
 
         if (previousState.listsSidebar.hasFeedActivity) {
             this.emitMutation({

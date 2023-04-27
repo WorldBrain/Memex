@@ -453,66 +453,6 @@ describe('Dashboard lists sidebar logic', () => {
         ).toEqual(true)
     })
 
-    it('should be able to set local lists state', async ({ device }) => {
-        const { searchResults } = await setupTest(device)
-        const listIds = DATA.LISTS_1.map((list) => list.id)
-
-        expect(
-            Object.values(searchResults.state.listsSidebar.listData),
-        ).toEqual([])
-        expect(searchResults.state.listsSidebar.localLists).toEqual({
-            loadingState: 'pristine',
-            isAddInputShown: false,
-            isExpanded: true,
-            allListIds: [],
-            filteredListIds: [],
-        })
-
-        await searchResults.processEvent('setLocalLists', {
-            lists: DATA.LISTS_1,
-        })
-
-        expect(
-            Object.values(searchResults.state.listsSidebar.listData),
-        ).toEqual(DATA.LISTS_1)
-        expect(searchResults.state.listsSidebar.localLists).toEqual({
-            loadingState: 'pristine',
-            isAddInputShown: false,
-            isExpanded: true,
-            allListIds: listIds,
-            filteredListIds: listIds,
-        })
-    })
-
-    it('should be able to set followed lists state', async ({ device }) => {
-        const { searchResults } = await setupTest(device)
-        const listIds = DATA.LISTS_1.map((list) => list.id)
-
-        expect(
-            Object.values(searchResults.state.listsSidebar.listData),
-        ).toEqual([])
-        expect(searchResults.state.listsSidebar.followedLists).toEqual({
-            loadingState: 'pristine',
-            isExpanded: true,
-            allListIds: [],
-            filteredListIds: [],
-        })
-
-        await searchResults.processEvent('setFollowedLists', {
-            lists: DATA.LISTS_1,
-        })
-
-        expect(
-            Object.values(searchResults.state.listsSidebar.listData),
-        ).toEqual(DATA.LISTS_1)
-        expect(searchResults.state.listsSidebar.followedLists).toEqual({
-            loadingState: 'pristine',
-            isExpanded: true,
-            allListIds: listIds,
-            filteredListIds: listIds,
-        })
-    })
-
     it('should be able to create a new local list', async ({ device }) => {
         const { searchResults } = await setupTest(device)
         const listName = 'test'

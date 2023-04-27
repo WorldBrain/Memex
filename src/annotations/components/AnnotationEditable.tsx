@@ -35,7 +35,6 @@ import type { AnnotationCardInstanceLocation } from 'src/sidebar/annotations-sid
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { truncateText } from 'src/annotations/utils'
-import { ListData } from 'src/dashboard-refactor/lists-sidebar/types'
 
 export interface HighlightProps extends AnnotationProps {
     body: string

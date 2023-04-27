@@ -1,4 +1,4 @@
-import type { RootState } from './types'
+import type { RootState, Events } from './types'
 import type { BackgroundSearchParams } from 'src/search/background/types'
 import type { PageResult } from './search-results/types'
 import {
@@ -6,11 +6,15 @@ import {
     NormalizedState,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { eventProviderDomains } from '@worldbrain/memex-common/lib/constants'
+import type {
+    PageAnnotationsCacheInterface,
+    UnifiedList,
+} from 'src/annotations/cache/types'
 
-export const updatePickerValues = <T extends string | number>(event: {
-    added?: T
-    deleted?: T
-}) => (prevState: T[]): T[] => {
+export const updatePickerValues = (event: {
+    added?: string
+    deleted?: string
+}) => (prevState: string[]): string[] => {
     if (event.added) {
         return [...new Set([...prevState, event.added])]
     }
@@ -48,17 +52,44 @@ function getDomainsFilterIncludeSearchType(searchType) {
         return eventProviderDomains
     }
 }
-export const stateToSearchParams = ({
-    searchFilters,
-    listsSidebar,
-    searchResults,
-}: Pick<
-    RootState,
-    'listsSidebar' | 'searchFilters' | 'searchResults'
->): BackgroundSearchParams => {
+
+export const getListData = (
+    listId: UnifiedList['unifiedId'],
+    { listsSidebar }: Pick<RootState, 'listsSidebar'>,
+    opts?: { mustBeLocal?: boolean; source?: keyof Events },
+): UnifiedList => {
+    const listData = listsSidebar.lists.byId[listId]
+    const source = opts?.source ? `for ${opts.source} ` : ''
+
+    if (!listData) {
+        throw new Error(`Specified list data ${source}could not be found`)
+    }
+    if (opts?.mustBeLocal && listData.localId == null) {
+        throw new Error(
+            `Specified list data ${source}could not be found locally`,
+        )
+    }
+    return listData
+}
+
+export const stateToSearchParams = (
+    {
+        searchFilters,
+        listsSidebar,
+        searchResults,
+    }: Pick<RootState, 'listsSidebar' | 'searchFilters' | 'searchResults'>,
+    annotationsCache: PageAnnotationsCacheInterface,
+): BackgroundSearchParams => {
     const lists = [...searchFilters.spacesIncluded]
     if (listsSidebar.selectedListId != null) {
-        lists.push(listsSidebar.selectedListId)
+        const listData =
+            annotationsCache.lists.byId[listsSidebar.selectedListId]
+        if (listData.localId == null) {
+            throw new Error(
+                `Specified list for search refers to data that does not exist locally`,
+            )
+        }
+        lists.push(listData.localId!)
     }
 
     // Probably Temporary: Add a domain filter for video and twitter type searches

@@ -387,7 +387,7 @@ describe('Dashboard Refactor misc logic', () => {
         expect(await getLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY)).toBe(
             true,
         )
-        await searchResults.processEvent('clickFeedActivityIndicator', null)
+        await searchResults.processEvent('switchToFeed', null)
         expect(searchResults.state.listsSidebar.hasFeedActivity).toBe(false)
         expect(feedUrlOpened).toBe(true)
         expect(await getLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY)).toBe(

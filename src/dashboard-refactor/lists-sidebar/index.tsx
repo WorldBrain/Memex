@@ -1,6 +1,9 @@
 import React, { PureComponent } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import {
+    SPECIAL_LIST_IDS,
+    SPECIAL_LIST_NAMES,
+} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { fonts } from 'src/dashboard-refactor/styles'
 import ListsSidebarGroup, {
     Props as SidebarGroupProps,
@@ -67,7 +70,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             name="Activity Feed"
                             isSelected={
                                 this.props.selectedListId ===
-                                SPECIAL_LIST_IDS.INBOX + 2
+                                SPECIAL_LIST_NAMES.FEED
                             }
                             onClick={this.props.switchToFeed}
                             renderRightSideIcon={
@@ -79,10 +82,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                         <StaticSidebarItem
                             icon="heartEmpty"
                             name="All Saved"
-                            isSelected={
-                                this.props.selectedListId == null ||
-                                this.props.selectedListId === -1
-                            }
+                            isSelected={this.props.selectedListId == null}
                             onClick={this.props.onAllSavedSelection}
                         />
                         <StaticSidebarItem
@@ -90,11 +90,11 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             name="Inbox"
                             isSelected={
                                 this.props.selectedListId ==
-                                SPECIAL_LIST_IDS.INBOX
+                                SPECIAL_LIST_NAMES.INBOX
                             }
                             onClick={() =>
                                 this.props.onListSelection(
-                                    SPECIAL_LIST_IDS.INBOX,
+                                    SPECIAL_LIST_NAMES.INBOX,
                                 )
                             }
                             renderRightSideIcon={
@@ -114,11 +114,11 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             name="From Mobile"
                             isSelected={
                                 this.props.selectedListId ==
-                                SPECIAL_LIST_IDS.MOBILE
+                                SPECIAL_LIST_NAMES.MOBILE
                             }
                             onClick={() =>
                                 this.props.onListSelection(
-                                    SPECIAL_LIST_IDS.MOBILE,
+                                    SPECIAL_LIST_NAMES.MOBILE,
                                 )
                             }
                         />
@@ -131,7 +131,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                         {...this.props.ownListsGroup}
                         listsCount={this.props.ownListsGroup.listData.length}
                     >
-                        {this.props.localLists.isAddInputShown && (
+                        {this.props.isAddListInputShown && (
                             <SidebarItemInput
                                 onCancelClick={this.props.onCancelAddList}
                                 onConfirmClick={this.props.onConfirmAddList}

@@ -172,7 +172,7 @@ describe('Dashboard Refactor modals logic', () => {
             withAuth: false,
         })
         expect(searchResults.state.modals.showLogin).not.toBe(true)
-        await searchResults.processEvent('clickFeedActivityIndicator', null)
+        await searchResults.processEvent('switchToFeed', null)
         expect(searchResults.state.modals.showLogin).toBe(true)
     })
 })

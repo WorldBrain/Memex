@@ -1408,12 +1408,6 @@ describe('Dashboard search results logic', () => {
                 it('should be able to remove a page from the search filtered list, removing results from all days it occurs under', async ({
                     device,
                 }) => {
-                    const { searchResults } = await setupTest(device, {
-                        seedData: setNoteSearchResult(
-                            DATA.ANNOT_SEARCH_RESULT_2,
-                        ),
-                    })
-                    const pageId = DATA.PAGE_1.normalizedUrl
                     const list = DATA.LISTS_1[0]
                     await device.storageManager
                         .collection('customLists')
@@ -1421,6 +1415,14 @@ describe('Dashboard search results logic', () => {
                             id: list.id,
                             name: list.name,
                         })
+
+                    const { searchResults } = await setupTest(device, {
+                        runInitLogic: true,
+                        seedData: setNoteSearchResult(
+                            DATA.ANNOT_SEARCH_RESULT_2,
+                        ),
+                    })
+                    const pageId = DATA.PAGE_1.normalizedUrl
 
                     await searchResults.processEvent('setPageLists', {
                         id: pageId,
