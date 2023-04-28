@@ -127,7 +127,6 @@ export class DashboardContainer extends StatefulUIElement<
         tagsBG: runInBackground(),
         authBG: runInBackground(),
         annotationsCache: new PageAnnotationsCache({}),
-        openFeed: () => window.open(getFeedUrl(), '_blank'),
         openCollectionPage: (remoteListId) =>
             window.open(getListShareUrl({ remoteListId }), '_blank'),
     }

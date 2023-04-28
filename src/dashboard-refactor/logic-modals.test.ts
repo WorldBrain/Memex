@@ -168,7 +168,6 @@ describe('Dashboard Refactor modals logic', () => {
         device,
     }) => {
         const { searchResults } = await setupTest(device, {
-            openFeedUrl: () => {},
             withAuth: false,
         })
         expect(searchResults.state.modals.showLogin).not.toBe(true)

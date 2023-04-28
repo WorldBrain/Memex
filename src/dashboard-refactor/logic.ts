@@ -337,7 +337,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     ) => {}
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        const { annotationsCache } = this.options
+        const { annotationsCache, authBG } = this.options
         this.setupRemoteEventListeners()
         const searchParams = this.getURLSearchParams()
         const spacesQuery = searchParams.get('spaces')
@@ -361,8 +361,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: { listLoadState: { $set: taskState } },
                 }),
                 async () => {
+                    const user = await authBG.getCurrentUser()
                     await hydrateCacheForDashboard({
                         cache: annotationsCache,
+                        user: user
+                            ? { type: 'user-reference', id: user.id }
+                            : undefined,
                         bgModules: {
                             customLists: this.options.listsBG,
                             annotations: this.options.annotationsBG,

@@ -129,7 +129,6 @@ export async function setupTest(
         mockDocument?: any
         seedData?: DataSeeder
         overrideSearchTrigger?: boolean
-        openFeedUrl?: () => void
         copyToClipboard?: (text: string) => Promise<boolean>
         renderUpdateNotifBanner?: () => JSX.Element
     } = {
@@ -191,7 +190,6 @@ export async function setupTest(
             device.backgroundModules.activityIndicator.remoteFunctions,
         copyToClipboard:
             args.copyToClipboard ?? defaultTestSetupDeps.copyToClipboard,
-        openFeed: args.openFeedUrl ?? (() => undefined),
         openCollectionPage: () => {},
         renderUpdateNotifBanner: args.renderUpdateNotifBanner ?? (() => null),
         services: createUIServices(),

@@ -281,7 +281,9 @@ export async function hydrateCacheForDashboard({
     bgModules,
     ...args
 }: CacheHydratorDeps): Promise<void> {
-    const localListsData = await bgModules.customLists.fetchAllLists({})
+    const localListsData = await bgModules.customLists.fetchAllLists({
+        includeDescriptions: true,
+    })
     const remoteListIds = await bgModules.contentSharing.getRemoteListIds({
         localListIds: localListsData.map((list) => list.id),
     })
