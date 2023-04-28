@@ -100,7 +100,6 @@ export class DashboardContainer extends StatefulUIElement<
         | 'listsBG'
         | 'tagsBG'
         | 'authBG'
-        | 'openFeed'
         | 'openCollectionPage'
         | 'summarizeBG'
     > = {

@@ -1426,31 +1426,31 @@ describe('Dashboard search results logic', () => {
                 it('should be able to remove a page from the search filtered list, removing results from all days it occurs under', async ({
                     device,
                 }) => {
-                    const list = DATA.LISTS_1[0]
-                    await device.storageManager
-                        .collection('customLists')
-                        .createObject({
-                            id: list.id,
-                            name: list.name,
-                        })
-
-                    const { searchResults } = await setupTest(device, {
-                        runInitLogic: true,
-                        seedData: setNoteSearchResult(
-                            DATA.ANNOT_SEARCH_RESULT_2,
-                        ),
-                    })
+                    const { searchResults, annotationsCache } = await setupTest(
+                        device,
+                        {
+                            runInitLogic: true,
+                            seedData: setNoteSearchResult(
+                                DATA.ANNOT_SEARCH_RESULT_2,
+                            ),
+                        },
+                    )
+                    const listDataA = annotationsCache.getListByLocalId(
+                        DATA.LISTS_1[0].id,
+                    )
                     const pageId = DATA.PAGE_1.normalizedUrl
 
                     await searchResults.processEvent('setPageLists', {
                         id: pageId,
                         fullPageUrl: 'https://' + pageId,
-                        added: list.id,
+                        added: listDataA.unifiedId,
                         skipPageIndexing: true,
                     })
 
                     searchResults.processMutation({
-                        listsSidebar: { selectedListId: { $set: list.id } },
+                        listsSidebar: {
+                            selectedListId: { $set: listDataA.unifiedId },
+                        },
                     })
 
                     expect(
