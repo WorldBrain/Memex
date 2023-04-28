@@ -3400,7 +3400,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                     name: newName,
                 })
                 this.emitMutation({
-                    listsSidebar: { editListErrorMessage: { $set: null } },
+                    listsSidebar: {
+                        editListErrorMessage: { $set: null },
+                        editingListId: { $set: undefined },
+                    },
                 })
                 await this.options.listsBG.updateListName({
                     id: listData.localId,
@@ -3510,7 +3513,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.options.annotationsCache.removeList({ unifiedId: listId })
                 this.emitMutation({
                     modals: { deletingListId: { $set: undefined } },
-                    listsSidebar: { selectedListId: { $set: undefined } },
+                    listsSidebar: {
+                        selectedListId: { $set: undefined },
+                        filteredListIds: {
+                            $apply: (ids: string[]) =>
+                                ids.filter((id) => id !== listId),
+                        },
+                    },
                 })
                 await this.options.listsBG.removeList({ id: listData.localId! })
             },

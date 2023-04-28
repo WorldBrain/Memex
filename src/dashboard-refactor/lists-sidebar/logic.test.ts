@@ -167,7 +167,9 @@ describe('Dashboard lists sidebar logic', () => {
     })
 
     it('should be able to edit lists', async ({ device }) => {
-        const { searchResults, annotationsCache } = await setupTest(device, {})
+        const { searchResults, annotationsCache } = await setupTest(device, {
+            runInitLogic: true,
+        })
         const name = 'test'
         const nameUpdated = 'test list'
 
@@ -219,13 +221,17 @@ describe('Dashboard lists sidebar logic', () => {
     it('should block edit and show error on bad list name edits', async ({
         device,
     }) => {
-        const { searchResults, annotationsCache } = await setupTest(device)
+        const { searchResults, annotationsCache } = await setupTest(device, {
+            runInitLogic: true,
+        })
         const nameA = 'test A'
         const nameB = 'test B'
 
         await searchResults.processEvent('confirmListCreate', { value: nameA })
         await searchResults.processEvent('confirmListCreate', { value: nameB })
-        const listDataA = normalizedStateToArray(annotationsCache.lists)[0]
+        const listDataA = normalizedStateToArray(annotationsCache.lists).find(
+            (list) => list.name === nameA,
+        )
 
         expect(searchResults.state.listsSidebar.editingListId).toEqual(
             undefined,
@@ -263,7 +269,7 @@ describe('Dashboard lists sidebar logic', () => {
         )
         expect(annotationsCache.lists.byId[listDataA.unifiedId]).toEqual(
             expect.objectContaining({
-                listId: listDataA.unifiedId,
+                unifiedId: listDataA.unifiedId,
                 name: nameA,
             }),
         )
@@ -277,7 +283,7 @@ describe('Dashboard lists sidebar logic', () => {
         )
         expect(annotationsCache.lists.byId[listDataA.unifiedId]).toEqual(
             expect.objectContaining({
-                listId: listDataA.unifiedId,
+                unifiedId: listDataA.unifiedId,
                 name: nameA,
             }),
         )
@@ -286,7 +292,9 @@ describe('Dashboard lists sidebar logic', () => {
     it('should block create and show error on bad list name creates', async ({
         device,
     }) => {
-        const { searchResults } = await setupTest(device)
+        const { searchResults } = await setupTest(device, {
+            runInitLogic: true,
+        })
 
         expect(searchResults.state.listsSidebar.addListErrorMessage).toEqual(
             null,
@@ -664,6 +672,11 @@ describe('Dashboard lists sidebar logic', () => {
                 },
             },
         })
+
+        expect(
+            searchResults.state.listsSidebar.lists.byId[listData.unifiedId]
+                .wasPageDropped,
+        ).not.toEqual(true)
         expect(searchResults.state.listsSidebar.dragOverListId).toEqual(
             listData.unifiedId,
         )
@@ -680,7 +693,7 @@ describe('Dashboard lists sidebar logic', () => {
                 normalizedPageUrl: page.normalizedUrl,
             }),
         )
-        await searchResults.processEvent('dropPageOnListItem', {
+        const dropEventP = searchResults.processEvent('dropPageOnListItem', {
             listId: listData.unifiedId,
             dataTransfer,
         })
@@ -696,6 +709,13 @@ describe('Dashboard lists sidebar logic', () => {
             searchResults.state.searchResults.pageData.byId[page.normalizedUrl]
                 .lists,
         ).toEqual([listData.unifiedId])
+
+        // After a timeout, the "wasPageDropped" state should be reset
+        await dropEventP
+        expect(
+            searchResults.state.listsSidebar.lists.byId[listData.unifiedId]
+                .wasPageDropped,
+        ).toEqual(false)
 
         expect(
             await device.storageManager
@@ -735,17 +755,15 @@ describe('Dashboard lists sidebar logic', () => {
         const listData = annotationsCache.getListByLocalId(localListId)
 
         expect(
-            searchResults.state.listsSidebar.lists.byId[listData.unifiedId]
-                .remoteId,
+            annotationsCache.lists.byId[listData.unifiedId].remoteId,
         ).toBeUndefined()
 
         await searchResults.processEvent('shareList', {
-            listId: localListId,
+            listId: listData.unifiedId,
         })
 
-        expect(
-            searchResults.state.listsSidebar.lists.byId[listData.unifiedId]
-                .remoteId,
-        ).toBe(DATA.LISTS_1[1].remoteId)
+        expect(annotationsCache.lists.byId[listData.unifiedId].remoteId).toBe(
+            DATA.LISTS_1[1].remoteId,
+        )
     })
 })

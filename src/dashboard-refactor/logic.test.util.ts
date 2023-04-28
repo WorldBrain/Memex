@@ -207,11 +207,11 @@ export async function setupTest(
 
     const searchResults = device.createElement<RootState, Events>(logic)
 
-    if (args.runInitLogic) {
-        await searchResults.init()
-    }
     if (args.seedData) {
         await args.seedData(searchResults, device)
+    }
+    if (args.runInitLogic) {
+        await searchResults.init()
     }
 
     return { searchResults, logic, analytics, annotationsCache }
