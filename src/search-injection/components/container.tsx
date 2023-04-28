@@ -412,10 +412,11 @@ const NoResultsSection = styled.div`
     padding: 30px 0px;
 `
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale7};
     font-size: 16px;
     font-weight: bold;
     margin-bottom: 10px;
+    margin-top: 15px;
 `
 
 const InfoText = styled.div`

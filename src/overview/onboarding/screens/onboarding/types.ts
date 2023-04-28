@@ -28,6 +28,7 @@ export interface State {
     passwordMatch: boolean
     preventOnboardingFlow: boolean
     autoLoginState: UITaskState
+    showSyncNotification?: boolean
 }
 
 export type Event = UIEvent<{

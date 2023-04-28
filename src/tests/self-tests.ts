@@ -300,6 +300,7 @@ export function createSelfTests(options: {
                     title: 'Test template',
                     code: 'Soem test code {{{PageTitle}}}',
                     isFavourite: false,
+                    outputFormat: 'markdown',
                 })
                 console.log(`Added test copy-paster template`)
             }

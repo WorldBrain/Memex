@@ -6,14 +6,24 @@ import CopyPaster from './components/CopyPaster'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import * as Raven from 'src/util/raven'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import TurndownService from 'turndown'
+import MarkdownIt from 'markdown-it'
 
 interface State {
     isLoading: boolean
+    copySuccess: boolean
     templates: Template[]
     tmpTemplate: Template | undefined
     isNew: boolean
 }
 
+const turndownService = new TurndownService({
+    headingStyle: 'atx',
+    hr: '---',
+    codeBlockStyle: 'fenced',
+    bulletListMarker: '-',
+})
+const md = new MarkdownIt()
 export interface Props {
     initTemplates?: Template[]
     onClickOutside: React.MouseEventHandler
@@ -30,6 +40,7 @@ export default class CopyPasterContainer extends React.PureComponent<
         title: '',
         code: '',
         isFavourite: false,
+        outputFormat: 'markdown',
     }
 
     private copyPasterBG: RemoteCopyPasterInterface
@@ -44,6 +55,7 @@ export default class CopyPasterContainer extends React.PureComponent<
         tmpTemplate: undefined,
         templates: this.props.initTemplates ?? [],
         isNew: undefined,
+        copySuccess: false,
     }
 
     async componentDidMount() {
@@ -92,12 +104,52 @@ export default class CopyPasterContainer extends React.PureComponent<
         await this.syncTemplates()
     }
 
+    async copyRichTextToClipboard(html) {
+        // Create a hidden content-editable div
+        const hiddenDiv = document.createElement('div')
+
+        hiddenDiv.contentEditable = 'true'
+        hiddenDiv.style.position = 'absolute'
+        hiddenDiv.style.left = '-9999px'
+        hiddenDiv.innerHTML = html
+
+        // Append the hidden div to the body
+        document.body.appendChild(hiddenDiv)
+
+        // Select the content of the hidden div
+        const range = document.createRange()
+        range.selectNodeContents(hiddenDiv)
+        const selection = window.getSelection()
+        selection.removeAllRanges()
+        selection.addRange(range)
+
+        // Copy the selected content to the clipboard
+        document.execCommand('copy')
+
+        // Remove the hidden div from the body
+        document.body.removeChild(hiddenDiv)
+    }
+
     private handleTemplateCopy = async (id: number) => {
+        console.log('handlecopy')
         this.setState({ isLoading: true })
 
         try {
             const rendered = await this.props.renderTemplate(id)
-            await copyToClipboard(rendered)
+            const item = this.state.templates.find((item) => item.id === id)
+
+            if (item) {
+                if (
+                    item.outputFormat === 'markdown' ||
+                    item.outputFormat == null
+                ) {
+                    await copyToClipboard(rendered)
+                }
+                if (item.outputFormat === 'rich-text') {
+                    const htmlString = md.render(rendered)
+                    await this.copyRichTextToClipboard(htmlString)
+                }
+            }
         } catch (err) {
             console.error('Something went really bad copying:', err.message)
             Raven.captureException(err)
@@ -106,7 +158,8 @@ export default class CopyPasterContainer extends React.PureComponent<
                 category: 'TextExporter',
                 action: 'copyToClipboard',
             })
-            this.setState({ isLoading: false })
+            this.setState({ isLoading: false, copySuccess: true })
+            setTimeout(() => this.setState({ copySuccess: false }), 3000)
         }
     }
 
@@ -129,7 +182,8 @@ export default class CopyPasterContainer extends React.PureComponent<
                 isNew={this.state.isNew}
                 templates={this.state.templates}
                 isLoading={this.state.isLoading}
-                onClick={this.handleTemplateCopy}
+                copySuccess={this.state.copySuccess}
+                onClickCopy={this.handleTemplateCopy}
                 onClickSave={this.handleTemplateSave}
                 onClickDelete={this.handleTemplateDelete}
                 onClickOutside={this.props.onClickOutside}
@@ -161,6 +215,14 @@ export default class CopyPasterContainer extends React.PureComponent<
                         tmpTemplate: {
                             ...state.tmpTemplate,
                             title,
+                        },
+                    }))
+                }}
+                onOutputFormatChange={(outputFormat) => {
+                    this.setState((state) => ({
+                        tmpTemplate: {
+                            ...state.tmpTemplate,
+                            outputFormat,
                         },
                     }))
                 }}

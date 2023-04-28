@@ -39,6 +39,7 @@ export default class Logic extends UILogic<State, Event> {
         passwordConfirm: '',
         preventOnboardingFlow: false,
         autoLoginState: 'pristine',
+        showSyncNotification: false,
     })
 
     async init() {
@@ -183,9 +184,14 @@ export default class Logic extends UILogic<State, Event> {
                 await this.openLinkIfAvailable()
                 window.close()
             } else {
-                this.dependencies.navToDashboard()
-                if (newSignUp) {
+                if (!newSignUp) {
+                    this.emitMutation({
+                        showSyncNotification: { $set: true },
+                        loadState: { $set: 'success' },
+                    })
+                } else {
                     this.dependencies.navToGuidedTutorial()
+                    this.dependencies.navToDashboard()
                 }
             }
         } else {

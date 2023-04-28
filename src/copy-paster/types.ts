@@ -3,6 +3,7 @@ export interface Template {
     title: string
     code: string
     isFavourite: boolean
+    outputFormat?: 'markdown' | 'rich-text'
 }
 
 export type TemplateDoc = {

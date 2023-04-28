@@ -16,13 +16,14 @@ const CopyPasterWrapper = styled.div`
 
 interface CopyPasterProps {
     isLoading: boolean
+    copySuccess: boolean
     templates: Template[]
     copyPasterEditingTemplate?: Template
     isNew: boolean
 
     onClickNew: () => void
     onClickEdit: (id: number) => void
-    onClick: (id: number) => void
+    onClickCopy: (id: number) => void
     onClickCancel: () => void
     onClickSave: () => void
     onClickDelete: () => void
@@ -31,6 +32,7 @@ interface CopyPasterProps {
     onTitleChange: (title: string) => void
     onCodeChange: (code: string) => void
     onSetIsFavourite: (id: number, isFavourite: boolean) => void
+    onOutputFormatChange: (format: Template['outputFormat']) => void
 
     onClickOutside?: React.MouseEventHandler
 }
@@ -59,17 +61,21 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
                         onClickDelete={() => this.props.onClickDelete()}
                         onClickHowto={this.props.onClickHowto}
                         onTitleChange={(s) => this.props.onTitleChange(s)}
+                        onOutputFormatChange={(format) =>
+                            this.props.onOutputFormatChange(format)
+                        }
                         onCodeChange={(s) => this.props.onCodeChange(s)}
                     />
                 ) : (
                     <TemplateList
                         templates={templates}
                         isLoading={this.props.isLoading}
+                        copySuccess={this.props.copySuccess}
                         onClickSetIsFavourite={this.props.onSetIsFavourite}
                         onClickEdit={(id) => this.props.onClickEdit(id)}
                         onClickHowto={this.props.onClickHowto}
                         onClickNew={this.props.onClickNew}
-                        onClick={this.props.onClick}
+                        onClickCopy={this.props.onClickCopy}
                     />
                 )}
             </CopyPasterWrapper>
