@@ -23,7 +23,7 @@ interface CopyPasterProps {
 
     onClickNew: () => void
     onClickEdit: (id: number) => void
-    onClick: (id: number) => void
+    onClickCopy: (id: number) => void
     onClickCancel: () => void
     onClickSave: () => void
     onClickDelete: () => void
@@ -75,7 +75,7 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
                         onClickEdit={(id) => this.props.onClickEdit(id)}
                         onClickHowto={this.props.onClickHowto}
                         onClickNew={this.props.onClickNew}
-                        onClick={this.props.onClick}
+                        onClickCopy={this.props.onClickCopy}
                     />
                 )}
             </CopyPasterWrapper>

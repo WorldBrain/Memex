@@ -93,18 +93,6 @@ export default class CopyPasterContainer extends React.PureComponent<
         })
         await this.syncTemplates()
     }
-    private handleTemplateFormatChange = async (
-        id: number,
-        outputFormat: Template['outputFormat'],
-    ) => {
-        const template = this.findTemplateForId(id)
-
-        await this.copyPasterBG.updateTemplate({
-            ...template,
-            outputFormat,
-        })
-        await this.syncTemplates()
-    }
 
     private handleTemplateDelete = async () => {
         // NOTE: delete btn only appears in edit view, hence `state.tmpTemplate.id`
@@ -143,6 +131,7 @@ export default class CopyPasterContainer extends React.PureComponent<
     }
 
     private handleTemplateCopy = async (id: number) => {
+        console.log('handlecopy')
         this.setState({ isLoading: true })
 
         try {
@@ -194,7 +183,7 @@ export default class CopyPasterContainer extends React.PureComponent<
                 templates={this.state.templates}
                 isLoading={this.state.isLoading}
                 copySuccess={this.state.copySuccess}
-                onClick={this.handleTemplateCopy}
+                onClickCopy={this.handleTemplateCopy}
                 onClickSave={this.handleTemplateSave}
                 onClickDelete={this.handleTemplateDelete}
                 onClickOutside={this.props.onClickOutside}

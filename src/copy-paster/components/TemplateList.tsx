@@ -105,7 +105,7 @@ interface InternalTemplateListProps {
 
     onClickSetIsFavourite: (id: number, isFavourite: boolean) => void
     onClickEdit: (id: number) => void
-    onClick: (id: number) => void
+    onClickCopy: (id: number) => void
     onClickHowto: () => void
 }
 
@@ -141,7 +141,7 @@ class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
                 key={template.id}
                 template={template}
                 onClick={() => {
-                    this.props.onClick(template.id)
+                    this.props.onClickCopy(template.id)
                 }}
                 onClickSetIsFavourite={(isFavourite) =>
                     this.props.onClickSetIsFavourite(template.id, isFavourite)
@@ -159,7 +159,7 @@ interface TemplateListProps {
 
     onClickSetIsFavourite: (id: number, isFavourite: boolean) => void
     onClickEdit: (id: number) => void
-    onClick: (id: number) => void
+    onClickCopy: (id: number) => void
     onClickNew: () => void
     onClickHowto: () => void
 }
@@ -216,7 +216,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                 <ContentBlock>
                     <InternalTemplateList
                         templates={this.props.templates}
-                        onClick={this.props.onClick}
+                        onClickCopy={this.props.onClickCopy}
                         onClickSetIsFavourite={this.props.onClickSetIsFavourite}
                         onClickEdit={this.props.onClickEdit}
                         onClickHowto={this.props.onClickHowto}
