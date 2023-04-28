@@ -6,7 +6,6 @@ import CopyPaster from './components/CopyPaster'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import * as Raven from 'src/util/raven'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
-const { richTextFromMarkdown } = require('@contentful/rich-text-from-markdown')
 import TurndownService from 'turndown'
 import MarkdownIt from 'markdown-it'
 

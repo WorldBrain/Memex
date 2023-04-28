@@ -9,8 +9,6 @@ import type {
 } from './types'
 import { KEYS_TO_REQUIREMENTS, LEGACY_KEYS, NOTE_KEYS } from './constants'
 
-const { richTextFromMarkdown } = require('@contentful/rich-text-from-markdown')
-
 export function renderTemplate(
     template: Pick<Template, 'code'>,
     doc: TemplateDoc,

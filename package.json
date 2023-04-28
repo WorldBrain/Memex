@@ -199,6 +199,7 @@
         "@types/jest": "^28.1.7",
         "@types/js-combinatorics": "^0.5.31",
         "@types/lodash": "^4.14.108",
+        "@types/markdown-it": "^12.2.3",
         "@types/mongodb": "^3.0.21",
         "@types/mustache": "^4.0.1",
         "@types/openpgp": "^4.4.7",
