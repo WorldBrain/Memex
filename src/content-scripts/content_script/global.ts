@@ -618,7 +618,7 @@ export async function main(
             if (window.location.hostname === 'www.youtube.com') {
                 loadYoutubeButtons(annotationsFunctions)
             }
-            if (isSidebarOpen) {
+            if (inPageUI.componentsShown.sidebar) {
                 await inPageUI.showSidebar()
             }
             highlightRenderer.resetHighlightsStyles()
