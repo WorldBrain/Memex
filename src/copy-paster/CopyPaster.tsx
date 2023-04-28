@@ -96,7 +96,7 @@ export default class CopyPasterContainer extends React.PureComponent<
     }
     private handleTemplateFormatChange = async (
         id: number,
-        outputFormat: string,
+        outputFormat: Template['outputFormat'],
     ) => {
         const template = this.findTemplateForId(id)
 
@@ -157,7 +157,7 @@ export default class CopyPasterContainer extends React.PureComponent<
                 ) {
                     await copyToClipboard(rendered)
                 }
-                if (item.outputFormat === 'richText') {
+                if (item.outputFormat === 'rich-text') {
                     const htmlString = md.render(rendered)
                     await this.copyRichTextToClipboard(htmlString)
                 }

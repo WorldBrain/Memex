@@ -174,7 +174,7 @@ interface TemplateEditorProps {
     onClickHowto: () => void
 
     onTitleChange: (s: string) => void
-    onOutputFormatChange: (s: string) => void
+    onOutputFormatChange: (s: Template['outputFormat']) => void
     onCodeChange: (s: string) => void
 }
 
@@ -237,10 +237,11 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                         </OutputSwitcher>
                         <OutputSwitcher
                             onClick={() =>
-                                this.props.onOutputFormatChange('richText')
+                                this.props.onOutputFormatChange('rich-text')
                             }
                             outputFormatSelected={
-                                this.props.template?.outputFormat === 'richText'
+                                this.props.template?.outputFormat ===
+                                'rich-text'
                             }
                         >
                             Rich Text

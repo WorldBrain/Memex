@@ -32,7 +32,7 @@ interface CopyPasterProps {
     onTitleChange: (title: string) => void
     onCodeChange: (code: string) => void
     onSetIsFavourite: (id: number, isFavourite: boolean) => void
-    onOutputFormatChange: (format: string) => void
+    onOutputFormatChange: (format: Template['outputFormat']) => void
 
     onClickOutside?: React.MouseEventHandler
 }
