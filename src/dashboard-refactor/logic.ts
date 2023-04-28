@@ -3149,7 +3149,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                 ? undefined
                 : event.listId
 
-        this.updateQueryStringParameter('spaces', listIdToSet)
+        if (!Object.values(SPECIAL_LIST_NAMES).includes(listIdToSet)) {
+            this.updateQueryStringParameter('spaces', listIdToSet)
+        }
 
         await this.mutateAndTriggerSearch(previousState, {
             listsSidebar: { selectedListId: { $set: listIdToSet } },

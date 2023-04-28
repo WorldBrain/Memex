@@ -9,7 +9,6 @@ export interface Props
 const DropTargetSidebarItem: React.FunctionComponent<Props> = (props) => (
     <SidebarItem
         {...props}
-        isCollaborative
         renderRightSideIcon={() => {
             if (props.dropReceivingState.wasPageDropped) {
                 return (

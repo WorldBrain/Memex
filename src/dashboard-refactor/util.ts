@@ -84,7 +84,7 @@ export const stateToSearchParams = (
     if (listsSidebar.selectedListId != null) {
         const listData =
             annotationsCache.lists.byId[listsSidebar.selectedListId]
-        if (listData.localId == null) {
+        if (listData?.localId == null) {
             throw new Error(
                 `Specified list for search refers to data that does not exist locally`,
             )

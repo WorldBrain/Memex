@@ -144,6 +144,7 @@ export class DashboardContainer extends StatefulUIElement<
         super(props, new DashboardLogic(props))
 
         this.youtubeService = new YoutubeService(createYoutubeServiceOptions())
+        ;(window as any)['_state'] = () => ({ ...this.state })
     }
 
     private getListDetailsById: ListDetailsGetter = (id) => {
