@@ -13,6 +13,7 @@ import AuthDialog from 'src/authentication/components/AuthDialog/index'
 import { runInBackground } from 'src/util/webextensionRPC'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { GUIDED_ONBOARDING_URL } from '../../constants'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 const styles = require('../../components/onboarding-box.css')
 
@@ -52,6 +53,33 @@ export default class OnboardingScreen extends StatefulUIElement<
             <RightSide>
                 <CommentDemo src={'img/welcomeScreenIllustration.svg'} />
             </RightSide>
+        )
+    }
+
+    private renderSyncNotif() {
+        return (
+            <WelcomeContainer>
+                <LeftSide>
+                    <ContentBox>
+                        {' '}
+                        <LoadingIndicatorBoxSync>
+                            <LoadingIndicator size={40} />
+                        </LoadingIndicatorBoxSync>
+                        <DescriptionText>
+                            We're syncing your existing data. <br />
+                            It may take a while for everything to show up.
+                        </DescriptionText>
+                        <PrimaryAction
+                            type="secondary"
+                            size="medium"
+                            label="Go to Dashboard"
+                            onClick={() => {
+                                this.props.navToDashboard()
+                            }}
+                        />
+                    </ContentBox>
+                </LeftSide>
+            </WelcomeContainer>
         )
     }
 
@@ -120,7 +148,13 @@ export default class OnboardingScreen extends StatefulUIElement<
     )
 
     render() {
-        return <OnboardingBox>{this.renderLoginStep()}</OnboardingBox>
+        return (
+            <OnboardingBox>
+                {this.state.showSyncNotification
+                    ? this.renderSyncNotif()
+                    : this.renderLoginStep()}
+            </OnboardingBox>
+        )
     }
 }
 
@@ -146,6 +180,15 @@ const LoadingIndicatorBox = styled.div`
     grid-gap: 40px;
     height: 300px;
     width: 400px;
+`
+const LoadingIndicatorBoxSync = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    height: 100px;
+    width: 40px;
 `
 
 const UserScreenContainer = styled.div`
