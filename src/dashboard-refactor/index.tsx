@@ -404,6 +404,8 @@ export class DashboardContainer extends StatefulUIElement<
                     contentSharingBG: this.props.contentShareBG,
                     createNewEntry: () => undefined,
                     initialSelectedListIds: () => searchFilters.spacesIncluded,
+                    selectedListIdSidebar: this.state.listsSidebar
+                        .selectedListId,
                     selectEntry: (spaceId) =>
                         this.processEvent('addIncludedSpace', {
                             spaceId,
