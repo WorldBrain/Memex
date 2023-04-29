@@ -1682,7 +1682,23 @@ export class AnnotationsSidebar extends React.Component<
                         fontColor="greyScale6"
                         onClick={() => this.props.onResetSpaceSelect()}
                     />
-                    {this.renderPermissionStatusButton()}
+                    <RightSideButtonsTopBar>
+                        <PrimaryAction
+                            icon="goTo"
+                            type="tertiary"
+                            size="small"
+                            label="Open Space"
+                            fontColor="greyScale6"
+                            onClick={() =>
+                                window.open(
+                                    this.getBaseUrl() +
+                                        '/c/' +
+                                        selectedList.remoteId,
+                                )
+                            }
+                        />
+                        {this.renderPermissionStatusButton()}
+                    </RightSideButtonsTopBar>
                 </IsolatedViewHeaderTopBar>
                 <SpaceTitle>{selectedList.name}</SpaceTitle>
                 <SpaceDescription>{selectedList.description}</SpaceDescription>
@@ -1989,6 +2005,13 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 }
+
+const RightSideButtonsTopBar = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    grid-gap: 5px;
+`
 
 const OptionsContainer = styled.div`
     display: flex;

@@ -365,10 +365,7 @@ export class DashboardContainer extends StatefulUIElement<
                         searchBG.extendedSuggest({
                             type: 'domain',
                             limit: FILTER_PICKERS_LIMIT,
-                            notInclude: [
-                                ...searchFilters.domainsIncluded,
-                                ...searchFilters.domainsExcluded,
-                            ],
+                            notInclude: [...searchFilters.domainsExcluded],
                         }),
                     onUpdateEntrySelection: (args) =>
                         this.processEvent('setDomainsIncluded', {
@@ -407,6 +404,8 @@ export class DashboardContainer extends StatefulUIElement<
                     contentSharingBG: this.props.contentShareBG,
                     createNewEntry: () => undefined,
                     initialSelectedListIds: () => searchFilters.spacesIncluded,
+                    selectedListIdSidebar: this.state.listsSidebar
+                        .selectedListId,
                     selectEntry: (spaceId) =>
                         this.processEvent('addIncludedSpace', {
                             spaceId,

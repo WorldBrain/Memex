@@ -898,34 +898,45 @@ export default class Ribbon extends Component<Props, State> {
                                             placement={'left'}
                                             offsetX={10}
                                         >
-                                            <Icon
+                                            <IconBox
                                                 onClick={() =>
                                                     this.props.lists.setShowListsPicker(
                                                         !this.props.lists
                                                             .showListsPicker,
                                                     )
                                                 }
-                                                color={
-                                                    this.props.lists.pageListIds
-                                                        .length > 0
-                                                        ? 'prime1'
-                                                        : 'greyScale6'
-                                                }
-                                                heightAndWidth="22px"
-                                                filePath={'plus'}
-                                                containerRef={
-                                                    this.spacePickerRef
-                                                }
-                                            />
-                                            {this.props.lists.pageListIds
-                                                .length > 0 && (
-                                                <SpacesCounter>
-                                                    {
-                                                        this.props.lists
-                                                            .pageListIds.length
+                                            >
+                                                <Icon
+                                                    onClick={() =>
+                                                        this.props.lists.setShowListsPicker(
+                                                            !this.props.lists
+                                                                .showListsPicker,
+                                                        )
                                                     }
-                                                </SpacesCounter>
-                                            )}
+                                                    color={
+                                                        this.props.lists
+                                                            .pageListIds
+                                                            .length > 0
+                                                            ? 'prime1'
+                                                            : 'greyScale6'
+                                                    }
+                                                    heightAndWidth="22px"
+                                                    filePath={'plus'}
+                                                    containerRef={
+                                                        this.spacePickerRef
+                                                    }
+                                                />
+                                                {this.props.lists.pageListIds
+                                                    .length > 0 && (
+                                                    <SpacesCounter>
+                                                        {
+                                                            this.props.lists
+                                                                .pageListIds
+                                                                .length
+                                                        }
+                                                    </SpacesCounter>
+                                                )}
+                                            </IconBox>
                                         </TooltipBox>
                                         {!this.props.sidebar.isSidebarOpen && (
                                             <TooltipBox
@@ -939,38 +950,44 @@ export default class Ribbon extends Component<Props, State> {
                                                 placement={'left'}
                                                 offsetX={10}
                                             >
-                                                <Icon
+                                                <IconBox
                                                     onClick={(e) =>
                                                         this.handleCommentIconBtnClick(
                                                             e,
                                                         )
                                                     }
-                                                    color={'greyScale6'}
-                                                    heightAndWidth="20px"
-                                                    filePath={
-                                                        this.props.commentBox
-                                                            .isCommentSaved
-                                                            ? icons.saveIcon
-                                                            : // : this.props.hasAnnotations
-                                                              // ? icons.commentFull
-                                                              icons.commentAdd
-                                                    }
-                                                    containerRef={
-                                                        this.sidebarButtonRef
-                                                    }
-                                                />
-                                                {this.props.annotations
-                                                    .annotations.allIds.length >
-                                                    0 && (
-                                                    <SpacesCounter>
-                                                        {
+                                                >
+                                                    <Icon
+                                                        color={'greyScale6'}
+                                                        heightAndWidth="20px"
+                                                        filePath={
                                                             this.props
-                                                                .annotations
-                                                                .annotations
-                                                                .allIds.length
+                                                                .commentBox
+                                                                .isCommentSaved
+                                                                ? icons.saveIcon
+                                                                : // : this.props.hasAnnotations
+                                                                  // ? icons.commentFull
+                                                                  icons.commentAdd
                                                         }
-                                                    </SpacesCounter>
-                                                )}
+                                                        containerRef={
+                                                            this
+                                                                .sidebarButtonRef
+                                                        }
+                                                    />
+                                                    {this.props.annotations
+                                                        .annotations.allIds
+                                                        .length > 0 && (
+                                                        <SpacesCounter>
+                                                            {
+                                                                this.props
+                                                                    .annotations
+                                                                    .annotations
+                                                                    .allIds
+                                                                    .length
+                                                            }
+                                                        </SpacesCounter>
+                                                    )}
+                                                </IconBox>
                                             </TooltipBox>
                                         )}
                                         <TooltipBox
@@ -1070,6 +1087,13 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 }
+
+const IconBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+`
 
 const SupportContainer = styled.div`
     max-height: 600px;

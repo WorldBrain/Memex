@@ -28,6 +28,7 @@ export interface GenericPickerDependencies {
     loadDefaultSuggestions: () => string[] | Promise<string[]>
     initialSelectedEntries?: () => string[] | Promise<string[]>
     children?: any
+    closePicker?: () => void
 }
 
 export type GenericPickerDependenciesMinusSave = Omit<
@@ -171,6 +172,10 @@ export default abstract class GenericPickerLogic<
                     previousState.displayEntries,
                 )
             }
+        }
+
+        if (key === 'Escape') {
+            this.dependencies.closePicker()
         }
     }
 

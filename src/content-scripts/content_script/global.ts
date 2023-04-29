@@ -354,6 +354,11 @@ export async function main(
                 isPdf: pageInfo.isPdf,
                 shouldShare,
             })
+            if (inPageUI.componentsShown.sidebar) {
+                inPageUI.showSidebar({
+                    action: 'show_annotation',
+                })
+            }
         },
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,

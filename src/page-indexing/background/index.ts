@@ -499,10 +499,7 @@ export class PageIndexingBackground {
             )
         }
 
-        const needsIndexing = !(await this.isTabPageIndexed({
-            tabId: props.tabId,
-            fullPageUrl: props.fullUrl,
-        }))
+        const needsIndexing = !(await this.storage.getPage(props.fullUrl))
         if (!needsIndexing) {
             return null
         }
@@ -555,6 +552,8 @@ export class PageIndexingBackground {
                 }
             }
 
+            console.log('try update')
+
             await this.persistentStorage.createOrUpdatePage({
                 normalizedUrl,
                 storedContentType: StoredContentType.PdfContent,
@@ -563,6 +562,8 @@ export class PageIndexingBackground {
                     pageTexts: analysis.pdfPageTexts,
                 },
             })
+
+            console.log('worked update')
         }
     }
 
@@ -618,10 +619,10 @@ export class PageIndexingBackground {
                 pageData.url,
                 this._getTime(props.visitTime),
             )
-            await this.markTabPageAsIndexed({
-                tabId: props.tabId,
-                fullPageUrl: pageData.fullUrl,
-            })
+            // await this.markTabPageAsIndexed({
+            //     tabId: props.tabId,
+            //     fullPageUrl: pageData.fullUrl,
+            // })
         }
 
         await updatePageCounter()

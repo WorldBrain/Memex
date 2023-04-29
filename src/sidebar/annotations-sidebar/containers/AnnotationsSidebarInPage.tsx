@@ -223,6 +223,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         await (this.logic as SidebarContainerLogic).annotationsLoadComplete
 
         if (event.action === 'comment') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'annotations',
+            })
             await this.processEvent('setNewPageNoteText', {
                 comment: event.annotationData?.commentText ?? '',
             })
@@ -231,10 +234,19 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 sharedListId: event.sharedListId,
             })
         } else if (event.action === 'show_annotation') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: this.state.selectedListId ? 'spaces' : 'annotations',
+            })
             await this.activateAnnotation(event.annotationCacheId, 'show')
         } else if (event.action === 'edit_annotation') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: this.state.selectedListId ? 'spaces' : 'annotations',
+            })
             await this.activateAnnotation(event.annotationCacheId, 'edit')
         } else if (event.action === 'edit_annotation_spaces') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: this.state.selectedListId ? 'spaces' : 'annotations',
+            })
             await this.activateAnnotation(
                 event.annotationCacheId,
                 'edit_spaces',
@@ -247,7 +259,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
         } else if (event.action === 'show_my_annotations') {
             await this.processEvent('setActiveSidebarTab', {
-                tab: 'annotations',
+                tab: this.state.selectedListId ? 'spaces' : 'annotations',
             })
         } else if (event.action === 'show_page_summary') {
             await this.processEvent('setActiveSidebarTab', {
