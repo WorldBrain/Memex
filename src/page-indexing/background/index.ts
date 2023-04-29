@@ -499,10 +499,7 @@ export class PageIndexingBackground {
             )
         }
 
-        const needsIndexing = !(await this.isTabPageIndexed({
-            tabId: props.tabId,
-            fullPageUrl: props.fullUrl,
-        }))
+        const needsIndexing = !(await this.storage.getPage(props.fullUrl))
         if (!needsIndexing) {
             return null
         }
