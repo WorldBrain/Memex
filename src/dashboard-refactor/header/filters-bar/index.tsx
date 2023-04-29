@@ -210,6 +210,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                     searchInputPlaceholder="Add Space filters"
                     removeTooltipText="Remove Space filter"
                     filterMode
+                    closePicker={this.props.toggleSpaceFilter}
                 />
             </PopoutBox>
         )
@@ -231,6 +232,8 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                     {...this.props.domainPickerProps}
                     searchInputPlaceholder="Add a domain filters"
                     removeToolTipText="Remove filter"
+                    onClickOutside={this.props.toggleDomainsFilter}
+                    closePicker={this.props.toggleDomainsFilter}
                 />
             </PopoutBox>
         )
