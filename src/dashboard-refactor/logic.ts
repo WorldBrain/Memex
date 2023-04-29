@@ -277,7 +277,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isSpaceFilterActive: false,
                 isDomainFilterActive: false,
                 isTagFilterActive: false,
-                searchFiltersOpen: openFilterBarOnLoad ? true : false,
+                searchFiltersOpen: false,
                 spacesIncluded: spacesArray.length > 1 ? spacesArray : [],
                 tagsExcluded: [],
                 tagsIncluded: [],
@@ -349,6 +349,11 @@ export class DashboardLogic extends UILogic<State, Events> {
             spacesArray.push(parseFloat(spacesQuery))
         }
 
+        let shouldOpenFilterbar =
+            spacesArray.length > 0 || (from && from.length) || (to && to.length)
+                ? true
+                : false
+
         await loadInitial(this, async () => {
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
@@ -386,6 +391,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         spacesIncluded: {
                             $set: spacesArray.length > 0 ? spacesArray : [],
                         },
+                        searchFiltersOpen: { $set: shouldOpenFilterbar },
                     },
                 })
             } else {
