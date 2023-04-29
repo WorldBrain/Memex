@@ -169,6 +169,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             }
             // Replace the current URL with the new one
             window.location.replace(updatedUrl)
+        } else {
+            this.removeQueryString(key)
         }
     }
     removeQueryString(key) {
