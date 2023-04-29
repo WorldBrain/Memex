@@ -365,10 +365,7 @@ export class DashboardContainer extends StatefulUIElement<
                         searchBG.extendedSuggest({
                             type: 'domain',
                             limit: FILTER_PICKERS_LIMIT,
-                            notInclude: [
-                                ...searchFilters.domainsIncluded,
-                                ...searchFilters.domainsExcluded,
-                            ],
+                            notInclude: [...searchFilters.domainsExcluded],
                         }),
                     onUpdateEntrySelection: (args) =>
                         this.processEvent('setDomainsIncluded', {
