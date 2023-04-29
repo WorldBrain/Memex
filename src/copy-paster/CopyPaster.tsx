@@ -131,7 +131,6 @@ export default class CopyPasterContainer extends React.PureComponent<
     }
 
     private handleTemplateCopy = async (id: number) => {
-        console.log('handlecopy')
         this.setState({ isLoading: true })
 
         try {

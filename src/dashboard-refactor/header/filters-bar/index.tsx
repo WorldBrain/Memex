@@ -185,7 +185,10 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 offsetX={10}
                 closeComponent={this.props.toggleDatesFilter}
             >
-                <DatePicker {...this.props.datePickerProps} />
+                <DatePicker
+                    {...this.props.datePickerProps}
+                    onClickOutside={this.props.toggleDatesFilter}
+                />
             </PopoutBox>
         )
     }

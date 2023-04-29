@@ -113,6 +113,10 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
             // event.stopImmediatePropagation()
             this.handleInputChange({ isStartDate })()
         }
+        if (event.key === 'Escape') {
+            // event.stopImmediatePropagation()
+            this.props.onClickOutside(event)
+        }
     }
 
     /**
