@@ -91,30 +91,40 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         label: string,
     ) => {
         if (name === 'date' && isFiltered) {
-            var startDate = filterProps.startDateText
+            let startDateText: string
+            let endDateText: string
 
-            if (filterProps.endDateText) {
-                var endDate: string = filterProps.endDateText
+            if (!filterProps.startDate) {
+                startDateText = undefined
+                if (!filterProps.startDateText && isFiltered) {
+                    startDateText = 'Forever'
+                }
+            } else {
+                startDateText = filterProps.startDateText
             }
-
-            if (!filterProps.endDateText && isFiltered) {
-                var endDate = 'Now'
+            if (!filterProps.endDate) {
+                endDateText = undefined
+                if (!filterProps.endDateText && isFiltered) {
+                    endDateText = 'Now'
+                }
+            } else {
+                endDateText = filterProps.endDateText
             }
 
             return (
                 <>
                     {isFiltered && (
                         <>
-                            {startDate && (
+                            {startDateText && (
                                 <>
                                     <DateHelp>From</DateHelp>
-                                    <DateText>{startDate}</DateText>
+                                    <DateText>{startDateText}</DateText>
                                 </>
                             )}
-                            {endDate && (
+                            {endDateText && (
                                 <>
                                     <DateHelp>to</DateHelp>
-                                    <DateText>{endDate}</DateText>
+                                    <DateText>{endDateText}</DateText>
                                 </>
                             )}
                         </>

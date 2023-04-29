@@ -81,12 +81,6 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
         this.setState((state) => ({ ...state, [stateKey]: '' }))
         updateDateText('')
 
-        const updateDate = isStartDate
-            ? this.props.onStartDateChange
-            : this.props.onEndDateChange
-
-        this.handleDateChange({ isStartDate })(event)
-
         event.preventDefault()
     }
 
@@ -250,7 +244,7 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
             date.endOf('day')
         }
 
-        updateDate(date ? date.valueOf() : '')
+        updateDate(date ? date.valueOf() : undefined)
 
         // Change onboarding tooltip to more filters
         this.props.changeTooltip()
