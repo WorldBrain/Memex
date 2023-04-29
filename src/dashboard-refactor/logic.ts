@@ -278,7 +278,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isDomainFilterActive: false,
                 isTagFilterActive: false,
                 searchFiltersOpen: false,
-                spacesIncluded: spacesArray.length > 1 ? spacesArray : [],
+                spacesIncluded: [],
                 tagsExcluded: [],
                 tagsIncluded: [],
                 dateFromInput: fromQuery ? from : null,
@@ -2955,13 +2955,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { $set: this.getInitialState().searchFilters },
         })
-
-        if (previousState.listsSidebar.selectedListId) {
-            this.updateQueryStringParameter(
-                'spaces',
-                previousState.listsSidebar.selectedListId,
-            )
-        }
 
         this.emitMutation({
             searchFilters: { searchFiltersOpen: { $set: false } },
