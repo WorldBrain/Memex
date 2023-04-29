@@ -235,17 +235,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
         } else if (event.action === 'show_annotation') {
             await this.processEvent('setActiveSidebarTab', {
-                tab: 'annotations',
+                tab: this.state.selectedListId ? 'spaces' : 'annotations',
             })
             await this.activateAnnotation(event.annotationCacheId, 'show')
         } else if (event.action === 'edit_annotation') {
             await this.processEvent('setActiveSidebarTab', {
-                tab: 'annotations',
+                tab: this.state.selectedListId ? 'spaces' : 'annotations',
             })
             await this.activateAnnotation(event.annotationCacheId, 'edit')
         } else if (event.action === 'edit_annotation_spaces') {
             await this.processEvent('setActiveSidebarTab', {
-                tab: 'annotations',
+                tab: this.state.selectedListId ? 'spaces' : 'annotations',
             })
             await this.activateAnnotation(
                 event.annotationCacheId,
@@ -259,7 +259,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
         } else if (event.action === 'show_my_annotations') {
             await this.processEvent('setActiveSidebarTab', {
-                tab: 'annotations',
+                tab: this.state.selectedListId ? 'spaces' : 'annotations',
             })
         } else if (event.action === 'show_page_summary') {
             await this.processEvent('setActiveSidebarTab', {
