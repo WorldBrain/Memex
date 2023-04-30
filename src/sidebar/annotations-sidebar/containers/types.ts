@@ -102,6 +102,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showState: 'visible' | 'hidden'
     isLocked: boolean
     isWidthLocked: boolean
+    showAISuggestionsDropDown: boolean
+    AIsuggestions: { prompt: string; focused: boolean | null }[]
 
     activeTab: SidebarTab
     pillVisibility: string
@@ -193,18 +195,23 @@ interface SidebarEvents {
     unlockWidth: null
     adjustSidebarWidth: { newWidth: string; isWidthLocked?: boolean }
     setPopoutsActive: boolean
+    saveAIPrompt: { prompt: string }
+    removeAISuggestion: { suggestion: string }
+    navigateFocusInList: { direction: 'up' | 'down' }
 
     setActiveSidebarTab: {
         tab: SidebarTab
         textToProcess?: string
         url?: string
     }
+    selectAISuggestion: { suggestion: string }
     queryAIwithPrompt: {
         prompt: string
     }
     setQueryMode: {
         mode: string
     }
+    toggleAISuggestionsDropDown: null
     removeSelectedTextAIPreview: null
     updatePromptState: {
         prompt: string

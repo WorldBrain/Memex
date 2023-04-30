@@ -59,6 +59,7 @@ import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import DiscordNotification from '@worldbrain/memex-common/lib/common-ui/components/discord-notification-banner'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -144,10 +145,12 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     annotationsShareAll: any
     copyPageLink: any
     queryAIwithPrompt: any
+    selectAISuggestion: any
     setQueryMode: (mode) => void
     updatePromptState: any
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
+    toggleAISuggestionsDropDown: () => void
 
     //postShareHook: (shareInfo) => void
     //postShareHook: (shareInfo) => void+
@@ -157,6 +160,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     hasFeedActivity?: boolean
     removeSelectedTextAIPreview?: () => void
     // editableProps: EditableItemProps
+    saveAIPrompt: (prompt) => void
+    removeAISuggestion: (prompt) => void
+    navigateFocusInList: (direction: 'up' | 'down') => void
 }
 
 interface AnnotationsSidebarState {
@@ -174,6 +180,8 @@ interface AnnotationsSidebarState {
         [unifiedId: string]: 'othersAnnotations' | 'ownAnnotations' | 'all'
     }
     showAIhighlight: boolean
+    showAISuggestionsDropDown: boolean
+    AIsuggestions: []
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -203,6 +211,8 @@ export class AnnotationsSidebar extends React.Component<
         linkCopyState: false,
         othersOrOwnAnnotationsState: {},
         showAIhighlight: false,
+        showAISuggestionsDropDown: false,
+        AIsuggestions: [],
     }
 
     async componentDidMount() {
@@ -1188,7 +1198,63 @@ export class AnnotationsSidebar extends React.Component<
             return this.renderLoader()
         }
 
+        const addPromptButton = (prompt) => (
+            <TooltipBox tooltipText="Save as template" placement="left">
+                <Icon
+                    onClick={() => this.props.saveAIPrompt(prompt)}
+                    filePath={icons.plus}
+                    heightAndWidth="22px"
+                    color="prime1"
+                />
+            </TooltipBox>
+        )
+
         if (this.props.activeTab === 'summary') {
+            const SuggestionsList = ({ suggestions }) => {
+                return (
+                    <ClickAway
+                        onClickAway={() =>
+                            this.props.toggleAISuggestionsDropDown()
+                        }
+                    >
+                        <DropDown>
+                            {suggestions.map((suggestion) => (
+                                <DropDownItem
+                                    onClick={() =>
+                                        this.props.selectAISuggestion(
+                                            suggestion.prompt,
+                                        )
+                                    }
+                                    focused={
+                                        suggestion.focused && suggestion.focused
+                                    }
+                                >
+                                    {suggestion.prompt}
+                                    <RemoveTemplateIconBox>
+                                        <TooltipBox
+                                            tooltipText="Remove template"
+                                            placement="left"
+                                        >
+                                            <Icon
+                                                filePath={icons.removeX}
+                                                heightAndWidth="18px"
+                                                color="greyScale5"
+                                                onClick={(event) => {
+                                                    event.stopPropagation()
+                                                    this.props.removeAISuggestion(
+                                                        suggestion.prompt,
+                                                    )
+                                                }}
+                                            />
+                                        </TooltipBox>
+                                    </RemoveTemplateIconBox>
+                                </DropDownItem>
+                            ))}
+                        </DropDown>
+                    </ClickAway>
+                )
+            }
+
             return (
                 <AISidebarContainer>
                     {this.props.selectedTextAIPreview && (
@@ -1237,7 +1303,12 @@ export class AnnotationsSidebar extends React.Component<
                             </SelectedAITextContainer>
                         </SelectedAITextBox>
                     )}
-                    <QueryContainer>
+                    <QueryContainer
+                        AIDropDownShown={
+                            this.props.showAISuggestionsDropDown &&
+                            this.props.AIsuggestions.length > 0
+                        }
+                    >
                         <TextField
                             placeholder={
                                 this.props.prompt ??
@@ -1253,14 +1324,50 @@ export class AnnotationsSidebar extends React.Component<
                             }}
                             onKeyDown={async (event) => {
                                 if (event.key === 'Enter') {
+                                    console.log(
+                                        'enter pressed',
+                                        this.props.prompt,
+                                    )
                                     await this.props.queryAIwithPrompt(
                                         this.props.prompt,
                                     )
                                 }
+                                if (event.key === 'Escape') {
+                                    this.props.toggleAISuggestionsDropDown()
+                                }
+                                if (event.key === 'ArrowUp') {
+                                    if (!this.props.showAISuggestionsDropDown) {
+                                        this.props.toggleAISuggestionsDropDown()
+                                    }
+                                    this.props.navigateFocusInList('up')
+                                    focus()
+                                }
+
+                                if (event.key === 'ArrowDown') {
+                                    if (!this.props.showAISuggestionsDropDown) {
+                                        this.props.toggleAISuggestionsDropDown()
+                                    }
+                                    this.props.navigateFocusInList('down')
+                                    focus()
+                                }
                                 event.stopPropagation()
                             }}
                             height="40px"
+                            onClick={() =>
+                                this.props.toggleAISuggestionsDropDown()
+                            }
+                            actionButton={
+                                this.props.prompt &&
+                                this.props.prompt.length > 0 &&
+                                addPromptButton(this.props.prompt)
+                            }
                         />
+                        {this.props.showAISuggestionsDropDown &&
+                            this.props.AIsuggestions.length > 0 && (
+                                <SuggestionsList
+                                    suggestions={this.props.AIsuggestions}
+                                />
+                            )}
                     </QueryContainer>
                     {!this.props.selectedTextAIPreview && (
                         <OptionsContainer>
@@ -2070,6 +2177,51 @@ const SelectedAITextContainer = styled.div<{
         `}
 `
 
+const DropDown = styled.div`
+    display: flex;
+    flex-direction: column;
+    background: ${(props) => props.theme.colors.greyScale1};
+    border-radius: 0 0 6px 6px;
+    outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+    min-width: 100px;
+`
+
+const RemoveTemplateIconBox = styled.div`
+    display: none;
+    position: absolute;
+`
+
+const DropDownItem = styled.div<{ focused: boolean }>`
+    display: flex;
+    min-height: 24px;
+    align-items: center;
+    padding: 10px 20px;
+    color: ${(props) => props.theme.colors.greyScale7};
+    justify-content: space-between;
+    position: relative;
+
+    &:first-child {
+        border-top: 1px solid ${(props) => props.theme.colors.greyScale1};
+    }
+
+    &:hover {
+        background: ${(props) => props.theme.colors.greyScale2};
+        cursor: pointer;
+
+        ${RemoveTemplateIconBox} {
+            display: flex;
+            right: 15px;
+            z-index: 100;
+        }
+    }
+
+    ${(props) =>
+        props.focused &&
+        css`
+            background: ${(props) => props.theme.colors.greyScale2};
+        `}
+`
+
 const BlurContainer = styled.div`
     position: absolute;
     bottom: 0px;
@@ -2081,9 +2233,23 @@ const BlurContainer = styled.div`
     );
 `
 
-const QueryContainer = styled.div`
+const QueryContainer = styled.div<{
+    AIDropDownShown: boolean
+}>`
     height: 40px;
     padding: 15px;
+    display: flex;
+    flex-direction: column;
+    z-index: 101;
+
+    ${(props) =>
+        props.AIDropDownShown &&
+        css`
+            & > div:first-child {
+                border-bottom-right-radius: 0px;
+                border-bottom-left-radius: 0px;
+            }
+        `}
 `
 
 const AISidebarContainer = styled.div`
