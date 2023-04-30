@@ -70,6 +70,7 @@ export interface SyncSettingsByFeature {
     }
     openAI: {
         apiKey: string
+        promptSuggestions: string[]
     }
     inPageUI: {
         ribbonEnabled: boolean

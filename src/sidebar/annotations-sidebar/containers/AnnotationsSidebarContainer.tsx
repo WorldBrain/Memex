@@ -791,6 +791,30 @@ export class AnnotationsSidebarContainer<
                                     prompt,
                                 })
                             }}
+                            saveAIPrompt={(prompt) => {
+                                this.processEvent('saveAIPrompt', { prompt })
+                            }}
+                            removeAISuggestion={(suggestion) => {
+                                this.processEvent('removeAISuggestion', {
+                                    suggestion,
+                                })
+                            }}
+                            navigateFocusInList={(direction) => {
+                                this.processEvent('navigateFocusInList', {
+                                    direction,
+                                })
+                            }}
+                            toggleAISuggestionsDropDown={() =>
+                                this.processEvent(
+                                    'toggleAISuggestionsDropDown',
+                                    null,
+                                )
+                            }
+                            selectAISuggestion={(suggestion) => {
+                                this.processEvent('selectAISuggestion', {
+                                    suggestion,
+                                })
+                            }}
                             setQueryMode={(mode) => {
                                 this.processEvent('setQueryMode', {
                                     mode,

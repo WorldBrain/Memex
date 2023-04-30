@@ -552,8 +552,6 @@ export class PageIndexingBackground {
                 }
             }
 
-            console.log('try update')
-
             await this.persistentStorage.createOrUpdatePage({
                 normalizedUrl,
                 storedContentType: StoredContentType.PdfContent,
@@ -562,8 +560,6 @@ export class PageIndexingBackground {
                     pageTexts: analysis.pdfPageTexts,
                 },
             })
-
-            console.log('worked update')
         }
     }
 
