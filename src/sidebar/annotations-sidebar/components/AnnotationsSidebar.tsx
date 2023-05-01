@@ -2211,7 +2211,7 @@ const DropDownItem = styled.div<{ focused: boolean }>`
     color: ${(props) => props.theme.colors.greyScale7};
     justify-content: space-between;
     position: relative;
-
+    font-size: 14px;
     &:first-child {
         border-top: 1px solid ${(props) => props.theme.colors.greyScale1};
     }

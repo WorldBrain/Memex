@@ -1515,13 +1515,10 @@ export class SidebarContainerLogic extends UILogic<
             'promptSuggestions',
         )
 
-        let suggestions = rawSuggestions.map((prompt: string) => ({
-            prompt,
-            focused: null,
-        }))
-        await this.syncSettings.openAI.get('promptSuggestions')
+        let suggestions = []
 
-        if (!suggestions) {
+        if (!rawSuggestions) {
+            console.log('no suggestions')
             await this.syncSettings.openAI.set(
                 'promptSuggestions',
                 AI_PROMPT_DEFAULTS,
@@ -1530,6 +1527,11 @@ export class SidebarContainerLogic extends UILogic<
             suggestions = AI_PROMPT_DEFAULTS.map((prompt: string) => {
                 return { prompt, focused: null }
             })
+        } else {
+            suggestions = rawSuggestions.map((prompt: string) => ({
+                prompt,
+                focused: null,
+            }))
         }
 
         this.emitMutation({
