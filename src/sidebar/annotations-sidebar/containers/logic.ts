@@ -1518,7 +1518,6 @@ export class SidebarContainerLogic extends UILogic<
         let suggestions = []
 
         if (!rawSuggestions) {
-            console.log('no suggestions')
             await this.syncSettings.openAI.set(
                 'promptSuggestions',
                 AI_PROMPT_DEFAULTS,

@@ -116,16 +116,17 @@ export default class Logic extends UILogic<State, Event> {
             const auth = this.dependencies.authBG
             this.action = previousState.mode as 'login' | 'register'
             if (previousState.mode === 'signup') {
-                this.dependencies.onAuth?.({ reason: 'register' })
                 const { result } = await auth.registerWithEmailPassword(
                     credentials,
                 )
+
                 if (result.status === 'error') {
                     this.emitMutation({ error: { $set: result.reason } })
                     return
+                } else {
+                    this.dependencies.onAuth?.({ reason: 'register' })
                 }
             } else if (previousState.mode === 'login') {
-                this.dependencies.onAuth?.({ reason: 'login' })
                 this.dependencies.onModeChange?.({
                     mode: 'login',
                     setSaveState: 'running',
@@ -136,6 +137,8 @@ export default class Logic extends UILogic<State, Event> {
                 if (result.status === 'error') {
                     this.emitMutation({ error: { $set: result.reason } })
                     return
+                } else {
+                    this.dependencies.onAuth?.({ reason: 'login' })
                 }
             }
         })
