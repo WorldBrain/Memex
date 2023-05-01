@@ -2741,26 +2741,20 @@ export class DashboardLogic extends UILogic<State, Events> {
     setDateFromInputValue: EventHandler<'setDateFromInputValue'> = async ({
         event,
     }) => {
-        this.updateQueryStringParameter(
-            'from',
-            chrono.parseDate(event.value).getTime(),
-        )
-
         this.emitMutation({
-            searchFilters: { dateFromInput: { $set: event.value } },
+            searchFilters: {
+                dateFromInput: { $set: event.value ? event.value : '' },
+            },
         })
     }
 
     setDateToInputValue: EventHandler<'setDateToInputValue'> = async ({
         event,
     }) => {
-        this.updateQueryStringParameter(
-            'to',
-            chrono.parseDate(event.value).getTime(),
-        )
-
         this.emitMutation({
-            searchFilters: { dateToInput: { $set: event.value } },
+            searchFilters: {
+                dateToInput: { $set: event.value },
+            },
         })
     }
 
@@ -2768,18 +2762,31 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        this.updateQueryStringParameter('from', event.value.toString())
-
-        await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { dateFrom: { $set: event.value } },
-        })
+        if (!event.value) {
+            this.removeQueryString('from')
+            await this.mutateAndTriggerSearch(previousState, {
+                searchFilters: { dateFrom: { $set: undefined } },
+            })
+        } else {
+            this.updateQueryStringParameter('from', event.value.toString())
+            await this.mutateAndTriggerSearch(previousState, {
+                searchFilters: { dateFrom: { $set: event.value } },
+            })
+        }
     }
 
     setDateTo: EventHandler<'setDateTo'> = async ({ event, previousState }) => {
-        this.updateQueryStringParameter('to', event.value.toString())
-        await this.mutateAndTriggerSearch(previousState, {
-            searchFilters: { dateTo: { $set: event.value } },
-        })
+        if (!event.value) {
+            this.removeQueryString('to')
+            await this.mutateAndTriggerSearch(previousState, {
+                searchFilters: { dateTo: { $set: undefined } },
+            })
+        } else {
+            this.updateQueryStringParameter('to', event.value.toString())
+            await this.mutateAndTriggerSearch(previousState, {
+                searchFilters: { dateTo: { $set: event.value } },
+            })
+        }
     }
 
     setSpacesIncluded: EventHandler<'setSpacesIncluded'> = async ({
@@ -2816,8 +2823,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 localListIds.add(selectedLocalListId)
             }
         }
-
-        console.log('localListIds', localListIds)
 
         this.updateQueryStringParameter(
             'spaces',

@@ -111,6 +111,8 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 endDateText = filterProps.endDateText
             }
 
+            console.log('startDateText', endDateText)
+
             return (
                 <>
                     {isFiltered && (
