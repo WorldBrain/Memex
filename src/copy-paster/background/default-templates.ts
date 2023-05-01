@@ -43,9 +43,9 @@ export const NOTION_MD_TEMPLATE: Template = {
     outputFormat: 'markdown',
     code: `[{{{PageTitle}}}]({{{PageUrl}}})
 {{#Notes}}
-- {{{NoteHighlight}}}
-  {{{NoteSpaces}}}
-  {{{NoteText}}}
+* {{{NoteHighlight}}} 
+  * {{{NoteText}}}  
+    {{{NoteSpaces}}}
 {{/Notes}}
 `,
 }
