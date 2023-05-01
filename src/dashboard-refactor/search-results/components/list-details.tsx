@@ -17,12 +17,11 @@ import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-fi
 import type { UnifiedList } from 'src/annotations/cache/types'
 
 export interface Props {
-    listName: string
     remoteLink?: string
     isOwnedList?: boolean
     isJoinedList?: boolean
     description: string | null
-    listData: UnifiedList
+    listData: Pick<UnifiedList, 'unifiedId' | 'localId' | 'name'>
     saveDescription: (description: string) => void
     saveTitle: (title: string, listId: string) => void
     onAddContributorsClick?: React.MouseEventHandler
@@ -44,7 +43,7 @@ export default class ListDetails extends PureComponent<Props, State> {
         description: this.props.description ?? '',
         isEditingDescription: false,
         showQuickTutorial: false,
-        spaceTitle: this.props.listName,
+        spaceTitle: this.props.listData.name,
     }
 
     componentWillUpdate(nextProps: Props) {
@@ -53,7 +52,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                 description: nextProps.description ?? '',
                 isEditingDescription: false,
                 showQuickTutorial: false,
-                spaceTitle: nextProps.listName,
+                spaceTitle: nextProps.listData.name,
             })
         }
     }
@@ -176,7 +175,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                     this.props.description !==
                                                         this.state
                                                             .description ||
-                                                    this.props.listName !==
+                                                    this.props.listData.name !==
                                                         this.state.spaceTitle,
                                             })
                                         } else if (e.key === 'Escape') {
@@ -218,7 +217,8 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                             .description !==
                                                             this.state
                                                                 .description ||
-                                                        this.props.listName !==
+                                                        this.props.listData
+                                                            .name !==
                                                             this.state
                                                                 .spaceTitle,
                                                 })
@@ -231,11 +231,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                             <TitleContainer>
                                 <DetailsContainer>
                                     <SectionTitle>
-                                        {this.props.listName}
-                                        {this.props.listData.localId ===
-                                            20201015 && 'Saved on Mobile'}
-                                        {this.props.listData.localId ===
-                                            20201014 && 'Inbox'}
+                                        {this.props.listData.name}
                                     </SectionTitle>
                                     {/* <TitleEditContainer>
                                     {this.renderEditButton()}

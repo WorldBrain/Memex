@@ -16,7 +16,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     inboxUnreadCount: number
     dragOverListId?: string
     editingListId?: string
-    selectedListId?: string
+    selectedListId: string | null
     showMoreMenuListId?: string
     isSidebarToggleHovered?: boolean
     hasFeedActivity: boolean
@@ -30,7 +30,6 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     listDeleteState: TaskState
     listCreateState: TaskState
     listShareLoadingState: TaskState
-    showFeed?: boolean
 }
 
 export type Events = UIEvent<{

@@ -10,6 +10,8 @@ import type {
     PageAnnotationsCacheInterface,
     UnifiedList,
 } from 'src/annotations/cache/types'
+import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
+import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 export const updatePickerValues = (event: {
     added?: string
@@ -58,6 +60,25 @@ export const getListData = (
     { listsSidebar }: Pick<RootState, 'listsSidebar'>,
     opts?: { mustBeLocal?: boolean; source?: keyof Events },
 ): UnifiedList => {
+    // TODO: Deal with these static lists better, without needing to do this
+    if (
+        Object.values(SPECIAL_LIST_STRING_IDS).includes(
+            listsSidebar.selectedListId,
+        )
+    ) {
+        const name =
+            listsSidebar.selectedListId === SPECIAL_LIST_STRING_IDS.INBOX
+                ? SPECIAL_LIST_NAMES.INBOX
+                : SPECIAL_LIST_NAMES.MOBILE
+        return {
+            name,
+            hasRemoteAnnotationsToLoad: false,
+            unifiedAnnotationIds: [],
+            unifiedId: listsSidebar.selectedListId,
+            localId: parseInt(listsSidebar.selectedListId),
+        }
+    }
+
     const listData = listsSidebar.lists.byId[listId]
     const source = opts?.source ? `for ${opts.source} ` : ''
 
@@ -81,7 +102,13 @@ export const stateToSearchParams = (
     annotationsCache: PageAnnotationsCacheInterface,
 ): BackgroundSearchParams => {
     const lists = [...searchFilters.spacesIncluded]
-    if (listsSidebar.selectedListId != null) {
+    if (
+        Object.values(SPECIAL_LIST_STRING_IDS).includes(
+            listsSidebar.selectedListId,
+        )
+    ) {
+        lists.push(parseInt(listsSidebar.selectedListId))
+    } else if (listsSidebar.selectedListId != null) {
         const listData =
             annotationsCache.lists.byId[listsSidebar.selectedListId]
         if (listData?.localId == null) {

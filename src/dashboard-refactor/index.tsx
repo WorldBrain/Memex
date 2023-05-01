@@ -61,6 +61,7 @@ import { createYoutubeServiceOptions } from '@worldbrain/memex-common/lib/servic
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 
 export interface Props extends DashboardDependencies {}
 
@@ -131,14 +132,11 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
-
     youtubeService: YoutubeService
 
     private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
         window.location.hash = '#/' + route
     }
-
-    private SidebarContainer = React.createRef<HTMLElement>()
 
     constructor(props: Props) {
         super(props, new DashboardLogic(props))
@@ -158,12 +156,7 @@ export class DashboardContainer extends StatefulUIElement<
     private getListDetailsProps = (): ListDetailsProps | null => {
         const { listsSidebar, currentUser } = this.state
 
-        if (
-            listsSidebar.selectedListId == null ||
-            Object.values(SPECIAL_LIST_NAMES).includes(
-                listsSidebar.selectedListId,
-            )
-        ) {
+        if (listsSidebar.selectedListId == null) {
             return null
         }
 
@@ -178,7 +171,6 @@ export class DashboardContainer extends StatefulUIElement<
         return {
             listData,
             remoteLink,
-            listName: listData.name,
             isOwnedList,
             isJoinedList: !isOwnedList && listData.localId != null,
             description: listData.description ?? null,
@@ -468,9 +460,6 @@ export class DashboardContainer extends StatefulUIElement<
                     this.props.openCollectionPage(remoteListId)
                 }
                 switchToFeed={() => this.processEvent('switchToFeed', null)}
-                onAllSavedSelection={() =>
-                    this.processEvent('setSelectedListId', { listId: null })
-                }
                 onListSelection={(listId) => {
                     this.processEvent('setSelectedListId', { listId })
                 }}
@@ -541,6 +530,8 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('cancelListEdit', null),
                     onConfirmEdit: (value) =>
                         this.processEvent('confirmListEdit', { value, listId }),
+                    onDeleteSpaceIntent: () =>
+                        this.processEvent('setDeletingListId', { listId }),
                     onDeleteSpaceConfirm: () =>
                         this.processEvent('confirmListDelete', null),
                     toggleMenu: () =>
@@ -1408,7 +1399,6 @@ export class DashboardContainer extends StatefulUIElement<
                     />
                     <MainFrame>
                         <ListSidebarContent
-                            ref={this.SidebarContainer}
                             style={style}
                             size={{
                                 height: listsSidebar.isSidebarPeeking
@@ -1471,7 +1461,8 @@ export class DashboardContainer extends StatefulUIElement<
                             {this.renderListsSidebar()}
                         </ListSidebarContent>
                         <MainContent>
-                            {this.state.listsSidebar.showFeed ? (
+                            {this.state.listsSidebar.selectedListId ===
+                            SPECIAL_LIST_STRING_IDS.FEED ? (
                                 <FeedContainer>
                                     {/* <TitleContainer>
                                         <SectionTitle>

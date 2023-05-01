@@ -58,6 +58,7 @@ import { openPDFInViewer } from 'src/pdf/util'
 import { hydrateCacheForDashboard } from 'src/annotations/cache/utils'
 import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
 import type { AnnotationsSearchResponse } from 'src/search/background/types'
+import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -315,7 +316,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 areFollowedListsExpanded: true,
                 areJoinedListsExpanded: true,
                 selectedListId: null,
-                showFeed: false,
             },
             syncMenu: {
                 isDisplayed: false,
@@ -795,7 +795,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             mode: { $set: 'search' },
             listsSidebar: {
                 ...(mutation['listsSidebar'] ?? {}),
-                showFeed: { $set: false },
             },
         }
 
@@ -2964,7 +2963,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { $set: this.getInitialState().searchFilters },
-            listsSidebar: { selectedListId: { $set: undefined } },
+            listsSidebar: { selectedListId: { $set: null } },
         })
         this.emitMutation({
             searchFilters: { searchFiltersOpen: { $set: false } },
@@ -3146,7 +3145,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         const listIdToSet =
             previousState.listsSidebar.selectedListId === event.listId
-                ? undefined
+                ? null
                 : event.listId
 
         if (!Object.values(SPECIAL_LIST_NAMES).includes(listIdToSet)) {
@@ -3520,7 +3519,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.emitMutation({
                     modals: { deletingListId: { $set: undefined } },
                     listsSidebar: {
-                        selectedListId: { $set: undefined },
+                        selectedListId: { $set: null },
                         filteredListIds: {
                             $apply: (ids: string[]) =>
                                 ids.filter((id) => id !== listId),
@@ -3539,8 +3538,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         this.emitMutation({
             listsSidebar: {
-                showFeed: { $set: true },
-                selectedListId: { $set: SPECIAL_LIST_NAMES.FEED },
+                selectedListId: { $set: SPECIAL_LIST_STRING_IDS.FEED },
             },
         })
 
