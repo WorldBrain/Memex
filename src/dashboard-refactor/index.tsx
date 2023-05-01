@@ -434,7 +434,12 @@ export class DashboardContainer extends StatefulUIElement<
     private renderListsSidebar() {
         const { listsSidebar, currentUser } = this.state
 
-        const allLists = normalizedStateToArray(listsSidebar.lists)
+        let allLists = normalizedStateToArray(listsSidebar.lists)
+        if (listsSidebar.searchQuery.trim().length > 0) {
+            allLists = allLists.filter((list) =>
+                listsSidebar.filteredListIds.includes(list.unifiedId),
+            )
+        }
         const userReference: UserReference = currentUser
             ? { type: 'user-reference', id: currentUser.id }
             : undefined
