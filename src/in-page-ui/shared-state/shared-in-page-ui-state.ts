@@ -16,6 +16,7 @@ import {
     TypedRemoteEventEmitter,
 } from 'src/util/webextensionRPC'
 import type { ContentSharingEvents } from 'src/content-sharing/background/types'
+import * as sidebarUtils from 'src/sidebar-overlay/utils'
 
 export interface SharedInPageUIDependencies {
     getNormalizedPageUrl: () => MaybePromise<string>
@@ -46,6 +47,8 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         tooltip: false,
         highlights: false,
     }
+
+    ribbonEnabled = null
 
     /**
      * Keep track of currently selected space for other UI elements to follow.
@@ -191,6 +194,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
     }
 
     async showRibbon(options?: { action?: InPageUIRibbonAction }) {
+        this.ribbonEnabled = await sidebarUtils.getSidebarState()
         const maybeEmitAction = () => {
             if (options?.action) {
                 this._emitAction({
@@ -210,7 +214,11 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
     }
 
     async hideRibbon() {
+        this.ribbonEnabled = await sidebarUtils.getSidebarState()
         await this._setState('ribbon', false)
+        if (!this.ribbonEnabled) {
+            await this._removeComponent('ribbon')
+        }
     }
 
     async removeRibbon() {

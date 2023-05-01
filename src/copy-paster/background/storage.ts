@@ -30,6 +30,7 @@ export default class CopyPasterStorage extends StorageModule {
                         title: '$title:string',
                         code: '$code:string',
                         isFavourite: '$isFavourite:boolean',
+                        outputFormat: '$outputFormat:string',
                     },
                 ],
             },
@@ -56,12 +57,18 @@ export default class CopyPasterStorage extends StorageModule {
         return object.id
     }
 
-    async createTemplate({ title, code, isFavourite }: Omit<Template, 'id'>) {
+    async createTemplate({
+        title,
+        code,
+        isFavourite,
+        outputFormat,
+    }: Omit<Template, 'id'>) {
         const { object } = await this.operation('createTemplate', {
             id: this.getId(),
             title,
             code,
             isFavourite,
+            outputFormat,
         })
 
         return object.id
@@ -71,12 +78,19 @@ export default class CopyPasterStorage extends StorageModule {
         return this.operation('findTemplate', { id })
     }
 
-    async updateTemplate({ id, title, code, isFavourite }: Template) {
+    async updateTemplate({
+        id,
+        title,
+        code,
+        isFavourite,
+        outputFormat,
+    }: Template) {
         return this.operation('updateTemplate', {
             id,
             title,
             code,
             isFavourite,
+            outputFormat,
         })
     }
 

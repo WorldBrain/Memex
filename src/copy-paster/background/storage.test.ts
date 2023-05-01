@@ -1,6 +1,7 @@
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 
-import CopyPasterBackground from '.'
+import type CopyPasterBackground from '.'
+import type { Template } from '../types'
 
 async function setupTest() {
     const { backgroundModules } = await setupBackgroundIntegrationTest()
@@ -14,10 +15,11 @@ describe('Copy-paster template storage tests', () => {
     test('should be able to create and find a template', async () => {
         const { copyPaster } = await setupTest()
 
-        const newTemplate = {
+        const newTemplate: Omit<Template, 'id'> = {
             title: 'template test',
             code: '',
             isFavourite: false,
+            outputFormat: 'markdown',
         }
 
         const id = await copyPaster.createTemplate(newTemplate)
@@ -34,6 +36,7 @@ describe('Copy-paster template storage tests', () => {
             title: 'template test',
             code: '',
             isFavourite: false,
+            outputFormat: 'markdown',
         })
 
         await copyPaster.updateTemplate({
@@ -41,6 +44,7 @@ describe('Copy-paster template storage tests', () => {
             title: 'test 2',
             code: '',
             isFavourite: false,
+            outputFormat: 'markdown',
         })
 
         const result = await copyPaster.findTemplate({ id })
@@ -61,6 +65,7 @@ describe('Copy-paster template storage tests', () => {
             title: 'template test',
             code: '',
             isFavourite: false,
+            outputFormat: 'markdown',
         })
 
         result = await copyPaster.findAllTemplates()

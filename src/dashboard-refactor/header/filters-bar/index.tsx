@@ -91,30 +91,40 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         label: string,
     ) => {
         if (name === 'date' && isFiltered) {
-            var startDate = filterProps.startDateText
+            let startDateText: string
+            let endDateText: string
 
-            if (filterProps.endDateText) {
-                var endDate: string = filterProps.endDateText
+            if (!filterProps.startDate) {
+                startDateText = undefined
+                if (!filterProps.startDateText && isFiltered) {
+                    startDateText = 'Forever'
+                }
+            } else {
+                startDateText = filterProps.startDateText
             }
-
-            if (!filterProps.endDateText && isFiltered) {
-                var endDate = 'Now'
+            if (!filterProps.endDate) {
+                endDateText = undefined
+                if (!filterProps.endDateText && isFiltered) {
+                    endDateText = 'Now'
+                }
+            } else {
+                endDateText = filterProps.endDateText
             }
 
             return (
                 <>
                     {isFiltered && (
                         <>
-                            {startDate && (
+                            {startDateText && (
                                 <>
                                     <DateHelp>From</DateHelp>
-                                    <DateText>{startDate}</DateText>
+                                    <DateText>{startDateText}</DateText>
                                 </>
                             )}
-                            {endDate && (
+                            {endDateText && (
                                 <>
                                     <DateHelp>to</DateHelp>
-                                    <DateText>{endDate}</DateText>
+                                    <DateText>{endDateText}</DateText>
                                 </>
                             )}
                         </>
@@ -175,7 +185,10 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 offsetX={10}
                 closeComponent={this.props.toggleDatesFilter}
             >
-                <DatePicker {...this.props.datePickerProps} />
+                <DatePicker
+                    {...this.props.datePickerProps}
+                    onClickOutside={this.props.toggleDatesFilter}
+                />
             </PopoutBox>
         )
     }
@@ -197,6 +210,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                     searchInputPlaceholder="Add Space filters"
                     removeTooltipText="Remove Space filter"
                     filterMode
+                    closePicker={this.props.toggleSpaceFilter}
                 />
             </PopoutBox>
         )
@@ -218,6 +232,8 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                     {...this.props.domainPickerProps}
                     searchInputPlaceholder="Add a domain filters"
                     removeToolTipText="Remove filter"
+                    onClickOutside={this.props.toggleDomainsFilter}
+                    closePicker={this.props.toggleDomainsFilter}
                 />
             </PopoutBox>
         )

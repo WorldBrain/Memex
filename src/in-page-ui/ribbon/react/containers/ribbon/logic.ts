@@ -16,6 +16,7 @@ import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import browser from 'webextension-polyfill'
 import { Storage } from 'webextension-polyfill-ts'
 import { pageActionAllowed } from 'src/util/subscriptions/storage'
+import { sleepPromise } from 'src/util/promises'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -48,6 +49,7 @@ export interface RibbonContainerState {
     areExtraButtonsShown: boolean
     areTutorialShown: boolean
     showFeed: boolean
+    showRemoveMenu: boolean
     highlights: ValuesOf<componentTypes.RibbonHighlightsProps>
     tooltip: ValuesOf<componentTypes.RibbonTooltipProps>
     // sidebar: ValuesOf<componentTypes.RibbonSidebarProps>
@@ -55,6 +57,7 @@ export interface RibbonContainerState {
     bookmark: ValuesOf<componentTypes.RibbonBookmarkProps>
     tagging: ValuesOf<componentTypes.RibbonTaggingProps>
     lists: ValuesOf<componentTypes.RibbonListsProps>
+    annotations: number
     search: ValuesOf<componentTypes.RibbonSearchProps>
     pausing: ValuesOf<componentTypes.RibbonPausingProps>
 }
@@ -66,6 +69,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleRibbon: null
         highlightAnnotations: null
         toggleShowExtraButtons: null
+        toggleRemoveMenu: boolean | null
         toggleShowTutorial: null
         toggleFeed: null
         toggleReadingView: null
@@ -136,6 +140,7 @@ export class RibbonContainerLogic extends UILogic<
             showFeed: false,
             isWidthLocked: false,
             isRibbonEnabled: null,
+            showRemoveMenu: false,
             highlights: {
                 areHighlightsEnabled: false,
             },
@@ -157,6 +162,7 @@ export class RibbonContainerLogic extends UILogic<
                 showListsPicker: false,
                 pageListIds: [],
             },
+            annotations: null,
             search: {
                 showSearchBox: false,
                 searchValue: '',
@@ -218,6 +224,8 @@ export class RibbonContainerLogic extends UILogic<
         const lists = await this.dependencies.customLists.fetchPageLists({
             url,
         })
+        const annotations = await this.dependencies.annotationsCache.annotations
+            .allIds.length
 
         const bookmark = await this.dependencies.bookmarks.findBookmark(url)
 
@@ -251,6 +259,7 @@ export class RibbonContainerLogic extends UILogic<
                 },
             },
             lists: { pageListIds: { $set: lists } },
+            annotations: { $set: annotations },
         })
     }
 
@@ -339,15 +348,17 @@ export class RibbonContainerLogic extends UILogic<
         return latestState
     }
 
-    toggleFeed: EventHandler<'toggleFeed'> = ({ previousState }) => {
+    toggleFeed: EventHandler<'toggleFeed'> = async ({ previousState }) => {
         this.dependencies.setRibbonShouldAutoHide(previousState.showFeed)
         const mutation: UIMutation<RibbonContainerState> = {
             showFeed: { $set: !previousState.showFeed },
             areExtraButtonsShown: { $set: false },
+            showRemoveMenu: { $set: false },
             areTutorialShown: { $set: false },
         }
 
         if (!previousState.showFeed) {
+            await this.dependencies.activityIndicatorBG.markActivitiesAsSeen()
             mutation.commentBox = { showCommentBox: { $set: false } }
             mutation.tagging = { showTagsPicker: { $set: false } }
             mutation.lists = { showListsPicker: { $set: false } }
@@ -376,6 +387,27 @@ export class RibbonContainerLogic extends UILogic<
 
         this.emitMutation(mutation)
     }
+    toggleRemoveMenu: EventHandler<'toggleRemoveMenu'> = ({
+        previousState,
+        event,
+    }) => {
+        const mutation: UIMutation<RibbonContainerState> = {
+            showRemoveMenu: {
+                $set: event != null ? event : !previousState.showRemoveMenu,
+            },
+            areExtraButtonsShown: { $set: false },
+            areTutorialShown: { $set: false },
+            showFeed: { $set: false },
+        }
+
+        if (!previousState.showRemoveMenu) {
+            mutation.commentBox = { showCommentBox: { $set: false } }
+            mutation.tagging = { showTagsPicker: { $set: false } }
+            mutation.lists = { showListsPicker: { $set: false } }
+        }
+
+        this.emitMutation(mutation)
+    }
 
     toggleShowTutorial: EventHandler<'toggleShowTutorial'> = ({
         previousState,
@@ -386,6 +418,7 @@ export class RibbonContainerLogic extends UILogic<
         const mutation: UIMutation<RibbonContainerState> = {
             areTutorialShown: { $set: !previousState.areTutorialShown },
             areExtraButtonsShown: { $set: false },
+            showRemoveMenu: { $set: false },
             showFeed: { $set: false },
         }
 
@@ -464,6 +497,7 @@ export class RibbonContainerLogic extends UILogic<
                       lists: { showListsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
                       areExtraButtonsShown: { $set: false },
+                      showRemoveMenu: { $set: false },
                       areTutorialShown: { $set: false },
                       showFeed: { $set: false },
                   }
@@ -582,6 +616,7 @@ export class RibbonContainerLogic extends UILogic<
                       lists: { showListsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
                       areExtraButtonsShown: { $set: false },
+                      showRemoveMenu: { $set: false },
                       areTutorialShown: { $set: false },
                   }
                 : {}
@@ -695,6 +730,8 @@ export class RibbonContainerLogic extends UILogic<
         event,
     }) => {
         await this.initLogicResolvable
+
+        await sleepPromise(80)
         this.dependencies.setRibbonShouldAutoHide(!event.value)
         const extra: UIMutation<RibbonContainerState> =
             event.value === true
@@ -703,6 +740,7 @@ export class RibbonContainerLogic extends UILogic<
                       tagging: { showTagsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
                       areExtraButtonsShown: { $set: false },
+                      showRemoveMenu: { $set: false },
                       areTutorialShown: { $set: false },
                       showFeed: { $set: false },
                   }
@@ -722,6 +760,7 @@ export class RibbonContainerLogic extends UILogic<
                       tagging: { showTagsPicker: { $set: false } },
                       lists: { showListsPicker: { $set: false } },
                       areExtraButtonsShown: { $set: false },
+                      showRemoveMenu: { $set: false },
                       areTutorialShown: { $set: false },
                   }
                 : {}

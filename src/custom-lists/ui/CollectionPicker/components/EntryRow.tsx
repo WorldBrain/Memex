@@ -111,13 +111,19 @@ class EntryRow extends React.Component<Props> {
                 </NameWrapper>
                 <IconStyleWrapper>
                     {focused && (
-                        <ButtonContainer ref={contextMenuBtnRef}>
-                            <Icon
-                                filePath={icons.dots}
-                                heightAndWidth="14px"
-                                onClick={this.handleContextMenuBtnPress}
-                            />
-                        </ButtonContainer>
+                        <TooltipBox
+                            tooltipText={'Share & Edit Space'}
+                            placement="bottom"
+                            targetElementRef={contextMenuBtnRef.current}
+                        >
+                            <ButtonContainer ref={contextMenuBtnRef}>
+                                <Icon
+                                    filePath={icons.dots}
+                                    heightAndWidth="14px"
+                                    onClick={this.handleContextMenuBtnPress}
+                                />
+                            </ButtonContainer>
+                        </TooltipBox>
                     )}
                     {focused && onPressActOnAll && (
                         <ButtonContainer>

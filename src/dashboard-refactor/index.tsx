@@ -214,7 +214,7 @@ export class DashboardContainer extends StatefulUIElement<
 
     private renderFiltersBar() {
         const { searchBG } = this.props
-        const { searchFilters, searchResults } = this.state
+        const { searchFilters, searchResults, listsSidebar } = this.state
 
         const toggleTagsFilter = () =>
             this.processEvent('toggleShowTagPicker', {
@@ -232,6 +232,12 @@ export class DashboardContainer extends StatefulUIElement<
             this.processEvent('toggleShowSpacePicker', {
                 isActive: !searchFilters.isSpaceFilterActive,
             })
+        const selectedLocalListId =
+            listsSidebar.selectedListId != null
+                ? getListData(listsSidebar.selectedListId, {
+                      listsSidebar,
+                  })?.localId
+                : undefined
 
         return (
             <FiltersBar
@@ -283,10 +289,7 @@ export class DashboardContainer extends StatefulUIElement<
                         searchBG.extendedSuggest({
                             type: 'domain',
                             limit: FILTER_PICKERS_LIMIT,
-                            notInclude: [
-                                ...searchFilters.domainsIncluded,
-                                ...searchFilters.domainsExcluded,
-                            ],
+                            notInclude: [...searchFilters.domainsExcluded],
                         }),
                     onUpdateEntrySelection: (args) =>
                         this.processEvent('setDomainsIncluded', {
@@ -325,6 +328,7 @@ export class DashboardContainer extends StatefulUIElement<
                     contentSharingBG: this.props.contentShareBG,
                     createNewEntry: () => undefined,
                     initialSelectedListIds: () => searchFilters.spacesIncluded,
+                    dashboardSelectedListId: selectedLocalListId,
                     selectEntry: (spaceId) =>
                         this.processEvent('addIncludedSpace', {
                             spaceId,

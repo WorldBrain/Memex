@@ -9,6 +9,7 @@ export const JUST_URL: Template = {
     id: 1,
     title: 'Page URL',
     isFavourite: false,
+    outputFormat: 'markdown',
     code: `{{{PageUrl}}}`,
 }
 
@@ -16,6 +17,7 @@ export const URL_AND_TITLE: Template = {
     id: 2,
     title: 'Page URL & Title',
     isFavourite: false,
+    outputFormat: 'markdown',
     code: `{{{PageTitle}}}
 {{{PageUrl}}}`,
 }
@@ -24,6 +26,7 @@ export const ROAM_MD_TEMPLATE: Template = {
     id: 3,
     title: 'Roam Markdown',
     isFavourite: false,
+    outputFormat: 'markdown',
     code: `[[{{{PageTitle}}}]]
   url:: {{{PageUrl}}}
 {{#Notes}}
@@ -37,6 +40,7 @@ export const NOTION_MD_TEMPLATE: Template = {
     id: 4,
     title: 'Notion Markdown',
     isFavourite: false,
+    outputFormat: 'markdown',
     code: `[{{{PageTitle}}}]({{{PageUrl}}})
 {{#Notes}}
 - {{{NoteHighlight}}}
@@ -50,6 +54,7 @@ export const HTML_TEMPLATE: Template = {
     id: 5,
     title: 'HTML',
     isFavourite: false,
+    outputFormat: 'markdown',
     code: `<a target="_blank"  href="{{{PageUrl}}}">{{{PageTitle}}}</a>
 <ul>
 {{#Notes}}

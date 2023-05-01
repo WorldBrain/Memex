@@ -61,11 +61,7 @@ export const getListData = (
     opts?: { mustBeLocal?: boolean; source?: keyof Events },
 ): UnifiedList => {
     // TODO: Deal with these static lists better, without needing to do this
-    if (
-        Object.values(SPECIAL_LIST_STRING_IDS).includes(
-            listsSidebar.selectedListId,
-        )
-    ) {
+    if (Object.values(SPECIAL_LIST_STRING_IDS).includes(listId)) {
         const name =
             listsSidebar.selectedListId === SPECIAL_LIST_STRING_IDS.INBOX
                 ? SPECIAL_LIST_NAMES.INBOX

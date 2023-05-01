@@ -425,7 +425,10 @@ export class AnnotationsSidebarContainer<
 
     private renderListPickerForAnnotation = (
         instanceLocation: AnnotationCardInstanceLocation,
-    ) => (unifiedId: UnifiedAnnotation['unifiedId']) => {
+    ) => (
+        unifiedId: UnifiedAnnotation['unifiedId'],
+        closePicker: () => void,
+    ) => {
         const annotation = this.props.annotationsCache.annotations.byId[
             unifiedId
         ]
@@ -436,6 +439,7 @@ export class AnnotationsSidebarContainer<
                     instanceLocation,
                     showExternalConfirmations: true,
                 })}
+                closePicker={closePicker}
             />
         )
     }
@@ -785,6 +789,30 @@ export class AnnotationsSidebarContainer<
                             queryAIwithPrompt={(prompt) => {
                                 this.processEvent('queryAIwithPrompt', {
                                     prompt,
+                                })
+                            }}
+                            saveAIPrompt={(prompt) => {
+                                this.processEvent('saveAIPrompt', { prompt })
+                            }}
+                            removeAISuggestion={(suggestion) => {
+                                this.processEvent('removeAISuggestion', {
+                                    suggestion,
+                                })
+                            }}
+                            navigateFocusInList={(direction) => {
+                                this.processEvent('navigateFocusInList', {
+                                    direction,
+                                })
+                            }}
+                            toggleAISuggestionsDropDown={() =>
+                                this.processEvent(
+                                    'toggleAISuggestionsDropDown',
+                                    null,
+                                )
+                            }
+                            selectAISuggestion={(suggestion) => {
+                                this.processEvent('selectAISuggestion', {
+                                    suggestion,
                                 })
                             }}
                             setQueryMode={(mode) => {

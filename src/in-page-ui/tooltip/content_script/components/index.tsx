@@ -19,6 +19,7 @@ export function setupUIContainer(
                     <TooltipContainer
                         onTooltipInit={(showTooltip) => resolve(showTooltip)}
                         {...params}
+                        context="extension"
                     />
                 </ThemeProvider>
             </StyleSheetManager>,

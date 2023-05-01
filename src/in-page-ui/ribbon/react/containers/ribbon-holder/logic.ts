@@ -10,6 +10,7 @@ export interface RibbonHolderState {
     state: 'visible' | 'hidden'
     isSidebarOpen: boolean
     keepPageActivityIndicatorHidden: boolean
+    isRibbonEnabled?: boolean
 }
 
 export type RibbonHolderEvents = UIEvent<{

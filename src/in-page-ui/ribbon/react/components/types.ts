@@ -7,6 +7,8 @@ import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
+import { AnnotationInterface } from 'src/annotations/background/types'
+import { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
 export interface RibbonSubcomponentProps {
     highlights: RibbonHighlightsProps
@@ -16,6 +18,7 @@ export interface RibbonSubcomponentProps {
     bookmark: RibbonBookmarkProps
     tagging: RibbonTaggingProps
     lists: RibbonListsProps
+    annotations: PageAnnotationsCacheInterface
     search: RibbonSearchProps
     pausing: RibbonPausingProps
     activityIndicator: ActivityIndicatorProps
