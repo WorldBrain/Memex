@@ -2804,6 +2804,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             localListIds = new Set(previousState.searchFilters.spacesIncluded)
         }
 
+        localListIds.add(event.spaceId)
+
         if (previousState.listsSidebar.selectedListId != null) {
             const selectedLocalListId = this.options.annotationsCache.lists
                 .byId[previousState.listsSidebar.selectedListId]?.localId
@@ -2814,6 +2816,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 localListIds.add(selectedLocalListId)
             }
         }
+
+        console.log('localListIds', localListIds)
 
         this.updateQueryStringParameter(
             'spaces',
