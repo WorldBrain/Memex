@@ -15,6 +15,7 @@ export interface Props
 const StaticSidebarItem: React.FunctionComponent<Props> = (props) => (
     <SidebarItem
         {...props}
+        alwaysShowRightSideIcon
         renderLeftSideIcon={() => (
             <IconContainer>
                 <Icon
@@ -36,6 +37,7 @@ const StaticSidebarItem: React.FunctionComponent<Props> = (props) => (
 export default StaticSidebarItem
 
 const IconContainer = styled.div`
+    margin-left: 10px;
     height: 20px;
     width: 20px;
     display: flex;

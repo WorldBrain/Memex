@@ -86,7 +86,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             onClick={this.props.onAllSavedSelection}
                         />
                         <StaticSidebarItem
-                            icon="arrowDown"
+                            icon="inbox"
                             name="Inbox"
                             isSelected={
                                 this.props.selectedListId ==

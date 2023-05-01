@@ -9,6 +9,7 @@ export interface Props {
     name: string
     isSelected: boolean
     isCollaborative?: boolean
+    alwaysShowRightSideIcon?: boolean
     dropReceivingState?: DropReceivingState
     onClick: React.MouseEventHandler
     renderLeftSideIcon?: () => JSX.Element
@@ -187,7 +188,8 @@ const IconBox = styled.div<Props & State>`
 
     // List all states in which to display
     ${(props) =>
-        (props.isHovering ||
+        (props.alwaysShowRightSideIcon ||
+            props.isHovering ||
             props.dropReceivingState?.isDraggedOver ||
             props.dropReceivingState?.wasPageDropped ||
             props.isMenuDisplayed) &&
