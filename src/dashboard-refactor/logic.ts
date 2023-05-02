@@ -3136,6 +3136,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             async () => {
                 const localListId = Date.now()
                 const { unifiedId } = this.options.annotationsCache.addList({
+                    type: 'user-list',
                     name: newListName,
                     localId: localListId,
                     unifiedAnnotationIds: [],

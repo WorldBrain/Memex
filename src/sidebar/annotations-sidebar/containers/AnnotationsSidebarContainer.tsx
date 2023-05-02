@@ -119,6 +119,7 @@ export class AnnotationsSidebarContainer<
             unifiedAnnotationIds: annotationId ? [annotationId] : [],
             hasRemoteAnnotationsToLoad: false,
             creator: this.props.currentUser,
+            type: 'user-list',
         })
         await this.props.customListsBG.createCustomList({
             name: name,

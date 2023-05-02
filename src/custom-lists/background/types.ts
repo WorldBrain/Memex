@@ -1,3 +1,4 @@
+import type { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import type {
     SharedAnnotation,
     SharedAnnotationReference,
@@ -17,6 +18,7 @@ export interface PageList {
     isDeletable?: boolean
     isOwned?: boolean
     active?: boolean
+    type?: SharedCollectionType
 }
 
 export interface PageListEntry {

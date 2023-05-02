@@ -113,7 +113,7 @@ export type UnifiedAnnotationForCache = Omit<
         localListIds: number[]
     }
 
-export interface UnifiedList {
+type CoreUnifiedList = {
     // Core list data
     unifiedId: string
     localId?: number
@@ -129,5 +129,17 @@ export interface UnifiedList {
     // Misc list feature state
     unifiedAnnotationIds: UnifiedAnnotation['unifiedId'][]
 }
+
+export type UnifiedList = CoreUnifiedList &
+    (
+        | {
+              type: 'user-list' | 'special-list'
+          }
+        | {
+              type: 'page-link'
+              remoteId: string // This makes up the first part of the page link
+              sharedListEntryId: string // This makes up the last part of the page link
+          }
+    )
 
 export type UnifiedListForCache = Omit<UnifiedList, 'unifiedId'>

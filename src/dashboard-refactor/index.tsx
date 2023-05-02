@@ -195,6 +195,7 @@ export class DashboardContainer extends StatefulUIElement<
         const localListId = Date.now()
         const { unifiedId } = this.props.annotationsCache.addList({
             name,
+            type: 'user-list',
             localId: localListId,
             unifiedAnnotationIds: [],
             hasRemoteAnnotationsToLoad: false,

@@ -141,7 +141,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             cachedAnnot.unifiedListIds.unshift(unifiedId)
         })
 
-        return { ...list, unifiedId }
+        return { ...list, unifiedId } as UnifiedList
     }
 
     private prepareAnnotationForCaching = (

@@ -2915,6 +2915,7 @@ describe('SidebarContainerLogic', () => {
                 hasRemoteAnnotationsToLoad: true,
                 isForeignList: true,
                 unifiedAnnotationIds: [expect.any(String), expect.any(String)],
+                type: 'user-list',
             })
             expect(Object.keys(sidebar.state.listInstances).length).toBe(
                 listInstancesCountBefore + 1,

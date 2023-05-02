@@ -2086,6 +2086,7 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             const unifiedList = annotationsCache.addList({
+                type: 'user-list',
                 remoteId: event.sharedListId,
                 name: sharedList.title,
                 creator: sharedList.creator,

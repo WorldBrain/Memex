@@ -257,6 +257,7 @@ export default class RibbonContainer extends StatefulUIElement<
                             unifiedAnnotationIds: [],
                             hasRemoteAnnotationsToLoad: false,
                             creator: this.props.currentUser,
+                            type: 'user-list',
                         })
                         await this.processEvent('updateLists', {
                             value: {

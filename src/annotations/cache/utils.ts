@@ -23,6 +23,7 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation & {
@@ -117,16 +118,26 @@ export const reshapeLocalListForCache = (
         hasRemoteAnnotations?: boolean
         extraData?: Partial<UnifiedList>
     },
-): UnifiedListForCache => ({
-    name: list.name,
-    localId: list.id,
-    remoteId: list.remoteId,
-    creator: opts.extraData?.creator,
-    description: list.description,
-    unifiedAnnotationIds: [],
-    hasRemoteAnnotationsToLoad: !!opts.hasRemoteAnnotations,
-    ...(opts.extraData ?? {}),
-})
+): UnifiedListForCache => {
+    let type: UnifiedList['type'] = 'user-list'
+    if (list.type === 'page-link') {
+        type = 'page-link'
+    } else if (Object.values(SPECIAL_LIST_IDS).includes(list.id)) {
+        type = 'special-list'
+    }
+
+    return {
+        type,
+        name: list.name,
+        localId: list.id,
+        remoteId: list.remoteId,
+        creator: opts.extraData?.creator,
+        description: list.description,
+        unifiedAnnotationIds: [],
+        hasRemoteAnnotationsToLoad: !!opts.hasRemoteAnnotations,
+        ...(opts.extraData ?? {}),
+    }
+}
 
 export const reshapeFollowedListForCache = (
     list: FollowedList,
@@ -136,6 +147,8 @@ export const reshapeFollowedListForCache = (
     },
 ): UnifiedListForCache => ({
     name: list.name,
+    // TODO: Are followed page links a thing? If so there's no easy way to distinguish them here
+    type: 'user-list',
     localId: undefined,
     remoteId: list.sharedList.toString(),
     creator: { type: 'user-reference', id: list.creator },

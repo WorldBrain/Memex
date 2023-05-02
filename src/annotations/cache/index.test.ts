@@ -566,6 +566,10 @@ describe('Page annotations cache tests', () => {
                 ...testLists[2],
                 unifiedId: unifiedIdsB[1],
             },
+            [unifiedIdsB[2]]: {
+                ...testLists[3],
+                unifiedId: unifiedIdsB[2],
+            },
         })
         expect(emittedEvents).toEqual(expectedEvents)
     })
@@ -644,6 +648,7 @@ describe('Page annotations cache tests', () => {
 
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
             [testLists[2].remoteId, testLists[2].unifiedId],
+            [testLists[3].remoteId, testLists[3].unifiedId],
         ])
 
         const remoteIdA = 'test-remote-id-b'
@@ -651,6 +656,7 @@ describe('Page annotations cache tests', () => {
         const remoteIdD = 'test-remote-id-a'
 
         const { unifiedId: listIdD } = cache.addList({
+            type: 'user-list',
             remoteId: remoteIdD,
             name: 'new shared list',
             unifiedAnnotationIds: [],
@@ -658,12 +664,14 @@ describe('Page annotations cache tests', () => {
         })
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
             [testLists[2].remoteId, testLists[2].unifiedId],
+            [testLists[3].remoteId, testLists[3].unifiedId],
             [remoteIdD, listIdD],
         ])
 
         cache.updateList({ ...testLists[0], remoteId: remoteIdA })
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
             [testLists[2].remoteId, testLists[2].unifiedId],
+            [testLists[3].remoteId, testLists[3].unifiedId],
             [remoteIdD, listIdD],
             [remoteIdA, testLists[0].unifiedId],
         ])
@@ -671,6 +679,7 @@ describe('Page annotations cache tests', () => {
         cache.updateList({ ...testLists[1], remoteId: remoteIdB })
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
             [testLists[2].remoteId, testLists[2].unifiedId],
+            [testLists[3].remoteId, testLists[3].unifiedId],
             [remoteIdD, listIdD],
             [remoteIdA, testLists[0].unifiedId],
             [remoteIdB, testLists[1].unifiedId],
@@ -678,6 +687,7 @@ describe('Page annotations cache tests', () => {
 
         cache.removeList(testLists[2])
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
+            [testLists[3].remoteId, testLists[3].unifiedId],
             [remoteIdD, listIdD],
             [remoteIdA, testLists[0].unifiedId],
             [remoteIdB, testLists[1].unifiedId],
@@ -685,12 +695,14 @@ describe('Page annotations cache tests', () => {
 
         cache.removeList({ unifiedId: listIdD })
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
+            [testLists[3].remoteId, testLists[3].unifiedId],
             [remoteIdA, testLists[0].unifiedId],
             [remoteIdB, testLists[1].unifiedId],
         ])
 
         cache.removeList(testLists[1])
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
+            [testLists[3].remoteId, testLists[3].unifiedId],
             [remoteIdA, testLists[0].unifiedId],
         ])
     })

@@ -16,7 +16,7 @@ export const NORMALIZED_PAGE_URL_1 = 'test.com'
 export const NORMALIZED_PAGE_URL_2 = 'test.com/test'
 
 const ANNOTATION_IDS = ['0', '1', '2', '3']
-const LIST_IDS = ['0', '1', '2']
+const LIST_IDS = ['0', '1', '2', '3']
 
 export function ANNOTATIONS(): UnifiedAnnotation[] {
     return [
@@ -81,6 +81,7 @@ export function ANNOTATIONS(): UnifiedAnnotation[] {
 export function LISTS(): UnifiedList[] {
     return [
         {
+            type: 'user-list',
             unifiedId: LIST_IDS[0],
             localId: 0,
             name: 'test local list',
@@ -89,6 +90,7 @@ export function LISTS(): UnifiedList[] {
             unifiedAnnotationIds: [ANNOTATION_IDS[0], ANNOTATION_IDS[1]],
         },
         {
+            type: 'user-list',
             unifiedId: LIST_IDS[1],
             localId: 1,
             remoteId: 'remote-list-id-1',
@@ -103,10 +105,22 @@ export function LISTS(): UnifiedList[] {
             ],
         },
         {
+            type: 'user-list',
             unifiedId: LIST_IDS[2],
             remoteId: 'remote-list-id-2',
             name: 'test followed list',
             hasRemoteAnnotationsToLoad: false,
+            creator: USER_2,
+            unifiedAnnotationIds: [ANNOTATION_IDS[3]],
+        },
+        {
+            type: 'page-link',
+            unifiedId: LIST_IDS[3],
+            localId: 2,
+            remoteId: 'remote-list-id-3',
+            sharedListEntryId: 'shared-list-entry-id-a',
+            name: 'test joined page link list',
+            hasRemoteAnnotationsToLoad: true,
             creator: USER_2,
             unifiedAnnotationIds: [ANNOTATION_IDS[3]],
         },
