@@ -1,5 +1,5 @@
 import React, { PureComponent, ReactElement } from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 
@@ -11,13 +11,13 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 export interface SearchBarProps {
     placeholder?: string
     searchQuery: string
+    isSidebarLocked: boolean
     searchFiltersOpen: boolean
     onSearchQueryChange(queryString: string): void
     onSearchFiltersOpen(): void
     onInputClear(): void
     renderCopyPasterButton: () => ReactElement
     renderExpandButton: () => ReactElement
-    sidebarLockedState?: boolean
 }
 
 export default class SearchBar extends PureComponent<SearchBarProps> {
@@ -42,14 +42,14 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         const {
             searchFiltersOpen,
             searchQuery,
-            sidebarLockedState,
+            isSidebarLocked,
             onSearchFiltersOpen,
             renderCopyPasterButton,
             renderExpandButton,
         } = this.props
         return (
             <Margin vertical="auto">
-                <SearchBarContainer isClosed={!sidebarLockedState}>
+                <SearchBarContainer isClosed={!isSidebarLocked}>
                     <FullWidthMargin>
                         {!!searchQuery ? (
                             <IconContainer>

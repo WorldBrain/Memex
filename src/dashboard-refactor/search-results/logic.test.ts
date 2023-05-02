@@ -4,7 +4,6 @@ import {
     setPageSearchResult,
     setNoteSearchResult,
     makeNewShareStates,
-    objectFilter,
 } from '../logic.test.util'
 import * as DATA from '../logic.test.data'
 import * as utils from './util'
@@ -205,10 +204,23 @@ describe('Dashboard search results logic', () => {
         })
 
         it('should be able to set page lists', async ({ device }) => {
-            const { searchResults } = await setupTest(device, {
-                seedData: setPageSearchResult(),
-            })
+            const { searchResults, annotationsCache } = await setupTest(
+                device,
+                {
+                    seedData: setPageSearchResult(),
+                    runInitLogic: true,
+                },
+            )
             const pageId = DATA.PAGE_2.normalizedUrl
+            const listAData = annotationsCache.getListByLocalId(
+                DATA.LISTS_1[0].id,
+            )
+            const listBData = annotationsCache.getListByLocalId(
+                DATA.LISTS_1[1].id,
+            )
+            const listCData = annotationsCache.getListByLocalId(
+                DATA.LISTS_1[2].id,
+            )
 
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId].lists,
@@ -217,41 +229,41 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
                 fullPageUrl: 'https://' + pageId,
-                added: DATA.LISTS_1[0].id,
+                added: listAData.unifiedId,
                 skipPageIndexing: true,
             })
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
                 fullPageUrl: 'https://' + pageId,
-                added: DATA.LISTS_1[1].id,
+                added: listBData.unifiedId,
                 skipPageIndexing: true,
             })
 
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId].lists,
-            ).toEqual([DATA.LISTS_1[0].id, DATA.LISTS_1[1].id])
+            ).toEqual([listAData.unifiedId, listBData.unifiedId])
 
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
                 fullPageUrl: 'https://' + pageId,
-                deleted: DATA.LISTS_1[0].id,
+                deleted: listAData.unifiedId,
                 skipPageIndexing: true,
             })
 
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId].lists,
-            ).toEqual([DATA.LISTS_1[1].id])
+            ).toEqual([listBData.unifiedId])
 
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
                 fullPageUrl: 'https://' + pageId,
-                added: DATA.LISTS_1[2].id,
+                added: listCData.unifiedId,
                 skipPageIndexing: true,
             })
 
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId].lists,
-            ).toEqual([DATA.LISTS_1[1].id, DATA.LISTS_1[2].id])
+            ).toEqual([listBData.unifiedId, listCData.unifiedId])
         })
 
         it('should be able to cancel page deletion', async ({ device }) => {
@@ -407,21 +419,27 @@ describe('Dashboard search results logic', () => {
         it('should be able to remove a page from the search filtered list', async ({
             device,
         }) => {
-            const { searchResults } = await setupTest(device, {
-                seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-            })
+            const { searchResults, annotationsCache } = await setupTest(
+                device,
+                {
+                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
+                    runInitLogic: true,
+                },
+            )
             const pageId = DATA.PAGE_2.normalizedUrl
-            const list = DATA.LISTS_1[0]
+            const listData = annotationsCache.getListByLocalId(
+                DATA.LISTS_1[0].id,
+            )
 
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
                 fullPageUrl: 'https://' + pageId,
-                added: list.id,
+                added: listData.unifiedId,
                 skipPageIndexing: true,
             })
 
             searchResults.processMutation({
-                listsSidebar: { selectedListId: { $set: list.id } },
+                listsSidebar: { selectedListId: { $set: listData.unifiedId } },
             })
             expect(
                 searchResults.state.searchResults.results[
@@ -1408,29 +1426,31 @@ describe('Dashboard search results logic', () => {
                 it('should be able to remove a page from the search filtered list, removing results from all days it occurs under', async ({
                     device,
                 }) => {
-                    const { searchResults } = await setupTest(device, {
-                        seedData: setNoteSearchResult(
-                            DATA.ANNOT_SEARCH_RESULT_2,
-                        ),
-                    })
+                    const { searchResults, annotationsCache } = await setupTest(
+                        device,
+                        {
+                            runInitLogic: true,
+                            seedData: setNoteSearchResult(
+                                DATA.ANNOT_SEARCH_RESULT_2,
+                            ),
+                        },
+                    )
+                    const listDataA = annotationsCache.getListByLocalId(
+                        DATA.LISTS_1[0].id,
+                    )
                     const pageId = DATA.PAGE_1.normalizedUrl
-                    const list = DATA.LISTS_1[0]
-                    await device.storageManager
-                        .collection('customLists')
-                        .createObject({
-                            id: list.id,
-                            name: list.name,
-                        })
 
                     await searchResults.processEvent('setPageLists', {
                         id: pageId,
                         fullPageUrl: 'https://' + pageId,
-                        added: list.id,
+                        added: listDataA.unifiedId,
                         skipPageIndexing: true,
                     })
 
                     searchResults.processMutation({
-                        listsSidebar: { selectedListId: { $set: list.id } },
+                        listsSidebar: {
+                            selectedListId: { $set: listDataA.unifiedId },
+                        },
                     })
 
                     expect(
@@ -1917,24 +1937,25 @@ describe('Dashboard search results logic', () => {
             it('should modify suggestion cache upon adding lists to annotations', async ({
                 device,
             }) => {
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject({
-                        ...DATA.LISTS_1[0],
-                        createdAt: new Date('2020-01-01'),
-                    })
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject({
-                        ...DATA.LISTS_1[1],
-                        createdAt: new Date('2020-01-02'),
-                    })
-
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
-                })
-                await searchResults.init()
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_3,
+                        ),
+                        runInitLogic: true,
+                    },
+                )
                 const noteId = DATA.NOTE_2.url
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 const LIST_SUGGESTIONS = [
                     {
@@ -1951,40 +1972,53 @@ describe('Dashboard search results logic', () => {
                         focused: false,
                         remoteId: null,
                     },
+                    {
+                        localId: DATA.LISTS_1[2].id,
+                        name: DATA.LISTS_1[2].name,
+                        createdAt: expect.any(Number),
+                        focused: false,
+                        remoteId: null,
+                    },
                 ]
 
                 expect(
                     await device.backgroundModules.customLists.fetchInitialListSuggestions(),
-                ).toEqual([LIST_SUGGESTIONS[0], LIST_SUGGESTIONS[1]])
+                ).toEqual([
+                    LIST_SUGGESTIONS[0],
+                    LIST_SUGGESTIONS[1],
+                    LIST_SUGGESTIONS[2],
+                ])
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[1].id,
+                    added: listDataB.unifiedId,
                 })
 
                 expect(
                     await device.backgroundModules.customLists.fetchInitialListSuggestions(),
-                ).toEqual([LIST_SUGGESTIONS[1], LIST_SUGGESTIONS[0]])
+                ).toEqual([
+                    LIST_SUGGESTIONS[1],
+                    LIST_SUGGESTIONS[0],
+                    LIST_SUGGESTIONS[2],
+                ])
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[0].id,
+                    added: listDataA.unifiedId,
                 })
 
                 expect(
                     await device.backgroundModules.customLists.fetchInitialListSuggestions(),
-                ).toEqual([LIST_SUGGESTIONS[0], LIST_SUGGESTIONS[1]])
+                ).toEqual([
+                    LIST_SUGGESTIONS[0],
+                    LIST_SUGGESTIONS[1],
+                    LIST_SUGGESTIONS[2],
+                ])
             })
 
             it('should be able to update note share info, filtering out shared lists on unshare if requested else inheriting parent page lists', async ({
                 device,
             }) => {
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[0])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[1])
                 await device.storageManager
                     .collection('sharedListMetadata')
                     .createObject({
@@ -1992,11 +2026,25 @@ describe('Dashboard search results logic', () => {
                         remoteId: 'test-share-1',
                     })
 
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
-                })
-                await searchResults.init()
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_3,
+                        ),
+                        runInitLogic: true,
+                    },
+                )
                 const noteId = DATA.NOTE_2.url
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId],
@@ -2010,11 +2058,11 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[0].id,
+                    added: listDataA.unifiedId,
                 })
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[1].id,
+                    added: listDataB.unifiedId,
                 })
 
                 expect(
@@ -2023,7 +2071,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [listDataA.unifiedId, listDataB.unifiedId],
                     }),
                 )
 
@@ -2038,7 +2086,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [listDataA.unifiedId, listDataB.unifiedId],
                     }),
                 )
 
@@ -2054,7 +2102,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [listDataA.unifiedId, listDataB.unifiedId],
                     }),
                 )
 
@@ -2069,7 +2117,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [listDataA.unifiedId, listDataB.unifiedId],
                     }),
                 )
 
@@ -2085,7 +2133,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: false,
-                        lists: [DATA.LISTS_1[1].id], // Private list should remain
+                        lists: [listDataB.unifiedId], // Private list should remain
                     }),
                 )
             })
@@ -2094,24 +2142,32 @@ describe('Dashboard search results logic', () => {
                 device,
             }) => {
                 await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[0])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[1])
-                await device.storageManager
                     .collection('sharedListMetadata')
                     .createObject({
                         localId: DATA.LISTS_1[0].id,
                         remoteId: 'test-share-1',
                     })
 
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
-                    withAuth: true,
-                })
-                await searchResults.init()
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_3,
+                        ),
+                        withAuth: true,
+                        runInitLogic: true,
+                    },
+                )
                 const noteId = DATA.NOTE_2.url
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId],
@@ -2125,11 +2181,11 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[0].id,
+                    added: listDataA.unifiedId,
                 })
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[1].id,
+                    added: listDataB.unifiedId,
                 })
 
                 expect(
@@ -2138,7 +2194,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [listDataA.unifiedId, listDataB.unifiedId],
                     }),
                 )
 
@@ -2153,7 +2209,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [listDataA.unifiedId, listDataB.unifiedId],
                     }),
                 )
 
@@ -2169,7 +2225,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [listDataA.unifiedId, listDataB.unifiedId],
                     }),
                 )
 
@@ -2184,7 +2240,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [listDataA.unifiedId, listDataB.unifiedId],
                     }),
                 )
 
@@ -2200,7 +2256,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: false,
-                        lists: [DATA.LISTS_1[1].id], // Private list should remain
+                        lists: [listDataB.unifiedId], // Private list should remain
                     }),
                 )
             })
@@ -2209,24 +2265,32 @@ describe('Dashboard search results logic', () => {
                 device,
             }) => {
                 await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[0])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[1])
-                await device.storageManager
                     .collection('sharedListMetadata')
                     .createObject({
                         localId: DATA.LISTS_1[0].id,
                         remoteId: 'test-share-1',
                     })
 
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
-                    withAuth: true,
-                })
-                await searchResults.init()
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_3,
+                        ),
+                        withAuth: true,
+                        runInitLogic: true,
+                    },
+                )
                 const noteId = DATA.NOTE_2.url
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId],
@@ -2240,11 +2304,11 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[0].id,
+                    added: listDataA.unifiedId,
                 })
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[1].id,
+                    added: listDataB.unifiedId,
                 })
 
                 expect(
@@ -2253,7 +2317,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [listDataA.unifiedId, listDataB.unifiedId],
                     }),
                 )
 
@@ -2271,22 +2335,31 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [listDataA.unifiedId, listDataB.unifiedId],
                     }),
                 )
             })
 
             it('should be able to set note list state', async ({ device }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                })
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[0])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[1])
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_2,
+                        ),
+                        runInitLogic: true,
+                    },
+                )
                 const noteId = DATA.NOTE_2.url
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
@@ -2295,33 +2368,33 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[0].id,
+                    added: listDataA.unifiedId,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .lists,
-                ).toEqual([DATA.LISTS_1[0].id])
+                ).toEqual([listDataA.unifiedId])
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: DATA.LISTS_1[1].id,
+                    added: listDataB.unifiedId,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .lists,
-                ).toEqual([DATA.LISTS_1[0].id, DATA.LISTS_1[1].id])
+                ).toEqual([listDataA.unifiedId, listDataB.unifiedId])
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    deleted: DATA.LISTS_1[0].id,
+                    deleted: listDataA.unifiedId,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
                         .lists,
-                ).toEqual([DATA.LISTS_1[1].id])
+                ).toEqual([listDataB.unifiedId])
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    deleted: DATA.LISTS_1[1].id,
+                    deleted: listDataB.unifiedId,
                 })
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId]
@@ -2332,26 +2405,33 @@ describe('Dashboard search results logic', () => {
             it('should set note to protected when adding a _shared_ list while note is private', async ({
                 device,
             }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                })
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[0])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[1])
                 await device.storageManager
                     .collection('sharedListMetadata')
                     .createObject({
                         localId: DATA.LISTS_1[1].id,
                         remoteId: 'my-shared-list-1',
                     })
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_2,
+                        ),
+                        runInitLogic: true,
+                    },
+                )
 
                 const noteIdA = DATA.NOTE_1.url
                 const noteIdB = DATA.NOTE_2.url
-
-                await searchResults.init()
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 searchResults.processMutation({
                     searchResults: {
@@ -2382,7 +2462,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdA,
-                    added: DATA.LISTS_1[0].id, // This one is private - don't protect annot
+                    added: listDataA.unifiedId, // This one is private - don't protect annot
                 })
 
                 expect(
@@ -2391,7 +2471,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [listDataA.unifiedId],
                     }),
                 )
                 expect(
@@ -2406,7 +2486,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdA,
-                    added: DATA.LISTS_1[1].id, // This one is shared - protect annot!
+                    added: listDataB.unifiedId, // This one is shared - protect annot!
                 })
 
                 expect(
@@ -2415,7 +2495,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [listDataA.unifiedId, listDataB.unifiedId],
                     }),
                 )
                 expect(
@@ -2424,13 +2504,13 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdB,
-                    added: DATA.LISTS_1[0].id,
+                    added: listDataA.unifiedId,
                 })
 
                 expect(
@@ -2439,7 +2519,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[1].id, DATA.LISTS_1[0].id],
+                        lists: [listDataB.unifiedId, listDataA.unifiedId],
                     }),
                 )
             })
@@ -2447,18 +2527,6 @@ describe('Dashboard search results logic', () => {
             it('should set note to protected when removing a _shared_ list while note is public', async ({
                 device,
             }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
-                })
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[0])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[1])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[2])
                 await device.storageManager
                     .collection('sharedListMetadata')
                     .createObject({
@@ -2471,10 +2539,26 @@ describe('Dashboard search results logic', () => {
                         localId: DATA.LISTS_1[1].id,
                         remoteId: 'my-shared-list-1',
                     })
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_3,
+                        ),
+                        runInitLogic: true,
+                    },
+                )
 
                 const noteIdB = DATA.NOTE_2.url
-
-                await searchResults.init()
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 searchResults.processMutation({
                     searchResults: {
@@ -2496,17 +2580,17 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdB,
-                    added: DATA.LISTS_1[0].id,
+                    added: listDataA.unifiedId,
                     protectAnnotation: false,
                 })
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdB,
-                    added: DATA.LISTS_1[1].id,
+                    added: listDataB.unifiedId,
                     protectAnnotation: false,
                 })
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdB,
-                    added: DATA.LISTS_1[2].id,
+                    added: listDataC.unifiedId,
                     protectAnnotation: false,
                 })
 
@@ -2517,16 +2601,16 @@ describe('Dashboard search results logic', () => {
                         isBulkShareProtected: false,
                         isShared: true,
                         lists: [
-                            DATA.LISTS_1[0].id,
-                            DATA.LISTS_1[1].id,
-                            DATA.LISTS_1[2].id,
+                            listDataA.unifiedId,
+                            listDataB.unifiedId,
+                            listDataC.unifiedId,
                         ],
                     }),
                 )
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdB,
-                    deleted: DATA.LISTS_1[1].id,
+                    deleted: listDataB.unifiedId,
                 })
 
                 expect(
@@ -2535,7 +2619,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[2].id],
+                        lists: [listDataA.unifiedId, listDataC.unifiedId],
                     }),
                 )
             })
@@ -2543,18 +2627,6 @@ describe('Dashboard search results logic', () => {
             it('should add shared list to parent page + public siblings when adding to private note, making note selectively shared', async ({
                 device,
             }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                })
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[0])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[1])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[2])
                 await device.storageManager
                     .collection('sharedListMetadata')
                     .createObject({
@@ -2568,11 +2640,28 @@ describe('Dashboard search results logic', () => {
                         remoteId: 'my-shared-list-1',
                     })
 
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_2,
+                        ),
+                        runInitLogic: true,
+                    },
+                )
+
                 const pageIdA = DATA.PAGE_1.normalizedUrl
                 const noteIdA = DATA.NOTE_1.url
                 const noteIdB = DATA.NOTE_2.url
-
-                await searchResults.init()
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 searchResults.processMutation({
                     searchResults: {
@@ -2610,14 +2699,14 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdA,
-                    added: DATA.LISTS_1[0].id,
+                    added: listDataA.unifiedId,
                 })
 
                 expect(
                     searchResults.state.searchResults.pageData.byId[pageIdA],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [listDataA.unifiedId],
                     }),
                 )
                 expect(
@@ -2626,7 +2715,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [listDataA.unifiedId],
                     }),
                 )
                 expect(
@@ -2635,7 +2724,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [listDataA.unifiedId],
                     }),
                 )
             })
@@ -2643,18 +2732,6 @@ describe('Dashboard search results logic', () => {
             it('should remove shared list from page, auto-removing it from all children annotations, regardless of share state', async ({
                 device,
             }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
-                })
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[0])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[1])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[2])
                 await device.storageManager
                     .collection('sharedListMetadata')
                     .createObject({
@@ -2668,11 +2745,28 @@ describe('Dashboard search results logic', () => {
                         remoteId: 'my-shared-list-1',
                     })
 
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_3,
+                        ),
+                        runInitLogic: true,
+                    },
+                )
+
                 const pageIdA = DATA.PAGE_1.normalizedUrl
                 const noteIdA = DATA.NOTE_1.url
                 const noteIdB = DATA.NOTE_2.url
-
-                await searchResults.init()
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 searchResults.processMutation({
                     searchResults: {
@@ -2693,7 +2787,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageIdA],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [],
                     }),
                 )
                 expect(
@@ -2717,34 +2811,34 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdA,
-                    added: DATA.LISTS_1[0].id,
+                    added: listDataA.unifiedId,
                     protectAnnotation: false,
                 })
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdA,
-                    added: DATA.LISTS_1[1].id,
+                    added: listDataB.unifiedId,
                     protectAnnotation: false,
                 })
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdA,
-                    added: DATA.LISTS_1[2].id,
+                    added: listDataC.unifiedId,
                 })
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdB,
-                    added: DATA.LISTS_1[0].id,
+                    added: listDataA.unifiedId,
                 })
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdB,
-                    added: DATA.LISTS_1[1].id,
+                    added: listDataB.unifiedId,
                 })
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdB,
-                    added: DATA.LISTS_1[2].id,
+                    added: listDataC.unifiedId,
                 })
                 await searchResults.processEvent('setPageLists', {
                     id: pageIdA,
                     fullPageUrl: DATA.PAGE_1.fullUrl,
-                    added: DATA.LISTS_1[2].id, // This list is private, so manually adding it to the page here
+                    added: listDataC.unifiedId, // This list is private, so manually adding it to the page here
                 })
 
                 expect(
@@ -2752,9 +2846,9 @@ describe('Dashboard search results logic', () => {
                 ).toEqual(
                     expect.objectContaining({
                         lists: [
-                            DATA.LISTS_1[0].id,
-                            DATA.LISTS_1[1].id,
-                            DATA.LISTS_1[2].id,
+                            listDataA.unifiedId,
+                            listDataB.unifiedId,
+                            listDataC.unifiedId,
                         ],
                     }),
                 )
@@ -2765,9 +2859,9 @@ describe('Dashboard search results logic', () => {
                         isBulkShareProtected: false,
                         isShared: true,
                         lists: [
-                            DATA.LISTS_1[0].id,
-                            DATA.LISTS_1[1].id,
-                            DATA.LISTS_1[2].id,
+                            listDataA.unifiedId,
+                            listDataB.unifiedId,
+                            listDataC.unifiedId,
                         ],
                     }),
                 )
@@ -2778,9 +2872,9 @@ describe('Dashboard search results logic', () => {
                         isBulkShareProtected: true,
                         isShared: false,
                         lists: [
-                            DATA.LISTS_1[0].id,
-                            DATA.LISTS_1[1].id,
-                            DATA.LISTS_1[2].id,
+                            listDataA.unifiedId,
+                            listDataB.unifiedId,
+                            listDataC.unifiedId,
                         ],
                     }),
                 )
@@ -2788,14 +2882,14 @@ describe('Dashboard search results logic', () => {
                 await searchResults.processEvent('setPageLists', {
                     id: pageIdA,
                     fullPageUrl: DATA.PAGE_1.fullUrl,
-                    deleted: DATA.LISTS_1[2].id,
+                    deleted: listDataC.unifiedId,
                 })
 
                 expect(
                     searchResults.state.searchResults.pageData.byId[pageIdA],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[0].id, DATA.LISTS_1[1].id],
+                        lists: [listDataA.unifiedId, listDataB.unifiedId],
                     }),
                 )
                 expect(
@@ -2805,10 +2899,10 @@ describe('Dashboard search results logic', () => {
                         isBulkShareProtected: false,
                         isShared: true,
                         lists: [
-                            DATA.LISTS_1[0].id,
-                            DATA.LISTS_1[1].id,
+                            listDataA.unifiedId,
+                            listDataB.unifiedId,
                             // This should still be here as it's private - removing from page shouldn't affect children annots
-                            DATA.LISTS_1[2].id,
+                            listDataC.unifiedId,
                         ],
                     }),
                 )
@@ -2819,10 +2913,10 @@ describe('Dashboard search results logic', () => {
                         isBulkShareProtected: true,
                         isShared: false,
                         lists: [
-                            DATA.LISTS_1[0].id,
-                            DATA.LISTS_1[1].id,
+                            listDataA.unifiedId,
+                            listDataB.unifiedId,
                             // This should still be here as it's private - removing from page shouldn't affect children annots
-                            DATA.LISTS_1[2].id,
+                            listDataC.unifiedId,
                         ],
                     }),
                 )
@@ -2830,14 +2924,14 @@ describe('Dashboard search results logic', () => {
                 await searchResults.processEvent('setPageLists', {
                     id: pageIdA,
                     fullPageUrl: DATA.PAGE_1.fullUrl,
-                    deleted: DATA.LISTS_1[0].id,
+                    deleted: listDataA.unifiedId,
                 })
 
                 expect(
                     searchResults.state.searchResults.pageData.byId[pageIdA],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
                 expect(
@@ -2846,7 +2940,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[1].id, DATA.LISTS_1[2].id],
+                        lists: [listDataB.unifiedId, listDataC.unifiedId],
                     }),
                 )
                 expect(
@@ -2855,7 +2949,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[1].id, DATA.LISTS_1[2].id],
+                        lists: [listDataB.unifiedId, listDataC.unifiedId],
                     }),
                 )
             })
@@ -2864,10 +2958,6 @@ describe('Dashboard search results logic', () => {
                 device,
             }) => {
                 for (const listData of DATA.LISTS_1) {
-                    await device.storageManager
-                        .collection('customLists')
-                        .createObject({ id: listData.id, name: listData.name })
-
                     if (listData.remoteId) {
                         await device.storageManager
                             .collection('sharedListMetadata')
@@ -2877,18 +2967,29 @@ describe('Dashboard search results logic', () => {
                             })
                     }
                 }
-                const { searchResults } = await setupTest(device, {
-                    runInitLogic: true,
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                })
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        runInitLogic: true,
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_2,
+                        ),
+                    },
+                )
 
-                const privateListIdA = DATA.LISTS_1[0].id
-                const publicListIdA = DATA.LISTS_1[1].id
-                const publicListIdB = DATA.LISTS_1[2].id
                 const noteId = DATA.NOTE_2.url
                 const otherNoteIdA = DATA.NOTE_1.url
                 const otherNoteIdB = DATA.NOTE_3.url
                 const pageId = DATA.NOTE_2.pageUrl
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 searchResults.processMutation({
                     searchResults: {
@@ -2952,7 +3053,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: publicListIdA,
+                    added: listDataB.unifiedId,
                     protectAnnotation: false,
                 })
 
@@ -2960,7 +3061,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA],
+                        lists: [listDataB.unifiedId],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -2971,7 +3072,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA],
+                        lists: [listDataB.unifiedId],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -2982,7 +3083,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA],
+                        lists: [listDataB.unifiedId],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -2991,20 +3092,20 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: privateListIdA,
+                    added: listDataA.unifiedId,
                 })
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA, privateListIdA],
+                        lists: [listDataB.unifiedId, listDataA.unifiedId],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -3015,7 +3116,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA],
+                        lists: [listDataB.unifiedId],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -3026,7 +3127,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA],
+                        lists: [listDataB.unifiedId],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -3035,20 +3136,20 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    deleted: publicListIdA,
+                    deleted: listDataB.unifiedId,
                 })
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [privateListIdA],
+                        lists: [listDataA.unifiedId],
                         isShared: false,
                         isBulkShareProtected: true,
                     }),
@@ -3059,7 +3160,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA],
+                        lists: [listDataB.unifiedId],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -3070,7 +3171,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA],
+                        lists: [listDataB.unifiedId],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -3079,20 +3180,20 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId,
-                    added: publicListIdB,
+                    added: listDataC.unifiedId,
                 })
 
                 expect(
                     searchResults.state.searchResults.noteData.byId[noteId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [privateListIdA, publicListIdB],
+                        lists: [listDataA.unifiedId, listDataC.unifiedId],
                         isShared: false,
                         isBulkShareProtected: true,
                     }),
@@ -3103,7 +3204,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA, publicListIdB],
+                        lists: [listDataB.unifiedId, listDataC.unifiedId],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -3114,7 +3215,7 @@ describe('Dashboard search results logic', () => {
                     ],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA, publicListIdB],
+                        lists: [listDataB.unifiedId, listDataC.unifiedId],
                         isShared: true,
                         isBulkShareProtected: false,
                     }),
@@ -3123,7 +3224,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageId],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [publicListIdA, publicListIdB],
+                        lists: [listDataB.unifiedId, listDataC.unifiedId],
                     }),
                 )
             })
@@ -3131,15 +3232,6 @@ describe('Dashboard search results logic', () => {
             it('should be able to make a selectively shared annotation private, removing any shared lists without touching sibling annots or parent page lists', async ({
                 device,
             }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                })
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[0])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[1])
                 await device.storageManager
                     .collection('sharedListMetadata')
                     .createObject({
@@ -3147,11 +3239,28 @@ describe('Dashboard search results logic', () => {
                         remoteId: 'my-shared-list-1',
                     })
 
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_2,
+                        ),
+                        runInitLogic: true,
+                    },
+                )
+
                 const pageIdA = DATA.PAGE_1.normalizedUrl
                 const noteIdA = DATA.NOTE_1.url
                 const noteIdB = DATA.NOTE_2.url
-
-                await searchResults.init()
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 searchResults.processMutation({
                     searchResults: {
@@ -3189,12 +3298,12 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdA,
-                    added: DATA.LISTS_1[0].id, // This list is private - doesn't affect things
+                    added: listDataA.unifiedId, // This list is private - doesn't affect things
                 })
                 // Make note selectively shared, by choosing to protect it upon shared list add
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdA,
-                    added: DATA.LISTS_1[1].id,
+                    added: listDataB.unifiedId,
                     protectAnnotation: true,
                 })
 
@@ -3202,7 +3311,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageIdA],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
                 expect(
@@ -3211,7 +3320,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[1].id, DATA.LISTS_1[0].id],
+                        lists: [listDataB.unifiedId, listDataA.unifiedId],
                     }),
                 )
                 expect(
@@ -3220,7 +3329,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
 
@@ -3233,7 +3342,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageIdA],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
                 expect(
@@ -3242,7 +3351,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [listDataA.unifiedId],
                     }),
                 )
                 expect(
@@ -3251,7 +3360,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
             })
@@ -3259,27 +3368,34 @@ describe('Dashboard search results logic', () => {
             it('should be able to make a selectively shared annotation protected, removing any shared lists without touching sibling annots or parent page lists', async ({
                 device,
             }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                })
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[0])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[1])
                 await device.storageManager
                     .collection('sharedListMetadata')
                     .createObject({
                         localId: DATA.LISTS_1[1].id,
                         remoteId: 'my-shared-list-1',
                     })
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_2,
+                        ),
+                        runInitLogic: true,
+                    },
+                )
 
                 const pageIdA = DATA.PAGE_1.normalizedUrl
                 const noteIdA = DATA.NOTE_1.url
                 const noteIdB = DATA.NOTE_2.url
-
-                await searchResults.init()
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 searchResults.processMutation({
                     searchResults: {
@@ -3317,12 +3433,12 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdA,
-                    added: DATA.LISTS_1[0].id, // This list is private - doesn't affect things
+                    added: listDataA.unifiedId, // This list is private - doesn't affect things
                 })
                 // Make note selectively shared, by choosing to protect it upon shared list add
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdA,
-                    added: DATA.LISTS_1[1].id,
+                    added: listDataB.unifiedId,
                     protectAnnotation: true,
                 })
 
@@ -3330,7 +3446,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageIdA],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
                 expect(
@@ -3339,7 +3455,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[1].id, DATA.LISTS_1[0].id],
+                        lists: [listDataB.unifiedId, listDataA.unifiedId],
                     }),
                 )
                 expect(
@@ -3348,7 +3464,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
 
@@ -3361,7 +3477,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageIdA],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
                 expect(
@@ -3370,7 +3486,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [listDataA.unifiedId],
                     }),
                 )
                 expect(
@@ -3379,7 +3495,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
             })
@@ -3387,27 +3503,34 @@ describe('Dashboard search results logic', () => {
             it('should be able to make a selectively shared annotation protected via edit save btn, removing any shared lists without touching sibling annots or parent page lists', async ({
                 device,
             }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                })
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[0])
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[1])
                 await device.storageManager
                     .collection('sharedListMetadata')
                     .createObject({
                         localId: DATA.LISTS_1[1].id,
                         remoteId: 'my-shared-list-1',
                     })
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_2,
+                        ),
+                        runInitLogic: true,
+                    },
+                )
 
                 const pageIdA = DATA.PAGE_1.normalizedUrl
                 const noteIdA = DATA.NOTE_1.url
                 const noteIdB = DATA.NOTE_2.url
-
-                await searchResults.init()
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 searchResults.processMutation({
                     searchResults: {
@@ -3445,12 +3568,12 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdA,
-                    added: DATA.LISTS_1[0].id, // This list is private - doesn't affect things
+                    added: listDataA.unifiedId, // This list is private - doesn't affect things
                 })
                 // Make note selectively shared, by choosing to protect it upon shared list add
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdA,
-                    added: DATA.LISTS_1[1].id,
+                    added: listDataB.unifiedId,
                     protectAnnotation: true,
                 })
 
@@ -3458,7 +3581,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageIdA],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
                 expect(
@@ -3467,7 +3590,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[1].id, DATA.LISTS_1[0].id],
+                        lists: [listDataB.unifiedId, listDataA.unifiedId],
                     }),
                 )
                 expect(
@@ -3476,7 +3599,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
 
@@ -3490,7 +3613,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageIdA],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
                 expect(
@@ -3499,7 +3622,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [DATA.LISTS_1[0].id],
+                        lists: [listDataA.unifiedId],
                     }),
                 )
                 expect(
@@ -3508,7 +3631,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: true,
-                        lists: [DATA.LISTS_1[1].id],
+                        lists: [listDataB.unifiedId],
                     }),
                 )
             })
@@ -3519,17 +3642,29 @@ describe('Dashboard search results logic', () => {
                 const testRemoteListId = 'remote-list-0'
                 device.backgroundModules.contentSharing.remoteFunctions.shareList = async () =>
                     ({ remoteListId: testRemoteListId } as any)
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_2),
-                })
-                await device.storageManager
-                    .collection('customLists')
-                    .createObject(DATA.LISTS_1[0])
 
-                const listIdA = DATA.LISTS_1[0].id
+                const { searchResults, annotationsCache } = await setupTest(
+                    device,
+                    {
+                        seedData: setPageSearchResult(
+                            DATA.PAGE_SEARCH_RESULT_2,
+                        ),
+                        runInitLogic: true,
+                    },
+                )
+
                 const pageIdA = DATA.PAGE_1.normalizedUrl
                 const noteIdA = DATA.NOTE_1.url
                 const noteIdB = DATA.NOTE_2.url
+                const listDataA = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[0].id,
+                )
+                const listDataB = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[1].id,
+                )
+                const listDataC = annotationsCache.getListByLocalId(
+                    DATA.LISTS_1[2].id,
+                )
 
                 await searchResults.init()
                 searchResults.processMutation({
@@ -3572,18 +3707,20 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdA,
-                    added: listIdA,
+                    added: listDataA.unifiedId,
                 })
                 await searchResults.processEvent('setNoteLists', {
                     noteId: noteIdB,
-                    added: listIdA,
+                    added: listDataA.unifiedId,
                 })
 
                 expect(
-                    searchResults.state.listsSidebar.listData[listIdA],
+                    searchResults.state.listsSidebar.lists.byId[
+                        listDataA.unifiedId
+                    ],
                 ).toEqual(
                     expect.objectContaining({
-                        id: listIdA,
+                        unifiedId: listDataA.unifiedId,
                         remoteId: undefined,
                     }),
                 )
@@ -3600,7 +3737,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: false,
                         isShared: false,
-                        lists: [listIdA],
+                        lists: [listDataA.unifiedId],
                     }),
                 )
                 expect(
@@ -3609,19 +3746,21 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [listIdA],
+                        lists: [listDataA.unifiedId],
                     }),
                 )
 
                 await searchResults.processEvent('shareList', {
-                    listId: listIdA,
+                    listId: listDataA.unifiedId,
                 })
 
                 expect(
-                    searchResults.state.listsSidebar.listData[listIdA],
+                    searchResults.state.listsSidebar.lists.byId[
+                        listDataA.unifiedId
+                    ],
                 ).toEqual(
                     expect.objectContaining({
-                        id: listIdA,
+                        unifiedId: listDataA.unifiedId,
                         remoteId: testRemoteListId,
                     }),
                 )
@@ -3629,7 +3768,7 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.pageData.byId[pageIdA],
                 ).toEqual(
                     expect.objectContaining({
-                        lists: [listIdA],
+                        lists: [listDataA.unifiedId],
                     }),
                 )
                 expect(
@@ -3638,7 +3777,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [listIdA],
+                        lists: [listDataA.unifiedId],
                     }),
                 )
                 expect(
@@ -3647,7 +3786,7 @@ describe('Dashboard search results logic', () => {
                     expect.objectContaining({
                         isBulkShareProtected: true,
                         isShared: false,
-                        lists: [listIdA],
+                        lists: [listDataA.unifiedId],
                     }),
                 )
             })

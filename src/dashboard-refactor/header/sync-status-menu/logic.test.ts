@@ -11,11 +11,11 @@ describe('Dashboard sync menu logic', () => {
 
         expect(searchResults.state.syncMenu.isDisplayed).toBe(false)
         await searchResults.processEvent('setSyncStatusMenuDisplayState', {
-            isShown: true,
+            isShown: false,
         })
         expect(searchResults.state.syncMenu.isDisplayed).toBe(true)
         await searchResults.processEvent('setSyncStatusMenuDisplayState', {
-            isShown: false,
+            isShown: true,
         })
         expect(searchResults.state.syncMenu.isDisplayed).toBe(false)
     })

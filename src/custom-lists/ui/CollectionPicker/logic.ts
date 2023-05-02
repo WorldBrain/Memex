@@ -28,7 +28,7 @@ export interface SpacePickerDependencies {
     /** Called when user keys Enter+Cmd/Ctrl in main text input */
     onSubmit?: () => void | Promise<void>
     initialSelectedListIds?: () => number[] | Promise<number[]>
-    selectedListIdSidebar?: number
+    dashboardSelectedListId?: number
     children?: any
     filterMode?: boolean
     removeTooltipText?: string
@@ -146,7 +146,7 @@ export default class SpacePickerLogic extends UILogic<
                     (listId) =>
                         listId !== SPECIAL_LIST_IDS.INBOX &&
                         listId !== SPECIAL_LIST_IDS.MOBILE &&
-                        listId !== this.dependencies.selectedListIdSidebar,
+                        listId !== this.dependencies.dashboardSelectedListId,
                 )
                 const initSuggestions = await spacesBG.fetchInitialListSuggestions(
                     {
@@ -161,7 +161,7 @@ export default class SpacePickerLogic extends UILogic<
                 this.defaultEntries = this.defaultEntries.filter(
                     (item) =>
                         item.localId !==
-                        this.dependencies.selectedListIdSidebar,
+                        this.dependencies.dashboardSelectedListId,
                 )
 
                 this.emitMutation({

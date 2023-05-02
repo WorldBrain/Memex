@@ -16,6 +16,7 @@ import type {
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -100,8 +101,11 @@ export type PagePickerAugdProps = {
     [Key in keyof PagePickerProps]: (pageId: string) => PagePickerProps[Key]
 }
 
-export type SearchResultToState = (
-    result: AnnotationsSearchResponse | StandardSearchResponse,
+export type SearchResultToState<
+    T extends AnnotationsSearchResponse | StandardSearchResponse
+> = (
+    result: T,
+    annotationsCache: PageAnnotationsCacheInterface,
     extraPageResultState?: Pick<PageResult, 'areNotesShown'>,
 ) => Pick<RootState, 'results' | 'noteData' | 'pageData'>
 
@@ -119,14 +123,14 @@ export interface NoteFormState {
     isListPickerShown: boolean
     inputValue: string
     tags: string[]
-    lists: number[]
+    lists: string[]
 }
 
 export interface NoteData {
     url: string
     pageUrl: string
     tags: string[]
-    lists: number[]
+    lists: string[]
     comment?: string
     highlight?: string
     isEdited?: boolean
@@ -142,7 +146,7 @@ export type PageData = Pick<
     'fullUrl' | 'fullTitle' | 'tags' | 'favIconURI'
 > & {
     normalizedUrl: string
-    lists: number[]
+    lists: string[]
     displayTime: number
     hasNotes: boolean
     type: 'pdf' | 'page'
@@ -284,8 +288,8 @@ export type Events = UIEvent<{
     setPageLists: {
         id: string
         fullPageUrl: string
-        added?: number
-        deleted?: number
+        added?: string
+        deleted?: string
         skipPageIndexing?: boolean
     }
     confirmPageDelete: null
@@ -319,7 +323,7 @@ export type Events = UIEvent<{
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageNewNoteCommentValue: PageEventArgs & { value: string }
     setPageNewNoteTags: PageEventArgs & { tags: string[] }
-    setPageNewNoteLists: PageEventArgs & { lists: number[] }
+    setPageNewNoteLists: PageEventArgs & { lists: string[] }
     cancelPageNewNote: PageEventArgs
     savePageNewNote: PageEventArgs & {
         fullPageUrl: string
@@ -340,8 +344,8 @@ export type Events = UIEvent<{
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
     setNoteLists: NoteEventArgs & {
-        added?: number
-        deleted?: number
+        added?: string
+        deleted?: string
         protectAnnotation?: boolean
     }
     updateNoteShareInfo: NoteEventArgs & {

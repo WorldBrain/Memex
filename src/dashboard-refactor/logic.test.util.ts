@@ -33,6 +33,17 @@ export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
     result = DATA.PAGE_SEARCH_RESULT_1,
 ) => async (logic, { storageManager }) => {
     let idCounter = 0
+    for (const list of DATA.LISTS_1) {
+        await storageManager.collection('customLists').createObject({
+            id: list.id,
+            name: list.name,
+            searchableName: list.name,
+            createdAt: new Date(),
+            isNestable: true,
+            isDeletable: true,
+        })
+    }
+
     for (const page of result.docs) {
         await storageManager.collection('pages').createObject({
             url: page.url,
@@ -68,13 +79,6 @@ export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
             }
         }
 
-        for (const tag of page.tags) {
-            await storageManager.collection('tags').createObject({
-                name: tag,
-                url: page.url,
-            })
-        }
-
         if (page.hasBookmark) {
             await storageManager.collection('bookmarks').createObject({
                 url: page.url,
@@ -88,6 +92,17 @@ export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
 export const setNoteSearchResult: DataSeederCreator<AnnotationsSearchResponse> = (
     result = DATA.ANNOT_SEARCH_RESULT_2,
 ) => async (logic, { storageManager }) => {
+    for (const list of DATA.LISTS_1) {
+        await storageManager.collection('customLists').createObject({
+            id: list.id,
+            name: list.name,
+            searchableName: list.name,
+            createdAt: new Date(),
+            isNestable: true,
+            isDeletable: true,
+        })
+    }
+
     for (const page of result.docs) {
         await storageManager.collection('pages').createObject({
             url: page.url,
@@ -129,7 +144,6 @@ export async function setupTest(
         mockDocument?: any
         seedData?: DataSeeder
         overrideSearchTrigger?: boolean
-        openFeedUrl?: () => void
         copyToClipboard?: (text: string) => Promise<boolean>
         renderUpdateNotifBanner?: () => JSX.Element
     } = {
@@ -147,11 +161,13 @@ export async function setupTest(
             displayName: TEST_USER.displayName,
         })
     }
+    const annotationsCache = new PageAnnotationsCache({})
 
     const logic = new DashboardLogic({
         location,
+        history,
         analytics,
-        annotationsCache: new PageAnnotationsCache({ normalizedPageUrl: '' }),
+        annotationsCache,
         annotationsBG: insertBackgroundFunctionTab(
             device.backgroundModules.directLinking.remoteFunctions,
         ) as any,
@@ -189,7 +205,6 @@ export async function setupTest(
             device.backgroundModules.activityIndicator.remoteFunctions,
         copyToClipboard:
             args.copyToClipboard ?? defaultTestSetupDeps.copyToClipboard,
-        openFeed: args.openFeedUrl ?? (() => undefined),
         openCollectionPage: () => {},
         renderUpdateNotifBanner: args.renderUpdateNotifBanner ?? (() => null),
         services: createUIServices(),
@@ -205,14 +220,14 @@ export async function setupTest(
 
     const searchResults = device.createElement<RootState, Events>(logic)
 
-    if (args.runInitLogic) {
-        await searchResults.init()
-    }
     if (args.seedData) {
         await args.seedData(searchResults, device)
     }
+    if (args.runInitLogic) {
+        await searchResults.init()
+    }
 
-    return { searchResults, logic, analytics }
+    return { searchResults, logic, analytics, annotationsCache }
 }
 
 const getPrivacyLevel = (isShared, isBulkShareProtected) => {

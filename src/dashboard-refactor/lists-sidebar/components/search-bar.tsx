@@ -4,22 +4,8 @@ import styled, { css } from 'styled-components'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-
-import styles, { fonts } from 'src/dashboard-refactor/styles'
 import colors from 'src/dashboard-refactor/colors'
-import { SidebarLockedState } from '../types'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
-
-const textStyles = `
-    font-family: 'Satoshi', sans-serif;
-font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
-    font-weight: ${fonts.primary.weight.normal};
-    font-size: 14px;
-    line-height: 15px;
-    color: ${(props) => props.theme.colors.white};
-    cursor: text;
-`
 
 const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
     height: min-content;
@@ -27,7 +13,7 @@ const OuterContainer = styled.div<{ isSidebarLocked: boolean }>`
     border-radius: 5px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     width: fill-available;
     height: 34px;
@@ -83,19 +69,13 @@ const TextSpan = styled.span<{ bold: boolean }>`
         `};
 `
 
-const IconContainer = styled.div<{ hoverOff }>`
+const IconContainer = styled.div<{ hoverOff: boolean }>`
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-items: start;
     margin-left: 10px;
     cursor: ${(props) => props.hoverOff && 'default'};
-`
-
-const StyledIcon = styled(Icon)`
-    color: ${(props) => props.theme.colors.primary};
-    opacity: 0.7;
-    cursor: pointer;
 `
 
 const SearchArea = styled.div`
@@ -123,18 +103,6 @@ const CreateButton = styled.div`
     }
 `
 
-const ShortCut = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: 2px 5px;
-    border-radius: 5px;
-    width: 30px;
-    font-size: 10px;
-    color: ${(props) => props.theme.colors.white};
-    border: 1px solid ${(props) => props.theme.colors.darkerText};
-`
 const CreateBox = styled.div`
     display: flex;
     justify-content: flex-start;
@@ -143,12 +111,12 @@ const CreateBox = styled.div`
 `
 
 export interface ListsSidebarSearchBarProps {
-    searchQuery?: string
-    onSearchQueryChange(inputString: string): void
     onInputClear(): void
-    onCreateNew(newListName: string): void // should this return a promise?
-    sidebarLockedState: SidebarLockedState
-    localLists?: any
+    onCreateNew(newListName: string): void
+    onSearchQueryChange(inputString: string): void
+    areLocalListsEmpty: boolean
+    isSidebarLocked: boolean
+    searchQuery: string
 }
 
 export default class ListsSidebarSearchBar extends PureComponent<
@@ -180,7 +148,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
         )
     }
 
-    handleClearSearch() {
+    private handleClearSearch = () => {
         this.props.onInputClear()
         this.inputRef.current.focus()
     }
@@ -197,10 +165,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
     }
 
     render(): JSX.Element {
-        const {
-            searchQuery,
-            sidebarLockedState: { isSidebarLocked },
-        } = this.props
+        const { searchQuery, isSidebarLocked } = this.props
         return (
             <SearchArea>
                 <OuterContainer isSidebarLocked={isSidebarLocked}>
@@ -211,7 +176,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
                                     <Icon
                                         heightAndWidth="14px"
                                         path={icons.removeX}
-                                        onClick={() => this.handleClearSearch()}
+                                        onClick={this.handleClearSearch}
                                     />
                                 </Margin>
                             </IconContainer>
@@ -221,7 +186,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
                                     <Icon
                                         heightAndWidth="16px"
                                         path={icons.searchIcon}
-                                        hoverOff={true}
+                                        hoverOff
                                     />
                                 </Margin>
                             </IconContainer>
@@ -236,8 +201,8 @@ export default class ListsSidebarSearchBar extends PureComponent<
                         />
                     </InnerContainer>
                 </OuterContainer>
-                {this.props.searchQuery.length > 0 &&
-                    this.props.localLists.length === 0 &&
+                {searchQuery.length > 0 &&
+                    this.props.areLocalListsEmpty &&
                     this.renderCreateNew()}
             </SearchArea>
         )

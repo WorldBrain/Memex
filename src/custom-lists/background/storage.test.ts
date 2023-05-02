@@ -220,7 +220,7 @@ describe('Custom List Integrations', () => {
             ).toEqual([])
             expect(
                 await customLists.fetchAllLists({
-                    skipMobileList: true,
+                    skipSpecialLists: true,
                     includeDescriptions: true,
                 }),
             ).toEqual([])
@@ -253,7 +253,7 @@ describe('Custom List Integrations', () => {
             ])
             expect(
                 await customLists.fetchAllLists({
-                    skipMobileList: true,
+                    skipSpecialLists: true,
                     includeDescriptions: true,
                 }),
             ).toEqual([
@@ -467,7 +467,7 @@ describe('Custom List Integrations', () => {
             const { customLists } = await setupTest()
 
             const lists = await customLists.fetchAllLists({
-                skipMobileList: false,
+                skipSpecialLists: false,
             })
 
             checkDefined(lists)
@@ -478,7 +478,7 @@ describe('Custom List Integrations', () => {
             const { customLists } = await setupTest()
 
             const lists = await customLists.fetchAllLists({
-                skipMobileList: true,
+                skipSpecialLists: true,
             })
 
             checkDefined(lists)
@@ -559,7 +559,7 @@ describe('Custom List Integrations', () => {
 
             const lists = await customLists.fetchAllLists({
                 limit: 1,
-                skipMobileList: false,
+                skipSpecialLists: false,
             })
 
             checkDefined(lists)

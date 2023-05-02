@@ -49,6 +49,7 @@ import {
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { resolvablePromise } from 'src/util/promises'
 import type {
+    PageAnnotationsCacheEvents,
     PageAnnotationsCacheInterface,
     UnifiedAnnotation,
     UnifiedList,
@@ -301,7 +302,7 @@ export class SidebarContainerLogic extends UILogic<
         opts: { renderHighlights: boolean },
     ) {
         await executeUITask(this, 'cacheLoadState', async () => {
-            await cacheUtils.hydrateCache({
+            await cacheUtils.hydrateCacheForSidebar({
                 fullPageUrl,
                 user: this.options.currentUser,
                 cache: this.options.annotationsCache,
@@ -464,8 +465,8 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    private cacheListsSubscription = (
-        nextLists: PageAnnotationsCacheInterface['lists'],
+    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
+        nextLists,
     ) => {
         this.emitMutation({
             lists: { $set: nextLists },
@@ -480,8 +481,8 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    private cacheAnnotationsSubscription = (
-        nextAnnotations: PageAnnotationsCacheInterface['annotations'],
+    private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] = (
+        nextAnnotations,
     ) => {
         this.emitMutation({
             noteCreateState: { $set: 'success' },
@@ -1514,13 +1515,9 @@ export class SidebarContainerLogic extends UILogic<
             'promptSuggestions',
         )
 
-        let suggestions = rawSuggestions.map((prompt: string) => ({
-            prompt,
-            focused: null,
-        }))
-        await this.syncSettings.openAI.get('promptSuggestions')
+        let suggestions = []
 
-        if (!suggestions) {
+        if (!rawSuggestions) {
             await this.syncSettings.openAI.set(
                 'promptSuggestions',
                 AI_PROMPT_DEFAULTS,
@@ -1529,6 +1526,11 @@ export class SidebarContainerLogic extends UILogic<
             suggestions = AI_PROMPT_DEFAULTS.map((prompt: string) => {
                 return { prompt, focused: null }
             })
+        } else {
+            suggestions = rawSuggestions.map((prompt: string) => ({
+                prompt,
+                focused: null,
+            }))
         }
 
         this.emitMutation({

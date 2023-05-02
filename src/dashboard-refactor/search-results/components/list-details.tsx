@@ -14,18 +14,17 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { sizeConstants } from '../../constants'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import type { UnifiedList } from 'src/annotations/cache/types'
 
 export interface Props {
-    listName: string
     remoteLink?: string
-    localListId: number
     isOwnedList?: boolean
     isJoinedList?: boolean
     description: string | null
+    listData: Pick<UnifiedList, 'unifiedId' | 'localId' | 'name'>
     saveDescription: (description: string) => void
-    saveTitle: (title: string, listId: number) => void
+    saveTitle: (title: string, listId: string) => void
     onAddContributorsClick?: React.MouseEventHandler
-    listId?: number
     clearInbox?: () => void
 }
 
@@ -44,16 +43,16 @@ export default class ListDetails extends PureComponent<Props, State> {
         description: this.props.description ?? '',
         isEditingDescription: false,
         showQuickTutorial: false,
-        spaceTitle: this.props.listName,
+        spaceTitle: this.props.listData.name,
     }
 
     componentWillUpdate(nextProps: Props) {
-        if (this.props.localListId !== nextProps.localListId) {
+        if (this.props.listData.unifiedId !== nextProps.listData.unifiedId) {
             this.setState({
                 description: nextProps.description ?? '',
                 isEditingDescription: false,
                 showQuickTutorial: false,
-                spaceTitle: nextProps.listName,
+                spaceTitle: nextProps.listData.name,
             })
         }
     }
@@ -61,7 +60,10 @@ export default class ListDetails extends PureComponent<Props, State> {
     private finishEdit(args: { shouldSave?: boolean }) {
         if (args.shouldSave) {
             this.props.saveDescription(this.state.description)
-            this.props.saveTitle(this.state.spaceTitle, this.props.listId)
+            this.props.saveTitle(
+                this.state.spaceTitle,
+                this.props.listData.unifiedId,
+            )
         }
         this.setState({
             isEditingDescription: false,
@@ -104,7 +106,7 @@ export default class ListDetails extends PureComponent<Props, State> {
             )
         }
 
-        if (this.props.listId === 20201015) {
+        if (this.props.listData.localId === 20201015) {
             return (
                 <SubtitleText>
                     {'Things you saved from your mobile devices'}
@@ -112,7 +114,7 @@ export default class ListDetails extends PureComponent<Props, State> {
             )
         }
 
-        if (this.props.listId === 20201014) {
+        if (this.props.listData.localId === 20201014) {
             return (
                 <SubtitleText>
                     {
@@ -173,7 +175,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                     this.props.description !==
                                                         this.state
                                                             .description ||
-                                                    this.props.listName !==
+                                                    this.props.listData.name !==
                                                         this.state.spaceTitle,
                                             })
                                         } else if (e.key === 'Escape') {
@@ -215,7 +217,8 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                             .description !==
                                                             this.state
                                                                 .description ||
-                                                        this.props.listName !==
+                                                        this.props.listData
+                                                            .name !==
                                                             this.state
                                                                 .spaceTitle,
                                                 })
@@ -228,18 +231,15 @@ export default class ListDetails extends PureComponent<Props, State> {
                             <TitleContainer>
                                 <DetailsContainer>
                                     <SectionTitle>
-                                        {this.props.listName}
-                                        {this.props.listId === 20201015 &&
-                                            'Saved on Mobile'}
-                                        {this.props.listId === 20201014 &&
-                                            'Inbox'}
+                                        {this.props.listData.name}
                                     </SectionTitle>
                                     {/* <TitleEditContainer>
                                     {this.renderEditButton()}
                                 </TitleEditContainer> */}
                                 </DetailsContainer>
                                 <BtnsContainer>
-                                    {this.props.listId === 20201014 ? (
+                                    {this.props.listData.localId ===
+                                    20201014 ? (
                                         <TooltipBox
                                             tooltipText={
                                                 <TooltipTextContent>
@@ -268,8 +268,8 @@ export default class ListDetails extends PureComponent<Props, State> {
                                             />
                                         </TooltipBox>
                                     ) : undefined}
-                                    {this.props.listId !== 20201014 &&
-                                    this.props.listId !== 20201015 ? (
+                                    {this.props.listData.localId !== 20201014 &&
+                                    this.props.listData.localId !== 20201015 ? (
                                         <SpaceButtonRow>
                                             {this.props.isOwnedList ? (
                                                 <>

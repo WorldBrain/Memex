@@ -247,17 +247,13 @@ class SpacePicker extends StatefulUIElement<
         await this.processEvent('toggleEntryContextMenu', { listId })
     }
 
-    private handleSpaceContextMenuClose = (listId: number) => async (
-        shouldSaveName: boolean,
-    ) => {
-        if (shouldSaveName) {
-            const name = this.contextMenuRef?.current?.state.nameValue
-            if (name != null) {
-                await this.processEvent('renameList', {
-                    listId,
-                    name,
-                })
-            }
+    private handleSpaceContextMenuClose = (listId: number) => async () => {
+        const name = this.contextMenuRef?.current?.state.nameValue
+        if (name != null) {
+            await this.processEvent('renameList', {
+                listId,
+                name,
+            })
         }
         await this.processEvent('toggleEntryContextMenu', { listId })
     }
@@ -287,18 +283,14 @@ class SpacePicker extends StatefulUIElement<
                         listId: list.localId,
                     })
                 }
-                editableProps={{
-                    onConfirmClick: async (name) => {
-                        await this.processEvent('renameList', {
-                            listId: list.localId,
-                            name,
-                        })
-                    },
-                    onCancelClick: this.handleSpaceContextMenuClose(
-                        list.localId,
-                    ),
-                    errorMessage: this.state.renameListErrorMessage,
+                errorMessage={this.state.renameListErrorMessage}
+                onConfirmEdit={async (name) => {
+                    await this.processEvent('renameList', {
+                        listId: list.localId,
+                        name,
+                    })
                 }}
+                onCancelEdit={this.handleSpaceContextMenuClose(list.localId)}
                 onSpaceShare={(remoteListId) =>
                     this.processEvent('setListRemoteId', {
                         localListId: list.localId,

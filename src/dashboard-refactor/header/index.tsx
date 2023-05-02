@@ -4,15 +4,10 @@ import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { SETTINGS_URL } from 'src/constants'
 import SearchBar, { SearchBarProps } from './search-bar'
-import { SyncStatusIconState } from './types'
 import SyncStatusMenu, { SyncStatusMenuProps } from './sync-status-menu'
-import { fonts } from '../styles'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import Margin from '../components/Margin'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
-import type { SidebarLockedState } from '../lists-sidebar/types'
-import type { HoverState } from '../types'
-import { SyncStatusIcon } from './sync-status-menu/sync-status-icon'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import {
@@ -65,8 +60,6 @@ const RightHeader = styled.div`
 // `
 
 export interface HeaderProps {
-    sidebarLockedState: SidebarLockedState
-    sidebarToggleHoverState: HoverState
     selectedListName?: string
     searchBarProps: SearchBarProps
     syncStatusMenuProps: SyncStatusMenuProps
@@ -137,7 +130,6 @@ export default class Header extends PureComponent<Props> {
             searchBarProps,
             syncStatusIconState,
             syncStatusMenuProps,
-            selectedListName: selectedList,
         } = this.props
 
         const icon = getSyncStatusIcon(syncStatusIconState)
@@ -151,12 +143,7 @@ export default class Header extends PureComponent<Props> {
                     vertical="auto"
                     left="24px"
                 >
-                    <SearchBar
-                        {...searchBarProps}
-                        sidebarLockedState={
-                            this.props.sidebarLockedState.isSidebarLocked
-                        }
-                    />
+                    <SearchBar {...searchBarProps} />
                 </SearchSection>
                 <RightHeader>
                     <ActionWrapper>

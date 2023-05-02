@@ -410,12 +410,12 @@ export default class CustomListBackground {
     fetchAllLists: RemoteCollectionsInterface['fetchAllLists'] = async ({
         skip = 0,
         limit = 2000,
-        skipMobileList = false,
+        skipSpecialLists = false,
         includeDescriptions,
     }): Promise<PageList[]> => {
         return this.storage.fetchAllLists({
             includeDescriptions,
-            skipMobileList,
+            skipSpecialLists,
             limit,
             skip,
         })
@@ -647,7 +647,7 @@ export default class CustomListBackground {
 
         const lists = await this.fetchAllLists({
             limit: limitSuggestionsStorageLength - (extraListIds?.length ?? 0),
-            skipMobileList: true,
+            skipSpecialLists: true,
         })
 
         if (extraListIds?.length) {

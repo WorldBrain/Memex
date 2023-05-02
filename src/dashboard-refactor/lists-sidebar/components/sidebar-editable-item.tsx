@@ -1,7 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import colors from 'src/dashboard-refactor/colors'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -13,9 +12,8 @@ interface State {
 export interface Props {
     initValue?: string
     errorMessage: string | null
-    onCancelClick: (shouldSave: boolean) => void
+    onCancelClick: () => void
     onConfirmClick: (value: string) => void
-    cancelListEdit: () => void
 }
 
 export default class ListsSidebarEditableItem extends React.PureComponent<
@@ -34,7 +32,7 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
             if (this.state.value.length) {
                 e.stopPropagation()
             }
-            this.props.onCancelClick(false)
+            this.props.onCancelClick()
             return
         }
 
@@ -51,7 +49,7 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
     }
 
     private handleCancel: React.MouseEventHandler = () =>
-        this.props.onCancelClick(false)
+        this.props.onCancelClick()
 
     render() {
         return (

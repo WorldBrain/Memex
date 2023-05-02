@@ -52,6 +52,7 @@ import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -71,10 +72,10 @@ export type Props = RootState &
         activePage?: boolean
         searchResults?: any
         searchQuery?: string
-        listData: ListSidebarState['listData']
+        listData: ListSidebarState['lists']
         goToImportRoute: () => void
         toggleListShareMenu: () => void
-        selectedListId?: number
+        selectedListId?: string
         areAllNotesShown: boolean
         toggleSortMenuShown: () => void
         pageInteractionProps: PageInteractionAugdProps
@@ -111,7 +112,7 @@ export type Props = RootState &
         // updateAllResultNotesShareInfo: (info: NoteShareInfo) => void
         updateAllResultNotesShareInfo: (state: AnnotationSharingStates) => void
         clearInbox: () => void
-        filterByList: (listId: number) => void
+        filterByList: (localListId: number) => void
     }
 
 export interface State {
@@ -241,6 +242,11 @@ export default class SearchResultsContainer extends React.Component<
         showHorizontalScrollSwitch: 'none',
     }
 
+    private getLocalListIdsForCacheIds = (listIds: string[]): number[] =>
+        listIds
+            .map((listId) => this.props.listData.byId[listId]?.localId)
+            .filter((listId) => listId != null)
+
     private renderNoteResult = (
         day: number,
         pageId: string,
@@ -256,17 +262,19 @@ export default class SearchResultsContainer extends React.Component<
 
         const dummyEvent = {} as any
 
-        const listsToDisplay = noteData.isShared
+        const cachedListIds = noteData.isShared
             ? [
                   ...new Set([
                       ...pageData.lists.filter(
                           (listId) =>
-                              this.props.listData[listId]?.remoteId != null,
+                              this.props.listData.byId[listId]?.remoteId !=
+                              null,
                       ),
                       ...noteData.lists,
                   ]),
               ]
             : noteData.lists
+        const localListIds = this.getLocalListIdsForCacheIds(cachedListIds)
 
         return (
             <AnnotationEditable
@@ -274,7 +282,7 @@ export default class SearchResultsContainer extends React.Component<
                 key={noteId}
                 unifiedId={noteId}
                 tags={noteData.tags}
-                lists={listsToDisplay}
+                lists={localListIds}
                 body={noteData.highlight}
                 comment={noteData.comment}
                 isShared={noteData.isShared}
@@ -299,7 +307,7 @@ export default class SearchResultsContainer extends React.Component<
                 spacePickerButtonRef={this.spaceBtnBarDashboardRef}
                 renderListsPickerForAnnotation={() => (
                     <CollectionPicker
-                        initialSelectedListIds={() => listsToDisplay}
+                        initialSelectedListIds={() => localListIds}
                         selectEntry={(listId) =>
                             interactionProps.updateLists({
                                 added: listId,
@@ -336,7 +344,7 @@ export default class SearchResultsContainer extends React.Component<
                         copyLink={this.props.onNoteLinkCopy}
                         postShareHook={interactionProps.updateShareInfo}
                         spacePickerProps={{
-                            initialSelectedListIds: () => listsToDisplay,
+                            initialSelectedListIds: () => localListIds,
                             selectEntry: (listId, options) =>
                                 interactionProps.updateLists({
                                     added: listId,
@@ -406,7 +414,7 @@ export default class SearchResultsContainer extends React.Component<
                     autoFocus={false}
                     comment={newNoteForm.inputValue}
                     tags={newNoteForm.tags}
-                    lists={newNoteForm.lists}
+                    lists={this.getLocalListIdsForCacheIds(newNoteForm.lists)}
                     getListDetailsById={this.props.getListDetailsById}
                     {...boundAnnotCreateProps}
                     contextLocation={'dashboard'}
@@ -505,7 +513,10 @@ export default class SearchResultsContainer extends React.Component<
                 <PageResult
                     activePage={this.props.activePage}
                     isSearchFilteredByList={this.props.selectedListId != null}
-                    filteredbyListID={this.props.selectedListId}
+                    filteredbyListID={
+                        this.props.listData.byId[this.props.selectedListId]
+                            ?.localId
+                    }
                     youtubeService={this.props.youtubeService}
                     getListDetailsById={this.props.getListDetailsById}
                     shareMenuProps={{
@@ -519,14 +530,13 @@ export default class SearchResultsContainer extends React.Component<
                     {...interactionProps}
                     {...pickerProps}
                     {...page}
+                    lists={this.getLocalListIdsForCacheIds(page.lists)}
                     onTagPickerBtnClick={
                         this.props.shouldShowTagsUIs
                             ? interactionProps.onTagPickerBtnClick
                             : undefined
                     }
-                    filterbyList={(listId) => {
-                        this.props.filterByList(listId)
-                    }}
+                    filterbyList={this.props.filterByList}
                 />
                 {this.renderPageNotes(page, day, interactionProps)}
             </ResultBox>
@@ -610,7 +620,7 @@ export default class SearchResultsContainer extends React.Component<
 
         if (
             this.props.showMobileAppAd &&
-            this.props.selectedListId === 20201015
+            this.props.selectedListId === SPECIAL_LIST_NAMES.MOBILE
         ) {
             title = (
                 <MobileAdContainer>
@@ -719,7 +729,7 @@ export default class SearchResultsContainer extends React.Component<
             !this.props.searchFilters.isTagFilterActive &&
             !this.props.searchFilters.isDomainFilterActive
         ) {
-            if (this.props.selectedListId === 20201015) {
+            if (this.props.selectedListId === SPECIAL_LIST_NAMES.MOBILE) {
                 return (
                     <NoResultsMessage>
                         <IconBox heightAndWidth="34px" background="dark">
@@ -764,7 +774,7 @@ export default class SearchResultsContainer extends React.Component<
 
         if (
             this.props.clearInboxLoadState === 'running' &&
-            this.props.selectedListId === 20201014
+            this.props.selectedListId === SPECIAL_LIST_NAMES.INBOX
         ) {
             return this.renderLoader()
         }
@@ -876,7 +886,6 @@ export default class SearchResultsContainer extends React.Component<
                     {this.props.selectedListId != null && (
                         <ListDetails
                             {...this.props.listDetailsProps}
-                            listId={this.props.selectedListId}
                             clearInbox={this.props.clearInbox}
                         />
                     )}

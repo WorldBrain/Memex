@@ -1,8 +1,6 @@
 import React, { PureComponent } from 'react'
 import styled from 'styled-components'
-import { SidebarLockedState } from '../lists-sidebar/types'
 import { Icon } from '../styled-components'
-import { HoverState } from '../types'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
 const arrowStyles = `
@@ -60,27 +58,27 @@ const TriggerArea = styled.div`
 `
 
 export interface SidebarToggleProps {
-    sidebarLockedState: SidebarLockedState
-    hoverState: HoverState
+    isHovered: boolean
+    isSidebarLocked: boolean
+    onHoverEnter: (id: string) => void
+    onHoverLeave: (id: string) => void
+    toggleSidebarLockedState: () => void
 }
 
 export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
     render() {
-        const {
-            hoverState: { onHoverEnter, onHoverLeave, isHovered },
-            sidebarLockedState: { toggleSidebarLockedState, isSidebarLocked },
-        } = this.props
+        const { onHoverEnter, onHoverLeave, isHovered } = this.props
 
         return (
             <Container
                 isHovered={isHovered}
                 // onMouseLeave={onHoverLeave}
-                onClick={toggleSidebarLockedState}
+                onClick={this.props.toggleSidebarLockedState}
                 onMouseEnter={onHoverEnter}
                 onMouseOver={onHoverEnter}
                 id="testingthis"
             >
-                {!isSidebarLocked ? (
+                {!this.props.isSidebarLocked ? (
                     <>
                         {isHovered ? (
                             <Icon

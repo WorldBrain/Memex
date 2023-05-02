@@ -260,12 +260,12 @@ export default class CustomListStorage extends StorageModule {
     async fetchAllLists({
         limit,
         skip,
-        skipMobileList,
+        skipSpecialLists,
         includeDescriptions,
     }: {
         limit: number
         skip: number
-        skipMobileList?: boolean
+        skipSpecialLists?: boolean
         includeDescriptions?: boolean
     }) {
         const lists: PageList[] = await this.operation('findLists', {
@@ -288,7 +288,7 @@ export default class CustomListStorage extends StorageModule {
 
         const prepared = lists.map((list) => this.prepareList(list))
 
-        if (skipMobileList) {
+        if (skipSpecialLists) {
             return prepared.filter(CustomListStorage.filterOutSpecialLists)
         }
 

@@ -612,8 +612,14 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedNotesContainer>
-                {(this.spaceOwnershipStatus(listData) === 'Contributor' ||
-                    this.spaceOwnershipStatus(listData) === 'Creator') && (
+                {(cacheUtils.deriveListOwnershipStatus(
+                    listData,
+                    this.props.currentUser,
+                ) === 'Contributor' ||
+                    cacheUtils.deriveListOwnershipStatus(
+                        listData,
+                        this.props.currentUser,
+                    ) === 'Creator') && (
                     <>
                         <NewAnnotationBoxMyAnnotations>
                             {this.renderNewAnnotation(
@@ -858,7 +864,12 @@ export class AnnotationsSidebar extends React.Component<
             return
         }
 
-        if (this.spaceOwnershipStatus(listData) === 'Creator') {
+        if (
+            cacheUtils.deriveListOwnershipStatus(
+                listData,
+                this.props.currentUser,
+            ) === 'Creator'
+        ) {
             return (
                 <PopoutBox
                     placement="bottom"
@@ -880,7 +891,6 @@ export class AnnotationsSidebar extends React.Component<
                         localListId={listData.localId}
                         remoteListId={listData.remoteId}
                         editableProps={this.props.editableProps!}
-                        // ownershipStatus={this.spaceOwnershipStatus(listData)}
                         // isMenuDisplayed={this.state.showSpaceSharePopout}
                         // onDeleteSpaceIntent={
                         //     this.props.onDeleteClick
@@ -892,8 +902,14 @@ export class AnnotationsSidebar extends React.Component<
             )
         }
         if (
-            this.spaceOwnershipStatus(listData) === 'Follower' ||
-            this.spaceOwnershipStatus(listData) === 'Contributor'
+            cacheUtils.deriveListOwnershipStatus(
+                listData,
+                this.props.currentUser,
+            ) === 'Follower' ||
+            cacheUtils.deriveListOwnershipStatus(
+                listData,
+                this.props.currentUser,
+            ) === 'Contributor'
         ) {
             return (
                 <PopoutBox
@@ -942,27 +958,38 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderSharedNotesByList() {
-        const { lists, listInstances, annotationsCache } = this.props
+        const {
+            lists,
+            listInstances,
+            annotationsCache,
+            currentUser,
+        } = this.props
         const allLists = normalizedStateToArray(lists).filter(
             (listData) =>
                 listData.unifiedAnnotationIds.length > 0 ||
                 listData.hasRemoteAnnotationsToLoad ||
-                annotationsCache.pageListIds.has(listData.unifiedId),
+                annotationsCache.pageListIds
+                    .get(this.props.normalizedPageUrl)
+                    ?.has(listData.unifiedId), // TODO
         )
 
         if (allLists.length > 0) {
             let myLists = allLists.filter(
-                (list) => this.spaceOwnershipStatus(list) === 'Creator',
+                (list) =>
+                    cacheUtils.deriveListOwnershipStatus(list, currentUser) ===
+                    'Creator',
             )
 
             let followedLists = allLists.filter(
                 (list) =>
-                    this.spaceOwnershipStatus(list) === 'Follower' &&
-                    !list.isForeignList,
+                    cacheUtils.deriveListOwnershipStatus(list, currentUser) ===
+                        'Follower' && !list.isForeignList,
             )
 
             let joinedLists = allLists.filter(
-                (list) => this.spaceOwnershipStatus(list) === 'Contributor',
+                (list) =>
+                    cacheUtils.deriveListOwnershipStatus(list, currentUser) ===
+                    'Contributor',
             )
 
             return (
@@ -1116,10 +1143,13 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderFocusModeNotif(listData) {
+        const ownershipStatus = cacheUtils.deriveListOwnershipStatus(
+            listData,
+            this.props.currentUser,
+        )
         if (
             this.state.showIsolatedViewNotif &&
-            (this.spaceOwnershipStatus(listData) === 'Contributor' ||
-                this.spaceOwnershipStatus(listData) === 'Creator')
+            (ownershipStatus === 'Contributor' || ownershipStatus === 'Creator')
         ) {
             return (
                 <FocusModeNotifContainer>
@@ -1815,27 +1845,6 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private spaceOwnershipStatus(
-        listData: UnifiedList,
-    ): 'Creator' | 'Follower' | 'Contributor' {
-        if (listData.remoteId != null && listData.localId == null) {
-            return 'Follower'
-        }
-
-        if (listData.creator?.id === this.props.currentUser?.id) {
-            return 'Creator'
-        }
-
-        if (
-            listData.remoteId != null &&
-            listData.localId != null &&
-            listData.creator?.id !== this.props.currentUser?.id
-        ) {
-            return 'Contributor'
-        }
-
-        return undefined
-    }
     private throwNoSelectedListError() {
         throw new Error(
             'Isolated view specific render method called when state not set',
@@ -1852,7 +1861,10 @@ export class AnnotationsSidebar extends React.Component<
             this.props.selectedListId
         ]
 
-        const permissionStatus = this.spaceOwnershipStatus(selectedList)
+        const permissionStatus = cacheUtils.deriveListOwnershipStatus(
+            selectedList,
+            this.props.currentUser,
+        )
 
         if (permissionStatus === 'Follower' && !selectedList.isForeignList) {
             return (
@@ -2199,7 +2211,7 @@ const DropDownItem = styled.div<{ focused: boolean }>`
     color: ${(props) => props.theme.colors.greyScale7};
     justify-content: space-between;
     position: relative;
-
+    font-size: 14px;
     &:first-child {
         border-top: 1px solid ${(props) => props.theme.colors.greyScale1};
     }

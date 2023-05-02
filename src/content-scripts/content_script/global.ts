@@ -61,7 +61,7 @@ import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-ind
 import { runtime } from 'webextension-polyfill'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import { hydrateCache } from 'src/annotations/cache/utils'
+import { hydrateCacheForSidebar } from 'src/annotations/cache/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { UNDO_HISTORY } from 'src/constants'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
@@ -307,7 +307,7 @@ export async function main(
         : undefined
     const fullPageUrl = await pageInfo.getFullPageUrl()
     const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
-    const annotationsCache = new PageAnnotationsCache({ normalizedPageUrl })
+    const annotationsCache = new PageAnnotationsCache({})
     window['__annotationsCache'] = annotationsCache
 
     const pageHasBookark =
@@ -320,7 +320,7 @@ export async function main(
             .then((annotations) => annotations.length > 0))
     await bookmarks.setBookmarkStatusInBrowserIcon(pageHasBookark, fullPageUrl)
 
-    const loadCacheDataPromise = hydrateCache({
+    const loadCacheDataPromise = hydrateCacheForSidebar({
         fullPageUrl,
         user: currentUser,
         cache: annotationsCache,

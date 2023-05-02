@@ -1,68 +1,36 @@
-import { UIEvent } from 'ui-logic-core'
+import type { UIEvent } from 'ui-logic-core'
+import type { ListsSidebarSearchBarProps } from './components/search-bar'
+import type { TaskState } from 'ui-logic-core/lib/types'
+import type { UnifiedList } from 'src/annotations/cache/types'
+import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 
-import { ListsSidebarSearchBarProps } from './components/search-bar'
-import { ListsSidebarGroupProps } from './components/sidebar-group'
-import { TaskState } from 'ui-logic-core/lib/types'
+export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
+    lists: NormalizedState<UnifiedList & { wasPageDropped?: boolean }>
+    filteredListIds: UnifiedList['unifiedId'][]
+    areLocalListsExpanded: boolean
+    areFollowedListsExpanded: boolean
+    areJoinedListsExpanded: boolean
+    isAddListInputShown: boolean
+    spaceSidebarWidth: number
 
-export interface SidebarLockedState {
-    toggleSidebarLockedState(): void
+    inboxUnreadCount: number
+    dragOverListId?: string
+    editingListId?: string
+    selectedListId: string | null
+    showMoreMenuListId?: string
+    isSidebarToggleHovered?: boolean
+    hasFeedActivity: boolean
     isSidebarLocked: boolean
-}
-
-export interface SidebarPeekState {
-    setSidebarPeekState: (isPeeking: boolean) => () => void
     isSidebarPeeking: boolean
+    addListErrorMessage: string | null
+    editListErrorMessage: string | null
+
+    listLoadState: TaskState
+    listEditState: TaskState
+    listDeleteState: TaskState
+    listCreateState: TaskState
+    listShareLoadingState: TaskState
 }
-
-export interface ListData {
-    id: number
-    name: string
-    newName?: string
-    remoteId?: string
-    description?: string
-    isOwnedList?: boolean
-    isJoinedList?: boolean
-    wasPageDropped?: boolean
-}
-
-export interface ListGroupCommon
-    extends Pick<ListsSidebarGroupProps, 'loadingState'> {
-    isExpanded: boolean
-    allListIds: number[]
-    filteredListIds: number[] | null
-}
-
-export interface FollowedListGroup extends ListGroupCommon {}
-
-export interface LocalListGroup extends ListGroupCommon {
-    isAddInputShown: boolean
-}
-
-export type RootState = Pick<SidebarLockedState, 'isSidebarLocked'> &
-    Pick<SidebarPeekState, 'isSidebarPeeking'> &
-    Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
-        listData: { [id: number]: ListData }
-        followedLists: FollowedListGroup
-        localLists: LocalListGroup
-        joinedLists: ListGroupCommon
-        spaceSidebarWidth: number
-
-        inboxUnreadCount: number
-        dragOverListId?: number
-        editingListId?: number
-        selectedListId?: number
-        showMoreMenuListId?: number
-        isSidebarToggleHovered?: boolean
-        hasFeedActivity: boolean
-        addListErrorMessage: string | null
-        editListErrorMessage: string | null
-
-        listDeleteState: TaskState
-        listCreateState: TaskState
-        listEditState: TaskState
-        listShareLoadingState: TaskState
-        showFeed?: boolean
-    }
 
 export type Events = UIEvent<{
     setSidebarLocked: { isLocked: boolean }
@@ -74,29 +42,24 @@ export type Events = UIEvent<{
     cancelListCreate: null
     confirmListCreate: { value: string }
 
-    setLocalLists: { lists: ListData[] }
-    setFollowedLists: { lists: ListData[] }
     setLocalListsExpanded: { isExpanded: boolean }
     setFollowedListsExpanded: { isExpanded: boolean }
     setJoinedListsExpanded: { isExpanded: boolean }
 
-    changeListName: { value: string; listId?: number }
-    confirmListEdit: { value: string; listId?: number }
+    confirmListEdit: { value: string; listId: string }
     cancelListEdit: null
-    setDragOverListId: { listId?: number }
-    setEditingListId: { listId: number }
-    setSelectedListId: { listId: number }
-    setShowMoreMenuListId: { listId: number }
-    dropPageOnListItem: { listId: number; dataTransfer: DataTransfer }
-    shareList: { listId: number }
-    setListRemoteId: { localListId: number; remoteListId: string }
+    setDragOverListId: { listId?: string }
+    setEditingListId: { listId: string }
+    setSelectedListId: { listId: string }
+    setShowMoreMenuListId: { listId: string }
+    dropPageOnListItem: { listId: string; dataTransfer: DataTransfer }
+    shareList: { listId: string }
+    setListRemoteId: { listId: string; remoteListId: string }
 
     confirmListDelete: null
     cancelListDelete: null
 
     updateSelectedListDescription: { description: string }
-
-    clickFeedActivityIndicator: null
     switchToFeed: null
 }>
 

@@ -165,9 +165,9 @@ describe('Dashboard search filters logic', () => {
         device,
     }) => {
         const { searchResults } = await setupTest(device)
-        const dateValue = 'test'
+        const dateValue = 'today'
 
-        expect(searchResults.state.searchFilters.dateFromInput).toEqual('')
+        expect(searchResults.state.searchFilters.dateFromInput).toEqual(null)
         await searchResults.processEvent('setDateFromInputValue', {
             value: dateValue,
         })
@@ -180,9 +180,9 @@ describe('Dashboard search filters logic', () => {
         device,
     }) => {
         const { searchResults } = await setupTest(device)
-        const dateValue = 'test'
+        const dateValue = 'today'
 
-        expect(searchResults.state.searchFilters.dateToInput).toEqual('')
+        expect(searchResults.state.searchFilters.dateToInput).toEqual(null)
         await searchResults.processEvent('setDateToInputValue', {
             value: dateValue,
         })
