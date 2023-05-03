@@ -141,6 +141,9 @@ export default class RibbonContainer extends StatefulUIElement<
                 toggleRemoveMenu={() => {
                     this.processEvent('toggleRemoveMenu', null)
                 }}
+                toggleAskAI={() => {
+                    this.processEvent('toggleAskAI', null)
+                }}
                 toggleShowTutorial={() => {
                     this.processEvent('toggleShowTutorial', null)
                 }}
@@ -283,6 +286,9 @@ export default class RibbonContainer extends StatefulUIElement<
                     ...this.state.pausing,
                     handlePauseToggle: () =>
                         this.processEvent('handlePauseToggle', null),
+                }}
+                openPDFinViewer={() => {
+                    this.processEvent('openPDFinViewer', null)
                 }}
             />
         )

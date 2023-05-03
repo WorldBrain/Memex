@@ -287,7 +287,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                 },
                                 {
                                     icon: 'globe',
-                                    title: 'Public',
+                                    title: 'Auto-Shared',
                                     hasProtectedOption: true,
                                     onClick: this.handleSetShared,
                                     isSelected: this.props.isShared,

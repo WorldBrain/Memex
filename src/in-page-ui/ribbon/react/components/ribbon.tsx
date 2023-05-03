@@ -54,6 +54,8 @@ export interface Props extends RibbonSubcomponentProps {
     hideOnMouseLeave?: boolean
     toggleFeed: () => void
     showFeed: boolean
+    toggleAskAI: () => void
+    openPDFinViewer: () => void
 }
 
 interface State {
@@ -1006,6 +1008,65 @@ export default class Ribbon extends Component<Props, State> {
                                                 filePath={icons.searchIcon}
                                             />
                                         </TooltipBox>
+                                        {!this.props.sidebar.isSidebarOpen && (
+                                            <TooltipBox
+                                                tooltipText={this.getTooltipText(
+                                                    'askAI',
+                                                )}
+                                                placement={'left'}
+                                                offsetX={10}
+                                            >
+                                                <Icon
+                                                    onClick={() =>
+                                                        this.props.toggleAskAI()
+                                                    }
+                                                    color={'greyScale6'}
+                                                    heightAndWidth="20px"
+                                                    filePath={icons.stars}
+                                                />
+                                            </TooltipBox>
+                                        )}
+                                        {window.location.href.includes(
+                                            '.pdf',
+                                        ) &&
+                                            !window.location.href.includes(
+                                                'pdfjs/viewer.html?',
+                                            ) && (
+                                                <TooltipBox
+                                                    tooltipText={
+                                                        'Open PDF Reader'
+                                                    }
+                                                    placement={'left'}
+                                                    offsetX={10}
+                                                >
+                                                    <Icon
+                                                        onClick={() =>
+                                                            this.props.openPDFinViewer()
+                                                        }
+                                                        color={'greyScale6'}
+                                                        heightAndWidth="20px"
+                                                        filePath={icons.filePDF}
+                                                    />
+                                                </TooltipBox>
+                                            )}
+                                        {window.location.href.includes(
+                                            'pdfjs/viewer.html?',
+                                        ) && (
+                                            <TooltipBox
+                                                tooltipText={'Close PDF Reader'}
+                                                placement={'left'}
+                                                offsetX={10}
+                                            >
+                                                <Icon
+                                                    onClick={() =>
+                                                        this.props.openPDFinViewer()
+                                                    }
+                                                    color={'prime1'}
+                                                    heightAndWidth="20px"
+                                                    filePath={icons.filePDF}
+                                                />
+                                            </TooltipBox>
+                                        )}
                                     </PageAction>
                                 </UpperPart>
                                 {!this.props.sidebar.isSidebarOpen && (

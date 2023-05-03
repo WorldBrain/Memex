@@ -1631,11 +1631,10 @@ export class SidebarContainerLogic extends UILogic<
             },
         })
 
-        let isPagePDF = window.location.href.includes(
-            '/pdfjs/viewer.html?file=blob',
-        )
+        let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
         let fullTextToProcess
         if (isPagePDF) {
+            console.log('is pdf', document.body.innerText)
             fullTextToProcess = document.body.innerText
         }
 

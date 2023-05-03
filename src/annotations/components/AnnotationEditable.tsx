@@ -584,8 +584,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     <span>Shared in some Spaces</span>
                                 ) : (
                                     <span>
-                                        Shared in all Spaces <br /> you put the
-                                        page into
+                                        Automatically added to all <i>shared</i>{' '}
+                                        Spaces <br /> you put the page into
                                     </span>
                                 )
                             }
