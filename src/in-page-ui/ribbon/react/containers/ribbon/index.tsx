@@ -287,6 +287,9 @@ export default class RibbonContainer extends StatefulUIElement<
                     handlePauseToggle: () =>
                         this.processEvent('handlePauseToggle', null),
                 }}
+                openPDFinViewer={() => {
+                    this.processEvent('openPDFinViewer', null)
+                }}
             />
         )
     }

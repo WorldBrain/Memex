@@ -14,9 +14,11 @@ import { FocusableComponent } from 'src/annotations/components/types'
 import { Analytics } from 'src/analytics'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import browser from 'webextension-polyfill'
-import { Storage } from 'webextension-polyfill-ts'
+import { Runtime, Storage, Tabs } from 'webextension-polyfill-ts'
 import { pageActionAllowed } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
+import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
+import { PDFRemoteInterface } from 'src/pdf/background/types'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -74,6 +76,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleFeed: null
         toggleReadingView: null
         toggleAskAI: null
+        openPDFinViewer: null
         hydrateStateFromDB: { url: string }
     } & SubcomponentHandlers<'highlights'> &
         SubcomponentHandlers<'tooltip'> &
@@ -276,10 +279,44 @@ export class RibbonContainerLogic extends UILogic<
         }
     }
     toggleAskAI: EventHandler<'toggleAskAI'> = async ({ previousState }) => {
-        console.log('toggle')
         await this.dependencies.inPageUI.showSidebar({
             action: 'show_page_summary',
         })
+    }
+
+    openPDFinViewer: EventHandler<'openPDFinViewer'> = async ({
+        previousState,
+    }) => {
+        let url
+        if (window.location.href.includes('pdfjs/viewer.html?')) {
+            url = decodeURIComponent(window.location.href.split('?file=')[1])
+            window.open(url, '_self')
+        } else {
+            this.dependencies.openPDFinViewer(window.location.href)
+        }
+
+        // const { runtimeAPI, tabsAPI, pdfIntegrationBG } = this.dependencies
+        // const currentPageUrl = window.location.href
+        // const [currentTab] = await tabsAPI.query({
+        //     active: true,
+        //     currentWindow: true,
+        // })
+
+        // let nextPageUrl: string
+        // if (isUrlPDFViewerUrl(currentPageUrl, { runtimeAPI })) {
+        //     nextPageUrl = decodeURIComponent(
+        //         currentPageUrl.split('?file=')[1].toString(),
+        //     )
+        //     await pdfIntegrationBG.doNotOpenPdfViewerForNextPdf()
+        // } else {
+        //     nextPageUrl = constructPDFViewerUrl(currentPageUrl, {
+        //         runtimeAPI,
+        //     })
+        //     await pdfIntegrationBG.openPdfViewerForNextPdf()
+        // }
+
+        // await tabsAPI.update(currentTab.id, { url: nextPageUrl })
+        // // this.emitMutation({ currentPageUrl: { $set: nextPageUrl } })
     }
 
     setReadingWidth = async () => {

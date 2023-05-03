@@ -496,6 +496,11 @@ export async function main(
                     setState: tooltipUtils.setHighlightsState,
                 },
                 getFullPageUrl: pageInfo.getFullPageUrl,
+                openPDFinViewer: async (originalPageURL) => {
+                    await contentScriptsBG.openPdfInViewer({
+                        fullPdfUrl: originalPageURL,
+                    })
+                },
             })
             components.ribbon?.resolve()
         },
