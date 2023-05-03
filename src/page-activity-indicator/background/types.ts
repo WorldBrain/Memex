@@ -1,7 +1,9 @@
+import type { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export interface FollowedList {
     name: string
+    type?: SharedCollectionType
     creator: AutoPk
     platform?: string
     lastSync?: number

@@ -102,6 +102,7 @@ export default class PageActivityIndicatorStorage extends StorageModule {
     async createFollowedList(data: FollowedList): Promise<AutoPk> {
         const { object } = await this.operation('createFollowedList', {
             name: data.name,
+            type: data.type,
             creator: data.creator,
             lastSync: data.lastSync,
             platform: data.platform,

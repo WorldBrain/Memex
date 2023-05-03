@@ -1,3 +1,4 @@
+import type { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import type {
     SharedList,
     SharedListEntry,
@@ -10,6 +11,7 @@ export const sharedListToFollowedList = (
     extra?: { lastSync?: number },
 ): FollowedList => ({
     name: sharedList.title,
+    type: sharedList.type as SharedCollectionType,
     sharedList: sharedList.id,
     creator: sharedList.creator,
     platform: sharedList.platform,

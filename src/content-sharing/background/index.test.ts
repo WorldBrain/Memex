@@ -2366,6 +2366,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         sharedList: sharedListDataA[0].id,
+                                        type: 'page-link',
                                         user: userId,
                                         createdByDevice: null,
                                         createdWhen: expect.anything(),
@@ -2395,6 +2396,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         {
                                             id: expect.anything(), // TODO: Can we predict this?
                                             name: listTitle,
+                                            type: 'page-link',
                                             isDeletable: true,
                                             isNestable: true,
                                             createdAt: expect.anything()
@@ -2419,6 +2421,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             sharedList: sharedListDataA[0].id,
                                             creator: userId,
                                             name: listTitle,
+                                            type: 'page-link',
                                             lastSync: expect.anything(),
                                         }
                                     ])
