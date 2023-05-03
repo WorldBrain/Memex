@@ -39,9 +39,15 @@ export interface RemotePageActivityIndicatorInterface {
     ) => Promise<{
         [remoteListId: string]: Pick<
             FollowedList,
-            'sharedList' | 'creator' | 'name'
+            'sharedList' | 'creator' | 'name' | 'type'
         > &
             Pick<FollowedListEntry, 'hasAnnotationsFromOthers'>
+    }>
+    getEntriesForFollowedLists: (
+        followedListIds: string[],
+        opts?: { sortAscByCreationTime?: boolean },
+    ) => Promise<{
+        [followedListId: string]: FollowedListEntry[]
     }>
     getPageActivityStatus: (
         fullPageUrl: string,

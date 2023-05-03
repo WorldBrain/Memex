@@ -211,28 +211,28 @@ interface CacheHydratorDeps {
 }
 
 // NOTE: this is tested as part of the sidebar logic tests
-export async function hydrateCacheForSidebar({
-    bgModules,
-    ...args
-}: CacheHydratorDeps & {
-    fullPageUrl: string
-}): Promise<void> {
-    const localListsData = await bgModules.customLists.fetchAllLists({})
-    const remoteListIds = await bgModules.contentSharing.getRemoteListIds({
+export async function hydrateCacheForSidebar(
+    args: CacheHydratorDeps & {
+        fullPageUrl: string
+    },
+): Promise<void> {
+    const localListsData = await args.bgModules.customLists.fetchAllLists({})
+    const remoteListIds = await args.bgModules.contentSharing.getRemoteListIds({
         localListIds: localListsData.map((list) => list.id),
     })
-    const followedListsData = await bgModules.pageActivityIndicator.getPageFollowedLists(
+    const followedListsData = await args.bgModules.pageActivityIndicator.getPageFollowedLists(
         args.fullPageUrl,
         Object.values(remoteListIds),
     )
-    hydrateCacheLists({
+
+    await hydrateCacheLists({
         remoteListIds,
         localListsData,
         followedListsData,
         ...args,
     })
 
-    const annotationsData = await bgModules.annotations.listAnnotationsByPageUrl(
+    const annotationsData = await args.bgModules.annotations.listAnnotationsByPageUrl(
         {
             pageUrl: args.fullPageUrl,
             withLists: true,
@@ -240,14 +240,14 @@ export async function hydrateCacheForSidebar({
     )
 
     const annotationUrls = annotationsData.map((annot) => annot.url)
-    const privacyLvlsByAnnot = await bgModules.contentSharing.findAnnotationPrivacyLevels(
+    const privacyLvlsByAnnot = await args.bgModules.contentSharing.findAnnotationPrivacyLevels(
         { annotationUrls },
     )
-    const remoteIdsByAnnot = await bgModules.contentSharing.getRemoteAnnotationIds(
+    const remoteIdsByAnnot = await args.bgModules.contentSharing.getRemoteAnnotationIds(
         { annotationUrls },
     )
 
-    const pageLocalListIds = await bgModules.customLists.fetchPageLists({
+    const pageLocalListIds = await args.bgModules.customLists.fetchPageLists({
         url: args.fullPageUrl,
     })
 
@@ -290,20 +290,19 @@ export async function hydrateCacheForSidebar({
     )
 }
 
-export async function hydrateCacheForDashboard({
-    bgModules,
-    ...args
-}: CacheHydratorDeps): Promise<void> {
-    const localListsData = await bgModules.customLists.fetchAllLists({
+export async function hydrateCacheForDashboard(
+    args: CacheHydratorDeps,
+): Promise<void> {
+    const localListsData = await args.bgModules.customLists.fetchAllLists({
         includeDescriptions: true,
         skipSpecialLists: true,
     })
-    const remoteListIds = await bgModules.contentSharing.getRemoteListIds({
+    const remoteListIds = await args.bgModules.contentSharing.getRemoteListIds({
         localListIds: localListsData.map((list) => list.id),
     })
-    const followedListsData = await bgModules.pageActivityIndicator.getAllFollowedLists()
+    const followedListsData = await args.bgModules.pageActivityIndicator.getAllFollowedLists()
 
-    hydrateCacheLists({
+    await hydrateCacheLists({
         remoteListIds,
         localListsData,
         followedListsData,
@@ -311,25 +310,60 @@ export async function hydrateCacheForDashboard({
     })
 }
 
-function hydrateCacheLists(
+async function hydrateCacheLists(
     args: {
         localListsData: PageList[]
         remoteListIds: { [localListId: number]: string }
         followedListsData: {
             [remoteListId: string]: Pick<
                 FollowedList,
-                'sharedList' | 'creator' | 'name'
+                'sharedList' | 'creator' | 'name' | 'type'
             > &
                 Partial<Pick<FollowedListEntry, 'hasAnnotationsFromOthers'>>
         }
-    } & Omit<CacheHydratorDeps, 'bgModules'>,
-): void {
+    } & CacheHydratorDeps,
+): Promise<void> {
+    // Get all the IDs of page link lists
+    const pageLinkListIds = new Set<string>()
+    for (const list of Object.values(args.followedListsData)) {
+        if (list.type === 'page-link') {
+            pageLinkListIds.add(list.sharedList.toString())
+        }
+    }
+    for (const list of args.localListsData) {
+        const remoteId = args.remoteListIds[list.id]
+        if (remoteId != null && list.type === 'page-link') {
+            pageLinkListIds.add(remoteId)
+        }
+    }
+
+    // Look up the shared list entry IDs for all the page link lists to be able to get them to the cache
+    const sharedListEntryIdMap = new Map<string, string>()
+    if (pageLinkListIds.size) {
+        const followedEntriesByList = await args.bgModules.pageActivityIndicator.getEntriesForFollowedLists(
+            [...pageLinkListIds],
+            { sortAscByCreationTime: true },
+        )
+        for (const entries of Object.values(followedEntriesByList)) {
+            if (entries.length) {
+                sharedListEntryIdMap.set(
+                    entries[0].followedList.toString(),
+                    entries[0].sharedListEntry.toString(),
+                )
+            }
+        }
+    }
+
     const seenFollowedLists = new Set<AutoPk>()
 
     const listsToCache = args.localListsData.map((list) => {
         let creator = args.user
         let hasRemoteAnnotations = false
         const remoteId = args.remoteListIds[list.id]
+        const sharedListEntryId =
+            list.type === 'page-link'
+                ? sharedListEntryIdMap.get(remoteId) ?? undefined
+                : undefined
         if (remoteId != null && args.followedListsData[remoteId]) {
             seenFollowedLists.add(args.followedListsData[remoteId].sharedList)
             hasRemoteAnnotations =
@@ -342,6 +376,7 @@ function hydrateCacheLists(
         return reshapeLocalListForCache(list, {
             hasRemoteAnnotations,
             extraData: {
+                sharedListEntryId,
                 remoteId,
                 creator,
             },
@@ -351,13 +386,21 @@ function hydrateCacheLists(
     // Ensure we cover any followed-only lists (lists with no local data)
     Object.values(args.followedListsData)
         .filter((list) => !seenFollowedLists.has(list.sharedList))
-        .forEach((list) =>
+        .forEach((list) => {
+            const sharedListEntryId =
+                list.type === 'page-link'
+                    ? sharedListEntryIdMap.get(list.sharedList.toString()) ??
+                      undefined
+                    : undefined
             listsToCache.push(
                 reshapeFollowedListForCache(list, {
                     hasRemoteAnnotations: list.hasAnnotationsFromOthers,
+                    extraData: {
+                        sharedListEntryId,
+                    },
                 }),
-            ),
-        )
+            )
+        })
 
     args.cache.setLists(listsToCache)
 }

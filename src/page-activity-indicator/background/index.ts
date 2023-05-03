@@ -52,6 +52,7 @@ export class PageActivityIndicatorBackground {
             getAllFollowedLists: this.getAllFollowedLists,
             getPageFollowedLists: this.getPageFollowedLists,
             getPageActivityStatus: this.getPageActivityStatus,
+            getEntriesForFollowedLists: this.getEntriesForFollowedLists,
         }
     }
 
@@ -177,6 +178,7 @@ export class PageActivityIndicatorBackground {
                     sharedList: list.sharedList,
                     creator: list.creator,
                     name: list.name,
+                    type: list.type,
                 },
             ]),
         )
@@ -198,6 +200,12 @@ export class PageActivityIndicatorBackground {
         )
             ? 'has-annotations'
             : 'no-annotations'
+    }
+
+    private getEntriesForFollowedLists: RemotePageActivityIndicatorInterface['getEntriesForFollowedLists'] = async (
+        followedListIds,
+    ) => {
+        return this.storage.findFollowedListEntriesForLists(followedListIds)
     }
 
     private async getCurrentUser(): Promise<UserReference | null> {

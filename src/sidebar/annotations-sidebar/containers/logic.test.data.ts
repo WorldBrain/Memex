@@ -413,6 +413,7 @@ export const FOLLOWED_LISTS: FollowedList[] = [
         creator: CREATOR_2.id,
         name: 'followed-only page link list',
         lastSync: new Date('2023-05-02').getTime(),
+        type: SharedCollectionType.PageLink,
     },
 ]
 

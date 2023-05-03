@@ -40,6 +40,14 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                     operation: 'findObjects',
                     args: { normalizedPageUrl: '$normalizedPageUrl:string' },
                 },
+                findFollowedListEntriesForLists: {
+                    collection: 'followedListEntry',
+                    operation: 'findObjects',
+                    args: [
+                        { followedList: { $in: '$followedLists:string[]' } },
+                        { order: [['createdWhen', 'asc']] },
+                    ],
+                },
                 updateFollowedListLastSyncTime: {
                     collection: 'followedList',
                     operation: 'updateObject',
@@ -178,6 +186,31 @@ export default class PageActivityIndicatorStorage extends StorageModule {
         )
 
         return followedListEntries
+    }
+
+    async findFollowedListEntriesForLists(
+        followedLists: string[],
+    ): Promise<{
+        [followedListId: string]: FollowedListEntry[]
+    }> {
+        let listEntries: FollowedListEntry[] = await this.operation(
+            'findFollowedListEntriesForLists',
+            {
+                followedLists,
+            },
+        )
+        // Sort in ascending order by created time
+        listEntries = listEntries.sort((a, b) => a.createdWhen - b.createdWhen)
+
+        const entriesLookup: {
+            [followedListId: string]: FollowedListEntry[]
+        } = {}
+        for (const entry of listEntries) {
+            const entries = entriesLookup[entry.followedList] ?? []
+            entries.push(entry)
+            entriesLookup[entry.followedList] = entries
+        }
+        return entriesLookup
     }
 
     async updateFollowedListLastSync(
