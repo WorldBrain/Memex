@@ -54,6 +54,7 @@ export interface Props extends RibbonSubcomponentProps {
     hideOnMouseLeave?: boolean
     toggleFeed: () => void
     showFeed: boolean
+    toggleAskAI: () => void
 }
 
 interface State {
@@ -1006,6 +1007,24 @@ export default class Ribbon extends Component<Props, State> {
                                                 filePath={icons.searchIcon}
                                             />
                                         </TooltipBox>
+                                        {!this.props.sidebar.isSidebarOpen && (
+                                            <TooltipBox
+                                                tooltipText={this.getTooltipText(
+                                                    'askAI',
+                                                )}
+                                                placement={'left'}
+                                                offsetX={10}
+                                            >
+                                                <Icon
+                                                    onClick={() =>
+                                                        this.props.toggleAskAI()
+                                                    }
+                                                    color={'greyScale6'}
+                                                    heightAndWidth="20px"
+                                                    filePath={icons.stars}
+                                                />
+                                            </TooltipBox>
+                                        )}
                                     </PageAction>
                                 </UpperPart>
                                 {!this.props.sidebar.isSidebarOpen && (

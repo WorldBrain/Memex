@@ -192,7 +192,7 @@ export default class ListShareMenu extends React.Component<Props, State> {
                 }
                 privacyOptions={[
                     {
-                        title: 'Public',
+                        title: 'Auto-Shared',
                         shortcut: `shift+${ListShareMenu.MOD_KEY}+enter`,
                         description:
                             'Auto-added to Spaces the page is shared to',

@@ -73,6 +73,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleShowTutorial: null
         toggleFeed: null
         toggleReadingView: null
+        toggleAskAI: null
         hydrateStateFromDB: { url: string }
     } & SubcomponentHandlers<'highlights'> &
         SubcomponentHandlers<'tooltip'> &
@@ -273,6 +274,12 @@ export class RibbonContainerLogic extends UILogic<
         } else {
             this.setReadingWidth()
         }
+    }
+    toggleAskAI: EventHandler<'toggleAskAI'> = async ({ previousState }) => {
+        console.log('toggle')
+        await this.dependencies.inPageUI.showSidebar({
+            action: 'show_page_summary',
+        })
     }
 
     setReadingWidth = async () => {

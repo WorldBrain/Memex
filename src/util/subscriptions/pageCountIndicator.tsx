@@ -143,7 +143,7 @@ export class BlockCounterIndicator extends React.Component {
                                 />
                                 Bookmark, annotate or add a page to a Space
                             </InfoTooltipContentSubAreaBulletPoint>
-                            <InfoTooltipContentSubAreaBulletPoint>
+                            {/* <InfoTooltipContentSubAreaBulletPoint>
                                 <Icon
                                     icon="bulletPoint"
                                     heightAndWidth="16px"
@@ -151,8 +151,8 @@ export class BlockCounterIndicator extends React.Component {
                                     color="prime1"
                                 />
                                 Summarise a page or a piece of text
-                            </InfoTooltipContentSubAreaBulletPoint>
-                            <InfoTooltipContentSubAreaBulletPoint>
+                            </InfoTooltipContentSubAreaBulletPoint> */}
+                            {/* <InfoTooltipContentSubAreaBulletPoint>
                                 <Icon
                                     icon="bulletPoint"
                                     heightAndWidth="16px"
@@ -160,7 +160,7 @@ export class BlockCounterIndicator extends React.Component {
                                     color="prime1"
                                 />
                                 Open the Twitter references of a page
-                            </InfoTooltipContentSubAreaBulletPoint>
+                            </InfoTooltipContentSubAreaBulletPoint> */}
                         </InfoTooltipContentSubArea>
                         <InfoTooltipContentSubArea>
                             <InfoTooltipContentSubAreaTitle>

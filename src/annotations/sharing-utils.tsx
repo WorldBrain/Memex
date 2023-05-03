@@ -16,10 +16,10 @@ export function getShareButtonData(
     if (isShared && isBulkShareProtected) {
         return {
             icon: 'lock',
-            label: 'Public',
+            label: 'Auto-Shared',
         }
     } else if (isShared && !isBulkShareProtected) {
-        return { icon: 'globe', label: 'Public' }
+        return { icon: 'globe', label: 'Auto-Shared' }
     } else if (!isShared && isBulkShareProtected) {
         return {
             icon: 'lock',
