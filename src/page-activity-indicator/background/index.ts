@@ -289,8 +289,18 @@ export class PageActivityIndicatorBackground {
 
         for (const sharedList of sharedLists) {
             if (!existingFollowedListsLookup.get(sharedList.id)) {
-                await this.storage.createFollowedList(
-                    sharedListToFollowedList(sharedList),
+                const data = sharedListToFollowedList(sharedList)
+                await this.deps.storageManager.backend.operation(
+                    'createObject',
+                    'followedList',
+                    {
+                        name: data.name,
+                        type: data.type,
+                        creator: data.creator,
+                        lastSync: data.lastSync,
+                        platform: data.platform,
+                        sharedList: data.sharedList,
+                    },
                 )
             }
         }
@@ -356,15 +366,29 @@ export class PageActivityIndicatorBackground {
                 )
 
                 if (!localFollowedListEntry) {
-                    await this.storage.createFollowedListEntry(
-                        sharedListEntryToFollowedListEntry(
-                            {
-                                ...entry,
-                                creator: entry.creator.id,
-                                sharedList: entry.sharedList.id,
-                            },
-                            { hasAnnotationsFromOthers },
-                        ),
+                    const data = sharedListEntryToFollowedListEntry(
+                        {
+                            ...entry,
+                            id: entry.reference.id,
+                            creator: entry.creator.id,
+                            sharedList: entry.sharedList.id,
+                        },
+                        { hasAnnotationsFromOthers },
+                    )
+                    await this.deps.storageManager.backend.operation(
+                        'createObject',
+                        'followedListEntry',
+                        {
+                            creator: data.creator,
+                            entryTitle: data.entryTitle,
+                            followedList: data.followedList,
+                            sharedListEntry: data.sharedListEntry,
+                            normalizedPageUrl: data.normalizedPageUrl,
+                            hasAnnotationsFromOthers:
+                                data.hasAnnotationsFromOthers ?? false,
+                            createdWhen: data.createdWhen ?? Date.now(),
+                            updatedWhen: data.updatedWhen ?? Date.now(),
+                        },
                     )
                 } else if (
                     localFollowedListEntry.hasAnnotationsFromOthers !==
