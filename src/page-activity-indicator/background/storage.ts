@@ -127,8 +127,9 @@ export default class PageActivityIndicatorStorage extends StorageModule {
             creator: data.creator,
             entryTitle: data.entryTitle,
             followedList: data.followedList,
-            hasAnnotationsFromOthers: data.hasAnnotationsFromOthers ?? false,
+            sharedListEntry: data.sharedListEntry,
             normalizedPageUrl: data.normalizedPageUrl,
+            hasAnnotationsFromOthers: data.hasAnnotationsFromOthers ?? false,
             createdWhen: data.createdWhen ?? Date.now(),
             updatedWhen: data.updatedWhen ?? Date.now(),
         })

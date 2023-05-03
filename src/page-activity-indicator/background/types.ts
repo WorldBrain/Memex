@@ -14,6 +14,7 @@ export interface FollowedListEntry {
     creator: AutoPk
     entryTitle: string
     followedList: AutoPk
+    sharedListEntry: AutoPk
     hasAnnotationsFromOthers: boolean
     normalizedPageUrl: string
     createdWhen: number

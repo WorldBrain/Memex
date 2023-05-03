@@ -19,10 +19,15 @@ export const sharedListToFollowedList = (
 })
 
 export const sharedListEntryToFollowedListEntry = (
-    entry: SharedListEntry & { creator: AutoPk; sharedList: AutoPk },
+    entry: SharedListEntry & {
+        id: AutoPk
+        creator: AutoPk
+        sharedList: AutoPk
+    },
     extra?: { id?: AutoPk; hasAnnotationsFromOthers?: boolean },
 ): FollowedListEntry & { id?: AutoPk } => ({
     id: extra?.id,
+    sharedListEntry: entry.id,
     followedList: entry.sharedList,
     createdWhen: entry.createdWhen,
     updatedWhen: entry.updatedWhen,

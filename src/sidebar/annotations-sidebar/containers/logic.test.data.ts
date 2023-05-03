@@ -418,6 +418,7 @@ export const FOLLOWED_LISTS: FollowedList[] = [
 
 export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
     {
+        sharedListEntry: 'shared-list-entry-id-1',
         hasAnnotationsFromOthers: false,
         creator: CREATOR_1.id,
         entryTitle: TAB_TITLE_1,
@@ -427,6 +428,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2022-12-22').getTime(),
     },
     {
+        sharedListEntry: 'shared-list-entry-id-2',
         hasAnnotationsFromOthers: true,
         creator: CREATOR_2.id,
         entryTitle: TAB_TITLE_2,
@@ -436,6 +438,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2022-12-22').getTime(),
     },
     {
+        sharedListEntry: 'shared-list-entry-id-3',
         hasAnnotationsFromOthers: true,
         creator: CREATOR_2.id,
         entryTitle: TAB_TITLE_1,
@@ -445,6 +448,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2022-12-22').getTime(),
     },
     {
+        sharedListEntry: 'shared-list-entry-id-4',
         hasAnnotationsFromOthers: false,
         creator: CREATOR_1.id,
         entryTitle: TAB_TITLE_2,
@@ -454,6 +458,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2022-12-22').getTime(),
     },
     {
+        sharedListEntry: 'shared-list-entry-id-5',
         hasAnnotationsFromOthers: true,
         creator: CREATOR_1.id,
         entryTitle: TAB_TITLE_1,
@@ -463,6 +468,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2022-12-22').getTime(),
     },
     {
+        sharedListEntry: 'shared-list-entry-id-6',
         hasAnnotationsFromOthers: false,
         creator: CREATOR_1.id,
         entryTitle: TAB_TITLE_1,
@@ -472,6 +478,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2023-05-01').getTime(),
     },
     {
+        sharedListEntry: 'shared-list-entry-id-7',
         hasAnnotationsFromOthers: true,
         creator: CREATOR_2.id,
         entryTitle: TAB_TITLE_1,
