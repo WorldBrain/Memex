@@ -87,33 +87,39 @@ describe('Dashboard lists sidebar logic', () => {
     it('should be able to set selected list to filter in search', async ({
         device,
     }) => {
-        const { searchResults } = await setupTest(device, {
+        const { searchResults, annotationsCache } = await setupTest(device, {
             overrideSearchTrigger: true,
+            runInitLogic: true,
         })
+        await searchResults.processEvent('confirmListCreate', { value: 'test' })
+        const listData = normalizedStateToArray(annotationsCache.lists)[0]
 
         expect(searchResults.state.listsSidebar.selectedListId).toEqual(null)
-        expect(searchResults.logic['searchTriggeredCount']).toBe(0)
-
-        await searchResults.processEvent('setSelectedListId', { listId: '123' })
-
-        expect(searchResults.state.listsSidebar.selectedListId).toEqual('123')
         expect(searchResults.logic['searchTriggeredCount']).toBe(1)
 
-        await searchResults.processEvent('setSelectedListId', { listId: '123' })
+        await searchResults.processEvent('setSelectedListId', {
+            listId: listData.unifiedId,
+        })
 
         expect(searchResults.state.listsSidebar.selectedListId).toEqual(
-            undefined,
+            listData.unifiedId,
         )
         expect(searchResults.logic['searchTriggeredCount']).toBe(2)
 
-        await searchResults.processEvent('setSelectedListId', { listId: '123' })
+        await searchResults.processEvent('setSelectedListId', {
+            listId: listData.unifiedId,
+        })
 
-        expect(searchResults.state.listsSidebar.selectedListId).toEqual('123')
+        expect(searchResults.state.listsSidebar.selectedListId).toEqual(null)
         expect(searchResults.logic['searchTriggeredCount']).toBe(3)
 
-        await searchResults.processEvent('setSelectedListId', { listId: '1' })
+        await searchResults.processEvent('setSelectedListId', {
+            listId: listData.unifiedId,
+        })
 
-        expect(searchResults.state.listsSidebar.selectedListId).toEqual('1')
+        expect(searchResults.state.listsSidebar.selectedListId).toEqual(
+            listData.unifiedId,
+        )
         expect(searchResults.logic['searchTriggeredCount']).toBe(4)
     })
 
