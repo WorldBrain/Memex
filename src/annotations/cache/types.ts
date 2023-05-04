@@ -40,8 +40,8 @@ export interface PageAnnotationsCacheInterface {
         annotation: UnifiedAnnotationForCache,
         opts?: { now?: number },
     ) => { unifiedId: UnifiedAnnotation['unifiedId'] }
-    addList: (
-        list: UnifiedListForCache,
+    addList: <T extends UnifiedListType>(
+        list: UnifiedListForCache<T>,
     ) => { unifiedId: UnifiedList['unifiedId'] }
     updateAnnotation: (
         updates: Pick<
@@ -143,4 +143,6 @@ export type UnifiedList<
       }
     : CoreUnifiedList<T>
 
-export type UnifiedListForCache = Omit<UnifiedList, 'unifiedId'>
+export type UnifiedListForCache<
+    T extends UnifiedListType = UnifiedListType
+> = Omit<UnifiedList<T>, 'unifiedId'>

@@ -34,6 +34,11 @@ import type {
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
+import { createPageLinkListTitle } from 'src/content-sharing/utils'
+import type {
+    SharedList,
+    SharedListEntry,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -304,8 +309,89 @@ describe('SidebarContainerLogic', () => {
             ])
         })
 
-        it('should not reset annotation card instance states when annotations state changes', async () => {
-            expect(1).toBe(2)
+        it('should be able to create page links for the current page', async ({
+            device,
+        }) => {
+            const fullPageUrl = 'https://memex.garden'
+            const normalizedPageUrl = 'memex.garden'
+            const listName = createPageLinkListTitle()
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+                withAuth: true,
+                skipTestData: true,
+                fullPageUrl,
+            })
+
+            const serverStorage = await device.getServerStorage()
+            const [
+                sharedListsBefore,
+                sharedListEntriesBefore,
+            ] = await Promise.all([
+                serverStorage.manager
+                    .collection('sharedList')
+                    .findAllObjects({}),
+                serverStorage.manager
+                    .collection('sharedListEntry')
+                    .findAllObjects({}),
+            ])
+
+            expect(sharedListsBefore).toEqual([])
+            expect(sharedListEntriesBefore).toEqual([])
+            expect(sidebar.state.pageLinkCreateState).toEqual('pristine')
+            expect(annotationsCache.lists.byId).toEqual(
+                initNormalizedState().byId,
+            )
+
+            await sidebar.processEvent('createPageLink', null)
+            const [
+                sharedListsAfter,
+                sharedListEntriesAfter,
+            ] = (await Promise.all([
+                serverStorage.manager
+                    .collection('sharedList')
+                    .findAllObjects({}),
+                serverStorage.manager
+                    .collection('sharedListEntry')
+                    .findAllObjects({}),
+            ])) as [
+                SharedList & { id: string }[],
+                SharedListEntry & { id: string }[],
+            ]
+
+            expect(sharedListsAfter).toEqual([
+                expect.objectContaining({
+                    title: listName,
+                    type: 'page-link',
+                    creator: TEST_USER.id,
+                }),
+            ])
+            expect(sharedListEntriesAfter).toEqual([
+                expect.objectContaining({
+                    originalUrl: fullPageUrl,
+                    normalizedUrl: normalizedPageUrl,
+                    creator: TEST_USER.id,
+                    sharedList: sharedListsAfter[0].id,
+                }),
+            ])
+            expect(sidebar.state.pageLinkCreateState).toEqual('success')
+            expect(annotationsCache.lists.byId).toEqual({
+                [annotationsCache.lists.allIds[0]]: {
+                    unifiedId: expect.anything(),
+                    type: 'page-link',
+                    name: listName,
+                    pageTitle: listName, // TODO: Get the actual page title - maybe just query the DB using URL state
+                    remoteId: sharedListsAfter[0].id.toString(),
+                    sharedListEntryId: sharedListEntriesAfter[0].id.toString(),
+                    creator: {
+                        id: TEST_USER.id,
+                        type: 'user-reference',
+                    },
+                    unifiedAnnotationIds: [],
+                    hasRemoteAnnotationsToLoad: false,
+                },
+            })
+
+            // TODO: assert other state changes, when determined what they are
         })
     })
 

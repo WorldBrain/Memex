@@ -80,6 +80,10 @@ import {
     AIActionAllowed,
     updateAICounter,
 } from 'src/util/subscriptions/storage'
+import {
+    createPageLinkListTitle,
+    getSinglePageShareUrl,
+} from 'src/content-sharing/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -215,6 +219,7 @@ export class SidebarContainerLogic extends UILogic<
                 : 'success',
             loadState: 'running',
             noteCreateState: 'pristine',
+            pageLinkCreateState: 'pristine',
             secondarySearchState: 'pristine',
             remoteAnnotationsLoadState: 'pristine',
             foreignSelectedListLoadState: 'pristine',
@@ -2294,61 +2299,42 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    // private getAnnotListsAfterShareStateChange(params: {
-    //     previousState: SidebarContainerState
-    //     annotationIndex: number
-    //     incomingPrivacyState: AnnotationPrivacyState
-    //     keepListsIfUnsharing?: boolean
-    // }): number[] {
-    //     const { annotationsCache } = this.options
-    //     const existing =
-    //         params.previousState.annotations[params.annotationIndex]
+    createPageLink: EventHandler<'createPageLink'> = async ({
+        previousState,
+    }) => {
+        const fullPageUrl = previousState.fullPageUrl
+        if (!fullPageUrl) {
+            throw new Error(
+                'Cannot create page link - Page URL sidebar state not set',
+            )
+        }
+        const { contentSharingBG, annotationsCache, currentUser } = this.options
+        if (!currentUser) {
+            throw new Error('Cannot create page link - User not logged in')
+        }
 
-    //     const willUnshare =
-    //         !params.incomingPrivacyState.public &&
-    //         (existing.isShared || !params.incomingPrivacyState.protected)
-    //     const selectivelySharedToPrivateProtected =
-    //         !existing.isShared &&
-    //         existing.isBulkShareProtected &&
-    //         !params.incomingPrivacyState.public &&
-    //         params.incomingPrivacyState.protected
+        await executeUITask(this, 'pageLinkCreateState', async () => {
+            const {
+                remoteListId,
+                remoteListEntryId,
+            } = await contentSharingBG.createPageLink({ fullPageUrl })
+            const link = getSinglePageShareUrl({
+                remoteListId,
+                remoteListEntryId,
+            })
+            const listName = createPageLinkListTitle()
+            annotationsCache.addList<'page-link'>({
+                type: 'page-link',
+                name: listName,
+                pageTitle: listName, // TODO: Get the actual page title - maybe just query the DB using URL state
+                remoteId: remoteListId.toString(),
+                sharedListEntryId: remoteListEntryId.toString(),
+                creator: currentUser,
+                unifiedAnnotationIds: [],
+                hasRemoteAnnotationsToLoad: false,
+            })
 
-    //     // If the note is being made private, we need to remove all shared lists (private remain)
-    //     if (
-    //         (willUnshare && !params.keepListsIfUnsharing) ||
-    //         selectivelySharedToPrivateProtected
-    //     ) {
-    //         return existing.lists.filter(
-    //             (listId) => annotationsCache.listData[listId]?.remoteId == null,
-    //         )
-    //     }
-    //     if (!existing.isShared && params.incomingPrivacyState.public) {
-    //         const privateLists = params.previousState.annotations[
-    //             params.annotationIndex
-    //         ].lists.filter(
-    //             (listId) => annotationsCache.listData[listId]?.remoteId == null,
-    //         )
-    //         return [
-    //             ...annotationsCache.parentPageSharedListIds,
-    //             ...privateLists,
-    //         ]
-    //     }
-
-    //     return existing.lists
-    // }
-
-    private async setLastSharedAnnotationTimestamp(now = Date.now()) {
-        // const lastShared = await this.syncSettings.contentSharing.get(
-        //     'lastSharedAnnotationTimestamp',
-        // )
-
-        // if (lastShared == null) {
-        //     this.options.showAnnotationShareModal?.()
-        // }
-
-        await this.syncSettings.contentSharing.set(
-            'lastSharedAnnotationTimestamp',
-            now,
-        )
+            // TODO: Set some other state for the actual button,
+        })
     }
 }

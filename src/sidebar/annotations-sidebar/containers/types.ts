@@ -93,6 +93,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     loadState: TaskState
     cacheLoadState: TaskState
     noteCreateState: TaskState
+    pageLinkCreateState: TaskState
     secondarySearchState: TaskState
     remoteAnnotationsLoadState: TaskState
     foreignSelectedListLoadState: TaskState
@@ -308,6 +309,8 @@ interface SidebarEvents {
 
     setAllNotesCopyPasterShown: { shown: boolean }
     setAllNotesShareMenuShown: { shown: boolean }
+
+    createPageLink: null
 }
 
 export type SidebarContainerEvents = UIEvent<
