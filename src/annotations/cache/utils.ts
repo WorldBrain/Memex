@@ -198,28 +198,35 @@ interface CacheHydratorDeps {
 }
 
 // NOTE: this is tested as part of the sidebar logic tests
-export async function hydrateCacheForSidebar({
-    bgModules,
-    ...args
-}: CacheHydratorDeps & {
-    fullPageUrl: string
-}): Promise<void> {
-    const localListsData = await bgModules.customLists.fetchAllLists({})
-    const remoteListIds = await bgModules.contentSharing.getRemoteListIds({
-        localListIds: localListsData.map((list) => list.id),
-    })
-    const followedListsData = await bgModules.pageActivityIndicator.getPageFollowedLists(
-        args.fullPageUrl,
-        Object.values(remoteListIds),
-    )
-    hydrateCacheLists({
-        remoteListIds,
-        localListsData,
-        followedListsData,
-        ...args,
-    })
+export async function hydrateCacheForSidebar(
+    args: CacheHydratorDeps & {
+        fullPageUrl: string
+        skipListHydration?: boolean
+    },
+): Promise<void> {
+    if (!args.skipListHydration) {
+        const localListsData = await args.bgModules.customLists.fetchAllLists(
+            {},
+        )
+        const remoteListIds = await args.bgModules.contentSharing.getRemoteListIds(
+            {
+                localListIds: localListsData.map((list) => list.id),
+            },
+        )
+        const followedListsData = await args.bgModules.pageActivityIndicator.getPageFollowedLists(
+            args.fullPageUrl,
+            Object.values(remoteListIds),
+        )
 
-    const annotationsData = await bgModules.annotations.listAnnotationsByPageUrl(
+        await hydrateCacheLists({
+            remoteListIds,
+            localListsData,
+            followedListsData,
+            ...args,
+        })
+    }
+
+    const annotationsData = await args.bgModules.annotations.listAnnotationsByPageUrl(
         {
             pageUrl: args.fullPageUrl,
             withLists: true,
@@ -227,14 +234,14 @@ export async function hydrateCacheForSidebar({
     )
 
     const annotationUrls = annotationsData.map((annot) => annot.url)
-    const privacyLvlsByAnnot = await bgModules.contentSharing.findAnnotationPrivacyLevels(
+    const privacyLvlsByAnnot = await args.bgModules.contentSharing.findAnnotationPrivacyLevels(
         { annotationUrls },
     )
-    const remoteIdsByAnnot = await bgModules.contentSharing.getRemoteAnnotationIds(
+    const remoteIdsByAnnot = await args.bgModules.contentSharing.getRemoteAnnotationIds(
         { annotationUrls },
     )
 
-    const pageLocalListIds = await bgModules.customLists.fetchPageLists({
+    const pageLocalListIds = await args.bgModules.customLists.fetchPageLists({
         url: args.fullPageUrl,
     })
 
