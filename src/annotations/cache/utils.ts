@@ -423,3 +423,35 @@ export function deriveListOwnershipStatus(
 
     return 'Creator'
 }
+
+export type UnifiedListsByCategories = {
+    myLists: UnifiedList<'user-list' | 'special-list'>[]
+    joinedLists: UnifiedList<'user-list'>[]
+    followedLists: UnifiedList<'user-list'>[]
+    pageLinkLists: UnifiedList<'page-link'>[]
+}
+
+export function siftListsIntoCategories(
+    lists: UnifiedList[],
+    currentUser?: UserReference,
+): UnifiedListsByCategories {
+    const categories: UnifiedListsByCategories = {
+        myLists: [],
+        joinedLists: [],
+        followedLists: [],
+        pageLinkLists: [],
+    }
+    for (const list of lists) {
+        const ownership = deriveListOwnershipStatus(list, currentUser)
+        if (list.type === 'page-link') {
+            categories.pageLinkLists.push(list)
+        } else if (ownership === 'Creator') {
+            categories.myLists.push(list)
+        } else if (ownership === 'Follower' && !list.isForeignList) {
+            categories.followedLists.push(list as any)
+        } else if (ownership === 'Contributor') {
+            categories.joinedLists.push(list as any)
+        }
+    }
+    return categories
+}

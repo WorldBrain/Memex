@@ -720,7 +720,6 @@ export class AnnotationsSidebar extends React.Component<
     private renderSpacesItem(
         listData: UnifiedList,
         listInstance: ListInstance,
-        othersAnnotsCount: number,
     ) {
         return (
             <FollowedListNotesContainer
@@ -970,104 +969,10 @@ export class AnnotationsSidebar extends React.Component<
                 listData.hasRemoteAnnotationsToLoad ||
                 annotationsCache.pageListIds
                     .get(this.props.normalizedPageUrl)
-                    ?.has(listData.unifiedId), // TODO
+                    ?.has(listData.unifiedId),
         )
 
-        if (allLists.length > 0) {
-            let myLists = allLists.filter(
-                (list) =>
-                    cacheUtils.deriveListOwnershipStatus(list, currentUser) ===
-                    'Creator',
-            )
-
-            let followedLists = allLists.filter(
-                (list) =>
-                    cacheUtils.deriveListOwnershipStatus(list, currentUser) ===
-                        'Follower' && !list.isForeignList,
-            )
-
-            let joinedLists = allLists.filter(
-                (list) =>
-                    cacheUtils.deriveListOwnershipStatus(list, currentUser) ===
-                    'Contributor',
-            )
-
-            return (
-                <>
-                    <SpaceTypeSection>
-                        <SpaceTypeSectionHeader>
-                            My Spaces{' '}
-                            <SpacesCounter>{myLists.length}</SpacesCounter>
-                        </SpaceTypeSectionHeader>
-                        {myLists.length > 0 ? (
-                            <SpaceTypeSectionContainer>
-                                {myLists.map((listData) => {
-                                    let othersAnnotsCount = 0
-                                    const listInstance =
-                                        listInstances[listData.unifiedId]
-
-                                    this.spaceShareButtonRef[
-                                        listData.unifiedId
-                                    ] = React.createRef<HTMLDivElement>()
-
-                                    return this.renderSpacesItem(
-                                        listData,
-                                        listInstance,
-                                        othersAnnotsCount,
-                                    )
-                                })}
-                            </SpaceTypeSectionContainer>
-                        ) : undefined}
-                    </SpaceTypeSection>
-
-                    <SpaceTypeSection>
-                        <SpaceTypeSectionHeader>
-                            Followed Spaces{' '}
-                            <SpacesCounter>
-                                {followedLists.length}
-                            </SpacesCounter>
-                        </SpaceTypeSectionHeader>
-                        {followedLists.length > 0 ? (
-                            <SpaceTypeSectionContainer>
-                                {followedLists.map((listData) => {
-                                    let othersAnnotsCount = 0
-                                    const listInstance =
-                                        listInstances[listData.unifiedId]
-
-                                    return this.renderSpacesItem(
-                                        listData,
-                                        listInstance,
-                                        othersAnnotsCount,
-                                    )
-                                })}
-                            </SpaceTypeSectionContainer>
-                        ) : undefined}
-                    </SpaceTypeSection>
-
-                    <SpaceTypeSection>
-                        <SpaceTypeSectionHeader>
-                            Joined Spaces{' '}
-                            <SpacesCounter>{joinedLists.length}</SpacesCounter>
-                        </SpaceTypeSectionHeader>
-                        {joinedLists.length > 0 ? (
-                            <SpaceTypeSectionContainer>
-                                {joinedLists.map((listData) => {
-                                    let othersAnnotsCount = 0
-                                    const listInstance =
-                                        listInstances[listData.unifiedId]
-
-                                    return this.renderSpacesItem(
-                                        listData,
-                                        listInstance,
-                                        othersAnnotsCount,
-                                    )
-                                })}
-                            </SpaceTypeSectionContainer>
-                        ) : undefined}
-                    </SpaceTypeSection>
-                </>
-            )
-        } else {
+        if (allLists.length === 0) {
             return (
                 <EmptyMessageContainer>
                     <IconBox heightAndWidth="40px">
@@ -1085,6 +990,101 @@ export class AnnotationsSidebar extends React.Component<
                 </EmptyMessageContainer>
             )
         }
+
+        const {
+            followedLists,
+            pageLinkLists,
+            joinedLists,
+            myLists,
+        } = cacheUtils.siftListsIntoCategories(allLists, currentUser)
+
+        return (
+            <>
+                <SpaceTypeSection>
+                    <SpaceTypeSectionHeader>
+                        My Spaces{' '}
+                        <SpacesCounter>{myLists.length}</SpacesCounter>
+                    </SpaceTypeSectionHeader>
+                    {myLists.length > 0 ? (
+                        <SpaceTypeSectionContainer>
+                            {myLists.map((listData) => {
+                                const listInstance =
+                                    listInstances[listData.unifiedId]
+
+                                this.spaceShareButtonRef[
+                                    listData.unifiedId
+                                ] = React.createRef<HTMLDivElement>()
+
+                                return this.renderSpacesItem(
+                                    listData,
+                                    listInstance,
+                                )
+                            })}
+                        </SpaceTypeSectionContainer>
+                    ) : undefined}
+                </SpaceTypeSection>
+
+                <SpaceTypeSection>
+                    <SpaceTypeSectionHeader>
+                        Followed Spaces{' '}
+                        <SpacesCounter>{followedLists.length}</SpacesCounter>
+                    </SpaceTypeSectionHeader>
+                    {followedLists.length > 0 ? (
+                        <SpaceTypeSectionContainer>
+                            {followedLists.map((listData) => {
+                                const listInstance =
+                                    listInstances[listData.unifiedId]
+
+                                return this.renderSpacesItem(
+                                    listData,
+                                    listInstance,
+                                )
+                            })}
+                        </SpaceTypeSectionContainer>
+                    ) : undefined}
+                </SpaceTypeSection>
+
+                <SpaceTypeSection>
+                    <SpaceTypeSectionHeader>
+                        Joined Spaces{' '}
+                        <SpacesCounter>{joinedLists.length}</SpacesCounter>
+                    </SpaceTypeSectionHeader>
+                    {joinedLists.length > 0 ? (
+                        <SpaceTypeSectionContainer>
+                            {joinedLists.map((listData) => {
+                                const listInstance =
+                                    listInstances[listData.unifiedId]
+
+                                return this.renderSpacesItem(
+                                    listData,
+                                    listInstance,
+                                )
+                            })}
+                        </SpaceTypeSectionContainer>
+                    ) : undefined}
+                </SpaceTypeSection>
+
+                <SpaceTypeSection>
+                    <SpaceTypeSectionHeader>
+                        Page Links{' '}
+                        <SpacesCounter>{pageLinkLists.length}</SpacesCounter>
+                    </SpaceTypeSectionHeader>
+                    {pageLinkLists.length > 0 && (
+                        <SpaceTypeSectionContainer>
+                            {pageLinkLists.map((listData) => {
+                                const listInstance =
+                                    listInstances[listData.unifiedId]
+
+                                return this.renderSpacesItem(
+                                    listData,
+                                    listInstance,
+                                )
+                            })}
+                        </SpaceTypeSectionContainer>
+                    )}
+                </SpaceTypeSection>
+            </>
+        )
     }
 
     // TODO: properly derive this

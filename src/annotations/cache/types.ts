@@ -113,7 +113,7 @@ export type UnifiedAnnotationForCache = Omit<
         localListIds: number[]
     }
 
-type CoreUnifiedList = {
+type CoreUnifiedList<T> = {
     // Core list data
     unifiedId: string
     localId?: number
@@ -122,6 +122,7 @@ type CoreUnifiedList = {
     description?: string
     creator?: UserReference
     hasRemoteAnnotationsToLoad: boolean
+    type: T
 
     /** Denotes whether or not this list was loaded via a web UI page link AND has no locally available data. */
     isForeignList?: boolean
@@ -130,16 +131,15 @@ type CoreUnifiedList = {
     unifiedAnnotationIds: UnifiedAnnotation['unifiedId'][]
 }
 
-export type UnifiedList = CoreUnifiedList &
-    (
-        | {
-              type: 'user-list' | 'special-list'
-          }
-        | {
-              type: 'page-link'
-              remoteId: string // This makes up the first part of the page link
-              sharedListEntryId: string // This makes up the last part of the page link
-          }
-    )
+type UnifiedListType = 'user-list' | 'special-list' | 'page-link'
+
+export type UnifiedList<
+    T extends UnifiedListType = UnifiedListType
+> = T extends 'page-link'
+    ? CoreUnifiedList<'page-link'> & {
+          remoteId: string // This makes up the first part of the page link
+          sharedListEntryId: string // This makes up the last part of the page link
+      }
+    : CoreUnifiedList<T>
 
 export type UnifiedListForCache = Omit<UnifiedList, 'unifiedId'>
