@@ -211,6 +211,7 @@ const TopArea = styled.div<{ firstContainer: boolean }>`
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    grid-gap: 50px;
 
     ${(props) =>
         props.firstContainer &&
@@ -218,6 +219,7 @@ const TopArea = styled.div<{ firstContainer: boolean }>`
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            grid-gap: 0px;
         `}
 `
 
@@ -234,7 +236,7 @@ const TutorialCardContainer = styled.div<{
     bottom: ${(props) => (props.bottom ? props.bottom : null)};
     left: auto;
     right: ${(props) => (props.right ? props.right : null)};
-    width: ${(props) => (props.width ? props.width : '650px')};
+    width: ${(props) => (props.width ? props.width : 'fit-content')};
     height: ${(props) => props.height && props.height};
     display: flex;
     flex-direction: column;
@@ -247,7 +249,6 @@ const TutorialCardContainer = styled.div<{
     font-weight: 500;
     padding: 3em;
     text-align: center;
-    min-height: 60px;
     grid-gap: 30px;
 
     font-family: 'Satoshi', sans-serif;

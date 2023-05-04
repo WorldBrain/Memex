@@ -9,6 +9,8 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
+const icon = browser.runtime.getURL('/img/memex-icon.svg')
+
 // tutorial step like in the mockup
 export type TutorialStepContent = {
     subtitle: JSX.Element | string | React.Component
@@ -197,6 +199,15 @@ const ViewAllButton = styled.div`
     }
 `
 
+const GreenArea = styled.span`
+    background: ${(props) => props.theme.colors.prime1}70;
+    padding: 5px 10px;
+    border-radius: 4px;
+    color: ${(props) => props.theme.colors.white};
+    border: 1px solid ${(props) => props.theme.colors.prime1};
+    margin: 0 5px;
+`
+
 const TutorialOptionsList = styled.div`
     display: flex;
     flex-direction: column;
@@ -241,9 +252,10 @@ export const tutorialSteps: TutorialStepContent[] = [
                 <FirstCardContainer>
                     <IconBlock>
                         <Icon
-                            filePath={icons.stars}
+                            filePath={icon}
                             heightAndWidth="28px"
                             hoverOff
+                            originalImage
                             color={'prime1'}
                         />
                     </IconBlock>
@@ -252,8 +264,8 @@ export const tutorialSteps: TutorialStepContent[] = [
                             <Title>Get the basics in 90s</Title>
                         </TitleArea>
                         <Description>
-                            Hover over the green area on the right to open the
-                            Mini-Sidebar.
+                            Hover over the <GreenArea>green area</GreenArea> on
+                            the right to open the Mini-Sidebar.
                         </Description>
                     </ContentArea>
                 </FirstCardContainer>
@@ -299,41 +311,6 @@ export const tutorialSteps: TutorialStepContent[] = [
         right: null,
         showHoverArea: true,
         position: 'center',
-        width: '700px',
-    },
-    {
-        subtitle: (
-            <>
-                <CardContainer>
-                    <IconBlock>
-                        <Icon
-                            filePath={icons.plus}
-                            heightAndWidth="28px"
-                            hoverOff
-                            color={'prime1'}
-                        />
-                    </IconBlock>
-                    <ContentArea>
-                        <TitleArea>
-                            <Title>Add this page to a Space</Title>
-                            <KeyboardShortcuts
-                                keys={[getKeyName({ key: 'alt' }), 'C']}
-                            />
-                        </TitleArea>
-                        <Description>
-                            Spaces are like tags that you can share and
-                            collaboratively curate.
-                        </Description>
-                    </ContentArea>
-                </CardContainer>
-            </>
-        ),
-        bottom: '30px',
-        left: null,
-        right: null,
-        showHoverArea: false,
-        position: 'center',
-        width: '700px',
     },
     {
         subtitle: (
@@ -367,7 +344,72 @@ export const tutorialSteps: TutorialStepContent[] = [
         right: null,
         showHoverArea: false,
         position: 'center',
-        width: '700px',
+    },
+    {
+        subtitle: (
+            <>
+                <CardContainer>
+                    <IconBlock>
+                        <Icon
+                            filePath={icons.stars}
+                            heightAndWidth="28px"
+                            hoverOff
+                            color={'prime1'}
+                        />
+                    </IconBlock>
+                    <ContentArea>
+                        <TitleArea>
+                            <Title>Summarise this page or ask questions</Title>
+                            <KeyboardShortcuts
+                                keys={[getKeyName({ key: 'alt' }), 'A']}
+                            />
+                        </TitleArea>
+                        <Description>
+                            Summarise and ask questions about websites, youtube
+                            videos and PDFs
+                        </Description>
+                    </ContentArea>
+                </CardContainer>
+            </>
+        ),
+        bottom: '30px',
+        left: null,
+        right: null,
+        showHoverArea: false,
+        position: 'center',
+    },
+    {
+        subtitle: (
+            <>
+                <CardContainer>
+                    <IconBlock>
+                        <Icon
+                            filePath={icons.plus}
+                            heightAndWidth="28px"
+                            hoverOff
+                            color={'prime1'}
+                        />
+                    </IconBlock>
+                    <ContentArea>
+                        <TitleArea>
+                            <Title>Add this page to a Space</Title>
+                            <KeyboardShortcuts
+                                keys={[getKeyName({ key: 'alt' }), 'C']}
+                            />
+                        </TitleArea>
+                        <Description>
+                            Spaces are like tags that you can share and
+                            collaboratively curate.
+                        </Description>
+                    </ContentArea>
+                </CardContainer>
+            </>
+        ),
+        bottom: '30px',
+        left: null,
+        right: null,
+        showHoverArea: false,
+        position: 'center',
     },
     {
         subtitle: (
@@ -401,7 +443,6 @@ export const tutorialSteps: TutorialStepContent[] = [
         right: null,
         showHoverArea: false,
         position: 'center',
-        width: '700px',
     },
 
     {
@@ -437,7 +478,6 @@ export const tutorialSteps: TutorialStepContent[] = [
         right: null,
         showHoverArea: false,
         position: 'center',
-        width: '700px',
     },
 
     {
@@ -469,7 +509,6 @@ export const tutorialSteps: TutorialStepContent[] = [
         top: '20px',
         showHoverArea: false,
         position: 'center',
-        width: '700px',
     },
     {
         subtitle: (
