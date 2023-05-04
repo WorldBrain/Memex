@@ -493,7 +493,7 @@ export function createBackgroundModules(options: {
         backend:
             options.contentSharingBackend ??
             firebaseService<ContentSharingBackend>(
-                'personalCloud',
+                'contentSharing',
                 callFirebaseFunction,
             ),
         remoteEmitter: createRemoteEventEmitter('contentSharing', {

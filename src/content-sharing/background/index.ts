@@ -5,6 +5,7 @@ import type { ContentSharingBackend } from '@worldbrain/memex-common/lib/content
 import {
     makeAnnotationPrivacyLevel,
     getAnnotationPrivacyState,
+    extractIdsFromSinglePageShareUrl,
 } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import type CustomListBG from 'src/custom-lists/background'
 import type { AuthBackground } from 'src/authentication/background'
@@ -157,6 +158,7 @@ export default class ContentSharingBackground {
         })
 
         this.remoteFunctions = {
+            createPageLink: this.createPageLink,
             getExistingKeyLinksForList: async (...args) => {
                 const { contentSharing } = await options.servicesPromise
                 return contentSharing.getExistingKeyLinksForList(...args)
@@ -641,4 +643,13 @@ export default class ContentSharingBackground {
             source: 'sync' | 'local'
         },
     ) {}
+
+    createPageLink: ContentSharingInterface['createPageLink'] = async ({
+        fullPageUrl,
+    }) => {
+        const { link } = await this.options.backend.createPageLink({
+            fullPageUrl,
+        })
+        return extractIdsFromSinglePageShareUrl(link)
+    }
 }

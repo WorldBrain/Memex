@@ -5,6 +5,7 @@ import type {
     SharedListData,
 } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export interface ContentSharingInterface
     extends Pick<
@@ -106,6 +107,10 @@ export interface ContentSharingInterface
     >
     canWriteToSharedList(params: { localId: number }): Promise<boolean>
     canWriteToSharedListRemoteId(params: { remoteId: string }): Promise<boolean>
+
+    createPageLink(params: {
+        fullPageUrl: string
+    }): Promise<{ remoteListId: AutoPk; remoteListEntryId: AutoPk }>
 }
 
 export interface ContentSharingEvents {
