@@ -120,6 +120,7 @@ export function LISTS(): UnifiedList[] {
             remoteId: 'remote-list-id-3',
             sharedListEntryId: 'shared-list-entry-id-a',
             name: 'test joined page link list',
+            pageTitle: 'Test page title',
             hasRemoteAnnotationsToLoad: true,
             creator: USER_2,
             unifiedAnnotationIds: [ANNOTATION_IDS[3]],

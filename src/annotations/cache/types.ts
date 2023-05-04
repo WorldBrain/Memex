@@ -137,6 +137,7 @@ export type UnifiedList<
     T extends UnifiedListType = UnifiedListType
 > = T extends 'page-link'
     ? CoreUnifiedList<'page-link'> & {
+          pageTitle: string
           remoteId: string // This makes up the first part of the page link
           sharedListEntryId: string // This makes up the last part of the page link
       }

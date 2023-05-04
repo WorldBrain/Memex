@@ -337,8 +337,11 @@ async function hydrateCacheLists(
         }
     }
 
-    // Look up the shared list entry IDs for all the page link lists to be able to get them to the cache
-    const sharedListEntryIdMap = new Map<string, string>()
+    // Look up shared list entry data for all the page link lists to be able to get them to the cache
+    const sharedListEntryMap = new Map<
+        string,
+        { entryId: string; pageTitle: string }
+    >()
     if (pageLinkListIds.size) {
         const followedEntriesByList = await args.bgModules.pageActivityIndicator.getEntriesForFollowedLists(
             [...pageLinkListIds],
@@ -346,10 +349,10 @@ async function hydrateCacheLists(
         )
         for (const entries of Object.values(followedEntriesByList)) {
             if (entries.length) {
-                sharedListEntryIdMap.set(
-                    entries[0].followedList.toString(),
-                    entries[0].sharedListEntry.toString(),
-                )
+                sharedListEntryMap.set(entries[0].followedList.toString(), {
+                    entryId: entries[0].sharedListEntry.toString(),
+                    pageTitle: entries[0].entryTitle,
+                })
             }
         }
     }
@@ -360,9 +363,9 @@ async function hydrateCacheLists(
         let creator = args.user
         let hasRemoteAnnotations = false
         const remoteId = args.remoteListIds[list.id]
-        const sharedListEntryId =
+        const sharedListEntryData =
             list.type === 'page-link'
-                ? sharedListEntryIdMap.get(remoteId) ?? undefined
+                ? sharedListEntryMap.get(remoteId) ?? undefined
                 : undefined
         if (remoteId != null && args.followedListsData[remoteId]) {
             seenFollowedLists.add(args.followedListsData[remoteId].sharedList)
@@ -376,7 +379,8 @@ async function hydrateCacheLists(
         return reshapeLocalListForCache(list, {
             hasRemoteAnnotations,
             extraData: {
-                sharedListEntryId,
+                sharedListEntryId: sharedListEntryData?.entryId,
+                pageTitle: sharedListEntryData?.pageTitle,
                 remoteId,
                 creator,
             },
@@ -387,16 +391,17 @@ async function hydrateCacheLists(
     Object.values(args.followedListsData)
         .filter((list) => !seenFollowedLists.has(list.sharedList))
         .forEach((list) => {
-            const sharedListEntryId =
+            const sharedListEntryData =
                 list.type === 'page-link'
-                    ? sharedListEntryIdMap.get(list.sharedList.toString()) ??
+                    ? sharedListEntryMap.get(list.sharedList.toString()) ??
                       undefined
                     : undefined
             listsToCache.push(
                 reshapeFollowedListForCache(list, {
                     hasRemoteAnnotations: list.hasAnnotationsFromOthers,
                     extraData: {
-                        sharedListEntryId,
+                        sharedListEntryId: sharedListEntryData?.entryId,
+                        pageTitle: sharedListEntryData?.pageTitle,
                     },
                 }),
             )

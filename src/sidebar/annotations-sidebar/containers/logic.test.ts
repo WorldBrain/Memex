@@ -426,6 +426,7 @@ describe('SidebarContainerLogic', () => {
                         unifiedId: expect.any(String),
                         unifiedAnnotationIds: [],
                         remoteId: DATA.SHARED_LIST_IDS[4],
+                        pageTitle: DATA.FOLLOWED_LIST_ENTRIES[5].entryTitle,
                         sharedListEntryId: DATA.FOLLOWED_LIST_ENTRIES[5].sharedListEntry.toString(),
                     },
                 }),
@@ -439,6 +440,7 @@ describe('SidebarContainerLogic', () => {
                 cacheUtils.reshapeFollowedListForCache(DATA.FOLLOWED_LISTS[5], {
                     hasRemoteAnnotations: true,
                     extraData: {
+                        pageTitle: DATA.FOLLOWED_LIST_ENTRIES[6].entryTitle,
                         sharedListEntryId: DATA.FOLLOWED_LIST_ENTRIES[6].sharedListEntry.toString(),
                         unifiedId: expect.any(String),
                         unifiedAnnotationIds: [],
