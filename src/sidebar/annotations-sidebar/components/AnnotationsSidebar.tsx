@@ -721,6 +721,7 @@ export class AnnotationsSidebar extends React.Component<
         listData: UnifiedList,
         listInstance: ListInstance,
     ) {
+        const title = cacheUtils.getDisplayNameForList(listData)
         return (
             <FollowedListNotesContainer
                 bottom={listInstance.isOpen ? '0px' : '0px'}
@@ -728,10 +729,10 @@ export class AnnotationsSidebar extends React.Component<
                 top="0px"
             >
                 <FollowedListRow
+                    title={title}
                     onClick={() =>
                         this.props.onUnifiedListSelect(listData.unifiedId)
                     }
-                    title={listData.name}
                 >
                     <FollowedListTitleContainer>
                         <Icon
@@ -745,7 +746,7 @@ export class AnnotationsSidebar extends React.Component<
                                 )
                             }}
                         />
-                        <FollowedListTitle>{listData.name}</FollowedListTitle>
+                        <FollowedListTitle>{title}</FollowedListTitle>
                     </FollowedListTitleContainer>
                     <ButtonContainer>
                         <ActionButtons>
@@ -1210,10 +1211,6 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderResultsBody() {
-        const selectedList = this.props.annotationsCache.lists.byId[
-            this.props.selectedListId
-        ]
-
         const listData = this.props.lists.byId[this.props.selectedListId]
 
         if (this.props.activeTab === 'feed') {
@@ -1837,7 +1834,9 @@ export class AnnotationsSidebar extends React.Component<
                         {this.renderPermissionStatusButton()}
                     </RightSideButtonsTopBar>
                 </IsolatedViewHeaderTopBar>
-                <SpaceTitle>{selectedList.name}</SpaceTitle>
+                <SpaceTitle>
+                    {cacheUtils.getDisplayNameForList(selectedList)}
+                </SpaceTitle>
                 <SpaceDescription>{selectedList.description}</SpaceDescription>
                 {/* {totalAnnotsCountJSX}
                 {othersAnnotsCountJSX} */}

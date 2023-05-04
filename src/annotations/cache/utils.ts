@@ -460,3 +460,6 @@ export function siftListsIntoCategories(
     }
     return categories
 }
+
+export const getDisplayNameForList = (list: UnifiedList): string =>
+    list.type === 'page-link' ? `Annotated: ${list.pageTitle}` : list.name
