@@ -2308,6 +2308,11 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
     }) => {
         const fullPageUrl = previousState.fullPageUrl
+
+        this.emitMutation({
+            activeTab: { $set: 'spaces' },
+        })
+
         if (!fullPageUrl) {
             throw new Error(
                 'Cannot create page link - Page URL sidebar state not set',

@@ -1801,16 +1801,14 @@ export class AnnotationsSidebar extends React.Component<
                 </TopBarTabsContainer>
                 <TopBarBtnsContainer>
                     <PrimaryAction
-                        label="Create Page Link"
+                        label="Share Page"
                         onClick={this.props.clickCreatePageLinkBtn}
                         disabled={this.props.pageLinkCreateState === 'running'}
                         type="secondary"
                         size="small"
                         icon={
                             this.props.pageLinkCreateState === 'running' && (
-                                <LoadingBox>
-                                    <LoadingIndicator size={10} />{' '}
-                                </LoadingBox>
+                                <LoadingIndicator size={10} />
                             )
                         }
                     />
