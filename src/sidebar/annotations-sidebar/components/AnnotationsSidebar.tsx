@@ -58,6 +58,7 @@ import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/typ
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import DiscordNotification from '@worldbrain/memex-common/lib/common-ui/components/discord-notification-banner'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
 
@@ -157,6 +158,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     setPopoutsActive: (popoutsOpen: boolean) => void
     getYoutubePlayer?(): YoutubePlayer
     clickFeedActivityIndicator?: () => void
+    clickCreatePageLinkBtn: () => void
     hasFeedActivity?: boolean
     removeSelectedTextAIPreview?: () => void
     // editableProps: EditableItemProps
@@ -960,14 +962,20 @@ export class AnnotationsSidebar extends React.Component<
     private renderSharedNotesByList() {
         const {
             lists,
+            currentUser,
+            fullPageUrl,
             listInstances,
             annotationsCache,
-            currentUser,
         } = this.props
+        const normalizedPageUrl = fullPageUrl
+            ? normalizeUrl(fullPageUrl)
+            : undefined
         const allLists = normalizedStateToArray(lists).filter(
             (listData) =>
                 listData.unifiedAnnotationIds.length > 0 ||
                 listData.hasRemoteAnnotationsToLoad ||
+                (listData.type === 'page-link' &&
+                    listData.normalizedPageUrl === normalizedPageUrl) ||
                 annotationsCache.pageListIds
                     .get(this.props.normalizedPageUrl)
                     ?.has(listData.unifiedId),
@@ -1714,81 +1722,99 @@ export class AnnotationsSidebar extends React.Component<
     private renderTopBarSwitcher() {
         return (
             <TopBarContainer>
-                <PrimaryAction
-                    onClick={this.props.setActiveTab('annotations')}
-                    label={'My Annotations'}
-                    active={this.props.activeTab === 'annotations'}
-                    type={'tertiary'}
-                    size={'medium'}
-                    padding={'0px 6px'}
-                />
-                <PrimaryAction
-                    onClick={this.props.setActiveTab('spaces')}
-                    label={'Spaces'}
-                    active={this.props.activeTab === 'spaces'}
-                    type={'tertiary'}
-                    size={'medium'}
-                    iconPosition={'right'}
-                    padding={'0px 6px'}
-                    icon={
-                        this.props.cacheLoadState === 'running' ||
-                        this.props.cacheLoadState === 'pristine' ? (
-                            <LoadingBox>
-                                <LoadingIndicator size={10} />{' '}
-                            </LoadingBox>
-                        ) : this.props.pageHasNetworkAnnotations ? (
-                            <TooltipBox
-                                tooltipText={'Has annotations by others'}
-                                placement={'bottom'}
-                            >
-                                <LoadingBox hasToolTip>
-                                    <PageActivityIndicator active />
+                <TopBarTabsContainer>
+                    <PrimaryAction
+                        onClick={this.props.setActiveTab('annotations')}
+                        label={'My Annotations'}
+                        active={this.props.activeTab === 'annotations'}
+                        type={'tertiary'}
+                        size={'medium'}
+                        padding={'0px 6px'}
+                    />
+                    <PrimaryAction
+                        onClick={this.props.setActiveTab('spaces')}
+                        label={'Spaces'}
+                        active={this.props.activeTab === 'spaces'}
+                        type={'tertiary'}
+                        size={'medium'}
+                        iconPosition={'right'}
+                        padding={'0px 6px'}
+                        icon={
+                            this.props.cacheLoadState === 'running' ||
+                            this.props.cacheLoadState === 'pristine' ? (
+                                <LoadingBox>
+                                    <LoadingIndicator size={10} />{' '}
                                 </LoadingBox>
-                            </TooltipBox>
-                        ) : (
-                            <LoadingBox>
-                                <PageActivityIndicator active={false} />
-                            </LoadingBox>
-                        )
-                    }
-                />
-                <PrimaryAction
-                    onClick={this.props.setActiveTab('summary')}
-                    label={'Ask'}
-                    active={this.props.activeTab === 'summary'}
-                    type={'tertiary'}
-                    size={'medium'}
-                    iconPosition={'right'}
-                    padding={'0px 6px'}
-                />
-                <PrimaryAction
-                    onClick={(event) => {
-                        this.props.setActiveTab('feed')(event)
-                        this.props.clickFeedActivityIndicator()
-                    }}
-                    label={'Feed'}
-                    active={this.props.activeTab === 'feed'}
-                    type={'tertiary'}
-                    size={'medium'}
-                    iconPosition={'right'}
-                    padding={'0px 6px'}
-                    icon={
-                        this.props.hasFeedActivity ? (
-                            <TooltipBox
-                                tooltipText={'Has new feed updates'}
-                                placement={'bottom'}
-                            >
-                                <LoadingBox hasToolTip>
-                                    <PageActivityIndicator active />
+                            ) : this.props.pageHasNetworkAnnotations ? (
+                                <TooltipBox
+                                    tooltipText={'Has annotations by others'}
+                                    placement={'bottom'}
+                                >
+                                    <LoadingBox hasToolTip>
+                                        <PageActivityIndicator active />
+                                    </LoadingBox>
+                                </TooltipBox>
+                            ) : (
+                                <LoadingBox>
+                                    <PageActivityIndicator active={false} />
                                 </LoadingBox>
-                            </TooltipBox>
-                        ) : (
-                            <LoadingBox>
-                                <PageActivityIndicator active={false} />
-                            </LoadingBox>
-                        )
-                    }
-                />
+                            )
+                        }
+                    />
+                    <PrimaryAction
+                        onClick={this.props.setActiveTab('summary')}
+                        label={'Ask'}
+                        active={this.props.activeTab === 'summary'}
+                        type={'tertiary'}
+                        size={'medium'}
+                        iconPosition={'right'}
+                        padding={'0px 6px'}
+                    />
+                    <PrimaryAction
+                        onClick={(event) => {
+                            this.props.setActiveTab('feed')(event)
+                            this.props.clickFeedActivityIndicator()
+                        }}
+                        label={'Feed'}
+                        active={this.props.activeTab === 'feed'}
+                        type={'tertiary'}
+                        size={'medium'}
+                        iconPosition={'right'}
+                        padding={'0px 6px'}
+                        icon={
+                            this.props.hasFeedActivity ? (
+                                <TooltipBox
+                                    tooltipText={'Has new feed updates'}
+                                    placement={'bottom'}
+                                >
+                                    <LoadingBox hasToolTip>
+                                        <PageActivityIndicator active />
+                                    </LoadingBox>
+                                </TooltipBox>
+                            ) : (
+                                <LoadingBox>
+                                    <PageActivityIndicator active={false} />
+                                </LoadingBox>
+                            )
+                        }
+                    />
+                </TopBarTabsContainer>
+                <TopBarBtnsContainer>
+                    <PrimaryAction
+                        label="Create Page Link"
+                        onClick={this.props.clickCreatePageLinkBtn}
+                        disabled={this.props.pageLinkCreateState === 'running'}
+                        type="secondary"
+                        size="small"
+                        icon={
+                            this.props.pageLinkCreateState === 'running' && (
+                                <LoadingBox>
+                                    <LoadingIndicator size={10} />{' '}
+                                </LoadingBox>
+                            )
+                        }
+                    />
+                </TopBarBtnsContainer>
             </TopBarContainer>
         )
     }
@@ -2668,8 +2694,17 @@ const IsolatedViewHeaderTopBar = styled.div`
 const TopBarContainer = styled.div`
     display: flex;
     grid-gap: 4px;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+`
+const TopBarTabsContainer = styled.div`
+    display: flex;
     align-items: center;
 `
+
+const TopBarBtnsContainer = styled.div``
+
 const EmptyMessageContainer = styled.div`
     display: flex;
     flex-direction: column;

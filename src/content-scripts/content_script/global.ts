@@ -304,7 +304,7 @@ export async function main(
     const _currentUser = await authBG.getCurrentUser()
     const currentUser: UserReference = _currentUser
         ? { type: 'user-reference', id: _currentUser.id }
-        : undefined
+        : null
     const fullPageUrl = await pageInfo.getFullPageUrl()
     const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
     const annotationsCache = new PageAnnotationsCache({})
@@ -521,7 +521,7 @@ export async function main(
                     ? 'visible'
                     : 'hidden',
                 inPageUI,
-                currentUser,
+                getCurrentUser: () => currentUser,
                 annotationsCache,
                 highlighter: highlightRenderer,
                 authBG,

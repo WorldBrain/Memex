@@ -118,7 +118,7 @@ export class AnnotationsSidebarContainer<
             localId: listId,
             unifiedAnnotationIds: annotationId ? [annotationId] : [],
             hasRemoteAnnotationsToLoad: false,
-            creator: this.props.currentUser,
+            creator: this.props.getCurrentUser(),
             type: 'user-list',
         })
         await this.props.customListsBG.createCustomList({
@@ -728,7 +728,10 @@ export class AnnotationsSidebarContainer<
                             clickFeedActivityIndicator={() =>
                                 this.processEvent('markFeedAsRead', null)
                             }
-                            currentUser={this.props.currentUser}
+                            clickCreatePageLinkBtn={() =>
+                                this.processEvent('createPageLink', null)
+                            }
+                            currentUser={this.props.getCurrentUser()}
                             annotationsCache={this.props.annotationsCache}
                             onUnifiedListSelect={(unifiedListId) =>
                                 this.processEvent('setSelectedList', {

@@ -137,7 +137,8 @@ export type UnifiedList<
     T extends UnifiedListType = UnifiedListType
 > = T extends 'page-link'
     ? CoreUnifiedList<'page-link'> & {
-          pageTitle: string
+          normalizedPageUrl: string // Used in the sidebar logic, affording a way to relate page link lists to a given page the sidebar is open for
+          pageTitle: string // Used for display, replacing the list name
           remoteId: string // This makes up the first part of the page link
           sharedListEntryId: string // This makes up the last part of the page link
       }

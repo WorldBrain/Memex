@@ -121,6 +121,7 @@ export function LISTS(): UnifiedList[] {
             sharedListEntryId: 'shared-list-entry-id-a',
             name: 'test joined page link list',
             pageTitle: 'Test page title',
+            normalizedPageUrl: NORMALIZED_PAGE_URL_2,
             hasRemoteAnnotationsToLoad: true,
             creator: USER_2,
             unifiedAnnotationIds: [ANNOTATION_IDS[3]],

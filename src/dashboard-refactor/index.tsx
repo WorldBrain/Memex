@@ -1453,6 +1453,14 @@ export class DashboardContainer extends StatefulUIElement<
                             contentConversationsBG={
                                 this.props.contentConversationsBG
                             }
+                            getCurrentUser={() =>
+                                this.state.currentUser
+                                    ? {
+                                          id: this.state.currentUser.id,
+                                          type: 'user-reference',
+                                      }
+                                    : null
+                            }
                             setLoginModalShown={(isShown) =>
                                 this.processEvent('setShowLoginModal', {
                                     isShown,

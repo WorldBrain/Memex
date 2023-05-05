@@ -1,5 +1,4 @@
 import fromPairs from 'lodash/fromPairs'
-import { isFullUrl, normalizeUrl } from '@worldbrain/memex-url-utils'
 import browser from 'webextension-polyfill'
 import {
     UILogic,
@@ -8,6 +7,10 @@ import {
     loadInitial,
     executeUITask,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
+import {
+    normalizeUrl,
+    isFullUrl,
+} from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
     annotationConversationInitialState,
     annotationConversationEventHandlers,
@@ -309,7 +312,7 @@ export class SidebarContainerLogic extends UILogic<
         await executeUITask(this, 'cacheLoadState', async () => {
             await cacheUtils.hydrateCacheForSidebar({
                 fullPageUrl,
-                user: this.options.currentUser,
+                user: this.options.getCurrentUser(),
                 cache: this.options.annotationsCache,
                 skipListHydration: this.options.sidebarContext === 'dashboard',
                 bgModules: {
@@ -331,7 +334,7 @@ export class SidebarContainerLogic extends UILogic<
     }: Pick<SidebarContainerState, 'annotations'>) => {
         const highlights = cacheUtils.getUserHighlightsArray(
             { annotations },
-            this.options.currentUser?.id.toString(),
+            this.options.getCurrentUser()?.id.toString(),
         )
         this.options.events?.emit('renderHighlights', {
             highlights,
@@ -937,7 +940,7 @@ export class SidebarContainerLogic extends UILogic<
 
         if (
             !formData ||
-            annotationData?.creator?.id !== this.options.currentUser?.id ||
+            annotationData?.creator?.id !== this.options.getCurrentUser()?.id ||
             (event.shouldShare && !(await this.ensureLoggedIn()))
         ) {
             return
@@ -1112,7 +1115,7 @@ export class SidebarContainerLogic extends UILogic<
                     shouldShare: event.shouldShare,
                     isBulkShareProtected: event.isProtected,
                 }),
-                creator: this.options.currentUser,
+                creator: this.options.getCurrentUser(),
                 createdWhen: now,
                 lastEdited: now,
                 localListIds,
@@ -2310,7 +2313,7 @@ export class SidebarContainerLogic extends UILogic<
                 'Cannot create page link - Page URL sidebar state not set',
             )
         }
-        const { contentSharingBG, annotationsCache, currentUser } = this.options
+        const currentUser = this.options.getCurrentUser()
         if (!currentUser) {
             throw new Error('Cannot create page link - User not logged in')
         }
@@ -2319,18 +2322,21 @@ export class SidebarContainerLogic extends UILogic<
             const {
                 remoteListId,
                 remoteListEntryId,
-            } = await contentSharingBG.createPageLink({ fullPageUrl })
+            } = await this.options.contentSharingBG.createPageLink({
+                fullPageUrl,
+            })
             const link = getSinglePageShareUrl({
                 remoteListId,
                 remoteListEntryId,
             })
             const listName = createPageLinkListTitle()
-            annotationsCache.addList<'page-link'>({
+            this.options.annotationsCache.addList<'page-link'>({
                 type: 'page-link',
                 name: listName,
                 pageTitle: listName, // TODO: Get the actual page title - maybe just query the DB using URL state
                 remoteId: remoteListId.toString(),
                 sharedListEntryId: remoteListEntryId.toString(),
+                normalizedPageUrl: normalizeUrl(fullPageUrl),
                 creator: currentUser,
                 unifiedAnnotationIds: [],
                 hasRemoteAnnotationsToLoad: false,

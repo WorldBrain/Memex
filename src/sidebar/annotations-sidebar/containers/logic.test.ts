@@ -111,7 +111,7 @@ const setupLogicHelper = async ({
     const analytics = new FakeAnalytics()
     const sidebarLogic = new SidebarContainerLogic({
         fullPageUrl,
-        sidebarContext: 'dashboard',
+        sidebarContext: 'in-page',
         shouldHydrateCacheOnInit: true,
         authBG: backgroundModules.auth.remoteFunctions,
         subscription: backgroundModules.auth.subscriptionService,
@@ -127,7 +127,7 @@ const setupLogicHelper = async ({
         contentConversationsBG:
             backgroundModules.contentConversations.remoteFunctions,
         syncSettingsBG: backgroundModules.syncSettings,
-        currentUser: withAuth ? DATA.CREATOR_1 : undefined,
+        getCurrentUser: () => (withAuth ? DATA.CREATOR_1 : null),
         annotationsBG: annotationsBG,
         events: fakeEmitter as any,
         runtimeAPI: browserAPIs.runtime,
@@ -382,6 +382,7 @@ describe('SidebarContainerLogic', () => {
                     pageTitle: listName, // TODO: Get the actual page title - maybe just query the DB using URL state
                     remoteId: sharedListsAfter[0].id.toString(),
                     sharedListEntryId: sharedListEntriesAfter[0].id.toString(),
+                    normalizedPageUrl,
                     creator: {
                         id: TEST_USER.id,
                         type: 'user-reference',
@@ -390,8 +391,6 @@ describe('SidebarContainerLogic', () => {
                     hasRemoteAnnotationsToLoad: false,
                 },
             })
-
-            // TODO: assert other state changes, when determined what they are
         })
     })
 
@@ -513,6 +512,8 @@ describe('SidebarContainerLogic', () => {
                         unifiedAnnotationIds: [],
                         remoteId: DATA.SHARED_LIST_IDS[4],
                         pageTitle: DATA.FOLLOWED_LIST_ENTRIES[5].entryTitle,
+                        normalizedPageUrl:
+                            DATA.FOLLOWED_LIST_ENTRIES[5].normalizedPageUrl,
                         sharedListEntryId: DATA.FOLLOWED_LIST_ENTRIES[5].sharedListEntry.toString(),
                     },
                 }),
@@ -527,6 +528,8 @@ describe('SidebarContainerLogic', () => {
                     hasRemoteAnnotations: true,
                     extraData: {
                         pageTitle: DATA.FOLLOWED_LIST_ENTRIES[6].entryTitle,
+                        normalizedPageUrl:
+                            DATA.FOLLOWED_LIST_ENTRIES[6].normalizedPageUrl,
                         sharedListEntryId: DATA.FOLLOWED_LIST_ENTRIES[6].sharedListEntry.toString(),
                         unifiedId: expect.any(String),
                         unifiedAnnotationIds: [],

@@ -65,7 +65,7 @@ export interface SidebarContainerDependencies {
     subscription: SubscriptionsService
     theme?: MemexTheme & Partial<SidebarTheme>
 
-    currentUser?: UserReference
+    getCurrentUser: () => UserReference | null
     // search: SearchInterface
     // bookmarks: BookmarksInterface
     analytics: Analytics

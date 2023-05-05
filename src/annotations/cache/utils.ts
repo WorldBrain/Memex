@@ -24,6 +24,7 @@ import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/t
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import type { SharedListEntry } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation & {
@@ -347,7 +348,7 @@ async function hydrateCacheLists(
     // Look up shared list entry data for all the page link lists to be able to get them to the cache
     const sharedListEntryMap = new Map<
         string,
-        { entryId: string; pageTitle: string }
+        Pick<SharedListEntry, 'entryTitle' | 'normalizedUrl'> & { id: string }
     >()
     if (pageLinkListIds.size) {
         const followedEntriesByList = await args.bgModules.pageActivityIndicator.getEntriesForFollowedLists(
@@ -357,8 +358,9 @@ async function hydrateCacheLists(
         for (const entries of Object.values(followedEntriesByList)) {
             if (entries.length) {
                 sharedListEntryMap.set(entries[0].followedList.toString(), {
-                    entryId: entries[0].sharedListEntry.toString(),
-                    pageTitle: entries[0].entryTitle,
+                    normalizedUrl: entries[0].normalizedPageUrl,
+                    id: entries[0].sharedListEntry.toString(),
+                    entryTitle: entries[0].entryTitle,
                 })
             }
         }
@@ -386,8 +388,9 @@ async function hydrateCacheLists(
         return reshapeLocalListForCache(list, {
             hasRemoteAnnotations,
             extraData: {
-                sharedListEntryId: sharedListEntryData?.entryId,
-                pageTitle: sharedListEntryData?.pageTitle,
+                normalizedPageUrl: sharedListEntryData?.normalizedUrl,
+                sharedListEntryId: sharedListEntryData?.id,
+                pageTitle: sharedListEntryData?.entryTitle,
                 remoteId,
                 creator,
             },
@@ -407,8 +410,9 @@ async function hydrateCacheLists(
                 reshapeFollowedListForCache(list, {
                     hasRemoteAnnotations: list.hasAnnotationsFromOthers,
                     extraData: {
-                        sharedListEntryId: sharedListEntryData?.entryId,
-                        pageTitle: sharedListEntryData?.pageTitle,
+                        normalizedPageUrl: sharedListEntryData?.normalizedUrl,
+                        sharedListEntryId: sharedListEntryData?.id,
+                        pageTitle: sharedListEntryData?.entryTitle,
                     },
                 }),
             )
