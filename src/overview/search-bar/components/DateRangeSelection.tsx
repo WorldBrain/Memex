@@ -70,7 +70,6 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
      * Overrides react-date-picker's clear input handler to also clear our local input value states.
      */
     handleClearClick = ({ isStartDate }) => (event) => {
-        console.log('clear click')
         const stateKey = isStartDate ? 'startDateText' : 'endDateText'
         const refKey = isStartDate ? 'startDatePicker' : 'endDatePicker'
         const updateDateText = isStartDate

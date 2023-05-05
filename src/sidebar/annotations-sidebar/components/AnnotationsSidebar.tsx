@@ -1351,10 +1351,6 @@ export class AnnotationsSidebar extends React.Component<
                             }}
                             onKeyDown={async (event) => {
                                 if (event.key === 'Enter') {
-                                    console.log(
-                                        'enter pressed',
-                                        this.props.prompt,
-                                    )
                                     await this.props.queryAIwithPrompt(
                                         this.props.prompt,
                                     )

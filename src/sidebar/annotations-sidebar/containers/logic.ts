@@ -311,6 +311,7 @@ export class SidebarContainerLogic extends UILogic<
                 fullPageUrl,
                 user: this.options.currentUser,
                 cache: this.options.annotationsCache,
+                skipListHydration: this.options.sidebarContext === 'dashboard',
                 bgModules: {
                     customLists: this.options.customListsBG,
                     annotations: this.options.annotationsBG,
@@ -354,7 +355,9 @@ export class SidebarContainerLogic extends UILogic<
             )
             .flat()
             .map((unifiedAnnotId) => annotations.byId[unifiedAnnotId])
-            .filter((annot) => annot.body?.length > 0 && annot.selector != null)
+            .filter(
+                (annot) => annot?.body?.length > 0 && annot.selector != null,
+            )
 
         this.options.events?.emit('renderHighlights', {
             highlights,
@@ -1636,11 +1639,10 @@ export class SidebarContainerLogic extends UILogic<
             },
         })
 
-        let isPagePDF = window.location.href.includes(
-            '/pdfjs/viewer.html?file=blob',
-        )
+        let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
         let fullTextToProcess
         if (isPagePDF) {
+            console.log('is pdf', document.body.innerText)
             fullTextToProcess = document.body.innerText
         }
 

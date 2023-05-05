@@ -112,7 +112,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                 }
                 privacyOptions={[
                     {
-                        title: 'Public',
+                        title: 'Auto-Shared',
                         shortcut: `shift+${AllNotesShareMenu.MOD_KEY}+enter`,
                         description:
                             'Auto-added to Spaces the page is shared to',

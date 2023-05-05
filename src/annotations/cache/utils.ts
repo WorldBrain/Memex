@@ -214,23 +214,30 @@ interface CacheHydratorDeps {
 export async function hydrateCacheForSidebar(
     args: CacheHydratorDeps & {
         fullPageUrl: string
+        skipListHydration?: boolean
     },
 ): Promise<void> {
-    const localListsData = await args.bgModules.customLists.fetchAllLists({})
-    const remoteListIds = await args.bgModules.contentSharing.getRemoteListIds({
-        localListIds: localListsData.map((list) => list.id),
-    })
-    const followedListsData = await args.bgModules.pageActivityIndicator.getPageFollowedLists(
-        args.fullPageUrl,
-        Object.values(remoteListIds),
-    )
+    if (!args.skipListHydration) {
+        const localListsData = await args.bgModules.customLists.fetchAllLists(
+            {},
+        )
+        const remoteListIds = await args.bgModules.contentSharing.getRemoteListIds(
+            {
+                localListIds: localListsData.map((list) => list.id),
+            },
+        )
+        const followedListsData = await args.bgModules.pageActivityIndicator.getPageFollowedLists(
+            args.fullPageUrl,
+            Object.values(remoteListIds),
+        )
 
-    await hydrateCacheLists({
-        remoteListIds,
-        localListsData,
-        followedListsData,
-        ...args,
-    })
+        await hydrateCacheLists({
+            remoteListIds,
+            localListsData,
+            followedListsData,
+            ...args,
+        })
+    }
 
     const annotationsData = await args.bgModules.annotations.listAnnotationsByPageUrl(
         {

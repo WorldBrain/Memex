@@ -174,6 +174,9 @@ export default class RibbonHolder extends StatefulUIElement<
                             inPageUI={this.props.inPageUI}
                             isSidebarOpen={this.state.isSidebarOpen}
                             setRibbonShouldAutoHide={this.setAutoHide}
+                            openPDFinViewer={
+                                this.props.containerDependencies.openPDFinViewer
+                            }
                         />
                     </div>
                 )}
