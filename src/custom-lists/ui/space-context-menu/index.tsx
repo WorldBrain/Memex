@@ -12,13 +12,7 @@ import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { getListShareUrl } from 'src/content-sharing/utils'
 
-export interface Props extends Dependencies {
-    onConfirmEdit: (value: string) => void
-    changeListName?: (value: string) => void
-    onCancelEdit: () => void
-    onDeleteSpaceIntent?: React.MouseEventHandler
-    onDeleteSpaceConfirm?: React.MouseEventHandler
-}
+export interface Props extends Dependencies {}
 
 // NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
 //  from opening when you use the context menu in the dashboard.
@@ -51,32 +45,27 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         }
     }
 
-    private handleNameChange: React.KeyboardEventHandler = (event) => {
+    private handleNameChange: React.KeyboardEventHandler = async (event) => {
         const name = (event.target as HTMLInputElement).value
-        this.processEvent('updateSpaceName', { name })
-        this.props.changeListName?.(name)
+        await this.processEvent('updateSpaceName', { name })
     }
 
-    private handleNameEditInputKeyDown: React.KeyboardEventHandler = (e) => {
-        // Allow escape keydown to bubble up to close the sidebar only if no input state
-
-        const listName = this.state.nameValue.trim()
-
+    private handleNameEditInputKeyDown: React.KeyboardEventHandler = async (
+        e,
+    ) => {
         if (e.key === 'Escape') {
-            if (listName.length) {
+            // Allow escape keydown to bubble up to close the sidebar only if no input state
+            if (this.state.nameValue.trim().length) {
                 e.stopPropagation()
             }
-            this.props.onCancelEdit()
+            await this.processEvent('cancelSpaceNameEdit', null)
             return
         }
 
         if (e.key === 'Enter') {
-            if (listName.length) {
-                this.processEvent('setShowSaveBtn', { show: false })
-                e.preventDefault()
-                e.stopPropagation()
-                this.props.onConfirmEdit(listName)
-            }
+            e.preventDefault()
+            e.stopPropagation()
+            await this.processEvent('confirmSpaceNameEdit', null)
         }
 
         // If we don't have this, events will bubble up into the page!
@@ -188,10 +177,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             )
         }
 
-        if (
-            this.state.mode === 'confirm-space-delete' &&
-            this.props.onDeleteSpaceConfirm != null
-        ) {
+        if (this.state.mode === 'confirm-space-delete') {
             return (
                 <DeleteBox>
                     <TitleBox>Delete this Space?</TitleBox>
@@ -200,7 +186,11 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                     </DetailsText>
                     <ButtonRow>
                         <PrimaryAction
-                            onClick={wrapClick(this.props.onDeleteSpaceConfirm)}
+                            onClick={wrapClick((reactEvent) =>
+                                this.processEvent('confirmSpaceDelete', {
+                                    reactEvent,
+                                }),
+                            )}
                             label={'Delete'}
                             icon={'trash'}
                             type={'secondary'}
@@ -231,10 +221,6 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                 </ContextMenuContainer>
             )
         }
-
-        const deleteHandler =
-            this.props.onDeleteSpaceIntent ??
-            wrapClick(() => this.processEvent('deleteSpace', null))
 
         return (
             <ContextMenuContainer>
@@ -267,7 +253,11 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                 </EditArea>
                 <ButtonBox>
                     <PrimaryAction
-                        onClick={deleteHandler}
+                        onClick={wrapClick((reactEvent) =>
+                            this.processEvent('intendToDeleteSpace', {
+                                reactEvent,
+                            }),
+                        )}
                         icon={'trash'}
                         size={'medium'}
                         type={'tertiary'}
@@ -279,14 +269,12 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                 filePath="check"
                                 color="prime1"
                                 heightAndWidth="24px"
-                                onClick={() => {
-                                    this.processEvent('setShowSaveBtn', {
-                                        show: false,
-                                    })
-                                    this.props.onConfirmEdit(
-                                        this.state.nameValue,
+                                onClick={() =>
+                                    this.processEvent(
+                                        'confirmSpaceNameEdit',
+                                        null,
                                     )
-                                }}
+                                }
                             />
                         )}
                     </>

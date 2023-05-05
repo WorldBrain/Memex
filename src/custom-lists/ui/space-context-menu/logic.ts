@@ -13,17 +13,24 @@ export interface Dependencies {
     errorMessage: string | null
     spaceName: string
     loadOwnershipData?: boolean
+    onCancelEdit: () => void
     onSpaceShare?: (remoteListId: string) => void
     copyToClipboard: (text: string) => Promise<boolean>
+    onSpaceNameChange?: (newName: string) => void
+    onConfirmSpaceNameEdit: (newName: string) => Promise<void>
+    onDeleteSpaceIntent?: React.MouseEventHandler
+    onDeleteSpaceConfirm: React.MouseEventHandler
 }
 
 export type Event = UIEvent<{
     shareSpace: null
-    deleteSpace: null
-    cancelDeleteSpace: null
-    setShowSaveBtn: { show: boolean }
+    cancelSpaceNameEdit: null
+    confirmSpaceNameEdit: null
     updateSpaceName: { name: string }
     copyInviteLink: { linkIndex: number }
+    confirmSpaceDelete: { reactEvent: React.MouseEvent }
+    intendToDeleteSpace: { reactEvent: React.MouseEvent }
+    cancelDeleteSpace: null
 }>
 
 export interface State {
@@ -156,7 +163,19 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         )
     }
 
-    deleteSpace: EventHandler<'deleteSpace'> = async ({}) => {
+    confirmSpaceDelete: EventHandler<'confirmSpaceDelete'> = async ({
+        event,
+    }) => {
+        this.dependencies.onDeleteSpaceConfirm(event.reactEvent)
+    }
+
+    intendToDeleteSpace: EventHandler<'intendToDeleteSpace'> = async ({
+        event,
+    }) => {
+        if (this.dependencies.onDeleteSpaceIntent) {
+            this.dependencies.onDeleteSpaceIntent(event.reactEvent)
+            return
+        }
         this.emitMutation({ mode: { $set: 'confirm-space-delete' } })
     }
 
@@ -164,18 +183,29 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         this.emitMutation({ mode: { $set: null } })
     }
 
-    updateSpaceName: EventHandler<'updateSpaceName'> = async ({
-        previousState,
-        event,
-    }) => {
+    updateSpaceName: EventHandler<'updateSpaceName'> = async ({ event }) => {
+        this.dependencies.onSpaceNameChange?.(event.name)
         this.emitMutation({
             nameValue: { $set: event.name },
             showSaveButton: { $set: true },
         })
     }
 
-    setShowSaveBtn: EventHandler<'setShowSaveBtn'> = async ({ event }) => {
-        this.emitMutation({ showSaveButton: { $set: event.show } })
+    cancelSpaceNameEdit: EventHandler<'cancelSpaceNameEdit'> = async ({
+        event,
+    }) => {
+        this.dependencies.onCancelEdit()
+    }
+
+    confirmSpaceNameEdit: EventHandler<'confirmSpaceNameEdit'> = async ({
+        event,
+        previousState,
+    }) => {
+        const newName = previousState.nameValue.trim()
+        this.emitMutation({ showSaveButton: { $set: false } })
+        if (newName.length && newName !== this.dependencies.spaceName) {
+            await this.dependencies.onConfirmSpaceNameEdit(newName)
+        }
     }
 
     copyInviteLink: EventHandler<'copyInviteLink'> = async ({

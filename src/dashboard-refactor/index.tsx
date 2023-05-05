@@ -535,7 +535,7 @@ export class DashboardContainer extends StatefulUIElement<
                     contentSharingBG: this.props.contentShareBG,
                     onCancelEdit: () =>
                         this.processEvent('cancelListEdit', null),
-                    onConfirmEdit: (value) =>
+                    onConfirmSpaceNameEdit: (value) =>
                         this.processEvent('confirmListEdit', { value, listId }),
                     onDeleteSpaceIntent: () =>
                         this.processEvent('setDeletingListId', { listId }),

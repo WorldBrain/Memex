@@ -284,7 +284,7 @@ class SpacePicker extends StatefulUIElement<
                     })
                 }
                 errorMessage={this.state.renameListErrorMessage}
-                onConfirmEdit={async (name) => {
+                onConfirmSpaceNameEdit={async (name) => {
                     await this.processEvent('renameList', {
                         listId: list.localId,
                         name,
