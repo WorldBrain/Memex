@@ -1268,63 +1268,6 @@ export class DashboardContainer extends StatefulUIElement<
         }
     }
 
-    private renderHeaderBar() {
-        // attempt at using the sync header in the dashboard top level, instad of header. leaving this here for now we may need it not sure
-        return (
-            <HeaderBar>
-                <RightHeader>
-                    <SyncStatusHeaderBox
-                        className={
-                            DashboardContainer.SYNC_MENU_TOGGLE_BTN_CLASS
-                        }
-                        onClick={() =>
-                            this.processEvent('setSyncStatusMenuDisplayState', {
-                                isShown: !this.state.syncMenu.isDisplayed,
-                            })
-                        }
-                    >
-                        <Margin>
-                            <SyncStatusIcon
-                                color={deriveStatusIconColor(this.state)}
-                            />
-                        </Margin>
-                        <SyncStatusHeaderText>Sync Status</SyncStatusHeaderText>
-                    </SyncStatusHeaderBox>
-                    <SettingsSection
-                        vertical="auto"
-                        horizontal="17px"
-                        onClick={() => window.open(SETTINGS_URL, '_self')}
-                    >
-                        <Icon heightAndWidth="22px" filePath={icons.settings} />
-                    </SettingsSection>
-                    <SyncStatusMenu
-                        syncStatusIconState={deriveStatusIconColor(this.state)}
-                        {...this.state.syncMenu}
-                        isLoggedIn={this.state.currentUser != null}
-                        outsideClickIgnoreClass={
-                            HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS
-                        }
-                        onLoginClick={() =>
-                            this.processEvent('setShowLoginModal', {
-                                isShown: true,
-                            })
-                        }
-                        onClickOutside={() =>
-                            this.processEvent('setSyncStatusMenuDisplayState', {
-                                isShown: false,
-                            })
-                        }
-                        // onToggleDisplayState={() =>
-                        //     this.processEvent('setSyncStatusMenuDisplayState', {
-                        //         isShown: !this.state.syncMenu.isDisplayed,
-                        //     })
-                        // }
-                    />
-                </RightHeader>
-            </HeaderBar>
-        )
-    }
-
     render() {
         // <GlobalFonts />
         // <GlobalStyle />

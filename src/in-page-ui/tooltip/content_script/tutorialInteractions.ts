@@ -26,7 +26,7 @@ export const insertTutorial = async () => {
         tutorialTarget.setAttribute('id', 'memex-guided-tutorial')
         tutorialTarget.setAttribute(
             'style',
-            'display: flex; height: -webkit-fill-available; width: -webkit-fill-available; position: absolute; justify-content: center; align-items: center;',
+            'display: flex;z-index: 25000000; height: -webkit-fill-available; width: -webkit-fill-available; position: absolute; justify-content: center; align-items: center;',
         )
         document.body.appendChild(tutorialTarget)
 
