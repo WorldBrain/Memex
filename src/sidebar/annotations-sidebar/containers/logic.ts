@@ -306,6 +306,7 @@ export class SidebarContainerLogic extends UILogic<
                 fullPageUrl,
                 user: this.options.currentUser,
                 cache: this.options.annotationsCache,
+                skipListHydration: this.options.sidebarContext === 'dashboard',
                 bgModules: {
                     customLists: this.options.customListsBG,
                     annotations: this.options.annotationsBG,
@@ -349,7 +350,9 @@ export class SidebarContainerLogic extends UILogic<
             )
             .flat()
             .map((unifiedAnnotId) => annotations.byId[unifiedAnnotId])
-            .filter((annot) => annot.body?.length > 0 && annot.selector != null)
+            .filter(
+                (annot) => annot?.body?.length > 0 && annot.selector != null,
+            )
 
         this.options.events?.emit('renderHighlights', {
             highlights,
