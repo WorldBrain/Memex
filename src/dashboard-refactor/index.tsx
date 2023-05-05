@@ -93,6 +93,7 @@ export class DashboardContainer extends StatefulUIElement<
         | 'contentConversationsBG'
         | 'activityIndicatorBG'
         | 'contentShareBG'
+        | 'pageIndexingBG'
         | 'syncSettingsBG'
         | 'annotationsBG'
         | 'pdfViewerBG'
@@ -117,6 +118,7 @@ export class DashboardContainer extends StatefulUIElement<
         contentConversationsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
         contentScriptsBG: runInBackground(),
+        pageIndexingBG: runInBackground(),
         contentShareBG: runInBackground(),
         syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
@@ -1446,6 +1448,7 @@ export class DashboardContainer extends StatefulUIElement<
                             contentSharingBG={this.props.contentShareBG}
                             contentScriptsBG={this.props.contentScriptsBG}
                             syncSettingsBG={this.props.syncSettingsBG}
+                            pageIndexingBG={this.props.pageIndexingBG}
                             pageActivityIndicatorBG={
                                 this.props.pageActivityIndicatorBG
                             }

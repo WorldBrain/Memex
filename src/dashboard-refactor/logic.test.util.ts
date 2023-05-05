@@ -183,6 +183,7 @@ export async function setupTest(
         authBG: device.backgroundModules.auth.remoteFunctions,
         tagsBG: device.backgroundModules.tags.remoteFunctions,
         syncSettingsBG: device.backgroundModules.syncSettings.remoteFunctions,
+        pageIndexingBG: device.backgroundModules.pages.remoteFunctions as any,
         pageActivityIndicatorBG:
             device.backgroundModules.pageActivityIndicator.remoteFunctions,
         document: args.mockDocument,

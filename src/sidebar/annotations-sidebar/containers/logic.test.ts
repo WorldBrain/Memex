@@ -39,6 +39,7 @@ import type {
     SharedList,
     SharedListEntry,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -127,6 +128,14 @@ const setupLogicHelper = async ({
         contentConversationsBG:
             backgroundModules.contentConversations.remoteFunctions,
         syncSettingsBG: backgroundModules.syncSettings,
+        pageIndexingBG: {
+            lookupPageTitleForUrl:
+                backgroundModules.pages.lookupPageTitleForUrl,
+            initContentIdentifier:
+                backgroundModules.pages.initContentIdentifier,
+            waitForContentIdentifier:
+                backgroundModules.pages.waitForContentIdentifier,
+        },
         getCurrentUser: () => (withAuth ? DATA.CREATOR_1 : null),
         annotationsBG: annotationsBG,
         events: fakeEmitter as any,
@@ -314,7 +323,17 @@ describe('SidebarContainerLogic', () => {
         }) => {
             const fullPageUrl = 'https://memex.garden'
             const normalizedPageUrl = 'memex.garden'
+            const pageTitle = 'test page title'
             const listName = createPageLinkListTitle()
+
+            await device.storageManager.collection('pages').createObject({
+                fullUrl: fullPageUrl,
+                fullTitle: pageTitle,
+                url: normalizedPageUrl,
+                domain: normalizedPageUrl,
+                hostname: normalizedPageUrl,
+            })
+
             const { sidebar, annotationsCache } = await setupLogicHelper({
                 device,
                 withAuth: true,
@@ -379,7 +398,7 @@ describe('SidebarContainerLogic', () => {
                     unifiedId: expect.anything(),
                     type: 'page-link',
                     name: listName,
-                    pageTitle: listName, // TODO: Get the actual page title - maybe just query the DB using URL state
+                    pageTitle,
                     remoteId: sharedListsAfter[0].id.toString(),
                     sharedListEntryId: sharedListEntriesAfter[0].id.toString(),
                     normalizedPageUrl,

@@ -35,6 +35,7 @@ import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-ind
 import type { SummarizationInterface } from 'src/summarization-llm/background'
 import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 
 export interface RootState {
     loadState: TaskState
@@ -79,6 +80,7 @@ export interface DashboardDependencies {
     annotationsBG: AnnotationInterface<'caller'>
     activityIndicatorBG: ActivityIndicatorInterface
     syncSettingsBG: RemoteSyncSettingsInterface
+    pageIndexingBG: PageIndexingInterface<'caller'>
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     summarizeBG: SummarizationInterface<'caller'>
     pdfViewerBG: PDFRemoteInterface

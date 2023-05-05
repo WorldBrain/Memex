@@ -185,6 +185,7 @@ export async function main(
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
     const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
+    const pageIndexingBG = runInBackground<PageIndexingInterface<'caller'>>()
     const contentSharingBG = runInBackground<ContentSharingInterface>()
     const tagsBG = runInBackground<RemoteTagsInterface>()
     const contentScriptsBG = runInBackground<
@@ -527,6 +528,7 @@ export async function main(
                 authBG,
                 annotationsBG,
                 summarizeBG,
+                pageIndexingBG,
                 syncSettingsBG,
                 contentSharingBG,
                 pageActivityIndicatorBG,

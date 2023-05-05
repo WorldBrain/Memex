@@ -2319,21 +2319,21 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         await executeUITask(this, 'pageLinkCreateState', async () => {
+            const pageTitle = await this.options.pageIndexingBG.lookupPageTitleForUrl(
+                { fullPageUrl },
+            )
+
             const {
                 remoteListId,
                 remoteListEntryId,
             } = await this.options.contentSharingBG.createPageLink({
                 fullPageUrl,
             })
-            const link = getSinglePageShareUrl({
-                remoteListId,
-                remoteListEntryId,
-            })
             const listName = createPageLinkListTitle()
             this.options.annotationsCache.addList<'page-link'>({
                 type: 'page-link',
                 name: listName,
-                pageTitle: listName, // TODO: Get the actual page title - maybe just query the DB using URL state
+                pageTitle: pageTitle ?? listName,
                 remoteId: remoteListId.toString(),
                 sharedListEntryId: remoteListEntryId.toString(),
                 normalizedPageUrl: normalizeUrl(fullPageUrl),
@@ -2341,8 +2341,6 @@ export class SidebarContainerLogic extends UILogic<
                 unifiedAnnotationIds: [],
                 hasRemoteAnnotationsToLoad: false,
             })
-
-            // TODO: Set some other state for the actual button,
         })
     }
 }

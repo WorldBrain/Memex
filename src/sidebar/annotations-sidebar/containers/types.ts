@@ -34,6 +34,7 @@ import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/con
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { Storage, Runtime } from 'webextension-polyfill'
+import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -61,6 +62,7 @@ export interface SidebarContainerDependencies {
     contentConversationsBG: ContentConversationsInterface
     syncSettingsBG: RemoteSyncSettingsInterface
     contentScriptsBG: ContentScriptsInterface<'caller'>
+    pageIndexingBG: PageIndexingInterface<'caller'>
     authBG: AuthRemoteFunctionsInterface
     subscription: SubscriptionsService
     theme?: MemexTheme & Partial<SidebarTheme>
