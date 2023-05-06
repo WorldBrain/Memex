@@ -361,7 +361,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                         <TitleArea>
                             <Title>Summarise this page or ask questions</Title>
                             <KeyboardShortcuts
-                                keys={[getKeyName({ key: 'alt' }), 'A']}
+                                keys={[getKeyName({ key: 'alt' }), 'X']}
                             />
                         </TitleArea>
                         <Description>
