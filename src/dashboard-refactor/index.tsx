@@ -536,11 +536,13 @@ export class DashboardContainer extends StatefulUIElement<
                     onCancelEdit: () =>
                         this.processEvent('cancelListEdit', null),
                     onConfirmSpaceNameEdit: (value) =>
-                        this.processEvent('confirmListEdit', { value, listId }),
+                        this.processEvent('confirmListEdit', {
+                            value,
+                            listId,
+                            skipDBOps: true,
+                        }),
                     onDeleteSpaceIntent: () =>
                         this.processEvent('setDeletingListId', { listId }),
-                    onDeleteSpaceConfirm: () =>
-                        this.processEvent('confirmListDelete', null),
                     toggleMenu: () =>
                         this.processEvent('setShowMoreMenuListId', { listId }),
                     onSpaceShare: () =>

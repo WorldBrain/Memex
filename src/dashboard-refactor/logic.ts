@@ -3477,11 +3477,14 @@ export class DashboardLogic extends UILogic<State, Events> {
                         editingListId: { $set: undefined },
                     },
                 })
-                await this.options.listsBG.updateListName({
-                    id: listData.localId,
-                    oldName,
-                    newName,
-                })
+
+                if (!event.skipDBOps) {
+                    await this.options.listsBG.updateListName({
+                        id: listData.localId,
+                        oldName,
+                        newName,
+                    })
+                }
             },
         )
     }

@@ -10,16 +10,16 @@ export interface Dependencies {
     spacesBG: RemoteCollectionsInterface
     localListId: number
     remoteListId: string | null
-    errorMessage: string | null
+    errorMessage?: string
     spaceName: string
     loadOwnershipData?: boolean
     onCancelEdit: () => void
     onSpaceShare?: (remoteListId: string) => void
     copyToClipboard: (text: string) => Promise<boolean>
     onSpaceNameChange?: (newName: string) => void
-    onConfirmSpaceNameEdit: (newName: string) => Promise<void>
+    onConfirmSpaceNameEdit: (newName: string) => void
     onDeleteSpaceIntent?: React.MouseEventHandler
-    onDeleteSpaceConfirm: React.MouseEventHandler
+    onDeleteSpaceConfirm?: React.MouseEventHandler
 }
 
 export type Event = UIEvent<{
@@ -166,7 +166,10 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     confirmSpaceDelete: EventHandler<'confirmSpaceDelete'> = async ({
         event,
     }) => {
-        this.dependencies.onDeleteSpaceConfirm(event.reactEvent)
+        this.dependencies.onDeleteSpaceConfirm?.(event.reactEvent)
+        await this.dependencies.spacesBG.removeList({
+            id: this.dependencies.localListId,
+        })
     }
 
     intendToDeleteSpace: EventHandler<'intendToDeleteSpace'> = async ({
@@ -201,10 +204,17 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         event,
         previousState,
     }) => {
+        const oldName = this.dependencies.spaceName
         const newName = previousState.nameValue.trim()
         this.emitMutation({ showSaveButton: { $set: false } })
-        if (newName.length && newName !== this.dependencies.spaceName) {
-            await this.dependencies.onConfirmSpaceNameEdit(newName)
+
+        if (newName.length && newName !== oldName) {
+            this.dependencies.onConfirmSpaceNameEdit(newName)
+            await this.dependencies.spacesBG.updateListName({
+                id: this.dependencies.localListId,
+                oldName,
+                newName,
+            })
         }
     }
 

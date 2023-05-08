@@ -424,11 +424,12 @@ export default class SpacePickerLogic extends UILogic<
             ]
         }
 
-        await this.dependencies.spacesBG.updateListName({
-            id: event.listId,
-            newName: event.name,
-            oldName: previousState.displayEntries[stateEntryIndex].name,
-        })
+        // NOTE: Done in SpaceContextMenuLogic
+        // await this.dependencies.spacesBG.updateListName({
+        //     id: event.listId,
+        //     newName: event.name,
+        //     oldName: previousState.displayEntries[stateEntryIndex].name,
+        // })
     }
 
     deleteList: EventHandler<'deleteList'> = async ({
@@ -457,7 +458,10 @@ export default class SpacePickerLogic extends UILogic<
                 ...this.defaultEntries.slice(defaultEntryIndex + 1),
             ]
         }
-        await this.dependencies.spacesBG.removeList({ id: event.listId })
+
+        // NOTE: Done in SpaceContextMenuLogic
+        // await this.dependencies.spacesBG.removeList({ id: event.listId })
+
         this.emitMutation({
             contextMenuListId: { $set: null },
         })
