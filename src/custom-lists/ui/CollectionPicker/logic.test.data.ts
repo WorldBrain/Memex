@@ -61,17 +61,17 @@ export const TEST_LIST_METADATA = [
     },
 ]
 
-export const testListToSuggestion = (list: PageList) => ({
+export const testListToSuggestion = (list: PageList, focused = false) => ({
     createdAt: list.createdAt.getTime(),
-    focused: false,
+    focused,
     localId: list.id,
     name: list.name,
     remoteId:
         TEST_LIST_METADATA.find((d) => d.localId === list.id)?.remoteId ?? null,
 })
 
-export const TEST_LIST_SUGGESTIONS = TEST_LISTS.slice(0, 5).map(
-    testListToSuggestion,
+export const TEST_LIST_SUGGESTIONS = TEST_LISTS.slice(0, 5).map((list, i) =>
+    testListToSuggestion(list, i === 0),
 )
 
 export const derivePickerEntries = (

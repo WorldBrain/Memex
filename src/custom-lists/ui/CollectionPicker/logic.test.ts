@@ -200,7 +200,7 @@ describe('SpacePickerLogic', () => {
     it('should correctly search for a entry when entry is not selected', async ({
         device,
     }) => {
-        const queryResult = DATA.derivePickerEntries([DATA.TEST_LISTS[0]])
+        const queryResult = [DATA.TEST_LIST_SUGGESTIONS[0]]
 
         const { testLogic } = await setupLogicHelper({
             device,
@@ -297,7 +297,7 @@ describe('SpacePickerLogic', () => {
             skipDebounce: true,
         })
         expect(testLogic.state.displayEntries).toEqual([
-            DATA.testListToSuggestion(DATA.TEST_LISTS[5]),
+            DATA.testListToSuggestion(DATA.TEST_LISTS[5], true),
         ])
     })
 
@@ -314,19 +314,21 @@ describe('SpacePickerLogic', () => {
             }),
         )
 
-        const expectStateToEqualWithFocus = (focusedEntryId: number) =>
-            expect(testLogic.state).toEqual(
+        const expectStateToEqualWithFocus = (
+            focusedEntryId: number,
+            iteration: number,
+        ) =>
+            expect([iteration, testLogic.state]).toEqual([
+                iteration,
                 expect.objectContaining({
-                    displayEntries: DATA.TEST_LIST_SUGGESTIONS.map((entry) =>
-                        entry.localId === focusedEntryId
-                            ? { ...entry, focused: true }
-                            : entry,
-                    ),
+                    displayEntries: DATA.TEST_LIST_SUGGESTIONS.map((entry) => ({
+                        ...entry,
+                        focused: entry.localId === focusedEntryId,
+                    })),
                 }),
-            )
+            ])
 
         const keyPresses: [KeyEvent, number][] = [
-            ['ArrowDown', DATA.TEST_LISTS[0].id],
             ['ArrowDown', DATA.TEST_LISTS[1].id],
             ['ArrowDown', DATA.TEST_LISTS[2].id],
             ['ArrowDown', DATA.TEST_LISTS[3].id],
@@ -346,35 +348,38 @@ describe('SpacePickerLogic', () => {
             ['ArrowDown', DATA.TEST_LISTS[0].id],
         ]
 
+        let i = 0
         for (const [key, focusedEntryId] of keyPresses) {
             await testLogic.processEvent('keyPress', {
                 event: { key } as KeyboardEvent,
             })
-            expectStateToEqualWithFocus(focusedEntryId)
+            expectStateToEqualWithFocus(focusedEntryId, i)
+            i++
         }
     })
 
-    it('should trigger props.onSubmit upon ctrl/cmd+Enter press', async ({
-        device,
-    }) => {
-        let wasSubmitted = false
-        const { testLogic } = await setupLogicHelper({
-            device,
-            onSubmit: () => (wasSubmitted = true),
-        })
+    // NOTE: This functionality is disabled
+    // it('should trigger props.onSubmit upon ctrl/cmd+Enter press', async ({
+    //     device,
+    // }) => {
+    //     let wasSubmitted = false
+    //     const { testLogic } = await setupLogicHelper({
+    //         device,
+    //         onSubmit: () => (wasSubmitted = true),
+    //     })
 
-        await testLogic.init()
+    //     await testLogic.init()
 
-        expect(wasSubmitted).toBe(false)
-        await testLogic.processEvent('keyPress', {
-            event: { key: 'Enter' } as KeyboardEvent,
-        })
-        expect(wasSubmitted).toBe(false)
-        await testLogic.processEvent('keyPress', {
-            event: { key: 'Enter', metaKey: true } as KeyboardEvent,
-        })
-        expect(wasSubmitted).toBe(true)
-    })
+    //     expect(wasSubmitted).toBe(false)
+    //     await testLogic.processEvent('keyPress', {
+    //         event: { key: 'Enter' } as KeyboardEvent,
+    //     })
+    //     expect(wasSubmitted).toBe(false)
+    //     await testLogic.processEvent('keyPress', {
+    //         event: { key: 'Enter', metaKey: true } as KeyboardEvent,
+    //     })
+    //     expect(wasSubmitted).toBe(true)
+    // })
 
     it('should correctly validate new entries', async ({ device }) => {
         const { entryPickerLogic, testLogic } = await setupLogicHelper({
@@ -954,7 +959,7 @@ describe('SpacePickerLogic', () => {
             createdAt: DATA.TEST_LISTS[5].createdAt.getTime(),
             localId: DATA.TEST_LISTS[5].id,
             name: DATA.TEST_LISTS[5].name,
-            focused: false,
+            focused: true,
             remoteId: null,
         }
 
@@ -1163,9 +1168,13 @@ describe('SpacePickerLogic', () => {
             expect.objectContaining({
                 name: newEntryText,
                 localId: newEntryId,
-                focused: false,
+                focused: true,
             }),
-            ...DATA.TEST_LIST_SUGGESTIONS,
+            {
+                ...DATA.TEST_LIST_SUGGESTIONS[0],
+                focused: false,
+            },
+            ...DATA.TEST_LIST_SUGGESTIONS.slice(1),
         ])
         expect(testLogic.state).toEqual(
             expect.objectContaining({
@@ -1226,9 +1235,13 @@ describe('SpacePickerLogic', () => {
                     expect.objectContaining({
                         name: newEntryText,
                         localId: newEntryId,
-                        focused: false,
+                        focused: true,
                     }),
-                    ...DATA.TEST_LIST_SUGGESTIONS,
+                    {
+                        ...DATA.TEST_LIST_SUGGESTIONS[0],
+                        focused: false,
+                    },
+                    ...DATA.TEST_LIST_SUGGESTIONS.slice(1),
                 ],
             }),
         )
