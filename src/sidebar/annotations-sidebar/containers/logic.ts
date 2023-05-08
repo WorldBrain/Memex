@@ -85,6 +85,7 @@ import {
 } from 'src/util/subscriptions/storage'
 import {
     createPageLinkListTitle,
+    getListShareUrl,
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 
@@ -750,6 +751,35 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         await this.options.copyToClipboard(link)
+    }
+
+    openWebUIPageForSpace: EventHandler<'openWebUIPageForSpace'> = async ({
+        event,
+    }) => {
+        const listData = this.options.annotationsCache.lists.byId[
+            event.unifiedListId
+        ]
+        if (!listData) {
+            throw new Error(
+                'Requested space to open in Web UI not found locally',
+            )
+        }
+        if (!listData.remoteId) {
+            throw new Error(
+                'Requested space to open in Web UI has not been shared',
+            )
+        }
+
+        const webUIUrl =
+            listData.type === 'page-link'
+                ? getSinglePageShareUrl({
+                      remoteListId: listData.remoteId,
+                      remoteListEntryId: listData.sharedListEntryId,
+                  })
+                : getListShareUrl({
+                      remoteListId: listData.remoteId,
+                  })
+        window.open(webUIUrl, '_blank')
     }
 
     setPillVisibility: EventHandler<'setPillVisibility'> = async ({

@@ -129,7 +129,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     sharingAccess: AnnotationSharingAccess
     isDataLoading: boolean
     theme: Partial<SidebarTheme>
-    openCollectionPage: (remoteListId: string) => void
+    openWebUIPage: (unifiedListId: UnifiedList['unifiedId']) => void
     onShareAllNotesClick: () => void
     onCopyBtnClick: () => void
     onMenuItemClick: (sortingFn) => void
@@ -753,7 +753,11 @@ export class AnnotationsSidebar extends React.Component<
                     <ButtonContainer>
                         <ActionButtons>
                             <TooltipBox
-                                tooltipText="Go to Space"
+                                tooltipText={
+                                    listData.type === 'page-link'
+                                        ? 'Go to page in Web Reader'
+                                        : 'Go to Space'
+                                }
                                 placement="bottom"
                             >
                                 <Icon
@@ -761,8 +765,8 @@ export class AnnotationsSidebar extends React.Component<
                                     height="20px"
                                     onClick={(e) => {
                                         e.stopPropagation()
-                                        this.props.openCollectionPage(
-                                            listData.remoteId,
+                                        this.props.openWebUIPage(
+                                            listData.unifiedId,
                                         )
                                     }}
                                 />

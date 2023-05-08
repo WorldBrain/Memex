@@ -762,11 +762,10 @@ export class AnnotationsSidebarContainer<
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}
                             ref={this.sidebarRef}
-                            openCollectionPage={(remoteListId) =>
-                                window.open(
-                                    getListShareUrl({ remoteListId }),
-                                    '_blank',
-                                )
+                            openWebUIPage={(unifiedListId) =>
+                                this.processEvent('openWebUIPageForSpace', {
+                                    unifiedListId,
+                                })
                             }
                             onMenuItemClick={({ sortingFn }) =>
                                 this.processEvent('sortAnnotations', {

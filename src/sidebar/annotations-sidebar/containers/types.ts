@@ -294,6 +294,8 @@ interface SidebarEvents {
         rerenderHighlights?: boolean
     }
 
+    openWebUIPageForSpace: { unifiedListId: UnifiedList['unifiedId'] }
+
     // Search
     paginateSearch: null
     setPillVisibility: { value: string }
