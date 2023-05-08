@@ -241,6 +241,7 @@ export class SidebarContainerLogic extends UILogic<
             showAllNotesCopyPaster: false,
             pageSummary: '',
             selectedListId: null,
+            activeListContextMenuId: null,
 
             commentBox: { ...INIT_FORM_STATE },
 
@@ -780,6 +781,45 @@ export class SidebarContainerLogic extends UILogic<
                       remoteListId: listData.remoteId,
                   })
         window.open(webUIUrl, '_blank')
+    }
+
+    openContextMenuForList: EventHandler<'openContextMenuForList'> = async ({
+        event,
+        previousState,
+    }) => {
+        const listInstance = previousState.listInstances[event.unifiedListId]
+        if (!listInstance) {
+            throw new Error(
+                'Could not find list instance to open context menu for',
+            )
+        }
+
+        const nextActiveId =
+            previousState.activeListContextMenuId === event.unifiedListId
+                ? null
+                : event.unifiedListId
+
+        this.emitMutation({ activeListContextMenuId: { $set: nextActiveId } })
+    }
+
+    editListName: EventHandler<'editListName'> = async ({ event }) => {
+        this.options.annotationsCache.updateList({
+            unifiedId: event.unifiedListId,
+            name: event.newName,
+        })
+    }
+
+    shareList: EventHandler<'shareList'> = async ({ event }) => {
+        this.options.annotationsCache.updateList({
+            unifiedId: event.unifiedListId,
+            remoteId: event.remoteListId,
+        })
+    }
+
+    deleteList: EventHandler<'deleteList'> = async ({ event }) => {
+        this.options.annotationsCache.removeList({
+            unifiedId: event.unifiedListId,
+        })
     }
 
     setPillVisibility: EventHandler<'setPillVisibility'> = async ({

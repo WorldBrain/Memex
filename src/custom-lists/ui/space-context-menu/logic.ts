@@ -13,7 +13,7 @@ export interface Dependencies {
     errorMessage?: string
     spaceName: string
     loadOwnershipData?: boolean
-    onCancelEdit: () => void
+    onCancelEdit?: () => void
     onSpaceShare?: (remoteListId: string) => void
     copyToClipboard: (text: string) => Promise<boolean>
     onSpaceNameChange?: (newName: string) => void
@@ -194,10 +194,8 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         })
     }
 
-    cancelSpaceNameEdit: EventHandler<'cancelSpaceNameEdit'> = async ({
-        event,
-    }) => {
-        this.dependencies.onCancelEdit()
+    cancelSpaceNameEdit: EventHandler<'cancelSpaceNameEdit'> = async ({}) => {
+        this.dependencies.onCancelEdit?.()
     }
 
     confirmSpaceNameEdit: EventHandler<'confirmSpaceNameEdit'> = async ({

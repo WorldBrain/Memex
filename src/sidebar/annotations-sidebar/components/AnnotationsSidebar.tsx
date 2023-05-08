@@ -104,6 +104,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         closePicker?: () => void,
         referenceElement?: React.RefObject<HTMLDivElement>,
     ) => JSX.Element
+    renderContextMenuForList: (listData: UnifiedList) => JSX.Element
 
     setActiveTab: (tab: SidebarTab) => React.MouseEventHandler
     expandFollowedListNotes: (listId: string) => void
@@ -129,6 +130,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     sharingAccess: AnnotationSharingAccess
     isDataLoading: boolean
     theme: Partial<SidebarTheme>
+    openContextMenuForList: (
+        unifiedListId: UnifiedList['unifiedId'] | null,
+    ) => void
     openWebUIPage: (unifiedListId: UnifiedList['unifiedId']) => void
     onShareAllNotesClick: () => void
     onCopyBtnClick: () => void
@@ -176,7 +180,6 @@ interface AnnotationsSidebarState {
     showAllNotesShareMenu: boolean
     showPageSpacePicker: boolean
     showSortDropDown: boolean
-    showSpaceSharePopout?: UnifiedList['unifiedId']
     linkCopyState: boolean
     othersOrOwnAnnotationsState: {
         [unifiedId: string]: 'othersAnnotations' | 'ownAnnotations' | 'all'
@@ -198,7 +201,7 @@ export class AnnotationsSidebar extends React.Component<
     private copyButtonRef = React.createRef<HTMLDivElement>()
     private pageShareButtonRef = React.createRef<HTMLDivElement>()
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
-    private spaceShareButtonRef: {
+    private spaceContextBtnRefs: {
         [unifiedListId: string]: React.RefObject<HTMLDivElement>
     } = {}
 
@@ -771,55 +774,42 @@ export class AnnotationsSidebar extends React.Component<
                                     }}
                                 />
                             </TooltipBox>
+                            {listData.localId != null && (
+                                <TooltipBox
+                                    tooltipText="Share & Edit"
+                                    placement="bottom"
+                                >
+                                    <Icon
+                                        icon="dots"
+                                        height="20px"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            this.props.openContextMenuForList(
+                                                listData.unifiedId,
+                                            )
+                                        }}
+                                        containerRef={
+                                            this.spaceContextBtnRefs[
+                                                listData.unifiedId
+                                            ]
+                                        }
+                                    />
+                                </TooltipBox>
+                            )}
                         </ActionButtons>
                         {listData.creator?.id === this.props.currentUser?.id &&
-                        listData.remoteId != null ? (
-                            <TooltipBox
-                                tooltipText="Space is Shared"
-                                placement="bottom"
-                            >
-                                <Icon
-                                    filePath="peopleFine"
-                                    heightAndWidth="20px"
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        this.setState({
-                                            showSpaceSharePopout:
-                                                listData.unifiedId,
-                                        })
-                                    }}
-                                    containerRef={
-                                        this.spaceShareButtonRef[
-                                            listData.unifiedId
-                                        ]
-                                    }
-                                />
-                            </TooltipBox>
-                        ) : undefined}
-                        {/* {listData.creator?.id === this.props.currentUser?.id &&
-                        listData.remoteId == null ? (
-                            <TooltipBox
-                                tooltipText="Share Space"
-                                placement="bottom"
-                            >
-                                <Icon
-                                    icon="link"
-                                    height="20px"
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        this.setState({
-                                            showSpaceSharePopout:
-                                                listData.unifiedId,
-                                        })
-                                    }}
-                                    containerRef={
-                                        this.spaceShareButtonRef[
-                                            listData.unifiedId
-                                        ]
-                                    }
-                                />
-                            </TooltipBox>
-                        ) : undefined} */}
+                            listData.remoteId != null && (
+                                <TooltipBox
+                                    tooltipText="Space is Shared"
+                                    placement="bottom"
+                                >
+                                    <Icon
+                                        hoverOff
+                                        filePath="peopleFine"
+                                        heightAndWidth="20px"
+                                    />
+                                </TooltipBox>
+                            )}
                         {listInstance.annotationRefsLoadState !== 'success' &&
                         listData.hasRemoteAnnotationsToLoad ? (
                             this.renderLoader(undefined, 20)
@@ -841,9 +831,9 @@ export class AnnotationsSidebar extends React.Component<
                     </ButtonContainer>
                 </FollowedListRow>
                 {this.renderListAnnotations(listData.unifiedId)}
-                {this.renderShowShareSpacePopout(
+                {this.renderContextMenu(
                     listData,
-                    this.spaceShareButtonRef[listData.unifiedId],
+                    this.spaceContextBtnRefs[listData.unifiedId],
                 )}
             </FollowedListNotesContainer>
         )
@@ -859,108 +849,26 @@ export class AnnotationsSidebar extends React.Component<
         return `https://staging.memex.social`
     }
 
-    private renderShowShareSpacePopout(
+    private renderContextMenu(
         listData: UnifiedList,
-        ref: React.RefObject<any>,
+        ref?: React.RefObject<HTMLDivElement>,
     ) {
-        if (
-            !this.state.showSpaceSharePopout ||
-            this.state.showSpaceSharePopout !== listData.unifiedId
-        ) {
+        if (this.props.activeListContextMenuId !== listData.unifiedId) {
             return
         }
 
-        if (
-            cacheUtils.deriveListOwnershipStatus(
-                listData,
-                this.props.currentUser,
-            ) === 'Creator'
-        ) {
-            return (
-                <PopoutBox
-                    placement="bottom"
-                    closeComponent={() => {
-                        this.setState({
-                            showSpaceSharePopout: undefined,
-                        })
-                    }}
-                    strategy={'fixed'}
-                    targetElementRef={ref.current}
-                >
-                    TEsting this
-                    {/* <SpaceContextMenu
-                        {...this.props}
-                        {...this.state}
-                        contentSharingBG={this.props.contentSharing}
-                        spacesBG={collections}
-                        spaceName={listData.name}
-                        localListId={listData.localId}
-                        remoteListId={listData.remoteId}
-                        editableProps={this.props.editableProps!}
-                        // isMenuDisplayed={this.state.showSpaceSharePopout}
-                        // onDeleteSpaceIntent={
-                        //     this.props.onDeleteClick
-                        // }
-                        // onSpaceShare={onSpaceShare}
-                        // cancelSpaceNameEdit={this.props.cancelSpaceNameEdit()}
-                    /> */}
-                </PopoutBox>
-            )
-        }
-        if (
-            cacheUtils.deriveListOwnershipStatus(
-                listData,
-                this.props.currentUser,
-            ) === 'Follower' ||
-            cacheUtils.deriveListOwnershipStatus(
-                listData,
-                this.props.currentUser,
-            ) === 'Contributor'
-        ) {
-            return (
-                <PopoutBox
-                    placement="bottom"
-                    closeComponent={() => {
-                        this.setState({
-                            showSpaceSharePopout: undefined,
-                        })
-                    }}
-                    strategy={'fixed'}
-                    targetElementRef={ref.current}
-                >
-                    <CopyBox>
-                        <LinkFrame>
-                            {!this.state.linkCopyState
-                                ? (
-                                      this.getBaseUrl() +
-                                      `/c/${listData.remoteId}`
-                                  ).replace('https://', '')
-                                : 'Copied to clipboard'}
-                        </LinkFrame>
-                        <PrimaryAction
-                            type={'primary'}
-                            size={'medium'}
-                            label={'copy'}
-                            onClick={() => {
-                                this.setState({
-                                    linkCopyState: true,
-                                })
-                                setTimeout(() => {
-                                    this.setState({
-                                        linkCopyState: false,
-                                    })
-                                }, 2000)
-                                navigator.clipboard.writeText(
-                                    this.getBaseUrl() +
-                                        `/c/${listData.remoteId}`,
-                                )
-                            }}
-                            icon={!this.state.linkCopyState ? 'copy' : 'check'}
-                        />
-                    </CopyBox>
-                </PopoutBox>
-            )
-        }
+        return (
+            <PopoutBox
+                strategy="fixed"
+                placement="bottom"
+                targetElementRef={ref?.current}
+                closeComponent={() =>
+                    this.props.openContextMenuForList(listData.unifiedId)
+                }
+            >
+                {this.props.renderContextMenuForList(listData)}
+            </PopoutBox>
+        )
     }
 
     private renderSharedNotesByList() {
@@ -1024,7 +932,7 @@ export class AnnotationsSidebar extends React.Component<
                                 const listInstance =
                                     listInstances[listData.unifiedId]
 
-                                this.spaceShareButtonRef[
+                                this.spaceContextBtnRefs[
                                     listData.unifiedId
                                 ] = React.createRef<HTMLDivElement>()
 
@@ -1087,6 +995,10 @@ export class AnnotationsSidebar extends React.Component<
                             {pageLinkLists.map((listData) => {
                                 const listInstance =
                                     listInstances[listData.unifiedId]
+
+                                this.spaceContextBtnRefs[
+                                    listData.unifiedId
+                                ] = React.createRef<HTMLDivElement>()
 
                                 return this.renderSpacesItem(
                                     listData,

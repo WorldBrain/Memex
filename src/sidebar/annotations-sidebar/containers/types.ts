@@ -137,6 +137,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     }
 
     activeAnnotationId: UnifiedAnnotation['unifiedId'] | null
+    activeListContextMenuId: UnifiedList['unifiedId'] | null
 
     listInstances: { [unifiedListId: UnifiedList['unifiedId']]: ListInstance }
     annotationCardInstances: { [instanceId: string]: AnnotationCardInstance }
@@ -279,6 +280,11 @@ interface SidebarEvents {
     // Selected space management
     setSelectedList: { unifiedListId: UnifiedList['unifiedId'] | null }
     setSelectedListFromWebUI: { sharedListId: string }
+
+    openContextMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
+    editListName: { unifiedListId: UnifiedList['unifiedId']; newName: string }
+    deleteList: { unifiedListId: UnifiedList['unifiedId'] }
+    shareList: { unifiedListId: UnifiedList['unifiedId']; remoteListId: string }
 
     goToAnnotationInNewTab: {
         unifiedAnnotationId: UnifiedAnnotation['unifiedId']

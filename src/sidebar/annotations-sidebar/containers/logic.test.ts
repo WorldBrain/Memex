@@ -1373,7 +1373,7 @@ describe('SidebarContainerLogic', () => {
                     localId: localAnnotId,
                     remoteId: undefined,
                     normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
-                    creator: undefined, // NOTE: we're not auth'd
+                    creator: null, // NOTE: we're not auth'd
                     comment: DATA.COMMENT_1,
                     body: undefined,
                     selector: undefined,
@@ -1467,7 +1467,7 @@ describe('SidebarContainerLogic', () => {
                     localId: localAnnotId,
                     remoteId: undefined,
                     normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
-                    creator: undefined, // NOTE: we're not auth'd
+                    creator: null, // NOTE: we're not auth'd
                     comment: DATA.COMMENT_1,
                     body: undefined,
                     selector: undefined,
@@ -1655,7 +1655,7 @@ describe('SidebarContainerLogic', () => {
                     localId: localAnnotId,
                     remoteId: undefined,
                     normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
-                    creator: undefined, // NOTE: we're not auth'd
+                    creator: null, // NOTE: we're not auth'd
                     comment: DATA.COMMENT_1,
                     body: undefined,
                     selector: undefined,

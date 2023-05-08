@@ -51,6 +51,7 @@ import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/lib/common-ui/components/block-content'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
+import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -762,6 +763,11 @@ export class AnnotationsSidebarContainer<
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}
                             ref={this.sidebarRef}
+                            openContextMenuForList={(unifiedListId) =>
+                                this.processEvent('openContextMenuForList', {
+                                    unifiedListId,
+                                })
+                            }
                             openWebUIPage={(unifiedListId) =>
                                 this.processEvent('openWebUIPageForSpace', {
                                     unifiedListId,
@@ -886,6 +892,34 @@ export class AnnotationsSidebarContainer<
                             renderShareMenuForAnnotation={
                                 this.renderShareMenuForAnnotation
                             }
+                            renderContextMenuForList={(listData) => (
+                                <SpaceContextMenu
+                                    contentSharingBG={
+                                        this.props.contentSharingBG
+                                    }
+                                    spacesBG={this.props.customListsBG}
+                                    spaceName={listData.name}
+                                    localListId={listData.localId}
+                                    remoteListId={listData.remoteId ?? null}
+                                    onConfirmSpaceNameEdit={(newName) =>
+                                        this.processEvent('editListName', {
+                                            unifiedListId: listData.unifiedId,
+                                            newName,
+                                        })
+                                    }
+                                    onSpaceShare={(remoteListId) =>
+                                        this.processEvent('shareList', {
+                                            unifiedListId: listData.unifiedId,
+                                            remoteListId,
+                                        })
+                                    }
+                                    onDeleteSpaceConfirm={() =>
+                                        this.processEvent('deleteList', {
+                                            unifiedListId: listData.unifiedId,
+                                        })
+                                    }
+                                />
+                            )}
                             activeShareMenuNoteId={
                                 this.state.activeShareMenuNoteId
                             }
