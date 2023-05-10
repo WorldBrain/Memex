@@ -25,13 +25,11 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { getListShareUrl } from 'src/content-sharing/utils'
-import { siftListsIntoCategories } from 'src/annotations/cache/utils'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 
 export interface Props extends SpacePickerDependencies {}
@@ -245,10 +243,7 @@ class SpacePicker extends StatefulUIElement<
     )
 
     private renderListRows() {
-        let { myLists, pageLinkLists } = siftListsIntoCategories(
-            normalizedStateToArray(this.state.displayEntries),
-            this.state.currentUser,
-        )
+        let myLists = normalizedStateToArray(this.state.displayEntries)
         if (this.state.query.trim().length > 0) {
             myLists = myLists.filter((list) =>
                 this.state.filteredListIds.includes(list.unifiedId),
