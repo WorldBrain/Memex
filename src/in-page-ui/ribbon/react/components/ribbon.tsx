@@ -230,6 +230,7 @@ export default class Ribbon extends Component<Props, State> {
             >
                 <CollectionPicker
                     {...this.props.lists}
+                    shouldHydrateCacheOnInit
                     authBG={this.props.authBG}
                     spacesBG={this.props.spacesBG}
                     contentSharingBG={this.props.contentSharingBG}
@@ -585,6 +586,7 @@ export default class Ribbon extends Component<Props, State> {
                         autoFocus
                         renderSpacePicker={() => (
                             <CollectionPicker
+                                shouldHydrateCacheOnInit
                                 selectEntry={this.props.lists.selectEntry}
                                 unselectEntry={this.props.lists.unselectEntry}
                                 createNewEntry={this.props.lists.createNewEntry}

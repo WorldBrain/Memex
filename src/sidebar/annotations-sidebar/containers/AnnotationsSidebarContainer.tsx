@@ -340,6 +340,7 @@ export class AnnotationsSidebarContainer<
                         })
                     }
                     createNewEntry={this.createNewList()}
+                    annotationsCache={this.props.annotationsCache}
                     pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
                     contentSharingBG={this.props.contentSharingBG}
                     spacesBG={this.props.customListsBG}

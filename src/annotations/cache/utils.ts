@@ -1,12 +1,8 @@
 import type {
     FollowedList,
     FollowedListEntry,
-    RemotePageActivityIndicatorInterface,
 } from 'src/page-activity-indicator/background/types'
-import type {
-    PageList,
-    RemoteCollectionsInterface,
-} from 'src/custom-lists/background/types'
+import type { PageList } from 'src/custom-lists/background/types'
 import type { Annotation, SharedAnnotationWithRefs } from '../types'
 import type {
     PageAnnotationsCacheInterface,
@@ -18,13 +14,12 @@ import type {
 import { shareOptsToPrivacyLvl } from '../utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { AnnotationInterface } from '../background/types'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { SharedListEntry } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { BackgroundModuleRemoteInterfaces } from 'src/background-script/types'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation & {
@@ -200,20 +195,22 @@ export const getLocalListIdsForCacheIds = (
         .map((listId) => cache.lists.byId[listId]?.localId)
         .filter((id) => id != null)
 
-interface CacheHydratorDeps {
+interface CacheHydratorDeps<
+    T extends keyof BackgroundModuleRemoteInterfaces<'caller'>
+> {
     user?: UserReference
     cache: PageAnnotationsCacheInterface
-    bgModules: {
-        pageActivityIndicator: RemotePageActivityIndicatorInterface
-        contentSharing: ContentSharingInterface
-        annotations: AnnotationInterface<'caller'>
-        customLists: RemoteCollectionsInterface
-    }
+    bgModules: Pick<BackgroundModuleRemoteInterfaces<'caller'>, T>
 }
 
 // NOTE: this is tested as part of the sidebar logic tests
 export async function hydrateCacheForSidebar(
-    args: CacheHydratorDeps & {
+    args: CacheHydratorDeps<
+        | 'contentSharing'
+        | 'customLists'
+        | 'annotations'
+        | 'pageActivityIndicator'
+    > & {
         fullPageUrl: string
         skipListHydration?: boolean
     },
@@ -299,7 +296,9 @@ export async function hydrateCacheForSidebar(
 }
 
 export async function hydrateCacheForDashboard(
-    args: CacheHydratorDeps,
+    args: CacheHydratorDeps<
+        'contentSharing' | 'customLists' | 'pageActivityIndicator'
+    >,
 ): Promise<void> {
     const localListsData = await args.bgModules.customLists.fetchAllLists({
         includeDescriptions: true,
@@ -329,7 +328,9 @@ async function hydrateCacheLists(
             > &
                 Partial<Pick<FollowedListEntry, 'hasAnnotationsFromOthers'>>
         }
-    } & CacheHydratorDeps,
+    } & CacheHydratorDeps<
+        'contentSharing' | 'customLists' | 'pageActivityIndicator'
+    >,
 ): Promise<void> {
     // Get all the IDs of page link lists
     const pageLinkListIds = new Set<string>()

@@ -53,9 +53,17 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
+
+type NewNoteInteractionProps = AnnotationCreateEventProps & {
+    addPageToList: SpacePickerDependencies['selectEntry']
+    createNewList: SpacePickerDependencies['createNewEntry']
+    removePageFromList: SpacePickerDependencies['unselectEntry']
+}
 
 export type Props = RootState &
     Pick<
@@ -67,6 +75,7 @@ export type Props = RootState &
         | 'onPDFSearchSwitch'
         | 'onEventSearchSwitch'
     > & {
+        annotationsCache: PageAnnotationsCacheInterface // TODO: Ideally this doesn't need to be passed down here
         isSpacesSidebarLocked?: boolean
         searchFilters?: any
         activePage?: boolean
@@ -91,10 +100,10 @@ export type Props = RootState &
         isDisplayed: boolean
         openListShareModal: () => void
         newNoteInteractionProps: {
-            [Key in keyof AnnotationCreateEventProps]: (
+            [Key in keyof NewNoteInteractionProps]: (
                 day: number,
                 pageId: string,
-            ) => AnnotationCreateEventProps[Key]
+            ) => NewNoteInteractionProps[Key]
         }
         onPageNotesTypeSelection(
             day: number,
@@ -307,6 +316,7 @@ export default class SearchResultsContainer extends React.Component<
                 spacePickerButtonRef={this.spaceBtnBarDashboardRef}
                 renderListsPickerForAnnotation={() => (
                     <CollectionPicker
+                        annotationsCache={this.props.annotationsCache}
                         initialSelectedListIds={() => localListIds}
                         selectEntry={(listId) =>
                             interactionProps.updateLists({
@@ -344,6 +354,7 @@ export default class SearchResultsContainer extends React.Component<
                         copyLink={this.props.onNoteLinkCopy}
                         postShareHook={interactionProps.updateShareInfo}
                         spacePickerProps={{
+                            annotationsCache: this.props.annotationsCache,
                             initialSelectedListIds: () => localListIds,
                             selectEntry: (listId, options) =>
                                 interactionProps.updateLists({
@@ -405,19 +416,30 @@ export default class SearchResultsContainer extends React.Component<
 
         const boundAnnotCreateProps = bindFunctionalProps<
             typeof newNoteInteractionProps,
-            AnnotationCreateEventProps
+            NewNoteInteractionProps
         >(newNoteInteractionProps, day, normalizedUrl)
+        const lists = this.getLocalListIdsForCacheIds(newNoteForm.lists)
 
         return (
             <PageNotesBox bottom="10px" left="10px">
                 <AnnotationCreate
                     autoFocus={false}
                     comment={newNoteForm.inputValue}
-                    tags={newNoteForm.tags}
-                    lists={this.getLocalListIdsForCacheIds(newNoteForm.lists)}
+                    lists={lists}
                     getListDetailsById={this.props.getListDetailsById}
                     {...boundAnnotCreateProps}
                     contextLocation={'dashboard'}
+                    renderSpacePicker={() => (
+                        <CollectionPicker
+                            annotationsCache={this.props.annotationsCache}
+                            initialSelectedListIds={() => lists}
+                            selectEntry={boundAnnotCreateProps.addPageToList}
+                            createNewEntry={boundAnnotCreateProps.createNewList}
+                            unselectEntry={
+                                boundAnnotCreateProps.removePageFromList
+                            }
+                        />
+                    )}
                 />
                 <NoteResultContainer>
                     {noteIds[notesType].length > 0 && (
@@ -512,6 +534,7 @@ export default class SearchResultsContainer extends React.Component<
             >
                 <PageResult
                     activePage={this.props.activePage}
+                    annotationsCache={this.props.annotationsCache}
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={
                         this.props.listData.byId[this.props.selectedListId]

@@ -391,7 +391,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                             : undefined,
                         bgModules: {
                             customLists: this.options.listsBG,
-                            annotations: this.options.annotationsBG,
                             contentSharing: this.options.contentShareBG,
                             pageActivityIndicator: this.options
                                 .pageActivityIndicatorBG,

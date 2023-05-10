@@ -23,7 +23,6 @@ import type {
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
-import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { linkStreams } from 'openpgp'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 

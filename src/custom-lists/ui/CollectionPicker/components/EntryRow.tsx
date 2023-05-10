@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from 'react'
+import React from 'react'
 import styled, { css } from 'styled-components'
 import { Layers } from '@styled-icons/feather'
 import * as icons from 'src/common-ui/components/design-library/icons'
@@ -6,11 +6,13 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import type { SpaceDisplayEntry } from '../logic'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
-export interface Props extends SpaceDisplayEntry {
-    onPress?: (entry: SpaceDisplayEntry) => void
-    onFocus?: (entry: SpaceDisplayEntry, index?: number) => void
-    onPressActOnAll?: (entry: SpaceDisplayEntry, index?: number) => void
-    onContextMenuBtnPress: (entry: SpaceDisplayEntry, index?: number) => void
+export interface Props
+    extends Pick<SpaceDisplayEntry<'user-list'>, 'remoteId'> {
+    onPress: () => void
+    onFocus: () => void
+    onUnfocus: () => void
+    onPressActOnAll?: () => void
+    onContextMenuBtnPress: () => void
     index: number
     id?: string
     removeTooltipText?: string
@@ -19,54 +21,22 @@ export interface Props extends SpaceDisplayEntry {
     contextMenuBtnRef?: React.RefObject<HTMLDivElement>
     selected?: boolean
     allTabsButtonPressed?: number
+    focused?: boolean
 }
 
 class EntryRow extends React.Component<Props> {
-    _getEntry = () => {
-        const {
-            name,
-            selected,
-            focused,
-            localId,
-            remoteId,
-            createdAt,
-        } = this.props
-        return {
-            name,
-            selected,
-            focused,
-            localId,
-            remoteId,
-            createdAt,
-        }
-    }
-
-    private handleEntryPress = () => {
-        this.props.onPress && this.props.onPress(this._getEntry())
-    }
-
     private handleActOnAllPress: React.MouseEventHandler = (e) => {
         e.preventDefault()
         e.stopPropagation()
-        this.props.onPressActOnAll &&
-            this.props.onPressActOnAll(this._getEntry())
+        this.props.onPressActOnAll?.()
         return false
     }
 
     private handleContextMenuBtnPress: React.MouseEventHandler = (e) => {
-        this.props.onContextMenuBtnPress(this._getEntry())
+        this.props.onContextMenuBtnPress()
         e.preventDefault()
         e.stopPropagation()
         return false
-    }
-
-    private handleMouseOver = () => {
-        this.props.onFocus &&
-            this.props.onFocus(this._getEntry(), this.props.index)
-    }
-
-    private handleMouseOut = () => {
-        this.props.onFocus && this.props.onFocus(this._getEntry(), null)
     }
 
     render() {
@@ -84,9 +54,9 @@ class EntryRow extends React.Component<Props> {
 
         return (
             <Row
-                onClick={this.handleEntryPress}
-                onMouseOver={this.handleMouseOver}
-                onMouseLeave={this.handleMouseOut}
+                onClick={this.props.onPress}
+                onMouseOver={this.props.onFocus}
+                onMouseLeave={this.props.onUnfocus}
                 isFocused={focused}
                 id={id}
                 title={resultItem['props'].children}

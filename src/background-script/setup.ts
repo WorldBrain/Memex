@@ -97,6 +97,7 @@ import DeprecatedStorageModules from './deprecated-storage-modules'
 import { PageActivityIndicatorBackground } from 'src/page-activity-indicator/background'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { handleIncomingData } from 'src/personal-cloud/background/handle-incoming-data'
+
 export interface BackgroundModules {
     auth: AuthBackground
     analytics: AnalyticsBackground

@@ -323,6 +323,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         }}
                         initialSelectedListIds={() => this.state.pageListIds}
                         actOnAllTabs={this.handleListAllTabs}
+                        shouldHydrateCacheOnInit
                         context={'popup'}
                     />
                 </SpacePickerContainer>

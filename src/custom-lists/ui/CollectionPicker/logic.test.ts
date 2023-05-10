@@ -13,6 +13,11 @@ import {
     BAD_CHAR_SPACE_NAME_ERR_MSG,
 } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { PageAnnotationsCache } from 'src/annotations/cache'
+import {
+    initNormalizedState,
+    normalizedStateToArray,
+} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 
 async function insertTestData({
     storageManager,
@@ -44,6 +49,7 @@ async function insertTestData({
 
 const setupLogicHelper = async ({
     device,
+    shouldHydrateCacheOnInit,
     initialSelectedListIds,
     skipTestData,
     url,
@@ -51,6 +57,7 @@ const setupLogicHelper = async ({
     ...args
 }: {
     device: UILogicTestDevice
+    shouldHydrateCacheOnInit?: boolean
     createNewEntry?: (name: string) => Promise<number>
     selectEntry?: (id: string | number) => Promise<void>
     unselectEntry?: (id: string | number) => Promise<void>
@@ -67,6 +74,8 @@ const setupLogicHelper = async ({
     let generatedIds = 100
 
     const entryPickerLogic = new SpacePickerLogic({
+        shouldHydrateCacheOnInit: shouldHydrateCacheOnInit ?? true,
+        annotationsCache: new PageAnnotationsCache({}),
         createNewEntry: args.createNewEntry ?? (async (name) => generatedIds++),
         selectEntry: args.selectEntry ?? (async (id) => {}),
         unselectEntry: args.unselectEntry ?? (async (id) => {}),
@@ -75,6 +84,9 @@ const setupLogicHelper = async ({
         contentSharingBG:
             device.backgroundModules.contentSharing.remoteFunctions,
         spacesBG: device.backgroundModules.customLists.remoteFunctions,
+        authBG: device.backgroundModules.auth.remoteFunctions,
+        pageActivityIndicatorBG:
+            device.backgroundModules.pageActivityIndicator.remoteFunctions,
         onSubmit,
     })
 
@@ -90,12 +102,14 @@ describe('SpacePickerLogic', () => {
             device,
         })
 
-        expect(testLogic.state.displayEntries).toEqual([])
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
+            [],
+        )
         expect(testLogic.state.selectedListIds).toEqual([])
 
         await testLogic.init()
 
-        expect(testLogic.state.displayEntries).toEqual(
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
             DATA.TEST_LIST_SUGGESTIONS,
         )
         expect(testLogic.state.selectedListIds).toEqual([])
@@ -117,14 +131,14 @@ describe('SpacePickerLogic', () => {
 
         expect(testLogic.state).toEqual(
             expect.objectContaining({
-                displayEntries: [],
+                displayEntries: initNormalizedState(),
                 selectedListIds: [],
             }),
         )
 
         await testLogic.init()
 
-        expect(testLogic.state.displayEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[2],
             DATA.TEST_LIST_SUGGESTIONS[1],
@@ -164,7 +178,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.init()
 
-        expect(testLogic.state.displayEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[2],
             DATA.TEST_LIST_SUGGESTIONS[1],
@@ -271,7 +285,7 @@ describe('SpacePickerLogic', () => {
             device,
         })
         await testLogic.init()
-        expect(testLogic.state.displayEntries).toEqual(
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
             DATA.TEST_LIST_SUGGESTIONS,
         )
 
@@ -279,16 +293,19 @@ describe('SpacePickerLogic', () => {
             query: 'list',
             skipDebounce: true,
         })
-        expect(testLogic.state.displayEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             ...DATA.TEST_LIST_SUGGESTIONS,
-            DATA.testListToSuggestion(DATA.TEST_LISTS[5]),
+            DATA.testListToSuggestion(DATA.TEST_LISTS[5], {
+                // focused: false,
+                unifiedId: expect.anything(),
+            }),
         ])
 
         await testLogic.processEvent('searchInputChanged', {
             query: 'list test',
             skipDebounce: true,
         })
-        expect(testLogic.state.displayEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
         ])
 
@@ -296,8 +313,11 @@ describe('SpacePickerLogic', () => {
             query: 'list not',
             skipDebounce: true,
         })
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.testListToSuggestion(DATA.TEST_LISTS[5], true),
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
+            DATA.testListToSuggestion(DATA.TEST_LISTS[5], {
+                // focused: true,
+                unifiedId: expect.anything(),
+            }),
         ])
     })
 
@@ -387,26 +407,32 @@ describe('SpacePickerLogic', () => {
         })
         await testLogic.init()
 
-        expect(() => entryPickerLogic.validateEntry('test')).not.toThrowError()
-        expect(() =>
-            entryPickerLogic.validateEntry('test test'),
-        ).not.toThrowError()
-        expect(() =>
-            entryPickerLogic.validateEntry('test test $test %'),
-        ).not.toThrowError()
-        expect(() =>
-            entryPickerLogic.validateEntry('test test $test %🤣😁 😅😁'),
-        ).not.toThrowError()
-        expect(() => entryPickerLogic.validateEntry('   ')).toThrowError(
-            'Space Picker Validation: ' + EMPTY_SPACE_NAME_ERR_MSG,
+        expect(entryPickerLogic.validateSpaceName('test').valid).toBe(true)
+        expect(entryPickerLogic.validateSpaceName('test test').valid).toBe(true)
+        expect(
+            entryPickerLogic.validateSpaceName('test test $test %').valid,
+        ).toBe(true)
+        expect(
+            entryPickerLogic.validateSpaceName('test test $test %🤣😁 😅😁')
+                .valid,
+        ).toBe(true)
+        expect(entryPickerLogic.validateSpaceName('   ').valid).toBe(false)
+        expect(testLogic.state.renameListErrorMessage).toEqual(
+            EMPTY_SPACE_NAME_ERR_MSG,
         )
-        expect(() => entryPickerLogic.validateEntry(' test []  ')).toThrowError(
-            'Space Picker Validation: ' + BAD_CHAR_SPACE_NAME_ERR_MSG,
+        expect(entryPickerLogic.validateSpaceName(' test []  ').valid).toBe(
+            false,
         )
-        expect(() =>
-            entryPickerLogic.validateEntry(DATA.TEST_LIST_SUGGESTIONS[0].name),
-        ).toThrowError(
-            'Space Picker Validation: ' + NON_UNIQ_SPACE_NAME_ERR_MSG,
+        expect(testLogic.state.renameListErrorMessage).toEqual(
+            BAD_CHAR_SPACE_NAME_ERR_MSG,
+        )
+        expect(
+            entryPickerLogic.validateSpaceName(
+                DATA.TEST_LIST_SUGGESTIONS[0].name,
+            ).valid,
+        ).toBe(false)
+        expect(testLogic.state.renameListErrorMessage).toEqual(
+            NON_UNIQ_SPACE_NAME_ERR_MSG,
         )
     })
 
@@ -503,14 +529,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.init()
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -525,14 +544,7 @@ describe('SpacePickerLogic', () => {
             name: DATA.TEST_LIST_SUGGESTIONS[0].name,
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -549,14 +561,7 @@ describe('SpacePickerLogic', () => {
             name: DATA.TEST_LIST_SUGGESTIONS[1].name + '[ ( {',
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -572,14 +577,7 @@ describe('SpacePickerLogic', () => {
             name: newNameA,
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -593,14 +591,7 @@ describe('SpacePickerLogic', () => {
             name: newNameB,
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            { ...DATA.TEST_LIST_SUGGESTIONS[3], name: newNameB },
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -617,14 +608,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.init()
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -636,13 +620,7 @@ describe('SpacePickerLogic', () => {
             listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[2],
             DATA.TEST_LIST_SUGGESTIONS[3],
@@ -653,12 +631,7 @@ describe('SpacePickerLogic', () => {
             listId: DATA.TEST_LIST_SUGGESTIONS[3].localId,
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[2],
             DATA.TEST_LIST_SUGGESTIONS[4],
@@ -704,14 +677,7 @@ describe('SpacePickerLogic', () => {
         await testLogic.init()
 
         expect(testLogic.state.selectedListIds).toEqual([])
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -725,14 +691,7 @@ describe('SpacePickerLogic', () => {
             entry: DATA.TEST_LIST_SUGGESTIONS[1],
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -749,14 +708,7 @@ describe('SpacePickerLogic', () => {
             entry: DATA.TEST_LIST_SUGGESTIONS[1],
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -771,14 +723,7 @@ describe('SpacePickerLogic', () => {
             entry: DATA.TEST_LIST_SUGGESTIONS[0],
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -795,14 +740,7 @@ describe('SpacePickerLogic', () => {
             entry: DATA.TEST_LIST_SUGGESTIONS[3],
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[3],
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
@@ -835,14 +773,7 @@ describe('SpacePickerLogic', () => {
         await testLogic.init()
 
         expect(testLogic.state.selectedListIds).toEqual([])
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -856,14 +787,7 @@ describe('SpacePickerLogic', () => {
             entry: DATA.TEST_LIST_SUGGESTIONS[1],
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -880,14 +804,7 @@ describe('SpacePickerLogic', () => {
             entry: DATA.TEST_LIST_SUGGESTIONS[1],
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -902,14 +819,7 @@ describe('SpacePickerLogic', () => {
             entry: DATA.TEST_LIST_SUGGESTIONS[0],
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -926,14 +836,7 @@ describe('SpacePickerLogic', () => {
             entry: DATA.TEST_LIST_SUGGESTIONS[3],
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[3],
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
@@ -966,14 +869,7 @@ describe('SpacePickerLogic', () => {
         await testLogic.init()
 
         expect(testLogic.state.selectedListIds).toEqual([])
-        expect(testLogic.state.displayEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
             DATA.TEST_LIST_SUGGESTIONS[2],
@@ -986,28 +882,15 @@ describe('SpacePickerLogic', () => {
         })
 
         expect(testLogic.state.selectedListIds).toEqual([])
-        expect(testLogic.state.displayEntries).toEqual([expectedEntry])
-        expect(entryPickerLogic.defaultEntries).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
+            expectedEntry,
         ])
 
         await testLogic.processEvent('resultEntryPress', {
             entry: expectedEntry,
         })
 
-        expect(testLogic.state.displayEntries).toEqual([
-            expectedEntry,
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-        ])
-        expect(entryPickerLogic.defaultEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             expectedEntry,
             DATA.TEST_LIST_SUGGESTIONS[0],
             DATA.TEST_LIST_SUGGESTIONS[1],
@@ -1136,7 +1019,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.init()
 
-        expect(testLogic.state.displayEntries).toEqual(
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
             DATA.TEST_LIST_SUGGESTIONS,
         )
         expect(testLogic.state).toEqual(
@@ -1164,7 +1047,7 @@ describe('SpacePickerLogic', () => {
 
         expect(selectedEntry).toBe(newEntryId)
         expect(newEntryName).toBe(newEntryText)
-        expect(testLogic.state.displayEntries).toEqual([
+        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
             expect.objectContaining({
                 name: newEntryText,
                 localId: newEntryId,

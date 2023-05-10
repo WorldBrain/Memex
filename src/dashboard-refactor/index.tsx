@@ -326,9 +326,12 @@ export class DashboardContainer extends StatefulUIElement<
                     }
                 }
                 spacePickerProps={{
+                    authBG: this.props.authBG,
                     spacesBG: this.props.listsBG,
                     onClickOutside: toggleSpacesFilter,
                     contentSharingBG: this.props.contentShareBG,
+                    annotationsCache: this.props.annotationsCache,
+                    pageActivityIndicatorBG: this.props.pageActivityIndicatorBG,
                     createNewEntry: () => undefined,
                     initialSelectedListIds: () => searchFilters.spacesIncluded,
                     dashboardSelectedListId: selectedLocalListId,
@@ -615,6 +618,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                annotationsCache={this.props.annotationsCache}
                 filterByList={(localListId) => {
                     const listData = this.props.annotationsCache.getListByLocalId(
                         localListId,

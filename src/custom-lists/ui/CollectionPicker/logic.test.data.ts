@@ -61,28 +61,20 @@ export const TEST_LIST_METADATA = [
     },
 ]
 
-export const testListToSuggestion = (list: PageList, focused = false) => ({
-    createdAt: list.createdAt.getTime(),
-    focused,
+export const testListToSuggestion = (
+    list: PageList,
+    extra: Pick<SpaceDisplayEntry, 'unifiedId'>,
+): SpaceDisplayEntry => ({
+    type: 'user-list',
+    unifiedId: extra.unifiedId,
     localId: list.id,
     name: list.name,
     remoteId:
         TEST_LIST_METADATA.find((d) => d.localId === list.id)?.remoteId ?? null,
+    hasRemoteAnnotationsToLoad: false,
+    unifiedAnnotationIds: [],
 })
 
 export const TEST_LIST_SUGGESTIONS = TEST_LISTS.slice(0, 5).map((list, i) =>
-    testListToSuggestion(list, i === 0),
+    testListToSuggestion(list, { unifiedId: i.toString() }),
 )
-
-export const derivePickerEntries = (
-    lists: typeof TEST_LISTS,
-): SpaceDisplayEntry[] =>
-    lists.map((list) => ({
-        name: list.name,
-        localId: list.id,
-        focused: false,
-        createdAt: list.createdAt.getTime(),
-        remoteId:
-            TEST_LIST_METADATA.find((meta) => meta.localId === list.id)
-                ?.remoteId ?? null,
-    }))

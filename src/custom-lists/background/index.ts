@@ -627,13 +627,15 @@ export default class CustomListBackground {
 
     fetchInitialListSuggestions: RemoteCollectionsInterface['fetchInitialListSuggestions'] = async ({
         extraListIds,
-    } = {}): Promise<SpaceDisplayEntry[]> => {
+    } = {}): Promise<
+        Pick<SpaceDisplayEntry, 'localId' | 'name' | 'remoteId'>[]
+    > => {
         const suggestionIds = await this.localStorage.get('suggestionIds')
-        const listToDisplayEntry = (l: PageList): SpaceDisplayEntry => ({
+        const listToDisplayEntry = (
+            l: PageList,
+        ): Pick<SpaceDisplayEntry, 'localId' | 'name' | 'remoteId'> => ({
             localId: l.id,
             name: l.name,
-            createdAt: l.createdAt.getTime(),
-            focused: false,
             remoteId: null,
         })
 
