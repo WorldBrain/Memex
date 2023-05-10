@@ -230,8 +230,10 @@ export default class Ribbon extends Component<Props, State> {
             >
                 <CollectionPicker
                     {...this.props.lists}
+                    authBG={this.props.authBG}
                     spacesBG={this.props.spacesBG}
                     contentSharingBG={this.props.contentSharingBG}
+                    pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
                     actOnAllTabs={this.props.lists.listAllTabs}
                     initialSelectedListIds={
                         this.props.lists.fetchInitialListSelections
@@ -579,13 +581,21 @@ export default class Ribbon extends Component<Props, State> {
                         comment={this.props.commentBox.commentText}
                         lists={this.props.commentBox.lists}
                         getListDetailsById={this.props.getListDetailsById}
-                        createNewList={this.props.lists.createNewEntry}
-                        addPageToList={this.props.lists.selectEntry}
-                        removePageFromList={this.props.lists.unselectEntry}
                         isRibbonCommentBox
-                        spacesBG={this.props.spacesBG}
-                        contentSharingBG={this.props.contentSharingBG}
                         autoFocus
+                        renderSpacePicker={() => (
+                            <CollectionPicker
+                                selectEntry={this.props.lists.selectEntry}
+                                unselectEntry={this.props.lists.unselectEntry}
+                                createNewEntry={this.props.lists.createNewEntry}
+                                pageActivityIndicatorBG={
+                                    this.props.pageActivityIndicatorBG
+                                }
+                                contentSharingBG={this.props.contentSharingBG}
+                                spacesBG={this.props.spacesBG}
+                                authBG={this.props.authBG}
+                            />
+                        )}
                     />
                 </CommentBoxContainer>
             </PopoutBox>

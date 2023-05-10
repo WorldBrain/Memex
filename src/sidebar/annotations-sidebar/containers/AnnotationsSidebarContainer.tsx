@@ -315,7 +315,6 @@ export class AnnotationsSidebarContainer<
     }
 
     protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
-        const { customListsBG, contentSharingBG } = this.props
         return {
             onCommentChange: (comment) =>
                 this.processEvent('setNewPageNoteText', { comment }),
@@ -326,20 +325,28 @@ export class AnnotationsSidebarContainer<
                     isProtected,
                     listInstanceId,
                 }),
-            addPageToList: (listId) =>
-                this.processEvent('setNewPageNoteLists', {
-                    lists: [...this.state.commentBox.lists, listId],
-                }),
-            removePageFromList: (listId) =>
-                this.processEvent('setNewPageNoteLists', {
-                    lists: this.state.commentBox.lists.filter(
-                        (id) => id !== listId,
-                    ),
-                }),
+            renderSpacePicker: () => (
+                <CollectionPicker
+                    selectEntry={(listId) =>
+                        this.processEvent('setNewPageNoteLists', {
+                            lists: [...this.state.commentBox.lists, listId],
+                        })
+                    }
+                    unselectEntry={(listId) =>
+                        this.processEvent('setNewPageNoteLists', {
+                            lists: this.state.commentBox.lists.filter(
+                                (id) => id !== listId,
+                            ),
+                        })
+                    }
+                    createNewEntry={this.createNewList()}
+                    pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
+                    contentSharingBG={this.props.contentSharingBG}
+                    spacesBG={this.props.customListsBG}
+                    authBG={this.props.authBG}
+                />
+            ),
             getListDetailsById: this.getListDetailsById,
-            createNewList: this.createNewList(),
-            contentSharingBG,
-            spacesBG: customListsBG,
             comment: this.state.commentBox.commentText,
             lists: this.state.commentBox.lists,
             hoverState: null,
@@ -360,9 +367,11 @@ export class AnnotationsSidebarContainer<
         showExternalConfirmations?: boolean
     }): SpacePickerDependencies => {
         const {
+            authBG,
+            customListsBG,
+            contentSharingBG,
             annotationsCache,
-            customListsBG: customLists,
-            contentSharingBG: contentSharing,
+            pageActivityIndicatorBG,
         } = this.props
         // This is to show confirmation modal if the annotation is public and the user is trying to add it to a shared space
         const getUpdateListsEvent = (listId: number) =>
@@ -376,8 +385,11 @@ export class AnnotationsSidebarContainer<
                 : 'updateListsForAnnotation'
 
         return {
-            spacesBG: customLists,
-            contentSharingBG: contentSharing,
+            authBG,
+            annotationsCache,
+            contentSharingBG,
+            pageActivityIndicatorBG,
+            spacesBG: customListsBG,
             createNewEntry: this.createNewList(params.annotation.unifiedId),
             initialSelectedListIds: () =>
                 cacheUtils.getLocalListIdsForCacheIds(

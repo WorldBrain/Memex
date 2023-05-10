@@ -11,9 +11,8 @@ import type { ActivityIndicatorInterface } from 'src/activity-indicator/backgrou
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
-import { Tabs } from 'webextension-polyfill'
-import { Runtime } from 'webextension-polyfill-ts'
-import { PDFRemoteInterface } from 'src/pdf/background/types'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 
 interface FlagSetterInterface {
     getState(): Promise<boolean>
@@ -31,6 +30,8 @@ export interface RibbonContainerDependencies {
     customLists: RemoteCollectionsInterface
     activityIndicatorBG: ActivityIndicatorInterface
     tags: RemoteTagsInterface
+    authBG: AuthRemoteFunctionsInterface
+    pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     contentSharing: ContentSharingInterface
     annotations: AnnotationInterface<'caller'>
     annotationsCache: PageAnnotationsCacheInterface
