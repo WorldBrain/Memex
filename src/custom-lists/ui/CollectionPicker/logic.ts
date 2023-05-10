@@ -93,7 +93,7 @@ export interface SpacePickerState {
     currentUser: UserReference | null
     newEntryName: string
     focusedListId: UnifiedList['unifiedId'] | null
-    filteredListIds: UnifiedList['unifiedId'][]
+    filteredListIds: UnifiedList['unifiedId'][] | null
     displayEntries: NormalizedState<SpaceDisplayEntry>
     selectedListIds: number[]
     contextMenuPositionX: number
@@ -179,7 +179,7 @@ export default class SpacePickerLogic extends UILogic<
         focusedListId: null,
         displayEntries: initNormalizedState(),
         selectedListIds: [],
-        filteredListIds: [],
+        filteredListIds: null,
         loadState: 'pristine',
         renameListErrorMessage: null,
         contextMenuListId: null,
@@ -472,7 +472,7 @@ export default class SpacePickerLogic extends UILogic<
         })
 
         if (!query || query === '') {
-            this.emitMutation({ filteredListIds: { $set: [] } })
+            this.emitMutation({ filteredListIds: { $set: null } })
         } else {
             this.querySpaces(query, previousState)
         }
@@ -543,13 +543,13 @@ export default class SpacePickerLogic extends UILogic<
         emit = true,
     ) => {
         let entries = normalizedStateToArray(state.displayEntries)
-        if (state.filteredListIds.length) {
+        if (state.filteredListIds?.length) {
             entries = entries.filter((entry) =>
                 state.filteredListIds.includes(entry.unifiedId),
             )
         }
 
-        if (nextFocusIndex < 0 || nextFocusIndex >= entries.length) {
+        if (nextFocusIndex < -1 || nextFocusIndex >= entries.length) {
             return
         }
 

@@ -39,7 +39,7 @@ export const TEST_LISTS: PageList[] = [
     },
     {
         id: 6,
-        name: 'List 6 - not in suggestions',
+        name: 'List 6',
         isNestable: true,
         isDeletable: true,
         createdAt: new Date('2022-05-27'),
@@ -70,11 +70,12 @@ export const testListToSuggestion = (
     localId: list.id,
     name: list.name,
     remoteId:
-        TEST_LIST_METADATA.find((d) => d.localId === list.id)?.remoteId ?? null,
+        TEST_LIST_METADATA.find((d) => d.localId === list.id)?.remoteId ??
+        undefined,
     hasRemoteAnnotationsToLoad: false,
     unifiedAnnotationIds: [],
 })
 
-export const TEST_LIST_SUGGESTIONS = TEST_LISTS.slice(0, 5).map((list, i) =>
+export const TEST_LIST_SUGGESTIONS = TEST_LISTS.map((list, i) =>
     testListToSuggestion(list, { unifiedId: i.toString() }),
 )

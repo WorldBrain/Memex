@@ -145,7 +145,7 @@ class SpacePicker extends StatefulUIElement<
         if (
             (this.state.newEntryName.length > 0 && !this.props.filterMode) ||
             (this.state.query.trim().length > 0 &&
-                this.state.filteredListIds.length === 0)
+                this.state.filteredListIds?.length === 0)
         ) {
             return (
                 <EmptyListsView>
@@ -162,10 +162,7 @@ class SpacePicker extends StatefulUIElement<
             )
         }
 
-        if (
-            this.state.query.trim() === '' &&
-            this.state.filteredListIds.length === 0
-        ) {
+        if (!this.state.query.trim().length && !this.state.filteredListIds) {
             return (
                 <EmptyListsView>
                     <SectionCircle>
