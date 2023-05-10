@@ -1,8 +1,12 @@
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { loadInitial } from 'src/util/ui-logic'
+import type { Storage } from 'webextension-polyfill'
 import type { TaskState } from 'ui-logic-core/lib/types'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
-import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type {
+    CollectionsSettings,
+    RemoteCollectionsInterface,
+} from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { pageActionAllowed } from 'src/util/subscriptions/storage'
@@ -22,12 +26,14 @@ import { hydrateCacheForDashboard } from 'src/annotations/cache/utils'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { BrowserSettingsStore } from 'src/util/settings'
 
 export type SpaceDisplayEntry<
     T extends UnifiedListType = UnifiedListType
 > = UnifiedList<T>
 
 export interface SpacePickerDependencies {
+    localStorageAPI: Storage.LocalStorageArea
     shouldHydrateCacheOnInit?: boolean
     annotationsCache: PageAnnotationsCacheInterface
     createNewEntry: (name: string) => Promise<number>
@@ -139,6 +145,7 @@ export default class SpacePickerLogic extends UILogic<
     private searchInputRef?: HTMLInputElement
     private newTabKeys: KeyEvent[] = ['Enter', ',', 'Tab']
     private currentKeysPressed: KeyEvent[] = []
+    private localStorage: BrowserSettingsStore<CollectionsSettings>
 
     /**
      * Exists to have a numerical representation for the `focusedListId` state according
@@ -152,6 +159,10 @@ export default class SpacePickerLogic extends UILogic<
 
     constructor(protected dependencies: SpacePickerDependencies) {
         super()
+        this.localStorage = new BrowserSettingsStore(
+            dependencies.localStorageAPI,
+            { prefix: 'custom-lists_' },
+        )
     }
 
     get processingUpstreamOperation() {
@@ -206,6 +217,9 @@ export default class SpacePickerLogic extends UILogic<
             this.cacheListsSubscription = this.initCacheListsSubscription(
                 currentUser,
             )
+
+            // TODO: Use these to sort the entries
+            // const listSuggestionIds = await this.localStorage.get('suggestionIds')
 
             this.dependencies.annotationsCache.events.addListener(
                 'newListsState',

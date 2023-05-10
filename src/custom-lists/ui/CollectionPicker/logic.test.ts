@@ -74,6 +74,7 @@ const setupLogicHelper = async ({
     let generatedIds = 100
 
     const entryPickerLogic = new SpacePickerLogic({
+        localStorageAPI: device.browserAPIs.storage.local,
         shouldHydrateCacheOnInit: shouldHydrateCacheOnInit ?? true,
         annotationsCache: new PageAnnotationsCache({}),
         createNewEntry: args.createNewEntry ?? (async (name) => generatedIds++),

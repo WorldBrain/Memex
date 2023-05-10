@@ -235,6 +235,7 @@ export default class Ribbon extends Component<Props, State> {
                     spacesBG={this.props.spacesBG}
                     contentSharingBG={this.props.contentSharingBG}
                     pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
+                    localStorageAPI={browser.storage.local}
                     actOnAllTabs={this.props.lists.listAllTabs}
                     initialSelectedListIds={
                         this.props.lists.fetchInitialListSelections
@@ -587,6 +588,7 @@ export default class Ribbon extends Component<Props, State> {
                         renderSpacePicker={() => (
                             <CollectionPicker
                                 shouldHydrateCacheOnInit
+                                localStorageAPI={browser.storage.local}
                                 selectEntry={this.props.lists.selectEntry}
                                 unselectEntry={this.props.lists.unselectEntry}
                                 createNewEntry={this.props.lists.createNewEntry}

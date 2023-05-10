@@ -391,6 +391,7 @@ export class AnnotationsSidebarContainer<
             contentSharingBG,
             pageActivityIndicatorBG,
             spacesBG: customListsBG,
+            localStorageAPI: this.props.storageAPI.local,
             createNewEntry: this.createNewList(params.annotation.unifiedId),
             initialSelectedListIds: () =>
                 cacheUtils.getLocalListIdsForCacheIds(

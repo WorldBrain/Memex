@@ -329,6 +329,7 @@ export class DashboardContainer extends StatefulUIElement<
                     authBG: this.props.authBG,
                     spacesBG: this.props.listsBG,
                     onClickOutside: toggleSpacesFilter,
+                    localStorageAPI: this.props.localStorage,
                     contentSharingBG: this.props.contentShareBG,
                     annotationsCache: this.props.annotationsCache,
                     pageActivityIndicatorBG: this.props.pageActivityIndicatorBG,

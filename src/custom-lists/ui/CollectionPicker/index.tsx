@@ -1,5 +1,6 @@
 import React from 'react'
 import styled, { ThemeProvider, css } from 'styled-components'
+import browser from 'webextension-polyfill'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
 import ListPickerLogic, {
@@ -46,11 +47,13 @@ class SpacePicker extends StatefulUIElement<
         | 'contentSharingBG'
         | 'pageActivityIndicatorBG'
         | 'annotationsCache'
+        | 'localStorageAPI'
         | 'createNewEntry'
     > = {
         authBG: auth,
         spacesBG: collections,
         contentSharingBG: contentSharing,
+        localStorageAPI: browser.storage.local,
         pageActivityIndicatorBG: pageActivityIndicator,
         annotationsCache: new PageAnnotationsCache({}),
         createNewEntry: async (name) =>
