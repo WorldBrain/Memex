@@ -21,9 +21,10 @@ async function insertTestData({
     storageManager,
     backgroundModules,
 }: UILogicTestDevice) {
-    for (const list of [...DATA.TEST_LISTS]) {
+    for (const list of DATA.TEST_LISTS) {
         await backgroundModules.customLists.createCustomList({
             createdAt: list.createdAt,
+            type: list.type,
             name: list.name,
             id: list.id,
         })
@@ -42,6 +43,18 @@ async function insertTestData({
         await storageManager
             .collection('sharedListMetadata')
             .createObject(metadata)
+    }
+
+    for (const followedList of DATA.FOLLOWED_LISTS) {
+        await storageManager
+            .collection('followedList')
+            .createObject(followedList)
+    }
+
+    for (const followedListEntry of DATA.FOLLOWED_LIST_ENTRIES) {
+        await storageManager
+            .collection('followedListEntry')
+            .createObject(followedListEntry)
     }
 }
 

@@ -145,6 +145,7 @@ export class PageActivityIndicatorBackground {
                     sharedList: list.sharedList,
                     creator: list.creator,
                     name: list.name,
+                    type: list.type,
                 },
             ]),
         )
