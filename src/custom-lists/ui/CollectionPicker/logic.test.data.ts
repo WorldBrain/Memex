@@ -39,7 +39,7 @@ export const TEST_LISTS: PageList[] = [
     },
     {
         id: 6,
-        name: 'List 6',
+        name: 'List 6 diff',
         isNestable: true,
         isDeletable: true,
         createdAt: new Date('2022-05-27'),
