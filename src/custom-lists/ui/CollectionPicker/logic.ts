@@ -22,7 +22,7 @@ import {
     NormalizedState,
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { hydrateCacheForDashboard } from 'src/annotations/cache/utils'
+import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
@@ -94,7 +94,8 @@ export interface SpacePickerState {
     newEntryName: string
     focusedListId: UnifiedList['unifiedId'] | null
     filteredListIds: UnifiedList['unifiedId'][] | null
-    displayEntries: NormalizedState<SpaceDisplayEntry>
+    listEntries: NormalizedState<SpaceDisplayEntry<'user-list'>>
+    pageLinkEntries: NormalizedState<SpaceDisplayEntry<'page-link'>>
     selectedListIds: number[]
     contextMenuPositionX: number
     contextMenuPositionY: number
@@ -177,7 +178,8 @@ export default class SpacePickerLogic extends UILogic<
         newEntryName: '',
         currentUser: null,
         focusedListId: null,
-        displayEntries: initNormalizedState(),
+        listEntries: initNormalizedState(),
+        pageLinkEntries: initNormalizedState(),
         selectedListIds: [],
         filteredListIds: null,
         loadState: 'pristine',
@@ -196,11 +198,20 @@ export default class SpacePickerLogic extends UILogic<
             normalizedStateToArray(nextLists),
             currentUser,
         )
-        // TODO: set page links state
+        const userLists = myLists.filter(
+            (list) => list.type === 'user-list',
+        ) as UnifiedList<'user-list'>[]
+
         this.emitMutation({
-            displayEntries: {
+            listEntries: {
                 $set: initNormalizedState({
-                    seedData: myLists,
+                    seedData: userLists,
+                    getId: (list) => list.unifiedId,
+                }),
+            },
+            pageLinkEntries: {
+                $set: initNormalizedState({
+                    seedData: pageLinkLists,
                     getId: (list) => list.unifiedId,
                 }),
             },
@@ -234,7 +245,7 @@ export default class SpacePickerLogic extends UILogic<
             }
 
             if (this.dependencies.shouldHydrateCacheOnInit) {
-                await hydrateCacheForDashboard({
+                await hydrateCacheForListUsage({
                     user: currentUser,
                     cache: this.dependencies.annotationsCache,
                     bgModules: {
@@ -296,7 +307,7 @@ export default class SpacePickerLogic extends UILogic<
         if (
             (currentKeys.includes('Enter') && currentKeys.includes('Meta')) ||
             (event.key === 'Enter' &&
-                previousState.displayEntries.allIds.length === 0)
+                previousState.listEntries.allIds.length === 0)
         ) {
             if (previousState.newEntryName !== '') {
                 await this.newEntryPress({
@@ -314,15 +325,13 @@ export default class SpacePickerLogic extends UILogic<
 
         if (
             this.newTabKeys.includes(event.key as KeyEvent) &&
-            previousState.displayEntries.allIds.length > 0
+            previousState.listEntries.allIds.length > 0
         ) {
-            if (
-                previousState.displayEntries.byId[previousState.focusedListId]
-            ) {
+            if (previousState.listEntries.byId[previousState.focusedListId]) {
                 await this.resultEntryPress({
                     event: {
                         entry:
-                            previousState.displayEntries.byId[
+                            previousState.listEntries.byId[
                                 previousState.focusedListId
                             ],
                     },
@@ -444,7 +453,7 @@ export default class SpacePickerLogic extends UILogic<
         // await this.dependencies.spacesBG.updateListName({
         //     id: event.listId,
         //     newName: event.name,
-        //     oldName: previousState.displayEntries[stateEntryIndex].name,
+        //     oldName: previousState.listEntries[stateEntryIndex].name,
         // })
     }
 
@@ -493,7 +502,7 @@ export default class SpacePickerLogic extends UILogic<
                 true,
             )
 
-        const matchingEntryIds = normalizedStateToArray(state.displayEntries)
+        const matchingEntryIds = normalizedStateToArray(state.listEntries)
             .filter(doAllTermsMatch)
             .sort(sortDisplayEntries(new Set(state.selectedListIds)))
             .map((entry) => entry.unifiedId)
@@ -515,9 +524,10 @@ export default class SpacePickerLogic extends UILogic<
         state: SpacePickerState,
     ) => {
         const _input = input.trim()
-        const alreadyExists = normalizedStateToArray(
-            state.displayEntries,
-        ).reduce((acc, entry) => acc || entry.name === _input, false)
+        const alreadyExists = normalizedStateToArray(state.listEntries).reduce(
+            (acc, entry) => acc || entry.name === _input,
+            false,
+        )
 
         if (alreadyExists) {
             this.emitMutation({ newEntryName: { $set: '' } })
@@ -539,10 +549,10 @@ export default class SpacePickerLogic extends UILogic<
 
     private setFocusedEntryIndex = (
         nextFocusIndex: number | null,
-        state: Pick<SpacePickerState, 'displayEntries' | 'filteredListIds'>,
+        state: Pick<SpacePickerState, 'listEntries' | 'filteredListIds'>,
         emit = true,
     ) => {
-        let entries = normalizedStateToArray(state.displayEntries)
+        let entries = normalizedStateToArray(state.listEntries)
         if (state.filteredListIds?.length) {
             entries = entries.filter((entry) =>
                 state.filteredListIds.includes(entry.unifiedId),
@@ -609,23 +619,23 @@ export default class SpacePickerLogic extends UILogic<
 
                 await this.dependencies.unselectEntry(entry.localId)
             } else {
-                const prevDisplayEntriesIndex = previousState.displayEntries.allIds.indexOf(
+                const prevDisplayEntriesIndex = previousState.listEntries.allIds.indexOf(
                     listData.unifiedId,
                 )
                 const mutation: UIMutation<SpacePickerState> = {
                     selectedListIds: { $push: [entry.localId] },
-                    displayEntries: {
+                    listEntries: {
                         allIds: {
                             // Reposition selected entry at start of display list
                             $set: [
-                                previousState.displayEntries.allIds[
+                                previousState.listEntries.allIds[
                                     listData.unifiedId
                                 ],
-                                ...previousState.displayEntries.allIds.slice(
+                                ...previousState.listEntries.allIds.slice(
                                     0,
                                     prevDisplayEntriesIndex,
                                 ),
-                                ...previousState.displayEntries.allIds.slice(
+                                ...previousState.listEntries.allIds.slice(
                                     prevDisplayEntriesIndex + 1,
                                 ),
                             ],

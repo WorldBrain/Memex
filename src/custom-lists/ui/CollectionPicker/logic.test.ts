@@ -115,15 +115,13 @@ describe('SpacePickerLogic', () => {
             device,
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
-            [],
-        )
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([])
         expect(testLogic.state.selectedListIds).toEqual([])
 
         await testLogic.init()
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
-            DATA.TEST_LIST_SUGGESTIONS,
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
+            DATA.TEST_USER_LIST_SUGGESTIONS,
         )
         expect(testLogic.state.selectedListIds).toEqual([])
     })
@@ -144,20 +142,20 @@ describe('SpacePickerLogic', () => {
 
         expect(testLogic.state).toEqual(
             expect.objectContaining({
-                displayEntries: initNormalizedState(),
+                listEntries: initNormalizedState(),
                 selectedListIds: [],
             }),
         )
 
         await testLogic.init()
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[1],
+            DATA.TEST_USER_LIST_SUGGESTIONS[3],
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.selectedListIds).toEqual([
             DATA.TEST_LISTS[0].id,
@@ -185,20 +183,20 @@ describe('SpacePickerLogic', () => {
 
         expect(testLogic.state).toEqual(
             expect.objectContaining({
-                displayEntries: initNormalizedState(),
+                listEntries: initNormalizedState(),
                 selectedListIds: [],
             }),
         )
 
         await testLogic.init()
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[1],
+            DATA.TEST_USER_LIST_SUGGESTIONS[3],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.selectedListIds).toEqual([
             DATA.TEST_LISTS[0].id,
@@ -222,7 +220,7 @@ describe('SpacePickerLogic', () => {
         expect(testLogic.state).toEqual(
             expect.objectContaining({
                 query: 'test',
-                filteredListIds: [DATA.TEST_LIST_SUGGESTIONS[0].unifiedId],
+                filteredListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId],
                 selectedListIds: initialSelectedEntries,
             }),
         )
@@ -233,7 +231,7 @@ describe('SpacePickerLogic', () => {
     }) => {
         const { testLogic } = await setupLogicHelper({
             device,
-            queryEntries: async () => [DATA.TEST_LIST_SUGGESTIONS[0]],
+            queryEntries: async () => [DATA.TEST_USER_LIST_SUGGESTIONS[0]],
         })
 
         await testLogic.init()
@@ -242,7 +240,7 @@ describe('SpacePickerLogic', () => {
         expect(testLogic.state).toEqual(
             expect.objectContaining({
                 query: 'test',
-                filteredListIds: [DATA.TEST_LIST_SUGGESTIONS[0].unifiedId],
+                filteredListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId],
             }),
         )
     })
@@ -267,7 +265,7 @@ describe('SpacePickerLogic', () => {
             expect.objectContaining({
                 query: 'Test',
                 newEntryName: 'Test',
-                filteredListIds: [DATA.TEST_LIST_SUGGESTIONS[0].unifiedId],
+                filteredListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId],
             }),
         )
 
@@ -296,7 +294,7 @@ describe('SpacePickerLogic', () => {
             expect.objectContaining({
                 query: 'test',
                 newEntryName: 'test',
-                filteredListIds: [DATA.TEST_LIST_SUGGESTIONS[0].unifiedId],
+                filteredListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId],
             }),
         )
     })
@@ -308,8 +306,8 @@ describe('SpacePickerLogic', () => {
             device,
         })
         await testLogic.init()
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
-            DATA.TEST_LIST_SUGGESTIONS,
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
+            DATA.TEST_USER_LIST_SUGGESTIONS,
         )
         expect(testLogic.state.filteredListIds).toEqual(null)
 
@@ -318,12 +316,12 @@ describe('SpacePickerLogic', () => {
             skipDebounce: true,
         })
         expect(testLogic.state.filteredListIds).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0].unifiedId,
-            DATA.TEST_LIST_SUGGESTIONS[1].unifiedId,
-            DATA.TEST_LIST_SUGGESTIONS[2].unifiedId,
-            DATA.TEST_LIST_SUGGESTIONS[3].unifiedId,
-            DATA.TEST_LIST_SUGGESTIONS[4].unifiedId,
-            DATA.TEST_LIST_SUGGESTIONS[5].unifiedId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[1].unifiedId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[2].unifiedId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[3].unifiedId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[4].unifiedId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[5].unifiedId,
         ])
 
         await testLogic.processEvent('searchInputChanged', {
@@ -331,7 +329,7 @@ describe('SpacePickerLogic', () => {
             skipDebounce: true,
         })
         expect(testLogic.state.filteredListIds).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0].unifiedId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId,
         ])
 
         await testLogic.processEvent('searchInputChanged', {
@@ -339,7 +337,7 @@ describe('SpacePickerLogic', () => {
             skipDebounce: true,
         })
         expect(testLogic.state.filteredListIds).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[5].unifiedId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[5].unifiedId,
         ])
     })
 
@@ -451,7 +449,7 @@ describe('SpacePickerLogic', () => {
         )
         expect(
             entryPickerLogic.validateSpaceName(
-                DATA.TEST_LIST_SUGGESTIONS[0].name,
+                DATA.TEST_USER_LIST_SUGGESTIONS[0].name,
             ).valid,
         ).toBe(false)
         expect(testLogic.state.renameListErrorMessage).toEqual(
@@ -509,33 +507,33 @@ describe('SpacePickerLogic', () => {
 
         expect(testLogic.state.contextMenuListId).toEqual(null)
         await testLogic.processEvent('toggleEntryContextMenu', {
-            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            listId: DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
         })
 
         expect(testLogic.state.contextMenuListId).toEqual(
-            DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
         )
 
         await testLogic.processEvent('toggleEntryContextMenu', {
-            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            listId: DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
         })
 
         expect(testLogic.state.contextMenuListId).toEqual(null)
 
         await testLogic.processEvent('toggleEntryContextMenu', {
-            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            listId: DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
         })
 
         expect(testLogic.state.contextMenuListId).toEqual(
-            DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
         )
 
         await testLogic.processEvent('toggleEntryContextMenu', {
-            listId: DATA.TEST_LIST_SUGGESTIONS[0].localId,
+            listId: DATA.TEST_USER_LIST_SUGGESTIONS[0].localId,
         })
 
         expect(testLogic.state.contextMenuListId).toEqual(
-            DATA.TEST_LIST_SUGGESTIONS[0].localId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].localId,
         )
     })
 
@@ -550,19 +548,19 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.init()
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
-            DATA.TEST_LIST_SUGGESTIONS,
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
+            DATA.TEST_USER_LIST_SUGGESTIONS,
         )
         expect(testLogic.state.renameListErrorMessage).toEqual(null)
 
         // Attempt to re-use another list name - should set error
         await testLogic.processEvent('renameList', {
-            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
-            name: DATA.TEST_LIST_SUGGESTIONS[0].name,
+            listId: DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
+            name: DATA.TEST_USER_LIST_SUGGESTIONS[0].name,
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
-            DATA.TEST_LIST_SUGGESTIONS,
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
+            DATA.TEST_USER_LIST_SUGGESTIONS,
         )
         expect(testLogic.state.renameListErrorMessage).toEqual(
             NON_UNIQ_SPACE_NAME_ERR_MSG,
@@ -570,44 +568,44 @@ describe('SpacePickerLogic', () => {
 
         // Attempt to use a list name with invalid characters - also should set error
         await testLogic.processEvent('renameList', {
-            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
-            name: DATA.TEST_LIST_SUGGESTIONS[1].name + '[ ( {',
+            listId: DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
+            name: DATA.TEST_USER_LIST_SUGGESTIONS[1].name + '[ ( {',
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
-            DATA.TEST_LIST_SUGGESTIONS,
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
+            DATA.TEST_USER_LIST_SUGGESTIONS,
         )
         expect(testLogic.state.renameListErrorMessage).toEqual(
             BAD_CHAR_SPACE_NAME_ERR_MSG,
         )
 
         await testLogic.processEvent('renameList', {
-            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            listId: DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
             name: newNameA,
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            { ...DATA.TEST_USER_LIST_SUGGESTIONS[1], name: newNameA },
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[3],
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.renameListErrorMessage).toEqual(null)
 
         await testLogic.processEvent('renameList', {
-            listId: DATA.TEST_LIST_SUGGESTIONS[3].localId,
+            listId: DATA.TEST_USER_LIST_SUGGESTIONS[3].localId,
             name: newNameB,
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            { ...DATA.TEST_LIST_SUGGESTIONS[1], name: newNameA },
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            { ...DATA.TEST_LIST_SUGGESTIONS[3], name: newNameB },
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            { ...DATA.TEST_USER_LIST_SUGGESTIONS[1], name: newNameA },
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            { ...DATA.TEST_USER_LIST_SUGGESTIONS[3], name: newNameB },
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.renameListErrorMessage).toEqual(null)
     })
@@ -619,31 +617,31 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.init()
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
-            DATA.TEST_LIST_SUGGESTIONS,
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
+            DATA.TEST_USER_LIST_SUGGESTIONS,
         )
 
         await testLogic.processEvent('deleteList', {
-            listId: DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            listId: DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[3],
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
 
         await testLogic.processEvent('deleteList', {
-            listId: DATA.TEST_LIST_SUGGESTIONS[3].localId,
+            listId: DATA.TEST_USER_LIST_SUGGESTIONS[3].localId,
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
     })
 
@@ -659,12 +657,12 @@ describe('SpacePickerLogic', () => {
         expect(testLogic.state.selectedListIds).toEqual([])
 
         await testLogic.processEvent('resultEntryAllPress', {
-            entry: DATA.TEST_LIST_SUGGESTIONS[0],
+            entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
         })
         await entryPickerLogic.processingUpstreamOperation
 
         expect(testLogic.state.selectedListIds).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0].localId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].localId,
         ])
     })
 
@@ -686,82 +684,88 @@ describe('SpacePickerLogic', () => {
         await testLogic.init()
 
         expect(testLogic.state.selectedListIds).toEqual([])
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
-            DATA.TEST_LIST_SUGGESTIONS,
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
+            DATA.TEST_USER_LIST_SUGGESTIONS,
         )
         expect(selectedEntryId).toBe(null)
         expect(unselectedEntryId).toBe(null)
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_LIST_SUGGESTIONS[1],
+            entry: DATA.TEST_USER_LIST_SUGGESTIONS[1],
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[1],
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[3],
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.selectedListIds).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
         ])
-        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
+        expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[1].localId)
         expect(unselectedEntryId).toBe(null)
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_LIST_SUGGESTIONS[1],
+            entry: DATA.TEST_USER_LIST_SUGGESTIONS[1],
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[1],
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[3],
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.selectedListIds).toEqual([])
-        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
-        expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
+        expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[1].localId)
+        expect(unselectedEntryId).toBe(
+            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
+        )
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_LIST_SUGGESTIONS[0],
+            entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            DATA.TEST_USER_LIST_SUGGESTIONS[1],
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[3],
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.selectedListIds).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0].localId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].localId,
         ])
-        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[0].localId)
-        expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
+        expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[0].localId)
+        expect(unselectedEntryId).toBe(
+            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
+        )
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_LIST_SUGGESTIONS[3],
+            entry: DATA.TEST_USER_LIST_SUGGESTIONS[3],
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[3],
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            DATA.TEST_USER_LIST_SUGGESTIONS[1],
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.selectedListIds).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0].localId,
-            DATA.TEST_LIST_SUGGESTIONS[3].localId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].localId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[3].localId,
         ])
-        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[3].localId)
-        expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
+        expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[3].localId)
+        expect(unselectedEntryId).toBe(
+            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
+        )
     })
 
     it('should correctly select/unselect existing entry', async ({
@@ -782,82 +786,88 @@ describe('SpacePickerLogic', () => {
         await testLogic.init()
 
         expect(testLogic.state.selectedListIds).toEqual([])
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
-            DATA.TEST_LIST_SUGGESTIONS,
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
+            DATA.TEST_USER_LIST_SUGGESTIONS,
         )
         expect(selectedEntryId).toBe(null)
         expect(unselectedEntryId).toBe(null)
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_LIST_SUGGESTIONS[1],
+            entry: DATA.TEST_USER_LIST_SUGGESTIONS[1],
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[1],
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[3],
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.selectedListIds).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[1].localId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
         ])
-        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
+        expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[1].localId)
         expect(unselectedEntryId).toBe(null)
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_LIST_SUGGESTIONS[1],
+            entry: DATA.TEST_USER_LIST_SUGGESTIONS[1],
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[1],
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[3],
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.selectedListIds).toEqual([])
-        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
-        expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
+        expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[1].localId)
+        expect(unselectedEntryId).toBe(
+            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
+        )
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_LIST_SUGGESTIONS[0],
+            entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            DATA.TEST_USER_LIST_SUGGESTIONS[1],
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[3],
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.selectedListIds).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0].localId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].localId,
         ])
-        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[0].localId)
-        expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
+        expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[0].localId)
+        expect(unselectedEntryId).toBe(
+            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
+        )
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_LIST_SUGGESTIONS[3],
+            entry: DATA.TEST_USER_LIST_SUGGESTIONS[3],
         })
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[3],
-            DATA.TEST_LIST_SUGGESTIONS[0],
-            DATA.TEST_LIST_SUGGESTIONS[1],
-            DATA.TEST_LIST_SUGGESTIONS[2],
-            DATA.TEST_LIST_SUGGESTIONS[4],
-            DATA.TEST_LIST_SUGGESTIONS[5],
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[3],
+            DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            DATA.TEST_USER_LIST_SUGGESTIONS[1],
+            DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[4],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.selectedListIds).toEqual([
-            DATA.TEST_LIST_SUGGESTIONS[0].localId,
-            DATA.TEST_LIST_SUGGESTIONS[3].localId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].localId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[3].localId,
         ])
-        expect(selectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[3].localId)
-        expect(unselectedEntryId).toBe(DATA.TEST_LIST_SUGGESTIONS[1].localId)
+        expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[3].localId)
+        expect(unselectedEntryId).toBe(
+            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
+        )
     })
 
     it('should clear query upon entry selection', async ({ device }) => {
@@ -876,25 +886,25 @@ describe('SpacePickerLogic', () => {
         )
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_LIST_SUGGESTIONS[0],
+            entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
         })
 
         expect(testLogic.state).toEqual(
             expect.objectContaining({
                 query: '',
-                selectedListIds: [DATA.TEST_LIST_SUGGESTIONS[0].localId],
+                selectedListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].localId],
             }),
         )
         await testLogic.processEvent('searchInputChanged', { query: 'test' })
         expect(testLogic.state).toEqual(
             expect.objectContaining({
                 query: 'test',
-                selectedListIds: [DATA.TEST_LIST_SUGGESTIONS[0].localId],
+                selectedListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].localId],
             }),
         )
 
         await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_LIST_SUGGESTIONS[0],
+            entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
         })
 
         expect(testLogic.state).toEqual(
@@ -926,8 +936,8 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.init()
 
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
-            DATA.TEST_LIST_SUGGESTIONS,
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
+            DATA.TEST_USER_LIST_SUGGESTIONS,
         )
         expect(testLogic.state).toEqual(
             expect.objectContaining({
@@ -954,15 +964,15 @@ describe('SpacePickerLogic', () => {
 
         expect(selectedEntry).toBe(newEntryId)
         expect(newEntryName).toBe(newEntryText)
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
             expect.objectContaining({
                 name: newEntryText,
                 localId: newEntryId,
             }),
             {
-                ...DATA.TEST_LIST_SUGGESTIONS[0],
+                ...DATA.TEST_USER_LIST_SUGGESTIONS[0],
             },
-            ...DATA.TEST_LIST_SUGGESTIONS.slice(1),
+            ...DATA.TEST_USER_LIST_SUGGESTIONS.slice(1),
         ])
         expect(testLogic.state).toEqual(
             expect.objectContaining({
@@ -995,8 +1005,8 @@ describe('SpacePickerLogic', () => {
                 selectedListIds: [],
             }),
         )
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual(
-            DATA.TEST_LIST_SUGGESTIONS,
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
+            DATA.TEST_USER_LIST_SUGGESTIONS,
         )
 
         await testLogic.processEvent('searchInputChanged', {
@@ -1023,15 +1033,23 @@ describe('SpacePickerLogic', () => {
                 selectedListIds: [newEntryId],
             }),
         )
-        expect(normalizedStateToArray(testLogic.state.displayEntries)).toEqual([
+        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
             expect.objectContaining({
                 name: newEntryText,
                 localId: newEntryId,
             }),
             {
-                ...DATA.TEST_LIST_SUGGESTIONS[0],
+                ...DATA.TEST_USER_LIST_SUGGESTIONS[0],
             },
-            ...DATA.TEST_LIST_SUGGESTIONS.slice(1),
+            ...DATA.TEST_USER_LIST_SUGGESTIONS.slice(1),
         ])
+    })
+
+    describe('page links tab', () => {
+        it('should correctly load initial entries', async ({ device }) => {
+            const { testLogic } = await setupLogicHelper({ device })
+
+            await testLogic.init()
+        })
     })
 })

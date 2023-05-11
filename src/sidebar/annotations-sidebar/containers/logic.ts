@@ -311,7 +311,7 @@ export class SidebarContainerLogic extends UILogic<
         opts: { renderHighlights: boolean },
     ) {
         await executeUITask(this, 'cacheLoadState', async () => {
-            await cacheUtils.hydrateCacheForSidebar({
+            await cacheUtils.hydrateCacheForPageAnnotations({
                 fullPageUrl,
                 user: this.options.getCurrentUser(),
                 cache: this.options.annotationsCache,

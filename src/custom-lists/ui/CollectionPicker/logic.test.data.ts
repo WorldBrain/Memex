@@ -163,6 +163,7 @@ export const testListToSuggestion = (
     unifiedAnnotationIds: [],
 })
 
-export const TEST_LIST_SUGGESTIONS = TEST_LISTS.slice(0, 6).map((list, i) =>
-    testListToSuggestion(list, { unifiedId: i.toString() }),
-)
+export const TEST_USER_LIST_SUGGESTIONS = TEST_LISTS.slice(
+    0,
+    6,
+).map((list, i) => testListToSuggestion(list, { unifiedId: i.toString() }))

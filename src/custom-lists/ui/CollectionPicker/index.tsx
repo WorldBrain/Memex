@@ -77,12 +77,12 @@ class SpacePicker extends StatefulUIElement<
             return false
         }
 
-        const otherLists = normalizedStateToArray(
-            this.state.displayEntries,
-        ).map((e) => ({
-            id: e.localId,
-            name: e.name,
-        }))
+        const otherLists = normalizedStateToArray(this.state.listEntries).map(
+            (e) => ({
+                id: e.localId,
+                name: e.name,
+            }),
+        )
 
         return validateSpaceName(this.state.newEntryName, otherLists).valid
     }
@@ -92,7 +92,7 @@ class SpacePicker extends StatefulUIElement<
         name: string
     }> {
         const selectedIdSet = new Set(this.state.selectedListIds)
-        return normalizedStateToArray(this.state.displayEntries)
+        return normalizedStateToArray(this.state.listEntries)
             .filter(
                 (entry) =>
                     entry.localId != null && selectedIdSet.has(entry.localId),
@@ -243,7 +243,7 @@ class SpacePicker extends StatefulUIElement<
     )
 
     private renderListRows() {
-        let myLists = normalizedStateToArray(this.state.displayEntries)
+        let myLists = normalizedStateToArray(this.state.listEntries)
         if (this.state.query.trim().length > 0) {
             myLists = myLists.filter((list) =>
                 this.state.filteredListIds.includes(list.unifiedId),
@@ -388,7 +388,7 @@ class SpacePicker extends StatefulUIElement<
                     <AddNewEntry
                         resultItem={this.state.newEntryName}
                         onPress={this.handleNewListPress}
-                        resultsCount={this.state.displayEntries.allIds.length}
+                        resultsCount={this.state.listEntries.allIds.length}
                         commandKey={SpacePicker.MOD_KEY}
                     />
                 )}

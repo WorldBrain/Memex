@@ -204,7 +204,7 @@ interface CacheHydratorDeps<
 }
 
 // NOTE: this is tested as part of the sidebar logic tests
-export async function hydrateCacheForSidebar(
+export async function hydrateCacheForPageAnnotations(
     args: CacheHydratorDeps<
         | 'contentSharing'
         | 'customLists'
@@ -295,7 +295,8 @@ export async function hydrateCacheForSidebar(
     )
 }
 
-export async function hydrateCacheForDashboard(
+// NOTE: this is tested as part of the dashboard + space-picker logic tests
+export async function hydrateCacheForListUsage(
     args: CacheHydratorDeps<
         'contentSharing' | 'customLists' | 'pageActivityIndicator'
     >,
