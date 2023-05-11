@@ -316,6 +316,7 @@ export default class SearchResultsContainer extends React.Component<
                 spacePickerButtonRef={this.spaceBtnBarDashboardRef}
                 renderListsPickerForAnnotation={() => (
                     <CollectionPicker
+                        showPageLinks
                         annotationsCache={this.props.annotationsCache}
                         initialSelectedListIds={() => localListIds}
                         selectEntry={(listId) =>
@@ -431,6 +432,7 @@ export default class SearchResultsContainer extends React.Component<
                     contextLocation={'dashboard'}
                     renderSpacePicker={() => (
                         <CollectionPicker
+                            showPageLinks
                             annotationsCache={this.props.annotationsCache}
                             initialSelectedListIds={() => lists}
                             selectEntry={boundAnnotCreateProps.addPageToList}

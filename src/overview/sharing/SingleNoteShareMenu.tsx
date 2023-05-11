@@ -327,6 +327,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         <SectionTitle>Add to Spaces</SectionTitle>
                         <SpacePicker
                             {...this.props.spacePickerProps}
+                            showPageLinks
                             selectEntry={this.handleSpacePickerSelection(
                                 'select',
                             )}

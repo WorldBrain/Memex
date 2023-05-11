@@ -27,6 +27,7 @@ import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-ind
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { BrowserSettingsStore } from 'src/util/settings'
+import { getEntriesForCurrentTab } from './utils'
 
 export type SpaceDisplayEntry<
     T extends UnifiedListType = UnifiedListType
@@ -204,8 +205,11 @@ export default class SpacePickerLogic extends UILogic<
             currentUser,
         )
         const userLists = myLists.filter(
-            (list) => list.type === 'user-list',
+            (list) => list.type === 'user-list' && list.localId != null,
         ) as UnifiedList<'user-list'>[]
+        const localPageLinkLists = pageLinkLists.filter(
+            (list) => list.localId != null,
+        )
 
         this.emitMutation({
             listEntries: {
@@ -216,7 +220,7 @@ export default class SpacePickerLogic extends UILogic<
             },
             pageLinkEntries: {
                 $set: initNormalizedState({
-                    seedData: pageLinkLists,
+                    seedData: localPageLinkLists,
                     getId: (list) => list.unifiedId,
                 }),
             },
@@ -566,10 +570,10 @@ export default class SpacePickerLogic extends UILogic<
 
     private setFocusedEntryIndex = (
         nextFocusIndex: number | null,
-        state: Pick<SpacePickerState, 'listEntries' | 'filteredListIds'>,
+        state: SpacePickerState,
         emit = true,
     ) => {
-        let entries = normalizedStateToArray(state.listEntries)
+        let entries = getEntriesForCurrentTab(state)
         if (state.filteredListIds?.length) {
             entries = entries.filter((entry) =>
                 state.filteredListIds.includes(entry.unifiedId),

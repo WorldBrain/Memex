@@ -587,6 +587,7 @@ export default class Ribbon extends Component<Props, State> {
                         autoFocus
                         renderSpacePicker={() => (
                             <CollectionPicker
+                                showPageLinks
                                 shouldHydrateCacheOnInit
                                 localStorageAPI={browser.storage.local}
                                 selectEntry={this.props.lists.selectEntry}

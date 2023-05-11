@@ -32,8 +32,11 @@ import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-n
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { PageAnnotationsCache } from 'src/annotations/cache'
+import { getEntriesForCurrentTab } from './utils'
 
-export interface Props extends SpacePickerDependencies {}
+export interface Props extends SpacePickerDependencies {
+    showPageLinks?: boolean
+}
 
 class SpacePicker extends StatefulUIElement<
     Props,
@@ -73,7 +76,11 @@ class SpacePicker extends StatefulUIElement<
     }
 
     private get shouldShowAddNewEntry(): boolean {
-        if (this.props.filterMode || this.state.loadState === 'running') {
+        if (
+            this.props.filterMode ||
+            this.state.loadState === 'running' ||
+            this.state.currentTab === 'page-links'
+        ) {
             return false
         }
 
@@ -92,7 +99,7 @@ class SpacePicker extends StatefulUIElement<
         name: string
     }> {
         const selectedIdSet = new Set(this.state.selectedListIds)
-        return normalizedStateToArray(this.state.listEntries)
+        return getEntriesForCurrentTab(this.state)
             .filter(
                 (entry) =>
                     entry.localId != null && selectedIdSet.has(entry.localId),
@@ -184,12 +191,13 @@ class SpacePicker extends StatefulUIElement<
         }
     }
 
-    private renderUserListRow = (
-        entry: SpaceDisplayEntry<'user-list'>,
+    private renderListRow = (
+        entry: SpaceDisplayEntry<'user-list' | 'page-link'>,
         index: number,
     ) => (
-        <EntryRowContainer key={entry.localId}>
+        <EntryRowContainer key={entry.unifiedId}>
             <EntryRow
+                id={`ListKeyName-${entry.unifiedId}`}
                 onPress={() => {
                     this.displayListRef.current.scrollTo(0, 0)
                     this.processEvent('resultEntryPress', { entry })
@@ -204,7 +212,7 @@ class SpacePicker extends StatefulUIElement<
                 }
                 onFocus={async () => {
                     const el = document.getElementById(
-                        `ListKeyName-${entry.localId}`,
+                        `ListKeyName-${entry.unifiedId}`,
                     )
                     if (el != null) {
                         el.scrollTop = el.offsetTop
@@ -221,12 +229,16 @@ class SpacePicker extends StatefulUIElement<
                     })
                 }
                 allTabsButtonPressed={this.state.allTabsButtonPressed}
-                key={`ListKeyName-${entry.localId}`}
-                id={`ListKeyName-${entry.localId}`}
                 index={index}
                 selected={this.state.selectedListIds.includes(entry.localId)}
                 focused={this.state.focusedListId === entry.unifiedId}
-                resultItem={<ListResultItem>{entry.name}</ListResultItem>}
+                resultItem={
+                    <ListResultItem>
+                        {entry.type === 'page-link'
+                            ? entry.pageTitle ?? entry.name
+                            : entry.name}
+                    </ListResultItem>
+                }
                 removeTooltipText={
                     this.props.removeTooltipText ?? 'Remove from Space'
                 }
@@ -242,18 +254,18 @@ class SpacePicker extends StatefulUIElement<
         </EntryRowContainer>
     )
 
-    private renderListRows() {
-        let myLists = normalizedStateToArray(this.state.listEntries)
+    private renderListEntries() {
+        let listEntries = getEntriesForCurrentTab(this.state)
         if (this.state.query.trim().length > 0) {
-            myLists = myLists.filter((list) =>
+            listEntries = listEntries.filter((list) =>
                 this.state.filteredListIds.includes(list.unifiedId),
             )
         }
 
-        if (!myLists.length) {
+        if (!listEntries.length) {
             return this.renderEmptyList()
         }
-        return myLists.map(this.renderUserListRow)
+        return listEntries.map(this.renderListRow)
     }
 
     private handleSpaceContextMenuClose = (listId: number) => async () => {
@@ -379,10 +391,35 @@ class SpacePicker extends StatefulUIElement<
                 </SearchContainer>
 
                 <EntryList ref={this.displayListRef}>
-                    {this.state.query.trim().length === 0 && (
-                        <EntryListHeader>Recently used</EntryListHeader>
+                    {this.props.showPageLinks && (
+                        <TabsBar>
+                            <Tab
+                                active={this.state.currentTab === 'user-lists'}
+                                onClick={() =>
+                                    this.processEvent('switchTab', {
+                                        tab: 'user-lists',
+                                    })
+                                }
+                            >
+                                Spaces
+                            </Tab>
+                            <Tab
+                                active={this.state.currentTab === 'page-links'}
+                                onClick={() =>
+                                    this.processEvent('switchTab', {
+                                        tab: 'page-links',
+                                    })
+                                }
+                            >
+                                Page Links
+                            </Tab>
+                        </TabsBar>
                     )}
-                    {this.renderListRows()}
+                    {this.state.currentTab === 'user-lists' &&
+                        this.state.query.trim().length === 0 && (
+                            <EntryListHeader>Recently used</EntryListHeader>
+                        )}
+                    {this.renderListEntries()}
                 </EntryList>
                 {this.shouldShowAddNewEntry && (
                     <AddNewEntry
@@ -512,14 +549,12 @@ const EntryRowContainer = styled.div`
     border-radius: 6px;
 `
 
-const SpaceContextMenuBtn = styled.div`
-    border-radius: 3px;
-    padding: 2px;
-    height: 20px;
-    width: 20px;
+const TabsBar = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
 `
+
+const Tab = styled.button<{ active: boolean }>``
 
 export default SpacePicker

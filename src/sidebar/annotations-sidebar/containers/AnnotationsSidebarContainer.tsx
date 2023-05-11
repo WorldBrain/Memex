@@ -28,7 +28,7 @@ import analytics from 'src/analytics'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { Rnd } from 'react-rnd'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import type { Props as SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
 import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
@@ -327,6 +327,7 @@ export class AnnotationsSidebarContainer<
                 }),
             renderSpacePicker: () => (
                 <CollectionPicker
+                    showPageLinks
                     selectEntry={(listId) =>
                         this.processEvent('setNewPageNoteLists', {
                             lists: [...this.state.commentBox.lists, listId],
@@ -391,6 +392,7 @@ export class AnnotationsSidebarContainer<
             contentSharingBG,
             pageActivityIndicatorBG,
             spacesBG: customListsBG,
+            showPageLinks: true,
             localStorageAPI: this.props.storageAPI.local,
             createNewEntry: this.createNewList(params.annotation.unifiedId),
             initialSelectedListIds: () =>
