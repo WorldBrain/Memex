@@ -53,7 +53,7 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
 const timestampToString = (timestamp: number) =>

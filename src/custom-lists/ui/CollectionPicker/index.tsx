@@ -3,12 +3,12 @@ import styled, { ThemeProvider, css } from 'styled-components'
 import browser from 'webextension-polyfill'
 
 import { StatefulUIElement } from 'src/util/ui-logic'
-import ListPickerLogic, {
+import ListPickerLogic from 'src/custom-lists/ui/CollectionPicker/logic'
+import type {
     SpacePickerDependencies,
     SpacePickerEvent,
     SpacePickerState,
-    SpaceDisplayEntry,
-} from 'src/custom-lists/ui/CollectionPicker/logic'
+} from 'src/custom-lists/ui/CollectionPicker/types'
 import { PickerSearchInput } from './components/SearchInput'
 import AddNewEntry from './components/AddNewEntry'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -33,6 +33,7 @@ import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/u
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { getEntriesForCurrentTab } from './utils'
+import type { UnifiedList } from 'src/annotations/cache/types'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
@@ -127,7 +128,7 @@ class SpacePicker extends StatefulUIElement<
         })
     }
 
-    handleResultListFocus = (list: SpaceDisplayEntry, index?: number) => {
+    handleResultListFocus = (list: UnifiedList, index?: number) => {
         this.processEvent('resultEntryFocus', { entry: list, index })
 
         const el = document.getElementById(`ListKeyName-${list.localId}`)
@@ -192,7 +193,7 @@ class SpacePicker extends StatefulUIElement<
     }
 
     private renderListRow = (
-        entry: SpaceDisplayEntry<'user-list' | 'page-link'>,
+        entry: UnifiedList<'user-list' | 'page-link'>,
         index: number,
     ) => (
         <EntryRowContainer key={entry.unifiedId}>

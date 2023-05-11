@@ -7,7 +7,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
-import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import ConfirmDialog from '../../common-ui/components/ConfirmDialog'
 import {

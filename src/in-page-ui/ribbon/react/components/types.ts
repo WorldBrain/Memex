@@ -2,7 +2,7 @@ import type {
     PickerUpdateHandler,
     PickerUpdateHandlerArgs,
 } from 'src/common-ui/GenericPicker/types'
-import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'

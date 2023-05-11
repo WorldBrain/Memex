@@ -5,7 +5,7 @@ import type {
     SharedList,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import type { SpaceDisplayEntry } from '../ui/CollectionPicker/logic'
+import type { UnifiedList } from 'src/annotations/cache/types'
 
 export interface PageList {
     id: number
@@ -132,7 +132,7 @@ export interface RemoteCollectionsInterface {
     fetchInitialListSuggestions(args?: {
         /** Set this to factor in fetching of extra entries that might not be in the recently used suggestion store. */
         extraListIds?: number[]
-    }): Promise<Pick<SpaceDisplayEntry, 'localId' | 'name' | 'remoteId'>[]>
+    }): Promise<Pick<UnifiedList, 'localId' | 'name' | 'remoteId'>[]>
     fetchListPagesById(args: { id: number }): Promise<PageListEntry[]>
     fetchPageLists(args: { url: string }): Promise<number[]>
     fetchListIdsByUrl(args: { url: string }): Promise<number[]>

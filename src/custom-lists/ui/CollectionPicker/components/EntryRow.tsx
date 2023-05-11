@@ -3,11 +3,10 @@ import styled, { css } from 'styled-components'
 import { Layers } from '@styled-icons/feather'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import type { SpaceDisplayEntry } from '../logic'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import type { UnifiedList } from 'src/annotations/cache/types'
 
-export interface Props
-    extends Pick<SpaceDisplayEntry<'user-list'>, 'remoteId'> {
+export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onPress: () => void
     onFocus: () => void
     onUnfocus: () => void

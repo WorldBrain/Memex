@@ -1,4 +1,3 @@
-import type { SpaceDisplayEntry } from './logic'
 import type { PageList } from 'src/custom-lists/background/types'
 import type {
     FollowedList,
@@ -8,6 +7,7 @@ import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import type { UnifiedList } from 'src/annotations/cache/types'
 
 export const TAB_URL_1 = 'https://test.com'
 export const TAB_URL_2 = 'https://test.com/test'
@@ -150,13 +150,13 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
 
 const testListToSuggestion = (
     list: PageList,
-    extra: Pick<SpaceDisplayEntry, 'unifiedId' | 'type'> & {
+    extra: Pick<UnifiedList, 'unifiedId' | 'type'> & {
         sharedListEntryId?: string
         normalizedPageUrl?: string
         creator?: UserReference
         pageTitle?: string
     },
-): SpaceDisplayEntry => ({
+): UnifiedList => ({
     type: extra.type,
     unifiedId: extra.unifiedId,
     localId: list.id,

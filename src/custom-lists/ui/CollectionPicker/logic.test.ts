@@ -1,4 +1,4 @@
-import SpacePickerLogic, { SpaceDisplayEntry } from './logic'
+import SpacePickerLogic from './logic'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
@@ -16,6 +16,7 @@ import {
     initNormalizedState,
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import type { UnifiedList } from 'src/annotations/cache/types'
 
 async function insertTestData({
     storageManager,
@@ -72,7 +73,7 @@ const setupLogicHelper = async ({
     createNewEntry?: (name: string) => Promise<number>
     selectEntry?: (id: string | number) => Promise<void>
     unselectEntry?: (id: string | number) => Promise<void>
-    queryEntries?: (query: string) => Promise<SpaceDisplayEntry[]>
+    queryEntries?: (query: string) => Promise<UnifiedList[]>
     onSubmit?: () => void
     initialSelectedListIds?: number[]
     skipTestData?: boolean

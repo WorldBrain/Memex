@@ -1,88 +1,27 @@
-import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
+import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { loadInitial } from 'src/util/ui-logic'
-import type { Storage } from 'webextension-polyfill'
-import type { TaskState } from 'ui-logic-core/lib/types'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
-import type {
-    CollectionsSettings,
-    RemoteCollectionsInterface,
-} from 'src/custom-lists/background/types'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { CollectionsSettings } from 'src/custom-lists/background/types'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { pageActionAllowed } from 'src/util/subscriptions/storage'
 import type {
     PageAnnotationsCacheEvents,
-    PageAnnotationsCacheInterface,
     UnifiedList,
-    UnifiedListType,
 } from 'src/annotations/cache/types'
 import { siftListsIntoCategories } from 'src/annotations/cache/utils'
 import {
     initNormalizedState,
-    NormalizedState,
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
-import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
-import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { getEntriesForCurrentTab } from './utils'
-
-export type SpaceDisplayEntry<
-    T extends UnifiedListType = UnifiedListType
-> = UnifiedList<T>
-
-export interface SpacePickerDependencies {
-    localStorageAPI: Storage.LocalStorageArea
-    shouldHydrateCacheOnInit?: boolean
-    annotationsCache: PageAnnotationsCacheInterface
-    createNewEntry: (name: string) => Promise<number>
-    selectEntry: (
-        listId: number,
-        options?: { protectAnnotation?: boolean },
-    ) => Promise<void>
-    unselectEntry: (listId: number) => Promise<void>
-    actOnAllTabs?: (listId: number) => Promise<void>
-    /** Called when user keys Enter+Cmd/Ctrl in main text input */
-    onSubmit?: () => void | Promise<void>
-    initialSelectedListIds?: () => number[] | Promise<number[]>
-    dashboardSelectedListId?: number
-    children?: any
-    filterMode?: boolean
-    removeTooltipText?: string
-    searchInputPlaceholder?: string
-    onListShare?: (ids: { localListId: number; remoteListId: string }) => void
-    onClickOutside?: React.MouseEventHandler
-    authBG: AuthRemoteFunctionsInterface
-    spacesBG: RemoteCollectionsInterface
-    contentSharingBG: ContentSharingInterface
-    pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
-    width?: string
-    autoFocus?: boolean
-    context?: string
-    closePicker?: () => void
-}
-
-export type SpacePickerEvent = UIEvent<{
-    setSearchInputRef: { ref: HTMLInputElement }
-    searchInputChanged: { query: string; skipDebounce?: boolean }
-    selectedEntryPress: { entry: number }
-    resultEntryAllPress: { entry: SpaceDisplayEntry }
-    newEntryAllPress: { entry: string }
-    resultEntryPress: { entry: Pick<SpaceDisplayEntry, 'localId'> }
-    resultEntryFocus: { entry: SpaceDisplayEntry; index: number }
-    setListRemoteId: { localListId: number; remoteListId: string }
-    toggleEntryContextMenu: { listId: number }
-    updateContextMenuPosition: { x?: number; y?: number }
-    renameList: { listId: number; name: string }
-    deleteList: { listId: number }
-    newEntryPress: { entry: string }
-    switchTab: { tab: SpacePickerTab }
-    keyPress: { event: KeyboardEvent }
-    onKeyUp: { event: KeyboardEvent }
-    focusInput: {}
-}>
+import type {
+    SpacePickerState,
+    SpacePickerEvent,
+    SpacePickerDependencies,
+} from './types'
 
 type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     SpacePickerState,
@@ -90,29 +29,9 @@ type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     EventName
 >
 
-type SpacePickerTab = 'user-lists' | 'page-links'
-
-export interface SpacePickerState {
-    query: string
-    newEntryName: string
-    currentTab: SpacePickerTab
-    currentUser: UserReference | null
-    focusedListId: UnifiedList['unifiedId'] | null
-    filteredListIds: UnifiedList['unifiedId'][] | null
-    listEntries: NormalizedState<SpaceDisplayEntry<'user-list'>>
-    pageLinkEntries: NormalizedState<SpaceDisplayEntry<'page-link'>>
-    selectedListIds: number[]
-    contextMenuPositionX: number
-    contextMenuPositionY: number
-    contextMenuListId: number | null
-    loadState: TaskState
-    renameListErrorMessage: string | null
-    allTabsButtonPressed?: number
-}
-
 const sortDisplayEntries = (selectedEntryIds: Set<number>) => (
-    a: SpaceDisplayEntry,
-    b: SpaceDisplayEntry,
+    a: UnifiedList,
+    b: UnifiedList,
 ): number =>
     (selectedEntryIds.has(b.localId) ? 1 : 0) -
     (selectedEntryIds.has(a.localId) ? 1 : 0)
@@ -129,7 +48,7 @@ const __getListDataByLocalId = (
         source?: keyof SpacePickerEvent
         mustBeLocal?: boolean
     },
-): SpaceDisplayEntry => {
+): UnifiedList => {
     const listData = annotationsCache.getListByLocalId(localId)
     const source = opts?.source ? `for ${opts.source} ` : ''
 
