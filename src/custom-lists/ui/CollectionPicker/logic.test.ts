@@ -116,12 +116,18 @@ describe('SpacePickerLogic', () => {
         })
 
         expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([])
+        expect(normalizedStateToArray(testLogic.state.pageLinkEntries)).toEqual(
+            [],
+        )
         expect(testLogic.state.selectedListIds).toEqual([])
 
         await testLogic.init()
 
         expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
             DATA.TEST_USER_LIST_SUGGESTIONS,
+        )
+        expect(normalizedStateToArray(testLogic.state.pageLinkEntries)).toEqual(
+            DATA.TEST_PAGE_LINK_SUGGESTIONS,
         )
         expect(testLogic.state.selectedListIds).toEqual([])
     })
@@ -204,48 +210,7 @@ describe('SpacePickerLogic', () => {
         ])
     })
 
-    it('should correctly search for a entry when entry is already selected', async ({
-        device,
-    }) => {
-        const initialSelectedEntries = [DATA.TEST_LISTS[0].id]
-
-        const { testLogic } = await setupLogicHelper({
-            device,
-            initialSelectedListIds: initialSelectedEntries,
-        })
-
-        await testLogic.init()
-        await testLogic.processEvent('searchInputChanged', { query: 'test' })
-
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: 'test',
-                filteredListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId],
-                selectedListIds: initialSelectedEntries,
-            }),
-        )
-    })
-
-    it('should correctly search for a entry when entry is not selected', async ({
-        device,
-    }) => {
-        const { testLogic } = await setupLogicHelper({
-            device,
-            queryEntries: async () => [DATA.TEST_USER_LIST_SUGGESTIONS[0]],
-        })
-
-        await testLogic.init()
-        await testLogic.processEvent('searchInputChanged', { query: 'test' })
-
-        expect(testLogic.state).toEqual(
-            expect.objectContaining({
-                query: 'test',
-                filteredListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId],
-            }),
-        )
-    })
-
-    it('should correctly search for a entry regardless of case', async ({
+    it('should be able to search for an entry regardless of case', async ({
         device,
     }) => {
         const { testLogic } = await setupLogicHelper({
@@ -260,11 +225,13 @@ describe('SpacePickerLogic', () => {
             }),
         )
 
-        await testLogic.processEvent('searchInputChanged', { query: 'Test' })
+        await testLogic.processEvent('searchInputChanged', {
+            query: 'LIST Test',
+        })
         expect(testLogic.state).toEqual(
             expect.objectContaining({
-                query: 'Test',
-                newEntryName: 'Test',
+                query: 'LIST Test',
+                newEntryName: 'LIST Test',
                 filteredListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId],
             }),
         )
@@ -289,14 +256,69 @@ describe('SpacePickerLogic', () => {
             }),
         )
 
-        await testLogic.processEvent('searchInputChanged', { query: 'test' })
+        await testLogic.processEvent('searchInputChanged', {
+            query: 'list test',
+        })
         expect(testLogic.state).toEqual(
             expect.objectContaining({
-                query: 'test',
-                newEntryName: 'test',
+                query: 'list test',
+                newEntryName: 'list test',
                 filteredListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId],
             }),
         )
+    })
+
+    it("should be able to search for any entry when it's already selected", async ({
+        device,
+    }) => {
+        const initialSelectedEntries = [DATA.TEST_LISTS[0].id]
+
+        const { testLogic } = await setupLogicHelper({
+            device,
+            initialSelectedListIds: initialSelectedEntries,
+        })
+
+        await testLogic.init()
+        await testLogic.processEvent('searchInputChanged', {
+            query: 'list test',
+        })
+
+        expect(testLogic.state).toEqual(
+            expect.objectContaining({
+                query: 'list test',
+                filteredListIds: [DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId],
+                selectedListIds: initialSelectedEntries,
+            }),
+        )
+    })
+
+    it('should be able to search for page links via their corresponding page titles', async ({
+        device,
+    }) => {
+        const { testLogic } = await setupLogicHelper({ device })
+
+        await testLogic.init()
+
+        await testLogic.processEvent('searchInputChanged', { query: 'better' })
+        expect(testLogic.state.filteredListIds).toEqual([
+            DATA.TEST_PAGE_LINK_SUGGESTIONS[1].unifiedId,
+        ])
+
+        await testLogic.processEvent('searchInputChanged', {
+            query: 'testing site',
+        })
+        expect(testLogic.state.filteredListIds).toEqual([
+            DATA.TEST_PAGE_LINK_SUGGESTIONS[0].unifiedId,
+            DATA.TEST_PAGE_LINK_SUGGESTIONS[1].unifiedId,
+        ])
+
+        // Should match both a user list + page links
+        await testLogic.processEvent('searchInputChanged', { query: 'test' })
+        expect(testLogic.state.filteredListIds).toEqual([
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId,
+            DATA.TEST_PAGE_LINK_SUGGESTIONS[0].unifiedId,
+            DATA.TEST_PAGE_LINK_SUGGESTIONS[1].unifiedId,
+        ])
     })
 
     it('should do an inclusive search ANDing all distinct terms given', async ({
@@ -1045,11 +1067,66 @@ describe('SpacePickerLogic', () => {
         ])
     })
 
-    describe('page links tab', () => {
-        it('should correctly load initial entries', async ({ device }) => {
-            const { testLogic } = await setupLogicHelper({ device })
+    it('should be able to switch tabs', async ({ device }) => {
+        const { testLogic } = await setupLogicHelper({ device })
 
-            await testLogic.init()
+        await testLogic.init()
+        expect(testLogic.state.currentTab).toEqual('user-lists')
+        await testLogic.processEvent('switchTab', { tab: 'page-links' })
+        expect(testLogic.state.currentTab).toEqual('page-links')
+        await testLogic.processEvent('switchTab', { tab: 'user-lists' })
+        expect(testLogic.state.currentTab).toEqual('user-lists')
+        await testLogic.processEvent('switchTab', { tab: 'page-links' })
+        expect(testLogic.state.currentTab).toEqual('page-links')
+    })
+
+    it('should reset focus on tab switch', async ({ device }) => {
+        const {
+            testLogic,
+            annotationsCache,
+            entryPickerLogic,
+        } = await setupLogicHelper({
+            device,
         })
+
+        await testLogic.init()
+        expect(testLogic.state.currentTab).toEqual('user-lists')
+        expect(testLogic.state.focusedListId).toEqual(null)
+        expect(entryPickerLogic['focusIndex']).toBe(-1)
+
+        await testLogic.processEvent('keyPress', {
+            event: { key: 'ArrowDown' } as KeyboardEvent,
+        })
+        await testLogic.processEvent('keyPress', {
+            event: { key: 'ArrowDown' } as KeyboardEvent,
+        })
+        await testLogic.processEvent('keyPress', {
+            event: { key: 'ArrowDown' } as KeyboardEvent,
+        })
+        expect(entryPickerLogic['focusIndex']).toBe(2)
+        expect(testLogic.state.focusedListId).toEqual(
+            annotationsCache.getListByLocalId(DATA.TEST_LISTS[2].id).unifiedId,
+        )
+
+        await testLogic.processEvent('switchTab', { tab: 'page-links' })
+        expect(testLogic.state.currentTab).toEqual('page-links')
+        expect(entryPickerLogic['focusIndex']).toBe(-1)
+        expect(testLogic.state.focusedListId).toEqual(null)
+
+        await testLogic.processEvent('keyPress', {
+            event: { key: 'ArrowDown' } as KeyboardEvent,
+        })
+        await testLogic.processEvent('keyPress', {
+            event: { key: 'ArrowDown' } as KeyboardEvent,
+        })
+        expect(entryPickerLogic['focusIndex']).toBe(1)
+        expect(testLogic.state.focusedListId).toEqual(
+            annotationsCache.getListByLocalId(DATA.TEST_LISTS[1].id).unifiedId,
+        )
+
+        await testLogic.processEvent('switchTab', { tab: 'user-lists' })
+        expect(testLogic.state.currentTab).toEqual('user-lists')
+        expect(entryPickerLogic['focusIndex']).toBe(-1)
+        expect(testLogic.state.focusedListId).toEqual(null)
     })
 })

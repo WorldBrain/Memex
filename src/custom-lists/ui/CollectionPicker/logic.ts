@@ -77,6 +77,7 @@ export type SpacePickerEvent = UIEvent<{
     renameList: { listId: number; name: string }
     deleteList: { listId: number }
     newEntryPress: { entry: string }
+    switchTab: { tab: SpacePickerTab }
     keyPress: { event: KeyboardEvent }
     onKeyUp: { event: KeyboardEvent }
     focusInput: {}
@@ -88,10 +89,13 @@ type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     EventName
 >
 
+type SpacePickerTab = 'user-lists' | 'page-links'
+
 export interface SpacePickerState {
     query: string
-    currentUser: UserReference | null
     newEntryName: string
+    currentTab: SpacePickerTab
+    currentUser: UserReference | null
     focusedListId: UnifiedList['unifiedId'] | null
     filteredListIds: UnifiedList['unifiedId'][] | null
     listEntries: NormalizedState<SpaceDisplayEntry<'user-list'>>
@@ -176,6 +180,7 @@ export default class SpacePickerLogic extends UILogic<
     getInitialState = (): SpacePickerState => ({
         query: '',
         newEntryName: '',
+        currentTab: 'user-lists',
         currentUser: null,
         focusedListId: null,
         listEntries: initNormalizedState(),
@@ -292,6 +297,13 @@ export default class SpacePickerLogic extends UILogic<
         }
         currentKeys = currentKeys.filter((key) => key !== event.key)
         this.currentKeysPressed = currentKeys
+    }
+
+    switchTab: EventHandler<'switchTab'> = async ({ event, previousState }) => {
+        if (previousState.currentTab !== event.tab) {
+            this.emitMutation({ currentTab: { $set: event.tab } })
+            this.setFocusedEntryIndex(-1, previousState)
+        }
     }
 
     keyPress: EventHandler<'keyPress'> = async ({
@@ -493,16 +505,21 @@ export default class SpacePickerLogic extends UILogic<
     private querySpaces = (query: string, state: SpacePickerState) => {
         const distinctTerms = query.split(/\s+/).filter(Boolean)
         const doAllTermsMatch = (list: UnifiedList): boolean =>
-            distinctTerms.reduce(
-                (acc, term) =>
+            distinctTerms.reduce((acc, term) => {
+                const indexField =
+                    list.type === 'page-link' ? list.pageTitle : list.name
+                return (
                     acc &&
-                    list.name
+                    indexField
                         .toLocaleLowerCase()
-                        .includes(term.toLocaleLowerCase()),
-                true,
-            )
+                        .includes(term.toLocaleLowerCase())
+                )
+            }, true)
 
-        const matchingEntryIds = normalizedStateToArray(state.listEntries)
+        const matchingEntryIds = [
+            ...normalizedStateToArray(state.listEntries),
+            ...normalizedStateToArray(state.pageLinkEntries),
+        ]
             .filter(doAllTermsMatch)
             .sort(sortDisplayEntries(new Set(state.selectedListIds)))
             .map((entry) => entry.unifiedId)

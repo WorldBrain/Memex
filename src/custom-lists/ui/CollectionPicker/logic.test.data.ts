@@ -118,7 +118,7 @@ export const FOLLOWED_LISTS: FollowedList[] = [
     },
     {
         sharedList: TEST_LIST_METADATA[4].remoteId,
-        creator: CREATOR_1.id,
+        creator: CREATOR_2.id,
         name: TEST_LISTS[7].name,
         lastSync: new Date('2023-05-11').getTime(),
         type: SharedCollectionType.PageLink,
@@ -148,11 +148,16 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
     },
 ]
 
-export const testListToSuggestion = (
+const testListToSuggestion = (
     list: PageList,
-    extra: Pick<SpaceDisplayEntry, 'unifiedId'>,
+    extra: Pick<SpaceDisplayEntry, 'unifiedId' | 'type'> & {
+        sharedListEntryId?: string
+        normalizedPageUrl?: string
+        creator?: UserReference
+        pageTitle?: string
+    },
 ): SpaceDisplayEntry => ({
-    type: 'user-list',
+    type: extra.type,
     unifiedId: extra.unifiedId,
     localId: list.id,
     name: list.name,
@@ -161,9 +166,40 @@ export const testListToSuggestion = (
         undefined,
     hasRemoteAnnotationsToLoad: false,
     unifiedAnnotationIds: [],
+    creator: extra.creator,
+    pageTitle: extra.pageTitle,
+    normalizedPageUrl: extra.normalizedPageUrl,
+    sharedListEntryId: extra.sharedListEntryId,
 })
 
 export const TEST_USER_LIST_SUGGESTIONS = TEST_LISTS.slice(
     0,
     6,
-).map((list, i) => testListToSuggestion(list, { unifiedId: i.toString() }))
+).map((list, i) =>
+    testListToSuggestion(list, { unifiedId: i.toString(), type: 'user-list' }),
+)
+
+export const TEST_PAGE_LINK_SUGGESTIONS = [
+    testListToSuggestion(TEST_LISTS[6], {
+        unifiedId: '6',
+        type: 'page-link',
+        pageTitle: FOLLOWED_LIST_ENTRIES[0].entryTitle,
+        normalizedPageUrl: FOLLOWED_LIST_ENTRIES[0].normalizedPageUrl,
+        sharedListEntryId: FOLLOWED_LIST_ENTRIES[0].sharedListEntry.toString(),
+        creator: {
+            type: 'user-reference',
+            id: FOLLOWED_LIST_ENTRIES[0].creator,
+        },
+    }),
+    testListToSuggestion(TEST_LISTS[7], {
+        unifiedId: '7',
+        type: 'page-link',
+        pageTitle: FOLLOWED_LIST_ENTRIES[1].entryTitle,
+        normalizedPageUrl: FOLLOWED_LIST_ENTRIES[1].normalizedPageUrl,
+        sharedListEntryId: FOLLOWED_LIST_ENTRIES[1].sharedListEntry.toString(),
+        creator: {
+            type: 'user-reference',
+            id: FOLLOWED_LIST_ENTRIES[1].creator,
+        },
+    }),
+]
