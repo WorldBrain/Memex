@@ -42,6 +42,7 @@ export type SpacePickerEvent = UIEvent<{
     resultEntryFocus: { entry: UnifiedList; index: number }
     setListRemoteId: { localListId: number; remoteListId: string }
     toggleEntryContextMenu: { listId: number }
+    openListInWebUI: { unifiedListId: UnifiedList['unifiedId'] }
     updateContextMenuPosition: { x?: number; y?: number }
     renameList: { listId: number; name: string }
     deleteList: { listId: number }

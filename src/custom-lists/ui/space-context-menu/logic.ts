@@ -4,14 +4,18 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import type { TaskState } from 'ui-logic-core/lib/types'
 import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type { UnifiedList } from 'src/annotations/cache/types'
+import {
+    getListShareUrl,
+    getSinglePageShareUrl,
+} from 'src/content-sharing/utils'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export interface Dependencies {
     contentSharingBG: ContentSharingInterface
     spacesBG: RemoteCollectionsInterface
-    localListId: number
-    remoteListId: string | null
+    listData: UnifiedList
     errorMessage?: string
-    spaceName: string
     loadOwnershipData?: boolean
     onCancelEdit?: () => void
     onSpaceShare?: (remoteListId: string) => void
@@ -62,13 +66,14 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         ownershipLoadState: 'pristine',
         inviteLinksLoadState: 'pristine',
         inviteLinks: [],
-        nameValue: this.dependencies.spaceName,
+        nameValue: this.dependencies.listData.name,
         showSuccessMsg: false,
         mode: null,
         showSaveButton: false,
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
+        console.log('init for space:', this.dependencies.listData)
         let state = previousState
         await loadInitial(this, async () => {
             if (this.dependencies.loadOwnershipData) {
@@ -82,23 +87,28 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     }
 
     private async loadSpaceOwnership(previousState: State): Promise<State> {
-        const { remoteListId, spacesBG } = this.dependencies
+        const { listData, spacesBG } = this.dependencies
         const mutation: UIMutation<State> = {}
 
         await executeUITask(this, 'ownershipLoadState', async () => {
-            if (remoteListId == null) {
+            if (listData.remoteId == null) {
                 mutation.mode = { $set: null }
                 return
             }
 
-            const listData = await spacesBG.fetchSharedListDataWithOwnership({
-                remoteListId,
-            })
+            // TODO: maybe remove this call
+            const listDataWithOwnership = await spacesBG.fetchSharedListDataWithOwnership(
+                {
+                    remoteListId: listData.remoteId,
+                },
+            )
             if (listData == null) {
                 throw new Error('Remote list data not found')
             }
 
-            mutation.mode = { $set: listData.isOwned ? null : 'followed-space' }
+            mutation.mode = {
+                $set: listDataWithOwnership.isOwned ? null : 'followed-space',
+            }
         })
 
         this.emitMutation(mutation)
@@ -106,41 +116,73 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     }
 
     private async loadInviteLinks() {
-        const { remoteListId, contentSharingBG } = this.dependencies
+        const { listData, contentSharingBG } = this.dependencies
 
         await executeUITask(this, 'inviteLinksLoadState', async () => {
-            if (remoteListId == null) {
+            if (listData.remoteId == null) {
                 return
             }
 
+            // TODO: improve this endpoint so it can work with page-links, or just make it return IDs instead of links
             const { links } = await contentSharingBG.getExistingKeyLinksForList(
                 {
                     listReference: {
-                        id: remoteListId,
+                        id: listData.remoteId,
                         type: 'shared-list-reference',
                     },
                 },
             )
 
-            if (links.length) {
-                this.emitMutation({ inviteLinks: { $set: links } })
+            const contribLink = links.find((link) => link.keyString != null)
+
+            const inviteLinks: InviteLink[] = [
+                {
+                    roleID: SharedListRoleID.Commenter,
+                    link:
+                        listData.type === 'page-link'
+                            ? getSinglePageShareUrl({
+                                  remoteListId: listData.remoteId,
+                                  remoteListEntryId: listData.sharedListEntryId,
+                              })
+                            : getListShareUrl({
+                                  remoteListId: listData.remoteId,
+                              }),
+                },
+            ]
+            if (contribLink) {
+                inviteLinks.push({
+                    roleID: SharedListRoleID.ReadWrite,
+                    link:
+                        listData.type === 'page-link'
+                            ? getSinglePageShareUrl({
+                                  remoteListId: listData.remoteId,
+                                  remoteListEntryId: listData.sharedListEntryId,
+                                  collaborationKey: contribLink.keyString,
+                              })
+                            : getListShareUrl({
+                                  remoteListId: listData.remoteId,
+                                  collaborationKey: contribLink.keyString,
+                              }),
+                })
             }
+
+            this.emitMutation({ inviteLinks: { $set: inviteLinks } })
         })
     }
 
     shareSpace: EventHandler<'shareSpace'> = async ({}) => {
         const {
-            localListId,
+            listData,
             onSpaceShare,
             copyToClipboard,
             contentSharingBG,
         } = this.dependencies
 
-        let remoteListId = this.dependencies.remoteListId
+        let remoteListId = listData.remoteId
 
         await executeUITask(this, 'inviteLinksLoadState', async () => {
             const shareResult = await contentSharingBG.shareList({
-                localListId,
+                localListId: listData.localId,
             })
             remoteListId = shareResult.remoteListId
             onSpaceShare?.(remoteListId)
@@ -166,10 +208,12 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     confirmSpaceDelete: EventHandler<'confirmSpaceDelete'> = async ({
         event,
     }) => {
+        const { listData } = this.dependencies
+        if (!listData.localId) {
+            return
+        }
         this.dependencies.onDeleteSpaceConfirm?.(event.reactEvent)
-        await this.dependencies.spacesBG.removeList({
-            id: this.dependencies.localListId,
-        })
+        await this.dependencies.spacesBG.removeList({ id: listData.localId })
     }
 
     intendToDeleteSpace: EventHandler<'intendToDeleteSpace'> = async ({
@@ -202,14 +246,14 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         event,
         previousState,
     }) => {
-        const oldName = this.dependencies.spaceName
+        const oldName = this.dependencies.listData.name
         const newName = previousState.nameValue.trim()
         this.emitMutation({ showSaveButton: { $set: false } })
 
         if (newName.length && newName !== oldName) {
             this.dependencies.onConfirmSpaceNameEdit(newName)
             await this.dependencies.spacesBG.updateListName({
-                id: this.dependencies.localListId,
+                id: this.dependencies.listData.localId,
                 oldName,
                 newName,
             })

@@ -22,6 +22,10 @@ import type {
     SpacePickerEvent,
     SpacePickerDependencies,
 } from './types'
+import {
+    getListShareUrl,
+    getSinglePageShareUrl,
+} from 'src/content-sharing/utils'
 
 type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     SpacePickerState,
@@ -289,6 +293,25 @@ export default class SpacePickerLogic extends UILogic<
         if (event.key === 'Escape') {
             this.dependencies.closePicker()
         }
+    }
+
+    openListInWebUI: EventHandler<'openListInWebUI'> = async ({ event }) => {
+        const listData = this.dependencies.annotationsCache.lists.byId[
+            event.unifiedListId
+        ]
+        if (!listData?.remoteId) {
+            throw new Error(
+                'Cannot open Space in web UI - not tracked in UI state OR not shared',
+            )
+        }
+        const url =
+            listData.type === 'page-link'
+                ? getSinglePageShareUrl({
+                      remoteListId: listData.remoteId,
+                      remoteListEntryId: listData.sharedListEntryId,
+                  })
+                : getListShareUrl({ remoteListId: listData.remoteId })
+        window.open(url, '_blank')
     }
 
     toggleEntryContextMenu: EventHandler<'toggleEntryContextMenu'> = async ({

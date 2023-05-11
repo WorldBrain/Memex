@@ -39,9 +39,9 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     }
 
     private handleWebViewOpen: React.MouseEventHandler = (e) => {
-        const { remoteListId } = this.props
-        if (remoteListId != null) {
-            window.open(getListShareUrl({ remoteListId }))
+        const { listData } = this.props
+        if (listData.remoteId != null) {
+            window.open(getListShareUrl({ remoteListId: listData.remoteId }))
         }
     }
 
@@ -224,33 +224,37 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
 
         return (
             <ContextMenuContainer>
-                {this.props.remoteListId && (
+                {this.props.listData.remoteId != null && (
                     <SectionTitle>Sharing Links</SectionTitle>
                 )}
                 {this.renderShareLinks()}
 
-                <SectionTitle>Edit Space</SectionTitle>
-                <EditArea>
-                    <Container
-                        onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                        }}
-                    >
-                        <EditableListTitle
-                            onClick={(e) => {
-                                e.preventDefault()
-                                e.stopPropagation()
-                            }}
-                            onChange={this.handleNameChange}
-                            value={this.state.nameValue}
-                            onKeyDown={this.handleNameEditInputKeyDown}
-                        />
-                    </Container>
-                    {this.props.errorMessage && (
-                        <ErrMsg>{this.props.errorMessage}</ErrMsg>
-                    )}
-                </EditArea>
+                {this.props.listData.type === 'user-list' && (
+                    <>
+                        <SectionTitle>Edit Space</SectionTitle>
+                        <EditArea>
+                            <Container
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                }}
+                            >
+                                <EditableListTitle
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
+                                    }}
+                                    onChange={this.handleNameChange}
+                                    value={this.state.nameValue}
+                                    onKeyDown={this.handleNameEditInputKeyDown}
+                                />
+                            </Container>
+                            {this.props.errorMessage && (
+                                <ErrMsg>{this.props.errorMessage}</ErrMsg>
+                            )}
+                        </EditArea>
+                    </>
+                )}
                 <ButtonBox>
                     <PrimaryAction
                         onClick={wrapClick((reactEvent) =>

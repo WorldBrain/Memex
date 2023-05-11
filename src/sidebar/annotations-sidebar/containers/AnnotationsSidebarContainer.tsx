@@ -914,9 +914,7 @@ export class AnnotationsSidebarContainer<
                                         this.props.contentSharingBG
                                     }
                                     spacesBG={this.props.customListsBG}
-                                    spaceName={listData.name}
-                                    localListId={listData.localId}
-                                    remoteListId={listData.remoteId ?? null}
+                                    listData={listData}
                                     onConfirmSpaceNameEdit={(newName) =>
                                         this.processEvent('editListName', {
                                             unifiedListId: listData.unifiedId,

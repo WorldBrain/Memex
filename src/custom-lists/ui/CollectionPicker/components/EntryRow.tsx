@@ -11,7 +11,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onFocus: () => void
     onUnfocus: () => void
     onPressActOnAll?: () => void
-    onContextMenuBtnPress: () => void
+    onContextMenuBtnPress?: () => void
     index: number
     id?: string
     removeTooltipText?: string
@@ -79,7 +79,7 @@ class EntryRow extends React.Component<Props> {
                     )}
                 </NameWrapper>
                 <IconStyleWrapper>
-                    {focused && (
+                    {focused && this.props.onContextMenuBtnPress != null && (
                         <TooltipBox
                             tooltipText={'Share & Edit Space'}
                             placement="bottom"
