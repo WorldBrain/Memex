@@ -475,4 +475,4 @@ export function siftListsIntoCategories(
 }
 
 export const getDisplayNameForList = (list: UnifiedList): string =>
-    list.type === 'page-link' ? `Annotated: ${list.pageTitle}` : list.name
+    list.type === 'page-link' ? `${list.name}` : list.name

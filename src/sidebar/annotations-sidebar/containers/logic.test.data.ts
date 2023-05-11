@@ -204,7 +204,7 @@ export const LOCAL_LISTS: PageList[] = [
     },
     {
         id: 7,
-        name: 'Page Discussion',
+        name: new Date().toString(),
         isNestable: true,
         isDeletable: true,
         type: SharedCollectionType.PageLink,

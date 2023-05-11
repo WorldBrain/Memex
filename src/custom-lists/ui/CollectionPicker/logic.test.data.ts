@@ -69,7 +69,7 @@ export const TEST_LISTS: PageList[] = [
     },
     {
         id: 7,
-        name: 'Page Discussion',
+        name: new Date().toString(),
         isNestable: true,
         isDeletable: true,
         type: SharedCollectionType.PageLink,
@@ -77,7 +77,7 @@ export const TEST_LISTS: PageList[] = [
     },
     {
         id: 8,
-        name: 'Page Discussion',
+        name: new Date().toString(),
         isNestable: true,
         isDeletable: true,
         type: SharedCollectionType.PageLink,

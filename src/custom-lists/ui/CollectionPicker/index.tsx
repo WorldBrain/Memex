@@ -233,13 +233,7 @@ class SpacePicker extends StatefulUIElement<
                 index={index}
                 selected={this.state.selectedListIds.includes(entry.localId)}
                 focused={this.state.focusedListId === entry.unifiedId}
-                resultItem={
-                    <ListResultItem>
-                        {entry.type === 'page-link'
-                            ? entry.pageTitle ?? entry.name
-                            : entry.name}
-                    </ListResultItem>
-                }
+                resultItem={<ListResultItem>{entry.name}</ListResultItem>}
                 removeTooltipText={
                     this.props.removeTooltipText ?? 'Remove from Space'
                 }
