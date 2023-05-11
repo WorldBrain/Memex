@@ -73,7 +73,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        console.log('init for space:', this.dependencies.listData)
         let state = previousState
         await loadInitial(this, async () => {
             if (this.dependencies.loadOwnershipData) {

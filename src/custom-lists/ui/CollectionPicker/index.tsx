@@ -266,6 +266,13 @@ class SpacePicker extends StatefulUIElement<
             )
         }
 
+        if (this.state.currentTab === 'page-links') {
+            listEntries = listEntries.filter(
+                (list) =>
+                    list.normalizedPageUrl === this.state.currentNormalizedURL,
+            )
+        }
+
         if (!listEntries.length) {
             return this.renderEmptyList()
         }
@@ -391,8 +398,8 @@ class SpacePicker extends StatefulUIElement<
 
                 <EntryList ref={this.displayListRef}>
                     {this.props.showPageLinks && (
-                        <TabsBar>
-                            <Tab
+                        <OutputSwitcherContainer>
+                            <OutputSwitcher
                                 active={this.state.currentTab === 'user-lists'}
                                 onClick={() =>
                                     this.processEvent('switchTab', {
@@ -401,8 +408,8 @@ class SpacePicker extends StatefulUIElement<
                                 }
                             >
                                 Spaces
-                            </Tab>
-                            <Tab
+                            </OutputSwitcher>
+                            <OutputSwitcher
                                 active={this.state.currentTab === 'page-links'}
                                 onClick={() =>
                                     this.processEvent('switchTab', {
@@ -411,13 +418,13 @@ class SpacePicker extends StatefulUIElement<
                                 }
                             >
                                 Page Links
-                            </Tab>
-                        </TabsBar>
+                            </OutputSwitcher>
+                        </OutputSwitcherContainer>
                     )}
-                    {this.state.currentTab === 'user-lists' &&
+                    {/* {this.state.currentTab === 'user-lists' &&
                         this.state.query.trim().length === 0 && (
                             <EntryListHeader>Recently used</EntryListHeader>
-                        )}
+                        )} */}
                     {this.renderListEntries()}
                 </EntryList>
                 {this.shouldShowAddNewEntry && (
@@ -446,6 +453,32 @@ class SpacePicker extends StatefulUIElement<
         )
     }
 }
+
+const OutputSwitcherContainer = styled.div`
+    display: flex;
+    border-radius: 6px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale2};
+    margin-bottom: 5px;
+    width: fill-available;
+`
+
+const OutputSwitcher = styled.div<{
+    active: boolean
+}>`
+    display: flex;
+    color: ${(props) => props.theme.colors.greyScale7};
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    justify-content: center;
+    width: 50%;
+
+    ${(props) =>
+        props.active &&
+        css`
+            background: ${(props) => props.theme.colors.greyScale2};
+        `}
+`
 
 const SearchContainer = styled.div`
     margin: 5px 5px 0px 5px;
@@ -554,6 +587,6 @@ const TabsBar = styled.div`
     align-items: center;
 `
 
-const Tab = styled.button<{ active: boolean }>``
+const Tab = styled.div<{ active: boolean }>``
 
 export default SpacePicker

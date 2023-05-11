@@ -30,6 +30,7 @@ export interface SpacePickerState {
     loadState: TaskState
     renameListErrorMessage: string | null
     allTabsButtonPressed?: number
+    currentNormalizedURL?: string
 }
 
 export type SpacePickerEvent = UIEvent<{
@@ -82,4 +83,5 @@ export interface SpacePickerDependencies {
     autoFocus?: boolean
     context?: string
     closePicker?: () => void
+    currentUrl?: string
 }

@@ -346,6 +346,7 @@ export class AnnotationsSidebarContainer<
                     contentSharingBG={this.props.contentSharingBG}
                     spacesBG={this.props.customListsBG}
                     authBG={this.props.authBG}
+                    currentUrl={normalizeUrl(this.state.fullPageUrl)}
                 />
             ),
             getListDetailsById: this.getListDetailsById,
@@ -420,6 +421,7 @@ export class AnnotationsSidebarContainer<
                     unifiedId: annotationsCache.getListByLocalId(localListId)
                         ?.unifiedId,
                 }),
+            currentUrl: normalizeUrl(this.state.fullPageUrl),
         }
     }
 

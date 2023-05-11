@@ -340,6 +340,7 @@ export default class SearchResultsContainer extends React.Component<
                             })
                         }
                         createNewEntry={interactionProps.createNewList}
+                        currentUrl={pageId}
                     />
                 )}
                 renderShareMenuForAnnotation={() => (
@@ -371,6 +372,7 @@ export default class SearchResultsContainer extends React.Component<
                                     selected: [],
                                 }),
                             createNewEntry: interactionProps.createNewList,
+                            currentUrl: { pageId },
                         }}
                     />
                 )}
@@ -440,6 +442,7 @@ export default class SearchResultsContainer extends React.Component<
                             unselectEntry={
                                 boundAnnotCreateProps.removePageFromList
                             }
+                            currentUrl={normalizedUrl}
                         />
                     )}
                 />

@@ -52,6 +52,7 @@ export interface Props extends ShareMenuCommonProps {
         | 'pageActivityIndicatorBG'
         | 'annotationsCache'
         | 'localStorageAPI'
+        | 'currentUrl'
     > &
         Omit<
             SpacePickerDependencies,
@@ -61,6 +62,7 @@ export interface Props extends ShareMenuCommonProps {
             | 'pageActivityIndicatorBG'
             | 'annotationsCache'
             | 'localStorageAPI'
+            | 'currentUrl'
         >
 }
 
