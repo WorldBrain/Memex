@@ -506,14 +506,18 @@ export function createBackgroundModules(options: {
             options.browserAPIs.storage.local,
             { prefix: 'contentSharing.' },
         ),
-        customListsBG: customLists,
-        annotations: directLinking.annotationStorage,
-        auth,
         analytics: options.analyticsManager,
-        getServerStorage,
         servicesPromise: options.servicesPromise,
         captureException: options.captureException,
+        getServerStorage,
         generateServerId,
+        getBgModules: () => ({
+            auth,
+            customLists,
+            directLinking,
+            pageActivityIndicator,
+            pages,
+        }),
     })
 
     const copyPaster = new CopyPasterBackground({

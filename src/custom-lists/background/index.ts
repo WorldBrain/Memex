@@ -558,6 +558,7 @@ export default class CustomListBackground {
         params: ({ url: string } | { contentIdentifier: ContentIdentifier }) & {
             id: number
             tabId?: number
+            createdAt?: Date
             skipPageIndexing?: boolean
             suppressVisitCreation?: boolean
             suppressInboxEntry?: boolean
@@ -598,6 +599,7 @@ export default class CustomListBackground {
             pageUrl,
             listId: id,
             fullUrl: url,
+            createdAt: params.createdAt,
         })
 
         this.options.analytics.trackEvent({

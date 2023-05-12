@@ -6,6 +6,7 @@ import {
     makeAnnotationPrivacyLevel,
     getAnnotationPrivacyState,
     extractIdsFromSinglePageShareUrl,
+    createPageLinkListTitle,
 } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import type CustomListBG from 'src/custom-lists/background'
 import type { AuthBackground } from 'src/authentication/background'
@@ -23,6 +24,9 @@ import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/t
 import AnnotationSharingService from '@worldbrain/memex-common/lib/content-sharing/service/annotation-sharing'
 import ListSharingService from '@worldbrain/memex-common/lib/content-sharing/service/list-sharing'
 import type { BrowserSettingsStore } from 'src/util/settings'
+import type { BackgroundModules } from 'src/background-script/setup'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 
 export interface LocalContentSharingSettings {
     remotePageIdLookup: {
@@ -42,14 +46,19 @@ export default class ContentSharingBackground {
         public options: {
             storageManager: StorageManager
             backend: ContentSharingBackend
-            customListsBG: CustomListBG
-            annotations: AnnotationStorage
-            auth: AuthBackground
             analytics: Analytics
             servicesPromise: Promise<Pick<Services, 'contentSharing'>>
             remoteEmitter: RemoteEventEmitter<'contentSharing'>
             contentSharingSettingsStore: BrowserSettingsStore<
                 LocalContentSharingSettings
+            >
+            getBgModules: () => Pick<
+                BackgroundModules,
+                | 'auth'
+                | 'pages'
+                | 'customLists'
+                | 'directLinking'
+                | 'pageActivityIndicator'
             >
             captureException?: (e: Error) => void
             getServerStorage: () => Promise<
@@ -66,47 +75,71 @@ export default class ContentSharingBackground {
             storage: this.storage,
             generateServerId: options.generateServerId,
             addToListSuggestions: (listId) =>
-                options.customListsBG.updateListSuggestionsCache({
+                options.getBgModules().customLists.updateListSuggestionsCache({
                     added: listId,
                 }),
             listStorage: {
                 insertPageToList: (e) =>
-                    options.customListsBG.storage.insertPageToList({
-                        listId: e.listId,
-                        pageUrl: e.normalizedPageUrl,
-                        fullUrl: e.fullPageUrl,
-                    }),
+                    options
+                        .getBgModules()
+                        .customLists.storage.insertPageToList({
+                            listId: e.listId,
+                            pageUrl: e.normalizedPageUrl,
+                            fullUrl: e.fullPageUrl,
+                        }),
                 getEntriesForPage: (normalizedPageUrl) =>
-                    options.customListsBG.storage.fetchPageListEntriesByUrl({
-                        normalizedPageUrl,
-                    }),
+                    options
+                        .getBgModules()
+                        .customLists.storage.fetchPageListEntriesByUrl({
+                            normalizedPageUrl,
+                        }),
             },
             annotationStorage: {
                 getAnnotation: (annotationUrl) =>
-                    options.annotations.getAnnotationByPk(annotationUrl),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.getAnnotationByPk(
+                            annotationUrl,
+                        ),
                 getAnnotations: (annotationUrls) =>
-                    options.annotations.getAnnotations(annotationUrls),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.getAnnotations(
+                            annotationUrls,
+                        ),
                 getEntriesForAnnotation: (url) =>
-                    options.annotations.findListEntriesByUrl({ url }),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.findListEntriesByUrl({
+                            url,
+                        }),
                 getEntriesForAnnotations: (annotationUrls) =>
-                    options.annotations.findListEntriesByUrls({
-                        annotationUrls,
-                    }),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.findListEntriesByUrls({
+                            annotationUrls,
+                        }),
                 ensureAnnotationInList: (entry) =>
-                    options.annotations.ensureAnnotInList({
-                        listId: entry.listId,
-                        url: entry.annotationUrl,
-                    }),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.ensureAnnotInList({
+                            listId: entry.listId,
+                            url: entry.annotationUrl,
+                        }),
                 insertAnnotationToList: async (entry) =>
-                    options.annotations.insertAnnotToList({
-                        listId: entry.listId,
-                        url: entry.annotationUrl,
-                    }),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.insertAnnotToList({
+                            listId: entry.listId,
+                            url: entry.annotationUrl,
+                        }),
                 removeAnnotationFromList: async (entry) =>
-                    options.annotations.removeAnnotFromList({
-                        listId: entry.listId,
-                        url: entry.annotationUrl,
-                    }),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.removeAnnotFromList({
+                            listId: entry.listId,
+                            url: entry.annotationUrl,
+                        }),
             },
         })
 
@@ -119,40 +152,58 @@ export default class ContentSharingBackground {
                 annotationSharingService: this.annotationSharingService,
                 listStorage: {
                     getList: (listId) =>
-                        options.customListsBG.storage.fetchListById(listId),
+                        options
+                            .getBgModules()
+                            .customLists.storage.fetchListById(listId),
                     getListEntriesForPages: ({ listId, normalizedPageUrls }) =>
-                        options.customListsBG.storage.fetchListPageEntriesByUrls(
-                            {
+                        options
+                            .getBgModules()
+                            .customLists.storage.fetchListPageEntriesByUrls({
                                 listId,
                                 normalizedPageUrls,
-                            },
-                        ),
+                            }),
                     insertPageToList: ({
                         listId,
                         fullPageUrl,
                         normalizedPageUrl,
                     }) =>
-                        options.customListsBG.storage.insertPageToList({
-                            listId,
-                            fullUrl: fullPageUrl,
-                            pageUrl: normalizedPageUrl,
-                        }),
+                        options
+                            .getBgModules()
+                            .customLists.storage.insertPageToList({
+                                listId,
+                                fullUrl: fullPageUrl,
+                                pageUrl: normalizedPageUrl,
+                            }),
                 },
                 annotationStorage: {
                     getAnnotations: (annotationUrls) =>
-                        options.annotations.getAnnotations(annotationUrls),
+                        options
+                            .getBgModules()
+                            .directLinking.annotationStorage.getAnnotations(
+                                annotationUrls,
+                            ),
                     getEntriesByList: (listId) =>
-                        options.annotations.findListEntriesByList({ listId }),
+                        options
+                            .getBgModules()
+                            .directLinking.annotationStorage.findListEntriesByList(
+                                { listId },
+                            ),
                     insertAnnotationToList: async (entry) =>
-                        options.annotations.insertAnnotToList({
-                            listId: entry.listId,
-                            url: entry.annotationUrl,
-                        }),
+                        options
+                            .getBgModules()
+                            .directLinking.annotationStorage.insertAnnotToList({
+                                listId: entry.listId,
+                                url: entry.annotationUrl,
+                            }),
                     removeAnnotationFromList: async (entry) =>
-                        options.annotations.removeAnnotFromList({
-                            listId: entry.listId,
-                            url: entry.annotationUrl,
-                        }),
+                        options
+                            .getBgModules()
+                            .directLinking.annotationStorage.removeAnnotFromList(
+                                {
+                                    listId: entry.listId,
+                                    url: entry.annotationUrl,
+                                },
+                            ),
                 },
             })
         })
@@ -261,9 +312,9 @@ export default class ContentSharingBackground {
         }> = []
 
         for (const localId of Object.keys(remoteListIdsDict).map(Number)) {
-            const list = await this.options.customListsBG.storage.fetchListById(
-                localId,
-            )
+            const list = await this.options
+                .getBgModules()
+                .customLists.storage.fetchListById(localId)
             remoteListData.push({
                 localId,
                 remoteId: remoteListIdsDict[localId],
@@ -385,8 +436,9 @@ export default class ContentSharingBackground {
     ensureRemotePageId: ContentSharingInterface['ensureRemotePageId'] = async (
         normalizedPageUrl,
     ) => {
-        const userId = (await this.options.auth.authService.getCurrentUser())
-            ?.id
+        const userId = (
+            await this.options.getBgModules().auth.authService.getCurrentUser()
+        )?.id
         if (!userId) {
             throw new Error(
                 `Tried to execute sharing action without being authenticated`,
@@ -580,10 +632,12 @@ export default class ContentSharingBackground {
         params,
     ) => {
         const loweredPrefix = params.prefix.toLowerCase()
-        const lists = await this.options.customListsBG.storage.fetchAllLists({
-            limit: 10000,
-            skip: 0,
-        })
+        const lists = await this.options
+            .getBgModules()
+            .customLists.storage.fetchAllLists({
+                limit: 10000,
+                skip: 0,
+            })
         const remoteIds = await this.storage.getAllRemoteListIds()
         const suggestions: Array<{
             localId: number
@@ -611,7 +665,9 @@ export default class ContentSharingBackground {
         remoteId,
     }) => {
         // const remoteId = await this.storage.getRemoteListId({localId: params.localId,})
-        const currentUser = await this.options.auth.authService.getCurrentUser()
+        const currentUser = await this.options
+            .getBgModules()
+            .auth.authService.getCurrentUser()
         const storage = await this.options.getServerStorage()
         const listRole = await storage.contentSharing.getListRole({
             listReference: { type: 'shared-list-reference', id: remoteId },
@@ -646,10 +702,68 @@ export default class ContentSharingBackground {
 
     createPageLink: ContentSharingInterface['createPageLink'] = async ({
         fullPageUrl,
+        now,
     }) => {
-        const { link } = await this.options.backend.createPageLink({
+        const bgModules = this.options.getBgModules()
+        const normalizedPageUrl = normalizeUrl(fullPageUrl)
+        const listTitle = createPageLinkListTitle(new Date(now))
+        const remoteListEntryId = this.options
+            .generateServerId('sharedListEntry')
+            .toString()
+
+        const currentUser = await bgModules.auth.authService.getCurrentUser()
+        if (!currentUser) {
+            throw new Error('Page links cannot be created when logged out')
+        }
+
+        // Create all the local data needed for a page link
+        await bgModules.pages.indexPage(
+            {
+                fullUrl: fullPageUrl,
+                visitTime: now,
+                // tabId: ??,  TODO: Figure out how to get tab ID without changing all RPCs in this BG module
+            },
+            { addInboxEntryOnCreate: false },
+        )
+        const pageTitle = await bgModules.pages.lookupPageTitleForUrl({
             fullPageUrl,
         })
-        return extractIdsFromSinglePageShareUrl(link)
+
+        const localListId = await bgModules.customLists.createCustomList({
+            id: now,
+            name: listTitle,
+            type: 'page-link',
+            createdAt: new Date(now),
+        })
+        const { remoteListId } = await this.shareList({
+            localListId: localListId,
+        })
+        await bgModules.customLists.insertPageToList({
+            id: localListId,
+            url: fullPageUrl,
+            createdAt: new Date(now),
+            skipPageIndexing: true,
+            suppressInboxEntry: true,
+            suppressVisitCreation: true,
+        })
+
+        await bgModules.pageActivityIndicator.createFollowedList({
+            name: listTitle,
+            creator: currentUser.id,
+            sharedList: remoteListId,
+            type: SharedCollectionType.PageLink,
+        })
+        await bgModules.pageActivityIndicator.createFollowedListEntry({
+            normalizedPageUrl,
+            entryTitle: pageTitle,
+            creator: currentUser.id,
+            followedList: remoteListId,
+            hasAnnotationsFromOthers: false,
+            sharedListEntry: remoteListEntryId,
+            createdWhen: now,
+            updatedWhen: now,
+        })
+
+        return { remoteListId, remoteListEntryId, listTitle, localListId }
     }
 }

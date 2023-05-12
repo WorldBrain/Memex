@@ -2593,8 +2593,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 }
 
                                 const {
+                                    localListId,
                                     remoteListId,
                                     remoteListEntryId,
+                                    listTitle: createdListTitle,
                                 } = await contentSharing.createPageLink({
                                     fullPageUrl,
                                     now,
@@ -2603,9 +2605,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 // Local DB data should be created first
                                 // prettier-ignore
                                 {
+                                    expect(localListId).toEqual(now)
+                                    expect(createdListTitle).toEqual(listTitle)
                                     expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([
                                         {
-                                            id: now,
+                                            id: localListId,
                                             name: listTitle,
                                             type: 'page-link',
                                             isDeletable: true,
@@ -2617,7 +2621,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     ])
                                     expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([
                                         {
-                                            listId: now,
+                                            listId: localListId,
                                             pageUrl: normalizedPageUrl,
                                             fullUrl: fullPageUrl,
                                             createdAt: new Date(now)
@@ -2625,7 +2629,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     ])
                                     expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([
                                         {
-                                            localId: now,
+                                            localId: localListId,
                                             remoteId: remoteListId,
                                         }
                                     ])
@@ -2698,7 +2702,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 {
                                 expect(sharedListDataA).toEqual([
                                     {
-                                        id: remoteListId,
+                                        id: maybeInt(remoteListId.toString()),
                                         type: 'page-link',
                                         creator: userId,
                                         title: listTitle,
@@ -2708,7 +2712,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ])
                                 expect(sharedListEntryDataA).toEqual([
                                     {
-                                        id: remoteListEntryId,
+                                        id: maybeInt(remoteListEntryId.toString()),
                                         creator: userId,
                                         entryTitle: pageTitle,
                                         originalUrl: fullPageUrl,
