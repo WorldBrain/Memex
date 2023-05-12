@@ -110,6 +110,7 @@ export interface ContentSharingInterface
 
     createPageLink(params: {
         fullPageUrl: string
+        now?: number
     }): Promise<{ remoteListId: AutoPk; remoteListEntryId: AutoPk }>
 }
 
