@@ -735,9 +735,11 @@ export default class ContentSharingBackground {
             type: 'page-link',
             createdAt: new Date(now),
         })
-        const { remoteListId } = await this.shareList({
-            localListId: localListId,
-        })
+        const { remoteListId, links } = await this.shareList({ localListId })
+        const keyString = links.find(
+            ({ roleID }) => roleID === SharedListRoleID.ReadWrite,
+        )?.keyString!
+
         await bgModules.customLists.insertPageToList({
             id: localListId,
             url: fullPageUrl,
@@ -746,6 +748,15 @@ export default class ContentSharingBackground {
             suppressInboxEntry: true,
             suppressVisitCreation: true,
         })
+
+        if (keyString) {
+            await this.options.backend.processListKey({
+                type: SharedCollectionType.PageLink,
+                allowOwnCreation: true,
+                listId: remoteListId,
+                keyString,
+            })
+        }
 
         await bgModules.pageActivityIndicator.createFollowedList({
             name: listTitle,

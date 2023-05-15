@@ -68,8 +68,8 @@ async function setupTest(options: {
         personalCloud,
         directLinking,
     } = setup.backgroundModules
-    setup.authService.setUser(TEST_USER)
-    personalCloud.options.settingStore.set('deviceId', 11)
+    await setup.authService.setUser(TEST_USER)
+    await personalCloud.options.settingStore.set('deviceId', data.DEVICE_ID_A)
     personalCloud.actionQueue.forceQueueSkip = true
     await personalCloud.setup()
     await personalCloud.startSync()
@@ -2702,22 +2702,23 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 {
                                 expect(sharedListDataA).toEqual([
                                     {
-                                        id: maybeInt(remoteListId.toString()),
+                                        id: maybeInt(remoteListId),
                                         type: 'page-link',
                                         creator: userId,
                                         title: listTitle,
+                                        description: null,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
                                 ])
                                 expect(sharedListEntryDataA).toEqual([
                                     {
-                                        id: maybeInt(remoteListEntryId.toString()),
+                                        id: maybeInt(remoteListEntryId),
                                         creator: userId,
                                         entryTitle: pageTitle,
                                         originalUrl: fullPageUrl,
                                         normalizedUrl: normalizedPageUrl,
-                                        sharedList: sharedListDataA[0].id,
+                                        sharedList: maybeInt(remoteListId),
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -2739,7 +2740,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         id: expect.anything(),
                                         disabled: false,
                                         roleID: SharedListRoleID.ReadWrite,
-                                        sharedList: sharedListDataA[0].id,
+                                        sharedList: maybeInt(remoteListId),
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -2748,7 +2749,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         user: userId,
                                         roleID: SharedListRoleID.Owner,
-                                        sharedList: sharedListDataA[0].id,
+                                        sharedList: maybeInt(remoteListId),
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -2757,7 +2758,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         user: userId,
                                         roleID: SharedListRoleID.Owner,
-                                        sharedList: sharedListDataA[0].id,
+                                        sharedList: maybeInt(remoteListId),
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -2795,7 +2796,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         isDeletable: true,
                                         isNestable: true,
                                         user: userId,
-                                        createdByDevice: null,
+                                        createdByDevice: data.DEVICE_ID_A,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -2808,7 +2809,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         lang: null,
                                         description: null,
                                         user: userId,
-                                        createdByDevice: null,
+                                        createdByDevice: data.DEVICE_ID_A,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -2820,7 +2821,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         personalContentLocator: personalLocatorsA[0].id,
                                         readWhen: expect.any(Number),
                                         user: userId,
-                                        createdByDevice: null,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        pageEnd: null,
+                                        pageMax: null,
+                                        pageTotal: null,
+                                        readDuration: null,
+                                        scrollEndPixel: null,
+                                        scrollMaxPixel: null,
+                                        scrollEndPercentage: null,
+                                        scrollMaxPercentage: null,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -2842,7 +2851,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         contentSize: null,
                                         fingerprint: null,
                                         user: userId,
-                                        createdByDevice: null,
+                                        createdByDevice: data.DEVICE_ID_A,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -2853,7 +2862,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         personalList: personalListsA[0].id,
                                         personalContentMetadata: personalMetadataA[0].id,
                                         user: userId,
-                                        createdByDevice: null,
+                                        createdByDevice: data.DEVICE_ID_A,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -2864,7 +2873,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         personalList: personalListsA[0].id,
                                         remoteId: remoteListId,
                                         user: userId,
-                                        createdByDevice: null,
+                                        createdByDevice: data.DEVICE_ID_A,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -2875,7 +2884,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         sharedList: remoteListId,
                                         type: 'page-link',
                                         user: userId,
-                                        createdByDevice: null,
+                                        createdByDevice: data.DEVICE_ID_A,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
