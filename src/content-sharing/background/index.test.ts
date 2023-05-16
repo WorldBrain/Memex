@@ -2682,25 +2682,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await personalCloud.waitForSync()
 
                                 // Shared cloud DB data
-                                const sharedListDataA: Array<
-                                    SharedList & { id: AutoPk }
-                                > = await manager
-                                    .collection('sharedList')
-                                    .findAllObjects({})
-                                const sharedPageDataA: Array<
-                                    SharedPageInfo & { id: AutoPk }
-                                > = await manager
-                                    .collection('sharedPageInfo')
-                                    .findAllObjects({})
-                                const sharedListEntryDataA: Array<
-                                    SharedListEntry & { id: AutoPk }
-                                > = await manager
-                                    .collection('sharedListEntry')
-                                    .findAllObjects({})
-
                                 // prettier-ignore
                                 {
-                                expect(sharedListDataA).toEqual([
+                                expect(await manager.collection('sharedList').findAllObjects({})).toEqual([
                                     {
                                         id: maybeInt(remoteListId),
                                         type: 'page-link',
@@ -2711,7 +2695,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         updatedWhen: expect.anything(),
                                     }
                                 ])
-                                expect(sharedListEntryDataA).toEqual([
+                                expect(await manager.collection('sharedListEntry').findAllObjects({})).toEqual([
                                     {
                                         id: maybeInt(remoteListEntryId),
                                         creator: userId,
@@ -2723,7 +2707,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         updatedWhen: expect.anything(),
                                     }
                                 ])
-                                expect(sharedPageDataA).toEqual([
+                                expect(await manager.collection('sharedPageInfo').findAllObjects({})).toEqual([
                                     {
                                         id: expect.anything(),
                                         creator: userId,
@@ -2776,9 +2760,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 > = await manager
                                     .collection('personalList')
                                     .findAllObjects({})
-                                const personalReadsA = await manager
-                                    .collection('personalContentRead')
-                                    .findAllObjects({})
                                 const personalLocatorsA: Array<
                                     PersonalContentLocator & { id: AutoPk }
                                 > = await manager
@@ -2814,7 +2795,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         updatedWhen: expect.anything(),
                                     }
                                 ])
-                                expect(personalReadsA).toEqual([
+                                expect(await manager.collection('personalContentRead').findAllObjects({})).toEqual([
                                     {
                                         id: expect.anything(),
                                         personalContentMetadata: personalMetadataA[0].id,

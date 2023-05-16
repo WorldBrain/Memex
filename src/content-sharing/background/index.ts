@@ -752,7 +752,7 @@ export default class ContentSharingBackground {
         if (keyString) {
             await this.options.backend.processListKey({
                 type: SharedCollectionType.PageLink,
-                allowOwnCreation: true,
+                allowOwnKeyProcessing: true,
                 listId: remoteListId,
                 keyString,
             })
