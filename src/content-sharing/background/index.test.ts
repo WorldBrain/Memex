@@ -2592,16 +2592,23 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
                                 }
 
+                                const tabInfo = { tab: { id: 123 } }
                                 const {
                                     localListId,
                                     remoteListId,
                                     remoteListEntryId,
                                     listTitle: createdListTitle,
-                                } = await contentSharing.createPageLink(
-                                    { tab: { id: 123 } },
+                                } = await contentSharing.schedulePageLinkCreation(
+                                    tabInfo,
                                     {
                                         fullPageUrl,
                                         now,
+                                    },
+                                )
+                                await contentSharing.waitForPageLinkCreation(
+                                    tabInfo,
+                                    {
+                                        fullPageUrl,
                                     },
                                 )
 

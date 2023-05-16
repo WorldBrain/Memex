@@ -1,8 +1,8 @@
 export * from '@worldbrain/memex-common/lib/content-sharing/client-storage/types'
 import type {
     ListKeysServiceInterface,
+    ListSharingServiceInterface,
     AnnotationSharingServiceInterface,
-    SharedListData,
 } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
@@ -22,10 +22,8 @@ export interface ContentSharingInterface
             | 'setAnnotationPrivacyLevel'
             | 'getAnnotationSharingState'
             | 'getAnnotationSharingStates'
-        > {
-    shareList(params: {
-        localListId: number
-    }): Promise<Omit<SharedListData, 'annotationSharingStatesPromise'>>
+        >,
+        Pick<ListSharingServiceInterface, 'shareList'> {
     shareAnnotations(options: {
         annotationUrls: string[]
         shareToLists?: boolean
@@ -76,7 +74,7 @@ export interface ContentSharingInterface
 export interface RemoteContentSharingByTabsInterface<
     Role extends RemoteFunctionRole
 > {
-    createPageLink: RemoteFunction<
+    schedulePageLinkCreation: RemoteFunction<
         Role,
         {
             fullPageUrl: string
@@ -88,6 +86,11 @@ export interface RemoteContentSharingByTabsInterface<
             remoteListId: AutoPk
             remoteListEntryId: AutoPk
         }
+    >
+    waitForPageLinkCreation: RemoteFunction<
+        Role,
+        { fullPageUrl: string },
+        { keyString: string }
     >
 }
 

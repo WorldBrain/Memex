@@ -44,6 +44,9 @@ export interface LocalContentSharingSettings {
 export default class ContentSharingBackground {
     static ONE_WEEK_MS = 604800000
 
+    private pageLinkCreationPromises: {
+        [fullPageUrl: string]: Promise<{ keyString: string }>
+    } = {}
     private annotationSharingService: AnnotationSharingService
     private listSharingService: ListSharingService
     remoteFunctionsByTab: RemoteContentSharingByTabsInterface<'provider'>
@@ -217,7 +220,8 @@ export default class ContentSharingBackground {
         })
 
         this.remoteFunctionsByTab = {
-            createPageLink: this.createPageLink,
+            schedulePageLinkCreation: this.schedulePageLinkCreation,
+            waitForPageLinkCreation: this.waitForPageLinkCreation,
         }
 
         this.remoteFunctions = {
@@ -708,30 +712,87 @@ export default class ContentSharingBackground {
         },
     ) {}
 
-    createPageLink: RemoteContentSharingByTabsInterface<
+    waitForPageLinkCreation: RemoteContentSharingByTabsInterface<
         'provider'
-    >['createPageLink'] = async (
+    >['waitForPageLinkCreation'] = async (_, { fullPageUrl }) => {
+        const promise = this.pageLinkCreationPromises[fullPageUrl]
+        delete this.pageLinkCreationPromises[fullPageUrl]
+        return promise
+    }
+
+    schedulePageLinkCreation: RemoteContentSharingByTabsInterface<
+        'provider'
+    >['schedulePageLinkCreation'] = async (
         { tab },
         { fullPageUrl, now = Date.now() },
     ) => {
+        if (this.pageLinkCreationPromises[fullPageUrl]) {
+            throw new Error(
+                `Page link already in process of being created for this URL: ${fullPageUrl} - try calling "waitForPageLink" RPC method`,
+            )
+        }
         const bgModules = this.options.getBgModules()
-        const normalizedPageUrl = normalizeUrl(fullPageUrl)
-        const listTitle = createPageLinkListTitle(new Date(now))
-        const remoteListEntryId = this.options
-            .generateServerId('sharedListEntry')
-            .toString()
-
         const currentUser = await bgModules.auth.authService.getCurrentUser()
         if (!currentUser) {
             throw new Error('Page links cannot be created when logged out')
         }
+
+        const localListId = now
+        const listTitle = createPageLinkListTitle(new Date(now))
+        const remoteListId = this.options
+            .generateServerId('sharedList')
+            .toString()
+        const remoteListEntryId = this.options
+            .generateServerId('sharedListEntry')
+            .toString()
+
+        // Start but don't wait for the storage logic
+        this.pageLinkCreationPromises[
+            fullPageUrl
+        ] = this.performPageLinkCreation({
+            creator: currentUser.id,
+            listTitle,
+            localListId,
+            remoteListEntryId,
+            remoteListId,
+            tabId: tab?.id,
+            fullPageUrl,
+            now,
+        })
+
+        return { remoteListId, remoteListEntryId, listTitle, localListId }
+    }
+
+    private async performPageLinkCreation({
+        remoteListEntryId,
+        remoteListId,
+        localListId,
+        fullPageUrl,
+        listTitle,
+        creator,
+        tabId,
+        now,
+    }: Awaited<
+        ReturnType<
+            RemoteContentSharingByTabsInterface<
+                'provider'
+            >['schedulePageLinkCreation']
+        >
+    > & {
+        fullPageUrl: string
+        creator: string
+        tabId?: number
+        now?: number
+    }): Promise<{ keyString: string }> {
+        const bgModules = this.options.getBgModules()
+        const normalizedPageUrl = normalizeUrl(fullPageUrl)
 
         // Create all the local data needed for a page link
         await bgModules.pages.indexPage(
             {
                 fullUrl: fullPageUrl,
                 visitTime: now,
-                tabId: tab?.id,
+                tabId,
             },
             { addInboxEntryOnCreate: false },
         )
@@ -739,16 +800,12 @@ export default class ContentSharingBackground {
             fullPageUrl,
         })
 
-        const localListId = await bgModules.customLists.createCustomList({
-            id: now,
+        await bgModules.customLists.createCustomList({
+            id: localListId,
             name: listTitle,
             type: 'page-link',
             createdAt: new Date(now),
         })
-        const { remoteListId, links } = await this.shareList({ localListId })
-        const keyString = links.find(
-            ({ roleID }) => roleID === SharedListRoleID.ReadWrite,
-        )?.keyString!
 
         await bgModules.customLists.insertPageToList({
             id: localListId,
@@ -758,26 +815,18 @@ export default class ContentSharingBackground {
             suppressInboxEntry: true,
             suppressVisitCreation: true,
         })
-
-        if (keyString) {
-            await this.options.backend.processListKey({
-                type: SharedCollectionType.PageLink,
-                allowOwnKeyProcessing: true,
-                listId: remoteListId,
-                keyString,
-            })
-        }
+        const { links } = await this.shareList({ localListId, remoteListId })
 
         await bgModules.pageActivityIndicator.createFollowedList({
+            creator,
             name: listTitle,
-            creator: currentUser.id,
             sharedList: remoteListId,
             type: SharedCollectionType.PageLink,
         })
         await bgModules.pageActivityIndicator.createFollowedListEntry({
+            creator,
             normalizedPageUrl,
             entryTitle: pageTitle,
-            creator: currentUser.id,
             followedList: remoteListId,
             hasAnnotationsFromOthers: false,
             sharedListEntry: remoteListEntryId,
@@ -785,6 +834,23 @@ export default class ContentSharingBackground {
             updatedWhen: now,
         })
 
-        return { remoteListId, remoteListEntryId, listTitle, localListId }
+        const keyString = links.find(
+            ({ roleID }) => roleID === SharedListRoleID.ReadWrite,
+        )?.keyString
+
+        if (!keyString) {
+            throw new Error(
+                'Collaboration key was not created upon list share - ',
+            )
+        }
+
+        await this.options.backend.processListKey({
+            type: SharedCollectionType.PageLink,
+            allowOwnKeyProcessing: true,
+            listId: remoteListId,
+            keyString,
+        })
+
+        return { keyString }
     }
 }

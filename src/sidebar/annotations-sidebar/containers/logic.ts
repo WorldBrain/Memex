@@ -2392,21 +2392,20 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         await executeUITask(this, 'pageLinkCreateState', async () => {
-            const pageTitle = await this.options.pageIndexingBG.lookupPageTitleForUrl(
-                { fullPageUrl },
-            )
-
             const {
+                listTitle,
+                localListId,
                 remoteListId,
                 remoteListEntryId,
-            } = await this.options.contentSharingByTabsBG.createPageLink({
-                fullPageUrl,
-            })
-            const listName = createPageLinkListTitle()
+            } = await this.options.contentSharingByTabsBG.schedulePageLinkCreation(
+                {
+                    fullPageUrl,
+                },
+            )
             this.options.annotationsCache.addList<'page-link'>({
                 type: 'page-link',
-                name: listName,
-                pageTitle: pageTitle ?? listName,
+                name: listTitle,
+                localId: localListId,
                 remoteId: remoteListId.toString(),
                 sharedListEntryId: remoteListEntryId.toString(),
                 normalizedPageUrl: normalizeUrl(fullPageUrl),
@@ -2414,6 +2413,15 @@ export class SidebarContainerLogic extends UILogic<
                 unifiedAnnotationIds: [],
                 hasRemoteAnnotationsToLoad: false,
             })
+            const {
+                keyString,
+            } = await this.options.contentSharingByTabsBG.waitForPageLinkCreation(
+                {
+                    fullPageUrl,
+                },
+            )
+
+            // TODO: update some state with the keystring
         })
     }
 }
