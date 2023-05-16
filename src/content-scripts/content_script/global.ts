@@ -62,7 +62,10 @@ import { runtime } from 'webextension-polyfill'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { hydrateCacheForPageAnnotations } from 'src/annotations/cache/utils'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type {
+    ContentSharingInterface,
+    RemoteContentSharingByTabsInterface,
+} from 'src/content-sharing/background/types'
 import { UNDO_HISTORY } from 'src/constants'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
@@ -187,6 +190,9 @@ export async function main(
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const pageIndexingBG = runInBackground<PageIndexingInterface<'caller'>>()
     const contentSharingBG = runInBackground<ContentSharingInterface>()
+    const contentSharingByTabsBG = runInBackground<
+        RemoteContentSharingByTabsInterface<'caller'>
+    >()
     const tagsBG = runInBackground<RemoteTagsInterface>()
     const contentScriptsBG = runInBackground<
         ContentScriptsInterface<'caller'>
@@ -533,6 +539,7 @@ export async function main(
                 pageIndexingBG,
                 syncSettingsBG,
                 contentSharingBG,
+                contentSharingByTabsBG,
                 pageActivityIndicatorBG,
                 customListsBG: collectionsBG,
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,

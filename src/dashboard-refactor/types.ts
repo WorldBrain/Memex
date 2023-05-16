@@ -21,7 +21,10 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import type { SearchInterface } from 'src/search/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type {
+    ContentSharingInterface,
+    RemoteContentSharingByTabsInterface,
+} from 'src/content-sharing/background/types'
 import type { Analytics } from 'src/analytics'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import type { BackupInterface } from 'src/backup-restore/background/types'
@@ -72,6 +75,7 @@ export interface DashboardDependencies {
     authBG: AuthRemoteFunctionsInterface
     backupBG: BackupInterface<'caller'>
     contentShareBG: ContentSharingInterface
+    contentShareByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
     listsBG: RemoteCollectionsInterface
     searchBG: SearchInterface

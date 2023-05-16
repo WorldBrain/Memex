@@ -13,11 +13,15 @@ import type { AuthBackground } from 'src/authentication/background'
 import type { Analytics } from 'src/analytics/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { getNoteShareUrl } from 'src/content-sharing/utils'
-import type { RemoteEventEmitter } from 'src/util/webextensionRPC'
+import {
+    makeRemotelyCallable,
+    RemoteEventEmitter,
+} from 'src/util/webextensionRPC'
 import type { Services } from 'src/services/types'
 import type { ServerStorageModules } from 'src/storage/types'
 import type {
     ContentSharingInterface,
+    RemoteContentSharingByTabsInterface,
     __DeprecatedContentSharingInterface,
 } from './types'
 import { ContentSharingClientStorage } from './storage'
@@ -42,6 +46,7 @@ export default class ContentSharingBackground {
 
     private annotationSharingService: AnnotationSharingService
     private listSharingService: ListSharingService
+    remoteFunctionsByTab: RemoteContentSharingByTabsInterface<'provider'>
     remoteFunctions: ContentSharingInterface
     storage: ContentSharingClientStorage
 
@@ -211,8 +216,11 @@ export default class ContentSharingBackground {
             })
         })
 
-        this.remoteFunctions = {
+        this.remoteFunctionsByTab = {
             createPageLink: this.createPageLink,
+        }
+
+        this.remoteFunctions = {
             getExistingKeyLinksForList: async (...args) => {
                 const { contentSharing } = await options.servicesPromise
                 return contentSharing.getExistingKeyLinksForList(...args)
@@ -277,7 +285,11 @@ export default class ContentSharingBackground {
         }
     }
 
-    async setup() {}
+    setupRemoteFunctions() {
+        makeRemotelyCallable(this.remoteFunctionsByTab, {
+            insertExtraArg: true,
+        })
+    }
 
     async executePendingActions() {}
 
@@ -696,10 +708,12 @@ export default class ContentSharingBackground {
         },
     ) {}
 
-    createPageLink: ContentSharingInterface['createPageLink'] = async ({
-        fullPageUrl,
-        now,
-    }) => {
+    createPageLink: RemoteContentSharingByTabsInterface<
+        'provider'
+    >['createPageLink'] = async (
+        { tab },
+        { fullPageUrl, now = Date.now() },
+    ) => {
         const bgModules = this.options.getBgModules()
         const normalizedPageUrl = normalizeUrl(fullPageUrl)
         const listTitle = createPageLinkListTitle(new Date(now))
@@ -717,7 +731,7 @@ export default class ContentSharingBackground {
             {
                 fullUrl: fullPageUrl,
                 visitTime: now,
-                // tabId: ??,  TODO: Figure out how to get tab ID without changing all RPCs in this BG module
+                tabId: tab?.id,
             },
             { addInboxEntryOnCreate: false },
         )

@@ -1,19 +1,13 @@
 import fromPairs from 'lodash/fromPairs'
 import { FakeAnalytics } from 'src/analytics/mock'
-import {
-    SidebarContainerLogic,
-    createEditFormsForAnnotations,
-    INIT_FORM_STATE,
-} from './logic'
+import { SidebarContainerLogic, INIT_FORM_STATE } from './logic'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
     insertBackgroundFunctionTab,
 } from 'src/tests/ui-logic-tests'
 import * as DATA from './logic.test.data'
-import * as sharingTestData from 'src/content-sharing/background/index.test.data'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import normalizeUrl from '@worldbrain/memex-url-utils/lib/normalize'
 import { PageAnnotationsCache } from 'src/annotations/cache'
@@ -33,13 +27,11 @@ import type {
     AnnotationSharingState,
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
-import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { createPageLinkListTitle } from 'src/content-sharing/utils'
 import type {
     SharedList,
     SharedListEntry,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -117,14 +109,19 @@ const setupLogicHelper = async ({
         authBG: backgroundModules.auth.remoteFunctions,
         subscription: backgroundModules.auth.subscriptionService,
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
-        summarizeBG: (backgroundModules.summarizeBG
-            .remoteFunctions as unknown) as SummarizationInterface<'caller'>,
+        summarizeBG: insertBackgroundFunctionTab(
+            backgroundModules.summarizeBG.remoteFunctions,
+        ) as any,
         customListsBG: backgroundModules.customLists.remoteFunctions,
         contentSharingBG: backgroundModules.contentSharing.remoteFunctions,
+        contentSharingByTabsBG: insertBackgroundFunctionTab(
+            backgroundModules.contentSharing.remoteFunctionsByTab,
+        ) as any,
         pageActivityIndicatorBG:
             backgroundModules.pageActivityIndicator.remoteFunctions,
-        contentScriptsBG: (backgroundModules.contentScripts
-            .remoteFunctions as unknown) as ContentScriptsInterface<'caller'>,
+        contentScriptsBG: insertBackgroundFunctionTab(
+            backgroundModules.contentScripts.remoteFunctions,
+        ) as any,
         contentConversationsBG:
             backgroundModules.contentConversations.remoteFunctions,
         syncSettingsBG: backgroundModules.syncSettings,

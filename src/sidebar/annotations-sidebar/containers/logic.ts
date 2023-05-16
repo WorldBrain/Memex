@@ -2399,7 +2399,7 @@ export class SidebarContainerLogic extends UILogic<
             const {
                 remoteListId,
                 remoteListEntryId,
-            } = await this.options.contentSharingBG.createPageLink({
+            } = await this.options.contentSharingByTabsBG.createPageLink({
                 fullPageUrl,
             })
             const listName = createPageLinkListTitle()

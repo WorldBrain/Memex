@@ -10,6 +10,7 @@ import type { AnnotationCardInstanceLocation, SidebarTheme } from '../types'
 import type {
     AnnotationSharingStates,
     ContentSharingInterface,
+    RemoteContentSharingByTabsInterface,
 } from 'src/content-sharing/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { Analytics } from 'src/analytics'
@@ -59,6 +60,7 @@ export interface SidebarContainerDependencies {
     annotationsBG: AnnotationInterface<'caller'>
     customListsBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface
+    contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
     syncSettingsBG: RemoteSyncSettingsInterface
     contentScriptsBG: ContentScriptsInterface<'caller'>

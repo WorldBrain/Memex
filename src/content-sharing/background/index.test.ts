@@ -2597,10 +2597,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     remoteListId,
                                     remoteListEntryId,
                                     listTitle: createdListTitle,
-                                } = await contentSharing.createPageLink({
-                                    fullPageUrl,
-                                    now,
-                                })
+                                } = await contentSharing.createPageLink(
+                                    { tab: { id: 123 } },
+                                    {
+                                        fullPageUrl,
+                                        now,
+                                    },
+                                )
 
                                 // Local DB data should be created first
                                 // prettier-ignore

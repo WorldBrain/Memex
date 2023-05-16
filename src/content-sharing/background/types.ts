@@ -6,6 +6,10 @@ import type {
 } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import type {
+    RemoteFunction,
+    RemoteFunctionRole,
+} from 'src/util/webextensionRPC'
 
 export interface ContentSharingInterface
     extends Pick<
@@ -67,15 +71,24 @@ export interface ContentSharingInterface
     }): Promise<{
         [annotationUrl: string]: AnnotationPrivacyLevels
     }>
-    createPageLink(params: {
-        fullPageUrl: string
-        now?: number
-    }): Promise<{
-        listTitle: string
-        localListId: number
-        remoteListId: AutoPk
-        remoteListEntryId: AutoPk
-    }>
+}
+
+export interface RemoteContentSharingByTabsInterface<
+    Role extends RemoteFunctionRole
+> {
+    createPageLink: RemoteFunction<
+        Role,
+        {
+            fullPageUrl: string
+            now?: number
+        },
+        {
+            listTitle: string
+            localListId: number
+            remoteListId: AutoPk
+            remoteListEntryId: AutoPk
+        }
+    >
 }
 
 /**

@@ -692,6 +692,7 @@ export async function setupBackgroundModules(
     backgroundModules.notifications.setupRemoteFunctions()
     backgroundModules.social.setupRemoteFunctions()
     backgroundModules.directLinking.setupRemoteFunctions()
+    backgroundModules.contentSharing.setupRemoteFunctions()
     backgroundModules.search.setupRemoteFunctions()
     backgroundModules.activityIndicator.setupRemoteFunctions()
     backgroundModules.summarizeBG.setupRemoteFunctions()
@@ -719,7 +720,6 @@ export async function setupBackgroundModules(
 
     // Ensure log-in state gotten from FB + trigger share queue processing, but don't wait for it
     await backgroundModules.auth.authService.refreshUserInfo()
-    await backgroundModules.contentSharing.setup()
     await backgroundModules.personalCloud.setup()
 }
 
