@@ -923,6 +923,29 @@ export class AnnotationsSidebar extends React.Component<
             <>
                 <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
+                        Page Links{' '}
+                        <SpacesCounter>{pageLinkLists.length}</SpacesCounter>
+                    </SpaceTypeSectionHeader>
+                    {pageLinkLists.length > 0 && (
+                        <SpaceTypeSectionContainer>
+                            {pageLinkLists.map((listData) => {
+                                const listInstance =
+                                    listInstances[listData.unifiedId]
+
+                                this.spaceContextBtnRefs[
+                                    listData.unifiedId
+                                ] = React.createRef<HTMLDivElement>()
+
+                                return this.renderSpacesItem(
+                                    listData,
+                                    listInstance,
+                                )
+                            })}
+                        </SpaceTypeSectionContainer>
+                    )}
+                </SpaceTypeSection>
+                <SpaceTypeSection>
+                    <SpaceTypeSectionHeader>
                         My Spaces{' '}
                         <SpacesCounter>{myLists.length}</SpacesCounter>
                     </SpaceTypeSectionHeader>
@@ -983,30 +1006,6 @@ export class AnnotationsSidebar extends React.Component<
                             })}
                         </SpaceTypeSectionContainer>
                     ) : undefined}
-                </SpaceTypeSection>
-
-                <SpaceTypeSection>
-                    <SpaceTypeSectionHeader>
-                        Page Links{' '}
-                        <SpacesCounter>{pageLinkLists.length}</SpacesCounter>
-                    </SpaceTypeSectionHeader>
-                    {pageLinkLists.length > 0 && (
-                        <SpaceTypeSectionContainer>
-                            {pageLinkLists.map((listData) => {
-                                const listInstance =
-                                    listInstances[listData.unifiedId]
-
-                                this.spaceContextBtnRefs[
-                                    listData.unifiedId
-                                ] = React.createRef<HTMLDivElement>()
-
-                                return this.renderSpacesItem(
-                                    listData,
-                                    listInstance,
-                                )
-                            })}
-                        </SpaceTypeSectionContainer>
-                    )}
                 </SpaceTypeSection>
             </>
         )
@@ -1741,6 +1740,8 @@ export class AnnotationsSidebar extends React.Component<
 
         const selectedList = annotationsCache.lists.byId[selectedListId]
 
+        const isPageLink = selectedList.type === 'page-link'
+
         return (
             <IsolatedViewHeaderContainer>
                 <IsolatedViewHeaderTopBar>
@@ -1757,14 +1758,22 @@ export class AnnotationsSidebar extends React.Component<
                             icon="goTo"
                             type="tertiary"
                             size="small"
-                            label="Open Space"
+                            label={isPageLink ? 'Open Page Link' : 'Open Space'}
                             fontColor="greyScale6"
                             onClick={() =>
-                                window.open(
-                                    this.getBaseUrl() +
-                                        '/c/' +
-                                        selectedList.remoteId,
-                                )
+                                isPageLink
+                                    ? window.open(
+                                          this.getBaseUrl() +
+                                              '/c/' +
+                                              selectedList.remoteId +
+                                              '/p/' +
+                                              selectedList.sharedListEntryId,
+                                      )
+                                    : window.open(
+                                          this.getBaseUrl() +
+                                              '/c/' +
+                                              selectedList.remoteId,
+                                      )
                             }
                         />
                         {this.renderPermissionStatusButton()}
