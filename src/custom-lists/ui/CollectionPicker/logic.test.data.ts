@@ -167,7 +167,6 @@ const testListToSuggestion = (
     hasRemoteAnnotationsToLoad: false,
     unifiedAnnotationIds: [],
     creator: extra.creator,
-    pageTitle: extra.pageTitle,
     normalizedPageUrl: extra.normalizedPageUrl,
     sharedListEntryId: extra.sharedListEntryId,
 })

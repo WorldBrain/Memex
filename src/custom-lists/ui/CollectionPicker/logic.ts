@@ -452,11 +452,9 @@ export default class SpacePickerLogic extends UILogic<
         const distinctTerms = query.split(/\s+/).filter(Boolean)
         const doAllTermsMatch = (list: UnifiedList): boolean =>
             distinctTerms.reduce((acc, term) => {
-                const indexField =
-                    list.type === 'page-link' ? list.pageTitle : list.name
                 return (
                     acc &&
-                    indexField
+                    list.name
                         .toLocaleLowerCase()
                         .includes(term.toLocaleLowerCase())
                 )

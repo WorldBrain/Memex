@@ -392,7 +392,6 @@ async function hydrateCacheLists(
             extraData: {
                 normalizedPageUrl: sharedListEntryData?.normalizedUrl,
                 sharedListEntryId: sharedListEntryData?.id,
-                pageTitle: sharedListEntryData?.entryTitle,
                 remoteId,
                 creator,
             },
@@ -414,7 +413,6 @@ async function hydrateCacheLists(
                     extraData: {
                         normalizedPageUrl: sharedListEntryData?.normalizedUrl,
                         sharedListEntryId: sharedListEntryData?.id,
-                        pageTitle: sharedListEntryData?.entryTitle,
                     },
                 }),
             )
