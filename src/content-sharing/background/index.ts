@@ -16,7 +16,10 @@ import { getNoteShareUrl } from 'src/content-sharing/utils'
 import type { RemoteEventEmitter } from 'src/util/webextensionRPC'
 import type { Services } from 'src/services/types'
 import type { ServerStorageModules } from 'src/storage/types'
-import type { ContentSharingInterface } from './types'
+import type {
+    ContentSharingInterface,
+    __DeprecatedContentSharingInterface,
+} from './types'
 import { ContentSharingClientStorage } from './storage'
 import type { GenerateServerID } from '../../background-script/types'
 import type AnnotationStorage from 'src/annotations/background/storage'
@@ -222,8 +225,6 @@ export default class ContentSharingBackground {
             shareAnnotation: this.shareAnnotation,
             shareAnnotations: this.shareAnnotations,
             executePendingActions: this.executePendingActions.bind(this),
-            shareAnnotationsToAllLists: this.shareAnnotationsToAllLists,
-            unshareAnnotationsFromAllLists: this.unshareAnnotationsFromAllLists,
             shareAnnotationToSomeLists: this.shareAnnotationToSomeLists,
             unshareAnnotationFromList: this.unshareAnnotationFromList,
             unshareAnnotations: this.unshareAnnotations,
@@ -233,7 +234,6 @@ export default class ContentSharingBackground {
                 this,
             ),
             setAnnotationPrivacyLevel: this.setAnnotationPrivacyLevel,
-            deleteAnnotationPrivacyLevel: this.deleteAnnotationPrivacyLevel,
             generateRemoteAnnotationId: async () =>
                 this.generateRemoteAnnotationId(),
             getRemoteListId: async (callOptions) => {
@@ -256,28 +256,24 @@ export default class ContentSharingBackground {
                     localIds: callOptions.annotationUrls,
                 })
             },
-            areListsShared: async (callOptions) => {
-                return this.storage.areListsShared({
-                    localIds: callOptions.localListIds,
-                })
-            },
             getAnnotationSharingState: this.getAnnotationSharingState,
             getAnnotationSharingStates: this.getAnnotationSharingStates,
-            getAllRemoteLists: this.getAllRemoteLists,
-            waitForSync: this.waitForSync,
-            suggestSharedLists: this.suggestSharedLists,
-            unshareAnnotation: this.unshareAnnotation,
-            deleteAnnotationShare: this.deleteAnnotationShare,
-            canWriteToSharedListRemoteId: this.canWriteToSharedListRemoteId,
-            canWriteToSharedList: this.canWriteToSharedList,
-            // TODO: properly implement these 3 (via listKeys service)
-            generateKeyLink: async () => {
-                return { link: '', roleID: SharedListRoleID.Commenter }
-            },
-            hasCurrentKey: () => false,
-            processCurrentKey: async () => {
-                return { result: 'denied' }
-            },
+            // The following are all old RPCs that aren't used anymore, though their implementations still exist
+            // shareAnnotationsToAllLists: this.shareAnnotationsToAllLists,
+            // unshareAnnotationsFromAllLists: this.unshareAnnotationsFromAllLists,
+            // areListsShared: async (callOptions) => {
+            //     return this.storage.areListsShared({
+            //         localIds: callOptions.localListIds,
+            //     })
+            // },
+            // deleteAnnotationPrivacyLevel: this.deleteAnnotationPrivacyLevel,
+            // getAllRemoteLists: this.getAllRemoteLists,
+            // waitForSync: this.waitForSync,
+            // suggestSharedLists: this.suggestSharedLists,
+            // unshareAnnotation: this.unshareAnnotation,
+            // deleteAnnotationShare: this.deleteAnnotationShare,
+            // canWriteToSharedListRemoteId: this.canWriteToSharedListRemoteId,
+            // canWriteToSharedList: this.canWriteToSharedList,
         }
     }
 
@@ -303,7 +299,7 @@ export default class ContentSharingBackground {
         return getNoteShareUrl({ remoteAnnotationId })
     }
 
-    getAllRemoteLists: ContentSharingInterface['getAllRemoteLists'] = async () => {
+    getAllRemoteLists: __DeprecatedContentSharingInterface['getAllRemoteLists'] = async () => {
         const remoteListIdsDict = await this.storage.getAllRemoteListIds()
         const remoteListData: Array<{
             localId: number
@@ -373,7 +369,7 @@ export default class ContentSharingBackground {
         return { sharingStates: await this.getAnnotationSharingStates(options) }
     }
 
-    shareAnnotationsToAllLists: ContentSharingInterface['shareAnnotationsToAllLists'] = async (
+    shareAnnotationsToAllLists: __DeprecatedContentSharingInterface['shareAnnotationsToAllLists'] = async (
         options,
     ) => {
         const allMetadata = await this.storage.getRemoteAnnotationMetadata({
@@ -474,7 +470,7 @@ export default class ContentSharingBackground {
         return remotePageId
     }
 
-    unshareAnnotationsFromAllLists: ContentSharingInterface['unshareAnnotationsFromAllLists'] = async (
+    unshareAnnotationsFromAllLists: __DeprecatedContentSharingInterface['unshareAnnotationsFromAllLists'] = async (
         options,
     ) => {
         const sharingState = await this.annotationSharingService.removeAnnotationFromAllLists(
@@ -545,7 +541,7 @@ export default class ContentSharingBackground {
         return { sharingStates: await this.getAnnotationSharingStates(options) }
     }
 
-    unshareAnnotation: ContentSharingInterface['unshareAnnotation'] = async (
+    unshareAnnotation: __DeprecatedContentSharingInterface['unshareAnnotation'] = async (
         options,
     ) => {
         const privacyLevelObject = await this.storage.findAnnotationPrivacyLevel(
@@ -575,7 +571,7 @@ export default class ContentSharingBackground {
     }
 
     // OLD direct linking method
-    deleteAnnotationShare: ContentSharingInterface['deleteAnnotationShare'] = async (
+    deleteAnnotationShare: __DeprecatedContentSharingInterface['deleteAnnotationShare'] = async (
         options,
     ) => {
         await this.storage.deleteAnnotationMetadata({
@@ -608,13 +604,13 @@ export default class ContentSharingBackground {
         return this.annotationSharingService.setAnnotationPrivacyLevel(params)
     }
 
-    deleteAnnotationPrivacyLevel: ContentSharingInterface['deleteAnnotationPrivacyLevel'] = async (
+    deleteAnnotationPrivacyLevel: __DeprecatedContentSharingInterface['deleteAnnotationPrivacyLevel'] = async (
         params,
     ) => {
         await this.storage.deleteAnnotationPrivacyLevel(params)
     }
 
-    waitForSync: ContentSharingInterface['waitForSync'] = async () => {}
+    waitForSync: __DeprecatedContentSharingInterface['waitForSync'] = async () => {}
 
     getAnnotationSharingState: ContentSharingInterface['getAnnotationSharingState'] = async (
         params,
@@ -628,7 +624,7 @@ export default class ContentSharingBackground {
         return this.annotationSharingService.getAnnotationSharingStates(params)
     }
 
-    suggestSharedLists: ContentSharingInterface['suggestSharedLists'] = async (
+    suggestSharedLists: __DeprecatedContentSharingInterface['suggestSharedLists'] = async (
         params,
     ) => {
         const loweredPrefix = params.prefix.toLowerCase()
@@ -661,7 +657,7 @@ export default class ContentSharingBackground {
         return suggestions
     }
 
-    canWriteToSharedListRemoteId: ContentSharingInterface['canWriteToSharedListRemoteId'] = async ({
+    canWriteToSharedListRemoteId: __DeprecatedContentSharingInterface['canWriteToSharedListRemoteId'] = async ({
         remoteId,
     }) => {
         // const remoteId = await this.storage.getRemoteListId({localId: params.localId,})
@@ -684,7 +680,7 @@ export default class ContentSharingBackground {
         ].includes(listRole?.roleID)
         return canWrite
     }
-    canWriteToSharedList: ContentSharingInterface['canWriteToSharedList'] = async (
+    canWriteToSharedList: __DeprecatedContentSharingInterface['canWriteToSharedList'] = async (
         params,
     ) => {
         const remoteId = await this.storage.getRemoteListId({
