@@ -52,7 +52,7 @@ export interface Props extends ShareMenuCommonProps {
         | 'pageActivityIndicatorBG'
         | 'annotationsCache'
         | 'localStorageAPI'
-        | 'currentUrl'
+        | 'normalizedPageUrlToFilterPageLinksBy'
     > &
         Omit<
             SpacePickerDependencies,
@@ -62,7 +62,7 @@ export interface Props extends ShareMenuCommonProps {
             | 'pageActivityIndicatorBG'
             | 'annotationsCache'
             | 'localStorageAPI'
-            | 'currentUrl'
+            | 'normalizedPageUrlToFilterPageLinksBy'
         >
 }
 

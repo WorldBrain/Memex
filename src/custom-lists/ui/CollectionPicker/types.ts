@@ -30,7 +30,6 @@ export interface SpacePickerState {
     loadState: TaskState
     renameListErrorMessage: string | null
     allTabsButtonPressed?: number
-    currentNormalizedURL?: string
 }
 
 export type SpacePickerEvent = UIEvent<{
@@ -79,9 +78,9 @@ export interface SpacePickerDependencies {
     spacesBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
+    normalizedPageUrlToFilterPageLinksBy?: string
     width?: string
     autoFocus?: boolean
     context?: string
     closePicker?: () => void
-    currentUrl?: string
 }

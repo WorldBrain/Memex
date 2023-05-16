@@ -260,10 +260,15 @@ class SpacePicker extends StatefulUIElement<
             )
         }
 
-        if (this.state.currentTab === 'page-links') {
+        if (
+            this.state.currentTab === 'page-links' &&
+            this.props.normalizedPageUrlToFilterPageLinksBy
+        ) {
             listEntries = listEntries.filter(
                 (list) =>
-                    list.normalizedPageUrl === this.state.currentNormalizedURL,
+                    list.type === 'page-link' &&
+                    list.normalizedPageUrl ===
+                        this.props.normalizedPageUrlToFilterPageLinksBy,
             )
         }
 

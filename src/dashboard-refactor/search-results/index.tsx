@@ -340,7 +340,7 @@ export default class SearchResultsContainer extends React.Component<
                             })
                         }
                         createNewEntry={interactionProps.createNewList}
-                        currentUrl={pageId}
+                        normalizedPageUrlToFilterPageLinksBy={pageId}
                     />
                 )}
                 renderShareMenuForAnnotation={() => (
@@ -356,6 +356,7 @@ export default class SearchResultsContainer extends React.Component<
                         copyLink={this.props.onNoteLinkCopy}
                         postShareHook={interactionProps.updateShareInfo}
                         spacePickerProps={{
+                            normalizedPageUrlToFilterPageLinksBy: pageId,
                             annotationsCache: this.props.annotationsCache,
                             initialSelectedListIds: () => localListIds,
                             selectEntry: (listId, options) =>
@@ -372,7 +373,6 @@ export default class SearchResultsContainer extends React.Component<
                                     selected: [],
                                 }),
                             createNewEntry: interactionProps.createNewList,
-                            currentUrl: { pageId },
                         }}
                     />
                 )}
@@ -442,7 +442,7 @@ export default class SearchResultsContainer extends React.Component<
                             unselectEntry={
                                 boundAnnotCreateProps.removePageFromList
                             }
-                            currentUrl={normalizedUrl}
+                            normalizedPageUrlToFilterPageLinksBy={normalizedUrl}
                         />
                     )}
                 />

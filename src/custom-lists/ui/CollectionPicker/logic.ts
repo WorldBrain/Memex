@@ -116,7 +116,6 @@ export default class SpacePickerLogic extends UILogic<
         contextMenuListId: null,
         contextMenuPositionX: 0,
         contextMenuPositionY: 0,
-        currentNormalizedURL: '',
     })
 
     private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState']
@@ -194,9 +193,6 @@ export default class SpacePickerLogic extends UILogic<
                     this.dependencies.annotationsCache.lists,
                 )
             }
-            this.emitMutation({
-                currentNormalizedURL: { $set: this.dependencies.currentUrl },
-            })
         })
     }
 
