@@ -7,6 +7,7 @@ import type {
     PageAnnotationsCacheEvents,
     UnifiedAnnotation,
     UnifiedAnnotationForCache,
+    UnifiedListForCache,
 } from './types'
 
 type EmittedEvent = { event: keyof PageAnnotationsCacheEvents; args: any }
@@ -769,5 +770,55 @@ describe('Page annotations cache tests', () => {
 
         cache.removeAnnotation({ unifiedId: idB })
         expect([...cache['remoteAnnotIdsToCacheIds']]).toEqual([])
+    })
+
+    it('when adding a new shared list, any existing public annotations should automatically be added to that list', () => {
+        const { cache } = setupTest()
+        const testAnnotations = TEST_DATA.ANNOTATIONS()
+        const testLists = TEST_DATA.LISTS()
+
+        cache.setLists(testLists)
+        cache.setAnnotations(
+            reshapeUnifiedAnnotsForCaching(testAnnotations, testLists),
+        )
+
+        const testPublicAnnot: UnifiedAnnotationForCache = {
+            normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
+            privacyLevel: AnnotationPrivacyLevels.SHARED,
+            remoteId: 'remote-annot-id-2000',
+            comment: 'test public annot',
+            creator: TEST_DATA.USER_1,
+            unifiedListIds: [],
+            localListIds: [],
+            createdWhen: 4,
+            lastEdited: 4,
+        }
+
+        const { unifiedId: publicAnnotCacheId } = cache.addAnnotation(
+            testPublicAnnot,
+        )
+
+        const testList: UnifiedListForCache<'page-link'> = {
+            type: 'page-link',
+            name: 'test list',
+            normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
+            sharedListEntryId: 'shared-list-entry-id-2000',
+            hasRemoteAnnotationsToLoad: false,
+            unifiedAnnotationIds: [],
+            creator: TEST_DATA.USER_1,
+            remoteId: 'remote-list-id-2000',
+            collabKey: 'test-collab-key-1',
+            localId: 2000,
+        }
+
+        expect(cache.getListByLocalId(testList.localId)).toEqual(null)
+
+        cache.addList(testList)
+
+        expect(cache.getListByLocalId(testList.localId)).toEqual({
+            unifiedId: expect.anything(),
+            ...testList,
+            unifiedAnnotationIds: [publicAnnotCacheId],
+        })
     })
 })
