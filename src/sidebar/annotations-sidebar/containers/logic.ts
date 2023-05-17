@@ -2393,6 +2393,7 @@ export class SidebarContainerLogic extends UILogic<
 
         await executeUITask(this, 'pageLinkCreateState', async () => {
             const {
+                collabKey,
                 listTitle,
                 localListId,
                 remoteListId,
@@ -2413,13 +2414,9 @@ export class SidebarContainerLogic extends UILogic<
                 unifiedAnnotationIds: [],
                 hasRemoteAnnotationsToLoad: false,
             })
-            const {
-                keyString,
-            } = await this.options.contentSharingByTabsBG.waitForPageLinkCreation(
-                {
-                    fullPageUrl,
-                },
-            )
+            await this.options.contentSharingByTabsBG.waitForPageLinkCreation({
+                fullPageUrl,
+            })
 
             // TODO: update some state with the keystring
         })

@@ -45,7 +45,7 @@ export default class ContentSharingBackground {
     static ONE_WEEK_MS = 604800000
 
     private pageLinkCreationPromises: {
-        [fullPageUrl: string]: Promise<{ keyString: string }>
+        [fullPageUrl: string]: Promise<void>
     } = {}
     private annotationSharingService: AnnotationSharingService
     private listSharingService: ListSharingService
@@ -745,12 +745,16 @@ export default class ContentSharingBackground {
         const remoteListEntryId = this.options
             .generateServerId('sharedListEntry')
             .toString()
+        const collabKey = this.options
+            .generateServerId('sharedListKey')
+            .toString()
 
         // Start but don't wait for the storage logic
         this.pageLinkCreationPromises[
             fullPageUrl
         ] = this.performPageLinkCreation({
             creator: currentUser.id,
+            collabKey,
             listTitle,
             localListId,
             remoteListEntryId,
@@ -760,7 +764,13 @@ export default class ContentSharingBackground {
             now,
         })
 
-        return { remoteListId, remoteListEntryId, listTitle, localListId }
+        return {
+            remoteListId,
+            remoteListEntryId,
+            listTitle,
+            localListId,
+            collabKey,
+        }
     }
 
     private async performPageLinkCreation({
@@ -769,6 +779,7 @@ export default class ContentSharingBackground {
         localListId,
         fullPageUrl,
         listTitle,
+        collabKey,
         creator,
         tabId,
         now,
@@ -783,7 +794,7 @@ export default class ContentSharingBackground {
         creator: string
         tabId?: number
         now?: number
-    }): Promise<{ keyString: string }> {
+    }): Promise<void> {
         const bgModules = this.options.getBgModules()
         const normalizedPageUrl = normalizeUrl(fullPageUrl)
 
@@ -815,7 +826,11 @@ export default class ContentSharingBackground {
             suppressInboxEntry: true,
             suppressVisitCreation: true,
         })
-        const { links } = await this.shareList({ localListId, remoteListId })
+        await this.shareList({
+            localListId,
+            remoteListId,
+            collabKey,
+        })
 
         await bgModules.pageActivityIndicator.createFollowedList({
             creator,
@@ -834,23 +849,11 @@ export default class ContentSharingBackground {
             updatedWhen: now,
         })
 
-        const keyString = links.find(
-            ({ roleID }) => roleID === SharedListRoleID.ReadWrite,
-        )?.keyString
-
-        if (!keyString) {
-            throw new Error(
-                'Collaboration key was not created upon list share - ',
-            )
-        }
-
         await this.options.backend.processListKey({
             type: SharedCollectionType.PageLink,
             allowOwnKeyProcessing: true,
             listId: remoteListId,
-            keyString,
+            keyString: collabKey.toString(),
         })
-
-        return { keyString }
     }
 }

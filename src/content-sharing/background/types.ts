@@ -85,13 +85,10 @@ export interface RemoteContentSharingByTabsInterface<
             localListId: number
             remoteListId: AutoPk
             remoteListEntryId: AutoPk
+            collabKey: AutoPk
         }
     >
-    waitForPageLinkCreation: RemoteFunction<
-        Role,
-        { fullPageUrl: string },
-        { keyString: string }
-    >
+    waitForPageLinkCreation: RemoteFunction<Role, { fullPageUrl: string }, void>
 }
 
 /**

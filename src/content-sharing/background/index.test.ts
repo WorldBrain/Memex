@@ -2594,6 +2594,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 const tabInfo = { tab: { id: 123 } }
                                 const {
+                                    collabKey,
                                     localListId,
                                     remoteListId,
                                     remoteListEntryId,
@@ -2731,7 +2732,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('sharedListKey').findAllObjects({})).toEqual([
                                     {
-                                        id: expect.anything(),
+                                        id: maybeInt(collabKey),
                                         disabled: false,
                                         roleID: SharedListRoleID.ReadWrite,
                                         sharedList: maybeInt(remoteListId),
