@@ -61,6 +61,11 @@ import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/u
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
+import {
+    getFeedUrl,
+    getListShareUrl,
+    getSinglePageShareUrl,
+} from 'src/content-sharing/utils'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -839,16 +844,6 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    getBaseUrl() {
-        if (process.env.NODE_ENV === 'production') {
-            return `https://memex.social`
-        }
-        if (process.env.USE_FIREBASE_EMULATOR === 'true') {
-            return 'http://localhost:3000'
-        }
-        return `https://staging.memex.social`
-    }
-
     private renderContextMenu(
         listData: UnifiedList,
         ref?: React.RefObject<HTMLDivElement>,
@@ -1021,14 +1016,6 @@ export class AnnotationsSidebar extends React.Component<
     //     }
     // }
 
-    private whichFeed = () => {
-        if (process.env.NODE_ENV === 'production') {
-            return 'https://memex.social/feed'
-        } else {
-            return 'https://staging.memex.social/feed'
-        }
-    }
-
     private throwNoSelected
     rror() {
         throw new Error(
@@ -1039,7 +1026,7 @@ export class AnnotationsSidebar extends React.Component<
     private renderFeed() {
         return (
             <AnnotationsSectionStyled>
-                <FeedFrame src={this.whichFeed()} />
+                <FeedFrame src={getFeedUrl()} />
             </AnnotationsSectionStyled>
         )
     }
@@ -1761,19 +1748,19 @@ export class AnnotationsSidebar extends React.Component<
                             label={isPageLink ? 'Open Page Link' : 'Open Space'}
                             fontColor="greyScale6"
                             onClick={() =>
-                                isPageLink
-                                    ? window.open(
-                                          this.getBaseUrl() +
-                                              '/c/' +
-                                              selectedList.remoteId +
-                                              '/p/' +
-                                              selectedList.sharedListEntryId,
-                                      )
-                                    : window.open(
-                                          this.getBaseUrl() +
-                                              '/c/' +
-                                              selectedList.remoteId,
-                                      )
+                                window.open(
+                                    isPageLink
+                                        ? getSinglePageShareUrl({
+                                              remoteListId:
+                                                  selectedList.remoteId,
+                                              remoteListEntryId:
+                                                  selectedList.sharedListEntryId,
+                                          })
+                                        : getListShareUrl({
+                                              remoteListId:
+                                                  selectedList.remoteId,
+                                          }),
+                                )
                             }
                         />
                         {this.renderPermissionStatusButton()}
