@@ -117,12 +117,42 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     private async loadInviteLinks() {
         const { listData, contentSharingBG } = this.dependencies
 
+        const createListLink = (collaborationKey?: string): string =>
+            listData.type === 'page-link'
+                ? getSinglePageShareUrl({
+                      collaborationKey,
+                      remoteListId: listData.remoteId,
+                      remoteListEntryId: listData.sharedListEntryId,
+                  })
+                : getListShareUrl({
+                      collaborationKey,
+                      remoteListId: listData.remoteId,
+                  })
+
         await executeUITask(this, 'inviteLinksLoadState', async () => {
             if (listData.remoteId == null) {
                 return
             }
 
-            // TODO: improve this endpoint so it can work with page-links, or just make it return IDs instead of links
+            if (listData.collabKey != null) {
+                this.emitMutation({
+                    inviteLinks: {
+                        $set: [
+                            {
+                                roleID: SharedListRoleID.Commenter,
+                                link: createListLink(),
+                            },
+                            {
+                                roleID: SharedListRoleID.ReadWrite,
+                                link: createListLink(listData.collabKey),
+                            },
+                        ],
+                    },
+                })
+                return
+            }
+
+            // TODO: Remove all this logic once full support for list's `collabKey` is in the cache
             const { links } = await contentSharingBG.getExistingKeyLinksForList(
                 {
                     listReference: {
@@ -137,31 +167,13 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             const inviteLinks: InviteLink[] = [
                 {
                     roleID: SharedListRoleID.Commenter,
-                    link:
-                        listData.type === 'page-link'
-                            ? getSinglePageShareUrl({
-                                  remoteListId: listData.remoteId,
-                                  remoteListEntryId: listData.sharedListEntryId,
-                              })
-                            : getListShareUrl({
-                                  remoteListId: listData.remoteId,
-                              }),
+                    link: createListLink(),
                 },
             ]
             if (contribLink) {
                 inviteLinks.push({
                     roleID: SharedListRoleID.ReadWrite,
-                    link:
-                        listData.type === 'page-link'
-                            ? getSinglePageShareUrl({
-                                  remoteListId: listData.remoteId,
-                                  remoteListEntryId: listData.sharedListEntryId,
-                                  collaborationKey: contribLink.keyString,
-                              })
-                            : getListShareUrl({
-                                  remoteListId: listData.remoteId,
-                                  collaborationKey: contribLink.keyString,
-                              }),
+                    link: createListLink(contribLink.keyString),
                 })
             }
 

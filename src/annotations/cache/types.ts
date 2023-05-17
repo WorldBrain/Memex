@@ -118,6 +118,7 @@ type CoreUnifiedList<T> = {
     unifiedId: string
     localId?: number
     remoteId?: string
+    collabKey?: string
     name: string
     description?: string
     creator?: UserReference

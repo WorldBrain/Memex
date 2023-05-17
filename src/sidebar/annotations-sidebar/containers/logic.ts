@@ -2406,19 +2406,18 @@ export class SidebarContainerLogic extends UILogic<
             this.options.annotationsCache.addList<'page-link'>({
                 type: 'page-link',
                 name: listTitle,
+                creator: currentUser,
                 localId: localListId,
+                collabKey: collabKey.toString(),
                 remoteId: remoteListId.toString(),
                 sharedListEntryId: remoteListEntryId.toString(),
                 normalizedPageUrl: normalizeUrl(fullPageUrl),
-                creator: currentUser,
                 unifiedAnnotationIds: [],
                 hasRemoteAnnotationsToLoad: false,
             })
             await this.options.contentSharingByTabsBG.waitForPageLinkCreation({
                 fullPageUrl,
             })
-
-            // TODO: update some state with the keystring
         })
     }
 }
