@@ -448,7 +448,9 @@ export class AnnotationsSidebar extends React.Component<
                         />
                     </IconBox>
                     <InfoText>
-                        This page is added to this Space, but has no notes yet.
+                        {listData.type === 'page-link'
+                            ? 'Add new annotations to this shareable page link'
+                            : 'This page is added to this Space, but has no notes yet.'}
                     </InfoText>
                 </EmptyMessageContainer>
             )
@@ -1705,14 +1707,8 @@ export class AnnotationsSidebar extends React.Component<
                     <PrimaryAction
                         label="Share Page"
                         onClick={this.props.clickCreatePageLinkBtn}
-                        disabled={this.props.pageLinkCreateState === 'running'}
                         type="secondary"
                         size="small"
-                        icon={
-                            this.props.pageLinkCreateState === 'running' && (
-                                <LoadingIndicator size={10} />
-                            )
-                        }
                     />
                 </TopBarBtnsContainer>
             </TopBarContainer>
@@ -1767,6 +1763,7 @@ export class AnnotationsSidebar extends React.Component<
                     </RightSideButtonsTopBar>
                 </IsolatedViewHeaderTopBar>
                 <SpaceTitle>
+                    {selectedList.type === 'page-link' && 'Page link: '}{' '}
                     {cacheUtils.getDisplayNameForList(selectedList)}
                 </SpaceTitle>
                 <SpaceDescription>{selectedList.description}</SpaceDescription>
