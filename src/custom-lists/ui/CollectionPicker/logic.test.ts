@@ -31,14 +31,8 @@ async function insertTestData({
         })
     }
 
-    // Ensure not all the test lists are in the initial suggestions, for testing diversity
-    const suggestions = await backgroundModules.customLists['localStorage'].get(
-        'suggestionIds',
-    )
-    await backgroundModules.customLists['localStorage'].set(
-        'suggestionIds',
-        suggestions.slice(0, 5),
-    )
+    // Ensure no test lists are in the initial suggestions by default
+    await backgroundModules.customLists['localStorage'].set('suggestionIds', [])
 
     for (const metadata of DATA.TEST_LIST_METADATA) {
         await storageManager
@@ -186,7 +180,7 @@ describe('SpacePickerLogic', () => {
 
         await device.backgroundModules.customLists[
             'localStorage'
-        ].set('suggestionIds', [DATA.TEST_LISTS[4].id])
+        ].set('suggestionIds', [DATA.TEST_LISTS[5].id, DATA.TEST_LISTS[4].id])
 
         expect(testLogic.state).toEqual(
             expect.objectContaining({
@@ -200,10 +194,10 @@ describe('SpacePickerLogic', () => {
         expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
             DATA.TEST_USER_LIST_SUGGESTIONS[0],
             DATA.TEST_USER_LIST_SUGGESTIONS[2],
+            DATA.TEST_USER_LIST_SUGGESTIONS[5],
             DATA.TEST_USER_LIST_SUGGESTIONS[4],
             DATA.TEST_USER_LIST_SUGGESTIONS[1],
             DATA.TEST_USER_LIST_SUGGESTIONS[3],
-            DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.selectedListIds).toEqual([
             DATA.TEST_LISTS[0].id,
@@ -694,108 +688,6 @@ describe('SpacePickerLogic', () => {
     }) => {
         let selectedEntryId: string | number = null
         let unselectedEntryId: string | number = null
-        const { testLogic, entryPickerLogic } = await setupLogicHelper({
-            device,
-            unselectEntry: async (entryId) => {
-                unselectedEntryId = entryId
-            },
-            selectEntry: async (entryId) => {
-                selectedEntryId = entryId
-            },
-        })
-
-        await testLogic.init()
-
-        expect(testLogic.state.selectedListIds).toEqual([])
-        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual(
-            DATA.TEST_USER_LIST_SUGGESTIONS,
-        )
-        expect(selectedEntryId).toBe(null)
-        expect(unselectedEntryId).toBe(null)
-
-        await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_USER_LIST_SUGGESTIONS[1],
-        })
-
-        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
-            DATA.TEST_USER_LIST_SUGGESTIONS[1],
-            DATA.TEST_USER_LIST_SUGGESTIONS[0],
-            DATA.TEST_USER_LIST_SUGGESTIONS[2],
-            DATA.TEST_USER_LIST_SUGGESTIONS[3],
-            DATA.TEST_USER_LIST_SUGGESTIONS[4],
-            DATA.TEST_USER_LIST_SUGGESTIONS[5],
-        ])
-        expect(testLogic.state.selectedListIds).toEqual([
-            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
-        ])
-        expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[1].localId)
-        expect(unselectedEntryId).toBe(null)
-
-        await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_USER_LIST_SUGGESTIONS[1],
-        })
-
-        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
-            DATA.TEST_USER_LIST_SUGGESTIONS[1],
-            DATA.TEST_USER_LIST_SUGGESTIONS[0],
-            DATA.TEST_USER_LIST_SUGGESTIONS[2],
-            DATA.TEST_USER_LIST_SUGGESTIONS[3],
-            DATA.TEST_USER_LIST_SUGGESTIONS[4],
-            DATA.TEST_USER_LIST_SUGGESTIONS[5],
-        ])
-        expect(testLogic.state.selectedListIds).toEqual([])
-        expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[1].localId)
-        expect(unselectedEntryId).toBe(
-            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
-        )
-
-        await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
-        })
-
-        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
-            DATA.TEST_USER_LIST_SUGGESTIONS[0],
-            DATA.TEST_USER_LIST_SUGGESTIONS[1],
-            DATA.TEST_USER_LIST_SUGGESTIONS[2],
-            DATA.TEST_USER_LIST_SUGGESTIONS[3],
-            DATA.TEST_USER_LIST_SUGGESTIONS[4],
-            DATA.TEST_USER_LIST_SUGGESTIONS[5],
-        ])
-        expect(testLogic.state.selectedListIds).toEqual([
-            DATA.TEST_USER_LIST_SUGGESTIONS[0].localId,
-        ])
-        expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[0].localId)
-        expect(unselectedEntryId).toBe(
-            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
-        )
-
-        await testLogic.processEvent('resultEntryPress', {
-            entry: DATA.TEST_USER_LIST_SUGGESTIONS[3],
-        })
-
-        expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
-            DATA.TEST_USER_LIST_SUGGESTIONS[3],
-            DATA.TEST_USER_LIST_SUGGESTIONS[0],
-            DATA.TEST_USER_LIST_SUGGESTIONS[1],
-            DATA.TEST_USER_LIST_SUGGESTIONS[2],
-            DATA.TEST_USER_LIST_SUGGESTIONS[4],
-            DATA.TEST_USER_LIST_SUGGESTIONS[5],
-        ])
-        expect(testLogic.state.selectedListIds).toEqual([
-            DATA.TEST_USER_LIST_SUGGESTIONS[0].localId,
-            DATA.TEST_USER_LIST_SUGGESTIONS[3].localId,
-        ])
-        expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[3].localId)
-        expect(unselectedEntryId).toBe(
-            DATA.TEST_USER_LIST_SUGGESTIONS[1].localId,
-        )
-    })
-
-    it('should correctly select/unselect existing entry', async ({
-        device,
-    }) => {
-        let selectedEntryId: string | number = null
-        let unselectedEntryId: string | number = null
         const { testLogic } = await setupLogicHelper({
             device,
             unselectEntry: async (entryId) => {
@@ -884,8 +776,8 @@ describe('SpacePickerLogic', () => {
             DATA.TEST_USER_LIST_SUGGESTIONS[5],
         ])
         expect(testLogic.state.selectedListIds).toEqual([
-            DATA.TEST_USER_LIST_SUGGESTIONS[0].localId,
             DATA.TEST_USER_LIST_SUGGESTIONS[3].localId,
+            DATA.TEST_USER_LIST_SUGGESTIONS[0].localId,
         ])
         expect(selectedEntryId).toBe(DATA.TEST_USER_LIST_SUGGESTIONS[3].localId)
         expect(unselectedEntryId).toBe(

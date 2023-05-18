@@ -16,7 +16,7 @@ import {
 import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { BrowserSettingsStore } from 'src/util/settings'
-import { getEntriesForCurrentTab } from './utils'
+import { getEntriesForCurrentPickerTab } from './utils'
 import type {
     SpacePickerState,
     SpacePickerEvent,
@@ -26,6 +26,7 @@ import {
     getListShareUrl,
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     SpacePickerState,
@@ -33,12 +34,38 @@ type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     EventName
 >
 
-const sortDisplayEntries = (selectedEntryIds: Set<number>) => (
-    a: UnifiedList,
-    b: UnifiedList,
-): number =>
-    (selectedEntryIds.has(b.localId) ? 1 : 0) -
-    (selectedEntryIds.has(a.localId) ? 1 : 0)
+// TODO: Simplify this sorting logic if possible.
+//  Was struggling to wrap my head around this during implemention, though got it working but feel it could be simpler
+const sortDisplayEntries = (
+    selectedEntryIds: number[],
+    localListIdsMRU: number[],
+) => (a: UnifiedList, b: UnifiedList): number => {
+    const aSelectedScore = selectedEntryIds.indexOf(a.localId) + 1
+    const bSelectedScore = selectedEntryIds.indexOf(b.localId) + 1
+
+    // First sorting prio is whether a list is selected or not
+    if (aSelectedScore || bSelectedScore) {
+        if (aSelectedScore && !bSelectedScore) {
+            return -1
+        }
+        if (!aSelectedScore && bSelectedScore) {
+            return 1
+        }
+        return aSelectedScore - bSelectedScore
+    }
+
+    // Second sorting prio is MRU
+    const aMRUScore = localListIdsMRU.indexOf(a.localId) + 1
+    const bMRUScore = localListIdsMRU.indexOf(b.localId) + 1
+
+    if (aMRUScore && !bMRUScore) {
+        return -1
+    }
+    if (!aMRUScore && bMRUScore) {
+        return 1
+    }
+    return aMRUScore - bMRUScore
+}
 
 /**
  * This exists as a temporary way to resolve local list IDs -> cache state data, delaying a lot of
@@ -75,6 +102,9 @@ export default class SpacePickerLogic extends UILogic<
     private newTabKeys: KeyEvent[] = ['Enter', ',', 'Tab']
     private currentKeysPressed: KeyEvent[] = []
     private localStorage: BrowserSettingsStore<CollectionsSettings>
+    /** Mirrors the state of the same name, for use in the sorting fn. */
+    private selectedListIds: number[] = []
+    private localListIdsMRU: number[] = []
 
     /**
      * Exists to have a numerical representation for the `focusedListId` state according
@@ -127,24 +157,31 @@ export default class SpacePickerLogic extends UILogic<
             normalizedStateToArray(nextLists),
             currentUser,
         )
-        const userLists = myLists.filter(
-            (list) => list.type === 'user-list' && list.localId != null,
-        ) as UnifiedList<'user-list'>[]
-        const localPageLinkLists = pageLinkLists.filter(
-            (list) => list.localId != null,
+
+        const sortPredicate = sortDisplayEntries(
+            this.selectedListIds,
+            this.localListIdsMRU,
         )
+
+        const toSet = initNormalizedState({
+            getId: (list) => list.unifiedId,
+            seedData: myLists
+                .filter(
+                    (list) => list.type === 'user-list' && list.localId != null,
+                )
+                .sort(sortPredicate) as UnifiedList<'user-list'>[],
+        })
 
         this.emitMutation({
             listEntries: {
-                $set: initNormalizedState({
-                    seedData: userLists,
-                    getId: (list) => list.unifiedId,
-                }),
+                $set: toSet,
             },
             pageLinkEntries: {
                 $set: initNormalizedState({
-                    seedData: localPageLinkLists,
                     getId: (list) => list.unifiedId,
+                    seedData: pageLinkLists
+                        .filter((list) => list.localId != null)
+                        .sort(sortPredicate),
                 }),
             },
         })
@@ -157,24 +194,30 @@ export default class SpacePickerLogic extends UILogic<
                 ? { type: 'user-reference', id: user.id }
                 : undefined
             this.emitMutation({ currentUser: { $set: currentUser ?? null } })
+
+            this.localListIdsMRU =
+                (await this.localStorage.get('suggestionIds')) ?? []
+
+            if (this.dependencies.initialSelectedListIds) {
+                this.selectedListIds = (
+                    (await this.dependencies.initialSelectedListIds()) ?? []
+                ).filter(
+                    (localListId) =>
+                        !Object.values(SPECIAL_LIST_IDS).includes(localListId),
+                )
+                this.emitMutation({
+                    selectedListIds: { $set: [...this.selectedListIds] },
+                })
+            }
+
             this.cacheListsSubscription = this.initCacheListsSubscription(
                 currentUser,
             )
-
-            // TODO: Use these to sort the entries
-            // const listSuggestionIds = await this.localStorage.get('suggestionIds')
 
             this.dependencies.annotationsCache.events.addListener(
                 'newListsState',
                 this.cacheListsSubscription,
             )
-
-            if (this.dependencies.initialSelectedListIds) {
-                const selectedListIds = await this.dependencies.initialSelectedListIds()
-                this.emitMutation({
-                    selectedListIds: { $set: selectedListIds },
-                })
-            }
 
             if (this.dependencies.shouldHydrateCacheOnInit) {
                 await hydrateCacheForListUsage({
@@ -465,7 +508,6 @@ export default class SpacePickerLogic extends UILogic<
             ...normalizedStateToArray(state.pageLinkEntries),
         ]
             .filter(doAllTermsMatch)
-            .sort(sortDisplayEntries(new Set(state.selectedListIds)))
             .map((entry) => entry.unifiedId)
 
         this.emitMutation({ filteredListIds: { $set: matchingEntryIds } })
@@ -513,7 +555,7 @@ export default class SpacePickerLogic extends UILogic<
         state: SpacePickerState,
         emit = true,
     ) => {
-        let entries = getEntriesForCurrentTab(state)
+        let entries = getEntriesForCurrentPickerTab(state)
         if (state.filteredListIds?.length) {
             entries = entries.filter((entry) =>
                 state.filteredListIds.includes(entry.unifiedId),
@@ -538,13 +580,10 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry },
         previousState,
     }) => {
-        this.emitMutation({
-            selectedListIds: {
-                $set: previousState.selectedListIds.filter(
-                    (id) => id !== entry,
-                ),
-            },
-        })
+        this.selectedListIds = previousState.selectedListIds.filter(
+            (id) => id !== entry,
+        )
+        this.emitMutation({ selectedListIds: { $set: this.selectedListIds } })
 
         await this.dependencies.unselectEntry(entry)
     }
@@ -566,51 +605,45 @@ export default class SpacePickerLogic extends UILogic<
 
         // If we're going to unselect it
         try {
+            let entrySelectPromise: Promise<void>
             if (previousState.selectedListIds.includes(entry.localId)) {
-                const mutation: UIMutation<SpacePickerState> = {
-                    selectedListIds: {
-                        $set: previousState.selectedListIds.filter(
-                            (id) => id !== entry.localId,
-                        ),
-                    },
-                }
-
-                this.emitMutation(mutation)
-                nextState = this.withMutation(previousState, mutation)
-
-                await this.dependencies.unselectEntry(entry.localId)
-            } else {
-                const prevDisplayEntriesIndex = previousState.listEntries.allIds.indexOf(
-                    listData.unifiedId,
+                this.selectedListIds = previousState.selectedListIds.filter(
+                    (id) => id !== entry.localId,
                 )
-                const mutation: UIMutation<SpacePickerState> = {
-                    selectedListIds: { $push: [entry.localId] },
-                    listEntries: {
-                        allIds: {
-                            // Reposition selected entry at start of display list
-                            $set: [
-                                previousState.listEntries.allIds[
-                                    listData.unifiedId
-                                ],
-                                ...previousState.listEntries.allIds.slice(
-                                    0,
-                                    prevDisplayEntriesIndex,
-                                ),
-                                ...previousState.listEntries.allIds.slice(
-                                    prevDisplayEntriesIndex + 1,
-                                ),
-                            ],
-                        },
-                    },
-                }
 
-                this.emitMutation(mutation)
-                nextState = this.withMutation(previousState, mutation)
-                await this.dependencies.selectEntry(entry.localId)
+                entrySelectPromise = this.dependencies.unselectEntry(
+                    entry.localId,
+                )
+            } else {
+                this.localListIdsMRU = Array.from(
+                    new Set([listData.localId, ...this.localListIdsMRU]),
+                )
+                this.selectedListIds = Array.from(
+                    new Set([
+                        listData.localId,
+                        ...previousState.selectedListIds,
+                    ]),
+                )
+
+                entrySelectPromise = this.dependencies.selectEntry(
+                    entry.localId,
+                )
             }
-        } catch (e) {
+
             const mutation: UIMutation<SpacePickerState> = {
-                selectedListIds: { $set: previousState.selectedListIds },
+                selectedListIds: { $set: this.selectedListIds },
+            }
+
+            this.emitMutation(mutation)
+            nextState = this.withMutation(previousState, mutation)
+
+            // Manually trigger list subscription - which does the list state mutation - as it won't be auto-triggered here
+            this.cacheListsSubscription(previousState.listEntries)
+            await entrySelectPromise
+        } catch (e) {
+            this.selectedListIds = previousState.selectedListIds
+            const mutation: UIMutation<SpacePickerState> = {
+                selectedListIds: { $set: this.selectedListIds },
             }
 
             this.emitMutation(mutation)
@@ -638,14 +671,13 @@ export default class SpacePickerLogic extends UILogic<
             entry.localId,
         )
 
+        this.selectedListIds = isAlreadySelected
+            ? previousState.selectedListIds.filter(
+                  (entryId) => entryId !== entry.localId,
+              )
+            : [entry.localId, ...previousState.selectedListIds]
         this.emitMutation({
-            selectedListIds: {
-                $set: isAlreadySelected
-                    ? previousState.selectedListIds.filter(
-                          (entryId) => entryId !== entry.localId,
-                      )
-                    : [...previousState.selectedListIds, entry.localId],
-            },
+            selectedListIds: { $set: this.selectedListIds },
             allTabsButtonPressed: { $set: entry.localId },
         })
     }
@@ -655,6 +687,15 @@ export default class SpacePickerLogic extends UILogic<
         previousState: SpacePickerState,
     ): Promise<number> {
         const localListId = await this.dependencies.createNewEntry(name)
+
+        this.localListIdsMRU.unshift(localListId)
+        this.selectedListIds.unshift(localListId)
+        this.emitMutation({
+            query: { $set: '' },
+            newEntryName: { $set: '' },
+            selectedListIds: { $set: this.selectedListIds },
+        })
+        this.setFocusedEntryIndex(0, previousState)
 
         this.dependencies.annotationsCache.addList({
             name,
@@ -666,12 +707,6 @@ export default class SpacePickerLogic extends UILogic<
             creator: previousState.currentUser ?? undefined,
         })
 
-        this.emitMutation({
-            query: { $set: '' },
-            newEntryName: { $set: '' },
-            selectedListIds: { $push: [localListId] },
-        })
-        this.setFocusedEntryIndex(0, previousState)
         return localListId
     }
 

@@ -32,7 +32,7 @@ import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-n
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { PageAnnotationsCache } from 'src/annotations/cache'
-import { getEntriesForCurrentTab } from './utils'
+import { getEntriesForCurrentPickerTab } from './utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
 
 export interface Props extends SpacePickerDependencies {
@@ -100,7 +100,7 @@ class SpacePicker extends StatefulUIElement<
         name: string
     }> {
         const selectedIdSet = new Set(this.state.selectedListIds)
-        return getEntriesForCurrentTab(this.state)
+        return getEntriesForCurrentPickerTab(this.state)
             .filter(
                 (entry) =>
                     entry.localId != null && selectedIdSet.has(entry.localId),
@@ -253,7 +253,7 @@ class SpacePicker extends StatefulUIElement<
     )
 
     private renderListEntries() {
-        let listEntries = getEntriesForCurrentTab(this.state)
+        let listEntries = getEntriesForCurrentPickerTab(this.state)
         if (this.state.query.trim().length > 0) {
             listEntries = listEntries.filter((list) =>
                 this.state.filteredListIds.includes(list.unifiedId),
