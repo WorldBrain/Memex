@@ -236,6 +236,27 @@ export default class SpacePickerLogic extends UILogic<
                     this.dependencies.annotationsCache.lists,
                 )
             }
+
+            if (this.selectedListIds.length > 0) {
+                this.emitMutation({
+                    focusedListId: {
+                        $set:
+                            this.dependencies.annotationsCache.getListByLocalId(
+                                this.selectedListIds[0],
+                            )?.unifiedId ?? null,
+                    },
+                })
+            } else {
+                this.emitMutation({
+                    focusedListId: {
+                        $set:
+                            this.dependencies.annotationsCache.getListByLocalId(
+                                this.localListIdsMRU[0],
+                            )?.unifiedId ?? null,
+                    },
+                })
+            }
+            this.focusIndex = 0
         })
     }
 
