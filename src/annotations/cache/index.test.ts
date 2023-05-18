@@ -782,11 +782,33 @@ describe('Page annotations cache tests', () => {
             reshapeUnifiedAnnotsForCaching(testAnnotations, testLists),
         )
 
-        const testPublicAnnot: UnifiedAnnotationForCache = {
+        const annotA: UnifiedAnnotationForCache = {
             normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
             privacyLevel: AnnotationPrivacyLevels.SHARED,
             remoteId: 'remote-annot-id-2000',
-            comment: 'test public annot',
+            comment: 'test public annot 1',
+            creator: TEST_DATA.USER_1,
+            unifiedListIds: [],
+            localListIds: [],
+            createdWhen: 4,
+            lastEdited: 4,
+        }
+        const annotB: UnifiedAnnotationForCache = {
+            normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
+            privacyLevel: AnnotationPrivacyLevels.SHARED,
+            remoteId: 'remote-annot-id-2001',
+            comment: 'test public annot 2',
+            creator: TEST_DATA.USER_2,
+            unifiedListIds: [],
+            localListIds: [],
+            createdWhen: 4,
+            lastEdited: 4,
+        }
+        const annotC: UnifiedAnnotationForCache = {
+            normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
+            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            remoteId: 'remote-annot-id-2002',
+            comment: 'test private annot',
             creator: TEST_DATA.USER_1,
             unifiedListIds: [],
             localListIds: [],
@@ -794,9 +816,9 @@ describe('Page annotations cache tests', () => {
             lastEdited: 4,
         }
 
-        const { unifiedId: publicAnnotCacheId } = cache.addAnnotation(
-            testPublicAnnot,
-        )
+        const { unifiedId: annotAId } = cache.addAnnotation(annotA)
+        const { unifiedId: annotBId } = cache.addAnnotation(annotB)
+        const { unifiedId: annotCId } = cache.addAnnotation(annotC)
 
         const testList: UnifiedListForCache<'page-link'> = {
             type: 'page-link',
@@ -805,7 +827,7 @@ describe('Page annotations cache tests', () => {
             sharedListEntryId: 'shared-list-entry-id-2000',
             hasRemoteAnnotationsToLoad: false,
             unifiedAnnotationIds: [],
-            creator: TEST_DATA.USER_1,
+            creator: { ...TEST_DATA.USER_1 },
             remoteId: 'remote-list-id-2000',
             collabKey: 'test-collab-key-1',
             localId: 2000,
@@ -818,7 +840,7 @@ describe('Page annotations cache tests', () => {
         expect(cache.getListByLocalId(testList.localId)).toEqual({
             unifiedId: expect.anything(),
             ...testList,
-            unifiedAnnotationIds: [publicAnnotCacheId],
+            unifiedAnnotationIds: [annotAId], // Only the public one created by the same user as the list creator should show up
         })
     })
 })

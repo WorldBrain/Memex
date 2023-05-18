@@ -132,7 +132,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             for (const annotation of normalizedStateToArray(this.annotations)) {
                 if (
                     annotation.privacyLevel < AnnotationPrivacyLevels.SHARED ||
-                    annotation.creator !== list.creator
+                    annotation.creator?.id !== list.creator?.id
                 ) {
                     continue
                 }
