@@ -2411,6 +2411,11 @@ export class SidebarContainerLogic extends UILogic<
                 cacheListData,
             )
 
+            this.emitMutation({
+                activeTab: { $set: 'spaces' },
+                selectedListId: { $set: unifiedId },
+            })
+
             await Promise.all([
                 this.options.contentSharingByTabsBG.waitForPageLinkCreation({
                     fullPageUrl,
