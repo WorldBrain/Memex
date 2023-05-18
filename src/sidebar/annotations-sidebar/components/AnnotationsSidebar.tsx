@@ -1624,6 +1624,8 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderTopBarSwitcher() {
+        const listData = this.props.lists.byId[this.props.selectedListId]
+
         return (
             <TopBarContainer>
                 <TopBarTabsContainer>
@@ -1704,12 +1706,34 @@ export class AnnotationsSidebar extends React.Component<
                     />
                 </TopBarTabsContainer>
                 <TopBarBtnsContainer>
-                    <PrimaryAction
-                        label="Share Page"
-                        onClick={this.props.clickCreatePageLinkBtn}
-                        type="secondary"
-                        size="small"
-                    />
+                    {this.props.pageLinkCreateState === 'running' ? (
+                        <TooltipBox
+                            tooltipText={
+                                <span>
+                                    Preparing Page Link
+                                    <br />
+                                    link can be copied but web interface not
+                                    ready
+                                </span>
+                            }
+                            placement={'bottom-end'}
+                        >
+                            <LoadingPageLinkBox>
+                                <LoadingIndicator size={18} />
+                            </LoadingPageLinkBox>
+                        </TooltipBox>
+                    ) : (
+                        <>
+                            {listData?.type !== 'page-link' && (
+                                <PrimaryAction
+                                    label={'Share Page'}
+                                    onClick={this.props.clickCreatePageLinkBtn}
+                                    type="secondary"
+                                    size="small"
+                                />
+                            )}
+                        </>
+                    )}
                 </TopBarBtnsContainer>
             </TopBarContainer>
         )
@@ -2052,6 +2076,15 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 }
+
+const LoadingPageLinkBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-right: 15px;
+    height: 30px;
+    width: 30px;
+`
 
 const RightSideButtonsTopBar = styled.div`
     display: flex;
