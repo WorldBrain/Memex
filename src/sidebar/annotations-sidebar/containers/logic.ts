@@ -41,10 +41,7 @@ import {
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
-import {
-    AI_PROMPT_DEFAULTS,
-    AI_PROMPT_SUGGESTION_STORAGE_KEY,
-} from '../constants'
+import { AI_PROMPT_DEFAULTS } from '../constants'
 import {
     getInitialAnnotationConversationState,
     getInitialAnnotationConversationStates,
@@ -53,9 +50,8 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import { resolvablePromise } from 'src/util/promises'
 import type {
     PageAnnotationsCacheEvents,
-    PageAnnotationsCacheInterface,
-    UnifiedAnnotation,
     UnifiedList,
+    UnifiedListForCache,
 } from 'src/annotations/cache/types'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import {
@@ -83,7 +79,6 @@ import {
     updateAICounter,
 } from 'src/util/subscriptions/storage'
 import {
-    createPageLinkListTitle,
     getListShareUrl,
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
@@ -2377,10 +2372,6 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         const fullPageUrl = previousState.fullPageUrl
 
-        this.emitMutation({
-            activeTab: { $set: 'spaces' },
-        })
-
         if (!fullPageUrl) {
             throw new Error(
                 'Cannot create page link - Page URL sidebar state not set',
@@ -2403,7 +2394,8 @@ export class SidebarContainerLogic extends UILogic<
                     fullPageUrl,
                 },
             )
-            this.options.annotationsCache.addList<'page-link'>({
+
+            const cacheListData: UnifiedListForCache<'page-link'> = {
                 type: 'page-link',
                 name: listTitle,
                 creator: currentUser,
@@ -2414,10 +2406,30 @@ export class SidebarContainerLogic extends UILogic<
                 normalizedPageUrl: normalizeUrl(fullPageUrl),
                 unifiedAnnotationIds: [],
                 hasRemoteAnnotationsToLoad: false,
-            })
-            await this.options.contentSharingByTabsBG.waitForPageLinkCreation({
-                fullPageUrl,
-            })
+            }
+            const { unifiedId } = this.options.annotationsCache.addList(
+                cacheListData,
+            )
+
+            await Promise.all([
+                this.options.contentSharingByTabsBG.waitForPageLinkCreation({
+                    fullPageUrl,
+                }),
+                this.setLocallyAvailableSelectedList(
+                    {
+                        ...previousState,
+                        lists: this.options.annotationsCache.lists,
+                        listInstances: {
+                            ...previousState.listInstances,
+                            [unifiedId]: initListInstance({
+                                ...cacheListData,
+                                unifiedId,
+                            }),
+                        },
+                    },
+                    unifiedId,
+                ),
+            ])
         })
     }
 }
