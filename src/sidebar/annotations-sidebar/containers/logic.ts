@@ -2013,11 +2013,6 @@ export class SidebarContainerLogic extends UILogic<
         const nextState = this.withMutation(previousState, listInstanceMutation)
         this.emitMutation(listInstanceMutation)
 
-        await this.maybeLoadListRemoteAnnotations(
-            previousState,
-            event.unifiedListId,
-        )
-
         // NOTE: It's important the annots+lists states are gotten from the cache here as the above async call
         //   can result in new annotations being added to the cache which won't yet update this logic class' state
         //   (though they cache's state will be up-to-date)
@@ -2026,6 +2021,10 @@ export class SidebarContainerLogic extends UILogic<
             lists: this.options.annotationsCache.lists,
             listInstances: nextState.listInstances,
         })
+        await this.maybeLoadListRemoteAnnotations(
+            previousState,
+            event.unifiedListId,
+        )
     }
 
     markFeedAsRead: EventHandler<'markFeedAsRead'> = async () => {
@@ -2058,6 +2057,13 @@ export class SidebarContainerLogic extends UILogic<
             selectedListId: { $set: unifiedListId },
         })
 
+        this.options.events?.emit('renderHighlights', {
+            highlights: cacheUtils.getListHighlightsArray(
+                this.options.annotationsCache,
+                unifiedListId,
+            ),
+        })
+
         if (list.remoteId != null) {
             let nextState = state
             nextState = await this.loadRemoteAnnotationReferencesForSpecificLists(
@@ -2067,13 +2073,6 @@ export class SidebarContainerLogic extends UILogic<
 
             await this.maybeLoadListRemoteAnnotations(nextState, unifiedListId)
         }
-
-        this.options.events?.emit('renderHighlights', {
-            highlights: cacheUtils.getListHighlightsArray(
-                this.options.annotationsCache,
-                unifiedListId,
-            ),
-        })
     }
 
     setSelectedList: EventHandler<'setSelectedList'> = async ({
