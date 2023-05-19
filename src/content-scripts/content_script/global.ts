@@ -366,6 +366,7 @@ export async function main(
                     action: 'show_annotation',
                 })
             }
+            await inPageUI.hideTooltip()
         },
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
@@ -396,12 +397,15 @@ export async function main(
                           action: 'comment',
                       },
             )
+            await inPageUI.hideTooltip()
         },
-        askAI: () => (highlightedText: string) =>
+        askAI: () => (highlightedText: string) => {
             inPageUI.showSidebar({
                 action: 'show_page_summary',
                 highlightedText,
-            }),
+            })
+            inPageUI.hideTooltip()
+        },
     }
 
     if (window.location.hostname === 'www.youtube.com') {
