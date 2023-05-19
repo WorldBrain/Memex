@@ -500,7 +500,7 @@ export function createBackgroundModules(options: {
         remoteEmitter: createRemoteEventEmitter('contentSharing', {
             broadcastToTabs: true,
         }),
-        waitForSync: () => personalCloud.actionQueue.waitForSync(),
+        waitForSync: () => personalCloud.waitForSync(),
         storageManager,
         contentSharingSettingsStore: new BrowserSettingsStore(
             options.browserAPIs.storage.local,

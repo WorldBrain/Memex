@@ -626,8 +626,6 @@ export default class ContentSharingBackground {
         await this.storage.deleteAnnotationPrivacyLevel(params)
     }
 
-    waitForSync: __DeprecatedContentSharingInterface['waitForSync'] = async () => {}
-
     getAnnotationSharingState: ContentSharingInterface['getAnnotationSharingState'] = async (
         params,
     ) => {

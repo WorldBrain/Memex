@@ -126,7 +126,6 @@ export interface __DeprecatedContentSharingInterface {
     areListsShared(options: {
         localListIds: number[]
     }): Promise<{ [listId: number]: boolean }>
-    waitForSync(): Promise<void>
 }
 
 export interface ContentSharingEvents {
