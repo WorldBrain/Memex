@@ -232,7 +232,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                 )}
                 {this.renderShareLinks()}
 
-                {this.props.listData.type === 'user-list' && (
+                {this.props.listData.type !== 'special-list' && (
                     <>
                         <SectionTitle>Edit Space</SectionTitle>
                         <EditArea>
