@@ -220,10 +220,12 @@ export class PageActivityIndicatorBackground {
 
     createFollowedList: PageActivityIndicatorStorage['createFollowedList'] = (
         data,
-    ) => this.storage.createFollowedList(data)
+        opts,
+    ) => this.storage.createFollowedList(data, opts)
     createFollowedListEntry: PageActivityIndicatorStorage['createFollowedListEntry'] = (
         data,
-    ) => this.storage.createFollowedListEntry(data)
+        opts,
+    ) => this.storage.createFollowedListEntry(data, opts)
     updateFollowedListEntryHasAnnotations: PageActivityIndicatorStorage['updateFollowedListEntryHasAnnotations'] = (
         data,
     ) => this.storage.updateFollowedListEntryHasAnnotations(data)
