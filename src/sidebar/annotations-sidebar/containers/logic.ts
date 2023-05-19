@@ -478,12 +478,13 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             lists: { $set: nextLists },
             listInstances: {
-                $set: fromPairs(
-                    normalizedStateToArray(nextLists).map((list) => [
-                        list.unifiedId,
-                        initListInstance(list),
-                    ]),
-                ),
+                $apply: (prev: SidebarContainerState['listInstances']) =>
+                    fromPairs(
+                        normalizedStateToArray(nextLists).map((list) => [
+                            list.unifiedId,
+                            prev[list.unifiedId] ?? initListInstance(list),
+                        ]),
+                    ),
             },
         })
     }
