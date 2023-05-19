@@ -30,7 +30,11 @@ export interface MigrationProps {
     localStorage: Storage.LocalStorageArea
     bgModules: Pick<
         BackgroundModules,
-        'readwise' | 'syncSettings' | 'personalCloud' | 'pageActivityIndicator'
+        | 'readwise'
+        | 'syncSettings'
+        | 'personalCloud'
+        | 'pageActivityIndicator'
+        | 'auth'
     >
     localExtSettingStore: SettingStore<LocalExtensionSettings>
     syncSettingsStore: SyncSettingsStore<'extension'>
@@ -58,6 +62,7 @@ export const migrations: Migrations = {
         bgModules,
         storex,
     }) => {
+        await bgModules.auth.authService.waitForAuthReady()
         await storex.backend.operation('deleteObjects', 'followedList', {})
         await storex.backend.operation('deleteObjects', 'followedListEntry', {})
         await bgModules.pageActivityIndicator.syncFollowedLists()
