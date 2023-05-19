@@ -3,11 +3,25 @@ import { COLLECTION_DEFINITIONS } from '@worldbrain/memex-common/lib/storage/mod
 import {
     StorageModule,
     StorageModuleConfig,
+    StorageModuleConstructorArgs,
 } from '@worldbrain/storex-pattern-modules'
 import type { FollowedList, FollowedListEntry } from './types'
 import { getFollowedListEntryIdentifier } from './utils'
 
+interface InvokeCloudSyncFlag {
+    /**
+     * NOTE: In most cases you don't want to be invoking cloud sync for the followedList and followedListEntry collections,
+     *  as they're not fully supported in the translation layer and there is a separate sync handled via logic in
+     *  the PageActivityIndicatorBackground class.
+     */
+    invokeCloudSync?: boolean
+}
+
 export default class PageActivityIndicatorStorage extends StorageModule {
+    constructor(private options: StorageModuleConstructorArgs) {
+        super(options)
+    }
+
     getConfig(): StorageModuleConfig {
         return {
             collections: COLLECTION_DEFINITIONS,
@@ -96,26 +110,33 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                         normalizedPageUrl: '$normalizedPageUrl:string',
                     },
                 },
-                deleteFollowedListEntries: {
-                    collection: 'followedListEntry',
-                    operation: 'deleteObjects',
-                    args: {
-                        followedList: '$followedList:string',
-                    },
-                },
             },
         }
     }
 
-    async createFollowedList(data: FollowedList): Promise<AutoPk> {
-        const { object } = await this.operation('createFollowedList', {
+    async createFollowedList(
+        data: FollowedList,
+        opts?: InvokeCloudSyncFlag,
+    ): Promise<AutoPk> {
+        const doc = {
             name: data.name,
             type: data.type,
             creator: data.creator,
             lastSync: data.lastSync,
             platform: data.platform,
             sharedList: data.sharedList,
-        })
+        }
+
+        if (opts?.invokeCloudSync) {
+            const { object } = await this.operation('createFollowedList', doc)
+            return object.id
+        }
+
+        const { object } = await this.options.storageManager.backend.operation(
+            'createObject',
+            'followedList',
+            doc,
+        )
         return object.id
     }
 
@@ -130,8 +151,9 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                     'updatedWhen' | 'createdWhen' | 'hasAnnotationsFromOthers'
                 >
             >,
+        opts?: InvokeCloudSyncFlag,
     ): Promise<AutoPk> {
-        const { object } = await this.operation('createFollowedListEntry', {
+        const doc = {
             creator: data.creator,
             entryTitle: data.entryTitle,
             followedList: data.followedList,
@@ -140,7 +162,21 @@ export default class PageActivityIndicatorStorage extends StorageModule {
             hasAnnotationsFromOthers: data.hasAnnotationsFromOthers ?? false,
             createdWhen: data.createdWhen ?? Date.now(),
             updatedWhen: data.updatedWhen ?? Date.now(),
-        })
+        }
+
+        if (opts?.invokeCloudSync) {
+            const { object } = await this.operation(
+                'createFollowedListEntry',
+                doc,
+            )
+            return object.id
+        }
+
+        const { object } = await this.options.storageManager.backend.operation(
+            'createObject',
+            'followedListEntry',
+            doc,
+        )
         return object.id
     }
 
@@ -249,11 +285,17 @@ export default class PageActivityIndicatorStorage extends StorageModule {
     async deleteFollowedListAndAllEntries(
         data: Pick<FollowedList, 'sharedList'>,
     ): Promise<void> {
+        // No personal cloud analog collection exists for followedListEntry, though there is for page-link followedLists.
+        //  Hence why we're bypassing the storex middleware for followedListEntry here but not for followedList
+        await this.options.storageManager.backend.operation(
+            'deleteObjects',
+            'followedListEntry',
+            {
+                followedList: data.sharedList,
+            },
+        )
         await this.operation('deleteFollowedList', {
             sharedList: data.sharedList,
-        })
-        await this.operation('deleteFollowedListEntries', {
-            followedList: data.sharedList,
         })
     }
 

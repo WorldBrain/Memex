@@ -830,22 +830,29 @@ export default class ContentSharingBackground {
             collabKey,
         })
 
-        await bgModules.pageActivityIndicator.createFollowedList({
-            creator,
-            name: listTitle,
-            sharedList: remoteListId,
-            type: SharedCollectionType.PageLink,
-        })
-        await bgModules.pageActivityIndicator.createFollowedListEntry({
-            creator,
-            normalizedPageUrl,
-            entryTitle: pageTitle,
-            followedList: remoteListId,
-            hasAnnotationsFromOthers: false,
-            sharedListEntry: remoteListEntryId,
-            createdWhen: now,
-            updatedWhen: now,
-        })
+        // NOTE: These calls to created followList and followedListEntry docs should trigger personal cloud sync upload
+        await bgModules.pageActivityIndicator.createFollowedList(
+            {
+                creator,
+                name: listTitle,
+                sharedList: remoteListId,
+                type: SharedCollectionType.PageLink,
+            },
+            { invokeCloudSync: true },
+        )
+        await bgModules.pageActivityIndicator.createFollowedListEntry(
+            {
+                creator,
+                normalizedPageUrl,
+                entryTitle: pageTitle,
+                followedList: remoteListId,
+                hasAnnotationsFromOthers: false,
+                sharedListEntry: remoteListEntryId,
+                createdWhen: now,
+                updatedWhen: now,
+            },
+            { invokeCloudSync: true },
+        )
 
         await this.options.backend.processListKey({
             type: SharedCollectionType.PageLink,

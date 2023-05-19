@@ -299,18 +299,10 @@ export class PageActivityIndicatorBackground {
         for (const sharedList of sharedLists) {
             if (!existingFollowedListsLookup.get(sharedList.id)) {
                 const data = sharedListToFollowedList(sharedList)
-                await this.deps.storageManager.backend.operation(
-                    'createObject',
-                    'followedList',
-                    {
-                        name: data.name,
-                        type: data.type,
-                        creator: data.creator,
-                        lastSync: data.lastSync,
-                        platform: data.platform,
-                        sharedList: data.sharedList,
-                    },
-                )
+                // NOTE: This created followedList should NOT invoke cloud sync or things will go wrong
+                await this.storage.createFollowedList(data, {
+                    invokeCloudSync: false,
+                })
             }
         }
     }
@@ -384,21 +376,11 @@ export class PageActivityIndicatorBackground {
                         },
                         { hasAnnotationsFromOthers },
                     )
-                    await this.deps.storageManager.backend.operation(
-                        'createObject',
-                        'followedListEntry',
-                        {
-                            creator: data.creator,
-                            entryTitle: data.entryTitle,
-                            followedList: data.followedList,
-                            sharedListEntry: data.sharedListEntry,
-                            normalizedPageUrl: data.normalizedPageUrl,
-                            hasAnnotationsFromOthers:
-                                data.hasAnnotationsFromOthers ?? false,
-                            createdWhen: data.createdWhen ?? Date.now(),
-                            updatedWhen: data.updatedWhen ?? Date.now(),
-                        },
-                    )
+
+                    // NOTE: This created followedListEntry should NOT invoke cloud sync or things will go wrong
+                    await this.storage.createFollowedListEntry(data, {
+                        invokeCloudSync: false,
+                    })
                 } else if (
                     localFollowedListEntry.hasAnnotationsFromOthers !==
                     hasAnnotationsFromOthers
