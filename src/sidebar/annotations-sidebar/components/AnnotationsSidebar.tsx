@@ -225,6 +225,15 @@ export class AnnotationsSidebar extends React.Component<
         AIsuggestions: [],
     }
 
+    private maybeCreateContextBtnRef({
+        unifiedId,
+    }: Pick<UnifiedList, 'unifiedId'>): void {
+        if (this.spaceContextBtnRefs[unifiedId]) {
+            return
+        }
+        this.spaceContextBtnRefs[unifiedId] = React.createRef()
+    }
+
     async componentDidMount() {
         //setLocalStorage(SHOW_ISOLATED_VIEW_KEY, true)
         const isolatedViewNotifVisible = await getLocalStorage(
@@ -838,22 +847,16 @@ export class AnnotationsSidebar extends React.Component<
                     </ButtonContainer>
                 </FollowedListRow>
                 {this.renderListAnnotations(listData.unifiedId)}
-                {this.renderContextMenu(
-                    listData,
-                    this.spaceContextBtnRefs[listData.unifiedId],
-                )}
+                {this.renderContextMenu(listData)}
             </FollowedListNotesContainer>
         )
     }
 
-    private renderContextMenu(
-        listData: UnifiedList,
-        ref?: React.RefObject<HTMLDivElement>,
-    ) {
+    private renderContextMenu(listData: UnifiedList) {
         if (this.props.activeListContextMenuId !== listData.unifiedId) {
             return
         }
-
+        const ref = this.spaceContextBtnRefs[listData.unifiedId]
         return (
             <PopoutBox
                 strategy="fixed"
@@ -926,16 +929,10 @@ export class AnnotationsSidebar extends React.Component<
                     {pageLinkLists.length > 0 && (
                         <SpaceTypeSectionContainer>
                             {pageLinkLists.map((listData) => {
-                                const listInstance =
-                                    listInstances[listData.unifiedId]
-
-                                this.spaceContextBtnRefs[
-                                    listData.unifiedId
-                                ] = React.createRef<HTMLDivElement>()
-
+                                this.maybeCreateContextBtnRef(listData)
                                 return this.renderSpacesItem(
                                     listData,
-                                    listInstance,
+                                    listInstances[listData.unifiedId],
                                 )
                             })}
                         </SpaceTypeSectionContainer>
@@ -949,16 +946,10 @@ export class AnnotationsSidebar extends React.Component<
                     {myLists.length > 0 ? (
                         <SpaceTypeSectionContainer>
                             {myLists.map((listData) => {
-                                const listInstance =
-                                    listInstances[listData.unifiedId]
-
-                                this.spaceContextBtnRefs[
-                                    listData.unifiedId
-                                ] = React.createRef<HTMLDivElement>()
-
+                                this.maybeCreateContextBtnRef(listData)
                                 return this.renderSpacesItem(
                                     listData,
-                                    listInstance,
+                                    listInstances[listData.unifiedId],
                                 )
                             })}
                         </SpaceTypeSectionContainer>
@@ -972,15 +963,12 @@ export class AnnotationsSidebar extends React.Component<
                     </SpaceTypeSectionHeader>
                     {followedLists.length > 0 ? (
                         <SpaceTypeSectionContainer>
-                            {followedLists.map((listData) => {
-                                const listInstance =
-                                    listInstances[listData.unifiedId]
-
-                                return this.renderSpacesItem(
+                            {followedLists.map((listData) =>
+                                this.renderSpacesItem(
                                     listData,
-                                    listInstance,
-                                )
-                            })}
+                                    listInstances[listData.unifiedId],
+                                ),
+                            )}
                         </SpaceTypeSectionContainer>
                     ) : undefined}
                 </SpaceTypeSection>
@@ -992,15 +980,12 @@ export class AnnotationsSidebar extends React.Component<
                     </SpaceTypeSectionHeader>
                     {joinedLists.length > 0 ? (
                         <SpaceTypeSectionContainer>
-                            {joinedLists.map((listData) => {
-                                const listInstance =
-                                    listInstances[listData.unifiedId]
-
-                                return this.renderSpacesItem(
+                            {joinedLists.map((listData) =>
+                                this.renderSpacesItem(
                                     listData,
-                                    listInstance,
-                                )
-                            })}
+                                    listInstances[listData.unifiedId],
+                                ),
+                            )}
                         </SpaceTypeSectionContainer>
                     ) : undefined}
                 </SpaceTypeSection>

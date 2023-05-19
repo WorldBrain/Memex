@@ -94,7 +94,10 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             <ShareSectionContainer onClick={wrapClick}>
                 {this.state.inviteLinks.map(
                     ({ link, showCopyMsg, roleID }, linkIndex) => (
-                        <LinkAndRoleBox viewportBreakpoint="normal">
+                        <LinkAndRoleBox
+                            key={roleID}
+                            viewportBreakpoint="normal"
+                        >
                             <PermissionArea>
                                 <TooltipBox
                                     placement={'right'}
