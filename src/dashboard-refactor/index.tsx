@@ -196,25 +196,7 @@ export class DashboardContainer extends StatefulUIElement<
 
     // TODO: move this to logic class - main reason it exists separately is that it needs to return the created list ID
     private async createNewListViaPicker(name: string): Promise<number> {
-        const localListId = Date.now()
-        const { unifiedId } = this.props.annotationsCache.addList({
-            name,
-            type: 'user-list',
-            localId: localListId,
-            unifiedAnnotationIds: [],
-            hasRemoteAnnotationsToLoad: false,
-            creator: this.state.currentUser
-                ? { type: 'user-reference', id: this.state.currentUser.id }
-                : undefined,
-        })
-
-        this.processMutation({
-            listsSidebar: {
-                filteredListIds: { $unshift: [unifiedId] },
-            },
-        })
-        await this.props.listsBG.createCustomList({ name, id: localListId })
-        return localListId
+        return this.props.listsBG.createCustomList({ name })
     }
 
     private renderFiltersBar() {
