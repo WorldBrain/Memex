@@ -65,6 +65,7 @@ export const features = {} as any
 export const featuresBeta = remoteFunctions.featuresBeta
 export const tags = remoteFunctions.tags
 export const collections = remoteFunctions.collections
+export const pageActivityIndicator = remoteFunctions.pageActivityIndicator
 export const copyPaster = remoteFunctions.copyPaster
 export const readable = remoteFunctions.readablePageArchives
 export const contentSharing = remoteFunctions.contentSharing

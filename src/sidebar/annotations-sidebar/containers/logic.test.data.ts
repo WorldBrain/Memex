@@ -26,6 +26,8 @@ import type {
     FollowedListEntry,
 } from 'src/page-activity-indicator/background/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import { createPageLinkListTitle } from 'src/content-sharing/utils'
 
 export const COMMENT_1 = 'This is a test comment'
 export const TAB_URL_1 = 'https://test.com'
@@ -201,6 +203,14 @@ export const LOCAL_LISTS: PageList[] = [
         isDeletable: true,
         createdAt: new Date('2022-05-27'),
     },
+    {
+        id: 7,
+        name: createPageLinkListTitle(new Date('2023-05-01')),
+        isNestable: true,
+        isDeletable: true,
+        type: SharedCollectionType.PageLink,
+        createdAt: new Date('2023-05-01'),
+    },
 ]
 
 export const LIST_DESCRIPTIONS: ListDescription[] = [
@@ -275,6 +285,8 @@ export const SHARED_LIST_IDS = [
     'remote-list-id-2',
     'remote-list-id-3',
     'remote-list-id-4',
+    'remote-list-id-5',
+    'remote-list-id-6',
 ]
 
 export const TEST_LIST_METADATA: SharedListMetadata[] = [
@@ -289,6 +301,10 @@ export const TEST_LIST_METADATA: SharedListMetadata[] = [
     {
         localId: LOCAL_LISTS[2].id,
         remoteId: SHARED_LIST_IDS[2],
+    },
+    {
+        localId: LOCAL_LISTS[6].id,
+        remoteId: SHARED_LIST_IDS[4],
     },
 ]
 
@@ -351,6 +367,15 @@ export const SHARED_ANNOTATIONS: Array<
         updatedWhen: ANNOT_4.lastEdited.getTime(),
         uploadedWhen: 11111,
     },
+    {
+        id: '6',
+        creator: CREATOR_2.id,
+        normalizedPageUrl: normalizeUrl(TAB_URL_1),
+        comment: 'test comment 6',
+        createdWhen: new Date('2023-05-02').getTime(),
+        updatedWhen: new Date('2023-05-02').getTime(),
+        uploadedWhen: 11111,
+    },
 ]
 
 export const FOLLOWED_LISTS: FollowedList[] = [
@@ -378,10 +403,24 @@ export const FOLLOWED_LISTS: FollowedList[] = [
         name: 'test followed-only list',
         lastSync: new Date('2022-12-22').getTime(),
     },
+    {
+        sharedList: SHARED_LIST_IDS[4],
+        creator: CREATOR_1.id,
+        name: 'own page link list',
+        lastSync: new Date('2023-05-01').getTime(),
+    },
+    {
+        sharedList: SHARED_LIST_IDS[5],
+        creator: CREATOR_2.id,
+        name: 'followed-only page link list',
+        lastSync: new Date('2023-05-02').getTime(),
+        type: SharedCollectionType.PageLink,
+    },
 ]
 
 export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
     {
+        sharedListEntry: 'shared-list-entry-id-1',
         hasAnnotationsFromOthers: false,
         creator: CREATOR_1.id,
         entryTitle: TAB_TITLE_1,
@@ -391,6 +430,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2022-12-22').getTime(),
     },
     {
+        sharedListEntry: 'shared-list-entry-id-2',
         hasAnnotationsFromOthers: true,
         creator: CREATOR_2.id,
         entryTitle: TAB_TITLE_2,
@@ -400,6 +440,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2022-12-22').getTime(),
     },
     {
+        sharedListEntry: 'shared-list-entry-id-3',
         hasAnnotationsFromOthers: true,
         creator: CREATOR_2.id,
         entryTitle: TAB_TITLE_1,
@@ -409,6 +450,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2022-12-22').getTime(),
     },
     {
+        sharedListEntry: 'shared-list-entry-id-4',
         hasAnnotationsFromOthers: false,
         creator: CREATOR_1.id,
         entryTitle: TAB_TITLE_2,
@@ -418,6 +460,7 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         updatedWhen: new Date('2022-12-22').getTime(),
     },
     {
+        sharedListEntry: 'shared-list-entry-id-5',
         hasAnnotationsFromOthers: true,
         creator: CREATOR_1.id,
         entryTitle: TAB_TITLE_1,
@@ -425,6 +468,26 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
         normalizedPageUrl: normalizeUrl(TAB_URL_1),
         createdWhen: new Date('2022-12-22').getTime(),
         updatedWhen: new Date('2022-12-22').getTime(),
+    },
+    {
+        sharedListEntry: 'shared-list-entry-id-6',
+        hasAnnotationsFromOthers: false,
+        creator: CREATOR_1.id,
+        entryTitle: TAB_TITLE_1,
+        followedList: SHARED_LIST_IDS[4],
+        normalizedPageUrl: normalizeUrl(TAB_URL_1),
+        createdWhen: new Date('2023-05-01').getTime(),
+        updatedWhen: new Date('2023-05-01').getTime(),
+    },
+    {
+        sharedListEntry: 'shared-list-entry-id-7',
+        hasAnnotationsFromOthers: true,
+        creator: CREATOR_2.id,
+        entryTitle: TAB_TITLE_1,
+        followedList: SHARED_LIST_IDS[5],
+        normalizedPageUrl: normalizeUrl(TAB_URL_1),
+        createdWhen: new Date('2023-05-02').getTime(),
+        updatedWhen: new Date('2023-05-02').getTime(),
     },
 ]
 
@@ -485,5 +548,15 @@ export const SHARED_ANNOTATION_LIST_ENTRIES: Array<
         createdWhen: new Date('2022-12-22').getTime(),
         updatedWhen: new Date('2022-12-22').getTime(),
         uploadedWhen: new Date('2022-12-22').getTime(),
+    },
+    {
+        id: '6',
+        creator: CREATOR_2.id,
+        sharedList: SHARED_LIST_IDS[5],
+        normalizedPageUrl: normalizeUrl(TAB_URL_1),
+        sharedAnnotation: SHARED_ANNOTATIONS[5].id,
+        createdWhen: new Date('2023-05-02').getTime(),
+        updatedWhen: new Date('2023-05-02').getTime(),
+        uploadedWhen: new Date('2023-05-02').getTime(),
     },
 ]

@@ -7,6 +7,7 @@ import type {
     PageAnnotationsCacheEvents,
     UnifiedAnnotation,
     UnifiedAnnotationForCache,
+    UnifiedListForCache,
 } from './types'
 
 type EmittedEvent = { event: keyof PageAnnotationsCacheEvents; args: any }
@@ -566,6 +567,10 @@ describe('Page annotations cache tests', () => {
                 ...testLists[2],
                 unifiedId: unifiedIdsB[1],
             },
+            [unifiedIdsB[2]]: {
+                ...testLists[3],
+                unifiedId: unifiedIdsB[2],
+            },
         })
         expect(emittedEvents).toEqual(expectedEvents)
     })
@@ -644,6 +649,7 @@ describe('Page annotations cache tests', () => {
 
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
             [testLists[2].remoteId, testLists[2].unifiedId],
+            [testLists[3].remoteId, testLists[3].unifiedId],
         ])
 
         const remoteIdA = 'test-remote-id-b'
@@ -651,6 +657,7 @@ describe('Page annotations cache tests', () => {
         const remoteIdD = 'test-remote-id-a'
 
         const { unifiedId: listIdD } = cache.addList({
+            type: 'user-list',
             remoteId: remoteIdD,
             name: 'new shared list',
             unifiedAnnotationIds: [],
@@ -658,12 +665,14 @@ describe('Page annotations cache tests', () => {
         })
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
             [testLists[2].remoteId, testLists[2].unifiedId],
+            [testLists[3].remoteId, testLists[3].unifiedId],
             [remoteIdD, listIdD],
         ])
 
         cache.updateList({ ...testLists[0], remoteId: remoteIdA })
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
             [testLists[2].remoteId, testLists[2].unifiedId],
+            [testLists[3].remoteId, testLists[3].unifiedId],
             [remoteIdD, listIdD],
             [remoteIdA, testLists[0].unifiedId],
         ])
@@ -671,6 +680,7 @@ describe('Page annotations cache tests', () => {
         cache.updateList({ ...testLists[1], remoteId: remoteIdB })
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
             [testLists[2].remoteId, testLists[2].unifiedId],
+            [testLists[3].remoteId, testLists[3].unifiedId],
             [remoteIdD, listIdD],
             [remoteIdA, testLists[0].unifiedId],
             [remoteIdB, testLists[1].unifiedId],
@@ -678,6 +688,7 @@ describe('Page annotations cache tests', () => {
 
         cache.removeList(testLists[2])
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
+            [testLists[3].remoteId, testLists[3].unifiedId],
             [remoteIdD, listIdD],
             [remoteIdA, testLists[0].unifiedId],
             [remoteIdB, testLists[1].unifiedId],
@@ -685,12 +696,14 @@ describe('Page annotations cache tests', () => {
 
         cache.removeList({ unifiedId: listIdD })
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
+            [testLists[3].remoteId, testLists[3].unifiedId],
             [remoteIdA, testLists[0].unifiedId],
             [remoteIdB, testLists[1].unifiedId],
         ])
 
         cache.removeList(testLists[1])
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
+            [testLists[3].remoteId, testLists[3].unifiedId],
             [remoteIdA, testLists[0].unifiedId],
         ])
     })
@@ -757,5 +770,77 @@ describe('Page annotations cache tests', () => {
 
         cache.removeAnnotation({ unifiedId: idB })
         expect([...cache['remoteAnnotIdsToCacheIds']]).toEqual([])
+    })
+
+    it('when adding a new shared list, any existing public annotations should automatically be added to that list', () => {
+        const { cache } = setupTest()
+        const testAnnotations = TEST_DATA.ANNOTATIONS()
+        const testLists = TEST_DATA.LISTS()
+
+        cache.setLists(testLists)
+        cache.setAnnotations(
+            reshapeUnifiedAnnotsForCaching(testAnnotations, testLists),
+        )
+
+        const annotA: UnifiedAnnotationForCache = {
+            normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
+            privacyLevel: AnnotationPrivacyLevels.SHARED,
+            remoteId: 'remote-annot-id-2000',
+            comment: 'test public annot 1',
+            creator: TEST_DATA.USER_1,
+            unifiedListIds: [],
+            localListIds: [],
+            createdWhen: 4,
+            lastEdited: 4,
+        }
+        const annotB: UnifiedAnnotationForCache = {
+            normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
+            privacyLevel: AnnotationPrivacyLevels.SHARED,
+            remoteId: 'remote-annot-id-2001',
+            comment: 'test public annot 2',
+            creator: TEST_DATA.USER_2,
+            unifiedListIds: [],
+            localListIds: [],
+            createdWhen: 4,
+            lastEdited: 4,
+        }
+        const annotC: UnifiedAnnotationForCache = {
+            normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
+            privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+            remoteId: 'remote-annot-id-2002',
+            comment: 'test private annot',
+            creator: TEST_DATA.USER_1,
+            unifiedListIds: [],
+            localListIds: [],
+            createdWhen: 4,
+            lastEdited: 4,
+        }
+
+        const { unifiedId: annotAId } = cache.addAnnotation(annotA)
+        const { unifiedId: annotBId } = cache.addAnnotation(annotB)
+        const { unifiedId: annotCId } = cache.addAnnotation(annotC)
+
+        const testList: UnifiedListForCache<'page-link'> = {
+            type: 'page-link',
+            name: 'test list',
+            normalizedPageUrl: TEST_DATA.NORMALIZED_PAGE_URL_1,
+            sharedListEntryId: 'shared-list-entry-id-2000',
+            hasRemoteAnnotationsToLoad: false,
+            unifiedAnnotationIds: [],
+            creator: { ...TEST_DATA.USER_1 },
+            remoteId: 'remote-list-id-2000',
+            collabKey: 'test-collab-key-1',
+            localId: 2000,
+        }
+
+        expect(cache.getListByLocalId(testList.localId)).toEqual(null)
+
+        cache.addList(testList)
+
+        expect(cache.getListByLocalId(testList.localId)).toEqual({
+            unifiedId: expect.anything(),
+            ...testList,
+            unifiedAnnotationIds: [annotAId], // Only the public one created by the same user as the list creator should show up
+        })
     })
 })

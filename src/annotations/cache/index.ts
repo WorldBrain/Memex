@@ -127,6 +127,17 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
         if (list.remoteId != null) {
             this.remoteListIdsToCacheIds.set(list.remoteId, unifiedId)
+
+            // Ensure each public annot gets a ref to this list
+            for (const annotation of normalizedStateToArray(this.annotations)) {
+                if (
+                    annotation.privacyLevel < AnnotationPrivacyLevels.SHARED ||
+                    annotation.creator?.id !== list.creator?.id
+                ) {
+                    continue
+                }
+                list.unifiedAnnotationIds.push(annotation.unifiedId)
+            }
         }
 
         // Ensure each annot gets a ref back to this list
@@ -141,7 +152,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             cachedAnnot.unifiedListIds.unshift(unifiedId)
         })
 
-        return { ...list, unifiedId }
+        return { ...list, unifiedId } as UnifiedList
     }
 
     private prepareAnnotationForCaching = (

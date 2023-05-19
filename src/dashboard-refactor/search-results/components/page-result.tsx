@@ -13,11 +13,8 @@ import type {
     PageResult,
     PagePickerProps,
 } from '../types'
-import TagPicker from 'src/tags/ui/TagPicker'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import Margin from 'src/dashboard-refactor/components/Margin'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import AllNotesShareMenu, {
     Props as ShareMenuProps,
 } from 'src/overview/sharing/AllNotesShareMenu'
@@ -28,12 +25,14 @@ import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/l
 import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
 export interface Props
     extends Omit<PageData, 'lists'>,
         PageResult,
         PageInteractionProps,
         PagePickerProps {
+    annotationsCache: PageAnnotationsCacheInterface
     getListDetailsById: ListDetailsGetter
     isSearchFilteredByList: boolean
     filteredbyListID?: number
@@ -122,6 +121,7 @@ export default class PageResultView extends PureComponent<Props> {
                     strategy={'fixed'}
                 >
                     <CollectionPicker
+                        annotationsCache={this.props.annotationsCache}
                         selectEntry={(listId) =>
                             this.props.onListPickerUpdate({
                                 added: listId,
@@ -154,6 +154,7 @@ export default class PageResultView extends PureComponent<Props> {
                     strategy={'fixed'}
                 >
                     <CollectionPicker
+                        annotationsCache={this.props.annotationsCache}
                         selectEntry={(listId) =>
                             this.props.onListPickerUpdate({
                                 added: listId,

@@ -5,16 +5,25 @@ import type { ContentSharingBackend } from '@worldbrain/memex-common/lib/content
 import {
     makeAnnotationPrivacyLevel,
     getAnnotationPrivacyState,
+    extractIdsFromSinglePageShareUrl,
+    createPageLinkListTitle,
 } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import type CustomListBG from 'src/custom-lists/background'
 import type { AuthBackground } from 'src/authentication/background'
 import type { Analytics } from 'src/analytics/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { getNoteShareUrl } from 'src/content-sharing/utils'
-import type { RemoteEventEmitter } from 'src/util/webextensionRPC'
+import {
+    makeRemotelyCallable,
+    RemoteEventEmitter,
+} from 'src/util/webextensionRPC'
 import type { Services } from 'src/services/types'
 import type { ServerStorageModules } from 'src/storage/types'
-import type { ContentSharingInterface } from './types'
+import type {
+    ContentSharingInterface,
+    RemoteContentSharingByTabsInterface,
+    __DeprecatedContentSharingInterface,
+} from './types'
 import { ContentSharingClientStorage } from './storage'
 import type { GenerateServerID } from '../../background-script/types'
 import type AnnotationStorage from 'src/annotations/background/storage'
@@ -22,6 +31,9 @@ import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/t
 import AnnotationSharingService from '@worldbrain/memex-common/lib/content-sharing/service/annotation-sharing'
 import ListSharingService from '@worldbrain/memex-common/lib/content-sharing/service/list-sharing'
 import type { BrowserSettingsStore } from 'src/util/settings'
+import type { BackgroundModules } from 'src/background-script/setup'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 
 export interface LocalContentSharingSettings {
     remotePageIdLookup: {
@@ -32,8 +44,12 @@ export interface LocalContentSharingSettings {
 export default class ContentSharingBackground {
     static ONE_WEEK_MS = 604800000
 
+    private pageLinkCreationPromises: {
+        [fullPageUrl: string]: Promise<void>
+    } = {}
     private annotationSharingService: AnnotationSharingService
     private listSharingService: ListSharingService
+    remoteFunctionsByTab: RemoteContentSharingByTabsInterface<'provider'>
     remoteFunctions: ContentSharingInterface
     storage: ContentSharingClientStorage
 
@@ -41,14 +57,19 @@ export default class ContentSharingBackground {
         public options: {
             storageManager: StorageManager
             backend: ContentSharingBackend
-            customListsBG: CustomListBG
-            annotations: AnnotationStorage
-            auth: AuthBackground
             analytics: Analytics
             servicesPromise: Promise<Pick<Services, 'contentSharing'>>
             remoteEmitter: RemoteEventEmitter<'contentSharing'>
             contentSharingSettingsStore: BrowserSettingsStore<
                 LocalContentSharingSettings
+            >
+            getBgModules: () => Pick<
+                BackgroundModules,
+                | 'auth'
+                | 'pages'
+                | 'customLists'
+                | 'directLinking'
+                | 'pageActivityIndicator'
             >
             captureException?: (e: Error) => void
             getServerStorage: () => Promise<
@@ -65,47 +86,71 @@ export default class ContentSharingBackground {
             storage: this.storage,
             generateServerId: options.generateServerId,
             addToListSuggestions: (listId) =>
-                options.customListsBG.updateListSuggestionsCache({
+                options.getBgModules().customLists.updateListSuggestionsCache({
                     added: listId,
                 }),
             listStorage: {
                 insertPageToList: (e) =>
-                    options.customListsBG.storage.insertPageToList({
-                        listId: e.listId,
-                        pageUrl: e.normalizedPageUrl,
-                        fullUrl: e.fullPageUrl,
-                    }),
+                    options
+                        .getBgModules()
+                        .customLists.storage.insertPageToList({
+                            listId: e.listId,
+                            pageUrl: e.normalizedPageUrl,
+                            fullUrl: e.fullPageUrl,
+                        }),
                 getEntriesForPage: (normalizedPageUrl) =>
-                    options.customListsBG.storage.fetchPageListEntriesByUrl({
-                        normalizedPageUrl,
-                    }),
+                    options
+                        .getBgModules()
+                        .customLists.storage.fetchPageListEntriesByUrl({
+                            normalizedPageUrl,
+                        }),
             },
             annotationStorage: {
                 getAnnotation: (annotationUrl) =>
-                    options.annotations.getAnnotationByPk(annotationUrl),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.getAnnotationByPk(
+                            annotationUrl,
+                        ),
                 getAnnotations: (annotationUrls) =>
-                    options.annotations.getAnnotations(annotationUrls),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.getAnnotations(
+                            annotationUrls,
+                        ),
                 getEntriesForAnnotation: (url) =>
-                    options.annotations.findListEntriesByUrl({ url }),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.findListEntriesByUrl({
+                            url,
+                        }),
                 getEntriesForAnnotations: (annotationUrls) =>
-                    options.annotations.findListEntriesByUrls({
-                        annotationUrls,
-                    }),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.findListEntriesByUrls({
+                            annotationUrls,
+                        }),
                 ensureAnnotationInList: (entry) =>
-                    options.annotations.ensureAnnotInList({
-                        listId: entry.listId,
-                        url: entry.annotationUrl,
-                    }),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.ensureAnnotInList({
+                            listId: entry.listId,
+                            url: entry.annotationUrl,
+                        }),
                 insertAnnotationToList: async (entry) =>
-                    options.annotations.insertAnnotToList({
-                        listId: entry.listId,
-                        url: entry.annotationUrl,
-                    }),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.insertAnnotToList({
+                            listId: entry.listId,
+                            url: entry.annotationUrl,
+                        }),
                 removeAnnotationFromList: async (entry) =>
-                    options.annotations.removeAnnotFromList({
-                        listId: entry.listId,
-                        url: entry.annotationUrl,
-                    }),
+                    options
+                        .getBgModules()
+                        .directLinking.annotationStorage.removeAnnotFromList({
+                            listId: entry.listId,
+                            url: entry.annotationUrl,
+                        }),
             },
         })
 
@@ -118,43 +163,66 @@ export default class ContentSharingBackground {
                 annotationSharingService: this.annotationSharingService,
                 listStorage: {
                     getList: (listId) =>
-                        options.customListsBG.storage.fetchListById(listId),
+                        options
+                            .getBgModules()
+                            .customLists.storage.fetchListById(listId),
                     getListEntriesForPages: ({ listId, normalizedPageUrls }) =>
-                        options.customListsBG.storage.fetchListPageEntriesByUrls(
-                            {
+                        options
+                            .getBgModules()
+                            .customLists.storage.fetchListPageEntriesByUrls({
                                 listId,
                                 normalizedPageUrls,
-                            },
-                        ),
+                            }),
                     insertPageToList: ({
                         listId,
                         fullPageUrl,
                         normalizedPageUrl,
                     }) =>
-                        options.customListsBG.storage.insertPageToList({
-                            listId,
-                            fullUrl: fullPageUrl,
-                            pageUrl: normalizedPageUrl,
-                        }),
+                        options
+                            .getBgModules()
+                            .customLists.storage.insertPageToList({
+                                listId,
+                                fullUrl: fullPageUrl,
+                                pageUrl: normalizedPageUrl,
+                            }),
                 },
                 annotationStorage: {
                     getAnnotations: (annotationUrls) =>
-                        options.annotations.getAnnotations(annotationUrls),
+                        options
+                            .getBgModules()
+                            .directLinking.annotationStorage.getAnnotations(
+                                annotationUrls,
+                            ),
                     getEntriesByList: (listId) =>
-                        options.annotations.findListEntriesByList({ listId }),
+                        options
+                            .getBgModules()
+                            .directLinking.annotationStorage.findListEntriesByList(
+                                { listId },
+                            ),
                     insertAnnotationToList: async (entry) =>
-                        options.annotations.insertAnnotToList({
-                            listId: entry.listId,
-                            url: entry.annotationUrl,
-                        }),
+                        options
+                            .getBgModules()
+                            .directLinking.annotationStorage.insertAnnotToList({
+                                listId: entry.listId,
+                                url: entry.annotationUrl,
+                            }),
                     removeAnnotationFromList: async (entry) =>
-                        options.annotations.removeAnnotFromList({
-                            listId: entry.listId,
-                            url: entry.annotationUrl,
-                        }),
+                        options
+                            .getBgModules()
+                            .directLinking.annotationStorage.removeAnnotFromList(
+                                {
+                                    listId: entry.listId,
+                                    url: entry.annotationUrl,
+                                },
+                            ),
                 },
             })
         })
+
+        this.remoteFunctionsByTab = {
+            schedulePageLinkCreation: this.schedulePageLinkCreation,
+            waitForPageLinkCreation: this.waitForPageLinkCreation,
+        }
 
         this.remoteFunctions = {
             getExistingKeyLinksForList: async (...args) => {
@@ -169,8 +237,6 @@ export default class ContentSharingBackground {
             shareAnnotation: this.shareAnnotation,
             shareAnnotations: this.shareAnnotations,
             executePendingActions: this.executePendingActions.bind(this),
-            shareAnnotationsToAllLists: this.shareAnnotationsToAllLists,
-            unshareAnnotationsFromAllLists: this.unshareAnnotationsFromAllLists,
             shareAnnotationToSomeLists: this.shareAnnotationToSomeLists,
             unshareAnnotationFromList: this.unshareAnnotationFromList,
             unshareAnnotations: this.unshareAnnotations,
@@ -180,7 +246,6 @@ export default class ContentSharingBackground {
                 this,
             ),
             setAnnotationPrivacyLevel: this.setAnnotationPrivacyLevel,
-            deleteAnnotationPrivacyLevel: this.deleteAnnotationPrivacyLevel,
             generateRemoteAnnotationId: async () =>
                 this.generateRemoteAnnotationId(),
             getRemoteListId: async (callOptions) => {
@@ -203,32 +268,32 @@ export default class ContentSharingBackground {
                     localIds: callOptions.annotationUrls,
                 })
             },
-            areListsShared: async (callOptions) => {
-                return this.storage.areListsShared({
-                    localIds: callOptions.localListIds,
-                })
-            },
             getAnnotationSharingState: this.getAnnotationSharingState,
             getAnnotationSharingStates: this.getAnnotationSharingStates,
-            getAllRemoteLists: this.getAllRemoteLists,
-            waitForSync: this.waitForSync,
-            suggestSharedLists: this.suggestSharedLists,
-            unshareAnnotation: this.unshareAnnotation,
-            deleteAnnotationShare: this.deleteAnnotationShare,
-            canWriteToSharedListRemoteId: this.canWriteToSharedListRemoteId,
-            canWriteToSharedList: this.canWriteToSharedList,
-            // TODO: properly implement these 3 (via listKeys service)
-            generateKeyLink: async () => {
-                return { link: '', roleID: SharedListRoleID.Commenter }
-            },
-            hasCurrentKey: () => false,
-            processCurrentKey: async () => {
-                return { result: 'denied' }
-            },
+            // The following are all old RPCs that aren't used anymore, though their implementations still exist
+            // shareAnnotationsToAllLists: this.shareAnnotationsToAllLists,
+            // unshareAnnotationsFromAllLists: this.unshareAnnotationsFromAllLists,
+            // areListsShared: async (callOptions) => {
+            //     return this.storage.areListsShared({
+            //         localIds: callOptions.localListIds,
+            //     })
+            // },
+            // deleteAnnotationPrivacyLevel: this.deleteAnnotationPrivacyLevel,
+            // getAllRemoteLists: this.getAllRemoteLists,
+            // waitForSync: this.waitForSync,
+            // suggestSharedLists: this.suggestSharedLists,
+            // unshareAnnotation: this.unshareAnnotation,
+            // deleteAnnotationShare: this.deleteAnnotationShare,
+            // canWriteToSharedListRemoteId: this.canWriteToSharedListRemoteId,
+            // canWriteToSharedList: this.canWriteToSharedList,
         }
     }
 
-    async setup() {}
+    setupRemoteFunctions() {
+        makeRemotelyCallable(this.remoteFunctionsByTab, {
+            insertExtraArg: true,
+        })
+    }
 
     async executePendingActions() {}
 
@@ -250,7 +315,7 @@ export default class ContentSharingBackground {
         return getNoteShareUrl({ remoteAnnotationId })
     }
 
-    getAllRemoteLists: ContentSharingInterface['getAllRemoteLists'] = async () => {
+    getAllRemoteLists: __DeprecatedContentSharingInterface['getAllRemoteLists'] = async () => {
         const remoteListIdsDict = await this.storage.getAllRemoteListIds()
         const remoteListData: Array<{
             localId: number
@@ -259,9 +324,9 @@ export default class ContentSharingBackground {
         }> = []
 
         for (const localId of Object.keys(remoteListIdsDict).map(Number)) {
-            const list = await this.options.customListsBG.storage.fetchListById(
-                localId,
-            )
+            const list = await this.options
+                .getBgModules()
+                .customLists.storage.fetchListById(localId)
             remoteListData.push({
                 localId,
                 remoteId: remoteListIdsDict[localId],
@@ -320,7 +385,7 @@ export default class ContentSharingBackground {
         return { sharingStates: await this.getAnnotationSharingStates(options) }
     }
 
-    shareAnnotationsToAllLists: ContentSharingInterface['shareAnnotationsToAllLists'] = async (
+    shareAnnotationsToAllLists: __DeprecatedContentSharingInterface['shareAnnotationsToAllLists'] = async (
         options,
     ) => {
         const allMetadata = await this.storage.getRemoteAnnotationMetadata({
@@ -383,8 +448,9 @@ export default class ContentSharingBackground {
     ensureRemotePageId: ContentSharingInterface['ensureRemotePageId'] = async (
         normalizedPageUrl,
     ) => {
-        const userId = (await this.options.auth.authService.getCurrentUser())
-            ?.id
+        const userId = (
+            await this.options.getBgModules().auth.authService.getCurrentUser()
+        )?.id
         if (!userId) {
             throw new Error(
                 `Tried to execute sharing action without being authenticated`,
@@ -420,7 +486,7 @@ export default class ContentSharingBackground {
         return remotePageId
     }
 
-    unshareAnnotationsFromAllLists: ContentSharingInterface['unshareAnnotationsFromAllLists'] = async (
+    unshareAnnotationsFromAllLists: __DeprecatedContentSharingInterface['unshareAnnotationsFromAllLists'] = async (
         options,
     ) => {
         const sharingState = await this.annotationSharingService.removeAnnotationFromAllLists(
@@ -491,7 +557,7 @@ export default class ContentSharingBackground {
         return { sharingStates: await this.getAnnotationSharingStates(options) }
     }
 
-    unshareAnnotation: ContentSharingInterface['unshareAnnotation'] = async (
+    unshareAnnotation: __DeprecatedContentSharingInterface['unshareAnnotation'] = async (
         options,
     ) => {
         const privacyLevelObject = await this.storage.findAnnotationPrivacyLevel(
@@ -521,7 +587,7 @@ export default class ContentSharingBackground {
     }
 
     // OLD direct linking method
-    deleteAnnotationShare: ContentSharingInterface['deleteAnnotationShare'] = async (
+    deleteAnnotationShare: __DeprecatedContentSharingInterface['deleteAnnotationShare'] = async (
         options,
     ) => {
         await this.storage.deleteAnnotationMetadata({
@@ -554,13 +620,11 @@ export default class ContentSharingBackground {
         return this.annotationSharingService.setAnnotationPrivacyLevel(params)
     }
 
-    deleteAnnotationPrivacyLevel: ContentSharingInterface['deleteAnnotationPrivacyLevel'] = async (
+    deleteAnnotationPrivacyLevel: __DeprecatedContentSharingInterface['deleteAnnotationPrivacyLevel'] = async (
         params,
     ) => {
         await this.storage.deleteAnnotationPrivacyLevel(params)
     }
-
-    waitForSync: ContentSharingInterface['waitForSync'] = async () => {}
 
     getAnnotationSharingState: ContentSharingInterface['getAnnotationSharingState'] = async (
         params,
@@ -574,14 +638,16 @@ export default class ContentSharingBackground {
         return this.annotationSharingService.getAnnotationSharingStates(params)
     }
 
-    suggestSharedLists: ContentSharingInterface['suggestSharedLists'] = async (
+    suggestSharedLists: __DeprecatedContentSharingInterface['suggestSharedLists'] = async (
         params,
     ) => {
         const loweredPrefix = params.prefix.toLowerCase()
-        const lists = await this.options.customListsBG.storage.fetchAllLists({
-            limit: 10000,
-            skip: 0,
-        })
+        const lists = await this.options
+            .getBgModules()
+            .customLists.storage.fetchAllLists({
+                limit: 10000,
+                skip: 0,
+            })
         const remoteIds = await this.storage.getAllRemoteListIds()
         const suggestions: Array<{
             localId: number
@@ -605,11 +671,13 @@ export default class ContentSharingBackground {
         return suggestions
     }
 
-    canWriteToSharedListRemoteId: ContentSharingInterface['canWriteToSharedListRemoteId'] = async ({
+    canWriteToSharedListRemoteId: __DeprecatedContentSharingInterface['canWriteToSharedListRemoteId'] = async ({
         remoteId,
     }) => {
         // const remoteId = await this.storage.getRemoteListId({localId: params.localId,})
-        const currentUser = await this.options.auth.authService.getCurrentUser()
+        const currentUser = await this.options
+            .getBgModules()
+            .auth.authService.getCurrentUser()
         const storage = await this.options.getServerStorage()
         const listRole = await storage.contentSharing.getListRole({
             listReference: { type: 'shared-list-reference', id: remoteId },
@@ -626,7 +694,7 @@ export default class ContentSharingBackground {
         ].includes(listRole?.roleID)
         return canWrite
     }
-    canWriteToSharedList: ContentSharingInterface['canWriteToSharedList'] = async (
+    canWriteToSharedList: __DeprecatedContentSharingInterface['canWriteToSharedList'] = async (
         params,
     ) => {
         const remoteId = await this.storage.getRemoteListId({
@@ -641,4 +709,156 @@ export default class ContentSharingBackground {
             source: 'sync' | 'local'
         },
     ) {}
+
+    waitForPageLinkCreation: RemoteContentSharingByTabsInterface<
+        'provider'
+    >['waitForPageLinkCreation'] = async (_, { fullPageUrl }) => {
+        const promise = this.pageLinkCreationPromises[fullPageUrl]
+        delete this.pageLinkCreationPromises[fullPageUrl]
+        return promise
+    }
+
+    schedulePageLinkCreation: RemoteContentSharingByTabsInterface<
+        'provider'
+    >['schedulePageLinkCreation'] = async (
+        { tab },
+        { fullPageUrl, now = Date.now() },
+    ) => {
+        if (this.pageLinkCreationPromises[fullPageUrl]) {
+            throw new Error(
+                `Page link already in process of being created for this URL: ${fullPageUrl} - try calling "waitForPageLink" RPC method`,
+            )
+        }
+        const bgModules = this.options.getBgModules()
+        const currentUser = await bgModules.auth.authService.getCurrentUser()
+        if (!currentUser) {
+            throw new Error('Page links cannot be created when logged out')
+        }
+
+        const localListId = now
+        const listTitle = createPageLinkListTitle(new Date(now))
+        const remoteListId = this.options
+            .generateServerId('sharedList')
+            .toString()
+        const remoteListEntryId = this.options
+            .generateServerId('sharedListEntry')
+            .toString()
+        const collabKey = this.options
+            .generateServerId('sharedListKey')
+            .toString()
+
+        // Start but don't wait for the storage logic
+        this.pageLinkCreationPromises[
+            fullPageUrl
+        ] = this.performPageLinkCreation({
+            creator: currentUser.id,
+            collabKey,
+            listTitle,
+            localListId,
+            remoteListEntryId,
+            remoteListId,
+            tabId: tab?.id,
+            fullPageUrl,
+            now,
+        })
+
+        return {
+            remoteListId,
+            remoteListEntryId,
+            listTitle,
+            localListId,
+            collabKey,
+        }
+    }
+
+    private async performPageLinkCreation({
+        remoteListEntryId,
+        remoteListId,
+        localListId,
+        fullPageUrl,
+        listTitle,
+        collabKey,
+        creator,
+        tabId,
+        now,
+    }: Awaited<
+        ReturnType<
+            RemoteContentSharingByTabsInterface<
+                'provider'
+            >['schedulePageLinkCreation']
+        >
+    > & {
+        fullPageUrl: string
+        creator: string
+        tabId?: number
+        now?: number
+    }): Promise<void> {
+        const bgModules = this.options.getBgModules()
+        const normalizedPageUrl = normalizeUrl(fullPageUrl)
+
+        // Create all the local data needed for a page link
+        await bgModules.pages.indexPage(
+            {
+                fullUrl: fullPageUrl,
+                visitTime: now,
+                tabId,
+            },
+            { addInboxEntryOnCreate: false },
+        )
+        const pageTitle = await bgModules.pages.lookupPageTitleForUrl({
+            fullPageUrl,
+        })
+
+        await bgModules.customLists.createCustomList({
+            id: localListId,
+            name: listTitle,
+            type: 'page-link',
+            createdAt: new Date(now),
+        })
+
+        await bgModules.customLists.insertPageToList({
+            id: localListId,
+            url: fullPageUrl,
+            createdAt: new Date(now),
+            skipPageIndexing: true,
+            suppressInboxEntry: true,
+            suppressVisitCreation: true,
+        })
+        await this.shareList({
+            localListId,
+            remoteListId,
+            collabKey,
+        })
+
+        // NOTE: These calls to created followList and followedListEntry docs should trigger personal cloud sync upload
+        await bgModules.pageActivityIndicator.createFollowedList(
+            {
+                creator,
+                name: listTitle,
+                sharedList: remoteListId,
+                type: SharedCollectionType.PageLink,
+            },
+            { invokeCloudSync: true },
+        )
+        await bgModules.pageActivityIndicator.createFollowedListEntry(
+            {
+                creator,
+                normalizedPageUrl,
+                entryTitle: pageTitle,
+                followedList: remoteListId,
+                hasAnnotationsFromOthers: false,
+                sharedListEntry: remoteListEntryId,
+                createdWhen: now,
+                updatedWhen: now,
+            },
+            { invokeCloudSync: true },
+        )
+
+        await this.options.backend.processListKey({
+            type: SharedCollectionType.PageLink,
+            allowOwnKeyProcessing: true,
+            listId: remoteListId,
+            keyString: collabKey.toString(),
+        })
+    }
 }

@@ -225,9 +225,17 @@ export class RibbonContainerLogic extends UILogic<
         event: { url },
     }) => {
         const tags = await this.dependencies.tags.fetchPageTags({ url })
-        const lists = await this.dependencies.customLists.fetchPageLists({
-            url,
-        })
+        let lists = []
+        let fullLists = await this.dependencies.customLists.fetchListPagesByUrl(
+            { url: url },
+        )
+
+        fullLists
+            .filter((list) => list.type !== 'page-link')
+            .forEach((list) => {
+                lists.push(list.id)
+            })
+
         const annotations = await this.dependencies.annotationsCache.annotations
             .allIds.length
 

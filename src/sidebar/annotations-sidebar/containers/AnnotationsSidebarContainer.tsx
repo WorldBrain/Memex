@@ -28,7 +28,7 @@ import analytics from 'src/analytics'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { Rnd } from 'react-rnd'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import type { Props as SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
 import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
@@ -51,6 +51,7 @@ import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/lib/common-ui/components/block-content'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
+import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -113,13 +114,14 @@ export class AnnotationsSidebarContainer<
     ) => async (name: string) => {
         const listId = Date.now()
 
-        this.props.annotationsCache.addList({
-            name,
-            localId: listId,
-            unifiedAnnotationIds: annotationId ? [annotationId] : [],
-            hasRemoteAnnotationsToLoad: false,
-            creator: this.props.currentUser,
-        })
+        // this.props.annotationsCache.addList({
+        //     name,
+        //     localId: listId,
+        //     unifiedAnnotationIds: annotationId ? [annotationId] : [],
+        //     hasRemoteAnnotationsToLoad: false,
+        //     creator: this.props.getCurrentUser(),
+        //     type: 'user-list',
+        // })
         await this.props.customListsBG.createCustomList({
             name: name,
             id: listId,
@@ -313,7 +315,6 @@ export class AnnotationsSidebarContainer<
     }
 
     protected getCreateProps(): AnnotationsSidebarProps['annotationCreateProps'] {
-        const { customListsBG, contentSharingBG } = this.props
         return {
             onCommentChange: (comment) =>
                 this.processEvent('setNewPageNoteText', { comment }),
@@ -324,20 +325,33 @@ export class AnnotationsSidebarContainer<
                     isProtected,
                     listInstanceId,
                 }),
-            addPageToList: (listId) =>
-                this.processEvent('setNewPageNoteLists', {
-                    lists: [...this.state.commentBox.lists, listId],
-                }),
-            removePageFromList: (listId) =>
-                this.processEvent('setNewPageNoteLists', {
-                    lists: this.state.commentBox.lists.filter(
-                        (id) => id !== listId,
-                    ),
-                }),
+            renderSpacePicker: () => (
+                <CollectionPicker
+                    showPageLinks
+                    selectEntry={(listId) =>
+                        this.processEvent('setNewPageNoteLists', {
+                            lists: [...this.state.commentBox.lists, listId],
+                        })
+                    }
+                    unselectEntry={(listId) =>
+                        this.processEvent('setNewPageNoteLists', {
+                            lists: this.state.commentBox.lists.filter(
+                                (id) => id !== listId,
+                            ),
+                        })
+                    }
+                    createNewEntry={this.createNewList()}
+                    annotationsCache={this.props.annotationsCache}
+                    pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
+                    contentSharingBG={this.props.contentSharingBG}
+                    spacesBG={this.props.customListsBG}
+                    authBG={this.props.authBG}
+                    normalizedPageUrlToFilterPageLinksBy={normalizeUrl(
+                        this.state.fullPageUrl,
+                    )}
+                />
+            ),
             getListDetailsById: this.getListDetailsById,
-            createNewList: this.createNewList(),
-            contentSharingBG,
-            spacesBG: customListsBG,
             comment: this.state.commentBox.commentText,
             lists: this.state.commentBox.lists,
             hoverState: null,
@@ -358,9 +372,11 @@ export class AnnotationsSidebarContainer<
         showExternalConfirmations?: boolean
     }): SpacePickerDependencies => {
         const {
+            authBG,
+            customListsBG,
+            contentSharingBG,
             annotationsCache,
-            customListsBG: customLists,
-            contentSharingBG: contentSharing,
+            pageActivityIndicatorBG,
         } = this.props
         // This is to show confirmation modal if the annotation is public and the user is trying to add it to a shared space
         const getUpdateListsEvent = (listId: number) =>
@@ -374,8 +390,13 @@ export class AnnotationsSidebarContainer<
                 : 'updateListsForAnnotation'
 
         return {
-            spacesBG: customLists,
-            contentSharingBG: contentSharing,
+            authBG,
+            annotationsCache,
+            contentSharingBG,
+            pageActivityIndicatorBG,
+            spacesBG: customListsBG,
+            showPageLinks: true,
+            localStorageAPI: this.props.storageAPI.local,
             createNewEntry: this.createNewList(params.annotation.unifiedId),
             initialSelectedListIds: () =>
                 cacheUtils.getLocalListIdsForCacheIds(
@@ -402,6 +423,9 @@ export class AnnotationsSidebarContainer<
                     unifiedId: annotationsCache.getListByLocalId(localListId)
                         ?.unifiedId,
                 }),
+            normalizedPageUrlToFilterPageLinksBy: normalizeUrl(
+                this.state.fullPageUrl,
+            ),
         }
     }
 
@@ -727,7 +751,10 @@ export class AnnotationsSidebarContainer<
                             clickFeedActivityIndicator={() =>
                                 this.processEvent('markFeedAsRead', null)
                             }
-                            currentUser={this.props.currentUser}
+                            clickCreatePageLinkBtn={() =>
+                                this.processEvent('createPageLink', null)
+                            }
+                            currentUser={this.props.getCurrentUser()}
                             annotationsCache={this.props.annotationsCache}
                             onUnifiedListSelect={(unifiedListId) =>
                                 this.processEvent('setSelectedList', {
@@ -758,11 +785,15 @@ export class AnnotationsSidebarContainer<
                             getListDetailsById={this.getListDetailsById}
                             sidebarContext={this.props.sidebarContext}
                             ref={this.sidebarRef}
-                            openCollectionPage={(remoteListId) =>
-                                window.open(
-                                    getListShareUrl({ remoteListId }),
-                                    '_blank',
-                                )
+                            openContextMenuForList={(unifiedListId) =>
+                                this.processEvent('openContextMenuForList', {
+                                    unifiedListId,
+                                })
+                            }
+                            openWebUIPage={(unifiedListId) =>
+                                this.processEvent('openWebUIPageForSpace', {
+                                    unifiedListId,
+                                })
                             }
                             onMenuItemClick={({ sortingFn }) =>
                                 this.processEvent('sortAnnotations', {
@@ -883,6 +914,32 @@ export class AnnotationsSidebarContainer<
                             renderShareMenuForAnnotation={
                                 this.renderShareMenuForAnnotation
                             }
+                            renderContextMenuForList={(listData) => (
+                                <SpaceContextMenu
+                                    contentSharingBG={
+                                        this.props.contentSharingBG
+                                    }
+                                    spacesBG={this.props.customListsBG}
+                                    listData={listData}
+                                    onConfirmSpaceNameEdit={(newName) =>
+                                        this.processEvent('editListName', {
+                                            unifiedListId: listData.unifiedId,
+                                            newName,
+                                        })
+                                    }
+                                    onSpaceShare={(remoteListId) =>
+                                        this.processEvent('shareList', {
+                                            unifiedListId: listData.unifiedId,
+                                            remoteListId,
+                                        })
+                                    }
+                                    onDeleteSpaceConfirm={() =>
+                                        this.processEvent('deleteList', {
+                                            unifiedListId: listData.unifiedId,
+                                        })
+                                    }
+                                />
+                            )}
                             activeShareMenuNoteId={
                                 this.state.activeShareMenuNoteId
                             }

@@ -68,6 +68,7 @@ export const getListData = (
                 : SPECIAL_LIST_NAMES.MOBILE
         return {
             name,
+            type: 'special-list',
             hasRemoteAnnotationsToLoad: false,
             unifiedAnnotationIds: [],
             unifiedId: listsSidebar.selectedListId,

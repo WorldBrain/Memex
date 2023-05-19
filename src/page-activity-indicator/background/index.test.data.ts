@@ -57,10 +57,13 @@ export const sharedLists: Array<
 ]
 
 export const listEntries: {
-    [sharedListId: number]: Array<SharedListEntry & { creator: AutoPk }>
+    [sharedListId: number]: Array<
+        SharedListEntry & { id: AutoPk; creator: AutoPk }
+    >
 } = {
     [sharedLists[0].id]: [
         {
+            id: 'shared-list-entry-id-1',
             creator: users[0].id,
             normalizedUrl: 'test.com/a',
             originalUrl: 'https://test.com/a',
@@ -68,6 +71,7 @@ export const listEntries: {
             updatedWhen: 1,
         },
         {
+            id: 'shared-list-entry-id-2',
             creator: users[1].id,
             normalizedUrl: 'test.com/b',
             originalUrl: 'https://test.com/b',
@@ -77,6 +81,7 @@ export const listEntries: {
     ],
     [sharedLists[1].id]: [
         {
+            id: 'shared-list-entry-id-3',
             creator: users[0].id,
             normalizedUrl: 'test.com/a',
             originalUrl: 'https://test.com/a',
@@ -84,6 +89,7 @@ export const listEntries: {
             updatedWhen: 1,
         },
         {
+            id: 'shared-list-entry-id-4',
             creator: users[0].id,
             normalizedUrl: 'test.com/b',
             originalUrl: 'https://test.com/b',
@@ -93,6 +99,7 @@ export const listEntries: {
     ],
     [sharedLists[2].id]: [
         {
+            id: 'shared-list-entry-id-5',
             creator: users[0].id,
             normalizedUrl: 'test.com/a',
             originalUrl: 'https://test.com/a',
@@ -102,6 +109,7 @@ export const listEntries: {
     ],
     [sharedLists[3].id]: [
         {
+            id: 'shared-list-entry-id-6',
             creator: users[0].id,
             normalizedUrl: 'test.com/a',
             originalUrl: 'https://test.com/a',

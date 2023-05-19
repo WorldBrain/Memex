@@ -31,6 +31,7 @@ const calcExpectedListEntries = (
                       sharedListEntryToFollowedListEntry(
                           {
                               ...entry,
+                              id: entry.id,
                               sharedList: Number(sharedList),
                           },
                           {
@@ -513,6 +514,7 @@ describe('Page activity indicator background module tests', () => {
             const serverStorage = await getServerStorage()
             const newListEntries = [
                 {
+                    id: 'test-shared-list-entry-a',
                     sharedList,
                     creator: DATA.users[0].id,
                     normalizedUrl: 'test.com/c',
@@ -521,6 +523,7 @@ describe('Page activity indicator background module tests', () => {
                     updatedWhen: 1,
                 },
                 {
+                    id: 'test-shared-list-entry-b',
                     sharedList,
                     creator: DATA.users[0].id,
                     normalizedUrl: 'test.com/d',
@@ -1357,6 +1360,7 @@ describe('Page activity indicator background module tests', () => {
             // Add newer entry for one list + mock out Cloudflare fetch to return newer activity timestamp for that list
             const serverStorage = await getServerStorage()
             const newSharedListEntry = {
+                id: 'test-shared-list-entry-a',
                 creator: DATA.users[1].id,
                 sharedList: DATA.sharedLists[0].id,
                 normalizedUrl: 'test.com/c',

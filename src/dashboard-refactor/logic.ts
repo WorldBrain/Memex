@@ -55,7 +55,7 @@ import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/cons
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
 import { openPDFInViewer } from 'src/pdf/util'
-import { hydrateCacheForDashboard } from 'src/annotations/cache/utils'
+import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
 import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
 import type { AnnotationsSearchResponse } from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
@@ -384,14 +384,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                 }),
                 async () => {
                     const user = await authBG.getCurrentUser()
-                    await hydrateCacheForDashboard({
+                    await hydrateCacheForListUsage({
                         cache: annotationsCache,
                         user: user
                             ? { type: 'user-reference', id: user.id }
                             : undefined,
                         bgModules: {
                             customLists: this.options.listsBG,
-                            annotations: this.options.annotationsBG,
                             contentSharing: this.options.contentShareBG,
                             pageActivityIndicator: this.options
                                 .pageActivityIndicatorBG,
@@ -3136,6 +3135,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             async () => {
                 const localListId = Date.now()
                 const { unifiedId } = this.options.annotationsCache.addList({
+                    type: 'user-list',
                     name: newListName,
                     localId: localListId,
                     unifiedAnnotationIds: [],
@@ -3476,11 +3476,14 @@ export class DashboardLogic extends UILogic<State, Events> {
                         editingListId: { $set: undefined },
                     },
                 })
-                await this.options.listsBG.updateListName({
-                    id: listData.localId,
-                    oldName,
-                    newName,
-                })
+
+                if (!event.skipDBOps) {
+                    await this.options.listsBG.updateListName({
+                        id: listData.localId,
+                        oldName,
+                        newName,
+                    })
+                }
             },
         )
     }

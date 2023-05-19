@@ -52,6 +52,7 @@ export class PageActivityIndicatorBackground {
             getAllFollowedLists: this.getAllFollowedLists,
             getPageFollowedLists: this.getPageFollowedLists,
             getPageActivityStatus: this.getPageActivityStatus,
+            getEntriesForFollowedLists: this.getEntriesForFollowedLists,
         }
     }
 
@@ -144,6 +145,7 @@ export class PageActivityIndicatorBackground {
                     sharedList: list.sharedList,
                     creator: list.creator,
                     name: list.name,
+                    type: list.type,
                 },
             ]),
         )
@@ -177,6 +179,7 @@ export class PageActivityIndicatorBackground {
                     sharedList: list.sharedList,
                     creator: list.creator,
                     name: list.name,
+                    type: list.type,
                 },
             ]),
         )
@@ -200,6 +203,12 @@ export class PageActivityIndicatorBackground {
             : 'no-annotations'
     }
 
+    private getEntriesForFollowedLists: RemotePageActivityIndicatorInterface['getEntriesForFollowedLists'] = async (
+        followedListIds,
+    ) => {
+        return this.storage.findFollowedListEntriesForLists(followedListIds)
+    }
+
     private async getCurrentUser(): Promise<UserReference | null> {
         const userId = await this.deps.getCurrentUserId()
         if (userId == null) {
@@ -211,10 +220,12 @@ export class PageActivityIndicatorBackground {
 
     createFollowedList: PageActivityIndicatorStorage['createFollowedList'] = (
         data,
-    ) => this.storage.createFollowedList(data)
+        opts,
+    ) => this.storage.createFollowedList(data, opts)
     createFollowedListEntry: PageActivityIndicatorStorage['createFollowedListEntry'] = (
         data,
-    ) => this.storage.createFollowedListEntry(data)
+        opts,
+    ) => this.storage.createFollowedListEntry(data, opts)
     updateFollowedListEntryHasAnnotations: PageActivityIndicatorStorage['updateFollowedListEntryHasAnnotations'] = (
         data,
     ) => this.storage.updateFollowedListEntryHasAnnotations(data)
@@ -289,9 +300,11 @@ export class PageActivityIndicatorBackground {
 
         for (const sharedList of sharedLists) {
             if (!existingFollowedListsLookup.get(sharedList.id)) {
-                await this.storage.createFollowedList(
-                    sharedListToFollowedList(sharedList),
-                )
+                const data = sharedListToFollowedList(sharedList)
+                // NOTE: This created followedList should NOT invoke cloud sync or things will go wrong
+                await this.storage.createFollowedList(data, {
+                    invokeCloudSync: false,
+                })
             }
         }
     }
@@ -356,16 +369,20 @@ export class PageActivityIndicatorBackground {
                 )
 
                 if (!localFollowedListEntry) {
-                    await this.storage.createFollowedListEntry(
-                        sharedListEntryToFollowedListEntry(
-                            {
-                                ...entry,
-                                creator: entry.creator.id,
-                                sharedList: entry.sharedList.id,
-                            },
-                            { hasAnnotationsFromOthers },
-                        ),
+                    const data = sharedListEntryToFollowedListEntry(
+                        {
+                            ...entry,
+                            id: entry.reference.id,
+                            creator: entry.creator.id,
+                            sharedList: entry.sharedList.id,
+                        },
+                        { hasAnnotationsFromOthers },
                     )
+
+                    // NOTE: This created followedListEntry should NOT invoke cloud sync or things will go wrong
+                    await this.storage.createFollowedListEntry(data, {
+                        invokeCloudSync: false,
+                    })
                 } else if (
                     localFollowedListEntry.hasAnnotationsFromOthers !==
                     hasAnnotationsFromOthers

@@ -1,6 +1,8 @@
 import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 
+export const DEVICE_ID_A = 11
+
 export const LIST_DATA = {
     name: 'My shared list',
     id: Date.now(),

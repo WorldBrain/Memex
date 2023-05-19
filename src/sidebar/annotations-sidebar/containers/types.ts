@@ -10,6 +10,7 @@ import type { AnnotationCardInstanceLocation, SidebarTheme } from '../types'
 import type {
     AnnotationSharingStates,
     ContentSharingInterface,
+    RemoteContentSharingByTabsInterface,
 } from 'src/content-sharing/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { Analytics } from 'src/analytics'
@@ -34,6 +35,7 @@ import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/con
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { Storage, Runtime } from 'webextension-polyfill'
+import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -58,14 +60,16 @@ export interface SidebarContainerDependencies {
     annotationsBG: AnnotationInterface<'caller'>
     customListsBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface
+    contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
     syncSettingsBG: RemoteSyncSettingsInterface
     contentScriptsBG: ContentScriptsInterface<'caller'>
+    pageIndexingBG: PageIndexingInterface<'caller'>
     authBG: AuthRemoteFunctionsInterface
     subscription: SubscriptionsService
     theme?: MemexTheme & Partial<SidebarTheme>
 
-    currentUser?: UserReference
+    getCurrentUser: () => UserReference | null
     // search: SearchInterface
     // bookmarks: BookmarksInterface
     analytics: Analytics
@@ -93,6 +97,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     loadState: TaskState
     cacheLoadState: TaskState
     noteCreateState: TaskState
+    pageLinkCreateState: TaskState
     secondarySearchState: TaskState
     remoteAnnotationsLoadState: TaskState
     foreignSelectedListLoadState: TaskState
@@ -134,6 +139,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     }
 
     activeAnnotationId: UnifiedAnnotation['unifiedId'] | null
+    activeListContextMenuId: UnifiedList['unifiedId'] | null
 
     listInstances: { [unifiedListId: UnifiedList['unifiedId']]: ListInstance }
     annotationCardInstances: { [instanceId: string]: AnnotationCardInstance }
@@ -277,6 +283,11 @@ interface SidebarEvents {
     setSelectedList: { unifiedListId: UnifiedList['unifiedId'] | null }
     setSelectedListFromWebUI: { sharedListId: string }
 
+    openContextMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
+    editListName: { unifiedListId: UnifiedList['unifiedId']; newName: string }
+    deleteList: { unifiedListId: UnifiedList['unifiedId'] }
+    shareList: { unifiedListId: UnifiedList['unifiedId']; remoteListId: string }
+
     goToAnnotationInNewTab: {
         unifiedAnnotationId: UnifiedAnnotation['unifiedId']
     }
@@ -290,6 +301,8 @@ interface SidebarEvents {
         skipListsLoad?: boolean
         rerenderHighlights?: boolean
     }
+
+    openWebUIPageForSpace: { unifiedListId: UnifiedList['unifiedId'] }
 
     // Search
     paginateSearch: null
@@ -308,6 +321,8 @@ interface SidebarEvents {
 
     setAllNotesCopyPasterShown: { shown: boolean }
     setAllNotesShareMenuShown: { shown: boolean }
+
+    createPageLink: null
 }
 
 export type SidebarContainerEvents = UIEvent<

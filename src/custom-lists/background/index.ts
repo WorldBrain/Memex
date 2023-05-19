@@ -16,14 +16,14 @@ import { Analytics } from 'src/analytics/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from '@worldbrain/memex-common/lib/utils/suggestions-cache'
 import { PageIndexingBackground } from 'src/page-indexing/background'
-import TabManagementBackground from 'src/tab-management/background'
-import { ServerStorageModules } from 'src/storage/types'
+import type TabManagementBackground from 'src/tab-management/background'
+import type { ServerStorageModules } from 'src/storage/types'
 import type { AuthServices } from 'src/services/types'
-import { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
-import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
+import type { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { isExtensionTab } from 'src/tab-management/utils'
-import type { SpaceDisplayEntry } from '../ui/CollectionPicker/logic'
+import type { UnifiedList } from 'src/annotations/cache/types'
 
 const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 25
@@ -558,6 +558,7 @@ export default class CustomListBackground {
         params: ({ url: string } | { contentIdentifier: ContentIdentifier }) & {
             id: number
             tabId?: number
+            createdAt?: Date
             skipPageIndexing?: boolean
             suppressVisitCreation?: boolean
             suppressInboxEntry?: boolean
@@ -598,6 +599,7 @@ export default class CustomListBackground {
             pageUrl,
             listId: id,
             fullUrl: url,
+            createdAt: params.createdAt,
         })
 
         this.options.analytics.trackEvent({
@@ -627,13 +629,13 @@ export default class CustomListBackground {
 
     fetchInitialListSuggestions: RemoteCollectionsInterface['fetchInitialListSuggestions'] = async ({
         extraListIds,
-    } = {}): Promise<SpaceDisplayEntry[]> => {
+    } = {}): Promise<Pick<UnifiedList, 'localId' | 'name' | 'remoteId'>[]> => {
         const suggestionIds = await this.localStorage.get('suggestionIds')
-        const listToDisplayEntry = (l: PageList): SpaceDisplayEntry => ({
+        const listToDisplayEntry = (
+            l: PageList,
+        ): Pick<UnifiedList, 'localId' | 'name' | 'remoteId'> => ({
             localId: l.id,
             name: l.name,
-            createdAt: l.createdAt.getTime(),
-            focused: false,
             remoteId: null,
         })
 
