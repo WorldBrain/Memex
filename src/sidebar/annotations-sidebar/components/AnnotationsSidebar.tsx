@@ -860,7 +860,8 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <PopoutBox
                 strategy="fixed"
-                placement="bottom"
+                placement="bottom-end"
+                offsetX={10}
                 targetElementRef={ref?.current}
                 closeComponent={() =>
                     this.props.openContextMenuForList(listData.unifiedId)
