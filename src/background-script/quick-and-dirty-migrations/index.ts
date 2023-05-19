@@ -50,6 +50,20 @@ export const MIGRATION_PREFIX = '@QnDMigration-'
 
 export const migrations: Migrations = {
     /*
+     * This exists as we made some schema changes to the followedList* collections, adding `type` field
+     * to followedList for page-link lists. And adding `sharedListEntry` field to followedListEntry acting
+     * as a reference to the server-side collection of the same name. Thus they need to be re-pulled
+     */
+    [MIGRATION_PREFIX + 'trigger-reinit-followed-list-pull-resync-01']: async ({
+        bgModules,
+        storex,
+    }) => {
+        await storex.backend.operation('deleteObjects', 'followedList', {})
+        await storex.backend.operation('deleteObjects', 'followedListEntry', {})
+        await bgModules.pageActivityIndicator.syncFollowedLists()
+        await bgModules.pageActivityIndicator.syncFollowedListEntries()
+    },
+    /*
      * This exists to seed initial local followedList collection data based on remote data, for the
      * release of the page-activity indicator feature. Future changes to this collection should be
      * handled by cloud sync.

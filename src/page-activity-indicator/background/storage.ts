@@ -62,29 +62,6 @@ export default class PageActivityIndicatorStorage extends StorageModule {
                         { order: [['createdWhen', 'asc']] },
                     ],
                 },
-                updateFollowedListLastSyncTime: {
-                    collection: 'followedList',
-                    operation: 'updateObject',
-                    args: [
-                        { sharedList: '$sharedList:pk' },
-                        { lastSync: '$lastSync:number' },
-                    ],
-                },
-                updateFollowedListEntryHasAnnotations: {
-                    collection: 'followedListEntry',
-                    operation: 'updateObjects',
-                    args: [
-                        {
-                            followedList: '$followedList:string',
-                            normalizedPageUrl: '$normalizedPageUrl:string',
-                        },
-                        {
-                            hasAnnotationsFromOthers:
-                                '$hasAnnotationsFromOthers:boolean',
-                            updatedWhen: '$updatedWhen:number',
-                        },
-                    ],
-                },
                 deleteAllFollowedLists: {
                     collection: 'followedList',
                     operation: 'deleteObjects',
@@ -252,10 +229,14 @@ export default class PageActivityIndicatorStorage extends StorageModule {
     async updateFollowedListLastSync(
         data: Pick<FollowedList, 'sharedList' | 'lastSync'>,
     ): Promise<void> {
-        await this.operation('updateFollowedListLastSyncTime', {
-            sharedList: data.sharedList,
-            lastSync: data.lastSync,
-        })
+        await this.options.storageManager.backend.operation(
+            'updateObject',
+            'followedList',
+            {
+                sharedList: data.sharedList,
+            },
+            { lastSync: data.lastSync },
+        )
     }
 
     async updateFollowedListEntryHasAnnotations(
@@ -265,12 +246,18 @@ export default class PageActivityIndicatorStorage extends StorageModule {
         > &
             Partial<Pick<FollowedListEntry, 'updatedWhen'>>,
     ): Promise<void> {
-        await this.operation('updateFollowedListEntryHasAnnotations', {
-            followedList: data.followedList,
-            normalizedPageUrl: data.normalizedPageUrl,
-            hasAnnotationsFromOthers: data.hasAnnotationsFromOthers,
-            updatedWhen: data.updatedWhen ?? Date.now(),
-        })
+        await this.options.storageManager.backend.operation(
+            'updateObjects',
+            'followedListEntry',
+            {
+                followedList: data.followedList,
+                normalizedPageUrl: data.normalizedPageUrl,
+            },
+            {
+                hasAnnotationsFromOthers: data.hasAnnotationsFromOthers,
+                updatedWhen: data.updatedWhen ?? Date.now(),
+            },
+        )
     }
 
     async deleteFollowedListEntry(
