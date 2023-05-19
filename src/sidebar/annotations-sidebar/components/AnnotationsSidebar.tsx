@@ -733,7 +733,7 @@ export class AnnotationsSidebar extends React.Component<
         listData: UnifiedList,
         listInstance: ListInstance,
     ) {
-        const title = cacheUtils.getDisplayNameForList(listData)
+        const title = listData.name
         return (
             <FollowedListNotesContainer
                 bottom={listInstance.isOpen ? '0px' : '0px'}
@@ -1788,7 +1788,7 @@ export class AnnotationsSidebar extends React.Component<
                 </IsolatedViewHeaderTopBar>
                 <SpaceTitle>
                     {selectedList.type === 'page-link' && 'Page link: '}{' '}
-                    {cacheUtils.getDisplayNameForList(selectedList)}
+                    {selectedList.name}
                 </SpaceTitle>
                 <SpaceDescription>{selectedList.description}</SpaceDescription>
                 {/* {totalAnnotsCountJSX}

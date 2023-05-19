@@ -27,6 +27,7 @@ import type {
 } from 'src/page-activity-indicator/background/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import { createPageLinkListTitle } from 'src/content-sharing/utils'
 
 export const COMMENT_1 = 'This is a test comment'
 export const TAB_URL_1 = 'https://test.com'
@@ -204,7 +205,7 @@ export const LOCAL_LISTS: PageList[] = [
     },
     {
         id: 7,
-        name: new Date().toString(),
+        name: createPageLinkListTitle(new Date('2023-05-01')),
         isNestable: true,
         isDeletable: true,
         type: SharedCollectionType.PageLink,

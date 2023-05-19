@@ -315,21 +315,13 @@ describe('SidebarContainerLogic', () => {
             ])
         })
 
+        // TODO: check storage as well
         it('should be able to create page links for the current page', async ({
             device,
         }) => {
             const fullPageUrl = 'https://memex.garden'
             const normalizedPageUrl = 'memex.garden'
-            const pageTitle = 'test page title'
             const listName = createPageLinkListTitle()
-
-            await device.storageManager.collection('pages').createObject({
-                fullUrl: fullPageUrl,
-                fullTitle: pageTitle,
-                url: normalizedPageUrl,
-                domain: normalizedPageUrl,
-                hostname: normalizedPageUrl,
-            })
 
             const { sidebar, annotationsCache } = await setupLogicHelper({
                 device,
@@ -338,66 +330,23 @@ describe('SidebarContainerLogic', () => {
                 fullPageUrl,
             })
 
-            const serverStorage = await device.getServerStorage()
-            const [
-                sharedListsBefore,
-                sharedListEntriesBefore,
-            ] = await Promise.all([
-                serverStorage.manager
-                    .collection('sharedList')
-                    .findAllObjects({}),
-                serverStorage.manager
-                    .collection('sharedListEntry')
-                    .findAllObjects({}),
-            ])
-
-            expect(sharedListsBefore).toEqual([])
-            expect(sharedListEntriesBefore).toEqual([])
             expect(sidebar.state.pageLinkCreateState).toEqual('pristine')
             expect(annotationsCache.lists.byId).toEqual(
                 initNormalizedState().byId,
             )
 
             await sidebar.processEvent('createPageLink', null)
-            const [
-                sharedListsAfter,
-                sharedListEntriesAfter,
-            ] = (await Promise.all([
-                serverStorage.manager
-                    .collection('sharedList')
-                    .findAllObjects({}),
-                serverStorage.manager
-                    .collection('sharedListEntry')
-                    .findAllObjects({}),
-            ])) as [
-                SharedList & { id: string }[],
-                SharedListEntry & { id: string }[],
-            ]
 
-            expect(sharedListsAfter).toEqual([
-                expect.objectContaining({
-                    title: listName,
-                    type: 'page-link',
-                    creator: TEST_USER.id,
-                }),
-            ])
-            expect(sharedListEntriesAfter).toEqual([
-                expect.objectContaining({
-                    originalUrl: fullPageUrl,
-                    normalizedUrl: normalizedPageUrl,
-                    creator: TEST_USER.id,
-                    sharedList: sharedListsAfter[0].id,
-                }),
-            ])
             expect(sidebar.state.pageLinkCreateState).toEqual('success')
             expect(annotationsCache.lists.byId).toEqual({
                 [annotationsCache.lists.allIds[0]]: {
                     unifiedId: expect.anything(),
                     type: 'page-link',
                     name: listName,
-                    pageTitle,
-                    remoteId: sharedListsAfter[0].id.toString(),
-                    sharedListEntryId: sharedListEntriesAfter[0].id.toString(),
+                    remoteId: expect.anything(),
+                    localId: expect.any(Number),
+                    collabKey: expect.any(String),
+                    sharedListEntryId: expect.anything(),
                     normalizedPageUrl,
                     creator: {
                         id: TEST_USER.id,

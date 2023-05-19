@@ -471,6 +471,3 @@ export function siftListsIntoCategories(
     }
     return categories
 }
-
-export const getDisplayNameForList = (list: UnifiedList): string =>
-    list.type === 'page-link' ? `${list.name}` : list.name
