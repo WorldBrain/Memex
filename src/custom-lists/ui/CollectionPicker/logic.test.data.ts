@@ -8,6 +8,7 @@ import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/t
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
+import { createPageLinkListTitle } from 'src/content-sharing/utils'
 
 export const TAB_URL_1 = 'https://test.com'
 export const TAB_URL_2 = 'https://test.com/test'
@@ -69,7 +70,7 @@ export const TEST_LISTS: PageList[] = [
     },
     {
         id: 7,
-        name: new Date().toString(),
+        name: createPageLinkListTitle(new Date('2023-05-10')),
         isNestable: true,
         isDeletable: true,
         type: SharedCollectionType.PageLink,
@@ -77,7 +78,7 @@ export const TEST_LISTS: PageList[] = [
     },
     {
         id: 8,
-        name: new Date().toString(),
+        name: createPageLinkListTitle(new Date('2023-05-11')),
         isNestable: true,
         isDeletable: true,
         type: SharedCollectionType.PageLink,

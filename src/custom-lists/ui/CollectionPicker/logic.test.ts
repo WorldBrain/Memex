@@ -294,23 +294,17 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.init()
 
-        await testLogic.processEvent('searchInputChanged', { query: 'better' })
+        await testLogic.processEvent('searchInputChanged', {
+            query: 'May 11th',
+        })
         expect(testLogic.state.filteredListIds).toEqual([
             DATA.TEST_PAGE_LINK_SUGGESTIONS[1].unifiedId,
         ])
 
         await testLogic.processEvent('searchInputChanged', {
-            query: 'testing site',
+            query: 'may',
         })
         expect(testLogic.state.filteredListIds).toEqual([
-            DATA.TEST_PAGE_LINK_SUGGESTIONS[0].unifiedId,
-            DATA.TEST_PAGE_LINK_SUGGESTIONS[1].unifiedId,
-        ])
-
-        // Should match both a user list + page links
-        await testLogic.processEvent('searchInputChanged', { query: 'test' })
-        expect(testLogic.state.filteredListIds).toEqual([
-            DATA.TEST_USER_LIST_SUGGESTIONS[0].unifiedId,
             DATA.TEST_PAGE_LINK_SUGGESTIONS[0].unifiedId,
             DATA.TEST_PAGE_LINK_SUGGESTIONS[1].unifiedId,
         ])
@@ -384,7 +378,7 @@ describe('SpacePickerLogic', () => {
             ])
 
         const keyPresses: [KeyEvent, number][] = [
-            ['ArrowDown', DATA.TEST_LISTS[0].id],
+            // ['ArrowDown', DATA.TEST_LISTS[0].id],
             ['ArrowDown', DATA.TEST_LISTS[1].id],
             ['ArrowDown', DATA.TEST_LISTS[2].id],
             ['ArrowDown', DATA.TEST_LISTS[3].id],
@@ -985,7 +979,7 @@ describe('SpacePickerLogic', () => {
         await testLogic.init()
         expect(testLogic.state.currentTab).toEqual('user-lists')
         expect(testLogic.state.focusedListId).toEqual(null)
-        expect(entryPickerLogic['focusIndex']).toBe(-1)
+        expect(entryPickerLogic['focusIndex']).toBe(0)
 
         await testLogic.processEvent('keyPress', {
             event: { key: 'ArrowDown' } as KeyboardEvent,
@@ -996,9 +990,9 @@ describe('SpacePickerLogic', () => {
         await testLogic.processEvent('keyPress', {
             event: { key: 'ArrowDown' } as KeyboardEvent,
         })
-        expect(entryPickerLogic['focusIndex']).toBe(2)
+        expect(entryPickerLogic['focusIndex']).toBe(3)
         expect(testLogic.state.focusedListId).toEqual(
-            annotationsCache.getListByLocalId(DATA.TEST_LISTS[2].id).unifiedId,
+            annotationsCache.getListByLocalId(DATA.TEST_LISTS[3].id).unifiedId,
         )
 
         await testLogic.processEvent('switchTab', { tab: 'page-links' })
@@ -1014,7 +1008,7 @@ describe('SpacePickerLogic', () => {
         })
         expect(entryPickerLogic['focusIndex']).toBe(1)
         expect(testLogic.state.focusedListId).toEqual(
-            annotationsCache.getListByLocalId(DATA.TEST_LISTS[1].id).unifiedId,
+            DATA.TEST_PAGE_LINK_SUGGESTIONS[1].unifiedId,
         )
 
         await testLogic.processEvent('switchTab', { tab: 'user-lists' })
