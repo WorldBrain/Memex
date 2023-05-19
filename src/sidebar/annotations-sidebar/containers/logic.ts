@@ -1459,7 +1459,7 @@ export class SidebarContainerLogic extends UILogic<
         textAsAlternative?: string,
     ) {
         const isPagePDF =
-            fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?file=blob')
+            fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
         const maxLength = 50000
         const articleLengthTooMuch =
             ((textAsAlternative && textAsAlternative.length > maxLength) ||
@@ -1809,9 +1809,7 @@ export class SidebarContainerLogic extends UILogic<
                 previousState,
             )
         } else if (event.tab === 'summary') {
-            let isPagePDF = window.location.href.includes(
-                '/pdfjs/viewer.html?file=blob',
-            )
+            let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
             let fullTextToProcess
             if (isPagePDF) {
                 fullTextToProcess = document.body.innerText

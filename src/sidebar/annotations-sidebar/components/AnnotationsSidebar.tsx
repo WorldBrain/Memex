@@ -206,6 +206,7 @@ export class AnnotationsSidebar extends React.Component<
     private copyButtonRef = React.createRef<HTMLDivElement>()
     private pageShareButtonRef = React.createRef<HTMLDivElement>()
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
+    private sharePageLinkButtonRef = React.createRef<HTMLDivElement>()
     private spaceContextBtnRefs: {
         [unifiedListId: string]: React.RefObject<HTMLDivElement>
     } = {}
@@ -847,22 +848,26 @@ export class AnnotationsSidebar extends React.Component<
                     </ButtonContainer>
                 </FollowedListRow>
                 {this.renderListAnnotations(listData.unifiedId)}
-                {this.renderContextMenu(listData)}
+                {this.renderContextMenu(
+                    listData,
+                    this.spaceContextBtnRefs[listData.unifiedId],
+                )}
             </FollowedListNotesContainer>
         )
     }
 
-    private renderContextMenu(listData: UnifiedList) {
+    private renderContextMenu(listData: UnifiedList, ref: any) {
         if (this.props.activeListContextMenuId !== listData.unifiedId) {
             return
         }
-        const ref = this.spaceContextBtnRefs[listData.unifiedId]
+        const refObject = ref
         return (
             <PopoutBox
                 strategy="fixed"
                 placement="bottom-end"
                 offsetX={10}
-                targetElementRef={ref?.current}
+                offsetY={50}
+                targetElementRef={refObject?.current}
                 closeComponent={() =>
                     this.props.openContextMenuForList(listData.unifiedId)
                 }
@@ -1747,28 +1752,49 @@ export class AnnotationsSidebar extends React.Component<
                         onClick={() => this.props.onResetSpaceSelect()}
                     />
                     <RightSideButtonsTopBar>
-                        <PrimaryAction
-                            icon="goTo"
-                            type="tertiary"
-                            size="small"
-                            label={isPageLink ? 'Open Page Link' : 'Open Space'}
-                            fontColor="greyScale6"
-                            onClick={() =>
-                                window.open(
-                                    isPageLink
-                                        ? getSinglePageShareUrl({
-                                              remoteListId:
-                                                  selectedList.remoteId,
-                                              remoteListEntryId:
-                                                  selectedList.sharedListEntryId,
-                                          })
-                                        : getListShareUrl({
-                                              remoteListId:
-                                                  selectedList.remoteId,
-                                          }),
-                                )
-                            }
-                        />
+                        {this.renderContextMenu(
+                            selectedList,
+                            this.sharePageLinkButtonRef,
+                        )}
+                        <TooltipBox
+                            tooltipText={'Copy Invite Links'}
+                            placement="bottom"
+                        >
+                            <Icon
+                                icon="link"
+                                containerRef={this.sharePageLinkButtonRef}
+                                onClick={() =>
+                                    this.props.openContextMenuForList(
+                                        selectedList.unifiedId,
+                                    )
+                                }
+                                heightAndWidth="20px"
+                            />
+                        </TooltipBox>
+                        <TooltipBox
+                            tooltipText={'Open Page Link'}
+                            placement="bottom"
+                        >
+                            <Icon
+                                icon="goTo"
+                                heightAndWidth="20px"
+                                onClick={() =>
+                                    window.open(
+                                        isPageLink
+                                            ? getSinglePageShareUrl({
+                                                  remoteListId:
+                                                      selectedList.remoteId,
+                                                  remoteListEntryId:
+                                                      selectedList.sharedListEntryId,
+                                              })
+                                            : getListShareUrl({
+                                                  remoteListId:
+                                                      selectedList.remoteId,
+                                              }),
+                                    )
+                                }
+                            />
+                        </TooltipBox>
                         {this.renderPermissionStatusButton()}
                     </RightSideButtonsTopBar>
                 </IsolatedViewHeaderTopBar>
@@ -1806,14 +1832,16 @@ export class AnnotationsSidebar extends React.Component<
 
         if (permissionStatus === 'Follower' && !selectedList.isForeignList) {
             return (
-                <PrimaryAction
-                    label="Follower"
-                    type="forth"
-                    size="small"
-                    icon="check"
-                    onClick={null}
-                    fontColor={'greyScale6'}
-                />
+                <CreatorActionButtons>
+                    <PrimaryAction
+                        label="Follower"
+                        type="forth"
+                        size="small"
+                        icon="check"
+                        onClick={null}
+                        fontColor={'greyScale6'}
+                    />
+                </CreatorActionButtons>
             )
         }
 
@@ -2076,7 +2104,7 @@ const RightSideButtonsTopBar = styled.div`
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    grid-gap: 5px;
+    grid-gap: 10px;
 `
 
 const OptionsContainer = styled.div`
@@ -2476,6 +2504,7 @@ const CreatorActionButtons = styled.div`
     align-items: center;
     flex-direction: flex-end;
     grid-gap: 5px;
+    margin-left: 10px;
 `
 
 const NewAnnotationBoxMyAnnotations = styled.div`
