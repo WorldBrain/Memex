@@ -59,6 +59,7 @@ import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import DiscordNotification from '@worldbrain/memex-common/lib/common-ui/components/discord-notification-banner'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -99,6 +100,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         instanceLocation: AnnotationCardInstanceLocation,
     ) => (
         id: string,
+        closePicker?: () => void,
         referenceElement?: React.RefObject<HTMLDivElement>,
     ) => JSX.Element
 
@@ -143,10 +145,12 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     annotationsShareAll: any
     copyPageLink: any
     queryAIwithPrompt: any
+    selectAISuggestion: any
     setQueryMode: (mode) => void
     updatePromptState: any
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
+    toggleAISuggestionsDropDown: () => void
 
     //postShareHook: (shareInfo) => void
     //postShareHook: (shareInfo) => void+
@@ -156,6 +160,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     hasFeedActivity?: boolean
     removeSelectedTextAIPreview?: () => void
     // editableProps: EditableItemProps
+    saveAIPrompt: (prompt) => void
+    removeAISuggestion: (prompt) => void
+    navigateFocusInList: (direction: 'up' | 'down') => void
 }
 
 interface AnnotationsSidebarState {
@@ -173,6 +180,8 @@ interface AnnotationsSidebarState {
         [unifiedId: string]: 'othersAnnotations' | 'ownAnnotations' | 'all'
     }
     showAIhighlight: boolean
+    showAISuggestionsDropDown: boolean
+    AIsuggestions: []
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -202,6 +211,8 @@ export class AnnotationsSidebar extends React.Component<
         linkCopyState: false,
         othersOrOwnAnnotationsState: {},
         showAIhighlight: false,
+        showAISuggestionsDropDown: false,
+        AIsuggestions: [],
     }
 
     async componentDidMount() {
@@ -601,8 +612,14 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedNotesContainer>
-                {(this.spaceOwnershipStatus(listData) === 'Contributor' ||
-                    this.spaceOwnershipStatus(listData) === 'Creator') && (
+                {(cacheUtils.deriveListOwnershipStatus(
+                    listData,
+                    this.props.currentUser,
+                ) === 'Contributor' ||
+                    cacheUtils.deriveListOwnershipStatus(
+                        listData,
+                        this.props.currentUser,
+                    ) === 'Creator') && (
                     <>
                         <NewAnnotationBoxMyAnnotations>
                             {this.renderNewAnnotation(
@@ -847,7 +864,12 @@ export class AnnotationsSidebar extends React.Component<
             return
         }
 
-        if (this.spaceOwnershipStatus(listData) === 'Creator') {
+        if (
+            cacheUtils.deriveListOwnershipStatus(
+                listData,
+                this.props.currentUser,
+            ) === 'Creator'
+        ) {
             return (
                 <PopoutBox
                     placement="bottom"
@@ -869,7 +891,6 @@ export class AnnotationsSidebar extends React.Component<
                         localListId={listData.localId}
                         remoteListId={listData.remoteId}
                         editableProps={this.props.editableProps!}
-                        // ownershipStatus={this.spaceOwnershipStatus(listData)}
                         // isMenuDisplayed={this.state.showSpaceSharePopout}
                         // onDeleteSpaceIntent={
                         //     this.props.onDeleteClick
@@ -881,8 +902,14 @@ export class AnnotationsSidebar extends React.Component<
             )
         }
         if (
-            this.spaceOwnershipStatus(listData) === 'Follower' ||
-            this.spaceOwnershipStatus(listData) === 'Contributor'
+            cacheUtils.deriveListOwnershipStatus(
+                listData,
+                this.props.currentUser,
+            ) === 'Follower' ||
+            cacheUtils.deriveListOwnershipStatus(
+                listData,
+                this.props.currentUser,
+            ) === 'Contributor'
         ) {
             return (
                 <PopoutBox
@@ -931,27 +958,38 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderSharedNotesByList() {
-        const { lists, listInstances, annotationsCache } = this.props
+        const {
+            lists,
+            listInstances,
+            annotationsCache,
+            currentUser,
+        } = this.props
         const allLists = normalizedStateToArray(lists).filter(
             (listData) =>
                 listData.unifiedAnnotationIds.length > 0 ||
                 listData.hasRemoteAnnotationsToLoad ||
-                annotationsCache.pageListIds.has(listData.unifiedId),
+                annotationsCache.pageListIds
+                    .get(this.props.normalizedPageUrl)
+                    ?.has(listData.unifiedId), // TODO
         )
 
         if (allLists.length > 0) {
             let myLists = allLists.filter(
-                (list) => this.spaceOwnershipStatus(list) === 'Creator',
+                (list) =>
+                    cacheUtils.deriveListOwnershipStatus(list, currentUser) ===
+                    'Creator',
             )
 
             let followedLists = allLists.filter(
                 (list) =>
-                    this.spaceOwnershipStatus(list) === 'Follower' &&
-                    !list.isForeignList,
+                    cacheUtils.deriveListOwnershipStatus(list, currentUser) ===
+                        'Follower' && !list.isForeignList,
             )
 
             let joinedLists = allLists.filter(
-                (list) => this.spaceOwnershipStatus(list) === 'Contributor',
+                (list) =>
+                    cacheUtils.deriveListOwnershipStatus(list, currentUser) ===
+                    'Contributor',
             )
 
             return (
@@ -1105,10 +1143,13 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderFocusModeNotif(listData) {
+        const ownershipStatus = cacheUtils.deriveListOwnershipStatus(
+            listData,
+            this.props.currentUser,
+        )
         if (
             this.state.showIsolatedViewNotif &&
-            (this.spaceOwnershipStatus(listData) === 'Contributor' ||
-                this.spaceOwnershipStatus(listData) === 'Creator')
+            (ownershipStatus === 'Contributor' || ownershipStatus === 'Creator')
         ) {
             return (
                 <FocusModeNotifContainer>
@@ -1187,7 +1228,63 @@ export class AnnotationsSidebar extends React.Component<
             return this.renderLoader()
         }
 
+        const addPromptButton = (prompt) => (
+            <TooltipBox tooltipText="Save as template" placement="left">
+                <Icon
+                    onClick={() => this.props.saveAIPrompt(prompt)}
+                    filePath={icons.plus}
+                    heightAndWidth="22px"
+                    color="prime1"
+                />
+            </TooltipBox>
+        )
+
         if (this.props.activeTab === 'summary') {
+            const SuggestionsList = ({ suggestions }) => {
+                return (
+                    <ClickAway
+                        onClickAway={() =>
+                            this.props.toggleAISuggestionsDropDown()
+                        }
+                    >
+                        <DropDown>
+                            {suggestions.map((suggestion) => (
+                                <DropDownItem
+                                    onClick={() =>
+                                        this.props.selectAISuggestion(
+                                            suggestion.prompt,
+                                        )
+                                    }
+                                    focused={
+                                        suggestion.focused && suggestion.focused
+                                    }
+                                >
+                                    {suggestion.prompt}
+                                    <RemoveTemplateIconBox>
+                                        <TooltipBox
+                                            tooltipText="Remove template"
+                                            placement="left"
+                                        >
+                                            <Icon
+                                                filePath={icons.removeX}
+                                                heightAndWidth="18px"
+                                                color="greyScale5"
+                                                onClick={(event) => {
+                                                    event.stopPropagation()
+                                                    this.props.removeAISuggestion(
+                                                        suggestion.prompt,
+                                                    )
+                                                }}
+                                            />
+                                        </TooltipBox>
+                                    </RemoveTemplateIconBox>
+                                </DropDownItem>
+                            ))}
+                        </DropDown>
+                    </ClickAway>
+                )
+            }
+
             return (
                 <AISidebarContainer>
                     {this.props.selectedTextAIPreview && (
@@ -1236,7 +1333,12 @@ export class AnnotationsSidebar extends React.Component<
                             </SelectedAITextContainer>
                         </SelectedAITextBox>
                     )}
-                    <QueryContainer>
+                    <QueryContainer
+                        AIDropDownShown={
+                            this.props.showAISuggestionsDropDown &&
+                            this.props.AIsuggestions.length > 0
+                        }
+                    >
                         <TextField
                             placeholder={
                                 this.props.prompt ??
@@ -1256,10 +1358,42 @@ export class AnnotationsSidebar extends React.Component<
                                         this.props.prompt,
                                     )
                                 }
+                                if (event.key === 'Escape') {
+                                    this.props.toggleAISuggestionsDropDown()
+                                }
+                                if (event.key === 'ArrowUp') {
+                                    if (!this.props.showAISuggestionsDropDown) {
+                                        this.props.toggleAISuggestionsDropDown()
+                                    }
+                                    this.props.navigateFocusInList('up')
+                                    focus()
+                                }
+
+                                if (event.key === 'ArrowDown') {
+                                    if (!this.props.showAISuggestionsDropDown) {
+                                        this.props.toggleAISuggestionsDropDown()
+                                    }
+                                    this.props.navigateFocusInList('down')
+                                    focus()
+                                }
                                 event.stopPropagation()
                             }}
                             height="40px"
+                            onClick={() =>
+                                this.props.toggleAISuggestionsDropDown()
+                            }
+                            actionButton={
+                                this.props.prompt &&
+                                this.props.prompt.length > 0 &&
+                                addPromptButton(this.props.prompt)
+                            }
                         />
+                        {this.props.showAISuggestionsDropDown &&
+                            this.props.AIsuggestions.length > 0 && (
+                                <SuggestionsList
+                                    suggestions={this.props.AIsuggestions}
+                                />
+                            )}
                     </QueryContainer>
                     {!this.props.selectedTextAIPreview && (
                         <OptionsContainer>
@@ -1681,7 +1815,23 @@ export class AnnotationsSidebar extends React.Component<
                         fontColor="greyScale6"
                         onClick={() => this.props.onResetSpaceSelect()}
                     />
-                    {this.renderPermissionStatusButton()}
+                    <RightSideButtonsTopBar>
+                        <PrimaryAction
+                            icon="goTo"
+                            type="tertiary"
+                            size="small"
+                            label="Open Space"
+                            fontColor="greyScale6"
+                            onClick={() =>
+                                window.open(
+                                    this.getBaseUrl() +
+                                        '/c/' +
+                                        selectedList.remoteId,
+                                )
+                            }
+                        />
+                        {this.renderPermissionStatusButton()}
+                    </RightSideButtonsTopBar>
                 </IsolatedViewHeaderTopBar>
                 <SpaceTitle>{selectedList.name}</SpaceTitle>
                 <SpaceDescription>{selectedList.description}</SpaceDescription>
@@ -1691,27 +1841,6 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private spaceOwnershipStatus(
-        listData: UnifiedList,
-    ): 'Creator' | 'Follower' | 'Contributor' {
-        if (listData.remoteId != null && listData.localId == null) {
-            return 'Follower'
-        }
-
-        if (listData.creator?.id === this.props.currentUser?.id) {
-            return 'Creator'
-        }
-
-        if (
-            listData.remoteId != null &&
-            listData.localId != null &&
-            listData.creator?.id !== this.props.currentUser?.id
-        ) {
-            return 'Contributor'
-        }
-
-        return undefined
-    }
     private throwNoSelectedListError() {
         throw new Error(
             'Isolated view specific render method called when state not set',
@@ -1728,7 +1857,10 @@ export class AnnotationsSidebar extends React.Component<
             this.props.selectedListId
         ]
 
-        const permissionStatus = this.spaceOwnershipStatus(selectedList)
+        const permissionStatus = cacheUtils.deriveListOwnershipStatus(
+            selectedList,
+            this.props.currentUser,
+        )
 
         if (permissionStatus === 'Follower' && !selectedList.isForeignList) {
             return (
@@ -1989,6 +2121,13 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const RightSideButtonsTopBar = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    grid-gap: 5px;
+`
+
 const OptionsContainer = styled.div`
     display: flex;
     align-items: center;
@@ -2046,6 +2185,51 @@ const SelectedAITextContainer = styled.div<{
         `}
 `
 
+const DropDown = styled.div`
+    display: flex;
+    flex-direction: column;
+    background: ${(props) => props.theme.colors.greyScale1};
+    border-radius: 0 0 6px 6px;
+    outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+    min-width: 100px;
+`
+
+const RemoveTemplateIconBox = styled.div`
+    display: none;
+    position: absolute;
+`
+
+const DropDownItem = styled.div<{ focused: boolean }>`
+    display: flex;
+    min-height: 24px;
+    align-items: center;
+    padding: 10px 20px;
+    color: ${(props) => props.theme.colors.greyScale7};
+    justify-content: space-between;
+    position: relative;
+    font-size: 14px;
+    &:first-child {
+        border-top: 1px solid ${(props) => props.theme.colors.greyScale1};
+    }
+
+    &:hover {
+        background: ${(props) => props.theme.colors.greyScale2};
+        cursor: pointer;
+
+        ${RemoveTemplateIconBox} {
+            display: flex;
+            right: 15px;
+            z-index: 100;
+        }
+    }
+
+    ${(props) =>
+        props.focused &&
+        css`
+            background: ${(props) => props.theme.colors.greyScale2};
+        `}
+`
+
 const BlurContainer = styled.div`
     position: absolute;
     bottom: 0px;
@@ -2057,9 +2241,23 @@ const BlurContainer = styled.div`
     );
 `
 
-const QueryContainer = styled.div`
+const QueryContainer = styled.div<{
+    AIDropDownShown: boolean
+}>`
     height: 40px;
     padding: 15px;
+    display: flex;
+    flex-direction: column;
+    z-index: 101;
+
+    ${(props) =>
+        props.AIDropDownShown &&
+        css`
+            & > div:first-child {
+                border-bottom-right-radius: 0px;
+                border-bottom-left-radius: 0px;
+            }
+        `}
 `
 
 const AISidebarContainer = styled.div`

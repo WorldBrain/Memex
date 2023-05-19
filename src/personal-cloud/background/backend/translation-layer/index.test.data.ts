@@ -407,12 +407,14 @@ export const LOCAL_TEST_DATA_V24 = {
             isFavourite: false,
             title: 'Roam Markdown',
             code: '[[{{{PageTitle}}}]]',
+            outputFormat: 'markdown',
         },
         second: {
             id: 2,
             isFavourite: true,
             title: 'Other Markdown',
             code: '[[{{{PageUrl}}}]]',
+            outputFormat: 'markdown',
         },
     },
     settings: {

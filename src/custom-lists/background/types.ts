@@ -121,7 +121,7 @@ export interface RemoteCollectionsInterface {
     fetchAllLists(args: {
         skip?: number
         limit?: number
-        skipMobileList?: boolean
+        skipSpecialLists?: boolean
         includeDescriptions?: boolean
     }): Promise<PageList[]>
     fetchListById(args: { id: number }): Promise<PageList>

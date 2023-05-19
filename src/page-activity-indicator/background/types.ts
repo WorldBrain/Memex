@@ -24,6 +24,12 @@ export type PageActivityStatus =
     | 'no-activity'
 
 export interface RemotePageActivityIndicatorInterface {
+    getAllFollowedLists: () => Promise<{
+        [remoteListId: string]: Pick<
+            FollowedList,
+            'sharedList' | 'creator' | 'name'
+        >
+    }>
     getPageFollowedLists: (
         fullPageUrl: string,
         extraFollowedListIds?: string[],

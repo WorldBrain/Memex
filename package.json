@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.3.54",
+    "version": "3.3.63",
     "homepage": "https://worldbrain.io",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
@@ -104,6 +104,7 @@
         "json-date-parser": "^1.0.1",
         "json2md": "^1.12.0",
         "lodash": "^4.17.4",
+        "markdown-it": "^13.0.1",
         "marked": "^4.0.2",
         "moment": "^2.18.1",
         "moment-timezone": "^0.5.14",
@@ -198,6 +199,7 @@
         "@types/jest": "^28.1.7",
         "@types/js-combinatorics": "^0.5.31",
         "@types/lodash": "^4.14.108",
+        "@types/markdown-it": "^12.2.3",
         "@types/mongodb": "^3.0.21",
         "@types/mustache": "^4.0.1",
         "@types/openpgp": "^4.4.7",

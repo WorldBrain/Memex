@@ -34,6 +34,7 @@ import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotation
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
+import TutorialContainer from 'src/in-page-ui/guided-tutorial/content-script/components/tutorial-container'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -41,9 +42,11 @@ export interface Props extends RibbonSubcomponentProps {
     isRibbonEnabled: boolean
     shortcutsData: ShortcutElData[]
     showExtraButtons: boolean
+    showRemoveMenu: boolean
     showTutorial: boolean
     getListDetailsById: ListDetailsGetter
     toggleShowExtraButtons: () => void
+    toggleRemoveMenu: () => void
     toggleShowTutorial: () => void
     handleRibbonToggle: () => void
     handleRemoveRibbon: () => void
@@ -51,6 +54,8 @@ export interface Props extends RibbonSubcomponentProps {
     hideOnMouseLeave?: boolean
     toggleFeed: () => void
     showFeed: boolean
+    toggleAskAI: () => void
+    openPDFinViewer: () => void
 }
 
 interface State {
@@ -81,6 +86,7 @@ export default class Ribbon extends Component<Props, State> {
     private tutorialButtonRef = createRef<HTMLDivElement>()
     private feedButtonRef = createRef<HTMLDivElement>()
     private sidebarButtonRef = createRef<HTMLDivElement>()
+    private removeMenuButtonRef = createRef<HTMLDivElement>()
     private changeColorRef = createRef<HTMLDivElement>()
     private colorPickerField = createRef<HTMLInputElement>()
 
@@ -249,15 +255,200 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.sidebar.isSidebarOpen ? 'left-end' : 'left'
                 }
                 offsetX={10}
-                closeComponent={this.props.toggleShowTutorial}
-                width={'440px'}
+                closeComponent={() => {
+                    this.setState({
+                        showColorPicker: false,
+                        renderFeedback: false,
+                        renderLiveChat: false,
+                        renderChangeLog: false,
+                    })
+                    this.props.toggleShowTutorial()
+                }}
+                width={'fit-content'}
             >
-                <QuickTutorial
-                    getKeyboardShortcutsState={getKeyboardShortcutsState}
-                    onSettingsClick={() =>
-                        this.props.bgScriptBG.openOptionsTab('settings')
-                    }
-                />
+                <SupportContainer>
+                    <GlobalStyle />
+                    {this.state.showColorPicker ? (
+                        this.renderColorPicker()
+                    ) : this.state.renderFeedback ? (
+                        <FeedbackContainer>
+                            <LoadingIndicator size={30} />
+                            <FeedFrame
+                                src="https://memex.featurebase.app"
+                                frameborder="0"
+                                onmousewheel=""
+                                width="100%"
+                                height="533"
+                            />
+                        </FeedbackContainer>
+                    ) : this.state.renderLiveChat ? (
+                        <ChatBox>
+                            <LoadingIndicator size={30} />
+                            <ChatFrame
+                                src={
+                                    'https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599'
+                                }
+                                height={600}
+                                width={500}
+                            />
+                        </ChatBox>
+                    ) : this.state.renderChangeLog ? (
+                        <ChatBox>
+                            <LoadingIndicator size={30} />
+                            <ChatFrame
+                                src={'https://memex.featurebase.app/changelog'}
+                                height={600}
+                                width={500}
+                            />
+                        </ChatBox>
+                    ) : (
+                        <>
+                            <TutorialContainerBox>
+                                <SectionTitle>Settings</SectionTitle>
+                                <SupportBox>
+                                    <ExtraButtonRow
+                                        onClick={(event) => {
+                                            this.setState({
+                                                showColorPicker: true,
+                                            })
+                                            event.stopPropagation()
+                                        }}
+                                    >
+                                        <ColorPickerCircle
+                                            backgroundColor={
+                                                this.state.pickerColor
+                                            }
+                                        />
+                                        <InfoText>
+                                            Change Highlight Color
+                                        </InfoText>
+                                    </ExtraButtonRow>
+                                    <ExtraButtonRow
+                                        onClick={
+                                            this.props.tooltip
+                                                .handleTooltipToggle
+                                        }
+                                    >
+                                        <Icon
+                                            filePath={
+                                                this.props.tooltip
+                                                    .isTooltipEnabled
+                                                    ? icons.tooltipOff
+                                                    : icons.tooltipOn
+                                            }
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        {this.props.tooltip.isTooltipEnabled ? (
+                                            <InfoText>
+                                                Hide Highlighter Tooltip
+                                            </InfoText>
+                                        ) : (
+                                            <InfoText>
+                                                Show Highlighter Tooltip
+                                            </InfoText>
+                                        )}
+                                    </ExtraButtonRow>
+                                    <ExtraButtonRow
+                                        onClick={() =>
+                                            this.props.bgScriptBG.openOptionsTab(
+                                                'settings',
+                                            )
+                                        }
+                                    >
+                                        <Icon
+                                            filePath={icons.settings}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>All Settings</InfoText>
+                                    </ExtraButtonRow>
+                                </SupportBox>
+                            </TutorialContainerBox>
+                            <TutorialContainerBox>
+                                <SectionTitle>Support</SectionTitle>
+                                <SupportBox>
+                                    <ExtraButtonRow
+                                        onClick={() =>
+                                            this.setState({
+                                                renderFeedback: true,
+                                            })
+                                        }
+                                    >
+                                        <Icon
+                                            filePath={icons.sadFace}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>
+                                            Feature Requests & Bugs
+                                        </InfoText>
+                                    </ExtraButtonRow>
+                                    <ExtraButtonRow
+                                        onClick={async () => {
+                                            this.setState({
+                                                renderChangeLog: true,
+                                                updatesAvailable: false,
+                                            })
+                                            await this.setUpdateFlagToRead()
+                                        }}
+                                    >
+                                        <Icon
+                                            filePath={icons.clock}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>What's new?</InfoText>
+                                        {this.state.updatesAvailable && (
+                                            <UpdateAvailablePill>
+                                                New Updates
+                                            </UpdateAvailablePill>
+                                        )}
+                                    </ExtraButtonRow>
+                                    <ExtraButtonRow
+                                        onClick={() =>
+                                            this.setState({
+                                                renderLiveChat: true,
+                                            })
+                                        }
+                                    >
+                                        <Icon
+                                            filePath={icons.chatWithUs}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>Live Chat Support</InfoText>
+                                    </ExtraButtonRow>
+                                    <ExtraButtonRow
+                                        onClick={() =>
+                                            window.open(
+                                                'https://worldbrain.io/tutorials',
+                                            )
+                                        }
+                                    >
+                                        <Icon
+                                            filePath={icons.helpIcon}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>All Tutorials</InfoText>
+                                    </ExtraButtonRow>
+                                </SupportBox>
+                            </TutorialContainerBox>
+                            <QuickTutorial
+                                getKeyboardShortcutsState={
+                                    getKeyboardShortcutsState
+                                }
+                                onSettingsClick={() =>
+                                    this.props.bgScriptBG.openOptionsTab(
+                                        'settings',
+                                    )
+                                }
+                                hideEditorTutorials
+                            />
+                        </>
+                    )}
+                </SupportContainer>
             </PopoutBox>
         )
     }
@@ -363,287 +554,6 @@ export default class Ribbon extends Component<Props, State> {
         }
     }
 
-    renderLiveChat() {}
-
-    private renderExtraButtons() {
-        if (!this.props.showExtraButtons) {
-            return
-        }
-
-        return (
-            <PopoutBox
-                targetElementRef={this.settingsButtonRef.current}
-                placement={
-                    this.props.sidebar.isSidebarOpen ? 'left-end' : 'left-start'
-                }
-                offsetX={10}
-                width={!this.state.showColorPicker ? '360px' : '500px'}
-                closeComponent={() => {
-                    this.setState({
-                        showColorPicker: false,
-                        renderFeedback: false,
-                        renderLiveChat: false,
-                        renderChangeLog: false,
-                    })
-                    this.props.toggleShowExtraButtons()
-                }}
-            >
-                <GlobalStyle />
-                {this.state.showColorPicker ? (
-                    this.renderColorPicker()
-                ) : this.state.renderFeedback ? (
-                    <FeedbackContainer>
-                        <LoadingIndicator size={30} />
-                        <FeedFrame
-                            src="https://memex.featurebase.app"
-                            frameborder="0"
-                            onmousewheel=""
-                            width="100%"
-                            height="533"
-                        />
-                    </FeedbackContainer>
-                ) : this.state.renderLiveChat ? (
-                    <ChatBox>
-                        <LoadingIndicator size={30} />
-                        <ChatFrame
-                            src={
-                                'https://go.crisp.chat/chat/embed/?website_id=05013744-c145-49c2-9c84-bfb682316599'
-                            }
-                            height={600}
-                            width={500}
-                        />
-                    </ChatBox>
-                ) : this.state.renderChangeLog ? (
-                    <ChatBox>
-                        <LoadingIndicator size={30} />
-                        <ChatFrame
-                            src={'https://memex.featurebase.app/changelog'}
-                            height={600}
-                            width={500}
-                        />
-                    </ChatBox>
-                ) : (
-                    <ExtraButtonContainer>
-                        <BlockListArea>
-                            <BlockListTitleArea>
-                                <BlockListTitleContent>
-                                    <Icon
-                                        filePath={'block'}
-                                        heightAndWidth="22px"
-                                        hoverOff
-                                    />
-                                    <InfoText>
-                                        Block List for Action Sidebar
-                                    </InfoText>
-                                </BlockListTitleContent>
-                                <TooltipBox
-                                    tooltipText={'Modify existing block list'}
-                                    placement={'bottom'}
-                                >
-                                    <Icon
-                                        onClick={() =>
-                                            this.props.bgScriptBG.openOptionsTab(
-                                                'blocklist',
-                                            )
-                                        }
-                                        filePath={'settings'}
-                                        heightAndWidth={'18px'}
-                                        color={'prime1'}
-                                    />
-                                </TooltipBox>
-                            </BlockListTitleArea>
-                            <TextBoxArea>
-                                <TextField
-                                    value={this.state.blockListValue}
-                                    onChange={(event) =>
-                                        this.setState({
-                                            blockListValue: (event.target as HTMLInputElement)
-                                                .value,
-                                        })
-                                    }
-                                    width="fill-available"
-                                />
-                                <TooltipBox
-                                    tooltipText={
-                                        'Add this entry to the block list'
-                                    }
-                                    placement={'bottom'}
-                                >
-                                    <Icon
-                                        heightAndWidth="22px"
-                                        filePath="plus"
-                                        color="prime1"
-                                        onClick={async () => {
-                                            this.setState({
-                                                blockListValue:
-                                                    'Added to block list',
-                                            })
-                                            await addUrlToBlacklist(
-                                                this.state.blockListValue,
-                                            )
-                                            setTimeout(
-                                                () =>
-                                                    this.props.handleRemoveRibbon(),
-                                                2000,
-                                            )
-                                        }}
-                                    />
-                                </TooltipBox>
-                            </TextBoxArea>
-                        </BlockListArea>
-                        <ExtraButtonRow
-                            onClick={() => {
-                                this.props.handleRibbonToggle()
-                                this.props.sidebar.closeSidebar()
-                            }}
-                        >
-                            <Icon
-                                filePath={icons.quickActionRibbon}
-                                heightAndWidth="22px"
-                                hoverOff
-                            />
-                            {this.props.isRibbonEnabled ? (
-                                <InfoText>
-                                    Disable Action Sidebar on all pages
-                                </InfoText>
-                            ) : (
-                                <InfoText>
-                                    Enable Action Sidebar on all pages
-                                </InfoText>
-                            )}
-                        </ExtraButtonRow>
-                        <ExtraButtonRow
-                            onClick={(event) => {
-                                this.setState({
-                                    showColorPicker: true,
-                                })
-                                event.stopPropagation()
-                            }}
-                        >
-                            <ColorPickerCircle
-                                backgroundColor={this.state.pickerColor}
-                            />
-                            <InfoText>Change Highlight Color</InfoText>
-                        </ExtraButtonRow>
-                        {/* <ExtraButtonRow
-                            onClick={
-                                this.props.highlights.handleHighlightsToggle
-                            }
-                        >
-                            <Icon
-                                filePath={'highlight'}
-                                heightAndWidth="22px"
-                                hoverOff
-                                color={
-                                    this.props.highlights
-                                        .areHighlightsEnabled && 'prime1'
-                                }
-                            />
-                            {this.props.highlights.areHighlightsEnabled ? (
-                                <InfoText>Hide Highlights</InfoText>
-                            ) : (
-                                <InfoText>Show Highlights</InfoText>
-                            )}
-                        </ExtraButtonRow> */}
-
-                        <ExtraButtonRow
-                            onClick={this.props.tooltip.handleTooltipToggle}
-                        >
-                            <Icon
-                                filePath={
-                                    this.props.tooltip.isTooltipEnabled
-                                        ? icons.tooltipOff
-                                        : icons.tooltipOn
-                                }
-                                heightAndWidth="22px"
-                                hoverOff
-                            />
-                            {this.props.tooltip.isTooltipEnabled ? (
-                                <InfoText>Hide Highlighter Tooltip</InfoText>
-                            ) : (
-                                <InfoText>Show Highlighter Tooltip</InfoText>
-                            )}
-                        </ExtraButtonRow>
-                        <ExtraButtonRow
-                            onClick={() =>
-                                window.open('https://worldbrain.io/tutorials')
-                            }
-                        >
-                            <Icon
-                                filePath={icons.helpIcon}
-                                heightAndWidth="22px"
-                                hoverOff
-                            />
-                            <InfoText>Tutorials</InfoText>
-                        </ExtraButtonRow>
-                        <ExtraButtonRow
-                            onClick={() =>
-                                this.props.bgScriptBG.openOptionsTab('settings')
-                            }
-                        >
-                            <Icon
-                                filePath={icons.settings}
-                                heightAndWidth="22px"
-                                hoverOff
-                            />
-                            <InfoText>Settings</InfoText>
-                        </ExtraButtonRow>
-                        <SupportTitle>Support</SupportTitle>
-                        <ExtraButtonRow
-                            onClick={() =>
-                                this.setState({
-                                    renderFeedback: true,
-                                })
-                            }
-                        >
-                            <Icon
-                                filePath={icons.sadFace}
-                                heightAndWidth="22px"
-                                hoverOff
-                            />
-                            <InfoText>Feature Requests & Bugs</InfoText>
-                        </ExtraButtonRow>
-                        <ExtraButtonRow
-                            onClick={async () => {
-                                this.setState({
-                                    renderChangeLog: true,
-                                    updatesAvailable: false,
-                                })
-                                await this.setUpdateFlagToRead()
-                            }}
-                        >
-                            <Icon
-                                filePath={icons.clock}
-                                heightAndWidth="22px"
-                                hoverOff
-                            />
-                            <InfoText>What's new?</InfoText>
-                            {this.state.updatesAvailable && (
-                                <UpdateAvailablePill>
-                                    New Updates
-                                </UpdateAvailablePill>
-                            )}
-                        </ExtraButtonRow>
-                        <ExtraButtonRow
-                            onClick={() =>
-                                this.setState({
-                                    renderLiveChat: true,
-                                })
-                            }
-                        >
-                            <Icon
-                                filePath={icons.chatWithUs}
-                                heightAndWidth="22px"
-                                hoverOff
-                            />
-                            <InfoText>Live Chat Support</InfoText>
-                        </ExtraButtonRow>
-                    </ExtraButtonContainer>
-                )}
-            </PopoutBox>
-        )
-    }
-
     renderCommentBox() {
         if (!this.props.commentBox.showCommentBox) {
             return
@@ -680,6 +590,129 @@ export default class Ribbon extends Component<Props, State> {
                 </CommentBoxContainer>
             </PopoutBox>
         )
+    }
+    renderRemoveMenu() {
+        if (!this.props.showRemoveMenu) {
+            return
+        }
+
+        return (
+            <PopoutBox
+                targetElementRef={this.removeMenuButtonRef.current}
+                placement={'left-start'}
+                offsetX={10}
+                closeComponent={() => this.props.toggleRemoveMenu()}
+                instaClose
+            >
+                <RemoveMenuContainer>
+                    <ExtraButtonRow
+                        onClick={() => this.props.handleRemoveRibbon()}
+                    >
+                        <Icon
+                            filePath={'removeX'}
+                            heightAndWidth="22px"
+                            hoverOff
+                        />
+                        <InfoText>Hide Sidebar (or click on X)</InfoText>
+                    </ExtraButtonRow>
+                    <BlockListArea>
+                        <BlockListTitleArea>
+                            <BlockListTitleContent>
+                                <InfoText>
+                                    Add domain/page to sidebar block list
+                                </InfoText>
+                            </BlockListTitleContent>
+                            <TooltipBox
+                                tooltipText={'Modify existing block list'}
+                                placement={'bottom'}
+                            >
+                                <Icon
+                                    onClick={() =>
+                                        this.props.bgScriptBG.openOptionsTab(
+                                            'blocklist',
+                                        )
+                                    }
+                                    filePath={'settings'}
+                                    heightAndWidth={'22px'}
+                                    color={'greyScale5'}
+                                />
+                            </TooltipBox>
+                        </BlockListTitleArea>
+                        <TextBoxArea>
+                            <TextField
+                                value={this.state.blockListValue}
+                                onChange={(event) =>
+                                    this.setState({
+                                        blockListValue: (event.target as HTMLInputElement)
+                                            .value,
+                                    })
+                                }
+                                width="fill-available"
+                            />
+                            <TooltipBox
+                                tooltipText={'Add this entry to the block list'}
+                                placement={'bottom'}
+                            >
+                                <Icon
+                                    heightAndWidth="22px"
+                                    filePath="plus"
+                                    color="prime1"
+                                    onClick={async () => {
+                                        this.setState({
+                                            blockListValue:
+                                                'Added to block list',
+                                        })
+                                        await addUrlToBlacklist(
+                                            this.state.blockListValue,
+                                        )
+                                        setTimeout(
+                                            () =>
+                                                this.props.handleRemoveRibbon(),
+                                            2000,
+                                        )
+                                    }}
+                                />
+                            </TooltipBox>
+                        </TextBoxArea>
+                    </BlockListArea>
+                    <ExtraButtonRow
+                        onClick={() => {
+                            this.props.handleRibbonToggle()
+                            this.props.sidebar.closeSidebar()
+                        }}
+                    >
+                        <Icon
+                            filePath={icons.quickActionRibbon}
+                            heightAndWidth="22px"
+                            hoverOff
+                        />
+                        {this.props.isRibbonEnabled ? (
+                            <InfoText>Disable Sidebar on all pages</InfoText>
+                        ) : (
+                            <InfoText>Enable Sidebar on all pages</InfoText>
+                        )}
+                    </ExtraButtonRow>
+                </RemoveMenuContainer>
+            </PopoutBox>
+        )
+    }
+
+    private timer
+
+    handleHover() {
+        // Clear any previously set timer
+        clearTimeout(this.timer)
+
+        // Set a new timer for 500ms
+        this.timer = setTimeout(() => {
+            // Do something here, like show a tooltip or reveal additional information
+            this.props.toggleRemoveMenu()
+        }, 200)
+    }
+
+    handleMouseLeave() {
+        // Clear the timer when the mouse leaves the div
+        clearTimeout(this.timer)
     }
 
     render() {
@@ -867,34 +900,45 @@ export default class Ribbon extends Component<Props, State> {
                                             placement={'left'}
                                             offsetX={10}
                                         >
-                                            <Icon
+                                            <IconBox
                                                 onClick={() =>
                                                     this.props.lists.setShowListsPicker(
                                                         !this.props.lists
                                                             .showListsPicker,
                                                     )
                                                 }
-                                                color={
-                                                    this.props.lists.pageListIds
-                                                        .length > 0
-                                                        ? 'prime1'
-                                                        : 'greyScale6'
-                                                }
-                                                heightAndWidth="22px"
-                                                filePath={'plus'}
-                                                containerRef={
-                                                    this.spacePickerRef
-                                                }
-                                            />
-                                            {this.props.lists.pageListIds
-                                                .length > 0 && (
-                                                <SpacesCounter>
-                                                    {
-                                                        this.props.lists
-                                                            .pageListIds.length
+                                            >
+                                                <Icon
+                                                    onClick={() =>
+                                                        this.props.lists.setShowListsPicker(
+                                                            !this.props.lists
+                                                                .showListsPicker,
+                                                        )
                                                     }
-                                                </SpacesCounter>
-                                            )}
+                                                    color={
+                                                        this.props.lists
+                                                            .pageListIds
+                                                            .length > 0
+                                                            ? 'prime1'
+                                                            : 'greyScale6'
+                                                    }
+                                                    heightAndWidth="22px"
+                                                    filePath={'plus'}
+                                                    containerRef={
+                                                        this.spacePickerRef
+                                                    }
+                                                />
+                                                {this.props.lists.pageListIds
+                                                    .length > 0 && (
+                                                    <SpacesCounter>
+                                                        {
+                                                            this.props.lists
+                                                                .pageListIds
+                                                                .length
+                                                        }
+                                                    </SpacesCounter>
+                                                )}
+                                            </IconBox>
                                         </TooltipBox>
                                         {!this.props.sidebar.isSidebarOpen && (
                                             <TooltipBox
@@ -908,26 +952,44 @@ export default class Ribbon extends Component<Props, State> {
                                                 placement={'left'}
                                                 offsetX={10}
                                             >
-                                                <Icon
+                                                <IconBox
                                                     onClick={(e) =>
                                                         this.handleCommentIconBtnClick(
                                                             e,
                                                         )
                                                     }
-                                                    color={'greyScale6'}
-                                                    heightAndWidth="20px"
-                                                    filePath={
-                                                        this.props.commentBox
-                                                            .isCommentSaved
-                                                            ? icons.saveIcon
-                                                            : // : this.props.hasAnnotations
-                                                              // ? icons.commentFull
-                                                              icons.commentAdd
-                                                    }
-                                                    containerRef={
-                                                        this.sidebarButtonRef
-                                                    }
-                                                />
+                                                >
+                                                    <Icon
+                                                        color={'greyScale6'}
+                                                        heightAndWidth="20px"
+                                                        filePath={
+                                                            this.props
+                                                                .commentBox
+                                                                .isCommentSaved
+                                                                ? icons.saveIcon
+                                                                : // : this.props.hasAnnotations
+                                                                  // ? icons.commentFull
+                                                                  icons.commentAdd
+                                                        }
+                                                        containerRef={
+                                                            this
+                                                                .sidebarButtonRef
+                                                        }
+                                                    />
+                                                    {this.props.annotations
+                                                        .annotations.allIds
+                                                        .length > 0 && (
+                                                        <SpacesCounter>
+                                                            {
+                                                                this.props
+                                                                    .annotations
+                                                                    .annotations
+                                                                    .allIds
+                                                                    .length
+                                                            }
+                                                        </SpacesCounter>
+                                                    )}
+                                                </IconBox>
                                             </TooltipBox>
                                         )}
                                         <TooltipBox
@@ -946,6 +1008,65 @@ export default class Ribbon extends Component<Props, State> {
                                                 filePath={icons.searchIcon}
                                             />
                                         </TooltipBox>
+                                        {!this.props.sidebar.isSidebarOpen && (
+                                            <TooltipBox
+                                                tooltipText={this.getTooltipText(
+                                                    'askAI',
+                                                )}
+                                                placement={'left'}
+                                                offsetX={10}
+                                            >
+                                                <Icon
+                                                    onClick={() =>
+                                                        this.props.toggleAskAI()
+                                                    }
+                                                    color={'greyScale6'}
+                                                    heightAndWidth="20px"
+                                                    filePath={icons.stars}
+                                                />
+                                            </TooltipBox>
+                                        )}
+                                        {window.location.href.includes(
+                                            '.pdf',
+                                        ) &&
+                                            !window.location.href.includes(
+                                                'pdfjs/viewer.html?',
+                                            ) && (
+                                                <TooltipBox
+                                                    tooltipText={
+                                                        'Open PDF Reader'
+                                                    }
+                                                    placement={'left'}
+                                                    offsetX={10}
+                                                >
+                                                    <Icon
+                                                        onClick={() =>
+                                                            this.props.openPDFinViewer()
+                                                        }
+                                                        color={'greyScale6'}
+                                                        heightAndWidth="20px"
+                                                        filePath={icons.filePDF}
+                                                    />
+                                                </TooltipBox>
+                                            )}
+                                        {window.location.href.includes(
+                                            'pdfjs/viewer.html?',
+                                        ) && (
+                                            <TooltipBox
+                                                tooltipText={'Close PDF Reader'}
+                                                placement={'left'}
+                                                offsetX={10}
+                                            >
+                                                <Icon
+                                                    onClick={() =>
+                                                        this.props.openPDFinViewer()
+                                                    }
+                                                    color={'prime1'}
+                                                    heightAndWidth="20px"
+                                                    filePath={icons.filePDF}
+                                                />
+                                            </TooltipBox>
+                                        )}
                                     </PageAction>
                                 </UpperPart>
                                 {!this.props.sidebar.isSidebarOpen && (
@@ -962,31 +1083,11 @@ export default class Ribbon extends Component<Props, State> {
                                 >
                                     <BlockCounterIndicator />
                                     <TooltipBox
-                                        tooltipText={<span>Settings</span>}
-                                        placement={'left'}
-                                        offsetX={10}
-                                    >
-                                        <Icon
-                                            onClick={() =>
-                                                this.props.toggleShowExtraButtons()
-                                            }
-                                            color={'greyScale5'}
-                                            heightAndWidth="22px"
-                                            filePath={icons.settings}
-                                            containerRef={
-                                                this.settingsButtonRef
-                                            }
-                                        />
-                                        {this.state.updatesAvailable && (
-                                            <UpdateAvailableDot />
-                                        )}
-                                    </TooltipBox>
-                                    <TooltipBox
                                         tooltipText={
                                             <span>
-                                                Keyboard Shortcuts
+                                                Settings, Help &
                                                 <br />
-                                                and Help
+                                                Keyboard Shortcuts
                                             </span>
                                         }
                                         placement={'left'}
@@ -1003,38 +1104,35 @@ export default class Ribbon extends Component<Props, State> {
                                                 this.tutorialButtonRef
                                             }
                                         />
+                                        {this.state.updatesAvailable && (
+                                            <UpdateAvailableDot />
+                                        )}
                                     </TooltipBox>
                                     {!this.props.sidebar.isSidebarOpen && (
-                                        <TooltipBox
-                                            tooltipText={
-                                                <span>
-                                                    Close sidebar this once.
-                                                    <br />
-                                                    <SubText>
-                                                        Shift+Click to disable.
-                                                    </SubText>
-                                                </span>
+                                        <Icon
+                                            onMouseEnter={(event) => {
+                                                this.handleHover()
+                                            }}
+                                            onMouseLeave={(event) => {
+                                                this.handleMouseLeave()
+                                            }}
+                                            onClick={(event) => {
+                                                if (
+                                                    event.shiftKey &&
+                                                    this.props.isRibbonEnabled
+                                                ) {
+                                                    this.props.handleRibbonToggle()
+                                                } else {
+                                                    this.props.handleRemoveRibbon()
+                                                }
+                                            }}
+                                            color={'greyScale5'}
+                                            heightAndWidth="22px"
+                                            filePath={icons.removeX}
+                                            containerRef={
+                                                this.removeMenuButtonRef
                                             }
-                                            placement={'left'}
-                                            offsetX={10}
-                                        >
-                                            <Icon
-                                                onClick={(event) => {
-                                                    if (
-                                                        event.shiftKey &&
-                                                        this.props
-                                                            .isRibbonEnabled
-                                                    ) {
-                                                        this.props.handleRibbonToggle()
-                                                    } else {
-                                                        this.props.handleRemoveRibbon()
-                                                    }
-                                                }}
-                                                color={'greyScale5'}
-                                                heightAndWidth="22px"
-                                                filePath={icons.removeX}
-                                            />
-                                        </TooltipBox>
+                                        />
                                     )}
                                 </BottomSection>
                             </>
@@ -1045,11 +1143,47 @@ export default class Ribbon extends Component<Props, State> {
                 {this.renderTutorial()}
                 {this.renderFeedInfo()}
                 {this.renderCommentBox()}
-                {this.renderExtraButtons()}
+                {this.renderRemoveMenu()}
             </>
         )
     }
 }
+
+const IconBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+`
+
+const SupportContainer = styled.div`
+    max-height: 600px;
+    height: fit-content;
+    overflow: scroll;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    scrollbar-width: none;
+`
+
+const SupportBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+`
+
+const RemoveMenuContainer = styled.div`
+    display: flex;
+    padding: 15px;
+    width: 300px;
+    flex-direction: column;
+`
+const TutorialContainerBox = styled.div`
+    display: flex;
+    padding: 20px 20px 0 20px;
+    flex-direction: column;
+`
 
 const UpdateAvailablePill = styled.div`
     display: flex;
@@ -1090,7 +1224,7 @@ const SpacesCounter = styled.div`
 
 const SupportTitle = styled.div`
     color: ${(props) => props.theme.colors.greyScale4};
-    font-size: 16px;
+    font-size: 18px;
     margin: 15px 0 5px 15px;
 `
 
@@ -1130,11 +1264,6 @@ const UpperArea = styled.div`
     grid-gap: 8px;
 `
 
-const ButtonPositioning = styled.div`
-    position: absolute;
-    right: 15px;
-`
-
 const PickerButtonTopBar = styled.div`
     display: flex;
     justify-content: space-between;
@@ -1143,10 +1272,6 @@ const PickerButtonTopBar = styled.div`
     margin-left: -7px;
 `
 
-const ExtraButtonContainer = styled.div`
-    padding: 10px;
-    width: 300px;
-`
 const ColorPickerContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -1174,12 +1299,14 @@ const TooltipContent = styled.div`
 
 const BlockListArea = styled.div`
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
     display: flex;
     flex-direction: column;
     grid-gap: 5px;
     align-items: flex-start;
-    margin-bottom: 5px;
-    padding: 5px 10px 10px 0;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    padding: 10px 10px 15px 0;
 `
 
 const BlockListTitleArea = styled.div`
@@ -1202,7 +1329,7 @@ const BlockListTitleContent = styled.div`
 const TextBoxArea = styled.div`
     display: flex;
     align-items: center;
-    padding: 0 0 0 10px;
+    padding: 0 0 0 15px;
     width: fill-available;
     grid-gap: 5px;
 `
@@ -1323,7 +1450,8 @@ const ExtraButtonRow = styled.div`
     width: fill-available;
     cursor: pointer;
     border-radius: 3px;
-    padding: 0 15px;
+    padding: 0 10px;
+    margin: 0 -5px;
     position: relative;
 
     &:hover {
@@ -1422,9 +1550,12 @@ const TitleContent = styled.div`
 `
 
 const SectionTitle = styled.div`
+    font-size: 16px;
     color: ${(props) => props.theme.colors.white};
-    font-size: 18px;
+    display: flex;
     font-weight: bold;
+    justify-content: space-between;
+    align-items: center;
 `
 const SectionDescription = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};

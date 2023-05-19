@@ -35,7 +35,6 @@ import type { AnnotationCardInstanceLocation } from 'src/sidebar/annotations-sid
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { truncateText } from 'src/annotations/utils'
-import { ListData } from 'src/dashboard-refactor/lists-sidebar/types'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -86,6 +85,7 @@ export interface AnnotationProps {
     getListDetailsById: ListDetailsGetter
     renderListsPickerForAnnotation?: (
         unifiedId: UnifiedAnnotation['unifiedId'],
+        closePicker: () => void,
     ) => JSX.Element
     renderCopyPasterForAnnotation?: (
         unifiedId: UnifiedAnnotation['unifiedId'],
@@ -584,8 +584,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     <span>Shared in some Spaces</span>
                                 ) : (
                                     <span>
-                                        Shared in all Spaces <br /> you put the
-                                        page into
+                                        Automatically added to all <i>shared</i>{' '}
+                                        Spaces <br /> you put the page into
                                     </span>
                                 )
                             }
@@ -714,6 +714,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             >
                 {this.props.renderListsPickerForAnnotation(
                     this.props.unifiedId,
+                    () =>
+                        this.setState({
+                            showSpacePicker: 'hide',
+                        }),
                 )}
             </PopoutBox>
         )

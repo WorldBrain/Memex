@@ -39,6 +39,7 @@ export default class Logic extends UILogic<State, Event> {
         passwordConfirm: '',
         preventOnboardingFlow: false,
         autoLoginState: 'pristine',
+        showSyncNotification: false,
     })
 
     async init() {
@@ -174,18 +175,29 @@ export default class Logic extends UILogic<State, Event> {
             loadState: { $set: 'running' },
         })
 
-        this.syncPromise = executeUITask(this, 'syncState', async () =>
-            this.dependencies.personalCloudBG.enableCloudSyncForNewInstall(),
-        )
+        if ((await this.dependencies.authBG.getCurrentUser()) != null) {
+            this.syncPromise = executeUITask(this, 'syncState', async () =>
+                this.dependencies.personalCloudBG.enableCloudSyncForNewInstall(),
+            )
 
-        if (this.hasLinkToOpen) {
-            await this.openLinkIfAvailable()
-            window.close()
-        } else {
-            this.dependencies.navToDashboard()
-            if (newSignUp) {
-                this.dependencies.navToGuidedTutorial()
+            if (this.hasLinkToOpen) {
+                await this.openLinkIfAvailable()
+                window.close()
+            } else {
+                if (!newSignUp) {
+                    this.emitMutation({
+                        showSyncNotification: { $set: true },
+                        loadState: { $set: 'success' },
+                    })
+                } else {
+                    this.dependencies.navToGuidedTutorial()
+                    this.dependencies.navToDashboard()
+                }
             }
+        } else {
+            this.emitMutation({
+                loadState: { $set: 'error' },
+            })
         }
     }
 

@@ -1,5 +1,4 @@
 import React, { PureComponent } from 'react'
-import styled from 'styled-components'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -8,11 +7,9 @@ import SpaceContextMenu, {
 } from 'src/custom-lists/ui/space-context-menu'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { Props as EditableItemProps } from './sidebar-editable-item'
 
 export interface Props extends Omit<SpaceContextMenuProps, 'copyToClipboard'> {
     isMenuDisplayed: boolean
-    editableProps: EditableItemProps
     toggleMenu: React.MouseEventHandler
 }
 
@@ -40,7 +37,7 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
                 offsetY={-10}
                 closeComponent={(e) => {
                     this.toggleMenu(e)
-                    this.props.editableProps.cancelListEdit()
+                    this.props.onCancelEdit()
                 }}
                 strategy={'fixed'}
                 width={'300px'}

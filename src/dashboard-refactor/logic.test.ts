@@ -18,8 +18,14 @@ describe('Dashboard Refactor misc logic', () => {
             lastBackup: null,
             nextBackup: null,
         })
-        const { searchResults } = await setupTest(device)
+        const { searchResults, annotationsCache } = await setupTest(device, {
+            withAuth: true,
+        })
 
+        const creator: UserReference = {
+            type: 'user-reference',
+            id: TEST_USER.id,
+        }
         const listNames = ['testA', 'testB']
         const testDescription = 'this is a very interesting list'
         const listIds = await device.backgroundModules.customLists.createCustomLists(
@@ -29,47 +35,37 @@ describe('Dashboard Refactor misc logic', () => {
             { listId: listIds[0], description: testDescription },
         )
 
-        expect(
-            searchResults.state.listsSidebar.localLists.loadingState,
-        ).toEqual('pristine')
-        expect(searchResults.state.listsSidebar.listData).toEqual({})
-        expect(
-            searchResults.state.listsSidebar.localLists.filteredListIds,
-        ).toEqual([])
-        expect(searchResults.state.listsSidebar.localLists.allListIds).toEqual(
-            [],
+        expect(searchResults.state.listsSidebar.listLoadState).toEqual(
+            'pristine',
         )
+        expect(searchResults.state.listsSidebar.lists.byId).toEqual({})
+        expect(searchResults.state.listsSidebar.lists.allIds).toEqual([])
 
         await searchResults.processEvent('init', null)
 
-        expect(
-            searchResults.state.listsSidebar.localLists.loadingState,
-        ).toEqual('success')
-        expect(searchResults.state.listsSidebar.listData).toEqual({
-            [listIds[0]]: expect.objectContaining({
-                id: listIds[0],
+        expect(searchResults.state.listsSidebar.listLoadState).toEqual(
+            'success',
+        )
+        expect(annotationsCache.lists.byId).toEqual({
+            ['0']: expect.objectContaining({
+                localId: listIds[0],
                 name: listNames[0],
-                isOwnedList: true,
+                creator,
                 remoteId: undefined,
                 description: testDescription,
             }),
-            [listIds[1]]: expect.objectContaining({
-                id: listIds[1],
+            ['1']: expect.objectContaining({
+                localId: listIds[1],
                 name: listNames[1],
-                isOwnedList: true,
+                creator,
                 remoteId: undefined,
                 description: undefined,
             }),
         })
-        expect(
-            searchResults.state.listsSidebar.localLists.filteredListIds,
-        ).toEqual(listIds)
-        expect(searchResults.state.listsSidebar.localLists.allListIds).toEqual(
-            listIds,
-        )
+        expect(annotationsCache.lists.allIds.length).toBe(2)
     })
 
-    it('should be able to load followed + joined lists, after local lists, during init logic', async ({
+    it('should be able to load local + followed + joined lists during init logic', async ({
         device,
     }) => {
         device.backgroundModules.backupModule.isAutomaticBackupEnabled = async () =>
@@ -93,10 +89,12 @@ describe('Dashboard Refactor misc logic', () => {
             type: 'user-reference',
         }
 
+        const sharedListADescription = 'test A description'
         const sharedListARef = await contentSharing.createSharedList({
             userReference: userReferenceB,
-            listData: { title: 'testA', description: 'test A description' },
+            listData: { title: 'testA', description: sharedListADescription },
         })
+        // This one just exists, though not following it
         await contentSharing.createSharedList({
             userReference: userReferenceB,
             listData: { title: 'testB' },
@@ -106,30 +104,60 @@ describe('Dashboard Refactor misc logic', () => {
             listData: { title: 'testC' },
         })
 
-        await activityFollows.storeFollow({
-            objectId: sharedListARef.id as string,
-            collection: 'sharedList',
-            userReference: userReferenceA,
-        })
-        await activityFollows.storeFollow({
-            objectId: sharedListCRef.id as string,
-            collection: 'sharedList',
-            userReference: userReferenceA,
-        })
+        // await activityFollows.storeFollow({
+        //     objectId: sharedListARef.id as string,
+        //     collection: 'sharedList',
+        //     userReference: userReferenceA,
+        // })
+        // await activityFollows.storeFollow({
+        //     objectId: sharedListCRef.id as string,
+        //     collection: 'sharedList',
+        //     userReference: userReferenceA,
+        // })
+
+        await device.backgroundModules.pageActivityIndicator.createFollowedList(
+            {
+                creator: userReferenceB.id,
+                name: 'testA',
+                sharedList: sharedListARef.id,
+            },
+        )
+        await device.backgroundModules.pageActivityIndicator.createFollowedList(
+            {
+                creator: userReferenceB.id,
+                name: 'testC',
+                sharedList: sharedListCRef.id,
+            },
+        )
 
         // Create local data for list A, simulating a joined list (followed + local data)
         await device.storageManager.collection('customLists').createObject({
-            id: 123,
+            id: 1,
             name: 'testA',
             searchableName: 'testA',
             createdAt: new Date(),
         })
         await device.storageManager
+            .collection('customListDescriptions')
+            .createObject({
+                id: 1,
+                listId: 1,
+                description: sharedListADescription,
+            })
+        await device.storageManager
             .collection('sharedListMetadata')
             .createObject({
-                localId: 123,
+                localId: 1,
                 remoteId: sharedListARef.id,
             })
+
+        // Create a purely local list
+        await device.storageManager.collection('customLists').createObject({
+            id: 2,
+            name: 'testD',
+            searchableName: 'testD',
+            createdAt: new Date(),
+        })
 
         const [
             sharedListAData,
@@ -139,64 +167,39 @@ describe('Dashboard Refactor misc logic', () => {
             sharedListCRef,
         ])
 
-        expect(searchResults.state.listsSidebar.listData).toEqual({})
-        expect(
-            searchResults.state.listsSidebar.localLists.loadingState,
-        ).toEqual('pristine')
-        expect(
-            searchResults.state.listsSidebar.localLists.filteredListIds,
-        ).toEqual([])
-        expect(searchResults.state.listsSidebar.localLists.allListIds).toEqual(
-            [],
+        expect(searchResults.state.listsSidebar.lists.byId).toEqual({})
+        expect(searchResults.state.listsSidebar.listLoadState).toEqual(
+            'pristine',
         )
-        expect(
-            searchResults.state.listsSidebar.followedLists.loadingState,
-        ).toEqual('pristine')
-        expect(
-            searchResults.state.listsSidebar.followedLists.filteredListIds,
-        ).toEqual([])
-        expect(
-            searchResults.state.listsSidebar.followedLists.allListIds,
-        ).toEqual([])
 
         await searchResults.processEvent('init', null)
 
-        expect(searchResults.state.listsSidebar.listData).toEqual({
-            [123]: {
-                id: 123,
-                name: 'testA',
+        expect(searchResults.state.listsSidebar.lists.byId).toEqual({
+            ['0']: expect.objectContaining({
+                localId: 1,
                 remoteId: sharedListARef.id,
-                description: 'test A description',
-                isOwnedList: false,
-                isJoinedList: true,
-            },
-            [sharedListCData.createdWhen]: {
-                id: sharedListCData.createdWhen,
+                name: 'testA',
+                description: sharedListADescription,
+                creator: userReferenceB,
+            }),
+            ['1']: expect.objectContaining({
+                localId: 2,
+                remoteId: undefined,
+                name: 'testD',
+                description: undefined,
+                creator: userReferenceA,
+            }),
+            ['2']: expect.objectContaining({
+                localId: undefined,
+                remoteId: sharedListCRef.id.toString(),
                 name: 'testC',
-                remoteId: sharedListCRef.id,
-                description: null,
-                isOwnedList: false,
-                isJoinedList: false,
-            },
+                description: undefined,
+                creator: userReferenceB,
+            }),
         })
-        expect(
-            searchResults.state.listsSidebar.localLists.loadingState,
-        ).toEqual('success')
-        expect(
-            searchResults.state.listsSidebar.localLists.filteredListIds,
-        ).toEqual([123])
-        expect(searchResults.state.listsSidebar.localLists.allListIds).toEqual([
-            123,
-        ])
-        expect(
-            searchResults.state.listsSidebar.followedLists.loadingState,
-        ).toEqual('success')
-        expect(
-            searchResults.state.listsSidebar.followedLists.filteredListIds,
-        ).toEqual([sharedListCData.createdWhen])
-        expect(
-            searchResults.state.listsSidebar.followedLists.allListIds,
-        ).toEqual([sharedListCData.createdWhen])
+        expect(searchResults.state.listsSidebar.listLoadState).toEqual(
+            'success',
+        )
     })
 
     it('should trigger search during init logic', async ({ device }) => {
@@ -366,32 +369,5 @@ describe('Dashboard Refactor misc logic', () => {
         await logicB.cleanup()
         await logicC.cleanup()
         await logicD.cleanup()
-    })
-
-    it('should get feed activity status upon click', async ({ device }) => {
-        let feedUrlOpened = false
-
-        const { searchResults } = await setupTest(device, {
-            withAuth: true,
-            openFeedUrl: () => {
-                feedUrlOpened = true
-            },
-        })
-        searchResults.processMutation({
-            listsSidebar: { hasFeedActivity: { $set: true } },
-        })
-        await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, true)
-
-        expect(searchResults.state.listsSidebar.hasFeedActivity).toBe(true)
-        expect(feedUrlOpened).toBe(false)
-        expect(await getLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY)).toBe(
-            true,
-        )
-        await searchResults.processEvent('clickFeedActivityIndicator', null)
-        expect(searchResults.state.listsSidebar.hasFeedActivity).toBe(false)
-        expect(feedUrlOpened).toBe(true)
-        expect(await getLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY)).toBe(
-            false,
-        )
     })
 })

@@ -25,6 +25,7 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import { formateCalendarTime } from '@worldbrain/memex-common/lib/utils/date-time'
+import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
 export const notesTypeToString = (type: NotesType): string => {
     if (type === 'user') {
@@ -124,11 +125,17 @@ export const getInitialNoteResultState = (inputValue = ''): NoteResult => ({
     editNoteForm: getInitialFormState(inputValue),
 })
 
-const pageResultToPageData = (pageResult: AnnotPage): PageData => {
+const pageResultToPageData = (
+    pageResult: AnnotPage,
+    cache: PageAnnotationsCacheInterface,
+): PageData => {
     const isPdf = isPagePdf(pageResult)
+    const lists = pageResult.lists
+        .map((localListId) => cache.getListByLocalId(localListId)?.unifiedId)
+        .filter((id) => id != null)
     return {
+        lists,
         tags: pageResult.tags,
-        lists: pageResult.lists,
         fullUrl: pageResult.fullUrl,
         fullTitle: pageResult.title,
         normalizedUrl: pageResult.url,
@@ -143,38 +150,47 @@ const pageResultToPageData = (pageResult: AnnotPage): PageData => {
 
 const annotationToNoteData = (
     annotation: Annotation,
-): NoteData & NoteResult => ({
-    url: annotation.url,
-    pageUrl: annotation.pageUrl,
-    highlight: annotation.body,
-    comment: annotation.comment,
-    tags: annotation.tags ?? [],
-    lists: annotation.lists ?? [],
-    selector: annotation.selector,
-    createdWhen: annotation.createdWhen,
-    displayTime: new Date(
-        annotation.lastEdited ?? annotation.createdWhen,
-    ).getTime(),
-    isEdited: annotation.lastEdited != null,
-    isShared: annotation.isShared,
-    isBulkShareProtected: !!annotation.isBulkShareProtected,
-    ...getInitialNoteResultState(),
-    editNoteForm: {
-        inputValue: annotation.comment ?? '',
+    cache: PageAnnotationsCacheInterface,
+): NoteData & NoteResult => {
+    const lists =
+        annotation.lists
+            ?.map(
+                (localListId) => cache.getListByLocalId(localListId)?.unifiedId,
+            )
+            .filter((id) => id != null) ?? []
+    return {
+        url: annotation.url,
+        pageUrl: annotation.pageUrl,
+        highlight: annotation.body,
+        comment: annotation.comment,
         tags: annotation.tags ?? [],
-        // TODO: make into lists
-        lists: annotation.lists ?? [],
-        isTagPickerShown: false,
-        isListPickerShown: false,
-    },
-})
+        lists,
+        selector: annotation.selector,
+        createdWhen: annotation.createdWhen,
+        displayTime: new Date(
+            annotation.lastEdited ?? annotation.createdWhen,
+        ).getTime(),
+        isEdited: annotation.lastEdited != null,
+        isShared: annotation.isShared,
+        isBulkShareProtected: !!annotation.isBulkShareProtected,
+        ...getInitialNoteResultState(),
+        editNoteForm: {
+            inputValue: annotation.comment ?? '',
+            tags: annotation.tags ?? [],
+            lists,
+            isTagPickerShown: false,
+            isListPickerShown: false,
+        },
+    }
+}
 
-export const annotationSearchResultToState: SearchResultToState = (
-    result: AnnotationsSearchResponse,
+export const annotationSearchResultToState: SearchResultToState<AnnotationsSearchResponse> = (
+    result,
+    cache,
 ) => {
     // This case is for annots search with terms set
     if (!result.isAnnotsSearch) {
-        return pageSearchResultToState(result, { areNotesShown: true })
+        return pageSearchResultToState(result, cache, { areNotesShown: true })
     }
 
     const pageData = initNormalizedState<PageData>()
@@ -202,7 +218,10 @@ export const annotationSearchResultToState: SearchResultToState = (
 
             for (const annotation of sortedAnnots) {
                 noteData.allIds.push(annotation.url)
-                noteData.byId[annotation.url] = annotationToNoteData(annotation)
+                noteData.byId[annotation.url] = annotationToNoteData(
+                    annotation,
+                    cache,
+                )
             }
         }
 
@@ -216,14 +235,15 @@ export const annotationSearchResultToState: SearchResultToState = (
         const id = pageResult.url
 
         pageData.allIds.push(id)
-        pageData.byId[id] = pageResultToPageData(pageResult)
+        pageData.byId[id] = pageResultToPageData(pageResult, cache)
     }
 
     return { noteData, pageData, results: resultState }
 }
 
-export const pageSearchResultToState: SearchResultToState = (
-    result: StandardSearchResponse,
+export const pageSearchResultToState: SearchResultToState<StandardSearchResponse> = (
+    result,
+    cache,
     extraPageResultState,
 ) => {
     const pageData = initNormalizedState<PageData>()
@@ -235,7 +255,7 @@ export const pageSearchResultToState: SearchResultToState = (
         const sortedAnnots = pageResult.annotations.sort(sortByPagePosition)
         const noteIds = sortedAnnots.map((a) => a.url)
 
-        pageData.byId[id] = pageResultToPageData(pageResult)
+        pageData.byId[id] = pageResultToPageData(pageResult, cache)
         pageResults.byId[id] = getInitialPageResultState(
             pageResult.url,
             noteIds,
@@ -247,7 +267,10 @@ export const pageSearchResultToState: SearchResultToState = (
 
         for (const annotation of sortedAnnots) {
             noteData.allIds.push(annotation.url)
-            noteData.byId[annotation.url] = annotationToNoteData(annotation)
+            noteData.byId[annotation.url] = annotationToNoteData(
+                annotation,
+                cache,
+            )
         }
     }
 

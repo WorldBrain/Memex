@@ -49,6 +49,7 @@ export class PageActivityIndicatorBackground {
         })
 
         this.remoteFunctions = {
+            getAllFollowedLists: this.getAllFollowedLists,
             getPageFollowedLists: this.getPageFollowedLists,
             getPageActivityStatus: this.getPageActivityStatus,
         }
@@ -132,6 +133,20 @@ export class PageActivityIndicatorBackground {
                 now: opts?.now,
             })
         }
+    }
+
+    private getAllFollowedLists: RemotePageActivityIndicatorInterface['getAllFollowedLists'] = async () => {
+        const followedLists = await this.storage.findAllFollowedLists()
+        return fromPairs(
+            [...followedLists.values()].map((list) => [
+                list.sharedList,
+                {
+                    sharedList: list.sharedList,
+                    creator: list.creator,
+                    name: list.name,
+                },
+            ]),
+        )
     }
 
     private getPageFollowedLists: RemotePageActivityIndicatorInterface['getPageFollowedLists'] = async (

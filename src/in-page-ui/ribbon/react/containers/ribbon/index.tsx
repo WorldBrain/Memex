@@ -56,6 +56,12 @@ export default class RibbonContainer extends StatefulUIElement<
     }
 
     componentDidUpdate(prevProps: RibbonContainerProps) {
+        if (
+            !this.props.inPageUI.componentsShown.ribbon &&
+            this.state.showRemoveMenu
+        ) {
+            this.processEvent('toggleRemoveMenu', false)
+        }
         const { currentTab } = this.props
 
         if (currentTab.url !== prevProps.currentTab.url) {
@@ -106,6 +112,7 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
+                annotations={this.props.annotationsCache}
                 contentSharingBG={this.props.contentSharing}
                 bgScriptBG={this.props.bgScriptBG}
                 spacesBG={this.props.customLists}
@@ -131,10 +138,17 @@ export default class RibbonContainer extends StatefulUIElement<
                 toggleShowExtraButtons={() => {
                     this.processEvent('toggleShowExtraButtons', null)
                 }}
+                toggleRemoveMenu={() => {
+                    this.processEvent('toggleRemoveMenu', null)
+                }}
+                toggleAskAI={() => {
+                    this.processEvent('toggleAskAI', null)
+                }}
                 toggleShowTutorial={() => {
                     this.processEvent('toggleShowTutorial', null)
                 }}
                 showExtraButtons={this.state.areExtraButtonsShown}
+                showRemoveMenu={this.state.showRemoveMenu}
                 showTutorial={this.state.areTutorialShown}
                 showFeed={this.state.showFeed}
                 toggleFeed={() => {
@@ -272,6 +286,9 @@ export default class RibbonContainer extends StatefulUIElement<
                     ...this.state.pausing,
                     handlePauseToggle: () =>
                         this.processEvent('handlePauseToggle', null),
+                }}
+                openPDFinViewer={() => {
+                    this.processEvent('openPDFinViewer', null)
                 }}
             />
         )

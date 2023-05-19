@@ -65,6 +65,7 @@ export type Events = UIEvent<
 export interface DashboardDependencies {
     document: Document
     location: Location
+    history: History
     analytics: Analytics
     tagsBG: RemoteTagsInterface
     authBG: AuthRemoteFunctionsInterface
@@ -85,7 +86,6 @@ export interface DashboardDependencies {
     localStorage: Browser['storage']['local']
     runtimeAPI: Browser['runtime']
     tabsAPI: Browser['tabs']
-    openFeed: () => void
     openCollectionPage: (remoteCollectionId: string) => void
     renderUpdateNotifBanner: () => JSX.Element
     services: Pick<
@@ -108,25 +108,14 @@ export interface SearchResultTextPart {
     match: boolean
 }
 
-export interface HoverState {
-    onHoverEnter(id: number): void
-    onHoverLeave(id: number): void
-    isHovered: boolean
-}
-
-export interface SelectedState {
-    onSelection(id: number, isActive?: boolean): void
-    isSelected: boolean
-}
-
 export interface DashboardModalsState {
-    shareListId?: number
+    shareListId?: string
     showLogin?: boolean
     showSubscription?: boolean
     showDisplayNameSetup?: boolean
     showNoteShareOnboarding?: boolean
 
-    deletingListId?: number
+    deletingListId?: string
     deletingPageArgs?: PageEventArgs
     deletingNoteArgs?: NoteDataEventArgs
 
@@ -135,13 +124,13 @@ export interface DashboardModalsState {
 }
 
 export type DashboardModalsEvents = UIEvent<{
-    setShareListId: { listId?: number }
+    setShareListId: { listId?: string }
     setShowLoginModal: { isShown: boolean }
     setShowSubscriptionModal: { isShown: boolean }
     setShowDisplayNameSetupModal: { isShown: boolean }
     setShowNoteShareOnboardingModal: { isShown: boolean }
 
-    setDeletingListId: { listId: number }
+    setDeletingListId: { listId: string }
     setDeletingPageArgs: PageEventArgs
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null

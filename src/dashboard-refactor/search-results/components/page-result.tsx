@@ -30,14 +30,15 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 
 export interface Props
-    extends PageData,
+    extends Omit<PageData, 'lists'>,
         PageResult,
         PageInteractionProps,
         PagePickerProps {
     getListDetailsById: ListDetailsGetter
     isSearchFilteredByList: boolean
-    filteredbyListID: number
+    filteredbyListID?: number
     youtubeService: YoutubeService
+    lists: number[]
     shareMenuProps: Omit<
         ShareMenuProps,
         'annotationsBG' | 'contentSharingBG' | 'customListsBG'

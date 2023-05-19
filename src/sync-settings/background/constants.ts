@@ -57,6 +57,7 @@ export const SETTING_NAMES: SyncSettingNames = {
         apiKey: FEATURE_PREFIX.READWISE + 'apiKey',
     },
     openAI: {
-        apiKey: FEATURE_PREFIX.READWISE + 'apiKey',
+        apiKey: FEATURE_PREFIX.OPENAI + 'apiKey',
+        promptSuggestions: FEATURE_PREFIX.OPENAI + 'promptSuggestions',
     },
 }

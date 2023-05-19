@@ -85,7 +85,10 @@ export default class TemplateRow extends Component<Props, State> {
                     <Icon
                         filePath={icons.edit}
                         heightAndWidth="16px"
-                        onClick={this.props.onClickEdit}
+                        onClick={(event) => {
+                            event.stopPropagation()
+                            this.props.onClickEdit()
+                        }}
                     />
                 </ActionsContainer>
             </>

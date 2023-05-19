@@ -166,11 +166,17 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                             <SharePrivacyOption
                                 hasProtectedOption
                                 icon="globe"
-                                title="Public"
+                                title="Auto-Shared"
                                 shortcut={`shift+${getKeyName({
                                     key: 'mod',
                                 })}+enter`}
-                                description="Auto-added to Spaces this page is shared to"
+                                description={
+                                    <span>
+                                        Auto-added to <b>shared</b> Spaces{' '}
+                                        <br />
+                                        this page is shared to
+                                    </span>
+                                }
                                 onClick={this.saveWithShareIntent(true)}
                                 isSelected={this.props.isShared}
                             />
@@ -207,7 +213,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                 hoverOff
                             />
                             {this.props.isShared
-                                ? 'Public'
+                                ? 'Auto-Shared'
                                 : this.props.hasSharedLists
                                 ? 'Shared'
                                 : 'Private'}
@@ -226,7 +232,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                         optional={'shift'}
                                         size={'small'}
                                     />
-                                    to make public
+                                    to make auto-share
                                 </BottomText>
                             </SaveButtonTooltipContainer>
                         }

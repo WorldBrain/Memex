@@ -61,7 +61,7 @@ import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-ind
 import { runtime } from 'webextension-polyfill'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import { hydrateCache } from 'src/annotations/cache/utils'
+import { hydrateCacheForSidebar } from 'src/annotations/cache/utils'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { UNDO_HISTORY } from 'src/constants'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
@@ -82,6 +82,7 @@ import {
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import type { SaveAndRenderHighlightDeps } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
+import { isSidebarOpen } from 'src/overview/sidebar-left/selectors'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -275,6 +276,10 @@ export async function main(
     })
     const sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
+    const isSidebarEnabled =
+        (await sidebarUtils.getSidebarState()) &&
+        (pageInfo.isPdf ? isPdfViewerRunning : true)
+
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
     const inPageUI = new SharedInPageUIState({
@@ -302,13 +307,20 @@ export async function main(
         : undefined
     const fullPageUrl = await pageInfo.getFullPageUrl()
     const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
-    const annotationsCache = new PageAnnotationsCache({ normalizedPageUrl })
+    const annotationsCache = new PageAnnotationsCache({})
     window['__annotationsCache'] = annotationsCache
 
-    const pageHasBookark = await bookmarks.pageHasBookmark(fullPageUrl)
+    const pageHasBookark =
+        (await bookmarks.pageHasBookmark(fullPageUrl)) ||
+        (await collectionsBG
+            .fetchPageLists({ url: fullPageUrl })
+            .then((lists) => lists.length > 0)) ||
+        (await annotationsBG
+            .getAllAnnotationsByUrl({ url: fullPageUrl })
+            .then((annotations) => annotations.length > 0))
     await bookmarks.setBookmarkStatusInBrowserIcon(pageHasBookark, fullPageUrl)
 
-    const loadCacheDataPromise = hydrateCache({
+    const loadCacheDataPromise = hydrateCacheForSidebar({
         fullPageUrl,
         user: currentUser,
         cache: annotationsCache,
@@ -342,6 +354,11 @@ export async function main(
                 isPdf: pageInfo.isPdf,
                 shouldShare,
             })
+            if (inPageUI.componentsShown.sidebar) {
+                inPageUI.showSidebar({
+                    action: 'show_annotation',
+                })
+            }
         },
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
@@ -381,53 +398,7 @@ export async function main(
     }
 
     if (window.location.hostname === 'www.youtube.com') {
-        const below = document.querySelector('#below')
-        const player = document.querySelector('#player')
-
-        if (below) {
-            injectYoutubeButtonMenu(annotationsFunctions)
-        }
-        if (player) {
-            injectYoutubeButtonMenu(annotationsFunctions)
-            injectYoutubeContextMenu(annotationsFunctions)
-        }
-
-        if (!below || !player) {
-            // Create a new MutationObserver instance
-            const observer = new MutationObserver(function (
-                mutationsList,
-                observer,
-            ) {
-                mutationsList.forEach(function (mutation) {
-                    mutation.addedNodes.forEach((node) => {
-                        // Check if the added node is an HTMLElement
-                        if (node instanceof HTMLElement) {
-                            // Check if the "player" element is in the added node or its descendants
-                            if (node.querySelector('#player')) {
-                                injectYoutubeContextMenu(annotationsFunctions)
-                                injectYoutubeButtonMenu(annotationsFunctions)
-
-                                if (below && player) {
-                                    observer.disconnect()
-                                }
-                            }
-
-                            // Check if the "below" element is in the added node or its descendants
-                            if (node.querySelector('#below')) {
-                                injectYoutubeButtonMenu(annotationsFunctions)
-
-                                if (below && player) {
-                                    observer.disconnect()
-                                }
-                            }
-                        }
-                    })
-                })
-            })
-
-            // Start observing mutations to the document body
-            observer.observe(document.body, { childList: true, subtree: true })
-        }
+        loadYoutubeButtons(annotationsFunctions)
     }
 
     // if (window.location.hostname === 'www.youtube.com') {
@@ -525,6 +496,11 @@ export async function main(
                     setState: tooltipUtils.setHighlightsState,
                 },
                 getFullPageUrl: pageInfo.getFullPageUrl,
+                openPDFinViewer: async (originalPageURL) => {
+                    await contentScriptsBG.openPdfInViewer({
+                        fullPdfUrl: originalPageURL,
+                    })
+                },
             })
             components.ribbon?.resolve()
         },
@@ -649,6 +625,12 @@ export async function main(
             } else {
                 await inPageUI.reloadRibbon()
             }
+            if (window.location.hostname === 'www.youtube.com') {
+                loadYoutubeButtons(annotationsFunctions)
+            }
+            if (inPageUI.componentsShown.sidebar) {
+                await inPageUI.showSidebar()
+            }
             highlightRenderer.resetHighlightsStyles()
             await bookmarks.autoSetBookmarkStatusInBrowserIcon(tabId)
             await sleepPromise(500)
@@ -700,9 +682,6 @@ export async function main(
     }
 
     const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
-    const isSidebarEnabled =
-        (await sidebarUtils.getSidebarState()) &&
-        (pageInfo.isPdf ? isPdfViewerRunning : true)
     const pageActivityStatus = await pageActivityIndicatorBG.getPageActivityStatus(
         fullPageUrl,
     )
@@ -810,6 +789,56 @@ class PageInfo {
     getNormalizedPageUrl = async () => {
         await this.refreshIfNeeded()
         return this._identifier.normalizedUrl
+    }
+}
+
+export function loadYoutubeButtons(annotationsFunctions) {
+    const below = document.querySelector('#below')
+    const player = document.querySelector('#player')
+
+    if (below) {
+        injectYoutubeButtonMenu(annotationsFunctions)
+    }
+    if (player) {
+        injectYoutubeButtonMenu(annotationsFunctions)
+        injectYoutubeContextMenu(annotationsFunctions)
+    }
+
+    if (!below || !player) {
+        // Create a new MutationObserver instance
+        const observer = new MutationObserver(function (
+            mutationsList,
+            observer,
+        ) {
+            mutationsList.forEach(function (mutation) {
+                mutation.addedNodes.forEach((node) => {
+                    // Check if the added node is an HTMLElement
+                    if (node instanceof HTMLElement) {
+                        // Check if the "player" element is in the added node or its descendants
+                        if (node.querySelector('#player')) {
+                            injectYoutubeContextMenu(annotationsFunctions)
+                            injectYoutubeButtonMenu(annotationsFunctions)
+
+                            if (below && player) {
+                                observer.disconnect()
+                            }
+                        }
+
+                        // Check if the "below" element is in the added node or its descendants
+                        if (node.querySelector('#below')) {
+                            injectYoutubeButtonMenu(annotationsFunctions)
+
+                            if (below && player) {
+                                observer.disconnect()
+                            }
+                        }
+                    }
+                })
+            })
+        })
+
+        // Start observing mutations to the document body
+        observer.observe(document.body, { childList: true, subtree: true })
     }
 }
 

@@ -133,6 +133,30 @@ const HowtoBox = styled.div`
     }
 `
 
+const OutputSwitcherContainer = styled.div`
+    display: flex;
+    border-radius: 6px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale2};
+    width: fit-content;
+    margin-bottom: 5px;
+`
+
+const OutputSwitcher = styled.div<{
+    outputFormatSelected: boolean
+}>`
+    display: flex;
+    color: ${(props) => props.theme.colors.greyScale7};
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+
+    ${(props) =>
+        props.outputFormatSelected &&
+        css`
+            background: ${(props) => props.theme.colors.greyScale2};
+        `}
+`
+
 const ButtonBox = styled.div`
     display: flex;
     grid-gap: 10px;
@@ -150,6 +174,7 @@ interface TemplateEditorProps {
     onClickHowto: () => void
 
     onTitleChange: (s: string) => void
+    onOutputFormatChange: (s: Template['outputFormat']) => void
     onCodeChange: (s: string) => void
 }
 
@@ -197,6 +222,31 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                             this.props.onTitleChange(e.target.value)
                         }
                     />
+                    <OutputSwitcherContainer>
+                        <OutputSwitcher
+                            onClick={() =>
+                                this.props.onOutputFormatChange('markdown')
+                            }
+                            outputFormatSelected={
+                                this.props.template?.outputFormat ===
+                                    'markdown' ||
+                                this.props.template?.outputFormat == null
+                            }
+                        >
+                            Plain Text
+                        </OutputSwitcher>
+                        <OutputSwitcher
+                            onClick={() =>
+                                this.props.onOutputFormatChange('rich-text')
+                            }
+                            outputFormatSelected={
+                                this.props.template?.outputFormat ===
+                                'rich-text'
+                            }
+                        >
+                            Rich Text
+                        </OutputSwitcher>
+                    </OutputSwitcherContainer>
                     <TextArea
                         placeholder="Code"
                         className={styles.textArea}
