@@ -2,13 +2,14 @@ import type {
     PickerUpdateHandler,
     PickerUpdateHandlerArgs,
 } from 'src/common-ui/GenericPicker/types'
-import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
-import { AnnotationInterface } from 'src/annotations/background/types'
-import { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 
 export interface RibbonSubcomponentProps {
     highlights: RibbonHighlightsProps
@@ -23,6 +24,8 @@ export interface RibbonSubcomponentProps {
     pausing: RibbonPausingProps
     activityIndicator: ActivityIndicatorProps
     spacesBG: RemoteCollectionsInterface
+    authBG: AuthRemoteFunctionsInterface
+    pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     contentSharingBG: ContentSharingInterface
     bgScriptBG: RemoteBGScriptInterface
     onListShare: (ids: { localListId: number; remoteListId: string }) => void

@@ -11,19 +11,14 @@ import SaveBtn from './save-btn'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { NoteResultHoverState, FocusableComponent } from './types'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
-import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
-import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from '../types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 interface State {
     isTagPickerShown: boolean
@@ -38,30 +33,23 @@ export interface AnnotationCreateEventProps {
     onCancel: () => void
     onCommentChange: (text: string) => void
     getListDetailsById: ListDetailsGetter
-    onTagsHover?: React.MouseEventHandler
     onListsHover?: React.MouseEventHandler
     annotationFooterDependencies?: AnnotationFooterEventProps
     onFooterHover?: React.MouseEventHandler
     onNoteHover?: React.MouseEventHandler
     onUnhover?: React.MouseEventHandler
-    createNewList?: SpacePickerDependencies['createNewEntry']
-    addPageToList?: SpacePickerDependencies['selectEntry']
-    removePageFromList?: SpacePickerDependencies['unselectEntry']
 }
 
 export interface AnnotationCreateGeneralProps {
     hide?: () => void
     autoFocus?: boolean
     comment: string
-    tags?: string[]
     lists: number[]
-    onTagClick?: (tag: string) => void
     hoverState: NoteResultHoverState
     contextLocation?: string
     isRibbonCommentBox?: boolean
-    spacesBG?: RemoteCollectionsInterface
-    contentSharingBG?: ContentSharingInterface
     getYoutubePlayer?(): YoutubePlayer
+    renderSpacePicker(): JSX.Element
 }
 
 export interface Props
@@ -80,8 +68,7 @@ export class AnnotationCreate extends React.Component<Props, State>
     //     MarkdownPreviewAnnotationInsertMenu
     // >()
 
-    static defaultProps: Pick<Props, 'hoverState' | 'tags'> = {
-        tags: [],
+    static defaultProps: Pick<Props, 'hoverState'> = {
         hoverState: null,
     }
 
@@ -213,8 +200,6 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private renderSpacePicker = () => {
-        const { lists } = this.props
-
         if (!this.state.isListPickerShown) {
             return
         }
@@ -229,14 +214,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                     (() => this.toggleSpacePicker())
                 }
             >
-                <CollectionPicker
-                    initialSelectedListIds={() => lists}
-                    unselectEntry={this.props.removePageFromList}
-                    createNewEntry={this.props.createNewList}
-                    selectEntry={this.props.addPageToList}
-                    contentSharingBG={this.props.contentSharingBG}
-                    spacesBG={this.props.spacesBG}
-                />
+                {this.props.renderSpacePicker()}
             </PopoutBox>
         )
     }

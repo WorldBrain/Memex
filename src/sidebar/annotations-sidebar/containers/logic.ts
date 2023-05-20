@@ -1,5 +1,4 @@
 import fromPairs from 'lodash/fromPairs'
-import { isFullUrl, normalizeUrl } from '@worldbrain/memex-url-utils'
 import browser from 'webextension-polyfill'
 import {
     UILogic,
@@ -8,6 +7,10 @@ import {
     loadInitial,
     executeUITask,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
+import {
+    normalizeUrl,
+    isFullUrl,
+} from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
     annotationConversationInitialState,
     annotationConversationEventHandlers,
@@ -38,10 +41,7 @@ import {
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import { SIDEBAR_WIDTH_STORAGE_KEY } from '../constants'
-import {
-    AI_PROMPT_DEFAULTS,
-    AI_PROMPT_SUGGESTION_STORAGE_KEY,
-} from '../constants'
+import { AI_PROMPT_DEFAULTS } from '../constants'
 import {
     getInitialAnnotationConversationState,
     getInitialAnnotationConversationStates,
@@ -50,9 +50,8 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import { resolvablePromise } from 'src/util/promises'
 import type {
     PageAnnotationsCacheEvents,
-    PageAnnotationsCacheInterface,
-    UnifiedAnnotation,
     UnifiedList,
+    UnifiedListForCache,
 } from 'src/annotations/cache/types'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import {
@@ -68,7 +67,6 @@ import type { AnnotationSharingState } from 'src/content-sharing/background/type
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { SharedAnnotationReference } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { SummarizationService } from '@worldbrain/memex-common/lib/summarization/index'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { Storage } from 'webextension-polyfill'
 import throttle from 'lodash/throttle'
@@ -80,6 +78,10 @@ import {
     AIActionAllowed,
     updateAICounter,
 } from 'src/util/subscriptions/storage'
+import {
+    getListShareUrl,
+    getSinglePageShareUrl,
+} from 'src/content-sharing/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -215,6 +217,7 @@ export class SidebarContainerLogic extends UILogic<
                 : 'success',
             loadState: 'running',
             noteCreateState: 'pristine',
+            pageLinkCreateState: 'pristine',
             secondarySearchState: 'pristine',
             remoteAnnotationsLoadState: 'pristine',
             foreignSelectedListLoadState: 'pristine',
@@ -232,6 +235,7 @@ export class SidebarContainerLogic extends UILogic<
             showAllNotesCopyPaster: false,
             pageSummary: '',
             selectedListId: null,
+            activeListContextMenuId: null,
 
             commentBox: { ...INIT_FORM_STATE },
 
@@ -302,9 +306,9 @@ export class SidebarContainerLogic extends UILogic<
         opts: { renderHighlights: boolean },
     ) {
         await executeUITask(this, 'cacheLoadState', async () => {
-            await cacheUtils.hydrateCacheForSidebar({
+            await cacheUtils.hydrateCacheForPageAnnotations({
                 fullPageUrl,
-                user: this.options.currentUser,
+                user: this.options.getCurrentUser(),
                 cache: this.options.annotationsCache,
                 skipListHydration: this.options.sidebarContext === 'dashboard',
                 bgModules: {
@@ -326,7 +330,7 @@ export class SidebarContainerLogic extends UILogic<
     }: Pick<SidebarContainerState, 'annotations'>) => {
         const highlights = cacheUtils.getUserHighlightsArray(
             { annotations },
-            this.options.currentUser?.id.toString(),
+            this.options.getCurrentUser()?.id.toString(),
         )
         this.options.events?.emit('renderHighlights', {
             highlights,
@@ -474,12 +478,13 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             lists: { $set: nextLists },
             listInstances: {
-                $set: fromPairs(
-                    normalizedStateToArray(nextLists).map((list) => [
-                        list.unifiedId,
-                        initListInstance(list),
-                    ]),
-                ),
+                $apply: (prev: SidebarContainerState['listInstances']) =>
+                    fromPairs(
+                        normalizedStateToArray(nextLists).map((list) => [
+                            list.unifiedId,
+                            prev[list.unifiedId] ?? initListInstance(list),
+                        ]),
+                    ),
             },
         })
     }
@@ -744,6 +749,74 @@ export class SidebarContainerLogic extends UILogic<
         await this.options.copyToClipboard(link)
     }
 
+    openWebUIPageForSpace: EventHandler<'openWebUIPageForSpace'> = async ({
+        event,
+    }) => {
+        const listData = this.options.annotationsCache.lists.byId[
+            event.unifiedListId
+        ]
+        if (!listData) {
+            throw new Error(
+                'Requested space to open in Web UI not found locally',
+            )
+        }
+        if (!listData.remoteId) {
+            throw new Error(
+                'Requested space to open in Web UI has not been shared',
+            )
+        }
+
+        const webUIUrl =
+            listData.type === 'page-link'
+                ? getSinglePageShareUrl({
+                      remoteListId: listData.remoteId,
+                      remoteListEntryId: listData.sharedListEntryId,
+                  })
+                : getListShareUrl({
+                      remoteListId: listData.remoteId,
+                  })
+        window.open(webUIUrl, '_blank')
+    }
+
+    openContextMenuForList: EventHandler<'openContextMenuForList'> = async ({
+        event,
+        previousState,
+    }) => {
+        const listInstance = previousState.listInstances[event.unifiedListId]
+        if (!listInstance) {
+            throw new Error(
+                'Could not find list instance to open context menu for',
+            )
+        }
+
+        const nextActiveId =
+            previousState.activeListContextMenuId === event.unifiedListId
+                ? null
+                : event.unifiedListId
+
+        this.emitMutation({ activeListContextMenuId: { $set: nextActiveId } })
+    }
+
+    editListName: EventHandler<'editListName'> = async ({ event }) => {
+        this.options.annotationsCache.updateList({
+            unifiedId: event.unifiedListId,
+            name: event.newName,
+        })
+    }
+
+    shareList: EventHandler<'shareList'> = async ({ event }) => {
+        this.options.annotationsCache.updateList({
+            unifiedId: event.unifiedListId,
+            remoteId: event.remoteListId,
+        })
+    }
+
+    deleteList: EventHandler<'deleteList'> = async ({ event }) => {
+        this.options.annotationsCache.removeList({
+            unifiedId: event.unifiedListId,
+        })
+    }
+
     setPillVisibility: EventHandler<'setPillVisibility'> = async ({
         event,
     }) => {
@@ -932,7 +1005,7 @@ export class SidebarContainerLogic extends UILogic<
 
         if (
             !formData ||
-            annotationData?.creator?.id !== this.options.currentUser?.id ||
+            annotationData?.creator?.id !== this.options.getCurrentUser()?.id ||
             (event.shouldShare && !(await this.ensureLoggedIn()))
         ) {
             return
@@ -1107,7 +1180,7 @@ export class SidebarContainerLogic extends UILogic<
                     shouldShare: event.shouldShare,
                     isBulkShareProtected: event.isProtected,
                 }),
-                creator: this.options.currentUser,
+                creator: this.options.getCurrentUser(),
                 createdWhen: now,
                 lastEdited: now,
                 localListIds,
@@ -1386,7 +1459,7 @@ export class SidebarContainerLogic extends UILogic<
         textAsAlternative?: string,
     ) {
         const isPagePDF =
-            fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?file=blob')
+            fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
         const maxLength = 50000
         const articleLengthTooMuch =
             ((textAsAlternative && textAsAlternative.length > maxLength) ||
@@ -1637,7 +1710,6 @@ export class SidebarContainerLogic extends UILogic<
         let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
         let fullTextToProcess
         if (isPagePDF) {
-            console.log('is pdf', document.body.innerText)
             fullTextToProcess = document.body.innerText
         }
 
@@ -1737,9 +1809,7 @@ export class SidebarContainerLogic extends UILogic<
                 previousState,
             )
         } else if (event.tab === 'summary') {
-            let isPagePDF = window.location.href.includes(
-                '/pdfjs/viewer.html?file=blob',
-            )
+            let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
             let fullTextToProcess
             if (isPagePDF) {
                 fullTextToProcess = document.body.innerText
@@ -1942,11 +2012,6 @@ export class SidebarContainerLogic extends UILogic<
         const nextState = this.withMutation(previousState, listInstanceMutation)
         this.emitMutation(listInstanceMutation)
 
-        await this.maybeLoadListRemoteAnnotations(
-            previousState,
-            event.unifiedListId,
-        )
-
         // NOTE: It's important the annots+lists states are gotten from the cache here as the above async call
         //   can result in new annotations being added to the cache which won't yet update this logic class' state
         //   (though they cache's state will be up-to-date)
@@ -1955,6 +2020,10 @@ export class SidebarContainerLogic extends UILogic<
             lists: this.options.annotationsCache.lists,
             listInstances: nextState.listInstances,
         })
+        await this.maybeLoadListRemoteAnnotations(
+            previousState,
+            event.unifiedListId,
+        )
     }
 
     markFeedAsRead: EventHandler<'markFeedAsRead'> = async () => {
@@ -1987,6 +2056,13 @@ export class SidebarContainerLogic extends UILogic<
             selectedListId: { $set: unifiedListId },
         })
 
+        this.options.events?.emit('renderHighlights', {
+            highlights: cacheUtils.getListHighlightsArray(
+                this.options.annotationsCache,
+                unifiedListId,
+            ),
+        })
+
         if (list.remoteId != null) {
             let nextState = state
             nextState = await this.loadRemoteAnnotationReferencesForSpecificLists(
@@ -1996,13 +2072,6 @@ export class SidebarContainerLogic extends UILogic<
 
             await this.maybeLoadListRemoteAnnotations(nextState, unifiedListId)
         }
-
-        this.options.events?.emit('renderHighlights', {
-            highlights: cacheUtils.getListHighlightsArray(
-                this.options.annotationsCache,
-                unifiedListId,
-            ),
-        })
     }
 
     setSelectedList: EventHandler<'setSelectedList'> = async ({
@@ -2088,6 +2157,7 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             const unifiedList = annotationsCache.addList({
+                type: 'user-list',
                 remoteId: event.sharedListId,
                 name: sharedList.title,
                 creator: sharedList.creator,
@@ -2295,61 +2365,69 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    // private getAnnotListsAfterShareStateChange(params: {
-    //     previousState: SidebarContainerState
-    //     annotationIndex: number
-    //     incomingPrivacyState: AnnotationPrivacyState
-    //     keepListsIfUnsharing?: boolean
-    // }): number[] {
-    //     const { annotationsCache } = this.options
-    //     const existing =
-    //         params.previousState.annotations[params.annotationIndex]
+    createPageLink: EventHandler<'createPageLink'> = async ({
+        previousState,
+    }) => {
+        const fullPageUrl = previousState.fullPageUrl
 
-    //     const willUnshare =
-    //         !params.incomingPrivacyState.public &&
-    //         (existing.isShared || !params.incomingPrivacyState.protected)
-    //     const selectivelySharedToPrivateProtected =
-    //         !existing.isShared &&
-    //         existing.isBulkShareProtected &&
-    //         !params.incomingPrivacyState.public &&
-    //         params.incomingPrivacyState.protected
+        if (!fullPageUrl) {
+            throw new Error(
+                'Cannot create page link - Page URL sidebar state not set',
+            )
+        }
+        const currentUser = this.options.getCurrentUser()
+        if (!currentUser) {
+            throw new Error('Cannot create page link - User not logged in')
+        }
 
-    //     // If the note is being made private, we need to remove all shared lists (private remain)
-    //     if (
-    //         (willUnshare && !params.keepListsIfUnsharing) ||
-    //         selectivelySharedToPrivateProtected
-    //     ) {
-    //         return existing.lists.filter(
-    //             (listId) => annotationsCache.listData[listId]?.remoteId == null,
-    //         )
-    //     }
-    //     if (!existing.isShared && params.incomingPrivacyState.public) {
-    //         const privateLists = params.previousState.annotations[
-    //             params.annotationIndex
-    //         ].lists.filter(
-    //             (listId) => annotationsCache.listData[listId]?.remoteId == null,
-    //         )
-    //         return [
-    //             ...annotationsCache.parentPageSharedListIds,
-    //             ...privateLists,
-    //         ]
-    //     }
+        await executeUITask(this, 'pageLinkCreateState', async () => {
+            const {
+                collabKey,
+                listTitle,
+                localListId,
+                remoteListId,
+                remoteListEntryId,
+            } = await this.options.contentSharingByTabsBG.schedulePageLinkCreation(
+                {
+                    fullPageUrl,
+                },
+            )
 
-    //     return existing.lists
-    // }
+            const cacheListData: UnifiedListForCache<'page-link'> = {
+                type: 'page-link',
+                name: listTitle,
+                creator: currentUser,
+                localId: localListId,
+                collabKey: collabKey.toString(),
+                remoteId: remoteListId.toString(),
+                sharedListEntryId: remoteListEntryId.toString(),
+                normalizedPageUrl: normalizeUrl(fullPageUrl),
+                unifiedAnnotationIds: [],
+                hasRemoteAnnotationsToLoad: false,
+            }
+            const { unifiedId } = this.options.annotationsCache.addList(
+                cacheListData,
+            )
 
-    private async setLastSharedAnnotationTimestamp(now = Date.now()) {
-        // const lastShared = await this.syncSettings.contentSharing.get(
-        //     'lastSharedAnnotationTimestamp',
-        // )
-
-        // if (lastShared == null) {
-        //     this.options.showAnnotationShareModal?.()
-        // }
-
-        await this.syncSettings.contentSharing.set(
-            'lastSharedAnnotationTimestamp',
-            now,
-        )
+            await Promise.all([
+                this.options.contentSharingByTabsBG.waitForPageLinkCreation({
+                    fullPageUrl,
+                }),
+                this.setLocallyAvailableSelectedList(
+                    {
+                        ...previousState,
+                        lists: this.options.annotationsCache.lists,
+                        listInstances: {
+                            ...previousState.listInstances,
+                            [unifiedId]: initListInstance({
+                                ...cacheListData,
+                                unifiedId,
+                            }),
+                        },
+                    },
+                    unifiedId,
+                ),
+            ])
+        })
     }
 }

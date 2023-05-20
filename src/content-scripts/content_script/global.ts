@@ -61,8 +61,11 @@ import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-ind
 import { runtime } from 'webextension-polyfill'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import { hydrateCacheForSidebar } from 'src/annotations/cache/utils'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import { hydrateCacheForPageAnnotations } from 'src/annotations/cache/utils'
+import type {
+    ContentSharingInterface,
+    RemoteContentSharingByTabsInterface,
+} from 'src/content-sharing/background/types'
 import { UNDO_HISTORY } from 'src/constants'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
@@ -185,7 +188,11 @@ export async function main(
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
     const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
+    const pageIndexingBG = runInBackground<PageIndexingInterface<'caller'>>()
     const contentSharingBG = runInBackground<ContentSharingInterface>()
+    const contentSharingByTabsBG = runInBackground<
+        RemoteContentSharingByTabsInterface<'caller'>
+    >()
     const tagsBG = runInBackground<RemoteTagsInterface>()
     const contentScriptsBG = runInBackground<
         ContentScriptsInterface<'caller'>
@@ -304,7 +311,7 @@ export async function main(
     const _currentUser = await authBG.getCurrentUser()
     const currentUser: UserReference = _currentUser
         ? { type: 'user-reference', id: _currentUser.id }
-        : undefined
+        : null
     const fullPageUrl = await pageInfo.getFullPageUrl()
     const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
     const annotationsCache = new PageAnnotationsCache({})
@@ -320,7 +327,7 @@ export async function main(
             .then((annotations) => annotations.length > 0))
     await bookmarks.setBookmarkStatusInBrowserIcon(pageHasBookark, fullPageUrl)
 
-    const loadCacheDataPromise = hydrateCacheForSidebar({
+    const loadCacheDataPromise = hydrateCacheForPageAnnotations({
         fullPageUrl,
         user: currentUser,
         cache: annotationsCache,
@@ -359,6 +366,7 @@ export async function main(
                     action: 'show_annotation',
                 })
             }
+            await inPageUI.hideTooltip()
         },
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
@@ -389,12 +397,15 @@ export async function main(
                           action: 'comment',
                       },
             )
+            await inPageUI.hideTooltip()
         },
-        askAI: () => (highlightedText: string) =>
+        askAI: () => (highlightedText: string) => {
             inPageUI.showSidebar({
                 action: 'show_page_summary',
                 highlightedText,
-            }),
+            })
+            inPageUI.hideTooltip()
+        },
     }
 
     if (window.location.hostname === 'www.youtube.com') {
@@ -482,7 +493,9 @@ export async function main(
                 annotationsCache,
                 tags: tagsBG,
                 customLists: collectionsBG,
+                authBG,
                 bgScriptBG,
+                pageActivityIndicatorBG,
                 activityIndicatorBG: runInBackground(),
                 contentSharing: contentSharingBG,
                 bookmarks,
@@ -521,14 +534,16 @@ export async function main(
                     ? 'visible'
                     : 'hidden',
                 inPageUI,
-                currentUser,
+                getCurrentUser: () => currentUser,
                 annotationsCache,
                 highlighter: highlightRenderer,
                 authBG,
                 annotationsBG,
                 summarizeBG,
+                pageIndexingBG,
                 syncSettingsBG,
                 contentSharingBG,
+                contentSharingByTabsBG,
                 pageActivityIndicatorBG,
                 customListsBG: collectionsBG,
                 searchResultLimit: constants.SIDEBAR_SEARCH_RESULT_LIMIT,

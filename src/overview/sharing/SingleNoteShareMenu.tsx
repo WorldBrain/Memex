@@ -7,7 +7,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import type { ShareMenuCommonProps, ShareMenuCommonState } from './types'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
-import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/logic'
+import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import ConfirmDialog from '../../common-ui/components/ConfirmDialog'
 import {
@@ -46,9 +46,24 @@ export interface Props extends ShareMenuCommonProps {
     ) => void
     spacePickerProps: Pick<
         Partial<SpacePickerDependencies>,
-        'contentSharingBG' | 'spacesBG'
+        | 'contentSharingBG'
+        | 'spacesBG'
+        | 'authBG'
+        | 'pageActivityIndicatorBG'
+        | 'annotationsCache'
+        | 'localStorageAPI'
+        | 'normalizedPageUrlToFilterPageLinksBy'
     > &
-        Omit<SpacePickerDependencies, 'contentSharingBG' | 'spacesBG'>
+        Omit<
+            SpacePickerDependencies,
+            | 'contentSharingBG'
+            | 'spacesBG'
+            | 'authBG'
+            | 'pageActivityIndicatorBG'
+            | 'annotationsCache'
+            | 'localStorageAPI'
+            | 'normalizedPageUrlToFilterPageLinksBy'
+        >
 }
 
 export default class SingleNoteShareMenu extends React.PureComponent<
@@ -314,6 +329,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         <SectionTitle>Add to Spaces</SectionTitle>
                         <SpacePicker
                             {...this.props.spacePickerProps}
+                            showPageLinks
                             selectEntry={this.handleSpacePickerSelection(
                                 'select',
                             )}

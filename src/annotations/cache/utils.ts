@@ -1,12 +1,8 @@
 import type {
     FollowedList,
     FollowedListEntry,
-    RemotePageActivityIndicatorInterface,
 } from 'src/page-activity-indicator/background/types'
-import type {
-    PageList,
-    RemoteCollectionsInterface,
-} from 'src/custom-lists/background/types'
+import type { PageList } from 'src/custom-lists/background/types'
 import type { Annotation, SharedAnnotationWithRefs } from '../types'
 import type {
     PageAnnotationsCacheInterface,
@@ -18,11 +14,12 @@ import type {
 import { shareOptsToPrivacyLvl } from '../utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { AnnotationInterface } from '../background/types'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import type { SharedListEntry } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { BackgroundModuleRemoteInterfaces } from 'src/background-script/types'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation & {
@@ -117,16 +114,26 @@ export const reshapeLocalListForCache = (
         hasRemoteAnnotations?: boolean
         extraData?: Partial<UnifiedList>
     },
-): UnifiedListForCache => ({
-    name: list.name,
-    localId: list.id,
-    remoteId: list.remoteId,
-    creator: opts.extraData?.creator,
-    description: list.description,
-    unifiedAnnotationIds: [],
-    hasRemoteAnnotationsToLoad: !!opts.hasRemoteAnnotations,
-    ...(opts.extraData ?? {}),
-})
+): UnifiedListForCache => {
+    let type: UnifiedList['type'] = 'user-list'
+    if (list.type === 'page-link') {
+        type = 'page-link'
+    } else if (Object.values(SPECIAL_LIST_IDS).includes(list.id)) {
+        type = 'special-list'
+    }
+
+    return {
+        type,
+        name: list.name,
+        localId: list.id,
+        remoteId: list.remoteId,
+        creator: opts.extraData?.creator,
+        description: list.description,
+        unifiedAnnotationIds: [],
+        hasRemoteAnnotationsToLoad: !!opts.hasRemoteAnnotations,
+        ...(opts.extraData ?? {}),
+    }
+}
 
 export const reshapeFollowedListForCache = (
     list: FollowedList,
@@ -136,6 +143,8 @@ export const reshapeFollowedListForCache = (
     },
 ): UnifiedListForCache => ({
     name: list.name,
+    // TODO: Are followed page links a thing? If so there's no easy way to distinguish them here
+    type: 'user-list',
     localId: undefined,
     remoteId: list.sharedList.toString(),
     creator: { type: 'user-reference', id: list.creator },
@@ -186,20 +195,22 @@ export const getLocalListIdsForCacheIds = (
         .map((listId) => cache.lists.byId[listId]?.localId)
         .filter((id) => id != null)
 
-interface CacheHydratorDeps {
+interface CacheHydratorDeps<
+    T extends keyof BackgroundModuleRemoteInterfaces<'caller'>
+> {
     user?: UserReference
     cache: PageAnnotationsCacheInterface
-    bgModules: {
-        pageActivityIndicator: RemotePageActivityIndicatorInterface
-        contentSharing: ContentSharingInterface
-        annotations: AnnotationInterface<'caller'>
-        customLists: RemoteCollectionsInterface
-    }
+    bgModules: Pick<BackgroundModuleRemoteInterfaces<'caller'>, T>
 }
 
 // NOTE: this is tested as part of the sidebar logic tests
-export async function hydrateCacheForSidebar(
-    args: CacheHydratorDeps & {
+export async function hydrateCacheForPageAnnotations(
+    args: CacheHydratorDeps<
+        | 'contentSharing'
+        | 'customLists'
+        | 'annotations'
+        | 'pageActivityIndicator'
+    > & {
         fullPageUrl: string
         skipListHydration?: boolean
     },
@@ -284,20 +295,22 @@ export async function hydrateCacheForSidebar(
     )
 }
 
-export async function hydrateCacheForDashboard({
-    bgModules,
-    ...args
-}: CacheHydratorDeps): Promise<void> {
-    const localListsData = await bgModules.customLists.fetchAllLists({
+// NOTE: this is tested as part of the dashboard + space-picker logic tests
+export async function hydrateCacheForListUsage(
+    args: CacheHydratorDeps<
+        'contentSharing' | 'customLists' | 'pageActivityIndicator'
+    >,
+): Promise<void> {
+    const localListsData = await args.bgModules.customLists.fetchAllLists({
         includeDescriptions: true,
         skipSpecialLists: true,
     })
-    const remoteListIds = await bgModules.contentSharing.getRemoteListIds({
+    const remoteListIds = await args.bgModules.contentSharing.getRemoteListIds({
         localListIds: localListsData.map((list) => list.id),
     })
-    const followedListsData = await bgModules.pageActivityIndicator.getAllFollowedLists()
+    const followedListsData = await args.bgModules.pageActivityIndicator.getAllFollowedLists()
 
-    hydrateCacheLists({
+    await hydrateCacheLists({
         remoteListIds,
         localListsData,
         followedListsData,
@@ -305,25 +318,66 @@ export async function hydrateCacheForDashboard({
     })
 }
 
-function hydrateCacheLists(
+async function hydrateCacheLists(
     args: {
         localListsData: PageList[]
         remoteListIds: { [localListId: number]: string }
         followedListsData: {
             [remoteListId: string]: Pick<
                 FollowedList,
-                'sharedList' | 'creator' | 'name'
+                'sharedList' | 'creator' | 'name' | 'type'
             > &
                 Partial<Pick<FollowedListEntry, 'hasAnnotationsFromOthers'>>
         }
-    } & Omit<CacheHydratorDeps, 'bgModules'>,
-): void {
+    } & CacheHydratorDeps<
+        'contentSharing' | 'customLists' | 'pageActivityIndicator'
+    >,
+): Promise<void> {
+    // Get all the IDs of page link lists
+    const pageLinkListIds = new Set<string>()
+    for (const list of Object.values(args.followedListsData)) {
+        if (list.type === 'page-link') {
+            pageLinkListIds.add(list.sharedList.toString())
+        }
+    }
+    for (const list of args.localListsData) {
+        const remoteId = args.remoteListIds[list.id]
+        if (remoteId != null && list.type === 'page-link') {
+            pageLinkListIds.add(remoteId)
+        }
+    }
+
+    // Look up shared list entry data for all the page link lists to be able to get them to the cache
+    const sharedListEntryMap = new Map<
+        string,
+        Pick<SharedListEntry, 'entryTitle' | 'normalizedUrl'> & { id: string }
+    >()
+    if (pageLinkListIds.size) {
+        const followedEntriesByList = await args.bgModules.pageActivityIndicator.getEntriesForFollowedLists(
+            [...pageLinkListIds],
+            { sortAscByCreationTime: true },
+        )
+        for (const entries of Object.values(followedEntriesByList)) {
+            if (entries.length) {
+                sharedListEntryMap.set(entries[0].followedList.toString(), {
+                    normalizedUrl: entries[0].normalizedPageUrl,
+                    id: entries[0].sharedListEntry.toString(),
+                    entryTitle: entries[0].entryTitle,
+                })
+            }
+        }
+    }
+
     const seenFollowedLists = new Set<AutoPk>()
 
     const listsToCache = args.localListsData.map((list) => {
         let creator = args.user
         let hasRemoteAnnotations = false
         const remoteId = args.remoteListIds[list.id]
+        const sharedListEntryData =
+            list.type === 'page-link'
+                ? sharedListEntryMap.get(remoteId) ?? undefined
+                : undefined
         if (remoteId != null && args.followedListsData[remoteId]) {
             seenFollowedLists.add(args.followedListsData[remoteId].sharedList)
             hasRemoteAnnotations =
@@ -336,6 +390,8 @@ function hydrateCacheLists(
         return reshapeLocalListForCache(list, {
             hasRemoteAnnotations,
             extraData: {
+                normalizedPageUrl: sharedListEntryData?.normalizedUrl,
+                sharedListEntryId: sharedListEntryData?.id,
                 remoteId,
                 creator,
             },
@@ -345,13 +401,22 @@ function hydrateCacheLists(
     // Ensure we cover any followed-only lists (lists with no local data)
     Object.values(args.followedListsData)
         .filter((list) => !seenFollowedLists.has(list.sharedList))
-        .forEach((list) =>
+        .forEach((list) => {
+            const sharedListEntryData =
+                list.type === 'page-link'
+                    ? sharedListEntryMap.get(list.sharedList.toString()) ??
+                      undefined
+                    : undefined
             listsToCache.push(
                 reshapeFollowedListForCache(list, {
                     hasRemoteAnnotations: list.hasAnnotationsFromOthers,
+                    extraData: {
+                        normalizedPageUrl: sharedListEntryData?.normalizedUrl,
+                        sharedListEntryId: sharedListEntryData?.id,
+                    },
                 }),
-            ),
-        )
+            )
+        })
 
     args.cache.setLists(listsToCache)
 }
@@ -373,4 +438,36 @@ export function deriveListOwnershipStatus(
     }
 
     return 'Creator'
+}
+
+export type UnifiedListsByCategories = {
+    myLists: UnifiedList<'user-list' | 'special-list'>[]
+    joinedLists: UnifiedList<'user-list'>[]
+    followedLists: UnifiedList<'user-list'>[]
+    pageLinkLists: UnifiedList<'page-link'>[]
+}
+
+export function siftListsIntoCategories(
+    lists: UnifiedList[],
+    currentUser?: UserReference,
+): UnifiedListsByCategories {
+    const categories: UnifiedListsByCategories = {
+        myLists: [],
+        joinedLists: [],
+        followedLists: [],
+        pageLinkLists: [],
+    }
+    for (const list of lists) {
+        const ownership = deriveListOwnershipStatus(list, currentUser)
+        if (list.type === 'page-link') {
+            categories.pageLinkLists.push(list)
+        } else if (ownership === 'Creator') {
+            categories.myLists.push(list)
+        } else if (ownership === 'Follower' && !list.isForeignList) {
+            categories.followedLists.push(list as any)
+        } else if (ownership === 'Contributor') {
+            categories.joinedLists.push(list as any)
+        }
+    }
+    return categories
 }

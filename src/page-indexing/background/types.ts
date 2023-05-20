@@ -6,6 +6,7 @@ import { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/
 import {
     RemoteFunctionRole,
     RemoteFunctionWithExtraArgs,
+    RemoteFunctionWithoutExtraArgs,
 } from 'src/util/webextensionRPC'
 
 export interface PageIndexingInterface<Role extends RemoteFunctionRole> {
@@ -18,6 +19,11 @@ export interface PageIndexingInterface<Role extends RemoteFunctionRole> {
         Role,
         WaitForContentIdentifierParams,
         WaitForContentIdentifierReturns
+    >
+    lookupPageTitleForUrl: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { fullPageUrl: string },
+        string | null
     >
 }
 

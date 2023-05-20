@@ -36,11 +36,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
         listId: string,
     ) => Omit<
         SpaceContextMenuBtnProps,
-        | 'isMenuDisplayed'
-        | 'errorMessage'
-        | 'localListId'
-        | 'remoteListId'
-        | 'spaceName'
+        'isMenuDisplayed' | 'errorMessage' | 'listData'
     >
     searchBarProps: ListsSidebarSearchBarProps
     ownListsGroup: ListGroup
@@ -153,6 +149,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         {...this.props.initContextMenuBtnProps(
                                             list.unifiedId,
                                         )}
+                                        listData={list}
                                         isMenuDisplayed={
                                             this.props.showMoreMenuListId ===
                                             list.unifiedId
@@ -160,9 +157,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         errorMessage={
                                             this.props.editListErrorMessage
                                         }
-                                        localListId={list.localId!}
-                                        remoteListId={list.remoteId ?? null}
-                                        spaceName={list.name}
                                     />
                                 )}
                             />

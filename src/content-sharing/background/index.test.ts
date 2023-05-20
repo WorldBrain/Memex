@@ -68,8 +68,8 @@ async function setupTest(options: {
         personalCloud,
         directLinking,
     } = setup.backgroundModules
-    setup.authService.setUser(TEST_USER)
-    personalCloud.options.settingStore.set('deviceId', 11)
+    await setup.authService.setUser(TEST_USER)
+    await personalCloud.options.settingStore.set('deviceId', data.DEVICE_ID_A)
     personalCloud.actionQueue.forceQueueSkip = true
     await personalCloud.setup()
     await personalCloud.startSync()
@@ -2101,7 +2101,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
-            'should created shared list, entry, page info, key, role + all corresponding personal cloud data when a user creates a shareable page link for a standard web page',
+            'should create shared list, entry, page info, key, role + all corresponding personal cloud data when a user creates a shareable page link for a standard web page - via cloud',
             { skipConflictTests: true, skipSyncTests: true },
             () => {
                 const testData: TestData = {}
@@ -2366,6 +2366,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         sharedList: sharedListDataA[0].id,
+                                        type: 'page-link',
                                         user: userId,
                                         createdByDevice: null,
                                         createdWhen: expect.anything(),
@@ -2395,6 +2396,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         {
                                             id: expect.anything(), // TODO: Can we predict this?
                                             name: listTitle,
+                                            type: 'page-link',
                                             isDeletable: true,
                                             isNestable: true,
                                             createdAt: expect.anything()
@@ -2419,13 +2421,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             sharedList: sharedListDataA[0].id,
                                             creator: userId,
                                             name: listTitle,
+                                            type: 'page-link',
                                             lastSync: expect.anything(),
                                         }
                                     ])
                                     expect(await setup.storageManager.collection('followedListEntry').findAllObjects({})).toEqual([
                                         {
                                             id: expect.anything(),
-                                            followedList: expect.anything(),
+                                            followedList: sharedListDataA[0].id,
+                                            sharedListEntry: sharedListEntryDataA[0].id,
                                             entryTitle: '',
                                             creator: userId,
                                             normalizedPageUrl,
@@ -2515,6 +2519,369 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(personalReadsB.length).toBe(2)
                                 expect(personalLocatorsA.length).toBe(1)
                                 expect(personalLocatorsB.length).toBe(1)
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should created shared list, entry, page info, key, role + all corresponding personal cloud data when a user creates a shareable page link for a standard web page - via extension',
+            { skipConflictTests: true, skipSyncTests: true },
+            () => {
+                const testData: TestData = {}
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const {
+                                    contentSharing,
+                                    personalCloud,
+                                } = await setupTest({
+                                    setup,
+                                    testData,
+                                })
+
+                                const {
+                                    manager,
+                                } = await setup.getServerStorage()
+                                const now = Date.now()
+                                const listTitle = createPageLinkListTitle(
+                                    new Date(now),
+                                )
+                                const pageTitle = 'Test'
+                                const fullPageUrl = 'http://test.com'
+                                const normalizedPageUrl = 'test.com'
+                                const userId = TEST_USER.id
+
+                                // Shared cloud DB data
+                                // prettier-ignore
+                                {
+                                expect(await manager.collection('sharedList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListEntry').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedPageInfo').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListKey').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListRole').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListRoleByUser').findAllObjects({})).toEqual([])
+                                }
+
+                                // Personal cloud DB data
+                                // prettier-ignore
+                                {
+                                expect(await manager.collection('personalList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalListEntry').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalListShare').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalFollowedList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalContentMetadata').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalContentRead').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalContentLocator').findAllObjects({})).toEqual([])
+                                }
+
+                                // Local DB data
+                                // prettier-ignore
+                                {
+                                expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('pages').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('visits').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
+                                }
+
+                                const tabInfo = { tab: { id: 123 } }
+                                const {
+                                    collabKey,
+                                    localListId,
+                                    remoteListId,
+                                    remoteListEntryId,
+                                    listTitle: createdListTitle,
+                                } = await contentSharing.schedulePageLinkCreation(
+                                    tabInfo,
+                                    {
+                                        fullPageUrl,
+                                        now,
+                                    },
+                                )
+                                await contentSharing.waitForPageLinkCreation(
+                                    tabInfo,
+                                    {
+                                        fullPageUrl,
+                                    },
+                                )
+
+                                // Local DB data should be created first
+                                // prettier-ignore
+                                {
+                                    expect(localListId).toEqual(now)
+                                    expect(createdListTitle).toEqual(listTitle)
+                                    expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([
+                                        {
+                                            id: localListId,
+                                            name: listTitle,
+                                            type: 'page-link',
+                                            isDeletable: true,
+                                            isNestable: true,
+                                            searchableName: listTitle,
+                                            nameTerms: expect.any(Array),
+                                            createdAt: new Date(now)
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([
+                                        {
+                                            listId: localListId,
+                                            pageUrl: normalizedPageUrl,
+                                            fullUrl: fullPageUrl,
+                                            createdAt: new Date(now)
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([
+                                        {
+                                            localId: localListId,
+                                            remoteId: remoteListId,
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([
+                                        {
+                                            sharedList: remoteListId,
+                                            creator: userId,
+                                            name: listTitle,
+                                            type: 'page-link',
+                                            lastSync: undefined
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('followedListEntry').findAllObjects({})).toEqual([
+                                        {
+                                            id: expect.anything(),
+                                            followedList: remoteListId,
+                                            entryTitle: pageTitle,
+                                            creator: userId,
+                                            normalizedPageUrl,
+                                            hasAnnotationsFromOthers: false,
+                                            sharedListEntry: remoteListEntryId,
+                                            createdWhen: now,
+                                            updatedWhen: now,
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('pages').findAllObjects({})).toEqual([
+                                        {
+                                            url: normalizedPageUrl,
+                                            fullUrl: fullPageUrl,
+                                            fullTitle: pageTitle,
+                                            domain: normalizedPageUrl,
+                                            hostname: normalizedPageUrl,
+                                            text: 'test',
+                                            terms: expect.any(Array),
+                                            urlTerms: expect.any(Array),
+                                            titleTerms: expect.any(Array),
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('visits').findAllObjects({})).toEqual([
+                                        {
+                                            url: normalizedPageUrl,
+                                            time: now
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
+                                }
+
+                                // Sync so everything uploads and creates cloud-side data
+                                await personalCloud.integrateAllUpdates()
+                                await personalCloud.waitForSync()
+
+                                // Shared cloud DB data
+                                // prettier-ignore
+                                {
+                                expect(await manager.collection('sharedList').findAllObjects({})).toEqual([
+                                    {
+                                        id: maybeInt(remoteListId),
+                                        type: 'page-link',
+                                        creator: userId,
+                                        title: listTitle,
+                                        description: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('sharedListEntry').findAllObjects({})).toEqual([
+                                    {
+                                        id: maybeInt(remoteListEntryId),
+                                        creator: userId,
+                                        entryTitle: pageTitle,
+                                        originalUrl: fullPageUrl,
+                                        normalizedUrl: normalizedPageUrl,
+                                        sharedList: maybeInt(remoteListId),
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('sharedPageInfo').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: userId,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                        normalizedUrl: normalizedPageUrl,
+                                        originalUrl: fullPageUrl,
+                                        fullTitle: pageTitle
+                                    }
+                                ])
+                                expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListKey').findAllObjects({})).toEqual([
+                                    {
+                                        id: maybeInt(collabKey),
+                                        disabled: false,
+                                        roleID: SharedListRoleID.ReadWrite,
+                                        sharedList: maybeInt(remoteListId),
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('sharedListRole').findAllObjects({})).toEqual([
+                                    {
+                                        user: userId,
+                                        roleID: SharedListRoleID.Owner,
+                                        sharedList: maybeInt(remoteListId),
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('sharedListRoleByUser').findAllObjects({})).toEqual([
+                                    {
+                                        user: userId,
+                                        roleID: SharedListRoleID.Owner,
+                                        sharedList: maybeInt(remoteListId),
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                }
+
+                                // Personal cloud DB data
+                                const personalMetadataA: Array<
+                                    PersonalContentMetadata & { id: AutoPk }
+                                > = await manager
+                                    .collection('personalContentMetadata')
+                                    .findAllObjects({})
+                                const personalListsA: Array<
+                                    PersonalList & { id: AutoPk }
+                                > = await manager
+                                    .collection('personalList')
+                                    .findAllObjects({})
+                                const personalLocatorsA: Array<
+                                    PersonalContentLocator & { id: AutoPk }
+                                > = await manager
+                                    .collection('personalContentLocator')
+                                    .findAllObjects({})
+
+                                // prettier-ignore
+                                {
+                                expect(personalListsA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        localId: expect.anything(), // TODO: Can we expect an actual value?
+                                        name: listTitle,
+                                        type: 'page-link',
+                                        isDeletable: true,
+                                        isNestable: true,
+                                        user: userId,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(personalMetadataA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        canonicalUrl: fullPageUrl,
+                                        title: pageTitle,
+                                        lang: null,
+                                        description: null,
+                                        user: userId,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('personalContentRead').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        personalContentLocator: personalLocatorsA[0].id,
+                                        readWhen: expect.any(Number),
+                                        user: userId,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        pageEnd: null,
+                                        pageMax: null,
+                                        pageTotal: null,
+                                        readDuration: null,
+                                        scrollEndPixel: null,
+                                        scrollMaxPixel: null,
+                                        scrollEndPercentage: null,
+                                        scrollMaxPercentage: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(personalLocatorsA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        format: ContentLocatorFormat.HTML,
+                                        originalLocation: fullPageUrl,
+                                        location: normalizedPageUrl,
+                                        locationScheme: LocationSchemeType.NormalizedUrlV1,
+                                        locationType: ContentLocatorType.Remote,
+                                        primary: true,
+                                        valid: true,
+                                        version: 0,
+                                        lastVisited: expect.anything(),
+                                        localId: null,
+                                        contentSize: null,
+                                        fingerprint: null,
+                                        user: userId,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('personalListEntry').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        personalList: personalListsA[0].id,
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        user: userId,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('personalListShare').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        personalList: personalListsA[0].id,
+                                        remoteId: remoteListId,
+                                        user: userId,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('personalFollowedList').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        sharedList: remoteListId,
+                                        type: 'page-link',
+                                        user: userId,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                }
                             },
                         },
                     ],

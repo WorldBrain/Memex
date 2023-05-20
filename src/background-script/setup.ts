@@ -97,6 +97,7 @@ import DeprecatedStorageModules from './deprecated-storage-modules'
 import { PageActivityIndicatorBackground } from 'src/page-activity-indicator/background'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { handleIncomingData } from 'src/personal-cloud/background/handle-incoming-data'
+
 export interface BackgroundModules {
     auth: AuthBackground
     analytics: AnalyticsBackground
@@ -493,26 +494,30 @@ export function createBackgroundModules(options: {
         backend:
             options.contentSharingBackend ??
             firebaseService<ContentSharingBackend>(
-                'personalCloud',
+                'contentSharing',
                 callFirebaseFunction,
             ),
         remoteEmitter: createRemoteEventEmitter('contentSharing', {
             broadcastToTabs: true,
         }),
-        waitForSync: () => personalCloud.actionQueue.waitForSync(),
+        waitForSync: () => personalCloud.waitForSync(),
         storageManager,
         contentSharingSettingsStore: new BrowserSettingsStore(
             options.browserAPIs.storage.local,
             { prefix: 'contentSharing.' },
         ),
-        customListsBG: customLists,
-        annotations: directLinking.annotationStorage,
-        auth,
         analytics: options.analyticsManager,
-        getServerStorage,
         servicesPromise: options.servicesPromise,
         captureException: options.captureException,
+        getServerStorage,
         generateServerId,
+        getBgModules: () => ({
+            auth,
+            customLists,
+            directLinking,
+            pageActivityIndicator,
+            pages,
+        }),
     })
 
     const copyPaster = new CopyPasterBackground({
@@ -687,6 +692,7 @@ export async function setupBackgroundModules(
     backgroundModules.notifications.setupRemoteFunctions()
     backgroundModules.social.setupRemoteFunctions()
     backgroundModules.directLinking.setupRemoteFunctions()
+    backgroundModules.contentSharing.setupRemoteFunctions()
     backgroundModules.search.setupRemoteFunctions()
     backgroundModules.activityIndicator.setupRemoteFunctions()
     backgroundModules.summarizeBG.setupRemoteFunctions()
@@ -714,7 +720,6 @@ export async function setupBackgroundModules(
 
     // Ensure log-in state gotten from FB + trigger share queue processing, but don't wait for it
     await backgroundModules.auth.authService.refreshUserInfo()
-    await backgroundModules.contentSharing.setup()
     await backgroundModules.personalCloud.setup()
 }
 

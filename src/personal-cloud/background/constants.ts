@@ -28,4 +28,5 @@ export const CLOUD_SYNCED_COLLECTIONS: string[] = [
     SHARING_COLLECTION_NAMES.listMetadata,
     SHARING_COLLECTION_NAMES.annotationMetadata,
     FOLLOWED_LISTS_COLLECTION_NAMES.followedList,
+    FOLLOWED_LISTS_COLLECTION_NAMES.followedListEntry,
 ]

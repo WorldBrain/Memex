@@ -183,6 +183,7 @@ export async function setupTest(
         authBG: device.backgroundModules.auth.remoteFunctions,
         tagsBG: device.backgroundModules.tags.remoteFunctions,
         syncSettingsBG: device.backgroundModules.syncSettings.remoteFunctions,
+        pageIndexingBG: device.backgroundModules.pages.remoteFunctions as any,
         pageActivityIndicatorBG:
             device.backgroundModules.pageActivityIndicator.remoteFunctions,
         document: args.mockDocument,
@@ -198,6 +199,9 @@ export async function setupTest(
             device.backgroundModules.backupModule.remoteFunctions,
         ) as any,
         contentShareBG: device.backgroundModules.contentSharing.remoteFunctions,
+        contentShareByTabsBG: insertBackgroundFunctionTab(
+            device.backgroundModules.contentSharing.remoteFunctionsByTab,
+        ) as any,
         pdfViewerBG: device.backgroundModules.pdfBg.remoteFunctions,
         contentConversationsBG:
             device.backgroundModules.contentConversations.remoteFunctions,

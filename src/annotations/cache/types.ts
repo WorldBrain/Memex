@@ -40,8 +40,8 @@ export interface PageAnnotationsCacheInterface {
         annotation: UnifiedAnnotationForCache,
         opts?: { now?: number },
     ) => { unifiedId: UnifiedAnnotation['unifiedId'] }
-    addList: (
-        list: UnifiedListForCache,
+    addList: <T extends UnifiedListType>(
+        list: UnifiedListForCache<T>,
     ) => { unifiedId: UnifiedList['unifiedId'] }
     updateAnnotation: (
         updates: Pick<
@@ -113,15 +113,17 @@ export type UnifiedAnnotationForCache = Omit<
         localListIds: number[]
     }
 
-export interface UnifiedList {
+type CoreUnifiedList<T> = {
     // Core list data
     unifiedId: string
     localId?: number
     remoteId?: string
+    collabKey?: string
     name: string
     description?: string
     creator?: UserReference
     hasRemoteAnnotationsToLoad: boolean
+    type: T
 
     /** Denotes whether or not this list was loaded via a web UI page link AND has no locally available data. */
     isForeignList?: boolean
@@ -130,4 +132,18 @@ export interface UnifiedList {
     unifiedAnnotationIds: UnifiedAnnotation['unifiedId'][]
 }
 
-export type UnifiedListForCache = Omit<UnifiedList, 'unifiedId'>
+export type UnifiedListType = 'user-list' | 'special-list' | 'page-link'
+
+export type UnifiedList<
+    T extends UnifiedListType = UnifiedListType
+> = T extends 'page-link'
+    ? CoreUnifiedList<'page-link'> & {
+          normalizedPageUrl: string // Used in the sidebar logic, affording a way to relate page link lists to a given page the sidebar is open for
+          remoteId: string // This makes up the first part of the page link
+          sharedListEntryId: string // This makes up the last part of the page link
+      }
+    : CoreUnifiedList<T>
+
+export type UnifiedListForCache<
+    T extends UnifiedListType = UnifiedListType
+> = Omit<UnifiedList<T>, 'unifiedId'>

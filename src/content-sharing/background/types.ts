@@ -1,19 +1,20 @@
 export * from '@worldbrain/memex-common/lib/content-sharing/client-storage/types'
 import type {
     ListKeysServiceInterface,
+    ListSharingServiceInterface,
     AnnotationSharingServiceInterface,
-    SharedListData,
 } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import type {
+    RemoteFunction,
+    RemoteFunctionRole,
+} from 'src/util/webextensionRPC'
 
 export interface ContentSharingInterface
     extends Pick<
             ListKeysServiceInterface,
-            | 'deleteKeyLink'
-            | 'getExistingKeyLinksForList'
-            | 'hasCurrentKey'
-            | 'processCurrentKey'
-            | 'generateKeyLink'
+            'deleteKeyLink' | 'getExistingKeyLinksForList'
         >,
         Pick<
             AnnotationSharingServiceInterface,
@@ -21,27 +22,17 @@ export interface ContentSharingInterface
             | 'setAnnotationPrivacyLevel'
             | 'getAnnotationSharingState'
             | 'getAnnotationSharingStates'
-        > {
-    shareList(params: {
-        localListId: number
-    }): Promise<Omit<SharedListData, 'annotationSharingStatesPromise'>>
-
+        >,
+        Pick<ListSharingServiceInterface, 'shareList'> {
     shareAnnotations(options: {
         annotationUrls: string[]
         shareToLists?: boolean
         setBulkShareProtected?: boolean
     }): Promise<{ sharingStates: AnnotationSharingStates }>
-    shareAnnotationsToAllLists(options: {
-        annotationUrls: string[]
-    }): Promise<{ sharingStates: AnnotationSharingStates }>
-
     unshareAnnotations(options: {
         annotationUrls: string[]
         setBulkShareProtected?: boolean
     }): Promise<{ sharingStates: AnnotationSharingStates }>
-    unshareAnnotation(options: {
-        annotationUrl: string
-    }): Promise<{ sharingState: AnnotationSharingState }>
     ensureRemotePageId(normalizedPageUrl: string): Promise<string>
     getRemoteAnnotationLink(params: {
         annotationUrl: string
@@ -51,9 +42,6 @@ export interface ContentSharingInterface
     getRemoteListIds(options: {
         localListIds: number[]
     }): Promise<{ [localListId: number]: string | null }>
-    getAllRemoteLists(): Promise<
-        Array<{ localId: number; remoteId: string; name: string }>
-    >
     getRemoteAnnotationIds(params: {
         annotationUrls: string[]
     }): Promise<{ [localId: string]: string | number }>
@@ -66,7 +54,6 @@ export interface ContentSharingInterface
             excludeFromLists?: boolean
         }
     }>
-
     shareAnnotationToSomeLists(options: {
         annotationUrl: string
         localListIds: number[]
@@ -76,22 +63,45 @@ export interface ContentSharingInterface
         annotationUrl: string
         localListId: number
     }): Promise<{ sharingState: AnnotationSharingState }>
-    unshareAnnotationsFromAllLists(options: {
-        annotationUrls: string[]
-        setBulkShareProtected?: boolean
-    }): Promise<{ sharingStates: AnnotationSharingStates }>
-
-    areListsShared(options: {
-        localListIds: number[]
-    }): Promise<{ [listId: number]: boolean }>
-    waitForSync(): Promise<void>
     executePendingActions(): Promise<void>
     findAnnotationPrivacyLevels(params: {
         annotationUrls: string[]
     }): Promise<{
         [annotationUrl: string]: AnnotationPrivacyLevels
     }>
+}
 
+export interface RemoteContentSharingByTabsInterface<
+    Role extends RemoteFunctionRole
+> {
+    schedulePageLinkCreation: RemoteFunction<
+        Role,
+        {
+            fullPageUrl: string
+            now?: number
+        },
+        {
+            listTitle: string
+            localListId: number
+            remoteListId: AutoPk
+            remoteListEntryId: AutoPk
+            collabKey: AutoPk
+        }
+    >
+    waitForPageLinkCreation: RemoteFunction<Role, { fullPageUrl: string }, void>
+}
+
+/**
+ * These are all old, no-longer-used content sharing BG RPCs.
+ * Don't want to delete the implementations just yet, but still want to separate them from the used interface.
+ */
+export interface __DeprecatedContentSharingInterface {
+    shareAnnotationsToAllLists(options: {
+        annotationUrls: string[]
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    unshareAnnotation(options: {
+        annotationUrl: string
+    }): Promise<{ sharingState: AnnotationSharingState }>
     deleteAnnotationShare(params: { annotationUrl: string }): Promise<void>
     deleteAnnotationPrivacyLevel(params: { annotation: string }): Promise<void>
     suggestSharedLists(params: {
@@ -106,6 +116,16 @@ export interface ContentSharingInterface
     >
     canWriteToSharedList(params: { localId: number }): Promise<boolean>
     canWriteToSharedListRemoteId(params: { remoteId: string }): Promise<boolean>
+    unshareAnnotationsFromAllLists(options: {
+        annotationUrls: string[]
+        setBulkShareProtected?: boolean
+    }): Promise<{ sharingStates: AnnotationSharingStates }>
+    getAllRemoteLists(): Promise<
+        Array<{ localId: number; remoteId: string; name: string }>
+    >
+    areListsShared(options: {
+        localListIds: number[]
+    }): Promise<{ [listId: number]: boolean }>
 }
 
 export interface ContentSharingEvents {

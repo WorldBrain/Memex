@@ -1,19 +1,13 @@
 import fromPairs from 'lodash/fromPairs'
 import { FakeAnalytics } from 'src/analytics/mock'
-import {
-    SidebarContainerLogic,
-    createEditFormsForAnnotations,
-    INIT_FORM_STATE,
-} from './logic'
+import { SidebarContainerLogic, INIT_FORM_STATE } from './logic'
 import {
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
     insertBackgroundFunctionTab,
 } from 'src/tests/ui-logic-tests'
 import * as DATA from './logic.test.data'
-import * as sharingTestData from 'src/content-sharing/background/index.test.data'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import normalizeUrl from '@worldbrain/memex-url-utils/lib/normalize'
 import { PageAnnotationsCache } from 'src/annotations/cache'
@@ -33,7 +27,11 @@ import type {
     AnnotationSharingState,
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
-import type { SummarizationInterface } from 'src/summarization-llm/background'
+import { createPageLinkListTitle } from 'src/content-sharing/utils'
+import type {
+    SharedList,
+    SharedListEntry,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -106,23 +104,36 @@ const setupLogicHelper = async ({
     const analytics = new FakeAnalytics()
     const sidebarLogic = new SidebarContainerLogic({
         fullPageUrl,
-        sidebarContext: 'dashboard',
+        sidebarContext: 'in-page',
         shouldHydrateCacheOnInit: true,
         authBG: backgroundModules.auth.remoteFunctions,
         subscription: backgroundModules.auth.subscriptionService,
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
-        summarizeBG: (backgroundModules.summarizeBG
-            .remoteFunctions as unknown) as SummarizationInterface<'caller'>,
+        summarizeBG: insertBackgroundFunctionTab(
+            backgroundModules.summarizeBG.remoteFunctions,
+        ) as any,
         customListsBG: backgroundModules.customLists.remoteFunctions,
         contentSharingBG: backgroundModules.contentSharing.remoteFunctions,
+        contentSharingByTabsBG: insertBackgroundFunctionTab(
+            backgroundModules.contentSharing.remoteFunctionsByTab,
+        ) as any,
         pageActivityIndicatorBG:
             backgroundModules.pageActivityIndicator.remoteFunctions,
-        contentScriptsBG: (backgroundModules.contentScripts
-            .remoteFunctions as unknown) as ContentScriptsInterface<'caller'>,
+        contentScriptsBG: insertBackgroundFunctionTab(
+            backgroundModules.contentScripts.remoteFunctions,
+        ) as any,
         contentConversationsBG:
             backgroundModules.contentConversations.remoteFunctions,
         syncSettingsBG: backgroundModules.syncSettings,
-        currentUser: withAuth ? DATA.CREATOR_1 : undefined,
+        pageIndexingBG: {
+            lookupPageTitleForUrl:
+                backgroundModules.pages.lookupPageTitleForUrl,
+            initContentIdentifier:
+                backgroundModules.pages.initContentIdentifier,
+            waitForContentIdentifier:
+                backgroundModules.pages.waitForContentIdentifier,
+        },
+        getCurrentUser: () => (withAuth ? DATA.CREATOR_1 : null),
         annotationsBG: annotationsBG,
         events: fakeEmitter as any,
         runtimeAPI: browserAPIs.runtime,
@@ -304,8 +315,47 @@ describe('SidebarContainerLogic', () => {
             ])
         })
 
-        it('should not reset annotation card instance states when annotations state changes', async () => {
-            expect(1).toBe(2)
+        // TODO: check storage as well
+        it('should be able to create page links for the current page', async ({
+            device,
+        }) => {
+            const fullPageUrl = 'https://memex.garden'
+            const normalizedPageUrl = 'memex.garden'
+            const listName = createPageLinkListTitle()
+
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+                withAuth: true,
+                skipTestData: true,
+                fullPageUrl,
+            })
+
+            expect(sidebar.state.pageLinkCreateState).toEqual('pristine')
+            expect(annotationsCache.lists.byId).toEqual(
+                initNormalizedState().byId,
+            )
+
+            await sidebar.processEvent('createPageLink', null)
+
+            expect(sidebar.state.pageLinkCreateState).toEqual('success')
+            expect(annotationsCache.lists.byId).toEqual({
+                [annotationsCache.lists.allIds[0]]: {
+                    unifiedId: expect.anything(),
+                    type: 'page-link',
+                    name: listName,
+                    remoteId: expect.anything(),
+                    localId: expect.any(Number),
+                    collabKey: expect.any(String),
+                    sharedListEntryId: expect.anything(),
+                    normalizedPageUrl,
+                    creator: {
+                        id: TEST_USER.id,
+                        type: 'user-reference',
+                    },
+                    unifiedAnnotationIds: [],
+                    hasRemoteAnnotationsToLoad: false,
+                },
+            })
         })
     })
 
@@ -420,9 +470,30 @@ describe('SidebarContainerLogic', () => {
                         unifiedAnnotationIds: [],
                     },
                 }),
+                cacheUtils.reshapeLocalListForCache(DATA.LOCAL_LISTS[6], {
+                    extraData: {
+                        creator: DATA.CREATOR_1,
+                        unifiedId: expect.any(String),
+                        unifiedAnnotationIds: [],
+                        remoteId: DATA.SHARED_LIST_IDS[4],
+                        normalizedPageUrl:
+                            DATA.FOLLOWED_LIST_ENTRIES[5].normalizedPageUrl,
+                        sharedListEntryId: DATA.FOLLOWED_LIST_ENTRIES[5].sharedListEntry.toString(),
+                    },
+                }),
                 cacheUtils.reshapeFollowedListForCache(DATA.FOLLOWED_LISTS[3], {
                     hasRemoteAnnotations: true,
                     extraData: {
+                        unifiedId: expect.any(String),
+                        unifiedAnnotationIds: [],
+                    },
+                }),
+                cacheUtils.reshapeFollowedListForCache(DATA.FOLLOWED_LISTS[5], {
+                    hasRemoteAnnotations: true,
+                    extraData: {
+                        normalizedPageUrl:
+                            DATA.FOLLOWED_LIST_ENTRIES[6].normalizedPageUrl,
+                        sharedListEntryId: DATA.FOLLOWED_LIST_ENTRIES[6].sharedListEntry.toString(),
                         unifiedId: expect.any(String),
                         unifiedAnnotationIds: [],
                     },
@@ -553,14 +624,15 @@ describe('SidebarContainerLogic', () => {
                 ]),
             )
 
-            const [unifiedListIdA, unifiedListIdB] = normalizedStateToArray(
-                annotationsCache.lists,
-            )
+            const [
+                unifiedListIdA,
+                unifiedListIdB,
+                unifiedListIdC,
+            ] = normalizedStateToArray(annotationsCache.lists)
                 .filter((list) => list.hasRemoteAnnotationsToLoad)
                 .map((list) => list.unifiedId)
 
-            expect(emittedEvents).toEqual(expectedEvents)
-            expect(sidebar.state.listInstances).toEqual({
+            let expectedListInstances = {
                 ...defaultListInstanceStates,
                 [unifiedListIdA]: {
                     ...initListInstance(
@@ -576,7 +648,10 @@ describe('SidebarContainerLogic', () => {
                     sharedAnnotationReferences: [],
                     annotationRefsLoadState: 'pristine',
                 },
-            })
+            }
+
+            expect(emittedEvents).toEqual(expectedEvents)
+            expect(sidebar.state.listInstances).toEqual(expectedListInstances)
             expect(sidebar.state.activeTab).toEqual('annotations')
 
             await sidebar.processEvent('setActiveSidebarTab', { tab: 'spaces' })
@@ -590,42 +665,53 @@ describe('SidebarContainerLogic', () => {
                     args: { highlights: [] },
                 },
             )
+            expectedListInstances[unifiedListIdA] = {
+                isOpen: false,
+                unifiedListId: unifiedListIdA,
+                annotationsLoadState: 'pristine',
+                conversationsLoadState: 'pristine',
+                annotationRefsLoadState: 'success',
+                sharedAnnotationReferences: [
+                    {
+                        type: 'shared-annotation-reference',
+                        id: DATA.SHARED_ANNOTATIONS[2].id,
+                    },
+                ],
+            }
+            expectedListInstances[unifiedListIdB] = {
+                isOpen: false,
+                unifiedListId: unifiedListIdB,
+                annotationsLoadState: 'pristine',
+                conversationsLoadState: 'pristine',
+                annotationRefsLoadState: 'success',
+                sharedAnnotationReferences: [
+                    {
+                        type: 'shared-annotation-reference',
+                        id: DATA.SHARED_ANNOTATIONS[3].id,
+                    },
+                    {
+                        type: 'shared-annotation-reference',
+                        id: DATA.SHARED_ANNOTATIONS[4].id,
+                    },
+                ],
+            }
+            expectedListInstances[unifiedListIdC] = {
+                isOpen: false,
+                unifiedListId: unifiedListIdC,
+                annotationsLoadState: 'pristine',
+                conversationsLoadState: 'pristine',
+                annotationRefsLoadState: 'success',
+                sharedAnnotationReferences: [
+                    {
+                        type: 'shared-annotation-reference',
+                        id: DATA.SHARED_ANNOTATIONS[5].id,
+                    },
+                ],
+            }
 
             expect(sidebar.state.activeTab).toEqual('spaces')
             expect(emittedEvents).toEqual(expectedEvents)
-            expect(sidebar.state.listInstances).toEqual({
-                ...defaultListInstanceStates,
-                [unifiedListIdA]: {
-                    isOpen: false,
-                    unifiedListId: unifiedListIdA,
-                    annotationsLoadState: 'pristine',
-                    conversationsLoadState: 'pristine',
-                    annotationRefsLoadState: 'success',
-                    sharedAnnotationReferences: [
-                        {
-                            type: 'shared-annotation-reference',
-                            id: DATA.SHARED_ANNOTATIONS[2].id,
-                        },
-                    ],
-                },
-                [unifiedListIdB]: {
-                    isOpen: false,
-                    unifiedListId: unifiedListIdB,
-                    annotationsLoadState: 'pristine',
-                    conversationsLoadState: 'pristine',
-                    annotationRefsLoadState: 'success',
-                    sharedAnnotationReferences: [
-                        {
-                            type: 'shared-annotation-reference',
-                            id: DATA.SHARED_ANNOTATIONS[3].id,
-                        },
-                        {
-                            type: 'shared-annotation-reference',
-                            id: DATA.SHARED_ANNOTATIONS[4].id,
-                        },
-                    ],
-                },
-            })
+            expect(sidebar.state.listInstances).toEqual(expectedListInstances)
 
             // Verify re-opening the tab doesn't result in re-loads
             await sidebar.processEvent('setActiveSidebarTab', {
@@ -712,13 +798,15 @@ describe('SidebarContainerLogic', () => {
                 ]),
             )
 
-            const [unifiedListIdA, unifiedListIdB] = normalizedStateToArray(
-                annotationsCache.lists,
-            )
+            const [
+                unifiedListIdA,
+                unifiedListIdB,
+                unifiedListIdC,
+            ] = normalizedStateToArray(annotationsCache.lists)
                 .filter((list) => list.hasRemoteAnnotationsToLoad)
                 .map((list) => list.unifiedId)
 
-            expect(sidebar.state.listInstances).toEqual({
+            let expectedListInstances = {
                 ...defaultListInstanceStates,
                 [unifiedListIdA]: {
                     ...initListInstance(
@@ -734,7 +822,15 @@ describe('SidebarContainerLogic', () => {
                     sharedAnnotationReferences: [],
                     annotationRefsLoadState: 'pristine',
                 },
-            })
+                [unifiedListIdC]: {
+                    ...initListInstance(
+                        annotationsCache.lists.byId[unifiedListIdC],
+                    ),
+                    sharedAnnotationReferences: [],
+                    annotationRefsLoadState: 'pristine',
+                },
+            }
+            expect(sidebar.state.listInstances).toEqual(expectedListInstances)
 
             await sidebar.processEvent('setActiveSidebarTab', {
                 tab: 'spaces',
@@ -752,40 +848,52 @@ describe('SidebarContainerLogic', () => {
                 },
             )
 
+            expectedListInstances[unifiedListIdA] = {
+                isOpen: false,
+                unifiedListId: unifiedListIdA,
+                annotationsLoadState: 'pristine',
+                conversationsLoadState: 'pristine',
+                annotationRefsLoadState: 'success',
+                sharedAnnotationReferences: [
+                    {
+                        type: 'shared-annotation-reference',
+                        id: DATA.SHARED_ANNOTATIONS[2].id,
+                    },
+                ],
+            }
+            expectedListInstances[unifiedListIdB] = {
+                isOpen: false,
+                unifiedListId: unifiedListIdB,
+                annotationsLoadState: 'pristine',
+                conversationsLoadState: 'pristine',
+                annotationRefsLoadState: 'success',
+                sharedAnnotationReferences: [
+                    {
+                        type: 'shared-annotation-reference',
+                        id: DATA.SHARED_ANNOTATIONS[3].id,
+                    },
+                    {
+                        type: 'shared-annotation-reference',
+                        id: DATA.SHARED_ANNOTATIONS[4].id,
+                    },
+                ],
+            }
+            expectedListInstances[unifiedListIdC] = {
+                isOpen: false,
+                unifiedListId: unifiedListIdC,
+                annotationsLoadState: 'pristine',
+                conversationsLoadState: 'pristine',
+                annotationRefsLoadState: 'success',
+                sharedAnnotationReferences: [
+                    {
+                        type: 'shared-annotation-reference',
+                        id: DATA.SHARED_ANNOTATIONS[5].id,
+                    },
+                ],
+            }
+
             expect(emittedEvents).toEqual(expectedEvents)
-            expect(sidebar.state.listInstances).toEqual({
-                ...defaultListInstanceStates,
-                [unifiedListIdA]: {
-                    isOpen: false,
-                    unifiedListId: unifiedListIdA,
-                    annotationsLoadState: 'pristine',
-                    conversationsLoadState: 'pristine',
-                    annotationRefsLoadState: 'success',
-                    sharedAnnotationReferences: [
-                        {
-                            type: 'shared-annotation-reference',
-                            id: DATA.SHARED_ANNOTATIONS[2].id,
-                        },
-                    ],
-                },
-                [unifiedListIdB]: {
-                    isOpen: false,
-                    unifiedListId: unifiedListIdB,
-                    annotationsLoadState: 'pristine',
-                    conversationsLoadState: 'pristine',
-                    annotationRefsLoadState: 'success',
-                    sharedAnnotationReferences: [
-                        {
-                            type: 'shared-annotation-reference',
-                            id: DATA.SHARED_ANNOTATIONS[3].id,
-                        },
-                        {
-                            type: 'shared-annotation-reference',
-                            id: DATA.SHARED_ANNOTATIONS[4].id,
-                        },
-                    ],
-                },
-            })
+            expect(sidebar.state.listInstances).toEqual(expectedListInstances)
 
             await sidebar.processEvent('expandListAnnotations', {
                 unifiedListId: unifiedListIdA,
@@ -799,41 +907,15 @@ describe('SidebarContainerLogic', () => {
                     ),
                 },
             })
+            expectedListInstances[unifiedListIdA] = {
+                ...expectedListInstances[unifiedListIdA],
+                isOpen: true,
+                annotationsLoadState: 'success',
+                conversationsLoadState: 'success',
+            }
 
             expect(emittedEvents).toEqual(expectedEvents)
-            expect(sidebar.state.listInstances).toEqual({
-                ...defaultListInstanceStates,
-                [unifiedListIdA]: {
-                    isOpen: true,
-                    unifiedListId: unifiedListIdA,
-                    annotationsLoadState: 'success',
-                    conversationsLoadState: 'success',
-                    annotationRefsLoadState: 'success',
-                    sharedAnnotationReferences: [
-                        {
-                            type: 'shared-annotation-reference',
-                            id: DATA.SHARED_ANNOTATIONS[2].id,
-                        },
-                    ],
-                },
-                [unifiedListIdB]: {
-                    isOpen: false,
-                    unifiedListId: unifiedListIdB,
-                    annotationsLoadState: 'pristine',
-                    conversationsLoadState: 'pristine',
-                    annotationRefsLoadState: 'success',
-                    sharedAnnotationReferences: [
-                        {
-                            type: 'shared-annotation-reference',
-                            id: DATA.SHARED_ANNOTATIONS[3].id,
-                        },
-                        {
-                            type: 'shared-annotation-reference',
-                            id: DATA.SHARED_ANNOTATIONS[4].id,
-                        },
-                    ],
-                },
-            })
+            expect(sidebar.state.listInstances).toEqual(expectedListInstances)
 
             // Assert the 1 annotation was downloaded, cached, and a new card instance state created
             const newCachedAnnotAId = annotationsCache[
@@ -879,41 +961,15 @@ describe('SidebarContainerLogic', () => {
                     ],
                 },
             })
+            expectedListInstances[unifiedListIdB] = {
+                ...expectedListInstances[unifiedListIdB],
+                isOpen: true,
+                annotationsLoadState: 'success',
+                conversationsLoadState: 'success',
+            }
 
             expect(emittedEvents).toEqual(expectedEvents)
-            expect(sidebar.state.listInstances).toEqual({
-                ...defaultListInstanceStates,
-                [unifiedListIdA]: {
-                    isOpen: true,
-                    unifiedListId: unifiedListIdA,
-                    annotationsLoadState: 'success',
-                    conversationsLoadState: 'success',
-                    annotationRefsLoadState: 'success',
-                    sharedAnnotationReferences: [
-                        {
-                            type: 'shared-annotation-reference',
-                            id: DATA.SHARED_ANNOTATIONS[2].id,
-                        },
-                    ],
-                },
-                [unifiedListIdB]: {
-                    isOpen: true,
-                    unifiedListId: unifiedListIdB,
-                    annotationsLoadState: 'success',
-                    conversationsLoadState: 'success',
-                    annotationRefsLoadState: 'success',
-                    sharedAnnotationReferences: [
-                        {
-                            type: 'shared-annotation-reference',
-                            id: DATA.SHARED_ANNOTATIONS[3].id,
-                        },
-                        {
-                            type: 'shared-annotation-reference',
-                            id: DATA.SHARED_ANNOTATIONS[4].id,
-                        },
-                    ],
-                },
-            })
+            expect(sidebar.state.listInstances).toEqual(expectedListInstances)
 
             // Assert the 2 annotation were downloaded, cached (with one being de-duped, already existing locally), and new card instance states created
             const newCachedAnnotBId = annotationsCache[
@@ -991,16 +1047,16 @@ describe('SidebarContainerLogic', () => {
             expect(wasBGMethodCalled).toBe(false)
 
             // Open a list without remote annots to assert no download is attempted
-            const unifiedListIdC = normalizedStateToArray(
+            const unifiedListIdD = normalizedStateToArray(
                 annotationsCache.lists,
             ).find((list) => !list.hasRemoteAnnotationsToLoad).unifiedId
 
-            expect(sidebar.state.listInstances[unifiedListIdC].isOpen).toBe(
+            expect(sidebar.state.listInstances[unifiedListIdD].isOpen).toBe(
                 false,
             )
 
             await sidebar.processEvent('expandListAnnotations', {
-                unifiedListId: unifiedListIdC,
+                unifiedListId: unifiedListIdD,
             })
             expectedEvents.push({
                 event: 'renderHighlights',
@@ -1008,7 +1064,7 @@ describe('SidebarContainerLogic', () => {
                     highlights: expect.arrayContaining([
                         ...cacheUtils.getListHighlightsArray(
                             annotationsCache,
-                            unifiedListIdC,
+                            unifiedListIdD,
                         ),
                         ...cacheUtils.getListHighlightsArray(
                             annotationsCache,
@@ -1023,7 +1079,7 @@ describe('SidebarContainerLogic', () => {
             })
 
             expect(emittedEvents).toEqual(expectedEvents)
-            expect(sidebar.state.listInstances[unifiedListIdC].isOpen).toBe(
+            expect(sidebar.state.listInstances[unifiedListIdD].isOpen).toBe(
                 true,
             )
             expect(wasBGMethodCalled).toBe(false)
@@ -1261,7 +1317,7 @@ describe('SidebarContainerLogic', () => {
                     localId: localAnnotId,
                     remoteId: undefined,
                     normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
-                    creator: undefined, // NOTE: we're not auth'd
+                    creator: null, // NOTE: we're not auth'd
                     comment: DATA.COMMENT_1,
                     body: undefined,
                     selector: undefined,
@@ -1355,7 +1411,7 @@ describe('SidebarContainerLogic', () => {
                     localId: localAnnotId,
                     remoteId: undefined,
                     normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
-                    creator: undefined, // NOTE: we're not auth'd
+                    creator: null, // NOTE: we're not auth'd
                     comment: DATA.COMMENT_1,
                     body: undefined,
                     selector: undefined,
@@ -1543,7 +1599,7 @@ describe('SidebarContainerLogic', () => {
                     localId: localAnnotId,
                     remoteId: undefined,
                     normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
-                    creator: undefined, // NOTE: we're not auth'd
+                    creator: null, // NOTE: we're not auth'd
                     comment: DATA.COMMENT_1,
                     body: undefined,
                     selector: undefined,
@@ -2915,6 +2971,7 @@ describe('SidebarContainerLogic', () => {
                 hasRemoteAnnotationsToLoad: true,
                 isForeignList: true,
                 unifiedAnnotationIds: [expect.any(String), expect.any(String)],
+                type: 'user-list',
             })
             expect(Object.keys(sidebar.state.listInstances).length).toBe(
                 listInstancesCountBefore + 1,

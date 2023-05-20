@@ -112,10 +112,12 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
-                annotations={this.props.annotationsCache}
+                pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
                 contentSharingBG={this.props.contentSharing}
+                annotations={this.props.annotationsCache}
                 bgScriptBG={this.props.bgScriptBG}
                 spacesBG={this.props.customLists}
+                authBG={this.props.authBG}
                 ref={this.ribbonRef}
                 setRef={this.props.setRef}
                 getListDetailsById={(id) => {
@@ -260,6 +262,7 @@ export default class RibbonContainer extends StatefulUIElement<
                             unifiedAnnotationIds: [],
                             hasRemoteAnnotationsToLoad: false,
                             creator: this.props.currentUser,
+                            type: 'user-list',
                         })
                         await this.processEvent('updateLists', {
                             value: {

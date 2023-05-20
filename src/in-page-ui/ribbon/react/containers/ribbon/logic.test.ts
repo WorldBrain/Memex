@@ -78,8 +78,11 @@ describe('Ribbon logic', () => {
             bgScriptBG: backgroundModules.bgScript['remoteFunctions'],
             bookmarks: backgroundModules.bookmarks.remoteFunctions,
             tags: backgroundModules.tags.remoteFunctions,
+            pageActivityIndicatorBG:
+                backgroundModules.pageActivityIndicator.remoteFunctions,
             contentSharing: backgroundModules.contentSharing.remoteFunctions,
             customLists: backgroundModules.customLists.remoteFunctions,
+            authBG: backgroundModules.auth.remoteFunctions,
             annotations,
             ...(options?.dependencies ?? {}),
             tooltip: {

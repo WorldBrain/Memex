@@ -92,7 +92,9 @@ export class DashboardContainer extends StatefulUIElement<
         | 'pageActivityIndicatorBG'
         | 'contentConversationsBG'
         | 'activityIndicatorBG'
+        | 'contentShareByTabsBG'
         | 'contentShareBG'
+        | 'pageIndexingBG'
         | 'syncSettingsBG'
         | 'annotationsBG'
         | 'pdfViewerBG'
@@ -117,7 +119,9 @@ export class DashboardContainer extends StatefulUIElement<
         contentConversationsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
         contentScriptsBG: runInBackground(),
+        pageIndexingBG: runInBackground(),
         contentShareBG: runInBackground(),
+        contentShareByTabsBG: runInBackground(),
         syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
         pdfViewerBG: runInBackground(),
@@ -192,24 +196,7 @@ export class DashboardContainer extends StatefulUIElement<
 
     // TODO: move this to logic class - main reason it exists separately is that it needs to return the created list ID
     private async createNewListViaPicker(name: string): Promise<number> {
-        const localListId = Date.now()
-        const { unifiedId } = this.props.annotationsCache.addList({
-            name,
-            localId: localListId,
-            unifiedAnnotationIds: [],
-            hasRemoteAnnotationsToLoad: false,
-            creator: this.state.currentUser
-                ? { type: 'user-reference', id: this.state.currentUser.id }
-                : undefined,
-        })
-
-        this.processMutation({
-            listsSidebar: {
-                filteredListIds: { $unshift: [unifiedId] },
-            },
-        })
-        await this.props.listsBG.createCustomList({ name, id: localListId })
-        return localListId
+        return this.props.listsBG.createCustomList({ name })
     }
 
     private renderFiltersBar() {
@@ -323,9 +310,13 @@ export class DashboardContainer extends StatefulUIElement<
                     }
                 }
                 spacePickerProps={{
+                    authBG: this.props.authBG,
                     spacesBG: this.props.listsBG,
                     onClickOutside: toggleSpacesFilter,
+                    localStorageAPI: this.props.localStorage,
                     contentSharingBG: this.props.contentShareBG,
+                    annotationsCache: this.props.annotationsCache,
+                    pageActivityIndicatorBG: this.props.pageActivityIndicatorBG,
                     createNewEntry: () => undefined,
                     initialSelectedListIds: () => searchFilters.spacesIncluded,
                     dashboardSelectedListId: selectedLocalListId,
@@ -532,12 +523,14 @@ export class DashboardContainer extends StatefulUIElement<
                     contentSharingBG: this.props.contentShareBG,
                     onCancelEdit: () =>
                         this.processEvent('cancelListEdit', null),
-                    onConfirmEdit: (value) =>
-                        this.processEvent('confirmListEdit', { value, listId }),
+                    onConfirmSpaceNameEdit: (value) =>
+                        this.processEvent('confirmListEdit', {
+                            value,
+                            listId,
+                            skipDBOps: true,
+                        }),
                     onDeleteSpaceIntent: () =>
                         this.processEvent('setDeletingListId', { listId }),
-                    onDeleteSpaceConfirm: () =>
-                        this.processEvent('confirmListDelete', null),
                     toggleMenu: () =>
                         this.processEvent('setShowMoreMenuListId', { listId }),
                     onSpaceShare: () =>
@@ -610,6 +603,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                annotationsCache={this.props.annotationsCache}
                 filterByList={(localListId) => {
                     const listData = this.props.annotationsCache.getListByLocalId(
                         localListId,
@@ -1443,14 +1437,26 @@ export class DashboardContainer extends StatefulUIElement<
                             customListsBG={this.props.listsBG}
                             annotationsBG={this.props.annotationsBG}
                             contentSharingBG={this.props.contentShareBG}
+                            contentSharingByTabsBG={
+                                this.props.contentShareByTabsBG
+                            }
                             contentScriptsBG={this.props.contentScriptsBG}
                             syncSettingsBG={this.props.syncSettingsBG}
+                            pageIndexingBG={this.props.pageIndexingBG}
                             pageActivityIndicatorBG={
                                 this.props.pageActivityIndicatorBG
                             }
                             summarizeBG={this.props.summarizeBG}
                             contentConversationsBG={
                                 this.props.contentConversationsBG
+                            }
+                            getCurrentUser={() =>
+                                this.state.currentUser
+                                    ? {
+                                          id: this.state.currentUser.id,
+                                          type: 'user-reference',
+                                      }
+                                    : null
                             }
                             setLoginModalShown={(isShown) =>
                                 this.processEvent('setShowLoginModal', {

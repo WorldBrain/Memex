@@ -1,6 +1,9 @@
 import createResolvable, { Resolvable } from '@josephg/resolvable'
 import StorageManager from '@worldbrain/storex'
-import { normalizeUrl, isFileUrl } from '@worldbrain/memex-url-utils'
+import {
+    normalizeUrl,
+    isFileUrl,
+} from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { isTermsField } from '@worldbrain/memex-common/lib/storage/utils'
 import {
     ContentFingerprint,
@@ -45,6 +48,7 @@ import {
 import {
     remoteFunctionWithExtraArgs,
     registerRemoteFunctions,
+    remoteFunctionWithoutExtraArgs,
 } from '../../util/webextensionRPC'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import { isUrlSupported } from '../utils'
@@ -114,11 +118,21 @@ export class PageIndexingBackground {
                         tabId: params.tabId ?? info.tab?.id,
                     }),
             ),
+            lookupPageTitleForUrl: remoteFunctionWithoutExtraArgs(
+                this.lookupPageTitleForUrl,
+            ),
         }
     }
 
     setupRemoteFunctions() {
         registerRemoteFunctions(this.remoteFunctions)
+    }
+
+    lookupPageTitleForUrl: PageIndexingInterface<
+        'provider'
+    >['lookupPageTitleForUrl']['function'] = async ({ fullPageUrl }) => {
+        const pageData = await this.storage.getPage(fullPageUrl)
+        return pageData?.fullTitle ?? null
     }
 
     async initContentIdentifier(
