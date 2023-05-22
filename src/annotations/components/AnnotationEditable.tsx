@@ -29,7 +29,6 @@ import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import Portal from '@worldbrain/memex-common/lib/common-ui/components/portal'
 import type { UnifiedAnnotation, UnifiedList } from '../cache/types'
 import type { AnnotationCardInstanceLocation } from 'src/sidebar/annotations-sidebar/types'
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
@@ -778,7 +777,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     top="5px"
                     onMouseEnter={() => this.setState({ hoverCard: true })}
                     onMouseOver={() => this.setState({ hoverCard: true })}
-                    onMouseLeave={() => this.setState({ hoverCard: false })}
+                    onMouseLeave={() =>
+                        !this.isAnyModalOpen() &&
+                        this.setState({ hoverCard: false })
+                    }
                 >
                     <ItemBox
                         firstDivProps={{
