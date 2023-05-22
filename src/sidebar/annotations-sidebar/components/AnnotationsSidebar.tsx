@@ -791,28 +791,30 @@ export class AnnotationsSidebar extends React.Component<
                                     }}
                                 />
                             </TooltipBox>
-                            {listData.localId != null && (
-                                <TooltipBox
-                                    tooltipText="Share & Edit"
-                                    placement="bottom"
-                                >
-                                    <Icon
-                                        icon="dots"
-                                        height="20px"
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            this.props.openContextMenuForList(
-                                                listData.unifiedId,
-                                            )
-                                        }}
-                                        containerRef={
-                                            this.spaceContextBtnRefs[
-                                                listData.unifiedId
-                                            ]
-                                        }
-                                    />
-                                </TooltipBox>
-                            )}
+                            {listData.localId != null &&
+                                listData.creator?.id ===
+                                    this.props.currentUser?.id && (
+                                    <TooltipBox
+                                        tooltipText="Share & Edit"
+                                        placement="bottom"
+                                    >
+                                        <Icon
+                                            icon="dots"
+                                            height="20px"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                this.props.openContextMenuForList(
+                                                    listData.unifiedId,
+                                                )
+                                            }}
+                                            containerRef={
+                                                this.spaceContextBtnRefs[
+                                                    listData.unifiedId
+                                                ]
+                                            }
+                                        />
+                                    </TooltipBox>
+                                )}
                         </ActionButtons>
                         {listData.creator?.id === this.props.currentUser?.id &&
                             listData.remoteId != null && (
