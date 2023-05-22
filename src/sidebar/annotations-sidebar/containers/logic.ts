@@ -242,6 +242,8 @@ export class SidebarContainerLogic extends UILogic<
             listInstances: {},
             annotationCardInstances: {},
 
+            spacePickerAnnotationInstance: null,
+
             annotations: initNormalizedState(),
             lists: initNormalizedState(),
 
@@ -1074,6 +1076,14 @@ export class SidebarContainerLogic extends UILogic<
         )
 
         await savePromise
+    }
+
+    setSpacePickerAnnotationInstance: EventHandler<
+        'setSpacePickerAnnotationInstance'
+    > = async ({ event }) => {
+        this.emitMutation({
+            spacePickerAnnotationInstance: { $set: event.state },
+        })
     }
     /* -- END: Annotation card instance events -- */
 

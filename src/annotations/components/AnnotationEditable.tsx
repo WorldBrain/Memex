@@ -29,6 +29,7 @@ import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import Portal from '@worldbrain/memex-common/lib/common-ui/components/portal'
 import type { UnifiedAnnotation, UnifiedList } from '../cache/types'
 import type { AnnotationCardInstanceLocation } from 'src/sidebar/annotations-sidebar/types'
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
@@ -81,6 +82,7 @@ export interface AnnotationProps {
     onListClick?: (unifiedListId: number) => void
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
+    onSpacePickerToggle?: () => void
     getListDetailsById: ListDetailsGetter
     renderListsPickerForAnnotation?: (
         unifiedId: UnifiedAnnotation['unifiedId'],
@@ -213,6 +215,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 
     private updateSpacePickerState(showState: ListPickerShowState) {
+        this.props.onSpacePickerToggle?.()
         if (this.state.showSpacePicker === 'hide') {
             this.setState({
                 showSpacePicker: showState,
@@ -692,34 +695,35 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         referenceElement: React.RefObject<HTMLElement>,
         showWhen: ListPickerShowState,
     ) => {
-        if (this.state.showSpacePicker !== showWhen) {
-            return
-        }
+        // if (this.state.showSpacePicker !== showWhen) {
+        //     return
+        // }
 
-        return (
-            <PopoutBox
-                targetElementRef={referenceElement.current}
-                placement={
-                    this.state.showSpacePicker === 'lists-bar'
-                        ? 'bottom'
-                        : 'bottom-end'
-                }
-                closeComponent={() => {
-                    this.setState({
-                        showSpacePicker: 'hide',
-                    })
-                }}
-                offsetX={10}
-            >
-                {this.props.renderListsPickerForAnnotation(
-                    this.props.unifiedId,
-                    () =>
-                        this.setState({
-                            showSpacePicker: 'hide',
-                        }),
-                )}
-            </PopoutBox>
-        )
+        // return (
+        //     <PopoutBox
+        //         targetElementRef={referenceElement.current}
+        //         placement={
+        //             this.state.showSpacePicker === 'lists-bar'
+        //                 ? 'bottom'
+        //                 : 'bottom-end'
+        //         }
+        //         closeComponent={() => {
+        //             this.setState({
+        //                 showSpacePicker: 'hide',
+        //             })
+        //         }}
+        //         offsetX={10}
+        //     >
+        //         {this.props.renderListsPickerForAnnotation(
+        //             this.props.unifiedId,
+        //             () =>
+        //                 this.setState({
+        //                     showSpacePicker: 'hide',
+        //                 }),
+        //         )}
+        //     </PopoutBox>
+        // )
+        return null
     }
 
     renderShareMenu(referenceElement: React.RefObject<HTMLElement>) {

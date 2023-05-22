@@ -368,7 +368,6 @@ export class AnnotationsSidebarContainer<
 
     private getSpacePickerProps = (params: {
         annotation: UnifiedAnnotation
-        instanceLocation: AnnotationCardInstanceLocation
         showExternalConfirmations?: boolean
     }): SpacePickerDependencies => {
         const {
@@ -460,7 +459,6 @@ export class AnnotationsSidebarContainer<
             <CollectionPicker
                 {...this.getSpacePickerProps({
                     annotation,
-                    instanceLocation,
                     showExternalConfirmations: true,
                 })}
                 closePicker={closePicker}
@@ -468,9 +466,9 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderShareMenuForAnnotation = (
-        instanceLocation: AnnotationCardInstanceLocation,
-    ) => (unifiedId: UnifiedAnnotation['unifiedId']) => {
+    private renderShareMenuForAnnotation = () => (
+        unifiedId: UnifiedAnnotation['unifiedId'],
+    ) => {
         const annotation = this.props.annotationsCache.annotations.byId[
             unifiedId
         ]
@@ -501,7 +499,6 @@ export class AnnotationsSidebarContainer<
                 }
                 spacePickerProps={this.getSpacePickerProps({
                     annotation,
-                    instanceLocation,
                 })}
             />
         )
@@ -747,6 +744,12 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
+                            setSpacePickerAnnotationInstance={(state) =>
+                                this.processEvent(
+                                    'setSpacePickerAnnotationInstance',
+                                    { state },
+                                )
+                            }
                             hasFeedActivity={this.props.hasFeedActivity}
                             clickFeedActivityIndicator={() =>
                                 this.processEvent('markFeedAsRead', null)

@@ -79,6 +79,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     setActiveAnnotation: (
         annotationId: UnifiedAnnotation['unifiedId'],
     ) => React.MouseEventHandler
+    setSpacePickerAnnotationInstance: (
+        state: SidebarContainerState['spacePickerAnnotationInstance'],
+    ) => Promise<void>
     getListDetailsById: ListDetailsGetter
 
     bindSharedAnnotationEventHandlers: (
@@ -569,6 +572,17 @@ export class AnnotationsSidebar extends React.Component<
                             pageUrl={this.props.normalizedPageUrl}
                             isShared
                             isBulkShareProtected
+                            onSpacePickerToggle={() => {
+                                this.props.setSpacePickerAnnotationInstance(
+                                    this.props.spacePickerAnnotationInstance ==
+                                        null
+                                        ? {
+                                              instanceId: annotationCardId,
+                                              position: 'footer',
+                                          }
+                                        : null,
+                                )
+                            }}
                             unifiedId={annotation.unifiedId}
                             body={annotation.body}
                             comment={annotation.comment}
@@ -1419,6 +1433,13 @@ export class AnnotationsSidebar extends React.Component<
             )
         }
 
+        const {
+            annotationCardInstances,
+            spacePickerAnnotationInstance,
+        } = this.props
+        const instance =
+            annotationCardInstances[spacePickerAnnotationInstance?.instanceId]
+
         return (
             <>
                 {this.props.activeTab === 'annotations' ? (
@@ -1434,6 +1455,29 @@ export class AnnotationsSidebar extends React.Component<
                     <AnnotationsSectionStyled>
                         {this.renderSharedNotesByList()}
                     </AnnotationsSectionStyled>
+                )}
+                {spacePickerAnnotationInstance != null && (
+                    <PopoutBox
+                        targetElementRef={
+                            this.props.spacePickerButtonRef.current
+                        }
+                        placement={
+                            spacePickerAnnotationInstance.position ===
+                            'lists-bar'
+                                ? 'bottom'
+                                : 'bottom-end'
+                        }
+                        closeComponent={() =>
+                            this.props.setSpacePickerAnnotationInstance(null)
+                        }
+                        offsetX={10}
+                    >
+                        {this.props.renderListsPickerForAnnotation(
+                            spacePickerAnnotationInstance.instanceId,
+                        )(instance.unifiedAnnotationId, () =>
+                            this.props.setSpacePickerAnnotationInstance(null),
+                        )}
+                    </PopoutBox>
                 )}
                 <UpdateNotifBanner
                     location={'sidebar'}
@@ -1496,6 +1540,17 @@ export class AnnotationsSidebar extends React.Component<
                             {...this.props}
                             creatorId={annot.creator?.id}
                             currentUserId={this.props.currentUser?.id}
+                            onSpacePickerToggle={() => {
+                                this.props.setSpacePickerAnnotationInstance(
+                                    this.props.spacePickerAnnotationInstance ==
+                                        null
+                                        ? {
+                                              instanceId,
+                                              position: 'footer',
+                                          }
+                                        : null,
+                                )
+                            }}
                             lists={cacheUtils.getLocalListIdsForCacheIds(
                                 this.props.annotationsCache,
                                 annot.unifiedListIds,
