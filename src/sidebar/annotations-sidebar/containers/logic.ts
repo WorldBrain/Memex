@@ -431,9 +431,7 @@ export class SidebarContainerLogic extends UILogic<
                 fullPageUrl,
             )
 
-            const hasActivity =
-                hasNetworkActivity !== 'no-activity' &&
-                hasNetworkActivity !== 'no-annotations'
+            const hasActivity = hasNetworkActivity !== 'no-annotations'
 
             this.emitMutation({
                 pageHasNetworkAnnotations: {

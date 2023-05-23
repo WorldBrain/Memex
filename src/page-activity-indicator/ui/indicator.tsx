@@ -60,7 +60,7 @@ export default class PageActivityIndicator extends React.PureComponent<
                         }}
                     />
                     <TextBox>
-                        <TextMain>Page is annotated</TextMain>
+                        <TextMain>Page is added</TextMain>
                         <TextSecondary>
                             in Memex Spaces you follow
                         </TextSecondary>
