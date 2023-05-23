@@ -969,10 +969,9 @@ export class AnnotationsSidebar extends React.Component<
         const normalizedPageUrl = fullPageUrl
             ? normalizeUrl(fullPageUrl)
             : undefined
-        console.log('lists', lists)
         const allLists = normalizedStateToArray(lists).filter(
             (listData) =>
-                listData.unifiedAnnotationIds.length >= 0 ||
+                listData.unifiedAnnotationIds.length > 0 ||
                 listData.hasRemoteAnnotationsToLoad ||
                 (listData.type === 'page-link' &&
                     listData.normalizedPageUrl === normalizedPageUrl) ||
