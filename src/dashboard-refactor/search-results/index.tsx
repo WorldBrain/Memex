@@ -312,6 +312,9 @@ export default class SearchResultsContainer extends React.Component<
                         normalizedPageUrls={[pageId]}
                     />
                 )}
+                copyPasterAnnotationInstanceId={null}
+                spacePickerAnnotationInstance={null}
+                shareMenuAnnotationInstanceId={null}
                 renderListsPickerForAnnotation={() => (
                     <CollectionPicker
                         showPageLinks
