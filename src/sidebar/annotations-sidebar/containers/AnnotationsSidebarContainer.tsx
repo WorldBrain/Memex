@@ -10,7 +10,11 @@ import AnnotationsSidebar, {
 } from '../components/AnnotationsSidebar'
 import { SidebarContainerLogic, SidebarContainerOptions } from './logic'
 
-import type { SidebarContainerState, SidebarContainerEvents } from './types'
+import type {
+    SidebarContainerState,
+    SidebarContainerEvents,
+    AnnotationInstanceRefs,
+} from './types'
 import { ConfirmModal } from 'src/common-ui/components'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
@@ -66,8 +70,9 @@ export class AnnotationsSidebarContainer<
     P extends Props = Props
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
     private sidebarRef = React.createRef<AnnotationsSidebarComponent>()
-    private shareButtonRef = React.createRef<HTMLDivElement>()
-    private spacePickerButtonRef = React.createRef<HTMLDivElement>()
+    private annotationInstanceRefs: {
+        [instanceId: string]: AnnotationInstanceRefs
+    } = {}
 
     static defaultProps: Pick<Props, 'runtimeAPI' | 'storageAPI'> = {
         runtimeAPI: browser.runtime,
@@ -750,6 +755,18 @@ export class AnnotationsSidebarContainer<
                                     { state },
                                 )
                             }
+                            setShareMenuAnnotationInstance={(instanceId) =>
+                                this.processEvent(
+                                    'setShareMenuAnnotationInstanceId',
+                                    { instanceId },
+                                )
+                            }
+                            setCopyPasterAnnotationInstance={(instanceId) =>
+                                this.processEvent(
+                                    'setCopyPasterAnnotationInstanceId',
+                                    { instanceId },
+                                )
+                            }
                             hasFeedActivity={this.props.hasFeedActivity}
                             clickFeedActivityIndicator={() =>
                                 this.processEvent('markFeedAsRead', null)
@@ -946,8 +963,7 @@ export class AnnotationsSidebarContainer<
                             activeShareMenuNoteId={
                                 this.state.activeShareMenuNoteId
                             }
-                            shareButtonRef={this.shareButtonRef}
-                            spacePickerButtonRef={this.spacePickerButtonRef}
+                            annotationInstanceRefs={this.annotationInstanceRefs}
                             renderListsPickerForAnnotation={
                                 this.renderListPickerForAnnotation
                             }

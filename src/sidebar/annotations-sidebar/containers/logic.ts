@@ -242,7 +242,9 @@ export class SidebarContainerLogic extends UILogic<
             listInstances: {},
             annotationCardInstances: {},
 
+            shareMenuAnnotationInstanceId: null,
             spacePickerAnnotationInstance: null,
+            copyPasterAnnotationInstanceId: null,
 
             annotations: initNormalizedState(),
             lists: initNormalizedState(),
@@ -1083,6 +1085,22 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event }) => {
         this.emitMutation({
             spacePickerAnnotationInstance: { $set: event.state },
+        })
+    }
+
+    setCopyPasterAnnotationInstanceId: EventHandler<
+        'setCopyPasterAnnotationInstanceId'
+    > = async ({ event }) => {
+        this.emitMutation({
+            copyPasterAnnotationInstanceId: { $set: event.instanceId },
+        })
+    }
+
+    setShareMenuAnnotationInstanceId: EventHandler<
+        'setShareMenuAnnotationInstanceId'
+    > = async ({ event }) => {
+        this.emitMutation({
+            shareMenuAnnotationInstanceId: { $set: event.instanceId },
         })
     }
     /* -- END: Annotation card instance events -- */

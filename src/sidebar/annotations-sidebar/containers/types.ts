@@ -149,6 +149,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
         instanceId: string
         position: ListPickerShowState
     } | null
+    copyPasterAnnotationInstanceId: string | null
+    shareMenuAnnotationInstanceId: string | null
 
     showCommentBox: boolean
     commentBox: EditForm
@@ -287,6 +289,8 @@ interface SidebarEvents {
     setSpacePickerAnnotationInstance: {
         state: SidebarContainerState['spacePickerAnnotationInstance']
     }
+    setCopyPasterAnnotationInstanceId: { instanceId: string | null }
+    setShareMenuAnnotationInstanceId: { instanceId: string | null }
 
     // Selected space management
     setSelectedList: { unifiedListId: UnifiedList['unifiedId'] | null }
@@ -362,4 +366,11 @@ export interface ListInstance {
     annotationsLoadState: TaskState
     sharedAnnotationReferences?: SharedAnnotationReference[]
     isOpen: boolean
+}
+
+export interface AnnotationInstanceRefs {
+    spacePickerFooterBtn: React.RefObject<HTMLDivElement>
+    spacePickerBodyBtn: React.RefObject<HTMLDivElement>
+    copyPasterBtn: React.RefObject<HTMLDivElement>
+    shareMenuBtn: React.RefObject<HTMLDivElement>
 }

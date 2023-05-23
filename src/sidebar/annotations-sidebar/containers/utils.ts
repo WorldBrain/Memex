@@ -1,9 +1,14 @@
+import React from 'react'
 import type {
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
 import type { AnnotationCardInstanceLocation } from '../types'
-import type { AnnotationCardInstance, ListInstance } from './types'
+import type {
+    AnnotationCardInstance,
+    AnnotationInstanceRefs,
+    ListInstance,
+} from './types'
 
 export const generateAnnotationCardInstanceId = (
     { unifiedId }: Pick<UnifiedAnnotation, 'unifiedId'>,
@@ -35,3 +40,26 @@ export const initListInstance = (
     unifiedListId: list.unifiedId,
     isOpen: false,
 })
+
+export const createAnnotationInstanceRefs = (): AnnotationInstanceRefs => ({
+    shareMenuBtn: React.createRef(),
+    copyPasterBtn: React.createRef(),
+    spacePickerBodyBtn: React.createRef(),
+    spacePickerFooterBtn: React.createRef(),
+})
+
+/**
+ * NOTE: This shouldn't need to exist. When we clean up AnnotationSidebarContainer + AnnotationSidebar to each
+ *  have their own unique concerns, this logic can exist as part of AnnotationsSidebarContainer.
+ */
+export const getOrCreateAnnotationInstanceRefs = (
+    instanceId: string,
+    refs: { [instanceId: string]: AnnotationInstanceRefs },
+): AnnotationInstanceRefs => {
+    let instanceRefs = refs[instanceId]
+    if (!instanceRefs) {
+        instanceRefs = createAnnotationInstanceRefs()
+        refs[instanceId] = instanceRefs
+    }
+    return instanceRefs
+}

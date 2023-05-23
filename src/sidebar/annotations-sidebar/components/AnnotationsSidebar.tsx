@@ -28,6 +28,7 @@ import {
 } from 'src/annotations/components/AnnotationEdit'
 import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 import type {
+    AnnotationInstanceRefs,
     ListInstance,
     SidebarContainerState,
     SidebarTab,
@@ -52,7 +53,10 @@ import type {
 import * as cacheUtils from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { generateAnnotationCardInstanceId } from '../containers/utils'
+import {
+    generateAnnotationCardInstanceId,
+    getOrCreateAnnotationInstanceRefs,
+} from '../containers/utils'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
@@ -82,6 +86,12 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     setSpacePickerAnnotationInstance: (
         state: SidebarContainerState['spacePickerAnnotationInstance'],
     ) => Promise<void>
+    setShareMenuAnnotationInstance: (
+        state: SidebarContainerState['shareMenuAnnotationInstanceId'],
+    ) => Promise<void>
+    setCopyPasterAnnotationInstance: (
+        state: SidebarContainerState['copyPasterAnnotationInstanceId'],
+    ) => Promise<void>
     getListDetailsById: ListDetailsGetter
 
     bindSharedAnnotationEventHandlers: (
@@ -98,8 +108,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     renderCopyPasterForAnnotation: (
         instanceLocation: AnnotationCardInstanceLocation,
     ) => (id: string) => JSX.Element
-    shareButtonRef: React.RefObject<HTMLDivElement>
-    spacePickerButtonRef: React.RefObject<HTMLDivElement>
+    annotationInstanceRefs: {
+        [instanceId: string]: AnnotationInstanceRefs
+    }
     activeShareMenuNoteId: string
     renderAICounter: () => JSX.Element
     renderShareMenuForAnnotation: (
@@ -275,6 +286,35 @@ export class AnnotationsSidebar extends React.Component<
             return this.props.setPopoutsActive(false)
         }
     }
+
+    private getAnnotInstanceDropdownTogglers = (
+        instanceId: string,
+    ): Pick<
+        AnnotationEditableProps,
+        'onSpacePickerToggle' | 'onCopyPasterToggle' | 'onShareMenuToggle'
+    > => ({
+        onSpacePickerToggle: (showState) =>
+            this.props.setSpacePickerAnnotationInstance(
+                showState === 'hide'
+                    ? null
+                    : {
+                          instanceId,
+                          position: showState,
+                      },
+            ),
+        onCopyPasterToggle: () =>
+            this.props.setCopyPasterAnnotationInstance(
+                this.props.copyPasterAnnotationInstanceId == null
+                    ? instanceId
+                    : null,
+            ),
+        onShareMenuToggle: () =>
+            this.props.setShareMenuAnnotationInstance(
+                this.props.shareMenuAnnotationInstanceId == null
+                    ? instanceId
+                    : null,
+            ),
+    })
 
     private renderCopyPasterManager(localAnnotationIds: string[]) {
         if (!this.state.showAllNotesCopyPaster) {
@@ -469,19 +509,23 @@ export class AnnotationsSidebar extends React.Component<
             )
         } else {
             listAnnotations = annotationsData.map((annotation, i) => {
-                const annotationCardId = generateAnnotationCardInstanceId(
+                const instanceId = generateAnnotationCardInstanceId(
                     annotation,
                     listData.unifiedId,
+                )
+                const instanceRefs = getOrCreateAnnotationInstanceRefs(
+                    instanceId,
+                    this.props.annotationInstanceRefs,
                 )
 
                 // Only afford conversation logic if list is shared
                 const conversation =
                     listData.remoteId != null
-                        ? this.props.conversations[annotationCardId]
+                        ? this.props.conversations[instanceId]
                         : null
 
                 const annotationCard = this.props.annotationCardInstances[
-                    annotationCardId
+                    instanceId
                 ]
                 const sharedAnnotationRef: SharedAnnotationReference = {
                     id: annotation.remoteId,
@@ -577,7 +621,7 @@ export class AnnotationsSidebar extends React.Component<
                                     this.props.spacePickerAnnotationInstance ==
                                         null
                                         ? {
-                                              instanceId: annotationCardId,
+                                              instanceId: instanceId,
                                               position: 'footer',
                                           }
                                         : null,
@@ -616,9 +660,16 @@ export class AnnotationsSidebar extends React.Component<
                             hasReplies={hasReplies}
                             getListDetailsById={this.props.getListDetailsById}
                             {...ownAnnotationProps}
-                            shareButtonRef={this.props.shareButtonRef}
-                            spacePickerButtonRef={
-                                this.props.spacePickerButtonRef
+                            {...this.getAnnotInstanceDropdownTogglers(
+                                instanceId,
+                            )}
+                            shareMenuButtonRef={instanceRefs.shareMenuBtn}
+                            copyPasterButtonRef={instanceRefs.copyPasterBtn}
+                            spacePickerBodyButtonRef={
+                                instanceRefs.spacePickerBodyBtn
+                            }
+                            spacePickerFooterButtonRef={
+                                instanceRefs.spacePickerFooterBtn
                             }
                             getYoutubePlayer={this.props.getYoutubePlayer}
                             contextLocation={this.props.sidebarContext}
@@ -1433,13 +1484,6 @@ export class AnnotationsSidebar extends React.Component<
             )
         }
 
-        const {
-            annotationCardInstances,
-            spacePickerAnnotationInstance,
-        } = this.props
-        const instance =
-            annotationCardInstances[spacePickerAnnotationInstance?.instanceId]
-
         return (
             <>
                 {this.props.activeTab === 'annotations' ? (
@@ -1456,10 +1500,48 @@ export class AnnotationsSidebar extends React.Component<
                         {this.renderSharedNotesByList()}
                     </AnnotationsSectionStyled>
                 )}
+                {this.renderAnnotationDropdowns()}
+                <UpdateNotifBanner
+                    location={'sidebar'}
+                    theme={{ position: 'fixed' }}
+                    sidebarContext={this.props.sidebarContext}
+                />
+            </>
+        )
+    }
+
+    private renderAnnotationDropdowns() {
+        const {
+            annotationCardInstances,
+            spacePickerAnnotationInstance,
+            shareMenuAnnotationInstanceId,
+            copyPasterAnnotationInstanceId,
+            annotationInstanceRefs: annotationInstanceDropdownBtnRefs,
+        } = this.props
+
+        const instanceId =
+            spacePickerAnnotationInstance?.instanceId ??
+            shareMenuAnnotationInstanceId ??
+            copyPasterAnnotationInstanceId
+        if (!instanceId) {
+            return null
+        }
+
+        const instanceRefs = getOrCreateAnnotationInstanceRefs(
+            instanceId,
+            annotationInstanceDropdownBtnRefs,
+        )
+        const instance = annotationCardInstances[instanceId]
+
+        return (
+            <>
                 {spacePickerAnnotationInstance != null && (
                     <PopoutBox
                         targetElementRef={
-                            this.props.spacePickerButtonRef.current
+                            spacePickerAnnotationInstance.position ===
+                            'lists-bar'
+                                ? instanceRefs.spacePickerBodyBtn.current
+                                : instanceRefs.spacePickerFooterBtn.current
                         }
                         placement={
                             spacePickerAnnotationInstance.position ===
@@ -1479,11 +1561,35 @@ export class AnnotationsSidebar extends React.Component<
                         )}
                     </PopoutBox>
                 )}
-                <UpdateNotifBanner
-                    location={'sidebar'}
-                    theme={{ position: 'fixed' }}
-                    sidebarContext={this.props.sidebarContext}
-                />
+                {shareMenuAnnotationInstanceId != null && (
+                    <PopoutBox
+                        targetElementRef={instanceRefs.shareMenuBtn.current}
+                        placement="bottom-start"
+                        strategy="fixed"
+                        closeComponent={() =>
+                            this.props.setShareMenuAnnotationInstance(null)
+                        }
+                        offsetX={10}
+                    >
+                        {this.props.renderShareMenuForAnnotation(
+                            shareMenuAnnotationInstanceId,
+                        )(instance.unifiedAnnotationId)}
+                    </PopoutBox>
+                )}
+                {copyPasterAnnotationInstanceId != null && (
+                    <PopoutBox
+                        targetElementRef={instanceRefs.copyPasterBtn.current}
+                        placement="bottom-end"
+                        closeComponent={() =>
+                            this.props.setCopyPasterAnnotationInstance(null)
+                        }
+                        offsetX={10}
+                    >
+                        {this.props.renderCopyPasterForAnnotation(
+                            copyPasterAnnotationInstanceId,
+                        )(instance.unifiedAnnotationId)}
+                    </PopoutBox>
+                )}
             </>
         )
     }
@@ -1503,6 +1609,11 @@ export class AnnotationsSidebar extends React.Component<
                 const instanceState = this.props.annotationCardInstances[
                     instanceId
                 ]
+                const instanceRefs = getOrCreateAnnotationInstanceRefs(
+                    instanceId,
+                    this.props.annotationInstanceRefs,
+                )
+
                 if (!instanceState) {
                     console.warn(
                         'AnnotationsSidebar rendering: Could not find annotation instance state associated with ID:',
@@ -1587,8 +1698,18 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.theme.canClickAnnotations &&
                                 annot.body?.length > 0
                             }
+                            {...this.getAnnotInstanceDropdownTogglers(
+                                instanceId,
+                            )}
                             passDownRef={ref}
-                            shareButtonRef={this.props.shareButtonRef}
+                            shareMenuButtonRef={instanceRefs.shareMenuBtn}
+                            copyPasterButtonRef={instanceRefs.copyPasterBtn}
+                            spacePickerBodyButtonRef={
+                                instanceRefs.spacePickerBodyBtn
+                            }
+                            spacePickerFooterButtonRef={
+                                instanceRefs.spacePickerFooterBtn
+                            }
                             initShowSpacePicker={
                                 instanceState.cardMode === 'space-picker'
                                     ? 'footer'
