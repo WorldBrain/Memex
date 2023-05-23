@@ -33,7 +33,6 @@ import type { UnifiedAnnotation, UnifiedList } from '../cache/types'
 import type { AnnotationCardInstanceLocation } from 'src/sidebar/annotations-sidebar/types'
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
-import { truncateText } from 'src/annotations/utils'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -60,8 +59,10 @@ export interface AnnotationProps {
     isActive?: boolean
     activeShareMenuNoteId?: string
     isShared: boolean
-    shareButtonRef?: React.RefObject<HTMLDivElement>
-    spacePickerButtonRef?: React.RefObject<HTMLDivElement>
+    shareMenuButtonRef?: React.RefObject<HTMLDivElement>
+    copyPasterButtonRef?: React.RefObject<HTMLDivElement>
+    spacePickerBodyButtonRef?: React.RefObject<HTMLDivElement>
+    spacePickerFooterButtonRef?: React.RefObject<HTMLDivElement>
     hasReplies?: boolean
     appendRepliesToggle?: boolean
     isBulkShareProtected: boolean
@@ -81,6 +82,9 @@ export interface AnnotationProps {
     onListClick?: (unifiedListId: number) => void
     onHighlightClick?: React.MouseEventHandler
     onGoToAnnotation?: React.MouseEventHandler
+    onSpacePickerToggle?: (showState: ListPickerShowState) => void
+    onCopyPasterToggle?: () => void
+    onShareMenuToggle?: () => void
     getListDetailsById: ListDetailsGetter
     renderListsPickerForAnnotation?: (
         unifiedId: UnifiedAnnotation['unifiedId'],
@@ -96,6 +100,9 @@ export interface AnnotationProps {
     pageUrl?: string
     creatorId?: string | number
     currentUserId?: string | number
+    copyPasterAnnotationInstanceId: string
+    spacePickerAnnotationInstance: string
+    shareMenuAnnotationInstanceId: string
 }
 
 export interface AnnotationEditableEventProps {
@@ -126,16 +133,35 @@ export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
 
 export default class AnnotationEditable extends React.Component<Props, State> {
     private annotEditRef = React.createRef<AnnotationEdit>()
-    private spacePickerBarRef = React.createRef<HTMLDivElement>()
-    private shareButtonRef = React.createRef<HTMLDivElement>()
     private tutorialButtonRef = React.createRef<HTMLElement>()
+    private shareMenuButtonRef = React.createRef<HTMLDivElement>()
     private copyPasterButtonRef = React.createRef<HTMLDivElement>()
+    private spacePickerBodyButtonRef = React.createRef<HTMLDivElement>()
+    private spacePickerFooterButtonRef = React.createRef<HTMLDivElement>()
 
     static MOD_KEY = getKeyName({ key: 'mod' })
     static defaultProps: Pick<Props, 'hoverState' | 'tags' | 'lists'> = {
         tags: [],
         lists: [],
         hoverState: null,
+    }
+
+    constructor(props: Props) {
+        super(props)
+
+        // Afford control from above by using passed down refs instead of local refs, if supplied
+        if (props.copyPasterButtonRef) {
+            this.copyPasterButtonRef = props.copyPasterButtonRef
+        }
+        if (props.shareMenuButtonRef) {
+            this.shareMenuButtonRef = props.shareMenuButtonRef
+        }
+        if (props.spacePickerBodyButtonRef) {
+            this.spacePickerBodyButtonRef = props.spacePickerBodyButtonRef
+        }
+        if (props.spacePickerFooterButtonRef) {
+            this.spacePickerFooterButtonRef = props.spacePickerFooterButtonRef
+        }
     }
 
     state: State = {
@@ -213,6 +239,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 
     private updateSpacePickerState(showState: ListPickerShowState) {
+        this.props.onSpacePickerToggle?.(showState)
         if (this.state.showSpacePicker === 'hide') {
             this.setState({
                 showSpacePicker: showState,
@@ -512,9 +539,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 {
                     key: 'copy-paste-note-btn',
                     image: 'copy',
-                    onClick: () => this.setState({ showCopyPaster: true }),
+                    onClick: () => {
+                        this.props.onCopyPasterToggle?.()
+                        this.setState({ showCopyPaster: true })
+                    },
                     tooltipText: 'Copy Note',
-                    active: this.state.showCopyPaster,
+                    active:
+                        this.props.copyPasterAnnotationInstanceId ===
+                        this.props.unifiedId,
                     buttonRef: this.copyPasterButtonRef,
                 },
                 {
@@ -523,8 +555,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     imageColor: 'prime1',
                     tooltipText: 'Add Note to Spaces',
                     onClick: () => this.updateSpacePickerState('footer'),
-                    buttonRef: this.props.spacePickerButtonRef,
-                    active: this.state.showSpacePicker === 'footer',
+                    buttonRef: this.spacePickerFooterButtonRef,
+                    active:
+                        this.props.spacePickerAnnotationInstance ===
+                        this.props.unifiedId,
                 },
                 // {
                 //     key: 'share-note-btn',
@@ -591,17 +625,21 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             placement="bottom-start"
                         >
                             <PrimaryAction
-                                onClick={() =>
+                                onClick={() => {
+                                    this.props.onShareMenuToggle?.()
                                     this.setState({
                                         showShareMenu: true,
                                     })
-                                }
+                                }}
                                 label={shareIconData.label}
                                 icon={shareIconData.icon}
                                 size={'small'}
                                 type={'tertiary'}
-                                innerRef={this.shareButtonRef}
-                                active={this.state.showShareMenu}
+                                innerRef={this.shareMenuButtonRef}
+                                active={
+                                    this.props.shareMenuAnnotationInstanceId ===
+                                    this.props.unifiedId
+                                }
                             />
                         </TooltipBox>
                     )}
@@ -611,10 +649,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         actions={this.calcFooterActions()}
                     />
                     {this.renderSpacePicker(
-                        this.props.spacePickerButtonRef,
+                        this.spacePickerFooterButtonRef,
                         'footer',
                     )}
-                    {this.renderShareMenu(this.shareButtonRef)}
+                    {this.renderShareMenu(this.shareMenuButtonRef)}
                 </DefaultFooterStyled>
             )
         }
@@ -650,16 +688,17 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             <DefaultFooterStyled>
                 <ShareMenuContainer>
                     <PrimaryAction
-                        onClick={() =>
+                        onClick={() => {
+                            this.props.onShareMenuToggle?.()
                             this.setState({
                                 showShareMenu: true,
                             })
-                        }
+                        }}
                         label={shareIconData.label}
                         icon={shareIconData.icon}
                         size={'small'}
                         type={'tertiary'}
-                        innerRef={this.shareButtonRef}
+                        innerRef={this.shareMenuButtonRef}
                         active={this.state.showShareMenu}
                     />
                 </ShareMenuContainer>
@@ -678,11 +717,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         {/* {this.renderMarkdownHelpButton()} */}
                     </SaveActionBar>
                     {this.renderSpacePicker(
-                        this.props.spacePickerButtonRef,
+                        this.spacePickerFooterButtonRef,
                         'footer',
                     )}
                     {this.state.showShareMenu &&
-                        this.renderShareMenu(this.shareButtonRef)}
+                        this.renderShareMenu(this.shareMenuButtonRef)}
                 </DeletionBox>
             </DefaultFooterStyled>
         )
@@ -692,8 +731,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         referenceElement: React.RefObject<HTMLElement>,
         showWhen: ListPickerShowState,
     ) => {
-        if (this.state.showSpacePicker !== showWhen) {
-            return
+        // NOTE: If ref passed down, rendering assumed to be a concern of ancestor
+        if (
+            this.state.showSpacePicker !== showWhen ||
+            this.props.spacePickerBodyButtonRef != null ||
+            this.props.spacePickerFooterButtonRef != null
+        ) {
+            return null
         }
 
         return (
@@ -722,8 +766,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         )
     }
 
-    renderShareMenu(referenceElement: React.RefObject<HTMLElement>) {
-        if (!this.state.showShareMenu) {
+    private renderShareMenu(referenceElement: React.RefObject<HTMLElement>) {
+        // NOTE: If ref passed down, rendering assumed to be a concern of ancestor
+        if (
+            !this.state.showShareMenu ||
+            this.props.shareMenuButtonRef != null
+        ) {
             return
         }
 
@@ -744,8 +792,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         )
     }
 
-    renderCopyPaster(referenceElement: React.RefObject<HTMLElement>) {
-        if (!this.state.showCopyPaster) {
+    private renderCopyPaster(referenceElement: React.RefObject<HTMLElement>) {
+        // NOTE: If ref passed down, rendering assumed to be a concern of ancestor
+        if (
+            !this.state.showCopyPaster ||
+            this.props.copyPasterButtonRef != null
+        ) {
             return
         }
 
@@ -774,7 +826,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     top="5px"
                     onMouseEnter={() => this.setState({ hoverCard: true })}
                     onMouseOver={() => this.setState({ hoverCard: true })}
-                    onMouseLeave={() => this.setState({ hoverCard: false })}
+                    onMouseLeave={() =>
+                        !this.isAnyModalOpen() &&
+                        this.setState({ hoverCard: false })
+                    }
                 >
                     <ItemBox
                         firstDivProps={{
@@ -815,7 +870,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                         this.updateSpacePickerState('lists-bar')
                                     }
                                     spacePickerButtonRef={
-                                        this.spacePickerBarRef
+                                        this.spacePickerBodyButtonRef
                                     }
                                     padding={
                                         this.props.isEditing
@@ -829,7 +884,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         {this.renderCopyPaster(this.copyPasterButtonRef)}
                     </ItemBox>
                     {this.renderSpacePicker(
-                        this.spacePickerBarRef,
+                        this.spacePickerBodyButtonRef,
                         'lists-bar',
                     )}
                 </AnnotationBox>

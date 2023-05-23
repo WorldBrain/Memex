@@ -242,7 +242,6 @@ export default class SearchResultsContainer extends React.Component<
         }
     }
 
-    spaceBtnBarDashboardRef = React.createRef<HTMLDivElement>()
     sortButtonRef = React.createRef<HTMLDivElement>()
 
     state = {
@@ -313,7 +312,9 @@ export default class SearchResultsContainer extends React.Component<
                         normalizedPageUrls={[pageId]}
                     />
                 )}
-                spacePickerButtonRef={this.spaceBtnBarDashboardRef}
+                copyPasterAnnotationInstanceId={null}
+                spacePickerAnnotationInstance={null}
+                shareMenuAnnotationInstanceId={null}
                 renderListsPickerForAnnotation={() => (
                     <CollectionPicker
                         showPageLinks

@@ -36,6 +36,7 @@ import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtub
 import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { Storage, Runtime } from 'webextension-polyfill'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
+import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -143,6 +144,13 @@ export interface SidebarContainerState extends AnnotationConversationsState {
 
     listInstances: { [unifiedListId: UnifiedList['unifiedId']]: ListInstance }
     annotationCardInstances: { [instanceId: string]: AnnotationCardInstance }
+
+    spacePickerAnnotationInstance: {
+        instanceId: string
+        position: ListPickerShowState
+    } | null
+    copyPasterAnnotationInstanceId: string | null
+    shareMenuAnnotationInstanceId: string | null
 
     showCommentBox: boolean
     commentBox: EditForm
@@ -278,6 +286,11 @@ interface SidebarEvents {
         privacyLevel: AnnotationPrivacyLevels
     }>
     updateAllAnnotationsShareInfo: AnnotationSharingStates
+    setSpacePickerAnnotationInstance: {
+        state: SidebarContainerState['spacePickerAnnotationInstance']
+    }
+    setCopyPasterAnnotationInstanceId: { instanceId: string | null }
+    setShareMenuAnnotationInstanceId: { instanceId: string | null }
 
     // Selected space management
     setSelectedList: { unifiedListId: UnifiedList['unifiedId'] | null }
@@ -353,4 +366,11 @@ export interface ListInstance {
     annotationsLoadState: TaskState
     sharedAnnotationReferences?: SharedAnnotationReference[]
     isOpen: boolean
+}
+
+export interface AnnotationInstanceRefs {
+    spacePickerFooterBtn: React.RefObject<HTMLDivElement>
+    spacePickerBodyBtn: React.RefObject<HTMLDivElement>
+    copyPasterBtn: React.RefObject<HTMLDivElement>
+    shareMenuBtn: React.RefObject<HTMLDivElement>
 }

@@ -222,8 +222,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     private handleExternalAction = async (event: SidebarActionOptions) => {
         await (this.logic as SidebarContainerLogic).annotationsLoadComplete
 
-        console.log('trigger')
-
         if (event.action === 'comment') {
             await this.processEvent('setActiveSidebarTab', {
                 tab: this.state.selectedListId ? 'spaces' : 'annotations',
@@ -232,12 +230,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 comment: event.annotationData?.commentText ?? '',
             })
         } else if (event.action === 'selected_list_mode_from_web_ui') {
-            console.log('selected')
             await this.processEvent('setSelectedListFromWebUI', {
                 sharedListId: event.sharedListId,
             })
         } else if (event.action === 'show_annotation') {
-            console.log('show')
             await this.processEvent('setActiveSidebarTab', {
                 tab: this.state.selectedListId ? 'spaces' : 'annotations',
             })
