@@ -673,6 +673,18 @@ export class AnnotationsSidebar extends React.Component<
                             }
                             getYoutubePlayer={this.props.getYoutubePlayer}
                             contextLocation={this.props.sidebarContext}
+                            copyPasterAnnotationInstanceId={
+                                this.props.copyPasterAnnotationInstanceId &&
+                                annotation.unifiedId
+                            }
+                            spacePickerAnnotationInstance={
+                                this.props.spacePickerAnnotationInstance &&
+                                annotation.unifiedId
+                            }
+                            shareMenuAnnotationInstanceId={
+                                this.props.shareMenuAnnotationInstanceId &&
+                                annotation.unifiedId
+                            }
                         />
                         {listData.remoteId != null &&
                             annotation.remoteId != null && (
@@ -1478,6 +1490,7 @@ export class AnnotationsSidebar extends React.Component<
                     {this.renderFocusModeNotif(listData)}
                     {this.renderSelectedListTopBar()}
                     <AnnotationsSectionStyled>
+                        {this.renderAnnotationDropdowns()}
                         {this.renderAnnotationsEditableForSelectedList()}
                     </AnnotationsSectionStyled>
                 </>
@@ -1488,6 +1501,7 @@ export class AnnotationsSidebar extends React.Component<
             <>
                 {this.props.activeTab === 'annotations' ? (
                     <AnnotationsSectionStyled>
+                        {this.renderAnnotationDropdowns()}
                         {this.renderAnnotationsEditable(
                             cacheUtils.getUserAnnotationsArray(
                                 { annotations: this.props.annotations },
@@ -1500,7 +1514,6 @@ export class AnnotationsSidebar extends React.Component<
                         {this.renderSharedNotesByList()}
                     </AnnotationsSectionStyled>
                 )}
-                {this.renderAnnotationDropdowns()}
                 <UpdateNotifBanner
                     location={'sidebar'}
                     theme={{ position: 'fixed' }}
@@ -1725,6 +1738,18 @@ export class AnnotationsSidebar extends React.Component<
                                 'annotations-tab',
                             )}
                             getYoutubePlayer={this.props.getYoutubePlayer}
+                            copyPasterAnnotationInstanceId={
+                                this.props.copyPasterAnnotationInstanceId &&
+                                annot.unifiedId
+                            }
+                            spacePickerAnnotationInstance={
+                                this.props.spacePickerAnnotationInstance &&
+                                annot.unifiedId
+                            }
+                            shareMenuAnnotationInstanceId={
+                                this.props.shareMenuAnnotationInstanceId &&
+                                annot.unifiedId
+                            }
                         />
                     </AnnotationBox>
                 )

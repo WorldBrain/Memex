@@ -100,6 +100,9 @@ export interface AnnotationProps {
     pageUrl?: string
     creatorId?: string | number
     currentUserId?: string | number
+    copyPasterAnnotationInstanceId: string
+    spacePickerAnnotationInstance: string
+    shareMenuAnnotationInstanceId: string
 }
 
 export interface AnnotationEditableEventProps {
@@ -541,7 +544,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         this.setState({ showCopyPaster: true })
                     },
                     tooltipText: 'Copy Note',
-                    active: this.state.showCopyPaster,
+                    active:
+                        this.props.copyPasterAnnotationInstanceId ===
+                        this.props.unifiedId,
                     buttonRef: this.copyPasterButtonRef,
                 },
                 {
@@ -551,7 +556,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     tooltipText: 'Add Note to Spaces',
                     onClick: () => this.updateSpacePickerState('footer'),
                     buttonRef: this.spacePickerFooterButtonRef,
-                    active: this.state.showSpacePicker === 'footer',
+                    active:
+                        this.props.spacePickerAnnotationInstance ===
+                        this.props.unifiedId,
                 },
                 // {
                 //     key: 'share-note-btn',
@@ -629,7 +636,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 size={'small'}
                                 type={'tertiary'}
                                 innerRef={this.shareMenuButtonRef}
-                                active={this.state.showShareMenu}
+                                active={
+                                    this.props.shareMenuAnnotationInstanceId ===
+                                    this.props.unifiedId
+                                }
                             />
                         </TooltipBox>
                     )}
