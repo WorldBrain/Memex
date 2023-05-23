@@ -674,16 +674,17 @@ export class AnnotationsSidebar extends React.Component<
                             getYoutubePlayer={this.props.getYoutubePlayer}
                             contextLocation={this.props.sidebarContext}
                             copyPasterAnnotationInstanceId={
-                                this.props.copyPasterAnnotationInstanceId &&
-                                annotation.unifiedId
+                                this.props.copyPasterAnnotationInstanceId ===
+                                    instanceId && annotation.unifiedId
                             }
                             spacePickerAnnotationInstance={
-                                this.props.spacePickerAnnotationInstance &&
+                                this.props.spacePickerAnnotationInstance
+                                    ?.instanceId === instanceId &&
                                 annotation.unifiedId
                             }
                             shareMenuAnnotationInstanceId={
-                                this.props.shareMenuAnnotationInstanceId &&
-                                annotation.unifiedId
+                                this.props.shareMenuAnnotationInstanceId ===
+                                    instanceId && annotation.unifiedId
                             }
                         />
                         {listData.remoteId != null &&
@@ -1740,16 +1741,17 @@ export class AnnotationsSidebar extends React.Component<
                             )}
                             getYoutubePlayer={this.props.getYoutubePlayer}
                             copyPasterAnnotationInstanceId={
-                                this.props.copyPasterAnnotationInstanceId &&
-                                annot.unifiedId
+                                this.props.copyPasterAnnotationInstanceId ===
+                                    instanceId && annot.unifiedId
                             }
                             spacePickerAnnotationInstance={
-                                this.props.spacePickerAnnotationInstance &&
+                                this.props.spacePickerAnnotationInstance
+                                    ?.instanceId === instanceId &&
                                 annot.unifiedId
                             }
                             shareMenuAnnotationInstanceId={
-                                this.props.shareMenuAnnotationInstanceId &&
-                                annot.unifiedId
+                                this.props.shareMenuAnnotationInstanceId ===
+                                    instanceId && annot.unifiedId
                             }
                         />
                     </AnnotationBox>

@@ -59,7 +59,7 @@ export class PageActivityIndicatorBackground {
     async setup(): Promise<void> {
         await this.deps.jobScheduler.scheduleJob({
             name: PERIODIC_SYNC_JOB_NAME,
-            periodInMinutes: 15,
+            periodInMinutes: 2,
             job: this.syncFollowedListEntriesWithNewActivity,
         })
     }
