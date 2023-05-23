@@ -812,6 +812,7 @@ export class AnnotationsSidebar extends React.Component<
                     </>
                 )}
                 {listAnnotations}
+                {this.renderAnnotationDropdowns()}
             </FollowedNotesContainer>
         )
     }
@@ -825,7 +826,7 @@ export class AnnotationsSidebar extends React.Component<
             <FollowedListNotesContainer
                 bottom={listInstance.isOpen ? '0px' : '0px'}
                 key={listData.unifiedId}
-                top="0px"
+                top="5px"
             >
                 <FollowedListRow
                     title={title}
@@ -1490,7 +1491,6 @@ export class AnnotationsSidebar extends React.Component<
                     {this.renderFocusModeNotif(listData)}
                     {this.renderSelectedListTopBar()}
                     <AnnotationsSectionStyled>
-                        {this.renderAnnotationDropdowns()}
                         {this.renderAnnotationsEditableForSelectedList()}
                     </AnnotationsSectionStyled>
                 </>
@@ -1501,7 +1501,6 @@ export class AnnotationsSidebar extends React.Component<
             <>
                 {this.props.activeTab === 'annotations' ? (
                     <AnnotationsSectionStyled>
-                        {this.renderAnnotationDropdowns()}
                         {this.renderAnnotationsEditable(
                             cacheUtils.getUserAnnotationsArray(
                                 { annotations: this.props.annotations },
@@ -1793,7 +1792,10 @@ export class AnnotationsSidebar extends React.Component<
                         </TopAreaContainer>
                         {this.props.noteCreateState === 'running' ||
                         annotations.length > 0 ? (
-                            <AnnotationContainer>{annots}</AnnotationContainer>
+                            <AnnotationContainer>
+                                {this.renderAnnotationDropdowns()}
+                                {annots}
+                            </AnnotationContainer>
                         ) : (
                             <EmptyMessageContainer>
                                 <IconBox heightAndWidth="40px">
@@ -2755,6 +2757,8 @@ const TopAreaContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: fill-available;
+    z-index: 20;
+    background: ${(props) => props.theme.colors.black};
 `
 
 const AnnotationActions = styled.div`
@@ -2825,6 +2829,7 @@ const TopBar = styled.div`
     z-index: 11300;
     padding: 10px 10px 10px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
+    background: ${(props) => props.theme.colors.black};
 `
 
 const IsolatedViewHeaderContainer = styled.div`
@@ -2835,6 +2840,7 @@ const IsolatedViewHeaderContainer = styled.div`
     flex-direction: column;
     padding: 10px 10px 0 15px;
     z-index: 20;
+    background: ${(props) => props.theme.colors.black};
 `
 
 const IsolatedViewHeaderTopBar = styled.div`
@@ -2925,6 +2931,7 @@ const AnnotationContainer = styled(Margin)`
     overflow: scroll;
     padding-bottom: 100px;
     flex: 1;
+    z-index: 10;
 
     scrollbar-width: none;
 
@@ -3196,7 +3203,7 @@ const AnnotationsSectionStyled = styled.div`
     flex: 1;
     z-index: 19;
     overflow: scroll;
-    padding: 5px 10px 0px 10px;
+    padding: 0px 10px 0px 10px;
 
     scrollbar-width: none;
 
