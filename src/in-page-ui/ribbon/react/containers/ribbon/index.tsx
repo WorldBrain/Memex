@@ -252,17 +252,6 @@ export default class RibbonContainer extends StatefulUIElement<
                         }),
                     createNewEntry: async (name) => {
                         const listId = Date.now()
-
-                        this.props.annotationsCache.addList({
-                            name,
-                            localId: listId,
-                            remoteId: null,
-                            description: null,
-                            unifiedAnnotationIds: [],
-                            hasRemoteAnnotationsToLoad: false,
-                            creator: this.props.currentUser,
-                            type: 'user-list',
-                        })
                         await this.processEvent('updateLists', {
                             value: {
                                 added: listId,
