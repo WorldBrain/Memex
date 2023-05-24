@@ -963,6 +963,7 @@ export class AnnotationsSidebar extends React.Component<
             lists,
             currentUser,
             fullPageUrl,
+            pageListIds,
             listInstances,
             annotationsCache,
         } = this.props
@@ -975,9 +976,7 @@ export class AnnotationsSidebar extends React.Component<
                 listData.hasRemoteAnnotationsToLoad ||
                 (listData.type === 'page-link' &&
                     listData.normalizedPageUrl === normalizedPageUrl) ||
-                annotationsCache.pageListIds
-                    .get(this.props.normalizedPageUrl)
-                    ?.has(listData.unifiedId),
+                pageListIds.has(listData.unifiedId),
         )
 
         if (allLists.length === 0) {

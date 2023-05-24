@@ -114,7 +114,7 @@ export default class RibbonContainer extends StatefulUIElement<
             <Ribbon
                 pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
                 contentSharingBG={this.props.contentSharing}
-                annotations={this.props.annotationsCache}
+                annotationsCache={this.props.annotationsCache}
                 bgScriptBG={this.props.bgScriptBG}
                 spacesBG={this.props.customLists}
                 authBG={this.props.authBG}
@@ -242,7 +242,6 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.props.customLists.fetchPageLists({
                             url: this.normalizedPageUrl,
                         }),
-
                     selectEntry: (id) =>
                         this.processEvent('updateLists', {
                             value: { added: id, deleted: null, selected: [] },
@@ -253,17 +252,6 @@ export default class RibbonContainer extends StatefulUIElement<
                         }),
                     createNewEntry: async (name) => {
                         const listId = Date.now()
-
-                        this.props.annotationsCache.addList({
-                            name,
-                            localId: listId,
-                            remoteId: null,
-                            description: null,
-                            unifiedAnnotationIds: [],
-                            hasRemoteAnnotationsToLoad: false,
-                            creator: this.props.currentUser,
-                            type: 'user-list',
-                        })
                         await this.processEvent('updateLists', {
                             value: {
                                 added: listId,

@@ -153,7 +153,7 @@ export default class SpacePickerLogic extends UILogic<
     private initCacheListsSubscription = (
         currentUser?: UserReference,
     ): PageAnnotationsCacheEvents['newListsState'] => (nextLists) => {
-        const { myLists, pageLinkLists } = siftListsIntoCategories(
+        const { myLists, joinedLists, pageLinkLists } = siftListsIntoCategories(
             normalizedStateToArray(nextLists),
             currentUser,
         )
@@ -165,7 +165,7 @@ export default class SpacePickerLogic extends UILogic<
 
         const toSet = initNormalizedState({
             getId: (list) => list.unifiedId,
-            seedData: myLists
+            seedData: [...myLists, ...joinedLists]
                 .filter(
                     (list) => list.type === 'user-list' && list.localId != null,
                 )

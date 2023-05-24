@@ -230,9 +230,9 @@ export default class Ribbon extends Component<Props, State> {
             >
                 <CollectionPicker
                     {...this.props.lists}
-                    shouldHydrateCacheOnInit
                     authBG={this.props.authBG}
                     spacesBG={this.props.spacesBG}
+                    annotationsCache={this.props.annotationsCache}
                     contentSharingBG={this.props.contentSharingBG}
                     pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
                     localStorageAPI={browser.storage.local}
@@ -991,13 +991,13 @@ export default class Ribbon extends Component<Props, State> {
                                                                 .sidebarButtonRef
                                                         }
                                                     />
-                                                    {this.props.annotations
+                                                    {this.props.annotationsCache
                                                         .annotations.allIds
                                                         .length > 0 && (
                                                         <SpacesCounter>
                                                             {
                                                                 this.props
-                                                                    .annotations
+                                                                    .annotationsCache
                                                                     .annotations
                                                                     .allIds
                                                                     .length

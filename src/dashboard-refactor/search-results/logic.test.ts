@@ -225,6 +225,7 @@ describe('Dashboard search results logic', () => {
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId].lists,
             ).toEqual([])
+            expect(annotationsCache.pageListIds.get(pageId)).toEqual(undefined)
 
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
@@ -242,6 +243,9 @@ describe('Dashboard search results logic', () => {
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId].lists,
             ).toEqual([listAData.unifiedId, listBData.unifiedId])
+            expect(annotationsCache.pageListIds.get(pageId)).toEqual(
+                new Set([listAData.unifiedId, listBData.unifiedId]),
+            )
 
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
@@ -253,6 +257,9 @@ describe('Dashboard search results logic', () => {
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId].lists,
             ).toEqual([listBData.unifiedId])
+            expect(annotationsCache.pageListIds.get(pageId)).toEqual(
+                new Set([listBData.unifiedId]),
+            )
 
             await searchResults.processEvent('setPageLists', {
                 id: pageId,
@@ -264,6 +271,9 @@ describe('Dashboard search results logic', () => {
             expect(
                 searchResults.state.searchResults.pageData.byId[pageId].lists,
             ).toEqual([listBData.unifiedId, listCData.unifiedId])
+            expect(annotationsCache.pageListIds.get(pageId)).toEqual(
+                new Set([listBData.unifiedId, listCData.unifiedId]),
+            )
         })
 
         it('should be able to cancel page deletion', async ({ device }) => {
