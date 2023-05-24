@@ -127,6 +127,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showAllNotesCopyPaster: boolean
 
     fullPageUrl?: string
+    pageListIds: Set<UnifiedList['unifiedId']>
     lists: PageAnnotationsCacheInterface['lists']
     annotations: PageAnnotationsCacheInterface['annotations']
     pageSummary: string

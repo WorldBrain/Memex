@@ -143,6 +143,8 @@ export class SidebarContainerLogic extends UILogic<
     focusIndex
     summarisePageEvents: TypedRemoteEventEmitter<'pageSummary'>
     AIpromptSuggestions: { prompt: string; focused: boolean | null }[]
+    // NOTE: this mirrors the state key of the same name. Only really exists as the cache's `updatedPageData` event listener can't access state :/
+    private fullPageUrl: string
 
     constructor(private options: SidebarLogicOptions) {
         super()
@@ -181,7 +183,7 @@ export class SidebarContainerLogic extends UILogic<
                         return {
                             pageCreatorReference: annotation.creator,
                             normalizedPageUrl: normalizeUrl(
-                                state.fullPageUrl ?? options.fullPageUrl,
+                                state.fullPageUrl ?? this.fullPageUrl,
                             ),
                         }
                     },
@@ -248,6 +250,7 @@ export class SidebarContainerLogic extends UILogic<
 
             annotations: initNormalizedState(),
             lists: initNormalizedState(),
+            pageListIds: new Set(),
 
             activeAnnotationId: null, // TODO: make unified ID
 
@@ -397,6 +400,8 @@ export class SidebarContainerLogic extends UILogic<
             storageAPI,
             runtimeAPI,
         } = this.options
+
+        this.setupRemoteEventListeners()
         annotationsCache.events.addListener(
             'newAnnotationsState',
             this.cacheAnnotationsSubscription,
@@ -405,10 +410,24 @@ export class SidebarContainerLogic extends UILogic<
             'newListsState',
             this.cacheListsSubscription,
         )
-        this.setupRemoteEventListeners()
+        annotationsCache.events.addListener(
+            'updatedPageData',
+            this.cachePageListsSubscription,
+        )
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.cacheAnnotationsSubscription(annotationsCache.annotations)
         this.cacheListsSubscription(annotationsCache.lists)
+
+        if (fullPageUrl != null) {
+            this.fullPageUrl = fullPageUrl
+            const normalizedPageUrl = normalizeUrl(this.fullPageUrl)
+            this.cachePageListsSubscription(
+                normalizedPageUrl,
+                annotationsCache.pageListIds.get(normalizedPageUrl) ??
+                    new Set(),
+            )
+        }
+
         this.sidebar = document
             .getElementById('memex-sidebar-container')
             ?.shadowRoot.getElementById('annotationSidebarContainer')
@@ -428,7 +447,7 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             const hasNetworkActivity = await pageActivityIndicatorBG.getPageActivityStatus(
-                fullPageUrl,
+                this.fullPageUrl,
             )
 
             const hasActivity = hasNetworkActivity !== 'no-annotations'
@@ -439,8 +458,8 @@ export class SidebarContainerLogic extends UILogic<
                 },
             })
 
-            if (shouldHydrateCacheOnInit && fullPageUrl != null) {
-                await this.hydrateAnnotationsCache(fullPageUrl, {
+            if (shouldHydrateCacheOnInit && this.fullPageUrl != null) {
+                await this.hydrateAnnotationsCache(this.fullPageUrl, {
                     renderHighlights: true,
                 })
             }
@@ -472,6 +491,10 @@ export class SidebarContainerLogic extends UILogic<
             'newListsState',
             this.cacheListsSubscription,
         )
+        this.options.annotationsCache.events.removeListener(
+            'updatedPageData',
+            this.cachePageListsSubscription,
+        )
     }
 
     private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
@@ -489,6 +512,18 @@ export class SidebarContainerLogic extends UILogic<
                     ),
             },
         })
+    }
+
+    private cachePageListsSubscription: PageAnnotationsCacheEvents['updatedPageData'] = (
+        normalizedPageUrl,
+        nextPageListIds,
+    ) => {
+        if (
+            this.fullPageUrl &&
+            normalizeUrl(this.fullPageUrl) === normalizedPageUrl
+        ) {
+            this.emitMutation({ pageListIds: { $set: nextPageListIds } })
+        }
     }
 
     private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] = (
@@ -869,11 +904,14 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        const mutation: UIMutation<SidebarContainerState> = {
-            fullPageUrl: { $set: event.fullPageUrl },
-        }
-
-        this.emitMutation(mutation)
+        const normalizedPageUrl = normalizeUrl(event.fullPageUrl)
+        this.cachePageListsSubscription(
+            normalizedPageUrl,
+            this.options.annotationsCache.pageListIds.get(normalizedPageUrl) ??
+                new Set(),
+        )
+        this.fullPageUrl = event.fullPageUrl
+        this.emitMutation({ fullPageUrl: { $set: event.fullPageUrl } })
         await this.hydrateAnnotationsCache(event.fullPageUrl, {
             renderHighlights: event.rerenderHighlights,
         })
@@ -1330,7 +1368,7 @@ export class SidebarContainerLogic extends UILogic<
         return this.options.contentScriptsBG.goToAnnotationFromDashboardSidebar(
             {
                 fullPageUrl:
-                    this.options.fullPageUrl ??
+                    this.fullPageUrl ??
                     'https://' + annotation.normalizedPageUrl,
                 annotationCacheId: event.unifiedAnnotationId,
             },
@@ -2135,12 +2173,7 @@ export class SidebarContainerLogic extends UILogic<
             '@Sidebar-reading_view': true,
         })
 
-        const {
-            annotationsCache,
-            customListsBG,
-            authBG,
-            fullPageUrl,
-        } = this.options
+        const { annotationsCache, customListsBG } = this.options
 
         const cachedList = annotationsCache.getListByRemoteId(
             event.sharedListId,
@@ -2159,7 +2192,7 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        if (!fullPageUrl) {
+        if (!this.fullPageUrl) {
             throw new Error(
                 'Could not load remote list data for selected list mode without `props.fullPageUrl` being set in sidebar',
             )
@@ -2170,7 +2203,7 @@ export class SidebarContainerLogic extends UILogic<
             const sharedList = await customListsBG.fetchSharedListDataWithPageAnnotations(
                 {
                     remoteListId: event.sharedListId,
-                    normalizedPageUrl: normalizeUrl(fullPageUrl),
+                    normalizedPageUrl: normalizeUrl(this.fullPageUrl),
                 },
             )
 

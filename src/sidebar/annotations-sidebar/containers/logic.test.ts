@@ -379,6 +379,7 @@ describe('SidebarContainerLogic', () => {
             expect(annotationsCache.pageListIds).toEqual(new Map())
             expect(annotationsCache.lists).toEqual(initNormalizedState())
             expect(annotationsCache.annotations).toEqual(initNormalizedState())
+            expect(sidebar.state.pageListIds).toEqual(new Set())
             expect(sidebar.state.listInstances).toEqual({})
             expect(sidebar.state.annotationCardInstances).toEqual({})
 
@@ -557,6 +558,14 @@ describe('SidebarContainerLogic', () => {
                 }),
             ])
 
+            expect(sidebar.state.pageListIds).toEqual(
+                new Set(
+                    mapLocalListIdsToUnified(
+                        [DATA.LOCAL_LISTS[0].id, DATA.LOCAL_LISTS[3].id],
+                        annotationsCache,
+                    ),
+                ),
+            )
             expect(sidebar.state.listInstances).toEqual(
                 fromPairs(
                     normalizedStateToArray(
@@ -582,6 +591,53 @@ describe('SidebarContainerLogic', () => {
                         ])
                         .flat(),
                 ),
+            )
+        })
+
+        it('should update parent page list IDs as the associated cache state updates', async ({
+            device,
+        }) => {
+            const { sidebar, annotationsCache } = await setupLogicHelper({
+                device,
+                withAuth: true,
+                fullPageUrl: DATA.TAB_URL_1,
+            })
+            const normalizedUrl = normalizeUrl(DATA.TAB_URL_1)
+            const unifiedListIds = mapLocalListIdsToUnified(
+                [
+                    DATA.LOCAL_LISTS[0].id,
+                    DATA.LOCAL_LISTS[1].id,
+                    DATA.LOCAL_LISTS[2].id,
+                    DATA.LOCAL_LISTS[3].id,
+                ],
+                annotationsCache,
+            )
+
+            expect(annotationsCache.pageListIds).toEqual(
+                new Map([
+                    [
+                        normalizedUrl,
+                        new Set([unifiedListIds[0], unifiedListIds[3]]),
+                    ],
+                ]),
+            )
+            expect(sidebar.state.pageListIds).toEqual(
+                new Set([unifiedListIds[0], unifiedListIds[3]]),
+            )
+
+            annotationsCache.setPageData(normalizedUrl, [])
+
+            expect(annotationsCache.pageListIds).toEqual(
+                new Map([[normalizedUrl, new Set()]]),
+            )
+            expect(sidebar.state.pageListIds).toEqual(new Set())
+
+            annotationsCache.setPageData(normalizedUrl, [unifiedListIds[0]])
+            expect(annotationsCache.pageListIds).toEqual(
+                new Map([[normalizedUrl, new Set([unifiedListIds[0]])]]),
+            )
+            expect(sidebar.state.pageListIds).toEqual(
+                new Set([unifiedListIds[0]]),
             )
         })
 

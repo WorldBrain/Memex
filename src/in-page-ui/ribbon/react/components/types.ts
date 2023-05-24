@@ -19,7 +19,7 @@ export interface RibbonSubcomponentProps {
     bookmark: RibbonBookmarkProps
     tagging: RibbonTaggingProps
     lists: RibbonListsProps
-    annotations: PageAnnotationsCacheInterface
+    annotationsCache: PageAnnotationsCacheInterface
     search: RibbonSearchProps
     pausing: RibbonPausingProps
     activityIndicator: ActivityIndicatorProps

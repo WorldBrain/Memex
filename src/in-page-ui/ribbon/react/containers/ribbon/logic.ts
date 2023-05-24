@@ -13,12 +13,9 @@ import { resolvablePromise } from 'src/util/resolvable'
 import { FocusableComponent } from 'src/annotations/components/types'
 import { Analytics } from 'src/analytics'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
-import browser from 'webextension-polyfill'
-import { Runtime, Storage, Tabs } from 'webextension-polyfill-ts'
+import browser, { Storage } from 'webextension-polyfill'
 import { pageActionAllowed } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
-import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
-import { PDFRemoteInterface } from 'src/pdf/background/types'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -761,7 +758,10 @@ export class RibbonContainerLogic extends UILogic<
                     annotationsCache.getListByLocalId(localListId)?.unifiedId,
             )
             .filter((id) => id != null)
-        annotationsCache.setPageData(previousState.fullPageUrl, unifiedListIds)
+        annotationsCache.setPageData(
+            normalizeUrl(previousState.fullPageUrl),
+            unifiedListIds,
+        )
 
         return this.dependencies.customLists.updateListForPage({
             added: event.value.added,
