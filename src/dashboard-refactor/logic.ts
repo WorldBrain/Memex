@@ -24,10 +24,7 @@ import {
     flattenNestedResults,
     getListData,
 } from './util'
-import {
-    SPECIAL_LIST_IDS,
-    SPECIAL_LIST_NAMES,
-} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { NoResultsType } from './search-results/types'
 import { filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
@@ -59,6 +56,7 @@ import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
 import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
 import type { AnnotationsSearchResponse } from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -1187,6 +1185,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         const noteDataMutation: UIMutation<
             State['searchResults']['noteData']['byId']
         > = {}
+        const calcNextLists = updatePickerValues(event)
 
         // If we're removing a shared list, we also need to make sure it gets removed from children annots
         if (removingSharedList) {
@@ -1196,18 +1195,25 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             for (const noteId of childrenNoteIds) {
                 noteDataMutation[noteId] = {
-                    lists: { $apply: updatePickerValues(event) },
+                    lists: { $apply: calcNextLists },
                 }
             }
         }
 
+        const nextPageListIds = calcNextLists(
+            previousState.searchResults.pageData.byId[event.id].lists,
+        )
+        this.options.annotationsCache.setPageData(
+            normalizeUrl(event.fullPageUrl),
+            nextPageListIds,
+        )
         this.emitMutation({
             searchResults: {
                 noteData: { byId: noteDataMutation },
                 pageData: {
                     byId: {
                         [event.id]: {
-                            lists: { $apply: updatePickerValues(event) },
+                            lists: { $set: nextPageListIds },
                         },
                     },
                 },
