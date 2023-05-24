@@ -418,6 +418,14 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             [nextAnnotation.unifiedId]: nextAnnotation,
         }
 
+        this.updateCachedListAnnotationRefsForAnnotationUpdate(
+            {
+                unifiedId: nextAnnotation.unifiedId,
+                unifiedListIds: [],
+            },
+            nextAnnotation,
+        )
+
         this.events.emit('addedAnnotation', nextAnnotation)
         this.events.emit('newAnnotationsState', this.annotations)
         return { unifiedId: nextAnnotation.unifiedId }
