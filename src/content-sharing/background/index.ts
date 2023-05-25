@@ -339,7 +339,14 @@ export default class ContentSharingBackground {
 
     shareList: ContentSharingInterface['shareList'] = async (options) => {
         await this.options.servicesPromise
-        return this.listSharingService.shareList(options)
+        const {
+            annotationSharingStatesPromise,
+            ...sharingResult
+        } = await this.listSharingService.shareList(options)
+        // NOTE: Currently we don't wait for the annotationsSharingStatesPromise, letting list annotations
+        //  get shared asyncronously. If we wanted some UI loading state, we'd need to cache it in this BG
+        //  class and set up another RPC endpoint to wait for it (see `this.waitForPageLinkCreation` for an example).
+        return sharingResult
     }
 
     shareAnnotation: ContentSharingInterface['shareAnnotation'] = async (

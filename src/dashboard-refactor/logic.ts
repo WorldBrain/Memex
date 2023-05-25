@@ -123,17 +123,33 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             })
         })
-        this.personalCloudEvents.on('downloadStarted', () => {
-            this.emitMutation({
-                syncMenu: { pendingRemoteChangeCount: { $set: 1 } },
-            })
-        })
-        this.personalCloudEvents.on('downloadStopped', () => {
-            this.emitMutation({
-                syncMenu: { pendingRemoteChangeCount: { $set: 0 } },
-            })
-        })
+        this.personalCloudEvents.on(
+            'downloadStarted',
+            this.toggleSyncDownloadActive,
+        )
+        this.personalCloudEvents.on(
+            'downloadStopped',
+            this.toggleSyncDownloadActive,
+        )
     }
+
+    // NOTE: This debounce exists as sync DL documents come in 1-by-1, often with short delays between each doc, which
+    //  resulted in the status indicator constantly toggling on and off as docs came in. Leading to flickering when
+    //  many docs were queued up.
+    //  A rough test got me delays of 1-8s between docs created at roughly the same time, which is why the 8s wait was chosen.
+    private toggleSyncDownloadActive = debounce(
+        () => {
+            this.emitMutation({
+                syncMenu: {
+                    pendingRemoteChangeCount: {
+                        $apply: (prev) => (prev === 0 ? 1 : 0),
+                    },
+                },
+            })
+        },
+        8000,
+        { leading: true },
+    )
 
     private getURLSearchParams(): URLSearchParams {
         // Get the current URL of the page

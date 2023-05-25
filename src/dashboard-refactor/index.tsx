@@ -433,18 +433,22 @@ export class DashboardContainer extends StatefulUIElement<
 
         const ownListsData = allLists.filter(
             (list) =>
+                list.type !== 'page-link' &&
                 cacheUtils.deriveListOwnershipStatus(list, userReference) ===
-                'Creator',
+                    'Creator',
         )
         const followedListsData = allLists.filter(
             (list) =>
+                list.type !== 'page-link' &&
                 cacheUtils.deriveListOwnershipStatus(list, userReference) ===
-                    'Follower' && !list.isForeignList,
+                    'Follower' &&
+                !list.isForeignList,
         )
         const joinedListsData = allLists.filter(
             (list) =>
+                list.type !== 'page-link' &&
                 cacheUtils.deriveListOwnershipStatus(list, userReference) ===
-                'Contributor',
+                    'Contributor',
         )
 
         return (
