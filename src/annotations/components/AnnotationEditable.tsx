@@ -20,7 +20,6 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import type { NoteResultHoverState } from './types'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { getShareButtonData } from '../sharing-utils'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
@@ -29,8 +28,7 @@ import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import type { UnifiedAnnotation, UnifiedList } from '../cache/types'
-import type { AnnotationCardInstanceLocation } from 'src/sidebar/annotations-sidebar/types'
+import type { UnifiedAnnotation } from '../cache/types'
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 
@@ -48,6 +46,8 @@ export interface AnnotationProps {
     zIndex?: number
     tags: string[]
     lists: number[]
+    /** Set this to filter out a specific list from being displayed on the annotation (e.g., in selected list mode). */
+    listIdToFilterOut?: number
     createdWhen: Date | number
     isEditing?: boolean
     isDeleting?: boolean
@@ -256,14 +256,19 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         name: string | JSX.Element
         isShared: boolean
     }> {
-        return this.props.lists.map((id) => ({
-            id,
-            ...this.props.getListDetailsById(id),
-        }))
+        const { lists, listIdToFilterOut, getListDetailsById } = this.props
+        return lists
+            .filter((id) => id !== listIdToFilterOut)
+            .map((id) => ({
+                id,
+                ...getListDetailsById(id),
+            }))
     }
 
     private get hasSharedLists(): boolean {
-        return this.displayLists.some((list) => list.isShared)
+        return this.props.lists
+            .map((id) => this.props.getListDetailsById(id))
+            .some((list) => list.isShared)
     }
 
     private get creationInfo() {
