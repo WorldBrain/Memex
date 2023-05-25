@@ -537,8 +537,11 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setDeletingListId', { listId }),
                     toggleMenu: () =>
                         this.processEvent('setShowMoreMenuListId', { listId }),
-                    onSpaceShare: () =>
-                        this.processEvent('shareList', { listId }),
+                    onSpaceShare: (remoteListId) =>
+                        this.processEvent('handleListShare', {
+                            listId,
+                            remoteListId,
+                        }),
                 })}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () => {
