@@ -123,7 +123,8 @@ describe('Annotations search', () => {
             id: Date.now(),
         })
 
-        await contentSharingBg.shareList({ localListId: coll1Id })
+        await contentSharingBg.scheduleListShare({ localListId: coll1Id })
+        await contentSharingBg.waitForListShare({ localListId: coll1Id })
 
         await customListsBg.insertPageToList({
             id: coll2Id,

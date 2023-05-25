@@ -23,11 +23,10 @@ export interface ContentSharingInterface
             | 'getAnnotationSharingState'
             | 'getAnnotationSharingStates'
         > {
-    shareList(params: {
+    scheduleListShare(params: {
         localListId: number
-        remoteListId?: AutoPk
-        collabKey?: AutoPk
     }): Promise<Omit<SharedListData, 'annotationSharingStatesPromise'>>
+    waitForListShare(params: { localListId: number }): Promise<void>
     shareAnnotations(options: {
         annotationUrls: string[]
         shareToLists?: boolean
@@ -87,9 +86,9 @@ export interface RemoteContentSharingByTabsInterface<
         {
             listTitle: string
             localListId: number
-            remoteListId: AutoPk
-            remoteListEntryId: AutoPk
-            collabKey: AutoPk
+            remoteListId: string
+            remoteListEntryId: string
+            collabKey: string
         }
     >
     waitForPageLinkCreation: RemoteFunction<Role, { fullPageUrl: string }, void>

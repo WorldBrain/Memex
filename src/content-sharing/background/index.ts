@@ -7,6 +7,7 @@ import {
     getAnnotationPrivacyState,
     extractIdsFromSinglePageShareUrl,
     createPageLinkListTitle,
+    getListShareUrl,
 } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import type CustomListBG from 'src/custom-lists/background'
 import type { AuthBackground } from 'src/authentication/background'
@@ -20,6 +21,7 @@ import {
 import type { Services } from 'src/services/types'
 import type { ServerStorageModules } from 'src/storage/types'
 import type {
+    AnnotationSharingStates,
     ContentSharingInterface,
     RemoteContentSharingByTabsInterface,
     __DeprecatedContentSharingInterface,
@@ -46,6 +48,12 @@ export default class ContentSharingBackground {
 
     private pageLinkCreationPromises: {
         [fullPageUrl: string]: Promise<void>
+    } = {}
+    private listSharePromises: {
+        [localListId: number]: Promise<void>
+    } = {}
+    private listShareAnnotationSharePromises: {
+        [localListId: number]: Promise<AnnotationSharingStates>
     } = {}
     private annotationSharingService: AnnotationSharingService
     private listSharingService: ListSharingService
@@ -233,7 +241,8 @@ export default class ContentSharingBackground {
                 const { contentSharing } = await options.servicesPromise
                 return contentSharing.deleteKeyLink(...args)
             },
-            shareList: this.shareList,
+            scheduleListShare: this.scheduleListShare,
+            waitForListShare: this.waitForListShare,
             shareAnnotation: this.shareAnnotation,
             shareAnnotations: this.shareAnnotations,
             executePendingActions: this.executePendingActions.bind(this),
@@ -337,16 +346,73 @@ export default class ContentSharingBackground {
         return remoteListData
     }
 
-    shareList: ContentSharingInterface['shareList'] = async (options) => {
+    scheduleListShare: ContentSharingInterface['scheduleListShare'] = async ({
+        localListId,
+    }) => {
+        if (this.listSharePromises[localListId]) {
+            throw new Error(
+                `This list is already in the process of being shared - try calling "waitForListShare" RPC method`,
+            )
+        }
+
+        const remoteListId = this.options
+            .generateServerId('sharedList')
+            .toString()
+        const collabKey = this.options
+            .generateServerId('sharedListKey')
+            .toString()
+
+        this.listSharePromises[localListId] = this.performListShare({
+            localListId,
+            remoteListId,
+            collabKey,
+        })
+
+        return {
+            remoteListId,
+            links: [
+                {
+                    roleID: SharedListRoleID.Commenter,
+                    link: getListShareUrl({
+                        remoteListId,
+                    }),
+                },
+                {
+                    keyString: collabKey,
+                    roleID: SharedListRoleID.ReadWrite,
+                    link: getListShareUrl({
+                        remoteListId,
+                        collaborationKey: collabKey,
+                    }),
+                },
+            ],
+        }
+    }
+
+    waitForListShare: ContentSharingInterface['waitForListShare'] = async ({
+        localListId,
+    }) => {
+        const promise = this.listSharePromises[localListId]
+        delete this.listSharePromises[localListId]
+        return promise
+    }
+
+    private async performListShare(options: {
+        remoteListId: string
+        localListId: number
+        collabKey: string
+    }): Promise<void> {
         await this.options.servicesPromise
         const {
             annotationSharingStatesPromise,
-            ...sharingResult
         } = await this.listSharingService.shareList(options)
+
         // NOTE: Currently we don't wait for the annotationsSharingStatesPromise, letting list annotations
-        //  get shared asyncronously. If we wanted some UI loading state, we'd need to cache it in this BG
-        //  class and set up another RPC endpoint to wait for it (see `this.waitForPageLinkCreation` for an example).
-        return sharingResult
+        //  get shared asyncronously. If we wanted some UI loading state, we'd need to set up another remote
+        //  method to wait for it.
+        this.listShareAnnotationSharePromises[
+            options.localListId
+        ] = annotationSharingStatesPromise
     }
 
     shareAnnotation: ContentSharingInterface['shareAnnotation'] = async (
@@ -831,7 +897,7 @@ export default class ContentSharingBackground {
             suppressInboxEntry: true,
             suppressVisitCreation: true,
         })
-        await this.shareList({
+        await this.performListShare({
             localListId,
             remoteListId,
             collabKey,
