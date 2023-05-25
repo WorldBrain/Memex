@@ -537,8 +537,11 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setDeletingListId', { listId }),
                     toggleMenu: () =>
                         this.processEvent('setShowMoreMenuListId', { listId }),
-                    onSpaceShare: () =>
-                        this.processEvent('shareList', { listId }),
+                    onSpaceShare: (remoteListId) =>
+                        this.processEvent('handleListShare', {
+                            listId,
+                            remoteListId,
+                        }),
                 })}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () => {
@@ -1219,19 +1222,26 @@ export class DashboardContainer extends StatefulUIElement<
 
             return (
                 <ListShareModal
-                    listId={listData.remoteId}
-                    shareList={async () => {
-                        const shareResult = await this.props.contentShareBG.shareList(
-                            {
-                                localListId: listData.localId,
-                            },
-                        )
-                        await this.processEvent('setListRemoteId', {
-                            listId: listData.unifiedId,
-                            remoteListId: shareResult.remoteListId,
-                        })
-                        return shareResult
-                    }}
+                    {...(listData.remoteId != null
+                        ? { listId: listData.remoteId }
+                        : {
+                              scheduleListShare: async () => {
+                                  const shareResult = await this.props.contentShareBG.scheduleListShare(
+                                      {
+                                          localListId: listData.localId,
+                                      },
+                                  )
+                                  await this.processEvent('setListRemoteId', {
+                                      listId: listData.unifiedId,
+                                      remoteListId: shareResult.remoteListId,
+                                  })
+                                  return shareResult
+                              },
+                              waitForListShare: () =>
+                                  this.props.contentShareBG.waitForListShare({
+                                      localListId: listData.localId,
+                                  }),
+                          })}
                     onCloseRequested={() =>
                         this.processEvent('setShareListId', {})
                     }

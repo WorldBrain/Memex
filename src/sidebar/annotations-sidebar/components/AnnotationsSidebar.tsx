@@ -552,9 +552,7 @@ export class AnnotationsSidebar extends React.Component<
                     ownAnnotationProps.unifiedId = annotation.unifiedId
                     ownAnnotationProps.lists = cacheUtils.getLocalListIdsForCacheIds(
                         this.props.annotationsCache,
-                        annotation.unifiedListIds.filter(
-                            (listId) => listId !== unifiedListId,
-                        ),
+                        annotation.unifiedListIds,
                     )
                     ownAnnotationProps.comment = annotation.comment
                     ownAnnotationProps.isShared = [
@@ -663,6 +661,11 @@ export class AnnotationsSidebar extends React.Component<
                             {...this.getAnnotInstanceDropdownTogglers(
                                 instanceId,
                             )}
+                            listIdToFilterOut={
+                                this.props.annotationsCache.lists.byId[
+                                    unifiedListId
+                                ]?.localId
+                            }
                             shareMenuButtonRef={instanceRefs.shareMenuBtn}
                             copyPasterButtonRef={instanceRefs.copyPasterBtn}
                             spacePickerBodyButtonRef={

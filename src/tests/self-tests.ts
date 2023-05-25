@@ -308,7 +308,7 @@ export function createSelfTests(options: {
             let remoteListId1: string
             if (shouldTest('share') || shouldTest('pdf.online.share')) {
                 remoteListId1 = (
-                    await backgroundModules.contentSharing.shareList({
+                    await backgroundModules.contentSharing.scheduleListShare({
                         localListId: testListId1,
                     })
                 ).remoteListId
@@ -316,7 +316,7 @@ export function createSelfTests(options: {
 
                 const {
                     remoteListId: remoteListId2,
-                } = await backgroundModules.contentSharing.shareList({
+                } = await backgroundModules.contentSharing.scheduleListShare({
                     localListId: testListId2,
                 })
                 console.log('Shared test list #2, remote ID:', remoteListId2)

@@ -40,6 +40,7 @@ export type Event = UIEvent<{
 export interface State {
     loadState: TaskState
     ownershipLoadState: TaskState
+    listShareLoadState: TaskState
     inviteLinksLoadState: TaskState
     inviteLinks: InviteLink[]
     showSuccessMsg: boolean
@@ -64,6 +65,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     getInitialState = (): State => ({
         loadState: 'pristine',
         ownershipLoadState: 'pristine',
+        listShareLoadState: 'pristine',
         inviteLinksLoadState: 'pristine',
         inviteLinks: [],
         nameValue: this.dependencies.listData.name,
@@ -192,7 +194,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         let remoteListId = listData.remoteId
 
         await executeUITask(this, 'inviteLinksLoadState', async () => {
-            const shareResult = await contentSharingBG.shareList({
+            const shareResult = await contentSharingBG.scheduleListShare({
                 localListId: listData.localId,
             })
             remoteListId = shareResult.remoteListId
@@ -208,6 +210,12 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             if (linkToCopy != null) {
                 await copyToClipboard(linkToCopy)
             }
+        })
+
+        await executeUITask(this, 'listShareLoadState', async () => {
+            await contentSharingBG.waitForListShare({
+                localListId: listData.localId,
+            })
         })
 
         setTimeout(

@@ -742,9 +742,6 @@ describe('Dashboard lists sidebar logic', () => {
     it('should be able to share a list, setting its remoteId state', async ({
         device,
     }) => {
-        device.backgroundModules.contentSharing.remoteFunctions.shareList = async () =>
-            ({ remoteListId: DATA.LISTS_1[1].remoteId } as any)
-
         for (const listData of DATA.LISTS_1) {
             await device.storageManager.collection('customLists').createObject({
                 id: listData.id,
@@ -764,8 +761,9 @@ describe('Dashboard lists sidebar logic', () => {
             annotationsCache.lists.byId[listData.unifiedId].remoteId,
         ).toBeUndefined()
 
-        await searchResults.processEvent('shareList', {
+        await searchResults.processEvent('handleListShare', {
             listId: listData.unifiedId,
+            remoteListId: DATA.LISTS_1[1].remoteId,
         })
 
         expect(annotationsCache.lists.byId[listData.unifiedId].remoteId).toBe(

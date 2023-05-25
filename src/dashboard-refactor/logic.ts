@@ -3389,15 +3389,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    shareList: EventHandler<'shareList'> = async ({ event, previousState }) => {
-        const listData = getListData(event.listId, previousState, {
-            mustBeLocal: true,
-            source: 'shareList',
-        })
-        const { remoteListId } = await this.options.contentShareBG.shareList({
-            localListId: listData.localId!,
-        })
-
+    handleListShare: EventHandler<'handleListShare'> = async ({
+        event,
+        previousState,
+    }) => {
         const memberAnnotParentPageIds = new Set<string>()
         const memberPrivateAnnotIds = new Set<string>()
         for (const noteData of Object.values(
@@ -3440,7 +3435,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         // Should trigger state update on `newListsState` cache event
         this.options.annotationsCache.updateList({
             unifiedId: event.listId,
-            remoteId: remoteListId,
+            remoteId: event.remoteListId,
         })
 
         this.emitMutation({ searchResults: mutation })

@@ -3650,8 +3650,6 @@ describe('Dashboard search results logic', () => {
                 device,
             }) => {
                 const testRemoteListId = 'remote-list-0'
-                device.backgroundModules.contentSharing.remoteFunctions.shareList = async () =>
-                    ({ remoteListId: testRemoteListId } as any)
 
                 const { searchResults, annotationsCache } = await setupTest(
                     device,
@@ -3760,8 +3758,9 @@ describe('Dashboard search results logic', () => {
                     }),
                 )
 
-                await searchResults.processEvent('shareList', {
+                await searchResults.processEvent('handleListShare', {
                     listId: listDataA.unifiedId,
+                    remoteListId: testRemoteListId,
                 })
 
                 expect(
