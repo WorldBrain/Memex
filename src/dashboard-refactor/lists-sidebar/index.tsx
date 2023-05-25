@@ -121,11 +121,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                     </Margin>
                     <ListsSidebarGroup
                         {...this.props.ownListsGroup}
-                        listsCount={
-                            this.props.ownListsGroup.listData.filter(
-                                (list) => list.type !== 'page-link',
-                            ).length
-                        }
+                        listsCount={this.props.ownListsGroup.listData.length}
                     >
                         {this.props.isAddListInputShown && (
                             <SidebarItemInput
@@ -134,103 +130,76 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 errorMessage={this.props.addListErrorMessage}
                             />
                         )}
-                        {this.props.ownListsGroup.listData
-                            .filter(() => {})
-                            .map(
-                                (list) =>
-                                    list.type !== 'page-link' && (
-                                        <DropTargetSidebarItem
-                                            key={list.unifiedId}
-                                            name={list.name}
-                                            isSelected={
-                                                this.props.selectedListId ===
-                                                list.unifiedId
-                                            }
-                                            onClick={() =>
-                                                this.props.onListSelection(
-                                                    list.unifiedId,
-                                                )
-                                            }
-                                            dropReceivingState={this.props.initDropReceivingState(
-                                                list.unifiedId,
-                                            )}
-                                            isCollaborative={
-                                                list.remoteId != null
-                                            }
-                                            renderRightSideIcon={() => (
-                                                <SpaceContextMenuBtn
-                                                    {...this.props.initContextMenuBtnProps(
-                                                        list.unifiedId,
-                                                    )}
-                                                    listData={list}
-                                                    isMenuDisplayed={
-                                                        this.props
-                                                            .showMoreMenuListId ===
-                                                        list.unifiedId
-                                                    }
-                                                    errorMessage={
-                                                        this.props
-                                                            .editListErrorMessage
-                                                    }
-                                                />
-                                            )}
-                                        />
-                                    ),
-                            )}
+                        {this.props.ownListsGroup.listData.map((list) => (
+                            <DropTargetSidebarItem
+                                key={list.unifiedId}
+                                name={list.name}
+                                isSelected={
+                                    this.props.selectedListId === list.unifiedId
+                                }
+                                onClick={() =>
+                                    this.props.onListSelection(list.unifiedId)
+                                }
+                                dropReceivingState={this.props.initDropReceivingState(
+                                    list.unifiedId,
+                                )}
+                                isCollaborative={list.remoteId != null}
+                                renderRightSideIcon={() => (
+                                    <SpaceContextMenuBtn
+                                        {...this.props.initContextMenuBtnProps(
+                                            list.unifiedId,
+                                        )}
+                                        listData={list}
+                                        isMenuDisplayed={
+                                            this.props.showMoreMenuListId ===
+                                            list.unifiedId
+                                        }
+                                        errorMessage={
+                                            this.props.editListErrorMessage
+                                        }
+                                    />
+                                )}
+                            />
+                        ))}
                     </ListsSidebarGroup>
                     <ListsSidebarGroup
                         {...this.props.followedListsGroup}
                         listsCount={
-                            this.props.followedListsGroup.listData.filter(
-                                (list) => list.type !== 'page-link',
-                            ).length
+                            this.props.followedListsGroup.listData.length
                         }
                     >
-                        {this.props.followedListsGroup.listData.map(
-                            (list) =>
-                                list.type !== 'page-link' && (
-                                    <FollowedListSidebarItem
-                                        key={list.unifiedId}
-                                        name={list.name}
-                                        onClick={() =>
-                                            this.props.openRemoteListPage(
-                                                list.remoteId!,
-                                            )
-                                        }
-                                    />
-                                ),
-                        )}
+                        {this.props.followedListsGroup.listData.map((list) => (
+                            <FollowedListSidebarItem
+                                key={list.unifiedId}
+                                name={list.name}
+                                onClick={() =>
+                                    this.props.openRemoteListPage(
+                                        list.remoteId!,
+                                    )
+                                }
+                            />
+                        ))}
                     </ListsSidebarGroup>
                     <ListsSidebarGroup
                         {...this.props.joinedListsGroup}
-                        listsCount={
-                            this.props.joinedListsGroup.listData.filter(
-                                (list) => list.type !== 'page-link',
-                            ).length
-                        }
+                        listsCount={this.props.joinedListsGroup.listData.length}
                     >
-                        {this.props.joinedListsGroup.listData.map(
-                            (list) =>
-                                list.type !== 'page-link' && (
-                                    <DropTargetSidebarItem
-                                        key={list.unifiedId}
-                                        name={list.name}
-                                        isSelected={
-                                            this.props.selectedListId ===
-                                            list.unifiedId
-                                        }
-                                        onClick={() =>
-                                            this.props.onListSelection(
-                                                list.unifiedId,
-                                            )
-                                        }
-                                        dropReceivingState={this.props.initDropReceivingState(
-                                            list.unifiedId,
-                                        )}
-                                        isCollaborative
-                                    />
-                                ),
-                        )}
+                        {this.props.joinedListsGroup.listData.map((list) => (
+                            <DropTargetSidebarItem
+                                key={list.unifiedId}
+                                name={list.name}
+                                isSelected={
+                                    this.props.selectedListId === list.unifiedId
+                                }
+                                onClick={() =>
+                                    this.props.onListSelection(list.unifiedId)
+                                }
+                                dropReceivingState={this.props.initDropReceivingState(
+                                    list.unifiedId,
+                                )}
+                                isCollaborative
+                            />
+                        ))}
                     </ListsSidebarGroup>
                 </SidebarInnerContent>
             </Container>
