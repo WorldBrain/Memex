@@ -1,7 +1,7 @@
 export * from '@worldbrain/memex-common/lib/content-sharing/client-storage/types'
 import type {
+    SharedListData,
     ListKeysServiceInterface,
-    ListSharingServiceInterface,
     AnnotationSharingServiceInterface,
 } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
@@ -22,8 +22,12 @@ export interface ContentSharingInterface
             | 'setAnnotationPrivacyLevel'
             | 'getAnnotationSharingState'
             | 'getAnnotationSharingStates'
-        >,
-        Pick<ListSharingServiceInterface, 'shareList'> {
+        > {
+    shareList(params: {
+        localListId: number
+        remoteListId?: AutoPk
+        collabKey?: AutoPk
+    }): Promise<Omit<SharedListData, 'annotationSharingStatesPromise'>>
     shareAnnotations(options: {
         annotationUrls: string[]
         shareToLists?: boolean
