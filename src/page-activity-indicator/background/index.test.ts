@@ -155,7 +155,7 @@ describe('Page activity indicator background module tests', () => {
             ),
         ).toEqual({
             name: PERIODIC_SYNC_JOB_NAME,
-            periodInMinutes: 15,
+            periodInMinutes: 2,
             job:
                 backgroundModules.pageActivityIndicator[
                     'syncFollowedListEntriesWithNewActivity'

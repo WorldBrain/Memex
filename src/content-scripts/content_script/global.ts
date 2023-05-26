@@ -701,14 +701,13 @@ export async function main(
         fullPageUrl,
     )
 
-    const hasActivity = pageActivityStatus !== 'no-activity'
-    // pageActivityStatus !== 'no-activity' &&
-
-    console.log('hasactivity', pageActivityStatus, hasActivity)
-    if ((isSidebarEnabled && !isPageBlacklisted) || hasActivity) {
+    if (
+        (isSidebarEnabled && !isPageBlacklisted) ||
+        pageActivityStatus !== 'no-activity'
+    ) {
         await inPageUI.loadComponent('ribbon', {
             keepRibbonHidden: !isSidebarEnabled,
-            showPageActivityIndicator: hasActivity,
+            showPageActivityIndicator: pageActivityStatus === 'has-annotations',
         })
     }
 
