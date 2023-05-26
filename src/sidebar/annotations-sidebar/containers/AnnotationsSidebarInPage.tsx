@@ -155,10 +155,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         sidebarEvents.on('renderHighlight', ({ highlight }) =>
             highlighter.renderHighlight(
                 { id: highlight.unifiedId, selector: highlight.selector },
-                () =>
+                ({ annotationId, openInEdit }) =>
                     inPageUI.showSidebar({
-                        annotationCacheId: highlight.unifiedId,
-                        action: 'show_annotation',
+                        annotationCacheId: annotationId.toString(),
+                        action: openInEdit
+                            ? 'edit_annotation'
+                            : 'show_annotation',
                     }),
             ),
         )
@@ -168,10 +170,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                     id: h.unifiedId,
                     selector: h.selector,
                 })),
-                ({ annotationId }) =>
+                ({ annotationId, openInEdit }) =>
                     inPageUI.showSidebar({
                         annotationCacheId: annotationId.toString(),
-                        action: 'show_annotation',
+                        action: openInEdit
+                            ? 'edit_annotation'
+                            : 'show_annotation',
                     }),
                 { removeExisting: true },
             )
