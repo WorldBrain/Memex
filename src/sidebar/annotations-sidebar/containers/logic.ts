@@ -446,15 +446,13 @@ export class SidebarContainerLogic extends UILogic<
                 this.readingViewStorageListener(true)
             }
 
-            const hasNetworkActivity = await pageActivityIndicatorBG.getPageActivityStatus(
+            const pageActivityStatus = await pageActivityIndicatorBG.getPageActivityStatus(
                 this.fullPageUrl,
             )
 
-            const hasActivity = hasNetworkActivity !== 'no-annotations'
-
             this.emitMutation({
                 pageHasNetworkAnnotations: {
-                    $set: hasActivity,
+                    $set: pageActivityStatus === 'has-annotations',
                 },
             })
 
@@ -890,13 +888,17 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
 
-        const hasNetworkActivity = await this.options.pageActivityIndicatorBG.getPageActivityStatus(
+        const pageActivityStatus = await this.options.pageActivityIndicatorBG.getPageActivityStatus(
             event.fullPageUrl,
         )
 
+        const hasActivity =
+            hasNetworkActivity !== 'no-annotations' &&
+            hasNetworkActivity !== 'no-activity'
+
         this.emitMutation({
             pageHasNetworkAnnotations: {
-                $set: hasNetworkActivity != 'no-activity',
+                $set: hasActivity,
             },
         })
 
