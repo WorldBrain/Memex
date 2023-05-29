@@ -1,4 +1,6 @@
+// TODO: Replace these with a SettingStore<LocalPersonalCloudSettings>
 export const STORAGE_KEYS = {
     isSetUp: 'personalCloud.isSetUp',
-    lastSeen: 'personalCloud.lastSeen',
+    lastSyncDownload: 'personalCloud.lastSeen',
+    lastSyncUpload: 'personalCloud.lastSyncUpload',
 }

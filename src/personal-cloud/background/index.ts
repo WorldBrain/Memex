@@ -96,7 +96,7 @@ export class PersonalCloudBackground {
             collectionName: 'personalCloudAction',
             versions: { initial: STORAGE_VERSIONS[25].version },
             retryIntervalInMs: PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
-            executeAction: this.executeAction,
+            executeAction: this.processPersonalCloudAction,
             preprocessAction: this.preprocessAction,
             onSetupError: (err) => Raven.captureException(err),
             setTimeout: (job, timeout) => {
@@ -130,10 +130,11 @@ export class PersonalCloudBackground {
         this.options.runtimeAPI.onStartup.addListener(async () => {
             await this.startSync()
         })
-        this.actionQueue.events.on('statsChanged', (stats) => {
+        this.actionQueue.events.on('statsChanged', async (stats) => {
             this._modifyStats({
                 pendingUploads: stats.pendingActionCount,
             })
+            await this.options.settingStore.set('lastSyncUpload', Date.now())
         })
         // TODO: re-implement pending download count
         // this.options.backend.events.on('incomingChangesPending', (event) => {
@@ -252,7 +253,7 @@ export class PersonalCloudBackground {
         }
     }
 
-    _modifyStats(updates: Partial<PersonalCloudStats>) {
+    private _modifyStats(updates: Partial<PersonalCloudStats>) {
         this.stats = { ...this.stats, ...updates }
         this._debugLog('Updated stats', this.stats)
         if (this.emitEvents) {
@@ -499,7 +500,9 @@ export class PersonalCloudBackground {
         return object
     }
 
-    executeAction: ActionExecutor<PersonalCloudAction> = async ({ action }) => {
+    processPersonalCloudAction: ActionExecutor<PersonalCloudAction> = async ({
+        action,
+    }) => {
         if (!this.deviceId || !(await this.options.getUserId())) {
             // console.warn(
             //     'Tried to execute action without deviceId, so pausing the action queue',

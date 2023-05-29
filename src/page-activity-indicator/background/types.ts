@@ -51,5 +51,8 @@ export interface RemotePageActivityIndicatorInterface {
     }>
     getPageActivityStatus: (
         fullPageUrl: string,
-    ) => Promise<PageActivityStatus | false>
+    ) => Promise<{
+        status: PageActivityStatus
+        remoteListIds: AutoPk[]
+    }>
 }

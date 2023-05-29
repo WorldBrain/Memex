@@ -174,34 +174,34 @@ describe('Page activity indicator background module tests', () => {
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/a'),
-        ).toEqual('no-activity')
+        ).toEqual({ status: 'no-activity', remoteListIds: [] })
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/b'),
-        ).toEqual('no-activity')
+        ).toEqual({ status: 'no-activity', remoteListIds: [] })
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/c'),
-        ).toEqual('no-activity')
+        ).toEqual({ status: 'no-activity', remoteListIds: [] })
 
         await backgroundModules.pageActivityIndicator.syncFollowedLists()
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/a'),
-        ).toEqual('no-activity')
+        ).toEqual({ status: 'no-activity', remoteListIds: [] })
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/b'),
-        ).toEqual('no-activity')
+        ).toEqual({ status: 'no-activity', remoteListIds: [] })
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/c'),
-        ).toEqual('no-activity')
+        ).toEqual({ status: 'no-activity', remoteListIds: [] })
 
         await backgroundModules.pageActivityIndicator.syncFollowedListEntries({
             now: 1,
@@ -210,17 +210,23 @@ describe('Page activity indicator background module tests', () => {
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/a'),
-        ).toEqual('has-annotations')
+        ).toEqual({
+            status: 'has-annotations',
+            remoteListIds: [DATA.sharedLists[0].id],
+        })
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/b'),
-        ).toEqual('no-annotations')
+        ).toEqual({
+            status: 'no-annotations',
+            remoteListIds: [DATA.sharedLists[0].id],
+        })
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/c'),
-        ).toEqual('no-activity')
+        ).toEqual({ status: 'no-activity', remoteListIds: [] })
 
         // Delete annotations on the server, re-sync, then assert the status changes
         await serverStorage.manager
@@ -234,19 +240,22 @@ describe('Page activity indicator background module tests', () => {
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/a'),
-        ).toEqual('no-annotations')
+        ).toEqual({ status: 'no-activity', remoteListIds: [] }) // This has no-activity as the entries are created by the current user + no annotations from other users
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/b'),
-        ).toEqual('no-annotations')
+        ).toEqual({
+            status: 'no-annotations',
+            remoteListIds: [DATA.sharedLists[0].id],
+        })
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/c'),
-        ).toEqual('no-activity')
+        ).toEqual({ status: 'no-activity', remoteListIds: [] })
 
-        // Re-add an annotation for good measure
+        // Re-add an annotation from another user to test.com/b to ensure it flips status from { status: 'no-annotations', remoteListIds: [] } to { status: 'has-annotations', remoteListIds: [] }
         await serverStorage.manager
             .collection('sharedAnnotationListEntry')
             .createObject({
@@ -261,17 +270,20 @@ describe('Page activity indicator background module tests', () => {
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/a'),
-        ).toEqual('no-annotations')
+        ).toEqual({ status: 'no-activity', remoteListIds: [] })
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/b'),
-        ).toEqual('has-annotations')
+        ).toEqual({
+            status: 'has-annotations',
+            remoteListIds: [DATA.sharedLists[0].id],
+        })
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/c'),
-        ).toEqual('no-activity')
+        ).toEqual({ status: 'no-activity', remoteListIds: [] })
     })
 
     it('should be able to delete all followedList and followedListEntries in one swoop', async () => {

@@ -251,6 +251,7 @@ export class SidebarContainerLogic extends UILogic<
             annotations: initNormalizedState(),
             lists: initNormalizedState(),
             pageListIds: new Set(),
+            pageActiveListIds: [],
 
             activeAnnotationId: null, // TODO: make unified ID
 
@@ -390,10 +391,45 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    /** Should only be used for state initialization. */
+    private syncCachePageListsState(fullPageUrl: string): void {
+        const normalizedPageUrl = normalizeUrl(fullPageUrl)
+        const pageListCacheIdsSet =
+            this.options.annotationsCache.pageListIds.get(normalizedPageUrl) ??
+            new Set()
+        this.cachePageListsSubscription(normalizedPageUrl, pageListCacheIdsSet)
+    }
+
+    private async setPageActivityState(fullPageUrl: string): Promise<void> {
+        const { annotationsCache, pageActivityIndicatorBG } = this.options
+        const pageActivity = await pageActivityIndicatorBG.getPageActivityStatus(
+            fullPageUrl,
+        )
+
+        // Sync page active lists states with sidebar state
+        const pageActiveListIds: SidebarContainerState['pageActiveListIds'] = []
+        for (const remoteListId of pageActivity.remoteListIds) {
+            const listData = annotationsCache.getListByRemoteId(
+                remoteListId.toString(),
+            )
+            if (listData != null) {
+                pageActiveListIds.push(listData.unifiedId)
+            }
+        }
+
+        this.emitMutation({
+            pageActiveListIds: { $set: pageActiveListIds },
+            pageHasNetworkAnnotations: {
+                $set:
+                    pageActivity.status === 'has-annotations' ||
+                    pageActivity.status === 'no-annotations',
+            },
+        })
+    }
+
     init: EventHandler<'init'> = async ({ previousState }) => {
         const {
             shouldHydrateCacheOnInit,
-            pageActivityIndicatorBG,
             annotationsCache,
             initialState,
             fullPageUrl,
@@ -418,16 +454,6 @@ export class SidebarContainerLogic extends UILogic<
         this.cacheAnnotationsSubscription(annotationsCache.annotations)
         this.cacheListsSubscription(annotationsCache.lists)
 
-        if (fullPageUrl != null) {
-            this.fullPageUrl = fullPageUrl
-            const normalizedPageUrl = normalizeUrl(this.fullPageUrl)
-            this.cachePageListsSubscription(
-                normalizedPageUrl,
-                annotationsCache.pageListIds.get(normalizedPageUrl) ??
-                    new Set(),
-            )
-        }
-
         this.sidebar = document
             .getElementById('memex-sidebar-container')
             ?.shadowRoot.getElementById('annotationSidebarContainer')
@@ -446,21 +472,18 @@ export class SidebarContainerLogic extends UILogic<
                 this.readingViewStorageListener(true)
             }
 
-            const pageActivityStatus = await pageActivityIndicatorBG.getPageActivityStatus(
-                this.fullPageUrl,
-            )
+            if (fullPageUrl == null) {
+                return
+            }
 
-            this.emitMutation({
-                pageHasNetworkAnnotations: {
-                    $set: pageActivityStatus === 'has-annotations',
-                },
-            })
-
-            if (shouldHydrateCacheOnInit && this.fullPageUrl != null) {
+            this.fullPageUrl = fullPageUrl
+            if (shouldHydrateCacheOnInit) {
                 await this.hydrateAnnotationsCache(this.fullPageUrl, {
                     renderHighlights: true,
                 })
             }
+            this.syncCachePageListsState(this.fullPageUrl)
+            await this.setPageActivityState(this.fullPageUrl)
         })
         this.annotationsLoadComplete.resolve()
 
@@ -888,30 +911,13 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
 
-        const pageActivityStatus = await this.options.pageActivityIndicatorBG.getPageActivityStatus(
-            event.fullPageUrl,
-        )
-
-        const hasActivity =
-            hasNetworkActivity !== 'no-annotations' &&
-            hasNetworkActivity !== 'no-activity'
-
-        this.emitMutation({
-            pageHasNetworkAnnotations: {
-                $set: hasActivity,
-            },
-        })
-
         if (previousState.fullPageUrl === event.fullPageUrl) {
             return
         }
 
-        const normalizedPageUrl = normalizeUrl(event.fullPageUrl)
-        this.cachePageListsSubscription(
-            normalizedPageUrl,
-            this.options.annotationsCache.pageListIds.get(normalizedPageUrl) ??
-                new Set(),
-        )
+        this.syncCachePageListsState(event.fullPageUrl)
+        await this.setPageActivityState(event.fullPageUrl)
+
         this.fullPageUrl = event.fullPageUrl
         this.emitMutation({ fullPageUrl: { $set: event.fullPageUrl } })
         await this.hydrateAnnotationsCache(event.fullPageUrl, {
