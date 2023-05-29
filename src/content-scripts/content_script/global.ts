@@ -697,9 +697,9 @@ export async function main(
     }
 
     const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
-    const pageActivityStatus = await pageActivityIndicatorBG.getPageActivityStatus(
-        fullPageUrl,
-    )
+    const {
+        status: pageActivityStatus,
+    } = await pageActivityIndicatorBG.getPageActivityStatus(fullPageUrl)
 
     const hasActivity =
         pageActivityStatus === 'no-annotations' ||

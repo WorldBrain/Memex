@@ -446,7 +446,9 @@ export class SidebarContainerLogic extends UILogic<
                 this.readingViewStorageListener(true)
             }
 
-            const pageActivityStatus = await pageActivityIndicatorBG.getPageActivityStatus(
+            const {
+                status: pageActivityStatus,
+            } = await pageActivityIndicatorBG.getPageActivityStatus(
                 this.fullPageUrl,
             )
 
@@ -890,7 +892,9 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
 
-        const pageActivityStatus = await this.options.pageActivityIndicatorBG.getPageActivityStatus(
+        const {
+            status: pageActivityStatus,
+        } = await this.options.pageActivityIndicatorBG.getPageActivityStatus(
             event.fullPageUrl,
         )
 
