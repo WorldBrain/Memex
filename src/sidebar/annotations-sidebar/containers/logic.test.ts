@@ -28,10 +28,6 @@ import type {
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
 import { createPageLinkListTitle } from 'src/content-sharing/utils'
-import type {
-    SharedList,
-    SharedListEntry,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -594,15 +590,33 @@ describe('SidebarContainerLogic', () => {
             )
         })
 
-        it('should update parent page list IDs as the associated cache state updates', async ({
+        it('should update parent page list IDs as the associated cache state updates, without changing page active lists state', async ({
             device,
         }) => {
             const { sidebar, annotationsCache } = await setupLogicHelper({
                 device,
                 withAuth: true,
+                skipInitEvent: true,
                 fullPageUrl: DATA.TAB_URL_1,
             })
+
+            expect(annotationsCache.pageListIds).toEqual(new Map())
+            expect(sidebar.state.pageListIds).toEqual(new Set())
+            expect(sidebar.state.pageActiveListIds).toEqual([])
+
+            await sidebar.init()
+
             const normalizedUrl = normalizeUrl(DATA.TAB_URL_1)
+            const expectedPageActiveLists = DATA.FOLLOWED_LIST_ENTRIES.filter(
+                (entry) =>
+                    entry.normalizedPageUrl === normalizedUrl &&
+                    entry.hasAnnotationsFromOthers,
+            ).map(
+                (entry) =>
+                    annotationsCache.getListByRemoteId(
+                        entry.followedList.toString(),
+                    ).unifiedId,
+            )
             const unifiedListIds = mapLocalListIdsToUnified(
                 [
                     DATA.LOCAL_LISTS[0].id,
@@ -624,6 +638,9 @@ describe('SidebarContainerLogic', () => {
             expect(sidebar.state.pageListIds).toEqual(
                 new Set([unifiedListIds[0], unifiedListIds[3]]),
             )
+            expect(sidebar.state.pageActiveListIds).toEqual(
+                expectedPageActiveLists,
+            )
 
             annotationsCache.setPageData(normalizedUrl, [])
 
@@ -631,6 +648,9 @@ describe('SidebarContainerLogic', () => {
                 new Map([[normalizedUrl, new Set()]]),
             )
             expect(sidebar.state.pageListIds).toEqual(new Set())
+            expect(sidebar.state.pageActiveListIds).toEqual(
+                expectedPageActiveLists, // Note this remains unchanged, as it relates to activity by collaborators
+            )
 
             annotationsCache.setPageData(normalizedUrl, [unifiedListIds[0]])
             expect(annotationsCache.pageListIds).toEqual(
@@ -638,6 +658,9 @@ describe('SidebarContainerLogic', () => {
             )
             expect(sidebar.state.pageListIds).toEqual(
                 new Set([unifiedListIds[0]]),
+            )
+            expect(sidebar.state.pageActiveListIds).toEqual(
+                expectedPageActiveLists,
             )
         })
 

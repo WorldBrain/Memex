@@ -968,7 +968,7 @@ export class AnnotationsSidebar extends React.Component<
             fullPageUrl,
             pageListIds,
             listInstances,
-            annotationsCache,
+            pageActiveListIds,
         } = this.props
         const normalizedPageUrl = fullPageUrl
             ? normalizeUrl(fullPageUrl)
@@ -979,7 +979,8 @@ export class AnnotationsSidebar extends React.Component<
                 listData.hasRemoteAnnotationsToLoad ||
                 (listData.type === 'page-link' &&
                     listData.normalizedPageUrl === normalizedPageUrl) ||
-                pageListIds.has(listData.unifiedId),
+                pageListIds.has(listData.unifiedId) ||
+                pageActiveListIds.includes(listData.unifiedId),
         )
 
         if (allLists.length === 0) {

@@ -127,9 +127,13 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showAllNotesCopyPaster: boolean
 
     fullPageUrl?: string
+    /** Keeps track of lists for which this page has remote activity (e.g., other users adding it to a collab list) */
+    pageActiveListIds: UnifiedList['unifiedId'][]
+    /** Mirrors the annotations cache state of the same name */
     pageListIds: Set<UnifiedList['unifiedId']>
     lists: PageAnnotationsCacheInterface['lists']
     annotations: PageAnnotationsCacheInterface['annotations']
+
     pageSummary: string
     prompt: string
 
