@@ -464,10 +464,12 @@ export class DashboardLogic extends UILogic<State, Events> {
     ): Promise<State> {
         const { localStorage } = this.options
         const {
-            [CLOUD_STORAGE_KEYS.lastSeen]: cloudLastSynced,
+            [CLOUD_STORAGE_KEYS.lastSyncDownload]: lastSyncDownload,
+            [CLOUD_STORAGE_KEYS.lastSyncUpload]: lastSyncUpload,
             [STORAGE_KEYS.mobileAdSeen]: mobileAdSeen,
         } = await localStorage.get([
-            CLOUD_STORAGE_KEYS.lastSeen,
+            CLOUD_STORAGE_KEYS.lastSyncDownload,
+            CLOUD_STORAGE_KEYS.lastSyncUpload,
             STORAGE_KEYS.mobileAdSeen,
         ])
 
@@ -482,6 +484,11 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.syncSettings.dashboard.get('subscribeBannerShownAfter'),
             this.syncSettings.extension.get('areTagsMigratedToSpaces'),
         ])
+
+        const lastSyncTime: number =
+            lastSyncDownload > lastSyncUpload
+                ? lastSyncDownload
+                : lastSyncUpload ?? null
 
         const mutation: UIMutation<State> = {
             searchResults: {
@@ -498,12 +505,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isSidebarLocked: { $set: listsSidebarLocked ?? true },
             },
             syncMenu: {
-                lastSuccessfulSyncDate: {
-                    $set:
-                        cloudLastSynced == null
-                            ? null
-                            : new Date(cloudLastSynced),
-                },
+                lastSuccessfulSyncDate: { $set: new Date(lastSyncTime) },
             },
         }
         this.emitMutation(mutation)

@@ -27,6 +27,8 @@ export interface ExecuteClientInstructionsAction {
 
 export interface LocalPersonalCloudSettings {
     deviceId?: PersonalCloudDeviceId
+    lastSyncUpload?: number
+    /** Note we're also using this value as the last sync *download* time. */
     lastSeen?: number
     isSetUp?: boolean
 }
