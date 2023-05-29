@@ -193,44 +193,28 @@ export class PageActivityIndicatorBackground {
             { normalizedPageUrl },
         )
 
-        const currentUser = (await this.getCurrentUser()).id
-
-        if (
-            !followedListEntries.length ||
-            followedListEntries.reduce(
-                (acc, curr) =>
-                    acc ||
-                    (!curr.hasAnnotationsFromOthers &&
-                        curr.creator === currentUser),
-                false,
-            )
-        ) {
+        const currentUser = await this.getCurrentUser()
+        if (currentUser == null) {
             return 'no-activity'
         }
 
         if (
-            followedListEntries.reduce(
-                (acc, curr) =>
-                    acc ||
-                    (!curr.hasAnnotationsFromOthers &&
-                        curr.creator !== currentUser),
-                false,
+            followedListEntries.some(
+                (entry) =>
+                    !entry.hasAnnotationsFromOthers &&
+                    entry.creator !== currentUser.id,
             )
         ) {
             return 'no-annotations'
         }
 
         if (
-            followedListEntries.reduce(
-                (acc, curr) =>
-                    acc ||
-                    (curr.hasAnnotationsFromOthers &&
-                        curr.creator !== currentUser),
-                false,
-            )
+            followedListEntries.some((entry) => entry.hasAnnotationsFromOthers)
         ) {
             return 'has-annotations'
         }
+
+        return 'no-activity'
     }
 
     private getEntriesForFollowedLists: RemotePageActivityIndicatorInterface['getEntriesForFollowedLists'] = async (

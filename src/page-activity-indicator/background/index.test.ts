@@ -234,7 +234,7 @@ describe('Page activity indicator background module tests', () => {
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/a'),
-        ).toEqual('no-annotations')
+        ).toEqual('no-activity') // This has no-activity as the entries are created by the current user + no annotations from other users
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
@@ -246,7 +246,7 @@ describe('Page activity indicator background module tests', () => {
             ]('https://test.com/c'),
         ).toEqual('no-activity')
 
-        // Re-add an annotation for good measure
+        // Re-add an annotation from another user to test.com/b to ensure it flips status from 'no-annotations' to 'has-annotations'
         await serverStorage.manager
             .collection('sharedAnnotationListEntry')
             .createObject({
@@ -261,7 +261,7 @@ describe('Page activity indicator background module tests', () => {
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
             ]('https://test.com/a'),
-        ).toEqual('no-annotations')
+        ).toEqual('no-activity')
         expect(
             await backgroundModules.pageActivityIndicator[
                 'getPageActivityStatus'
