@@ -114,7 +114,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     private setupRemoteEventListeners() {
         this.personalCloudEvents = getRemoteEventEmitter('personalCloud')
-        this.personalCloudEvents.on('cloudStatsUpdated', ({ stats }) => {
+        this.personalCloudEvents.on('cloudStatsUpdated', async ({ stats }) => {
             this.emitMutation({
                 syncMenu: {
                     pendingLocalChangeCount: { $set: stats.pendingUploads },
@@ -122,6 +122,17 @@ export class DashboardLogic extends UILogic<State, Events> {
                     // pendingRemoteChangeCount: { $set: stats.pendingDownloads },
                 },
             })
+
+            if (stats.pendingDownloads === 0 && stats.pendingUploads === 0) {
+                const dateNow = Date.now()
+                this.emitMutation({
+                    syncMenu: {
+                        lastSuccessfulSyncDate: {
+                            $set: new Date(dateNow),
+                        },
+                    },
+                })
+            }
         })
         this.personalCloudEvents.on(
             'downloadStarted',

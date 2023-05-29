@@ -26,6 +26,9 @@ export const timeSinceNowToString = (date: Date | null): string => {
     const days = diffTimestamp(now, timestamp, 'days')
     const years = diffTimestamp(now, timestamp, 'years')
 
+    if (seconds === 0) {
+        return `Just now`
+    }
     if (seconds < 60) {
         return `${seconds} seconds ago`
     }
