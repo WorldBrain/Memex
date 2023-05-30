@@ -1,4 +1,4 @@
-import responseToDataUrl from 'response-to-data-url'
+import { blobToDataUrl } from 'src/util/blob-to-data-url'
 
 /**
  * @param url
@@ -38,8 +38,8 @@ async function getFavIcon(favIconUrl) {
             return undefined
         }
     }
-    const dataUrl = await responseToDataUrl(response)
-    return dataUrl
+    const blob = await response.blob()
+    return blobToDataUrl(blob)
 }
 
 /**
