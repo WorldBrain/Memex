@@ -1,7 +1,5 @@
 import browser from 'webextension-polyfill'
 import * as PDFJS from 'pdfjs-dist'
-import transformPageText from 'src/util/transform-page-text'
-import type { MemexPDFMetadata } from './types'
 import { loadBlob } from 'src/imports/background/utils'
 import type { RawPdfPageContent } from 'src/page-analysis/types'
 import { extractDataFromPDFDocument } from 'src/pdf/util'

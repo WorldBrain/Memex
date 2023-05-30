@@ -2,8 +2,8 @@ import normalizeUrl from '@worldbrain/memex-url-utils/lib/normalize'
 import { extractUrlParts as transformUrl } from '@worldbrain/memex-common/lib/url-utils/extract-parts'
 import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/lib/constants'
 
-import transformPageText from '../util/transform-page-text'
 import { extractContent } from './util'
+import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
 import { PipelineReq, PipelineRes } from './types'
 
 export { transformUrl }
@@ -20,7 +20,7 @@ export function extractTerms(text: string): Set<string> {
         return new Set()
     }
 
-    const { text: transformedText } = transformPageText({ text })
+    const { text: transformedText } = transformPageText(text)
 
     if (!transformedText || !transformedText.length) {
         return new Set()
