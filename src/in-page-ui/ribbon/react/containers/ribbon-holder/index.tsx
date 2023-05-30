@@ -10,7 +10,7 @@ import { StatefulUIElement } from 'src/util/ui-logic'
 import RibbonContainer from '../ribbon'
 import { SharedInPageUIEvents } from 'src/in-page-ui/shared-state/types'
 import PageActivityIndicator from 'src/page-activity-indicator/ui/indicator'
-const styles = require('./styles.css')
+import styled, { css } from 'styled-components'
 
 const RIBBON_HIDE_TIMEOUT = 700
 
@@ -161,11 +161,10 @@ export default class RibbonHolder extends StatefulUIElement<
             <>
                 {(!this.props.setUpOptions.keepRibbonHidden ||
                     this.state.state === 'visible') && (
-                    <div
+                    <RibbonHolderBox
                         ref={this.handleHolderRef}
-                        className={cx(styles.holder, {
-                            [styles.withSidebar]: this.state.isSidebarOpen,
-                        })}
+                        isSidebarOpen={this.state.isSidebarOpen}
+                        ribbonPosition={this.state.ribbonPosition}
                     >
                         <RibbonContainer
                             {...this.props.containerDependencies}
@@ -177,8 +176,9 @@ export default class RibbonHolder extends StatefulUIElement<
                             openPDFinViewer={
                                 this.props.containerDependencies.openPDFinViewer
                             }
+                            ribbonPosition={this.state.ribbonPosition}
                         />
-                    </div>
+                    </RibbonHolderBox>
                 )}
                 {this.props.setUpOptions.showPageActivityIndicator &&
                     !this.state.isSidebarOpen &&
@@ -196,3 +196,54 @@ export default class RibbonHolder extends StatefulUIElement<
         )
     }
 }
+
+const RibbonHolderBox = styled.div<{
+    isSidebarOpen: boolean
+    ribbonPosition: 'topRight' | 'bottomRight' | 'centerVertical'
+}>`
+    position: fixed;
+    right: 0;
+    top: 130px;
+    z-index: 2147483647;
+
+    ${(props) =>
+        (props.ribbonPosition === 'topRight' ||
+            props.ribbonPosition === 'bottomRight') &&
+        css<{ isSidebarOpen }>`
+            display: flex;
+            box-shadow: none;
+            justify-content: flex-end;
+            height: ${(props) =>
+                props.isSidebarOpen ? 'fit-content' : '34px'};
+            width: ${(props) => (props.isSidebarOpen ? 'fit-content' : '50px')};
+            align-items: flex-start;
+            transition: unset;
+
+            & .removeSidebar {
+                visibility: hidden;
+                display: none;
+            }
+        `}
+    ${(props) =>
+        props.ribbonPosition === 'topRight' &&
+        css<{ isSidebarOpen }>`
+            right: 0px;
+            top: 0px;
+            align-items: flex-start;
+        `}
+    ${(props) =>
+        props.ribbonPosition === 'bottomRight' &&
+        css<{ isSidebarOpen }>`
+            right: 0px;
+            bottom: 0px;
+            top: unset;
+            align-items: flex-end;
+        `}
+
+    ${(props) =>
+        props.isSidebarOpen &&
+        css`
+            top: 0px;
+            height: 100%;
+        `}
+`

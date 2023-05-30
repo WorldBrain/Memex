@@ -15,6 +15,7 @@ export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
     isSidebarOpen: boolean
     setRef?: (el: HTMLElement) => void
+    ribbonPosition: 'topRight' | 'bottomRight' | 'centerVertical'
 }
 
 export default class RibbonContainer extends StatefulUIElement<
@@ -152,6 +153,7 @@ export default class RibbonContainer extends StatefulUIElement<
                 showExtraButtons={this.state.areExtraButtonsShown}
                 showRemoveMenu={this.state.showRemoveMenu}
                 showTutorial={this.state.areTutorialShown}
+                ribbonPosition={this.props.ribbonPosition}
                 showFeed={this.state.showFeed}
                 toggleFeed={() => {
                     this.processEvent('toggleFeed', null)

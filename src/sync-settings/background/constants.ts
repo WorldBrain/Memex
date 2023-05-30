@@ -45,6 +45,7 @@ export const SETTING_NAMES: SyncSettingNames = {
         ribbonEnabled: FEATURE_PREFIX.IN_PAGE_UI + 'ribbon_enabled',
         tooltipEnabled: FEATURE_PREFIX.IN_PAGE_UI + 'tooltip_enabled',
         highlightsEnabled: FEATURE_PREFIX.IN_PAGE_UI + 'highlights_enabled',
+        ribbonPosition: FEATURE_PREFIX.IN_PAGE_UI + 'ribbon_position',
     },
     searchInjection: {
         hideMemexResults: FEATURE_PREFIX.SEARCH_INJECTION + 'hideMemexResults',

@@ -11,6 +11,7 @@ export interface RibbonHolderState {
     isSidebarOpen: boolean
     keepPageActivityIndicatorHidden: boolean
     isRibbonEnabled?: boolean
+    ribbonPosition: 'topRight' | 'bottomRight' | 'centerVertical'
 }
 
 export type RibbonHolderEvents = UIEvent<{
@@ -46,6 +47,7 @@ export class RibbonHolderLogic extends UILogic<
                 : 'hidden',
             isSidebarOpen: this.dependencies.inPageUI.componentsShown.sidebar,
             keepPageActivityIndicatorHidden: false,
+            ribbonPosition: null,
         }
     }
 
@@ -54,6 +56,18 @@ export class RibbonHolderLogic extends UILogic<
             'stateChanged',
             this._handleUIStateChange,
         )
+
+        const ribbonPosition = 'topRight'
+
+        // await this.dependencies.syncSettings.inPageUI.get(
+        //     'ribbonPosition',
+        // )
+
+        this.emitMutation({
+            ribbonPosition: {
+                $set: ribbonPosition ? 'bottomRight' : 'centerVertical',
+            },
+        })
 
         // await loadInitial<RibbonHolderState>(this, async () => {
         //     await this._maybeLoad(previousState, {})
