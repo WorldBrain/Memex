@@ -283,6 +283,9 @@ export default class RibbonContainer extends StatefulUIElement<
                 openPDFinViewer={() => {
                     this.processEvent('openPDFinViewer', null)
                 }}
+                selectRibbonPositionOption={(option) =>
+                    this.processEvent('selectRibbonPositionOption', option)
+                }
             />
         )
     }

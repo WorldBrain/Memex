@@ -68,6 +68,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleRibbon: null
         highlightAnnotations: null
         toggleShowExtraButtons: null
+        selectRibbonPositionOption: null
         toggleRemoveMenu: boolean | null
         toggleShowTutorial: null
         toggleFeed: null
@@ -776,6 +777,24 @@ export class RibbonContainerLogic extends UILogic<
         return this.dependencies.customLists.addOpenTabsToList({
             listId: event.value,
         })
+    }
+    selectRibbonPositionOption: EventHandler<
+        'selectRibbonPositionOption'
+    > = async ({ event }) => {
+        console.log('event')
+        await this.dependencies.syncSettings.inPageUI.set(
+            'ribbonPosition',
+            event,
+        )
+
+        console.log(
+            'is it',
+            await this.dependencies.syncSettings.inPageUI.get('ribbonPosition'),
+        )
+
+        // return this.dependencies.customLists.addOpenTabsToList({
+        //     listId: event?.value,
+        // })
     }
 
     setShowListsPicker: EventHandler<'setShowListsPicker'> = async ({

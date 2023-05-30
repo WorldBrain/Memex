@@ -57,6 +57,7 @@ export interface Props extends RibbonSubcomponentProps {
     showFeed: boolean
     toggleAskAI: () => void
     openPDFinViewer: () => void
+    selectRibbonPositionOption: (option) => void
 }
 
 interface State {
@@ -395,6 +396,60 @@ export default class Ribbon extends Component<Props, State> {
                                             hoverOff
                                         />
                                         <InfoText>All Settings</InfoText>
+                                    </ExtraButtonRow>
+                                    <ExtraButtonRow
+                                    // onClick={() =>
+                                    //     this.props.bgScriptBG.openOptionsTab(
+                                    //         'settings',
+                                    //     )
+                                    // }
+                                    >
+                                        <Icon
+                                            filePath={icons.sidebarIcon}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>
+                                            Change sidebar location
+                                        </InfoText>
+                                        <SelectionDropDown
+                                            onChange={(event) =>
+                                                this.props.selectRibbonPositionOption(
+                                                    event.target.value,
+                                                )
+                                            }
+                                        >
+                                            <SelectionItem
+                                                onClick={() =>
+                                                    this.props.selectRibbonPositionOption(
+                                                        'topRight',
+                                                    )
+                                                }
+                                                value={'topRight'}
+                                            >
+                                                Top Right
+                                            </SelectionItem>
+                                            <SelectionItem
+                                                onClick={() =>
+                                                    this.props.selectRibbonPositionOption(
+                                                        'centerRight',
+                                                    )
+                                                }
+                                                value={'centerRight'}
+                                            >
+                                                Center Right
+                                            </SelectionItem>
+                                            <SelectionItem
+                                                onClick={() =>
+                                                    this.props.selectRibbonPositionOption(
+                                                        'bottomRight',
+                                                    )
+                                                }
+                                                value={'bottomRight'}
+                                            >
+                                                Bottom Right
+                                            </SelectionItem>
+                                        </SelectionDropDown>
                                     </ExtraButtonRow>
                                 </SupportBox>
                             </TutorialContainerBox>
@@ -1728,7 +1783,8 @@ export default class Ribbon extends Component<Props, State> {
     }
 }
 
-const MemexLogo = styled.div``
+const SelectionItem = styled.option``
+const SelectionDropDown = styled.select``
 
 const FeedButtonContainer = styled.div`
     width: 30px;
