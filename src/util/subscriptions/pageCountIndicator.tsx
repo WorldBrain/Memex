@@ -184,7 +184,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
                                     color="prime1"
                                 />
                                 Generally, every interacted page counts{' '}
-                                <strong>just once.</strong>
+                                <strong>just once. Forever</strong>
                             </InfoTooltipContentSubAreaBulletPoint>
                             <InfoTooltipContentSubAreaBulletPoint>
                                 <Icon

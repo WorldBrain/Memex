@@ -2038,7 +2038,7 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
             display: flex;
             box-shadow: none;
             justify-content: center;
-            height: 50px;
+            height: 34px;
             width: fit-content;
             align-items: flex-start;
             right: 0px;

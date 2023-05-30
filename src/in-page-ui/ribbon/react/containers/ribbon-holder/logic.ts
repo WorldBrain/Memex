@@ -52,20 +52,17 @@ export class RibbonHolderLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
+        // const ribbonPosition = await this.dependencies.containerDependencies.syncSettings.inPageUI.get(
+        //     'ribbonPosition',
+        // )
         this.dependencies.inPageUI.events.on(
             'stateChanged',
             this._handleUIStateChange,
         )
 
-        const ribbonPosition = 'topRight'
-
-        // await this.dependencies.syncSettings.inPageUI.get(
-        //     'ribbonPosition',
-        // )
-
         this.emitMutation({
             ribbonPosition: {
-                $set: ribbonPosition ? 'bottomRight' : 'centerVertical',
+                $set: 'topRight',
             },
         })
 
