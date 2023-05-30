@@ -1,5 +1,5 @@
 import extractHtmlContent from './extract-html-content'
-import transformPageHTML from 'src/util/transform-page-html'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html'
 import { runInTab } from 'src/util/webextensionRPC'
 import type { PageContent } from 'src/search'
 import type { RawPageContent } from 'src/page-analysis/types'
