@@ -1,7 +1,7 @@
-import { PagePipeline } from 'src/search/pipeline'
-import { FetchPageData } from './fetch-page-data'
+import type { PagePipeline } from '@worldbrain/memex-common/lib/page-indexing/pipeline'
+import type { FetchPageData } from './fetch-page-data'
 import { FetchPageDataError } from './fetch-page-data-error'
-import { PageDataResult, PageContent, FetchPageProcessor } from './types'
+import type { PageDataResult, PageContent, FetchPageProcessor } from './types'
 
 export class FetchPageDataProcessor implements FetchPageProcessor {
     constructor(

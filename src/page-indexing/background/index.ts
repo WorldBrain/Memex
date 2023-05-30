@@ -28,7 +28,8 @@ import {
     VisitInteraction,
     PipelineRes,
 } from 'src/search/types'
-import pipeline, { transformUrl } from 'src/search/pipeline'
+import { extractUrlParts } from '@worldbrain/memex-common/lib/url-utils/extract-parts'
+import pagePipeline from '@worldbrain/memex-common/lib/page-indexing/pipeline'
 import { initErrHandler } from 'src/search/storage'
 import { Page, PageCreationProps, PageCreationOpts } from 'src/search'
 import { DexieUtilsPlugin } from 'src/search/plugins'
@@ -346,7 +347,7 @@ export class PageIndexingBackground {
         pageDoc,
         rejectNoContent,
     }: Partial<PageAddRequest>): Promise<void> {
-        const { favIconURI, ...pageData } = await pipeline({
+        const { favIconURI, ...pageData } = await pagePipeline({
             pageDoc,
             rejectNoContent,
         })
@@ -359,13 +360,13 @@ export class PageIndexingBackground {
     }
 
     async addFavIconIfNeeded(url: string, favIcon: string) {
-        const { hostname } = transformUrl(url)
+        const { hostname } = extractUrlParts(url)
 
         return this.storage.createFavIconIfNeeded(hostname, favIcon)
     }
 
     async addPageTerms(pipelineReq: PipelineReq): Promise<void> {
-        const pageData = await pipeline(pipelineReq)
+        const pageData = await pagePipeline(pipelineReq)
         await this.createOrUpdatePage(pageData)
     }
 
@@ -423,7 +424,7 @@ export class PageIndexingBackground {
     }
 
     async addFavIcon(url: string, favIconURI: string | Blob) {
-        const { hostname } = transformUrl(url)
+        const { hostname } = extractUrlParts(url)
 
         await this.storage
             .createOrUpdateFavIcon(hostname, favIconURI)
@@ -432,7 +433,7 @@ export class PageIndexingBackground {
 
     async domainHasFavIcon(ambiguousUrl: string) {
         const db = this.options.storageManager
-        const { hostname } = transformUrl(ambiguousUrl)
+        const { hostname } = extractUrlParts(ambiguousUrl)
 
         const res = await db
             .collection('favIcons')
@@ -530,7 +531,7 @@ export class PageIndexingBackground {
             url: props.fullUrl,
         })
 
-        const pageData = await pipeline({
+        const pageData = await pagePipeline({
             pageDoc: { ...analysis, url: props.fullUrl },
             rejectNoContent: !props.stubOnly,
         })
@@ -678,7 +679,7 @@ export class PageIndexingBackground {
     }
 
     async indexTestPage(props: PageCreationProps) {
-        const pageData = await pipeline({
+        const pageData = await pagePipeline({
             pageDoc: { url: props.fullUrl, content: {} },
             rejectNoContent: false,
         })
