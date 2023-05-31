@@ -265,7 +265,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                         </TitleArea>
                         <Description>
                             Hover over the <GreenArea>green area</GreenArea> in
-                            the bottom right to get started.
+                            the top right to get started.
                         </Description>
                     </ContentArea>
                 </FirstCardContainer>
@@ -305,7 +305,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </CardContainer>
             </>
         ),
-        bottom: '60px',
+        top: '60px',
         left: null,
         right: '20px',
         showHoverArea: false,
@@ -337,7 +337,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </CardContainer>
             </>
         ),
-        bottom: '30px',
+        top: '30px',
         left: null,
         right: null,
         showHoverArea: false,
@@ -369,7 +369,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </CardContainer>
             </>
         ),
-        bottom: '60px',
+        top: '60px',
         left: null,
         right: '20px',
         showHoverArea: false,
@@ -402,7 +402,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                 </CardContainer>
             </>
         ),
-        bottom: '60px',
+        top: '60px',
         left: null,
         right: '20px',
         showHoverArea: false,
