@@ -2136,6 +2136,13 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                     }
                 `}
 
+
+                ${(props) =>
+                    props.isSidebarOpen &&
+                    css`
+                        align-items: center;
+                    `}
+
     
 `
 
