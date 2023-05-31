@@ -150,7 +150,7 @@ export async function checkStatus() {
 
         // TODO: make more robust by fetching free tier units from Cloudflare workers and KV
         return {
-            pageLimit: 25,
+            pageLimit: DEFAULT_COUNTER_STORAGE_KEY.sQ,
             AIlimit: 25,
             pageCounter: 0,
             AIcounter: 0,
