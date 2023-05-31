@@ -240,15 +240,15 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     private updateSpacePickerState(showState: ListPickerShowState) {
         this.props.onSpacePickerToggle?.(showState)
-        if (this.state.showSpacePicker === 'hide') {
-            this.setState({
-                showSpacePicker: showState,
-            })
-        } else {
-            this.setState({
-                showSpacePicker: 'hide',
-            })
-        }
+        // if (this.state.showSpacePicker === 'hide') {
+        //     this.setState({
+        //         showSpacePicker: showState,
+        //     })
+        // } else {
+        //     this.setState({
+        //         showSpacePicker: 'hide',
+        //     })
+        // }
     }
 
     private get displayLists(): Array<{
@@ -655,7 +655,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     />
                     {this.renderSpacePicker(
                         this.spacePickerFooterButtonRef,
-                        'footer',
+                        this.state.showSpacePicker,
                     )}
                     {this.renderShareMenu(this.shareMenuButtonRef)}
                 </DefaultFooterStyled>
@@ -721,10 +721,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         </BtnContainerStyled>
                         {/* {this.renderMarkdownHelpButton()} */}
                     </SaveActionBar>
-                    {this.renderSpacePicker(
+                    {/* {this.renderSpacePicker(
                         this.spacePickerFooterButtonRef,
                         'footer',
-                    )}
+                    )} */}
                     {this.state.showShareMenu &&
                         this.renderShareMenu(this.shareMenuButtonRef)}
                 </DeletionBox>
@@ -739,8 +739,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         // NOTE: If ref passed down, rendering assumed to be a concern of ancestor
         if (
             this.state.showSpacePicker !== showWhen ||
-            this.props.spacePickerBodyButtonRef != null ||
-            this.props.spacePickerFooterButtonRef != null
+            this.state.showSpacePicker === 'hide'
         ) {
             return null
         }
@@ -888,10 +887,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         </AnnotationStyled>
                         {this.renderCopyPaster(this.copyPasterButtonRef)}
                     </ItemBox>
-                    {this.renderSpacePicker(
+                    {/* {this.renderSpacePicker(
                         this.spacePickerBodyButtonRef,
                         'lists-bar',
-                    )}
+                    )} */}
                 </AnnotationBox>
                 {this.state.showQuickTutorial && (
                     <PopoutBox
