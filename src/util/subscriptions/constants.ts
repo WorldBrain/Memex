@@ -4,8 +4,8 @@ const currentMonth = currentDate.getMonth()
 export const COUNTER_STORAGE_KEY = '@status'
 export const OPEN_AI_API_KEY = '@openAIKey'
 export const DEFAULT_COUNTER_STORAGE_KEY = {
-    s: 25,
-    sQ: 25,
+    s: 26,
+    sQ: 26,
     c: 0,
     cQ: 0,
     m: currentMonth,
