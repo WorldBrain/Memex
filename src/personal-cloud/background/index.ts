@@ -137,17 +137,17 @@ export class PersonalCloudBackground {
             await this.options.settingStore.set('lastSyncUpload', Date.now())
         })
         // TODO: re-implement pending download count
-        // this.options.backend.events.on('incomingChangesPending', (event) => {
-        //     this._modifyStats({
-        //         pendingDownloads:
-        //             this.stats.pendingDownloads + event.changeCountDelta,
-        //     })
-        // })
-        // this.options.backend.events.on('incomingChangesProcessed', (event) => {
-        //     this._modifyStats({
-        //         pendingDownloads: this.stats.pendingDownloads - event.count,
-        //     })
-        // })
+        this.options.backend.events.on('incomingChangesPending', (event) => {
+            this._modifyStats({
+                pendingDownloads:
+                    this.stats.pendingDownloads + event.changeCountDelta,
+            })
+        })
+        this.options.backend.events.on('incomingChangesProcessed', (event) => {
+            this._modifyStats({
+                pendingDownloads: this.stats.pendingDownloads - event.count,
+            })
+        })
     }
 
     private prepareDataMigration = async () => {

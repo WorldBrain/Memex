@@ -115,11 +115,15 @@ export class DashboardLogic extends UILogic<State, Events> {
     private setupRemoteEventListeners() {
         this.personalCloudEvents = getRemoteEventEmitter('personalCloud')
         this.personalCloudEvents.on('cloudStatsUpdated', async ({ stats }) => {
+            const dateNow = Date.now()
             this.emitMutation({
                 syncMenu: {
                     pendingLocalChangeCount: { $set: stats.pendingUploads },
                     // TODO: re-implement pending download count
-                    // pendingRemoteChangeCount: { $set: stats.pendingDownloads },
+                    pendingRemoteChangeCount: { $set: stats.pendingDownloads },
+                    lastSuccessfulSyncDate: {
+                        $set: new Date(dateNow),
+                    },
                 },
             })
 
@@ -142,6 +146,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             'downloadStopped',
             this.toggleSyncDownloadActive,
         )
+        this.emitMutation({
+            syncMenu: {
+                pendingLocalChangeCount: {
+                    $set: 0,
+                },
+                pendingRemoteChangeCount: {
+                    $set: 0,
+                },
+            },
+        })
     }
 
     // NOTE: This debounce exists as sync DL documents come in 1-by-1, often with short delays between each doc, which
@@ -350,8 +364,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
             syncMenu: {
                 isDisplayed: false,
-                pendingLocalChangeCount: 0,
-                pendingRemoteChangeCount: 0,
+                pendingLocalChangeCount: null,
+                pendingRemoteChangeCount: null,
                 lastSuccessfulSyncDate: null,
             },
         }
