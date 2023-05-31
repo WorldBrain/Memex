@@ -5,13 +5,12 @@ import {
 } from '@worldbrain/storex-pattern-modules'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { ReadableData } from 'src/reader/types'
-import Readability from 'readability/Readability'
-import { fetchDOMFromUrl } from 'src/page-analysis/background/fetch-page-data'
+// import Readability from 'readability/Readability'
 import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
 } from '@worldbrain/memex-common/lib/storage/modules/reader/constants'
-import DOMPurify from 'dompurify'
+// import DOMPurify from 'dompurify'
 
 export default class ReaderStorage extends StorageModule {
     static READER_COLL = COLLECTION_NAMES.readablePage
@@ -67,47 +66,48 @@ export default class ReaderStorage extends StorageModule {
         fullUrl: string
         doc?: Document
     }): Promise<ReadableData> => {
-        const normalizedUrl = normalizeUrl(fullUrl, {})
+        return null
+        // const normalizedUrl = normalizeUrl(fullUrl, {})
 
-        let document = doc
-        if (!document) {
-            console.log(`Reader::Parser Document fetching from URL ${fullUrl}`)
+        // let document = doc
+        // if (!document) {
+        //     console.log(`Reader::Parser Document fetching from URL ${fullUrl}`)
 
-            document = await fetchDOMFromUrl(fullUrl, 5000).run()
-        } else {
-            console.log(`Reader::Parser Document given`)
-        }
+        //     document = await fetchDOMFromUrl(fullUrl, 5000).run()
+        // } else {
+        //     console.log(`Reader::Parser Document given`)
+        // }
 
-        console.log(
-            `Reader::Parser Original Doc Size - ${
-                document.body.outerHTML.length / 1000
-            }k`,
-        )
-        console.time('Reader::Parser::ParseTime')
+        // console.log(
+        //     `Reader::Parser Original Doc Size - ${
+        //         document.body.outerHTML.length / 1000
+        //     }k`,
+        // )
+        // console.time('Reader::Parser::ParseTime')
 
-        const article = new Readability(document).parse()
-        article.content = DOMPurify.sanitize(article.content)
-        console.timeEnd('Reader::Parser::ParseTime')
-        console.log(
-            `Reader::Parser Readable Doc Size - ${
-                document.body.outerHTML.length / 1000
-            }k`,
-        )
+        // const article = new Readability(document).parse()
+        // article.content = DOMPurify.sanitize(article.content)
+        // console.timeEnd('Reader::Parser::ParseTime')
+        // console.log(
+        //     `Reader::Parser Readable Doc Size - ${
+        //         document.body.outerHTML.length / 1000
+        //     }k`,
+        // )
 
-        const readableData = {
-            title: article.title,
-            content: article.content,
-            textContent: article.textContent,
-            url: normalizedUrl,
-            length: article.length,
-            fullUrl,
-            strategy: 'mozilla/readability',
-            created: Date.now(),
-        }
+        // const readableData = {
+        //     title: article.title,
+        //     content: article.content,
+        //     textContent: article.textContent,
+        //     url: normalizedUrl,
+        //     length: article.length,
+        //     fullUrl,
+        //     strategy: 'mozilla/readability',
+        //     created: Date.now(),
+        // }
 
-        await this.operation('createReadable', readableData)
+        // await this.operation('createReadable', readableData)
 
-        return readableData as ReadableData
+        // return readableData as ReadableData
     }
 
     getReadable = (url: string): Promise<ReadableData | null> => {
