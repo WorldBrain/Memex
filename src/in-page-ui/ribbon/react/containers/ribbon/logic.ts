@@ -778,24 +778,6 @@ export class RibbonContainerLogic extends UILogic<
             listId: event.value,
         })
     }
-    selectRibbonPositionOption: EventHandler<
-        'selectRibbonPositionOption'
-    > = async ({ event }) => {
-        console.log('event')
-        await this.dependencies.syncSettings.inPageUI.set(
-            'ribbonPosition',
-            event,
-        )
-
-        console.log(
-            'is it',
-            await this.dependencies.syncSettings.inPageUI.get('ribbonPosition'),
-        )
-
-        // return this.dependencies.customLists.addOpenTabsToList({
-        //     listId: event?.value,
-        // })
-    }
 
     setShowListsPicker: EventHandler<'setShowListsPicker'> = async ({
         event,

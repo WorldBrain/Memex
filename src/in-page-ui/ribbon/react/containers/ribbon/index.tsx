@@ -15,7 +15,8 @@ export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
     isSidebarOpen: boolean
     setRef?: (el: HTMLElement) => void
-    ribbonPosition: 'topRight' | 'bottomRight' | 'centerVertical'
+    ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
+    selectRibbonPositionOption: (option) => void
 }
 
 export default class RibbonContainer extends StatefulUIElement<
@@ -283,8 +284,10 @@ export default class RibbonContainer extends StatefulUIElement<
                 openPDFinViewer={() => {
                     this.processEvent('openPDFinViewer', null)
                 }}
-                selectRibbonPositionOption={(option) =>
-                    this.processEvent('selectRibbonPositionOption', option)
+                selectRibbonPositionOption={
+                    (option) => this.props.selectRibbonPositionOption(option)
+
+                    // this.processEvent('selectRibbonPositionOption', option)
                 }
             />
         )

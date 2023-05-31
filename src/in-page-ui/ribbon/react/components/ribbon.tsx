@@ -40,7 +40,7 @@ export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
     isExpanded: boolean
     isRibbonEnabled: boolean
-    ribbonPosition: 'topRight' | 'bottomRight' | 'centerVertical'
+    ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
     shortcutsData: ShortcutElData[]
     showExtraButtons: boolean
     showRemoveMenu: boolean
@@ -218,13 +218,13 @@ export default class Ribbon extends Component<Props, State> {
         this.props.lists.setShowListsPicker(false)
     }
 
-    private renderSpacePicker(ribbonPosition) {
+    private renderSpacePicker() {
         if (!this.props.lists.showListsPicker) {
             return
         }
 
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         return (
             <PopoutBox
@@ -263,13 +263,13 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
-    private renderTutorial(ribbonPosition) {
+    private renderTutorial() {
         if (!this.props.showTutorial) {
             return
         }
 
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         return (
             <PopoutBox
@@ -397,13 +397,7 @@ export default class Ribbon extends Component<Props, State> {
                                         />
                                         <InfoText>All Settings</InfoText>
                                     </ExtraButtonRow>
-                                    <ExtraButtonRow
-                                    // onClick={() =>
-                                    //     this.props.bgScriptBG.openOptionsTab(
-                                    //         'settings',
-                                    //     )
-                                    // }
-                                    >
+                                    <ExtraButtonRow deactivateHover>
                                         <Icon
                                             filePath={icons.sidebarIcon}
                                             heightAndWidth="22px"
@@ -412,44 +406,64 @@ export default class Ribbon extends Component<Props, State> {
                                         <InfoText>
                                             Change sidebar location
                                         </InfoText>
-                                        <SelectionDropDown
-                                            onChange={(event) =>
-                                                this.props.selectRibbonPositionOption(
-                                                    event.target.value,
-                                                )
-                                            }
-                                        >
-                                            <SelectionItem
-                                                onClick={() =>
+                                        <SelectionContainer>
+                                            <SelectionDropDown
+                                                onChange={(event) =>
                                                     this.props.selectRibbonPositionOption(
-                                                        'topRight',
+                                                        event.target.value,
                                                     )
                                                 }
-                                                value={'topRight'}
                                             >
-                                                Top Right
-                                            </SelectionItem>
-                                            <SelectionItem
-                                                onClick={() =>
-                                                    this.props.selectRibbonPositionOption(
-                                                        'centerRight',
-                                                    )
-                                                }
-                                                value={'centerRight'}
-                                            >
-                                                Center Right
-                                            </SelectionItem>
-                                            <SelectionItem
-                                                onClick={() =>
-                                                    this.props.selectRibbonPositionOption(
-                                                        'bottomRight',
-                                                    )
-                                                }
-                                                value={'bottomRight'}
-                                            >
-                                                Bottom Right
-                                            </SelectionItem>
-                                        </SelectionDropDown>
+                                                <SelectionItem
+                                                    onClick={() => {
+                                                        this.props.toggleShowTutorial()
+                                                        this.props.selectRibbonPositionOption(
+                                                            'topRight',
+                                                        )
+                                                    }}
+                                                    value={'topRight'}
+                                                    selected={
+                                                        this.props
+                                                            .ribbonPosition ===
+                                                        'topRight'
+                                                    }
+                                                >
+                                                    Top Right
+                                                </SelectionItem>
+                                                <SelectionItem
+                                                    onClick={() => {
+                                                        this.props.toggleShowTutorial()
+                                                        this.props.selectRibbonPositionOption(
+                                                            'centerRight',
+                                                        )
+                                                    }}
+                                                    value={'centerRight'}
+                                                    selected={
+                                                        this.props
+                                                            .ribbonPosition ===
+                                                        'centerRight'
+                                                    }
+                                                >
+                                                    Center Right
+                                                </SelectionItem>
+                                                <SelectionItem
+                                                    onClick={() => {
+                                                        this.props.toggleShowTutorial()
+                                                        this.props.selectRibbonPositionOption(
+                                                            'bottomRight',
+                                                        )
+                                                    }}
+                                                    value={'bottomRight'}
+                                                    selected={
+                                                        this.props
+                                                            .ribbonPosition ===
+                                                        'bottomRight'
+                                                    }
+                                                >
+                                                    Bottom Right
+                                                </SelectionItem>
+                                            </SelectionDropDown>
+                                        </SelectionContainer>
                                     </ExtraButtonRow>
                                 </SupportBox>
                             </TutorialContainerBox>
@@ -601,13 +615,13 @@ export default class Ribbon extends Component<Props, State> {
         }
     }
 
-    renderFeedInfo(ribbonPosition) {
+    renderFeedInfo() {
         if (!this.props.showFeed) {
             return
         }
 
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         return (
             <PopoutBox
@@ -658,13 +672,13 @@ export default class Ribbon extends Component<Props, State> {
         }
     }
 
-    renderCommentBox(ribbonPosition) {
+    renderCommentBox() {
         if (!this.props.commentBox.showCommentBox) {
             return
         }
 
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         return (
             <PopoutBox
@@ -722,13 +736,13 @@ export default class Ribbon extends Component<Props, State> {
             </PopoutBox>
         )
     }
-    renderRemoveMenu(ribbonPosition) {
+    renderRemoveMenu() {
         if (!this.props.showRemoveMenu) {
             return
         }
 
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         return (
             <PopoutBox
@@ -875,9 +889,9 @@ export default class Ribbon extends Component<Props, State> {
         clearTimeout(this.timer)
     }
 
-    renderFeedButton(ribbonPosition) {
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+    renderFeedButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         return (
             <TooltipBox
@@ -894,7 +908,7 @@ export default class Ribbon extends Component<Props, State> {
                 }
                 offsetX={0}
             >
-                <FeedButtonContainer ribbonPosition={ribbonPosition}>
+                <FeedButtonContainer ribbonPosition={this.props.ribbonPosition}>
                     <FeedIndicatorBox
                         isSidebarOpen={this.props.sidebar.isSidebarOpen}
                         onClick={() => this.props.toggleFeed()}
@@ -910,9 +924,9 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
-    renderCloseButton(ribbonPosition) {
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+    renderCloseButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         return (
             <TooltipBox
@@ -948,9 +962,9 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
-    renderReadingViewToggleButton(ribbonPosition?) {
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+    renderReadingViewToggleButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         if (!this.props.sidebar.isWidthLocked) {
             return (
@@ -999,7 +1013,7 @@ export default class Ribbon extends Component<Props, State> {
         }
     }
 
-    renderBookmarkButton(ribbonPosition?) {
+    renderBookmarkButton() {
         let bookmarkDate
         if (this.props.bookmark.isBookmarked != null) {
             bookmarkDate = moment(
@@ -1007,8 +1021,8 @@ export default class Ribbon extends Component<Props, State> {
             ).format('LLL')
         }
 
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         return (
             <TooltipBox
@@ -1071,9 +1085,9 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
-    renderSpacesButton(ribbonPosition?) {
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+    renderSpacesButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         return (
             <TooltipBox
@@ -1110,6 +1124,7 @@ export default class Ribbon extends Component<Props, State> {
                             }
                             icon={'plus'}
                             innerRef={this.spacePickerRef}
+                            active={this.props.lists.showListsPicker}
                         />
                         {this.props.lists.pageListIds.length > 0 && (
                             <SpacesCounter>
@@ -1151,9 +1166,9 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
-    renderSidebarToggle(ribbonPosition?) {
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+    renderSidebarToggle() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         return (
             <TooltipBox
@@ -1216,9 +1231,9 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
-    renderSearchButton(ribbonPosition?) {
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+    renderSearchButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         return (
             <TooltipBox
@@ -1256,9 +1271,9 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
-    renderAItriggerButton(ribbonPosition?) {
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+    renderAItriggerButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
         return (
             <TooltipBox
                 tooltipText={this.getTooltipText('askAI')}
@@ -1295,9 +1310,9 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
-    renderPDFReaderButton(ribbonPosition?) {
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+    renderPDFReaderButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         const isNotReader =
             window.location.href.includes('.pdf') &&
@@ -1371,7 +1386,6 @@ export default class Ribbon extends Component<Props, State> {
                 (!topRight && !bottomRight) ||
                 this.props.sidebar.isSidebarOpen
             ) {
-                console.log('isnot', isNotReader)
                 return isNotReader ? (
                     <TooltipBox
                         tooltipText={'Open PDF Reader'}
@@ -1419,9 +1433,9 @@ export default class Ribbon extends Component<Props, State> {
         }
     }
 
-    renderTutorialButton(ribbonPosition?) {
-        const topRight = ribbonPosition === 'topRight'
-        const bottomRight = ribbonPosition === 'bottomRight'
+    renderTutorialButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
         return (
             <TooltipBox
@@ -1455,7 +1469,7 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
-    renderCloseRibbonButton(ribbonPosition?) {
+    renderCloseRibbonButton() {
         return (
             <>
                 {!this.props.sidebar.isSidebarOpen && (
@@ -1484,14 +1498,14 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
-    renderHorizontalRibbon(ribbonPosition?) {
+    renderHorizontalRibbon() {
         if (!this.props.isExpanded) {
             return (
                 <IconContainer
                     ref={this.props.setRef}
                     isPeeking={this.props.isExpanded}
                     isSidebarOpen={this.props.sidebar.isSidebarOpen}
-                    ribbonPosition={ribbonPosition}
+                    ribbonPosition={this.props.ribbonPosition}
                 >
                     <Icon
                         icon={logoNoText}
@@ -1506,13 +1520,13 @@ export default class Ribbon extends Component<Props, State> {
                     <OuterRibbon
                         isPeeking={this.props.isExpanded}
                         isSidebarOpen={this.props.sidebar.isSidebarOpen}
-                        ribbonPosition={ribbonPosition}
+                        ribbonPosition={this.props.ribbonPosition}
                     >
                         <InnerRibbon
                             ref={this.props.setRef}
                             isPeeking={this.props.isExpanded}
                             isSidebarOpen={this.props.sidebar.isSidebarOpen}
-                            ribbonPosition={ribbonPosition}
+                            ribbonPosition={this.props.ribbonPosition}
                         >
                             {(this.props.isExpanded ||
                                 this.props.sidebar.isSidebarOpen) && (
@@ -1535,9 +1549,7 @@ export default class Ribbon extends Component<Props, State> {
                                         >
                                             {!this.props.sidebar
                                                 .isSidebarOpen &&
-                                                this.renderFeedButton(
-                                                    ribbonPosition,
-                                                )}
+                                                this.renderFeedButton()}
                                             <BlockCounterIndicator
                                                 ribbonPosition={
                                                     this.props.ribbonPosition
@@ -1547,9 +1559,7 @@ export default class Ribbon extends Component<Props, State> {
                                                         .isSidebarOpen
                                                 }
                                             />
-                                            {this.renderTutorialButton(
-                                                ribbonPosition,
-                                            )}
+                                            {this.renderTutorialButton()}
                                         </BottomSection>
 
                                         <VerticalLine
@@ -1572,15 +1582,9 @@ export default class Ribbon extends Component<Props, State> {
                                                         .isSidebarOpen
                                                 }
                                             >
-                                                {this.renderSearchButton(
-                                                    ribbonPosition,
-                                                )}
-                                                {this.renderPDFReaderButton(
-                                                    ribbonPosition,
-                                                )}
-                                                {this.renderCloseRibbonButton(
-                                                    ribbonPosition,
-                                                )}
+                                                {this.renderSearchButton()}
+                                                {this.renderPDFReaderButton()}
+                                                {this.renderCloseRibbonButton()}
                                             </PageAction>
                                         ) : (
                                             <PageAction
@@ -1598,40 +1602,24 @@ export default class Ribbon extends Component<Props, State> {
                                                         {this.props.sidebar
                                                             .isSidebarOpen ? (
                                                             <>
-                                                                {this.renderCloseButton(
-                                                                    ribbonPosition,
-                                                                )}
+                                                                {this.renderCloseButton()}
                                                                 {this.renderReadingViewToggleButton()}
                                                             </>
                                                         ) : undefined}
                                                     </UpperArea>
                                                 )}
-                                                {this.renderPDFReaderButton(
-                                                    ribbonPosition,
-                                                )}
-                                                {this.renderSearchButton(
-                                                    ribbonPosition,
-                                                )}
+                                                {this.renderPDFReaderButton()}
+                                                {this.renderSearchButton()}
                                                 {!this.props.sidebar
                                                     .isSidebarOpen &&
-                                                    this.renderAItriggerButton(
-                                                        ribbonPosition,
-                                                    )}
+                                                    this.renderAItriggerButton()}
                                                 {!this.props.sidebar
                                                     .isSidebarOpen &&
-                                                    this.renderSidebarToggle(
-                                                        ribbonPosition,
-                                                    )}
+                                                    this.renderSidebarToggle()}
 
-                                                {this.renderSpacesButton(
-                                                    ribbonPosition,
-                                                )}
-                                                {this.renderBookmarkButton(
-                                                    ribbonPosition,
-                                                )}
-                                                {this.renderCloseRibbonButton(
-                                                    ribbonPosition,
-                                                )}
+                                                {this.renderSpacesButton()}
+                                                {this.renderBookmarkButton()}
+                                                {this.renderCloseRibbonButton()}
                                             </PageAction>
                                         )}
                                     </UpperPart>
@@ -1639,30 +1627,29 @@ export default class Ribbon extends Component<Props, State> {
                             )}
                         </InnerRibbon>
                     </OuterRibbon>
-                    {this.renderSpacePicker(ribbonPosition)}
-                    {this.renderTutorial(ribbonPosition)}
-                    {this.renderFeedInfo(ribbonPosition)}
-                    {this.renderCommentBox(ribbonPosition)}
-                    {this.renderRemoveMenu(ribbonPosition)}
+                    {this.renderSpacePicker()}
+                    {this.renderTutorial()}
+                    {this.renderFeedInfo()}
+                    {this.renderCommentBox()}
+                    {this.renderRemoveMenu()}
                 </>
             )
         }
     }
 
-    renderVerticalRibbon(ribbonPosition) {
-        console.log('rendervertical')
+    renderVerticalRibbon() {
         return (
             <>
                 <OuterRibbon
                     isPeeking={this.props.isExpanded}
                     isSidebarOpen={this.props.sidebar.isSidebarOpen}
-                    ribbonPosition={ribbonPosition}
+                    ribbonPosition={this.props.ribbonPosition}
                 >
                     <InnerRibbon
                         ref={this.props.setRef}
                         isPeeking={this.props.isExpanded}
                         isSidebarOpen={this.props.sidebar.isSidebarOpen}
-                        ribbonPosition={ribbonPosition}
+                        ribbonPosition={this.props.ribbonPosition}
                     >
                         {(this.props.isExpanded ||
                             this.props.sidebar.isSidebarOpen) && (
@@ -1674,7 +1661,7 @@ export default class Ribbon extends Component<Props, State> {
                                     }
                                 >
                                     {!this.props.sidebar.isSidebarOpen &&
-                                        this.renderFeedButton(ribbonPosition)}
+                                        this.renderFeedButton()}
                                     <PageAction
                                         ribbonPosition={
                                             this.props.ribbonPosition
@@ -1688,9 +1675,7 @@ export default class Ribbon extends Component<Props, State> {
                                                 {this.props.sidebar
                                                     .isSidebarOpen ? (
                                                     <>
-                                                        {this.renderCloseButton(
-                                                            ribbonPosition,
-                                                        )}
+                                                        {this.renderCloseButton()}
                                                         {this.renderReadingViewToggleButton()}
                                                     </>
                                                 ) : undefined}
@@ -1703,26 +1688,14 @@ export default class Ribbon extends Component<Props, State> {
                                             </UpperArea>
                                         )}
 
-                                        {this.renderBookmarkButton(
-                                            ribbonPosition,
-                                        )}
-                                        {this.renderSpacesButton(
-                                            ribbonPosition,
-                                        )}
+                                        {this.renderBookmarkButton()}
+                                        {this.renderSpacesButton()}
                                         {!this.props.sidebar.isSidebarOpen &&
-                                            this.renderSidebarToggle(
-                                                ribbonPosition,
-                                            )}
-                                        {this.renderSearchButton(
-                                            ribbonPosition,
-                                        )}
+                                            this.renderSidebarToggle()}
+                                        {this.renderSearchButton()}
                                         {!this.props.sidebar.isSidebarOpen &&
-                                            this.renderAItriggerButton(
-                                                ribbonPosition,
-                                            )}
-                                        {this.renderPDFReaderButton(
-                                            ribbonPosition,
-                                        )}
+                                            this.renderAItriggerButton()}
+                                        {this.renderPDFReaderButton()}
                                     </PageAction>
                                 </UpperPart>
                                 {!this.props.sidebar.isSidebarOpen && (
@@ -1753,11 +1726,11 @@ export default class Ribbon extends Component<Props, State> {
                         )}
                     </InnerRibbon>
                 </OuterRibbon>
-                {this.renderSpacePicker(ribbonPosition)}
-                {this.renderTutorial(ribbonPosition)}
-                {this.renderFeedInfo(ribbonPosition)}
-                {this.renderCommentBox(ribbonPosition)}
-                {this.renderRemoveMenu(ribbonPosition)}
+                {this.renderSpacePicker()}
+                {this.renderTutorial()}
+                {this.renderFeedInfo()}
+                {this.renderCommentBox()}
+                {this.renderRemoveMenu()}
             </>
         )
     }
@@ -1766,31 +1739,52 @@ export default class Ribbon extends Component<Props, State> {
         if (!this.state.shortcutsReady) {
             return false
         }
+
         if (
             (this.props.ribbonPosition === 'topRight' ||
                 this.props.ribbonPosition === 'bottomRight') &&
             !this.props.sidebar.isSidebarOpen
         ) {
-            return this.renderHorizontalRibbon(this.props.ribbonPosition)
+            return this.renderHorizontalRibbon()
         }
         if (
-            this.props.ribbonPosition === 'centerVertical' ||
+            this.props.ribbonPosition === 'centerRight' ||
             this.props.sidebar.isSidebarOpen
         ) {
-            return this.renderVerticalRibbon(this.props.ribbonPosition)
+            return this.renderVerticalRibbon()
         }
-        //return this.renderHorizontalRibbon(this.props.ribbonPosition)
+        return null
     }
 }
 
 const SelectionItem = styled.option``
-const SelectionDropDown = styled.select``
+const SelectionDropDown = styled.select`
+    font-size: 12px;
+    font-weight: 400;
+    background: ${(props) => props.theme.colors.greyScale1};
+    color: ${(props) => props.theme.colors.greyScale6};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    border-radius: 3px;
+    padding: 3px;
+    outline: none;
+`
+const SelectionContainer = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    flex: 1;
+`
 
-const FeedButtonContainer = styled.div`
-    width: 30px;
+const FeedButtonContainer = styled.div<{ ribbonPosition }>`
     display: flex;
     align-items: center;
     justify-content: center;
+
+    ${(props) =>
+        props.isSidebarOpen &&
+        props.ribbonPosition === 'centerRight' &&
+        css`
+            width: 34px;
+        `}
 `
 
 const IconBox = styled.div`
@@ -2094,7 +2088,6 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
             display: flex;
             box-shadow: none;
             justify-content: center;
-            height: 34px;
             width: fit-content;
             align-items: flex-start;
             right: 0px;
@@ -2111,11 +2104,13 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
             props.ribbonPosition === 'topRight' &&
             css`
                 border-radius: 0 0 0 8px;
+                height: 44px;
             `}
         ${(props) =>
             props.ribbonPosition === 'bottomRight' &&
             css`
                 border-radius: 8px 0 0 0;
+                height: 44px;
             `}
 
             ${(props) =>
@@ -2222,7 +2217,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
 
 `
 
-const ExtraButtonRow = styled.div`
+const ExtraButtonRow = styled.div<{ deactivateHover }>`
     height: 40px;
     display: flex;
     grid-gap: 10px;
@@ -2237,6 +2232,16 @@ const ExtraButtonRow = styled.div`
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
+
+    ${(props) =>
+        props.deactivateHover &&
+        css`
+            cursor: default;
+
+            &:hover {
+                outline: none;
+            }
+        `}
 `
 
 const HorizontalLine = styled.div<{ sidebaropen: boolean }>`

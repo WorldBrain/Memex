@@ -9,7 +9,7 @@ import browser from 'webextension-polyfill'
 import { COUNTER_STORAGE_KEY } from './constants'
 
 interface Props {
-    ribbonPosition: 'topRight' | 'bottomRight' | 'centerVertical'
+    ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
     isSidebarOpen: boolean
 }
 

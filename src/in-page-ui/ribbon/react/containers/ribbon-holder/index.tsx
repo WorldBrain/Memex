@@ -38,6 +38,9 @@ export default class RibbonHolder extends StatefulUIElement<
             'stateChanged',
             this.handleInPageUIStateChange,
         )
+
+        window['_getRibbonState'] = () => ({ ...this.state })
+        window['_getRibbonProps'] = () => ({ ...this.props })
     }
 
     componentWillUnmount() {
@@ -177,6 +180,12 @@ export default class RibbonHolder extends StatefulUIElement<
                                 this.props.containerDependencies.openPDFinViewer
                             }
                             ribbonPosition={this.state.ribbonPosition}
+                            selectRibbonPositionOption={(position) =>
+                                this.processEvent(
+                                    'selectRibbonPositionOption',
+                                    position,
+                                )
+                            }
                         />
                     </RibbonHolderBox>
                 )}
@@ -199,7 +208,7 @@ export default class RibbonHolder extends StatefulUIElement<
 
 const RibbonHolderBox = styled.div<{
     isSidebarOpen: boolean
-    ribbonPosition: 'topRight' | 'bottomRight' | 'centerVertical'
+    ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
 }>`
     position: fixed;
     right: 0;
@@ -213,8 +222,6 @@ const RibbonHolderBox = styled.div<{
             display: flex;
             box-shadow: none;
             justify-content: flex-end;
-            height: ${(props) =>
-                props.isSidebarOpen ? 'fit-content' : '34px'};
             width: ${(props) => (props.isSidebarOpen ? 'fit-content' : '50px')};
             align-items: flex-start;
             transition: unset;
@@ -230,6 +237,7 @@ const RibbonHolderBox = styled.div<{
             right: 0px;
             top: 0px;
             align-items: flex-start;
+            height: 42px;
         `}
     ${(props) =>
         props.ribbonPosition === 'bottomRight' &&
@@ -238,6 +246,7 @@ const RibbonHolderBox = styled.div<{
             bottom: 0px;
             top: unset;
             align-items: flex-end;
+            height: 42px;
         `}
 
     ${(props) =>

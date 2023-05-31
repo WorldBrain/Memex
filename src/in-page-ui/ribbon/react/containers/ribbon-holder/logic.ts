@@ -11,13 +11,14 @@ export interface RibbonHolderState {
     isSidebarOpen: boolean
     keepPageActivityIndicatorHidden: boolean
     isRibbonEnabled?: boolean
-    ribbonPosition: 'topRight' | 'bottomRight' | 'centerVertical'
+    ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
 }
 
 export type RibbonHolderEvents = UIEvent<{
     openSidebarToSharedSpaces: null
     show: null
     hide: null
+    selectRibbonPositionOption: null
 }>
 
 export interface RibbonHolderDependencies {
@@ -52,19 +53,27 @@ export class RibbonHolderLogic extends UILogic<
     }
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        // const ribbonPosition = await this.dependencies.containerDependencies.syncSettings.inPageUI.get(
-        //     'ribbonPosition',
-        // )
         this.dependencies.inPageUI.events.on(
             'stateChanged',
             this._handleUIStateChange,
         )
 
+        const ribbonPosition = await this.dependencies.containerDependencies.syncSettings.inPageUI.get(
+            'ribbonPosition',
+        )
+
         this.emitMutation({
             ribbonPosition: {
-                $set: 'topRight',
+                $set: ribbonPosition ?? 'bottomRight',
             },
         })
+
+        if (ribbonPosition == null) {
+            await this.dependencies.containerDependencies.syncSettings.inPageUI.set(
+                'ribbonPosition',
+                'bottomRight',
+            )
+        }
 
         // await loadInitial<RibbonHolderState>(this, async () => {
         //     await this._maybeLoad(previousState, {})
@@ -76,6 +85,25 @@ export class RibbonHolderLogic extends UILogic<
             'stateChanged',
             this._handleUIStateChange,
         )
+    }
+
+    selectRibbonPositionOption: EventHandler<
+        'selectRibbonPositionOption'
+    > = async ({ event }) => {
+        const ribbonPosition = await this.dependencies.containerDependencies.syncSettings.inPageUI.set(
+            'ribbonPosition',
+            event,
+        )
+
+        this.emitMutation({
+            ribbonPosition: {
+                $set: event,
+            },
+        })
+
+        // return this.dependencies.customLists.addOpenTabsToList({
+        //     listId: event?.value,
+        // })
     }
 
     show: EventHandler<'show'> = () => {
