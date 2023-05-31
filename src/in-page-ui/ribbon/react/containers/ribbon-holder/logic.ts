@@ -11,12 +11,14 @@ export interface RibbonHolderState {
     isSidebarOpen: boolean
     keepPageActivityIndicatorHidden: boolean
     isRibbonEnabled?: boolean
+    ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
 }
 
 export type RibbonHolderEvents = UIEvent<{
     openSidebarToSharedSpaces: null
     show: null
     hide: null
+    selectRibbonPositionOption: null
 }>
 
 export interface RibbonHolderDependencies {
@@ -46,6 +48,7 @@ export class RibbonHolderLogic extends UILogic<
                 : 'hidden',
             isSidebarOpen: this.dependencies.inPageUI.componentsShown.sidebar,
             keepPageActivityIndicatorHidden: false,
+            ribbonPosition: null,
         }
     }
 
@@ -54,6 +57,23 @@ export class RibbonHolderLogic extends UILogic<
             'stateChanged',
             this._handleUIStateChange,
         )
+
+        const ribbonPosition = await this.dependencies.containerDependencies.syncSettings.inPageUI.get(
+            'ribbonPosition',
+        )
+
+        this.emitMutation({
+            ribbonPosition: {
+                $set: ribbonPosition ?? 'topRight',
+            },
+        })
+
+        if (ribbonPosition == null) {
+            await this.dependencies.containerDependencies.syncSettings.inPageUI.set(
+                'ribbonPosition',
+                'topRight',
+            )
+        }
 
         // await loadInitial<RibbonHolderState>(this, async () => {
         //     await this._maybeLoad(previousState, {})
@@ -65,6 +85,25 @@ export class RibbonHolderLogic extends UILogic<
             'stateChanged',
             this._handleUIStateChange,
         )
+    }
+
+    selectRibbonPositionOption: EventHandler<
+        'selectRibbonPositionOption'
+    > = async ({ event }) => {
+        const ribbonPosition = await this.dependencies.containerDependencies.syncSettings.inPageUI.set(
+            'ribbonPosition',
+            event,
+        )
+
+        this.emitMutation({
+            ribbonPosition: {
+                $set: event,
+            },
+        })
+
+        // return this.dependencies.customLists.addOpenTabsToList({
+        //     listId: event?.value,
+        // })
     }
 
     show: EventHandler<'show'> = () => {

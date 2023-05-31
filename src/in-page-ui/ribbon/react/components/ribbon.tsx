@@ -34,12 +34,13 @@ import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotation
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
-import TutorialContainer from 'src/in-page-ui/guided-tutorial/content-script/components/tutorial-container'
+import { logoNoText } from 'src/common-ui/components/design-library/icons'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
     isExpanded: boolean
     isRibbonEnabled: boolean
+    ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
     shortcutsData: ShortcutElData[]
     showExtraButtons: boolean
     showRemoveMenu: boolean
@@ -56,6 +57,7 @@ export interface Props extends RibbonSubcomponentProps {
     showFeed: boolean
     toggleAskAI: () => void
     openPDFinViewer: () => void
+    selectRibbonPositionOption: (option) => void
 }
 
 interface State {
@@ -221,11 +223,25 @@ export default class Ribbon extends Component<Props, State> {
             return
         }
 
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
         return (
             <PopoutBox
                 targetElementRef={this.spacePickerRef.current}
-                placement={'left-start'}
-                offsetX={10}
+                placement={
+                    topRight
+                        ? 'bottom-end'
+                        : bottomRight
+                        ? 'top-end'
+                        : 'left-start'
+                }
+                offsetX={
+                    topRight ||
+                    (bottomRight && !this.props.sidebar.isSidebarOpen)
+                        ? 10
+                        : 10
+                }
                 closeComponent={this.hideListPicker}
             >
                 <CollectionPicker
@@ -252,13 +268,27 @@ export default class Ribbon extends Component<Props, State> {
             return
         }
 
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
         return (
             <PopoutBox
                 targetElementRef={this.tutorialButtonRef.current}
                 placement={
-                    this.props.sidebar.isSidebarOpen ? 'left-end' : 'left'
+                    this.props.sidebar.isSidebarOpen
+                        ? 'left'
+                        : topRight
+                        ? 'bottom'
+                        : bottomRight
+                        ? 'top'
+                        : 'left-end'
                 }
-                offsetX={10}
+                offsetX={
+                    topRight ||
+                    (bottomRight && !this.props.sidebar.isSidebarOpen)
+                        ? 18
+                        : 10
+                }
                 closeComponent={() => {
                     this.setState({
                         showColorPicker: false,
@@ -352,6 +382,74 @@ export default class Ribbon extends Component<Props, State> {
                                                 Show Highlighter Tooltip
                                             </InfoText>
                                         )}
+                                    </ExtraButtonRow>
+                                    <ExtraButtonRow deactivateHover>
+                                        <Icon
+                                            filePath={icons.quickActionRibbon}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>
+                                            Change sidebar location
+                                        </InfoText>
+                                        <SelectionContainer>
+                                            <SelectionDropDown
+                                                onChange={(event) =>
+                                                    this.props.selectRibbonPositionOption(
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            >
+                                                <SelectionItem
+                                                    onClick={() => {
+                                                        this.props.toggleShowTutorial()
+                                                        this.props.selectRibbonPositionOption(
+                                                            'topRight',
+                                                        )
+                                                    }}
+                                                    value={'topRight'}
+                                                    selected={
+                                                        this.props
+                                                            .ribbonPosition ===
+                                                        'topRight'
+                                                    }
+                                                >
+                                                    Top Right
+                                                </SelectionItem>
+                                                <SelectionItem
+                                                    onClick={() => {
+                                                        this.props.toggleShowTutorial()
+                                                        this.props.selectRibbonPositionOption(
+                                                            'centerRight',
+                                                        )
+                                                    }}
+                                                    value={'centerRight'}
+                                                    selected={
+                                                        this.props
+                                                            .ribbonPosition ===
+                                                        'centerRight'
+                                                    }
+                                                >
+                                                    Center Right
+                                                </SelectionItem>
+                                                <SelectionItem
+                                                    onClick={() => {
+                                                        this.props.toggleShowTutorial()
+                                                        this.props.selectRibbonPositionOption(
+                                                            'bottomRight',
+                                                        )
+                                                    }}
+                                                    value={'bottomRight'}
+                                                    selected={
+                                                        this.props
+                                                            .ribbonPosition ===
+                                                        'bottomRight'
+                                                    }
+                                                >
+                                                    Bottom Right
+                                                </SelectionItem>
+                                            </SelectionDropDown>
+                                        </SelectionContainer>
                                     </ExtraButtonRow>
                                     <ExtraButtonRow
                                         onClick={() =>
@@ -522,11 +620,27 @@ export default class Ribbon extends Component<Props, State> {
             return
         }
 
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
         return (
             <PopoutBox
                 targetElementRef={this.feedButtonRef.current}
-                placement={'left-start'}
-                offsetX={0}
+                placement={
+                    this.props.sidebar.isSidebarOpen
+                        ? 'left'
+                        : topRight
+                        ? 'bottom'
+                        : bottomRight
+                        ? 'top'
+                        : 'left-start'
+                }
+                offsetX={
+                    topRight ||
+                    (bottomRight && !this.props.sidebar.isSidebarOpen)
+                        ? 18
+                        : 10
+                }
                 offsetY={-15}
                 width={'630px'}
                 closeComponent={() => this.props.toggleFeed()}
@@ -563,11 +677,27 @@ export default class Ribbon extends Component<Props, State> {
             return
         }
 
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
         return (
             <PopoutBox
                 targetElementRef={this.sidebarButtonRef.current}
-                placement={'left-start'}
-                offsetX={10}
+                placement={
+                    this.props.sidebar.isSidebarOpen
+                        ? 'left'
+                        : topRight
+                        ? 'bottom'
+                        : bottomRight
+                        ? 'top'
+                        : 'left-start'
+                }
+                offsetX={
+                    topRight ||
+                    (bottomRight && !this.props.sidebar.isSidebarOpen)
+                        ? 18
+                        : 10
+                }
             >
                 <CommentBoxContainer
                     hasComment={this.props.commentBox.commentText.length > 0}
@@ -611,25 +741,42 @@ export default class Ribbon extends Component<Props, State> {
             return
         }
 
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
         return (
             <PopoutBox
                 targetElementRef={this.removeMenuButtonRef.current}
-                placement={'left-start'}
-                offsetX={10}
+                placement={
+                    this.props.sidebar.isSidebarOpen
+                        ? 'left'
+                        : topRight
+                        ? 'bottom'
+                        : bottomRight
+                        ? 'top'
+                        : 'left-start'
+                }
+                offsetX={
+                    topRight ||
+                    (bottomRight && !this.props.sidebar.isSidebarOpen)
+                        ? 10
+                        : 10
+                }
                 closeComponent={() => this.props.toggleRemoveMenu()}
-                instaClose
             >
                 <RemoveMenuContainer>
-                    <ExtraButtonRow
-                        onClick={() => this.props.handleRemoveRibbon()}
-                    >
-                        <Icon
-                            filePath={'removeX'}
-                            heightAndWidth="22px"
-                            hoverOff
-                        />
-                        <InfoText>Hide Sidebar (or click on X)</InfoText>
-                    </ExtraButtonRow>
+                    {this.props.ribbonPosition === 'topRight' && (
+                        <ExtraButtonRow
+                            onClick={() => this.props.handleRemoveRibbon()}
+                        >
+                            <Icon
+                                filePath={'removeX'}
+                                heightAndWidth="22px"
+                                hoverOff
+                            />
+                            <InfoText>Hide Sidebar (or click on X)</InfoText>
+                        </ExtraButtonRow>
+                    )}
                     <BlockListArea>
                         <BlockListTitleArea>
                             <BlockListTitleContent>
@@ -707,6 +854,18 @@ export default class Ribbon extends Component<Props, State> {
                             <InfoText>Enable Sidebar on all pages</InfoText>
                         )}
                     </ExtraButtonRow>
+                    {this.props.ribbonPosition === 'bottomRight' && (
+                        <ExtraButtonRow
+                            onClick={() => this.props.handleRemoveRibbon()}
+                        >
+                            <Icon
+                                filePath={'removeX'}
+                                heightAndWidth="22px"
+                                hoverOff
+                            />
+                            <InfoText>Hide Sidebar (or click on X)</InfoText>
+                        </ExtraButtonRow>
+                    )}
                 </RemoveMenuContainer>
             </PopoutBox>
         )
@@ -730,11 +889,131 @@ export default class Ribbon extends Component<Props, State> {
         clearTimeout(this.timer)
     }
 
-    render() {
-        if (!this.state.shortcutsReady) {
-            return false
-        }
+    renderFeedButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
+        return (
+            <TooltipBox
+                targetElementRef={this.feedButtonRef.current}
+                tooltipText={'Show Feed'}
+                placement={
+                    this.props.sidebar.isSidebarOpen
+                        ? 'left'
+                        : topRight
+                        ? 'bottom'
+                        : bottomRight
+                        ? 'top'
+                        : 'left'
+                }
+                offsetX={0}
+            >
+                <FeedButtonContainer ribbonPosition={this.props.ribbonPosition}>
+                    <FeedIndicatorBox
+                        isSidebarOpen={this.props.sidebar.isSidebarOpen}
+                        onClick={() => this.props.toggleFeed()}
+                        ref={this.feedButtonRef}
+                    >
+                        <FeedActivityDot
+                            key="activity-feed-indicator"
+                            {...this.props.activityIndicator}
+                        />
+                    </FeedIndicatorBox>
+                </FeedButtonContainer>
+            </TooltipBox>
+        )
+    }
+
+    renderCloseButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
+        return (
+            <TooltipBox
+                targetElementRef={this.feedButtonRef.current}
+                tooltipText={
+                    <TooltipContent>
+                        Close <KeyboardShortcuts keys={['Esc']} size="small" />
+                    </TooltipContent>
+                }
+                placement={
+                    this.props.sidebar.isSidebarOpen
+                        ? 'left'
+                        : topRight
+                        ? 'bottom'
+                        : bottomRight
+                        ? 'top'
+                        : 'left'
+                }
+                offsetX={
+                    topRight ||
+                    (bottomRight && !this.props.sidebar.isSidebarOpen)
+                        ? 18
+                        : 10
+                }
+            >
+                <Icon
+                    filePath="removeX"
+                    heightAndWidth="20px"
+                    color="greyScale6"
+                    onClick={() => this.props.sidebar.closeSidebar()}
+                />
+            </TooltipBox>
+        )
+    }
+
+    renderReadingViewToggleButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
+        if (!this.props.sidebar.isWidthLocked) {
+            return (
+                <TooltipBox
+                    tooltipText="Side-by-Side Reading"
+                    placement={
+                        this.props.sidebar.isSidebarOpen
+                            ? 'left'
+                            : topRight
+                            ? 'bottom'
+                            : bottomRight
+                            ? 'top'
+                            : 'left'
+                    }
+                >
+                    <Icon
+                        filePath={icons.sideBySide}
+                        heightAndWidth="20px"
+                        color={'greyScale6'}
+                        onClick={() => this.props.sidebar.toggleReadingView()}
+                    />
+                </TooltipBox>
+            )
+        } else {
+            return (
+                <TooltipBox
+                    tooltipText="Full Page Reading"
+                    placement={
+                        this.props.sidebar.isSidebarOpen
+                            ? 'left'
+                            : topRight
+                            ? 'bottom'
+                            : bottomRight
+                            ? 'top'
+                            : 'left'
+                    }
+                >
+                    <Icon
+                        filePath={icons.fullPageReading}
+                        heightAndWidth="20px"
+                        color={'greyScale6'}
+                        onClick={() => this.props.sidebar.toggleReadingView()}
+                    />
+                </TooltipBox>
+            )
+        }
+    }
+
+    renderBookmarkButton() {
         let bookmarkDate
         if (this.props.bookmark.isBookmarked != null) {
             bookmarkDate = moment(
@@ -742,125 +1021,663 @@ export default class Ribbon extends Component<Props, State> {
             ).format('LLL')
         }
 
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
+        return (
+            <TooltipBox
+                tooltipText={
+                    this.props.bookmark.isBookmarked ? (
+                        <span>
+                            Saved on <DateText>{bookmarkDate}</DateText>
+                        </span>
+                    ) : (
+                        this.getTooltipText('createBookmark')
+                    )
+                }
+                placement={
+                    this.props.sidebar.isSidebarOpen
+                        ? 'left'
+                        : topRight
+                        ? 'bottom'
+                        : bottomRight
+                        ? 'top'
+                        : 'left'
+                }
+                offsetX={10}
+            >
+                {(topRight || bottomRight) &&
+                !this.props.sidebar.isSidebarOpen ? (
+                    <PrimaryAction
+                        size={'medium'}
+                        type="tertiary"
+                        label={'Save'}
+                        fontColor={'greyScale7'}
+                        onClick={() => this.props.bookmark.toggleBookmark()}
+                        icon={
+                            this.props.bookmark.isBookmarked
+                                ? 'heartFull'
+                                : 'heartEmpty'
+                        }
+                        iconColor={
+                            this.props.bookmark.isBookmarked
+                                ? 'prime1'
+                                : 'greyScale5'
+                        }
+                    />
+                ) : (
+                    <Icon
+                        onClick={() => this.props.bookmark.toggleBookmark()}
+                        color={
+                            this.props.bookmark.isBookmarked
+                                ? 'prime1'
+                                : 'greyScale6'
+                        }
+                        heightAndWidth="20px"
+                        filePath={
+                            this.props.bookmark.isBookmarked
+                                ? icons.heartFull
+                                : icons.heartEmpty
+                        }
+                    />
+                )}
+            </TooltipBox>
+        )
+    }
+
+    renderSpacesButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
+        return (
+            <TooltipBox
+                tooltipText={this.getTooltipText('addToCollection')}
+                placement={
+                    this.props.sidebar.isSidebarOpen
+                        ? 'left'
+                        : topRight
+                        ? 'bottom'
+                        : bottomRight
+                        ? 'top'
+                        : 'left'
+                }
+                offsetX={10}
+            >
+                {(topRight || bottomRight) &&
+                !this.props.sidebar.isSidebarOpen ? (
+                    <IconBox
+                        onClick={() =>
+                            this.props.lists.setShowListsPicker(
+                                !this.props.lists.showListsPicker,
+                            )
+                        }
+                    >
+                        <PrimaryAction
+                            size={'medium'}
+                            type="tertiary"
+                            label={'Spaces'}
+                            fontColor={'greyScale7'}
+                            onClick={() =>
+                                this.props.lists.setShowListsPicker(
+                                    !this.props.lists.showListsPicker,
+                                )
+                            }
+                            icon={'plus'}
+                            innerRef={this.spacePickerRef}
+                            active={this.props.lists.showListsPicker}
+                        />
+                        {this.props.lists.pageListIds.length > 0 && (
+                            <SpacesCounter>
+                                {this.props.lists.pageListIds.length}
+                            </SpacesCounter>
+                        )}
+                    </IconBox>
+                ) : (
+                    <IconBox
+                        onClick={() =>
+                            this.props.lists.setShowListsPicker(
+                                !this.props.lists.showListsPicker,
+                            )
+                        }
+                    >
+                        <Icon
+                            onClick={() =>
+                                this.props.lists.setShowListsPicker(
+                                    !this.props.lists.showListsPicker,
+                                )
+                            }
+                            color={
+                                this.props.lists.pageListIds.length > 0
+                                    ? 'prime1'
+                                    : 'greyScale6'
+                            }
+                            heightAndWidth="22px"
+                            filePath={'plus'}
+                            containerRef={this.spacePickerRef}
+                        />
+                        {this.props.lists.pageListIds.length > 0 && (
+                            <SpacesCounter>
+                                {this.props.lists.pageListIds.length}
+                            </SpacesCounter>
+                        )}
+                    </IconBox>
+                )}
+            </TooltipBox>
+        )
+    }
+
+    renderSidebarToggle() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
+        return (
+            <TooltipBox
+                targetElementRef={this.sidebarButtonRef.current}
+                tooltipText={this.getTooltipText('toggleSidebar')}
+                placement={topRight ? 'top' : bottomRight ? 'bottom' : 'left'}
+                offsetX={10}
+            >
+                {(topRight || bottomRight) &&
+                !this.props.sidebar.isSidebarOpen ? (
+                    <IconBox onClick={(e) => this.handleCommentIconBtnClick(e)}>
+                        <PrimaryAction
+                            size={'medium'}
+                            type="tertiary"
+                            label={'Notes'}
+                            fontColor={'greyScale7'}
+                            onClick={null}
+                            icon={
+                                this.props.commentBox.isCommentSaved
+                                    ? 'saveIcon'
+                                    : 'commentAdd'
+                            }
+                        />
+                        {this.props.annotationsCache.annotations.allIds.length >
+                            0 && (
+                            <SpacesCounter>
+                                {
+                                    this.props.annotationsCache.annotations
+                                        .allIds.length
+                                }
+                            </SpacesCounter>
+                        )}
+                    </IconBox>
+                ) : (
+                    <IconBox onClick={(e) => this.handleCommentIconBtnClick(e)}>
+                        <Icon
+                            color={'greyScale6'}
+                            heightAndWidth="20px"
+                            filePath={
+                                this.props.commentBox.isCommentSaved
+                                    ? icons.saveIcon
+                                    : // : this.props.hasAnnotations
+                                      // ? icons.commentFull
+                                      icons.commentAdd
+                            }
+                            containerRef={this.sidebarButtonRef}
+                        />
+                        {this.props.annotationsCache.annotations.allIds.length >
+                            0 && (
+                            <SpacesCounter>
+                                {
+                                    this.props.annotationsCache.annotations
+                                        .allIds.length
+                                }
+                            </SpacesCounter>
+                        )}
+                    </IconBox>
+                )}
+            </TooltipBox>
+        )
+    }
+
+    renderSearchButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
+        return (
+            <TooltipBox
+                tooltipText={this.getTooltipText('openDashboard')}
+                placement={
+                    this.props.sidebar.isSidebarOpen
+                        ? 'left'
+                        : topRight
+                        ? 'bottom'
+                        : bottomRight
+                        ? 'top'
+                        : 'left'
+                }
+                offsetX={10}
+            >
+                {(topRight || bottomRight) &&
+                !this.props.sidebar.isSidebarOpen ? (
+                    <PrimaryAction
+                        size={'medium'}
+                        type="tertiary"
+                        label={'Search'}
+                        fontColor={'greyScale7'}
+                        onClick={() => this.props.bgScriptBG.openOverviewTab()}
+                        icon={'searchIcon'}
+                    />
+                ) : (
+                    <Icon
+                        onClick={() => this.props.bgScriptBG.openOverviewTab()}
+                        color={'greyScale6'}
+                        heightAndWidth="20px"
+                        filePath={icons.searchIcon}
+                    />
+                )}
+            </TooltipBox>
+        )
+    }
+
+    renderAItriggerButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+        return (
+            <TooltipBox
+                tooltipText={this.getTooltipText('askAI')}
+                placement={
+                    this.props.sidebar.isSidebarOpen
+                        ? 'left'
+                        : topRight
+                        ? 'bottom'
+                        : bottomRight
+                        ? 'top'
+                        : 'left'
+                }
+                offsetX={10}
+            >
+                {(topRight || bottomRight) &&
+                !this.props.sidebar.isSidebarOpen ? (
+                    <PrimaryAction
+                        size={'medium'}
+                        type="tertiary"
+                        label={'Summarize'}
+                        fontColor={'greyScale7'}
+                        onClick={() => this.props.toggleAskAI()}
+                        icon={'stars'}
+                    />
+                ) : (
+                    <Icon
+                        onClick={() => this.props.toggleAskAI()}
+                        color={'greyScale6'}
+                        heightAndWidth="20px"
+                        filePath={icons.stars}
+                    />
+                )}
+            </TooltipBox>
+        )
+    }
+
+    renderPDFReaderButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
+        const isNotReader =
+            window.location.href.includes('.pdf') &&
+            !window.location.href.includes('pdfjs/viewer.html?')
+
+        const isPDF = window.location.href.includes('.pdf')
+
+        if (isPDF) {
+            if (
+                (topRight || bottomRight) &&
+                !this.props.sidebar.isSidebarOpen
+            ) {
+                return isNotReader ? (
+                    <TooltipBox
+                        tooltipText={
+                            <span>
+                                Open PDF Reader
+                                <br />
+                                to save, sort, annotate & summarize
+                            </span>
+                        }
+                        placement={
+                            this.props.sidebar.isSidebarOpen
+                                ? 'left'
+                                : topRight
+                                ? 'bottom'
+                                : bottomRight
+                                ? 'top'
+                                : 'left'
+                        }
+                        offsetX={10}
+                    >
+                        <PrimaryAction
+                            size={'medium'}
+                            type="tertiary"
+                            label={'Open PDF Reader'}
+                            fontColor={'greyScale7'}
+                            onClick={() => this.props.openPDFinViewer()}
+                            icon={'filePDF'}
+                            innerRef={this.spacePickerRef}
+                        />
+                    </TooltipBox>
+                ) : (
+                    <TooltipBox
+                        tooltipText={'Close PDF Reader'}
+                        placement={
+                            this.props.sidebar.isSidebarOpen
+                                ? 'left'
+                                : topRight
+                                ? 'bottom'
+                                : bottomRight
+                                ? 'top'
+                                : 'left'
+                        }
+                        offsetX={10}
+                    >
+                        <PrimaryAction
+                            size={'medium'}
+                            type="tertiary"
+                            label={'Close PDF Reader'}
+                            fontColor={'greyScale7'}
+                            onClick={() => this.props.openPDFinViewer()}
+                            icon={'filePDF'}
+                            innerRef={this.spacePickerRef}
+                        />
+                    </TooltipBox>
+                )
+            }
+
+            if (
+                (!topRight && !bottomRight) ||
+                this.props.sidebar.isSidebarOpen
+            ) {
+                return isNotReader ? (
+                    <TooltipBox
+                        tooltipText={'Open PDF Reader'}
+                        placement={
+                            this.props.sidebar.isSidebarOpen
+                                ? 'left'
+                                : topRight
+                                ? 'bottom'
+                                : bottomRight
+                                ? 'top'
+                                : 'left'
+                        }
+                        offsetX={10}
+                    >
+                        <Icon
+                            onClick={() => this.props.openPDFinViewer()}
+                            color={'greyScale6'}
+                            heightAndWidth="20px"
+                            filePath={icons.filePDF}
+                        />
+                    </TooltipBox>
+                ) : (
+                    <TooltipBox
+                        tooltipText={'Close PDF Reader'}
+                        placement={
+                            this.props.sidebar.isSidebarOpen
+                                ? 'left'
+                                : topRight
+                                ? 'bottom'
+                                : bottomRight
+                                ? 'top'
+                                : 'left'
+                        }
+                        offsetX={10}
+                    >
+                        <Icon
+                            onClick={() => this.props.openPDFinViewer()}
+                            color={'prime1'}
+                            heightAndWidth="20px"
+                            filePath={icons.filePDF}
+                        />
+                    </TooltipBox>
+                )
+            }
+        }
+    }
+
+    renderTutorialButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
+        return (
+            <TooltipBox
+                tooltipText={
+                    <span>
+                        Settings, Help &
+                        <br />
+                        Keyboard Shortcuts
+                    </span>
+                }
+                placement={
+                    this.props.sidebar.isSidebarOpen
+                        ? 'left'
+                        : topRight
+                        ? 'bottom'
+                        : bottomRight
+                        ? 'top'
+                        : 'left'
+                }
+                offsetX={15}
+            >
+                <Icon
+                    onClick={() => this.props.toggleShowTutorial()}
+                    color={'greyScale5'}
+                    heightAndWidth="22px"
+                    filePath={icons.helpIcon}
+                    containerRef={this.tutorialButtonRef}
+                />
+                {this.state.updatesAvailable && <UpdateAvailableDot />}
+            </TooltipBox>
+        )
+    }
+
+    renderCloseRibbonButton() {
+        return (
+            <>
+                {!this.props.sidebar.isSidebarOpen && (
+                    <Icon
+                        onClick={(event) => {
+                            this.handleHover()
+                        }}
+                        onMouseLeave={(event) => {
+                            this.handleMouseLeave()
+                        }}
+                        // onClick={(event) => {
+                        //     if (event.shiftKey && this.props.isRibbonEnabled) {
+                        //         this.props.handleHover()
+                        //     } else {
+                        //         this.props.handleRemoveRibbon()
+                        //     }
+                        // }}
+                        color={'greyScale5'}
+                        heightAndWidth="24px"
+                        padding="4px"
+                        filePath={icons.removeX}
+                        containerRef={this.removeMenuButtonRef}
+                    />
+                )}
+            </>
+        )
+    }
+
+    renderHorizontalRibbon() {
+        if (!this.props.isExpanded) {
+            return (
+                <IconContainer
+                    ref={this.props.setRef}
+                    isPeeking={this.props.isExpanded}
+                    isSidebarOpen={this.props.sidebar.isSidebarOpen}
+                    ribbonPosition={this.props.ribbonPosition}
+                >
+                    <Icon
+                        icon={logoNoText}
+                        heightAndWidth="20px"
+                        originalImage
+                    />
+                </IconContainer>
+            )
+        } else {
+            return (
+                <>
+                    <OuterRibbon
+                        isPeeking={this.props.isExpanded}
+                        isSidebarOpen={this.props.sidebar.isSidebarOpen}
+                        ribbonPosition={this.props.ribbonPosition}
+                    >
+                        <InnerRibbon
+                            ref={this.props.setRef}
+                            isPeeking={this.props.isExpanded}
+                            isSidebarOpen={this.props.sidebar.isSidebarOpen}
+                            ribbonPosition={this.props.ribbonPosition}
+                        >
+                            {(this.props.isExpanded ||
+                                this.props.sidebar.isSidebarOpen) && (
+                                <>
+                                    <UpperPart
+                                        ribbonPosition={
+                                            this.props.ribbonPosition
+                                        }
+                                        isSidebarOpen={
+                                            this.props.sidebar.isSidebarOpen
+                                        }
+                                    >
+                                        <BottomSection
+                                            sidebarOpen={
+                                                this.props.sidebar.isSidebarOpen
+                                            }
+                                            ribbonPosition={
+                                                this.props.ribbonPosition
+                                            }
+                                        >
+                                            {!this.props.sidebar
+                                                .isSidebarOpen &&
+                                                this.renderFeedButton()}
+                                            <BlockCounterIndicator
+                                                ribbonPosition={
+                                                    this.props.ribbonPosition
+                                                }
+                                                isSidebarOpen={
+                                                    this.props.sidebar
+                                                        .isSidebarOpen
+                                                }
+                                            />
+                                            {this.renderTutorialButton()}
+                                        </BottomSection>
+
+                                        <VerticalLine
+                                            sidebaropen={
+                                                this.props.sidebar.isSidebarOpen
+                                            }
+                                        />
+                                        {window.location.href.includes(
+                                            '.pdf',
+                                        ) &&
+                                        !window.location.href.includes(
+                                            'pdfjs/viewer.html?',
+                                        ) ? (
+                                            <PageAction
+                                                ribbonPosition={
+                                                    this.props.ribbonPosition
+                                                }
+                                                isSidebarOpen={
+                                                    this.props.sidebar
+                                                        .isSidebarOpen
+                                                }
+                                            >
+                                                {this.renderSearchButton()}
+                                                {this.renderPDFReaderButton()}
+                                                {this.renderCloseRibbonButton()}
+                                            </PageAction>
+                                        ) : (
+                                            <PageAction
+                                                ribbonPosition={
+                                                    this.props.ribbonPosition
+                                                }
+                                                isSidebarOpen={
+                                                    this.props.sidebar
+                                                        .isSidebarOpen
+                                                }
+                                            >
+                                                {this.props.sidebar
+                                                    .isSidebarOpen && (
+                                                    <UpperArea>
+                                                        {this.props.sidebar
+                                                            .isSidebarOpen ? (
+                                                            <>
+                                                                {this.renderCloseButton()}
+                                                                {this.renderReadingViewToggleButton()}
+                                                            </>
+                                                        ) : undefined}
+                                                    </UpperArea>
+                                                )}
+                                                {this.renderPDFReaderButton()}
+                                                {this.renderSearchButton()}
+                                                {!this.props.sidebar
+                                                    .isSidebarOpen &&
+                                                    this.renderAItriggerButton()}
+                                                {!this.props.sidebar
+                                                    .isSidebarOpen &&
+                                                    this.renderSidebarToggle()}
+
+                                                {this.renderSpacesButton()}
+                                                {this.renderBookmarkButton()}
+                                                {this.renderCloseRibbonButton()}
+                                            </PageAction>
+                                        )}
+                                    </UpperPart>
+                                </>
+                            )}
+                        </InnerRibbon>
+                    </OuterRibbon>
+                    {this.renderSpacePicker()}
+                    {this.renderTutorial()}
+                    {this.renderFeedInfo()}
+                    {this.renderCommentBox()}
+                    {this.renderRemoveMenu()}
+                </>
+            )
+        }
+    }
+
+    renderVerticalRibbon() {
         return (
             <>
                 <OuterRibbon
                     isPeeking={this.props.isExpanded}
                     isSidebarOpen={this.props.sidebar.isSidebarOpen}
+                    ribbonPosition={this.props.ribbonPosition}
                 >
                     <InnerRibbon
                         ref={this.props.setRef}
                         isPeeking={this.props.isExpanded}
                         isSidebarOpen={this.props.sidebar.isSidebarOpen}
+                        ribbonPosition={this.props.ribbonPosition}
                     >
                         {(this.props.isExpanded ||
                             this.props.sidebar.isSidebarOpen) && (
                             <>
-                                <UpperPart>
-                                    {!this.props.sidebar.isSidebarOpen && (
-                                        <>
-                                            <TooltipBox
-                                                targetElementRef={
-                                                    this.feedButtonRef.current
-                                                }
-                                                tooltipText={'Show Feed'}
-                                                placement={'left'}
-                                                offsetX={0}
-                                            >
-                                                <FeedIndicatorBox
-                                                    isSidebarOpen={
-                                                        this.props.sidebar
-                                                            .isSidebarOpen
-                                                    }
-                                                    onClick={() =>
-                                                        this.props.toggleFeed()
-                                                    }
-                                                    ref={this.feedButtonRef}
-                                                >
-                                                    <FeedActivityDot
-                                                        key="activity-feed-indicator"
-                                                        {...this.props
-                                                            .activityIndicator}
-                                                    />
-                                                </FeedIndicatorBox>
-                                            </TooltipBox>
-                                            <HorizontalLine
-                                                sidebaropen={
-                                                    this.props.sidebar
-                                                        .isSidebarOpen
-                                                }
-                                            />
-                                        </>
-                                    )}
-                                    <PageAction>
+                                <UpperPart
+                                    ribbonPosition={this.props.ribbonPosition}
+                                    isSidebarOpen={
+                                        this.props.sidebar.isSidebarOpen
+                                    }
+                                >
+                                    {!this.props.sidebar.isSidebarOpen &&
+                                        this.renderFeedButton()}
+                                    <PageAction
+                                        ribbonPosition={
+                                            this.props.ribbonPosition
+                                        }
+                                        isSidebarOpen={
+                                            this.props.sidebar.isSidebarOpen
+                                        }
+                                    >
                                         {this.props.sidebar.isSidebarOpen && (
                                             <UpperArea>
-                                                <TooltipBox
-                                                    targetElementRef={
-                                                        this.feedButtonRef
-                                                            .current
-                                                    }
-                                                    tooltipText={
-                                                        <TooltipContent>
-                                                            Close{' '}
-                                                            <KeyboardShortcuts
-                                                                keys={['Esc']}
-                                                                size="small"
-                                                            />
-                                                        </TooltipContent>
-                                                    }
-                                                    placement={'left'}
-                                                    offsetX={0}
-                                                >
-                                                    <Icon
-                                                        filePath="removeX"
-                                                        heightAndWidth="20px"
-                                                        color="greyScale6"
-                                                        onClick={() =>
-                                                            this.props.sidebar.closeSidebar()
-                                                        }
-                                                    />
-                                                </TooltipBox>
                                                 {this.props.sidebar
                                                     .isSidebarOpen ? (
-                                                    !this.props.sidebar
-                                                        .isWidthLocked ? (
-                                                        <TooltipBox
-                                                            tooltipText="Side-by-Side Reading"
-                                                            placement="left"
-                                                        >
-                                                            <Icon
-                                                                filePath={
-                                                                    icons.sideBySide
-                                                                }
-                                                                heightAndWidth="20px"
-                                                                color={
-                                                                    'greyScale6'
-                                                                }
-                                                                onClick={() =>
-                                                                    this.props.sidebar.toggleReadingView()
-                                                                }
-                                                            />
-                                                        </TooltipBox>
-                                                    ) : (
-                                                        <TooltipBox
-                                                            tooltipText="Full Page Reading"
-                                                            placement="left"
-                                                        >
-                                                            <Icon
-                                                                filePath={
-                                                                    icons.fullPageReading
-                                                                }
-                                                                heightAndWidth="20px"
-                                                                color={
-                                                                    'greyScale6'
-                                                                }
-                                                                onClick={() =>
-                                                                    this.props.sidebar.toggleReadingView()
-                                                                }
-                                                            />
-                                                        </TooltipBox>
-                                                    )
+                                                    <>
+                                                        {this.renderCloseButton()}
+                                                        {this.renderReadingViewToggleButton()}
+                                                    </>
                                                 ) : undefined}
                                                 <HorizontalLine
                                                     sidebaropen={
@@ -870,218 +1687,15 @@ export default class Ribbon extends Component<Props, State> {
                                                 />
                                             </UpperArea>
                                         )}
-                                        <TooltipBox
-                                            tooltipText={
-                                                this.props.bookmark
-                                                    .isBookmarked ? (
-                                                    <span>
-                                                        Bookmarked on{' '}
-                                                        <DateText>
-                                                            {bookmarkDate}
-                                                        </DateText>
-                                                    </span>
-                                                ) : (
-                                                    this.getTooltipText(
-                                                        'createBookmark',
-                                                    )
-                                                )
-                                            }
-                                            placement={'left'}
-                                            offsetX={10}
-                                        >
-                                            <Icon
-                                                onClick={() =>
-                                                    this.props.bookmark.toggleBookmark()
-                                                }
-                                                color={
-                                                    this.props.bookmark
-                                                        .isBookmarked
-                                                        ? 'prime1'
-                                                        : 'greyScale6'
-                                                }
-                                                heightAndWidth="20px"
-                                                filePath={
-                                                    this.props.bookmark
-                                                        .isBookmarked
-                                                        ? icons.heartFull
-                                                        : icons.heartEmpty
-                                                }
-                                            />
-                                        </TooltipBox>
-                                        <TooltipBox
-                                            tooltipText={this.getTooltipText(
-                                                'addToCollection',
-                                            )}
-                                            placement={'left'}
-                                            offsetX={10}
-                                        >
-                                            <IconBox
-                                                onClick={() =>
-                                                    this.props.lists.setShowListsPicker(
-                                                        !this.props.lists
-                                                            .showListsPicker,
-                                                    )
-                                                }
-                                            >
-                                                <Icon
-                                                    onClick={() =>
-                                                        this.props.lists.setShowListsPicker(
-                                                            !this.props.lists
-                                                                .showListsPicker,
-                                                        )
-                                                    }
-                                                    color={
-                                                        this.props.lists
-                                                            .pageListIds
-                                                            .length > 0
-                                                            ? 'prime1'
-                                                            : 'greyScale6'
-                                                    }
-                                                    heightAndWidth="22px"
-                                                    filePath={'plus'}
-                                                    containerRef={
-                                                        this.spacePickerRef
-                                                    }
-                                                />
-                                                {this.props.lists.pageListIds
-                                                    .length > 0 && (
-                                                    <SpacesCounter>
-                                                        {
-                                                            this.props.lists
-                                                                .pageListIds
-                                                                .length
-                                                        }
-                                                    </SpacesCounter>
-                                                )}
-                                            </IconBox>
-                                        </TooltipBox>
-                                        {!this.props.sidebar.isSidebarOpen && (
-                                            <TooltipBox
-                                                targetElementRef={
-                                                    this.sidebarButtonRef
-                                                        .current
-                                                }
-                                                tooltipText={this.getTooltipText(
-                                                    'toggleSidebar',
-                                                )}
-                                                placement={'left'}
-                                                offsetX={10}
-                                            >
-                                                <IconBox
-                                                    onClick={(e) =>
-                                                        this.handleCommentIconBtnClick(
-                                                            e,
-                                                        )
-                                                    }
-                                                >
-                                                    <Icon
-                                                        color={'greyScale6'}
-                                                        heightAndWidth="20px"
-                                                        filePath={
-                                                            this.props
-                                                                .commentBox
-                                                                .isCommentSaved
-                                                                ? icons.saveIcon
-                                                                : // : this.props.hasAnnotations
-                                                                  // ? icons.commentFull
-                                                                  icons.commentAdd
-                                                        }
-                                                        containerRef={
-                                                            this
-                                                                .sidebarButtonRef
-                                                        }
-                                                    />
-                                                    {this.props.annotationsCache
-                                                        .annotations.allIds
-                                                        .length > 0 && (
-                                                        <SpacesCounter>
-                                                            {
-                                                                this.props
-                                                                    .annotationsCache
-                                                                    .annotations
-                                                                    .allIds
-                                                                    .length
-                                                            }
-                                                        </SpacesCounter>
-                                                    )}
-                                                </IconBox>
-                                            </TooltipBox>
-                                        )}
-                                        <TooltipBox
-                                            tooltipText={this.getTooltipText(
-                                                'openDashboard',
-                                            )}
-                                            placement={'left'}
-                                            offsetX={10}
-                                        >
-                                            <Icon
-                                                onClick={() =>
-                                                    this.props.bgScriptBG.openOverviewTab()
-                                                }
-                                                color={'greyScale6'}
-                                                heightAndWidth="20px"
-                                                filePath={icons.searchIcon}
-                                            />
-                                        </TooltipBox>
-                                        {!this.props.sidebar.isSidebarOpen && (
-                                            <TooltipBox
-                                                tooltipText={this.getTooltipText(
-                                                    'askAI',
-                                                )}
-                                                placement={'left'}
-                                                offsetX={10}
-                                            >
-                                                <Icon
-                                                    onClick={() =>
-                                                        this.props.toggleAskAI()
-                                                    }
-                                                    color={'greyScale6'}
-                                                    heightAndWidth="20px"
-                                                    filePath={icons.stars}
-                                                />
-                                            </TooltipBox>
-                                        )}
-                                        {window.location.href.includes(
-                                            '.pdf',
-                                        ) &&
-                                            !window.location.href.includes(
-                                                'pdfjs/viewer.html?',
-                                            ) && (
-                                                <TooltipBox
-                                                    tooltipText={
-                                                        'Open PDF Reader'
-                                                    }
-                                                    placement={'left'}
-                                                    offsetX={10}
-                                                >
-                                                    <Icon
-                                                        onClick={() =>
-                                                            this.props.openPDFinViewer()
-                                                        }
-                                                        color={'greyScale6'}
-                                                        heightAndWidth="20px"
-                                                        filePath={icons.filePDF}
-                                                    />
-                                                </TooltipBox>
-                                            )}
-                                        {window.location.href.includes(
-                                            'pdfjs/viewer.html?',
-                                        ) && (
-                                            <TooltipBox
-                                                tooltipText={'Close PDF Reader'}
-                                                placement={'left'}
-                                                offsetX={10}
-                                            >
-                                                <Icon
-                                                    onClick={() =>
-                                                        this.props.openPDFinViewer()
-                                                    }
-                                                    color={'prime1'}
-                                                    heightAndWidth="20px"
-                                                    filePath={icons.filePDF}
-                                                />
-                                            </TooltipBox>
-                                        )}
+
+                                        {this.renderBookmarkButton()}
+                                        {this.renderSpacesButton()}
+                                        {!this.props.sidebar.isSidebarOpen &&
+                                            this.renderSidebarToggle()}
+                                        {this.renderSearchButton()}
+                                        {!this.props.sidebar.isSidebarOpen &&
+                                            this.renderAItriggerButton()}
+                                        {this.renderPDFReaderButton()}
                                     </PageAction>
                                 </UpperPart>
                                 {!this.props.sidebar.isSidebarOpen && (
@@ -1092,63 +1706,21 @@ export default class Ribbon extends Component<Props, State> {
                                     />
                                 )}
                                 <BottomSection
-                                    sidebaropen={
+                                    sidebarOpen={
                                         this.props.sidebar.isSidebarOpen
                                     }
+                                    ribbonPosition={this.props.ribbonPosition}
                                 >
-                                    <BlockCounterIndicator />
-                                    <TooltipBox
-                                        tooltipText={
-                                            <span>
-                                                Settings, Help &
-                                                <br />
-                                                Keyboard Shortcuts
-                                            </span>
+                                    <BlockCounterIndicator
+                                        ribbonPosition={
+                                            this.props.ribbonPosition
                                         }
-                                        placement={'left'}
-                                        offsetX={10}
-                                    >
-                                        <Icon
-                                            onClick={() =>
-                                                this.props.toggleShowTutorial()
-                                            }
-                                            color={'greyScale5'}
-                                            heightAndWidth="22px"
-                                            filePath={icons.helpIcon}
-                                            containerRef={
-                                                this.tutorialButtonRef
-                                            }
-                                        />
-                                        {this.state.updatesAvailable && (
-                                            <UpdateAvailableDot />
-                                        )}
-                                    </TooltipBox>
-                                    {!this.props.sidebar.isSidebarOpen && (
-                                        <Icon
-                                            onMouseEnter={(event) => {
-                                                this.handleHover()
-                                            }}
-                                            onMouseLeave={(event) => {
-                                                this.handleMouseLeave()
-                                            }}
-                                            onClick={(event) => {
-                                                if (
-                                                    event.shiftKey &&
-                                                    this.props.isRibbonEnabled
-                                                ) {
-                                                    this.props.handleRibbonToggle()
-                                                } else {
-                                                    this.props.handleRemoveRibbon()
-                                                }
-                                            }}
-                                            color={'greyScale5'}
-                                            heightAndWidth="22px"
-                                            filePath={icons.removeX}
-                                            containerRef={
-                                                this.removeMenuButtonRef
-                                            }
-                                        />
-                                    )}
+                                        isSidebarOpen={
+                                            this.props.sidebar.isSidebarOpen
+                                        }
+                                    />
+                                    {this.renderTutorialButton()}
+                                    {this.renderCloseRibbonButton()}
                                 </BottomSection>
                             </>
                         )}
@@ -1162,13 +1734,87 @@ export default class Ribbon extends Component<Props, State> {
             </>
         )
     }
+
+    render() {
+        if (!this.state.shortcutsReady) {
+            return false
+        }
+
+        if (
+            (this.props.ribbonPosition === 'topRight' ||
+                this.props.ribbonPosition === 'bottomRight') &&
+            !this.props.sidebar.isSidebarOpen
+        ) {
+            return this.renderHorizontalRibbon()
+        }
+        if (
+            this.props.ribbonPosition === 'centerRight' ||
+            this.props.sidebar.isSidebarOpen
+        ) {
+            return this.renderVerticalRibbon()
+        }
+        return null
+    }
 }
+
+const SelectionItem = styled.option``
+const SelectionDropDown = styled.select`
+    font-size: 12px;
+    font-weight: 400;
+    background: ${(props) => props.theme.colors.greyScale1};
+    color: ${(props) => props.theme.colors.greyScale6};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    border-radius: 3px;
+    padding: 3px;
+    outline: none;
+`
+const SelectionContainer = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    flex: 1;
+`
+
+const FeedButtonContainer = styled.div<{ ribbonPosition }>`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    ${(props) =>
+        props.isSidebarOpen &&
+        props.ribbonPosition === 'centerRight' &&
+        css`
+            width: 34px;
+        `}
+`
 
 const IconBox = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+`
+
+const IconContainer = styled.div<{ ribbonPosition }>`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    height: 90%;
+    width: 90%;
+    background: ${(props) => props.theme.colors.greyScale1}90;
+    backdrop-filter: blur(4px);
+
+    ${(props) =>
+        props.ribbonPosition === 'bottomRight' &&
+        css`
+            border-radius: 8px 0 0 0;
+        `}
+    ${(props) =>
+        props.ribbonPosition === 'topRight' &&
+        css`
+            border-radius: 0 0 0 8px;
+            margin-top: -2px;
+        `}
 `
 
 const SupportContainer = styled.div`
@@ -1235,6 +1881,7 @@ const SpacesCounter = styled.div`
     color: ${(props) => props.theme.colors.black};
     background-color: ${(props) => props.theme.colors.white};
     border-radius: 30px;
+    min-width: 10px;
 `
 
 const SupportTitle = styled.div`
@@ -1349,11 +1996,31 @@ const TextBoxArea = styled.div`
     grid-gap: 5px;
 `
 
-const UpperPart = styled.div`
+const UpperPart = styled.div<{ ribbonPosition; isSidebarOpen }>`
     width: fill-available;
+
+    ${(props) =>
+        (props.ribbonPosition === 'topRight' ||
+            props.ribbonPosition === 'bottomRight') &&
+        css`
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: fill-available;
+        `}
+
+    ${(props) =>
+        props.isSidebarOpen &&
+        css`
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0px 10px;
+        `}
 `
 
-const BottomSection = styled.div<{ sidebaropen: boolean }>`
+const BottomSection = styled.div<{ ribbonPosition; sidebarOpen }>`
     align-self: center;
     display: flex;
     flex-direction: column;
@@ -1361,6 +2028,28 @@ const BottomSection = styled.div<{ sidebaropen: boolean }>`
     justify-content: center;
     align-items: center;
     padding: 8px 0px;
+
+    ${(props) =>
+        (props.ribbonPosition === 'topRight' ||
+            props.ribbonPosition === 'bottomRight') &&
+        css`
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            grid-gap: 15px;
+            padding: 0 10px;
+        `}
+
+    ${(props) =>
+        props.sidebarOpen &&
+        css`
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0px 10px;
+        `}
 `
 
 const openAnimation = keyframes`
@@ -1368,7 +2057,7 @@ const openAnimation = keyframes`
  100% { padding-bottom: 0px; opacity: 1 }
 `
 
-const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
+const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
     flex-direction: column;
     justify-content: center;
     align-self: center;
@@ -1377,14 +2066,10 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
     right: -40px;
     position: sticky;
     display: flex;
-    /* box-shadow: -1px 2px 5px 0px rgba(0, 0, 0, 0.16); */
     line-height: normal;
     text-align: start;
     align-items: center;
-    background: transparent;
     z-index: 2147483644;
-    /* animation: slide-in ease-out;
-    animation-duration: 0.05s; */
 
     ${(props) =>
         props.isPeeking &&
@@ -1398,17 +2083,16 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
         `}
 
     ${(props) =>
-        props.isSidebarOpen &&
+        (props.ribbonPosition === 'topRight' ||
+            props.ribbonPosition === 'bottomRight') &&
         css`
             display: flex;
             box-shadow: none;
             justify-content: center;
-            height: 100vh;
-            width: 28px;
+            width: fit-content;
             align-items: flex-start;
-            padding: 0 7px 0 5px;
             right: 0px;
-            background: ${(props) => props.theme.colors.black};
+            top: 0px;
             transition: unset;
 
             & .removeSidebar {
@@ -1416,16 +2100,52 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
                 display: none;
             }
         `}
+
+        ${(props) =>
+            props.ribbonPosition === 'topRight' &&
+            css`
+                border-radius: 0 0 0 8px;
+                height: 44px;
+            `}
+        ${(props) =>
+            props.ribbonPosition === 'bottomRight' &&
+            css`
+                border-radius: 8px 0 0 0;
+                height: 44px;
+            `}
+
+            ${(props) =>
+                props.isSidebarOpen &&
+                css<{ ribbonPosition }>`
+                    display: flex;
+                    box-shadow: none;
+                    justify-content: center;
+                    height: 100vh;
+                    width: 28px;
+                    align-items: flex-start;
+                    padding: 0px 7px 0px 5px;
+                    right: 0px;
+                    transition: unset;
+                    background: ${(props) => props.theme.colors.black};
+                    border-radius: 0px;
+                    height: fill-available;
+
+                    & .removeSidebar {
+                        visibility: hidden;
+                        display: none;
+                    }
+                `}
+
+    
 `
 
-const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
+const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
     position: absolute;
     top: 20px;
     width: 44px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 5px 0;
     display: none;
     background: ${(props) => props.theme.colors.greyScale1};
     border: 1px solid ${(props) => props.theme.colors.greyScale3};
@@ -1441,23 +2161,64 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen }>`
     `}
 
     ${(props) =>
-        props.isSidebarOpen &&
-        css`
+        (props.ribbonPosition === 'topRight' ||
+            props.ribbonPosition === 'bottomRight') &&
+        css<{ isSidebarOpen; isPeeking }>`
             display: flex;
             box-shadow: none;
-            height: 100%;
+            justify-content: center;
+            height: ${(props) => (props.isPeeking ? '42px' : '50px')};
+            width: ${(props) => (props.isPeeking ? 'fit-content' : '50px')};
+            align-items: flex-start;
+            padding: ${(props) => (!props.isPeeking ? '0px' : '0 5px 0 5px;')};
+            right: 0px;
             top: 0px;
-            width: 28px;
-            justify-content: space-between;
-            padding: 5px 0px;
-            background: transparent;
-            border: none;
+            transition: unset;
+            flex-direction: row;
             align-items: center;
-            background: ${(props) => props.theme.colors.black};
+
+            & .removeSidebar {
+                visibility: hidden;
+                display: none;
+            }
         `}
+
+        ${(props) =>
+            props.ribbonPosition === 'topRight' &&
+            props.isPeeking &&
+            css`
+                border-radius: 0 0 0 8px;
+            `}
+        ${(props) =>
+            props.ribbonPosition === 'bottomRight' &&
+            props.isPeeking &&
+            css`
+                border-radius: 8px 0 0 0;
+            `}
+
+            ${(props) =>
+                props.isSidebarOpen &&
+                css`
+                    display: flex;
+                    box-shadow: none;
+                    height: 100%;
+                    top: 0px;
+                    width: 28px;
+                    justify-content: space-between;
+                    padding: px 0px;
+                    background: transparent;
+                    border: none;
+                    align-items: center;
+                    width: 100%;
+                    padding: 10px 0px;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    height: inherit;
+                `}
+
 `
 
-const ExtraButtonRow = styled.div`
+const ExtraButtonRow = styled.div<{ deactivateHover }>`
     height: 40px;
     display: flex;
     grid-gap: 10px;
@@ -1472,6 +2233,16 @@ const ExtraButtonRow = styled.div`
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
+
+    ${(props) =>
+        props.deactivateHover &&
+        css`
+            cursor: default;
+
+            &:hover {
+                outline: none;
+            }
+        `}
 `
 
 const HorizontalLine = styled.div<{ sidebaropen: boolean }>`
@@ -1480,14 +2251,38 @@ const HorizontalLine = styled.div<{ sidebaropen: boolean }>`
     height: 1px;
     background-color: ${(props) => props.theme.colors.greyScale3};
 `
+const VerticalLine = styled.div<{ sidebaropen: boolean }>`
+    width: 1px;
+    background-color: ${(props) => props.theme.colors.greyScale3};
+    height: fill-available;
+`
 
-const PageAction = styled.div`
+const PageAction = styled.div<{ ribbonPosition; isSidebarOpen }>`
     display: grid;
     grid-gap: 10px;
     grid-auto-flow: row;
     align-items: center;
     justify-content: center;
     padding: 7px 10px 10px 10px;
+
+    ${(props) =>
+        (props.ribbonPosition === 'topRight' ||
+            props.ribbonPosition === 'bottomRight') &&
+        css`
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0px 10px;
+        `}
+    ${(props) =>
+        props.isSidebarOpen &&
+        css`
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0px 10px;
+        `}
 `
 
 const SubText = styled.span`

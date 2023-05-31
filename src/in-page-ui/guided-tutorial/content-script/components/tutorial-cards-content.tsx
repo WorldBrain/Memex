@@ -261,11 +261,11 @@ export const tutorialSteps: TutorialStepContent[] = [
                     </IconBlock>
                     <ContentArea>
                         <TitleArea>
-                            <Title>Get the basics in 90s</Title>
+                            <Title>Get the basics of Memex in 90s</Title>
                         </TitleArea>
                         <Description>
-                            Hover over the <GreenArea>green area</GreenArea> on
-                            the right to open the Mini-Sidebar.
+                            Hover over the <GreenArea>green area</GreenArea> in
+                            the top right to get started.
                         </Description>
                     </ContentArea>
                 </FirstCardContainer>
@@ -299,17 +299,16 @@ export const tutorialSteps: TutorialStepContent[] = [
                             />
                         </TitleArea>
                         <Description>
-                            Use the heart icon in the Mini-Sidebar or use
-                            keyboard shortcuts.
+                            Saved & annotated pages are full-text searchable.
                         </Description>
                     </ContentArea>
                 </CardContainer>
             </>
         ),
-        bottom: '30px',
+        top: '60px',
         left: null,
-        right: null,
-        showHoverArea: true,
+        right: '20px',
+        showHoverArea: false,
         position: 'center',
     },
     {
@@ -332,14 +331,13 @@ export const tutorialSteps: TutorialStepContent[] = [
                             />
                         </TitleArea>
                         <Description>
-                            Select some text and use the tooltip, or use
-                            keyboard shortcuts.
+                            Select some text to highlight and/or add a note.
                         </Description>
                     </ContentArea>
                 </CardContainer>
             </>
         ),
-        bottom: '30px',
+        top: '30px',
         left: null,
         right: null,
         showHoverArea: false,
@@ -359,22 +357,21 @@ export const tutorialSteps: TutorialStepContent[] = [
                     </IconBlock>
                     <ContentArea>
                         <TitleArea>
-                            <Title>Summarise this page or ask questions</Title>
+                            <Title>Summarise websites, videos or PDFs</Title>
                             <KeyboardShortcuts
                                 keys={[getKeyName({ key: 'alt' }), 'X']}
                             />
                         </TitleArea>
                         <Description>
-                            Summarise and ask questions about websites, youtube
-                            videos and PDFs
+                            Hover to bottom right again and select "Summarize"
                         </Description>
                     </ContentArea>
                 </CardContainer>
             </>
         ),
-        bottom: '30px',
+        top: '60px',
         left: null,
-        right: null,
+        right: '20px',
         showHoverArea: false,
         position: 'center',
     },
@@ -392,124 +389,124 @@ export const tutorialSteps: TutorialStepContent[] = [
                     </IconBlock>
                     <ContentArea>
                         <TitleArea>
-                            <Title>Add this page to a Space</Title>
+                            <Title>Organise with Spaces</Title>
                             <KeyboardShortcuts
                                 keys={[getKeyName({ key: 'alt' }), 'C']}
                             />
                         </TitleArea>
                         <Description>
                             Spaces are like tags that you can share and
-                            collaboratively curate.
+                            collaboratively curate with others.
                         </Description>
                     </ContentArea>
                 </CardContainer>
             </>
         ),
-        bottom: '30px',
-        left: null,
-        right: null,
-        showHoverArea: false,
-        position: 'center',
-    },
-    {
-        subtitle: (
-            <>
-                <CardContainer>
-                    <IconBlock>
-                        <Icon
-                            filePath={icons.commentAdd}
-                            heightAndWidth="28px"
-                            hoverOff
-                            color={'prime1'}
-                        />
-                    </IconBlock>
-                    <ContentArea>
-                        <TitleArea>
-                            <Title>View Annotations</Title>
-                            <KeyboardShortcuts
-                                keys={[getKeyName({ key: 'alt' }), 'Q']}
-                            />
-                        </TitleArea>
-                        <Description>
-                            Click on the highlight or open the sidebar via the
-                            Mini-Sidebar.
-                        </Description>
-                    </ContentArea>
-                </CardContainer>
-            </>
-        ),
-        bottom: '30px',
-        left: null,
-        right: null,
-        showHoverArea: false,
-        position: 'center',
-    },
-
-    {
-        subtitle: (
-            <>
-                <CardContainer>
-                    <IconBlock>
-                        <Icon
-                            filePath={icons.searchIcon}
-                            heightAndWidth="28px"
-                            hoverOff
-                            color={'prime1'}
-                        />
-                    </IconBlock>
-                    <ContentArea>
-                        <TitleArea>
-                            <Title>
-                                Full-Text search saved pages and annotations
-                            </Title>
-                            <KeyboardShortcuts
-                                keys={[getKeyName({ key: 'alt' }), 'F']}
-                            />
-                        </TitleArea>
-                        <Description>
-                            Click on the search icon in the Mini-Sidebar
-                        </Description>
-                    </ContentArea>
-                </CardContainer>
-            </>
-        ),
-        bottom: '30px',
-        left: null,
-        right: null,
-        showHoverArea: false,
-        position: 'center',
-    },
-
-    {
-        subtitle: (
-            <>
-                <CardContainer>
-                    <IconBlock>
-                        <Icon
-                            filePath={icons.pin}
-                            heightAndWidth="28px"
-                            hoverOff
-                            color={'prime1'}
-                        />
-                    </IconBlock>
-                    <ContentArea>
-                        <TitleArea>
-                            <Title>Pin Memex to the extension bar</Title>
-                        </TitleArea>
-                        <Description>
-                            Don't like the Mini-Sidebar and want to use
-                            something else?
-                        </Description>
-                    </ContentArea>
-                </CardContainer>
-            </>
-        ),
+        top: '60px',
         left: null,
         right: '20px',
-        top: '20px',
         showHoverArea: false,
         position: 'center',
     },
+    // {
+    //     subtitle: (
+    //         <>
+    //             <CardContainer>
+    //                 <IconBlock>
+    //                     <Icon
+    //                         filePath={icons.commentAdd}
+    //                         heightAndWidth="28px"
+    //                         hoverOff
+    //                         color={'prime1'}
+    //                     />
+    //                 </IconBlock>
+    //                 <ContentArea>
+    //                     <TitleArea>
+    //                         <Title>View Annotations</Title>
+    //                         <KeyboardShortcuts
+    //                             keys={[getKeyName({ key: 'alt' }), 'Q']}
+    //                         />
+    //                     </TitleArea>
+    //                     <Description>
+    //                         Click on the highlight or open the sidebar via the
+    //                         Mini-Sidebar.
+    //                     </Description>
+    //                 </ContentArea>
+    //             </CardContainer>
+    //         </>
+    //     ),
+    //     bottom: '30px',
+    //     left: null,
+    //     right: null,
+    //     showHoverArea: false,
+    //     position: 'center',
+    // },
+
+    // {
+    //     subtitle: (
+    //         <>
+    //             <CardContainer>
+    //                 <IconBlock>
+    //                     <Icon
+    //                         filePath={icons.searchIcon}
+    //                         heightAndWidth="28px"
+    //                         hoverOff
+    //                         color={'prime1'}
+    //                     />
+    //                 </IconBlock>
+    //                 <ContentArea>
+    //                     <TitleArea>
+    //                         <Title>
+    //                             Full-Text search saved pages and annotations
+    //                         </Title>
+    //                         <KeyboardShortcuts
+    //                             keys={[getKeyName({ key: 'alt' }), 'F']}
+    //                         />
+    //                     </TitleArea>
+    //                     <Description>
+    //                         Click on the search icon in the Mini-Sidebar
+    //                     </Description>
+    //                 </ContentArea>
+    //             </CardContainer>
+    //         </>
+    //     ),
+    //     bottom: '30px',
+    //     left: null,
+    //     right: null,
+    //     showHoverArea: false,
+    //     position: 'center',
+    // },
+
+    // {
+    //     subtitle: (
+    //         <>
+    //             <CardContainer>
+    //                 <IconBlock>
+    //                     <Icon
+    //                         filePath={icons.pin}
+    //                         heightAndWidth="28px"
+    //                         hoverOff
+    //                         color={'prime1'}
+    //                     />
+    //                 </IconBlock>
+    //                 <ContentArea>
+    //                     <TitleArea>
+    //                         <Title>Pin Memex to the extension bar</Title>
+    //                     </TitleArea>
+    //                     <Description>
+    //                         Don't like the Mini-Sidebar and want to use
+    //                         something else?
+    //                     </Description>
+    //                 </ContentArea>
+    //             </CardContainer>
+    //         </>
+    //     ),
+    //     left: null,
+    //     right: '20px',
+    //     top: '20px',
+    //     showHoverArea: false,
+    //     position: 'center',
+    // },
     {
         subtitle: (
             <>
