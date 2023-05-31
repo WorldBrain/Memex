@@ -8,7 +8,12 @@ import styled, { css } from 'styled-components'
 import browser from 'webextension-polyfill'
 import { COUNTER_STORAGE_KEY } from './constants'
 
-export class BlockCounterIndicator extends React.Component {
+interface Props {
+    ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
+    isSidebarOpen: boolean
+}
+
+export class BlockCounterIndicator extends React.Component<Props> {
     state = {
         currentCount: undefined,
         totalCount: undefined,
@@ -64,9 +69,14 @@ export class BlockCounterIndicator extends React.Component {
     }
 
     renderTooltip = (leftOverBlocks) => {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
         return (
             <PopoutBox
-                placement="left-start"
+                placement={
+                    topRight ? 'bottom' : bottomRight ? 'top' : 'left-start'
+                }
                 targetElementRef={this.tooltipButtonRef.current}
                 closeComponent={() => this.setState({ showTooltip: false })}
                 offsetX={10}
@@ -174,7 +184,7 @@ export class BlockCounterIndicator extends React.Component {
                                     color="prime1"
                                 />
                                 Generally, every interacted page counts{' '}
-                                <strong>just once.</strong>
+                                <strong>just once. Forever</strong>
                             </InfoTooltipContentSubAreaBulletPoint>
                             <InfoTooltipContentSubAreaBulletPoint>
                                 <Icon
@@ -210,12 +220,24 @@ export class BlockCounterIndicator extends React.Component {
             3.6
         const leftOverBlocks = this.state.totalCount - this.state.currentCount
 
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
         if (!this.state.shouldShow) {
             return null
         } else {
             return (
                 <TooltipBox
-                    placement="left"
+                    placement={
+                        this.props.isSidebarOpen
+                            ? 'left'
+                            : topRight
+                            ? 'bottom'
+                            : bottomRight
+                            ? 'top'
+                            : 'left'
+                    }
+                    offsetX={15}
                     tooltipText={
                         <TooltipTextContainer>
                             <TooltipTextTop>
@@ -287,8 +309,8 @@ const CounterContainer = styled.div<{
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 28px;
-    width: 28px;
+    height: 24px;
+    width: 24px;
 
     ${(props) =>
         props.progress === 0 &&
@@ -307,8 +329,8 @@ const InnerContainer = styled.div`
     border-radius: 50px;
     background-color: ${(props) => props.theme.colors.black};
     color: ${(props) => props.theme.colors.greyScale6};
-    height: 24px;
-    width: 24px;
+    height: 20px;
+    width: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
