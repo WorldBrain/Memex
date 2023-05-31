@@ -38,9 +38,6 @@ export default class RibbonHolder extends StatefulUIElement<
             'stateChanged',
             this.handleInPageUIStateChange,
         )
-
-        window['_getRibbonState'] = () => ({ ...this.state })
-        window['_getRibbonProps'] = () => ({ ...this.props })
     }
 
     componentWillUnmount() {

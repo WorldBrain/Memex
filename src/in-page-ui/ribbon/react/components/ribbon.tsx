@@ -383,23 +383,9 @@ export default class Ribbon extends Component<Props, State> {
                                             </InfoText>
                                         )}
                                     </ExtraButtonRow>
-                                    <ExtraButtonRow
-                                        onClick={() =>
-                                            this.props.bgScriptBG.openOptionsTab(
-                                                'settings',
-                                            )
-                                        }
-                                    >
-                                        <Icon
-                                            filePath={icons.settings}
-                                            heightAndWidth="22px"
-                                            hoverOff
-                                        />
-                                        <InfoText>All Settings</InfoText>
-                                    </ExtraButtonRow>
                                     <ExtraButtonRow deactivateHover>
                                         <Icon
-                                            filePath={icons.sidebarIcon}
+                                            filePath={icons.quickActionRibbon}
                                             heightAndWidth="22px"
                                             hoverOff
                                         />
@@ -464,6 +450,20 @@ export default class Ribbon extends Component<Props, State> {
                                                 </SelectionItem>
                                             </SelectionDropDown>
                                         </SelectionContainer>
+                                    </ExtraButtonRow>
+                                    <ExtraButtonRow
+                                        onClick={() =>
+                                            this.props.bgScriptBG.openOptionsTab(
+                                                'settings',
+                                            )
+                                        }
+                                    >
+                                        <Icon
+                                            filePath={icons.settings}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>All Settings</InfoText>
                                     </ExtraButtonRow>
                                 </SupportBox>
                             </TutorialContainerBox>
@@ -1029,7 +1029,7 @@ export default class Ribbon extends Component<Props, State> {
                 tooltipText={
                     this.props.bookmark.isBookmarked ? (
                         <span>
-                            Bookmarked on <DateText>{bookmarkDate}</DateText>
+                            Saved on <DateText>{bookmarkDate}</DateText>
                         </span>
                     ) : (
                         this.getTooltipText('createBookmark')
@@ -1509,7 +1509,7 @@ export default class Ribbon extends Component<Props, State> {
                 >
                     <Icon
                         icon={logoNoText}
-                        heightAndWidth="22px"
+                        heightAndWidth="20px"
                         originalImage
                     />
                 </IconContainer>
@@ -1799,9 +1799,9 @@ const IconContainer = styled.div<{ ribbonPosition }>`
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    height: 100%;
-    width: 100%;
-    background: ${(props) => props.theme.colors.greyScale1}80;
+    height: 90%;
+    width: 90%;
+    background: ${(props) => props.theme.colors.greyScale1}90;
     backdrop-filter: blur(4px);
 
     ${(props) =>
@@ -1813,6 +1813,7 @@ const IconContainer = styled.div<{ ribbonPosition }>`
         props.ribbonPosition === 'topRight' &&
         css`
             border-radius: 0 0 0 8px;
+            margin-top: -2px;
         `}
 `
 
