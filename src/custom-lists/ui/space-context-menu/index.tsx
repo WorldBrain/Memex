@@ -272,7 +272,11 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         icon={'trash'}
                         size={'medium'}
                         type={'tertiary'}
-                        label={'Delete Space'}
+                        label={
+                            this.props.listData.type === 'page-link'
+                                ? 'Delete Page Link'
+                                : 'Delete Space'
+                        }
                     />
                     <>
                         {this.state?.showSaveButton && (
