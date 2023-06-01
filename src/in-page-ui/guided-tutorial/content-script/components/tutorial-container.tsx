@@ -174,11 +174,11 @@ const HoverArea = styled.div`
     right: 0px;
     /* border-bottom-left-radius: 40px;
     border-top-left-radius: 40px; */
-    top: 0px;
+    bottom: 0px;
     right: 0px;
-    width: 55px;
-    height: 44px;
-    border-bottom-left-radius: 8px;
+    width: 44px;
+    height: 38px;
+    border-top-left-radius: 8px;
     border: 1px solid ${(props) => props.theme.colors.prime1};
     background: ${(props) => props.theme.colors.prime1}60;
 
