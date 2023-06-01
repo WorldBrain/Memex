@@ -1,7 +1,7 @@
 import { runtime } from 'webextension-polyfill'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { fetchDOMForUrl } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-dom-for-url'
-import extractFavIcon from 'src/page-analysis/background/content-extraction/extract-fav-icon'
+import extractFavIcon from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-fav-icon'
 // import extractPdfContent from 'src/page-analysis/background/content-extraction/extract-pdf-content'
 import {
     extractPageMetadataFromRawContent,
