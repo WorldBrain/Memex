@@ -764,20 +764,97 @@ export default class Ribbon extends Component<Props, State> {
                 }
                 closeComponent={() => this.props.toggleRemoveMenu()}
             >
-                <RemoveMenuContainer>
-                    {this.props.ribbonPosition === 'topRight' && (
-                        <ExtraButtonRow
-                            onClick={() => this.props.handleRemoveRibbon()}
-                        >
-                            <Icon
-                                filePath={'removeX'}
-                                heightAndWidth="22px"
-                                hoverOff
-                            />
-                            <InfoText>Hide Sidebar (or click on X)</InfoText>
-                        </ExtraButtonRow>
-                    )}
-                    <BlockListArea>
+                <RemoveMenuContainer ribbonPosition={this.props.ribbonPosition}>
+                    <ExtraButtonRow
+                        onClick={() => this.props.handleRemoveRibbon()}
+                    >
+                        <Icon
+                            filePath={'removeX'}
+                            heightAndWidth="22px"
+                            hoverOff
+                        />
+                        <InfoText>Hide Sidebar</InfoText>
+                    </ExtraButtonRow>
+                    <ExtraButtonRow deactivateHover>
+                        <Icon
+                            filePath={icons.quickActionRibbon}
+                            heightAndWidth="22px"
+                            hoverOff
+                        />
+                        <InfoText>Change sidebar location</InfoText>
+                        <SelectionContainer>
+                            <SelectionDropDown
+                                onChange={(event) =>
+                                    this.props.selectRibbonPositionOption(
+                                        event.target.value,
+                                    )
+                                }
+                            >
+                                <SelectionItem
+                                    onClick={() => {
+                                        this.props.toggleShowTutorial()
+                                        this.props.selectRibbonPositionOption(
+                                            'topRight',
+                                        )
+                                    }}
+                                    value={'topRight'}
+                                    selected={
+                                        this.props.ribbonPosition === 'topRight'
+                                    }
+                                >
+                                    Top Right
+                                </SelectionItem>
+                                <SelectionItem
+                                    onClick={() => {
+                                        this.props.toggleShowTutorial()
+                                        this.props.selectRibbonPositionOption(
+                                            'centerRight',
+                                        )
+                                    }}
+                                    value={'centerRight'}
+                                    selected={
+                                        this.props.ribbonPosition ===
+                                        'centerRight'
+                                    }
+                                >
+                                    Center Right
+                                </SelectionItem>
+                                <SelectionItem
+                                    onClick={() => {
+                                        this.props.toggleShowTutorial()
+                                        this.props.selectRibbonPositionOption(
+                                            'bottomRight',
+                                        )
+                                    }}
+                                    value={'bottomRight'}
+                                    selected={
+                                        this.props.ribbonPosition ===
+                                        'bottomRight'
+                                    }
+                                >
+                                    Bottom Right
+                                </SelectionItem>
+                            </SelectionDropDown>
+                        </SelectionContainer>
+                    </ExtraButtonRow>
+                    <ExtraButtonRow
+                        onClick={() => {
+                            this.props.handleRibbonToggle()
+                            this.props.sidebar.closeSidebar()
+                        }}
+                    >
+                        <Icon
+                            filePath={icons.block}
+                            heightAndWidth="22px"
+                            hoverOff
+                        />
+                        {this.props.isRibbonEnabled ? (
+                            <InfoText>Disable Sidebar on all pages</InfoText>
+                        ) : (
+                            <InfoText>Enable Sidebar on all pages</InfoText>
+                        )}
+                    </ExtraButtonRow>
+                    <BlockListArea ribbonPosition={this.props.ribbonPosition}>
                         <BlockListTitleArea>
                             <BlockListTitleContent>
                                 <InfoText>
@@ -837,35 +914,6 @@ export default class Ribbon extends Component<Props, State> {
                             </TooltipBox>
                         </TextBoxArea>
                     </BlockListArea>
-                    <ExtraButtonRow
-                        onClick={() => {
-                            this.props.handleRibbonToggle()
-                            this.props.sidebar.closeSidebar()
-                        }}
-                    >
-                        <Icon
-                            filePath={icons.quickActionRibbon}
-                            heightAndWidth="22px"
-                            hoverOff
-                        />
-                        {this.props.isRibbonEnabled ? (
-                            <InfoText>Disable Sidebar on all pages</InfoText>
-                        ) : (
-                            <InfoText>Enable Sidebar on all pages</InfoText>
-                        )}
-                    </ExtraButtonRow>
-                    {this.props.ribbonPosition === 'bottomRight' && (
-                        <ExtraButtonRow
-                            onClick={() => this.props.handleRemoveRibbon()}
-                        >
-                            <Icon
-                                filePath={'removeX'}
-                                heightAndWidth="22px"
-                                hoverOff
-                            />
-                            <InfoText>Hide Sidebar (or click on X)</InfoText>
-                        </ExtraButtonRow>
-                    )}
                 </RemoveMenuContainer>
             </PopoutBox>
         )
@@ -1509,7 +1557,7 @@ export default class Ribbon extends Component<Props, State> {
                 >
                     <Icon
                         icon={logoNoText}
-                        heightAndWidth="20px"
+                        heightAndWidth="18px"
                         originalImage
                     />
                 </IconContainer>
@@ -1799,8 +1847,8 @@ const IconContainer = styled.div<{ ribbonPosition }>`
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    height: 90%;
-    width: 90%;
+    height: 100%;
+    width: 100%;
     background: ${(props) => props.theme.colors.greyScale1}90;
     backdrop-filter: blur(4px);
 
@@ -1834,11 +1882,19 @@ const SupportBox = styled.div`
     margin-top: 10px;
 `
 
-const RemoveMenuContainer = styled.div`
+const RemoveMenuContainer = styled.div<{
+    ribbonPosition
+}>`
     display: flex;
     padding: 15px;
-    width: 300px;
+    width: 330px;
     flex-direction: column;
+
+    ${(props) =>
+        props.ribbonPosition === 'bottomRight' &&
+        css`
+            flex-direction: column-reverse;
+        `}
 `
 const TutorialContainerBox = styled.div`
     display: flex;
@@ -1959,7 +2015,7 @@ const TooltipContent = styled.div`
     justify-content: center;
 `
 
-const BlockListArea = styled.div`
+const BlockListArea = styled.div<{ ribbonPosition }>`
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
     display: flex;
@@ -1969,6 +2025,19 @@ const BlockListArea = styled.div`
     margin-bottom: 10px;
     margin-top: 10px;
     padding: 10px 10px 15px 0;
+
+    ${(props) =>
+        props.ribbonPosition === 'topRight' &&
+        css`
+            border-bottom: none;
+            margin-bottom: 0px;
+        `}
+    ${(props) =>
+        props.ribbonPosition === 'bottomRight' &&
+        css`
+            border-top: none;
+            margin-top: 0px;
+        `}
 `
 
 const BlockListTitleArea = styled.div`
@@ -2105,13 +2174,13 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
             props.ribbonPosition === 'topRight' &&
             css`
                 border-radius: 0 0 0 8px;
-                height: 44px;
+                height: 36px;
             `}
         ${(props) =>
             props.ribbonPosition === 'bottomRight' &&
             css`
                 border-radius: 8px 0 0 0;
-                height: 44px;
+                height: 52px;
             `}
 
             ${(props) =>

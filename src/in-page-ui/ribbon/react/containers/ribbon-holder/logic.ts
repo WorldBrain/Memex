@@ -64,14 +64,14 @@ export class RibbonHolderLogic extends UILogic<
 
         this.emitMutation({
             ribbonPosition: {
-                $set: ribbonPosition ?? 'topRight',
+                $set: ribbonPosition ?? 'bottomRight',
             },
         })
 
         if (ribbonPosition == null) {
             await this.dependencies.containerDependencies.syncSettings.inPageUI.set(
                 'ribbonPosition',
-                'topRight',
+                'bottomRight',
             )
         }
 

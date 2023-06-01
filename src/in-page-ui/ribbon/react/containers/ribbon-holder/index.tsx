@@ -219,7 +219,7 @@ const RibbonHolderBox = styled.div<{
             display: flex;
             box-shadow: none;
             justify-content: flex-end;
-            width: ${(props) => (props.isSidebarOpen ? 'fit-content' : '50px')};
+            width: ${(props) => (props.isSidebarOpen ? 'fit-content' : '40px')};
             align-items: flex-start;
             transition: unset;
 
@@ -234,7 +234,7 @@ const RibbonHolderBox = styled.div<{
             right: 0px;
             top: 0px;
             align-items: flex-start;
-            height: 42px;
+            height: 34px;
         `}
     ${(props) =>
         props.ribbonPosition === 'bottomRight' &&
@@ -243,7 +243,7 @@ const RibbonHolderBox = styled.div<{
             bottom: 0px;
             top: unset;
             align-items: flex-end;
-            height: 42px;
+            height: 34px;
         `}
 
     ${(props) =>
