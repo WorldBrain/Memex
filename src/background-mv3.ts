@@ -6,7 +6,8 @@ import {
     setupRpcConnection,
     setupRemoteFunctionsImplementations,
 } from './util/webextensionRPC'
-import fetchPageData from 'src/page-analysis/background/fetch-page-data'
+import { fetchPDFData } from 'src/page-analysis/background/fetch-page-data'
+import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
 import { StorageChangesManager } from './util/storage-changes'
 import initSentry, { captureException } from './util/raven'
 import {
@@ -71,7 +72,9 @@ async function main() {
         },
     )
     const fetchPageDataProcessor = new FetchPageDataProcessor({
+        runtimeAPI: browser.runtime,
         fetchPageData,
+        fetchPDFData,
         pagePipeline,
     })
 

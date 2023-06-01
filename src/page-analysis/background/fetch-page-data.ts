@@ -1,48 +1,9 @@
-import { runtime } from 'webextension-polyfill'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { fetchDOMForUrl } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-dom-for-url'
-import extractFavIcon from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-fav-icon'
+import { defaultOpts } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
+import type { FetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 // import extractPdfContent from 'src/page-analysis/background/content-extraction/extract-pdf-content'
-import {
-    extractPageMetadataFromRawContent,
-    extractRawPageContent,
-    getPageFullText,
-} from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
-import type { PageDataResult } from './types'
-import { FetchPageDataError } from './fetch-page-data-error'
-import { isUrlPDFViewerUrl } from 'src/pdf/util'
 
-export type FetchPageData = (args: {
-    url: string
-    timeout?: number
-    domParser?: (html: string) => Document
-    opts?: FetchPageDataOpts
-}) => FetchPageDataReturnValue
-export type RunXHR = () => Promise<PageDataResult>
-export type CancelXHR = () => void
-
-export interface FetchPageDataOpts {
-    /** Denotes whether to attempt page text + metadata fetch. */
-    includePageContent: boolean
-    /** Denotes whether to attempt favicon fetch. */
-    includeFavIcon: boolean
-}
-
-export interface FetchPageDataReturnValue {
-    run: RunXHR
-    cancel: CancelXHR
-}
-
-export const defaultOpts: FetchPageDataOpts = {
-    includePageContent: false,
-    includeFavIcon: false,
-}
-
-/**
- * Given a URL will attempt an async fetch of the text and metadata from the page
- * which the URL points to.
- */
-const fetchPageData: FetchPageData = ({
+export const fetchPDFData: FetchPageData = ({
     url,
     timeout = 10000,
     domParser,
@@ -51,6 +12,7 @@ const fetchPageData: FetchPageData = ({
     let normalizedUrl: string
 
     try {
+        // TODO: What's going on here?? Needs explanation
         normalizedUrl = JSON.stringify(
             normalizeUrl(url, {
                 removeQueryParameters: [/.*/i],
@@ -60,12 +22,9 @@ const fetchPageData: FetchPageData = ({
         normalizedUrl = url
     }
 
-    let run: RunXHR
-    let cancel: CancelXHR
-
-    // Check if pdf and run code for pdf instead
-    if (isUrlPDFViewerUrl(url, { runtimeAPI: runtime })) {
-        run = async () => {
+    return {
+        cancel: () => undefined,
+        run: async () => {
             // TODO: PDFs can no longer be processed in the BG SW, thus can't be remotely fetched like this
             return {}
             // if (opts.includePageContent) {
@@ -75,39 +34,6 @@ const fetchPageData: FetchPageData = ({
             //         content,
             //     }
             // }
-        }
-        cancel = () => undefined
-    } else {
-        const req = fetchDOMForUrl(url, timeout, domParser)
-        cancel = req.cancel
-
-        run = async function (): Promise<PageDataResult> {
-            const doc = await req.run()
-
-            if (!doc) {
-                throw new FetchPageDataError('Cannot fetch DOM', 'temporary')
-            }
-
-            const result: PageDataResult = {}
-            if (opts.includePageContent) {
-                const rawContent = extractRawPageContent(doc, url)
-                const metadata = extractPageMetadataFromRawContent(rawContent)
-                const fullText = getPageFullText(rawContent, metadata)
-
-                result.content = { ...metadata, fullText }
-                if (rawContent.type === 'html') {
-                    result.htmlBody = rawContent.body
-                }
-            }
-            if (opts.includeFavIcon) {
-                result.favIconURI = await extractFavIcon(url, doc)
-            }
-
-            return result
-        }
+        },
     }
-
-    return { run, cancel }
 }
-
-export default fetchPageData

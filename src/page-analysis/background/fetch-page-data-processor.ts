@@ -1,12 +1,19 @@
+import type { Runtime } from 'webextension-polyfill'
 import type { PagePipeline } from '@worldbrain/memex-common/lib/page-indexing/pipeline'
-import type { FetchPageData } from './fetch-page-data'
-import { FetchPageDataError } from './fetch-page-data-error'
-import type { PageDataResult, PageContent, FetchPageProcessor } from './types'
+import { isUrlPDFViewerUrl } from 'src/pdf/util'
+import type { PageContent, FetchPageProcessor } from './types'
+import type {
+    FetchPageData,
+    PageDataResult,
+} from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
+import { FetchPageDataError } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/errors'
 
 export class FetchPageDataProcessor implements FetchPageProcessor {
     constructor(
         private props: {
+            runtimeAPI: Pick<Runtime.Static, 'getURL'>
             fetchPageData: FetchPageData
+            fetchPDFData: FetchPageData
             pagePipeline: PagePipeline
             domParser?: (html: string) => Document
         },
@@ -19,11 +26,19 @@ export class FetchPageDataProcessor implements FetchPageProcessor {
         htmlBody?: string
         pdfFingerprints?: string[]
     }> {
-        const fetch = this.props.fetchPageData({
-            url,
-            domParser: this.props.domParser,
-            opts: { includePageContent: true, includeFavIcon: true },
+        const fetch = isUrlPDFViewerUrl(url, {
+            runtimeAPI: this.props.runtimeAPI,
         })
+            ? this.props.fetchPDFData({
+                  url,
+                  domParser: this.props.domParser,
+                  opts: { includePageContent: true, includeFavIcon: true },
+              })
+            : this.props.fetchPageData({
+                  url,
+                  domParser: this.props.domParser,
+                  opts: { includePageContent: true, includeFavIcon: true },
+              })
 
         let fetchResult: PageDataResult
         try {
