@@ -85,6 +85,7 @@ export async function main(): Promise<void> {
     )
     const fetchPageDataProcessor = new FetchPageDataProcessor({
         runtimeAPI: browser.runtime,
+        domParser: (html) => new DOMParser().parseFromString(html, 'text/html'),
         fetchPageData,
         fetchPDFData,
         pagePipeline,
