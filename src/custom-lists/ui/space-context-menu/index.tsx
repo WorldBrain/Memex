@@ -234,7 +234,11 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
 
                 {this.props.listData.type !== 'special-list' && (
                     <>
-                        <SectionTitle>Edit Space</SectionTitle>
+                        <SectionTitle>
+                            {this.props.listData.type === 'page-link'
+                                ? 'Edit Page Link Name'
+                                : 'Edit Space Name'}
+                        </SectionTitle>
                         <EditArea>
                             <Container
                                 onClick={(e) => {
@@ -268,7 +272,11 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         icon={'trash'}
                         size={'medium'}
                         type={'tertiary'}
-                        label={'Delete Space'}
+                        label={
+                            this.props.listData.type === 'page-link'
+                                ? 'Delete Page Link'
+                                : 'Delete Space'
+                        }
                     />
                     <>
                         {this.state?.showSaveButton && (
@@ -325,7 +333,7 @@ const ContextMenuContainer = styled.div`
 
 const SectionTitle = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.greyScale4};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 400;
     width: 100%;
     display: flex;

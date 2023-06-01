@@ -68,6 +68,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleRibbon: null
         highlightAnnotations: null
         toggleShowExtraButtons: null
+        selectRibbonPositionOption: null
         toggleRemoveMenu: boolean | null
         toggleShowTutorial: null
         toggleFeed: null

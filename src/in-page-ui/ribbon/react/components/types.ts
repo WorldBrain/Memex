@@ -29,6 +29,7 @@ export interface RibbonSubcomponentProps {
     contentSharingBG: ContentSharingInterface
     bgScriptBG: RemoteBGScriptInterface
     onListShare: (ids: { localListId: number; remoteListId: string }) => void
+    selectRibbonPositionOption: (option) => void
 }
 
 export interface RibbonHighlightsProps {

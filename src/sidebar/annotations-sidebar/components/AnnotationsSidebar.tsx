@@ -1786,7 +1786,7 @@ export class AnnotationsSidebar extends React.Component<
                 {(this.props.activeTab === 'annotations' ||
                     this.props.selectedListId) && (
                     <>
-                        <DiscordNotification />
+                        {/* <DiscordNotification /> */}
                         <TopAreaContainer>
                             <NewAnnotationBoxMyAnnotations>
                                 {this.renderNewAnnotation()}

@@ -76,6 +76,7 @@ export interface SyncSettingsByFeature {
         ribbonEnabled: boolean
         tooltipEnabled: boolean
         highlightsEnabled: boolean
+        ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
     }
 }
 
