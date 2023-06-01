@@ -176,7 +176,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                                     '.',
                                                 ) &&
                                                 this.state.displayName.length >=
-                                                    3 &&
+                                                    2 &&
                                                 this.state.password.length >
                                                     0 &&
                                                 this.state.passwordConfirm
