@@ -3,11 +3,12 @@ import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { fetchDOMForUrl } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-dom-for-url'
 import extractFavIcon from 'src/page-analysis/background/content-extraction/extract-fav-icon'
 // import extractPdfContent from 'src/page-analysis/background/content-extraction/extract-pdf-content'
-import { extractRawPageContent } from 'src/page-analysis/content_script/extract-page-content'
-import extractPageMetadataFromRawContent, {
+import {
+    extractPageMetadataFromRawContent,
+    extractRawPageContent,
     getPageFullText,
-} from './content-extraction'
-import { PageDataResult } from './types'
+} from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
+import type { PageDataResult } from './types'
 import { FetchPageDataError } from './fetch-page-data-error'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 

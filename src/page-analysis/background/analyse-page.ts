@@ -1,7 +1,8 @@
-import extractPageMetadataFromRawContent, {
+import {
+    extractPageMetadataFromRawContent,
     getPageFullText,
-} from './content-extraction'
-import type { PageContent } from 'src/search'
+} from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
+import type { PageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
 import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import type TabManagementBackground from 'src/tab-management/background'
 import type { ExtractedPDFData } from './content-extraction/types'

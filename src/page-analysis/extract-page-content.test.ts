@@ -1,10 +1,11 @@
 /* eslint-env jest */
 
 import { JSDOM } from 'jsdom'
-import { extractRawPageContent } from './content_script/extract-page-content'
-import extractPageMetadataFromRawContent, {
+import { extractRawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
+import {
+    extractPageMetadataFromRawContent,
     getPageFullText,
-} from './background/content-extraction'
+} from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
 
 describe('Extract page content', () => {
     // beforeAll(() => {

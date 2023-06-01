@@ -1,8 +1,8 @@
 import browser from 'webextension-polyfill'
 import * as PDFJS from 'pdfjs-dist'
 import { loadBlob } from 'src/imports/background/utils'
-import type { RawPdfPageContent } from 'src/page-analysis/types'
 import { extractDataFromPDFDocument } from 'src/pdf/util'
+import type { RawPdfPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
 
 // NOTE: This is the old mv2 logic where PDF data got fetched then processed in the BG.
 //  It moved to happen in the content script as PDFJS's getDocument no longer works in BG Service Worker
