@@ -1,7 +1,7 @@
 /* eslint-env jest */
 
 import { JSDOM } from 'jsdom'
-import extractRawPageContent from './content_script/extract-page-content'
+import { extractRawPageContent } from './content_script/extract-page-content'
 import extractPageMetadataFromRawContent, {
     getPageFullText,
 } from './background/content-extraction'
@@ -29,7 +29,7 @@ describe('Extract page content', () => {
         //     const result = await extractPageContent(null, pdfUrl)
     })
 
-    test('extract content from an HTML page', async () => {
+    test('extract content from an HTML page', () => {
         // eslint-disable-next-line new-cap
         const dom = new JSDOM(`
             <!DOCTYPE html>
@@ -44,12 +44,12 @@ describe('Extract page content', () => {
             </body>
             </html>
         `)
-        const rawContent = await extractRawPageContent(
+        const rawContent = extractRawPageContent(
             dom.window.document,
             'https://test.com',
         )
-        const metadata = await extractPageMetadataFromRawContent(rawContent)
-        const fullText = await getPageFullText(rawContent, metadata)
+        const metadata = extractPageMetadataFromRawContent(rawContent)
+        const fullText = getPageFullText(rawContent, metadata)
         expect({ ...metadata, fullText }).toEqual({
             fullText: ' Hello world ',
             lang: 'en',

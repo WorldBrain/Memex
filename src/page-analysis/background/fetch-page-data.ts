@@ -3,7 +3,7 @@ import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { fetchDOMForUrl } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-dom-for-url'
 import extractFavIcon from 'src/page-analysis/background/content-extraction/extract-fav-icon'
 // import extractPdfContent from 'src/page-analysis/background/content-extraction/extract-pdf-content'
-import extractRawPageContent from 'src/page-analysis/content_script/extract-page-content'
+import { extractRawPageContent } from 'src/page-analysis/content_script/extract-page-content'
 import extractPageMetadataFromRawContent, {
     getPageFullText,
 } from './content-extraction'
@@ -80,11 +80,7 @@ const fetchPageData: FetchPageData = ({
         const req = fetchDOMForUrl(url, timeout, domParser)
         cancel = req.cancel
 
-        /**
-         * @return {Promise<any>} Resolves to an object containing `content` and `favIconURI` data
-         *  fetched from the DOM pointed at by the `url` of `fetchPageData` call.
-         */
-        run = async function () {
+        run = async function (): Promise<PageDataResult> {
             const doc = await req.run()
 
             if (!doc) {
@@ -93,11 +89,9 @@ const fetchPageData: FetchPageData = ({
 
             const result: PageDataResult = {}
             if (opts.includePageContent) {
-                const rawContent = await extractRawPageContent(doc, url)
-                const metadata = await extractPageMetadataFromRawContent(
-                    rawContent,
-                )
-                const fullText = await getPageFullText(rawContent, metadata)
+                const rawContent = extractRawPageContent(doc, url)
+                const metadata = extractPageMetadataFromRawContent(rawContent)
+                const fullText = getPageFullText(rawContent, metadata)
 
                 result.content = { ...metadata, fullText }
                 if (rawContent.type === 'html') {

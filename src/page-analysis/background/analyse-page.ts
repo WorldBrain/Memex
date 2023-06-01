@@ -1,9 +1,11 @@
 import extractPageMetadataFromRawContent, {
     getPageFullText,
 } from './content-extraction'
-import { PageContent } from 'src/search'
-import TabManagementBackground from 'src/tab-management/background'
-import { RawPageContent } from '../types'
+import type { PageContent } from 'src/search'
+import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import type TabManagementBackground from 'src/tab-management/background'
+import type { ExtractedPDFData } from './content-extraction/types'
+import { runInTab } from 'src/util/webextensionRPC'
 
 export interface PageAnalysis {
     content: PageContent
@@ -34,43 +36,8 @@ const analysePage: PageAnalyzer = async (options) => {
     const { tabId, url } = options
     options.includeFavIcon = options.includeFavIcon ?? true
 
-    const extracted = await extractPageContent(options)
-    const { content, rawContent } = extracted
-    const favIconURI =
-        options.includeFavIcon && extracted.rawContent.type !== 'pdf'
-            ? await options.tabManagement.getFavIcon({ tabId })
-            : undefined
-    const htmlBody = rawContent.type === 'html' ? rawContent.body : undefined
-
-    return {
-        content,
-        favIconURI,
-        htmlBody,
-        pdfMetadata: extracted.pdfMetadata,
-        pdfPageTexts: extracted.pdfPageTexts,
-    }
-}
-
-async function extractPageContent(options: {
-    tabId: number
-    tabManagement: Pick<TabManagementBackground, 'extractRawPageContent'>
-    fetch?: typeof fetch
-    includeContent?: 'metadata-only' | 'metadata-with-full-text'
-    url?: string
-}): Promise<
-    | {
-          content: PageContent
-          rawContent: RawPageContent
-          pdfMetadata?: PageAnalysis['pdfMetadata']
-          pdfPageTexts?: PageAnalysis['pdfPageTexts']
-      }
-    | undefined
-> {
-    let content
-    let rawContent
-    let pdfMetadata
-    let pdfPageTexts
-
+    let pdfMetadata: PageAnalysis['pdfMetadata']
+    let pdfPageTexts: PageAnalysis['pdfPageTexts']
     if (!options.includeContent) {
         return
     }
@@ -78,22 +45,30 @@ async function extractPageContent(options: {
     const ytVideoUrlPattern = /^.*(?:(?:youtu.be\/)|(?:v\/)|(?:\/u\/\w\/)|(?:embed\/)|(?:watch\?))\??(?:v=)?([^#&?]*).*/
     const [, videoId] = options.url.match(ytVideoUrlPattern) ?? []
 
-    rawContent = await options.tabManagement.extractRawPageContent(
+    const rawContent = await options.tabManagement.extractRawPageContent(
         options.tabId,
     )
     if (!rawContent) {
         throw new Error(`Could extract raw page content`)
     }
 
-    content = await extractPageMetadataFromRawContent(rawContent, options)
+    let content: PageContent | ExtractedPDFData
+    if (rawContent.type === 'pdf') {
+        const pdfContent = await runInTab<
+            InPDFPageUIContentScriptRemoteInterface
+        >(options.tabId).extractPDFContents()
+        pdfMetadata = pdfContent.pdfMetadata
+        pdfPageTexts = pdfContent.pdfPageTexts
+        delete pdfContent.pdfMetadata
+        delete pdfContent.pdfPageTexts
+        content = pdfContent
+    } else {
+        content = extractPageMetadataFromRawContent(rawContent)
+    }
 
     if (options.includeContent === 'metadata-with-full-text') {
-        content.fullText = await getPageFullText(rawContent, content)
+        content.fullText = getPageFullText(rawContent, content)
     }
-    pdfMetadata = content.pdfMetadata
-    pdfPageTexts = content.pdfPageTexts
-    delete content.pdfMetadata
-    delete content.pdfPageTexts
 
     if (videoId) {
         const isStaging =
@@ -124,7 +99,19 @@ async function extractPageContent(options: {
                 content.fullText + JSON.parse(responseContent).transcriptText
         }
     }
-    return { content, rawContent, pdfMetadata, pdfPageTexts }
+    const favIconURI =
+        options.includeFavIcon && rawContent.type !== 'pdf'
+            ? await options.tabManagement.getFavIcon({ tabId })
+            : undefined
+    const htmlBody = rawContent.type === 'html' ? rawContent.body : undefined
+
+    return {
+        content,
+        htmlBody,
+        favIconURI,
+        pdfMetadata,
+        pdfPageTexts,
+    }
 }
 
 export default analysePage

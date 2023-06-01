@@ -1,32 +1,31 @@
-import extractHtmlContent from './extract-html-content'
+import PAGE_METADATA_RULES from '../../page-metadata-rules'
 import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html'
-import { runInTab } from 'src/util/webextensionRPC'
 import type { PageContent } from 'src/search'
-import type { RawPageContent } from 'src/page-analysis/types'
-import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import type {
+    RawHtmlPageContent,
+    RawPageContent,
+} from 'src/page-analysis/types'
+
+const pick = (keys: string[]) => (obj: { [key: string]: string }) =>
+    Object.assign({}, ...keys.map((key) => ({ [key]: obj[key] })))
 
 export default function extractPageMetadataFromRawContent(
-    rawContent: RawPageContent,
-    options?: { fetch?: typeof fetch; tabId?: number },
-): Promise<
-    PageContent & {
-        pdfMetadata?: { [key: string]: any }
-        pdfPageTexts?: string[]
-    }
-> {
-    if (rawContent.type === 'pdf') {
-        return runInTab<InPDFPageUIContentScriptRemoteInterface>(
-            options!.tabId!,
-        ).extractPDFContents()
-    } else {
-        return extractHtmlContent(rawContent)
+    rawContent: RawHtmlPageContent,
+): PageContent & {
+    pdfMetadata?: { [key: string]: any }
+    pdfPageTexts?: string[]
+} {
+    return {
+        lang: rawContent.lang,
+        // Picking desired fields, as getMetadata adds some unrequested stuff.
+        ...pick(Object.keys(PAGE_METADATA_RULES))(rawContent.metadata),
     }
 }
 
-export async function getPageFullText(
+export function getPageFullText(
     rawContent: RawPageContent,
     metadata: PageContent,
-) {
+): string {
     return rawContent.type === 'html'
         ? transformPageHTML({
               html: rawContent.body,

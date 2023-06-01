@@ -29,8 +29,8 @@ const title = {
 }
 
 export default {
-    canonicalUrl,
     title,
+    canonicalUrl,
     keywords: metadataRuleSets.keywords,
     description: metadataRuleSets.description,
 }

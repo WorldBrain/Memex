@@ -1,12 +1,7 @@
 import { blobToDataUrl } from 'src/util/blob-to-data-url'
 
-/**
- * @param url
- * @param {Document} doc DOM to attempt to find favicon URL from.
- * @returns {string?} URL pointing to the document's favicon or null.
- */
-function getFavIconURLFromDOM(url, doc) {
-    const favEl = doc.querySelector('link[rel*="icon"]')
+function getFavIconURLFromDOM(url: string, doc: Document): string {
+    const favEl = doc.querySelector<HTMLLinkElement>('link[rel*="icon"]')
     const urlPage = new URL(url)
     if (favEl?.href) {
         const urlFavIcon = new URL(favEl.href)
@@ -20,33 +15,17 @@ function getFavIconURLFromDOM(url, doc) {
     }
 }
 
-/**
- * @param {string} favIconUrl URL pointing to a favicon.
- * @returns {string?} Favicon encoded as data URL.
- */
-async function getFavIcon(favIconUrl) {
-    if (!favIconUrl) {
-        return
-    }
-
+async function getFavIcon(favIconUrl: string): Promise<string> {
     const response = await fetch(favIconUrl)
 
     if (response.status >= 400 && response.status < 600) {
-        try {
-            throw new Error(`Bad response from server: ${response.status}`)
-        } catch (err) {
-            return undefined
-        }
+        throw new Error(`Bad response from server: ${response.status}`)
     }
     const blob = await response.blob()
     return blobToDataUrl(blob)
 }
 
-/**
- * @param {Document} doc DOM to attempt to extract favicon from.
- * @returns {string?} Favicon encoded as data URL.
- */
-const extractFavIcon = (url, doc = document) => {
+const extractFavIcon = (url: string, doc = document) => {
     try {
         return getFavIcon(getFavIconURLFromDOM(url, doc))
     } catch (err) {
@@ -55,4 +34,5 @@ const extractFavIcon = (url, doc = document) => {
         return undefined // carry on without fav-icon
     }
 }
+
 export default extractFavIcon

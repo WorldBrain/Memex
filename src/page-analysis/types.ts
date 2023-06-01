@@ -1,11 +1,12 @@
 export interface PageAnalyzerInterface {
-    extractRawPageContent: ExtractRawPageContent
+    extractRawPageContent: () => Promise<RawPageContent>
 }
 
-export type ExtractRawPageContent = (
-    doc?: Document,
-    url?: string,
-) => Promise<RawPageContent>
+export type ExtractRawPageContent<Ret extends RawPageContent> = (
+    doc: Document,
+    url: string,
+) => Ret
+
 export type RawPageContent = RawHtmlPageContent | RawPdfPageContent
 export interface RawHtmlPageContent {
     type: 'html'
