@@ -357,7 +357,9 @@ export const tutorialSteps: TutorialStepContent[] = [
                     </IconBlock>
                     <ContentArea>
                         <TitleArea>
-                            <Title>Summarise websites, videos or PDFs</Title>
+                            <Title>
+                                Summarise websites, YouTube videos or PDFs
+                            </Title>
                             <KeyboardShortcuts
                                 keys={[getKeyName({ key: 'alt' }), 'X']}
                             />

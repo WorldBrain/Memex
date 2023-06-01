@@ -201,13 +201,26 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
             return null
         }
 
+        if (
+            pendingLocalChangeCount == null &&
+            pendingRemoteChangeCount == null
+        ) {
+            return (
+                <Container>
+                    <LoadingBox>
+                        <LoadingIndicator size={30} />
+                    </LoadingBox>
+                </Container>
+            )
+        }
+
         return (
             <Container>
                 {this.renderStatus()}
                 <Separator />
                 <RowContainer>
                     <Row>
-                        <InfoText> pending local changes</InfoText>
+                        <InfoText> pending uploads</InfoText>
                         <SectionCircle>
                             {pendingLocalChangeCount < 0
                                 ? 0
@@ -215,16 +228,16 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         </SectionCircle>
                         {/* This is a hack to make sure we don't show negative numbers but it'll hide some problems away */}
                     </Row>
-                    {/*
-                    TODO: Re-implement this
+
+                    {/* TODO: Re-implement this */}
                     <Row>
+                        <InfoText> pending downloads</InfoText>
                         <SectionCircle>
                             {pendingRemoteChangeCount < 0
                                 ? 0
                                 : pendingRemoteChangeCount}
                         </SectionCircle>
-                        <InfoText> pending remote changes</InfoText>
-                    </Row> */}
+                    </Row>
                 </RowContainer>
                 <Separator />
                 <BottomRow>

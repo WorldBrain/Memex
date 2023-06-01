@@ -2,7 +2,7 @@ import { UIEvent } from 'ui-logic-core'
 
 export interface RootState {
     isDisplayed: boolean
-    lastSuccessfulSyncDate: Date | null
+    lastSuccessfulSyncDate: Date
     pendingLocalChangeCount: number
     pendingRemoteChangeCount: number
 }

@@ -7,6 +7,10 @@ import {
 import type { Dependencies, State, Event } from './types'
 import delay from 'src/util/delay'
 import { browser } from 'webextension-polyfill-ts'
+import {
+    TypedRemoteEventEmitter,
+    getRemoteEventEmitter,
+} from 'src/util/webextensionRPC'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
     State,
@@ -20,6 +24,7 @@ export default class Logic extends UILogic<State, Event> {
     action?: 'login' | 'register'
     hasLinkToOpen = false
     hasAccountSynced = false
+    personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
 
     constructor(private dependencies: Dependencies) {
         super()
@@ -189,6 +194,29 @@ export default class Logic extends UILogic<State, Event> {
                         showSyncNotification: { $set: true },
                         loadState: { $set: 'success' },
                     })
+
+                    this.personalCloudEvents = getRemoteEventEmitter(
+                        'personalCloud',
+                    )
+                    this.personalCloudEvents.on(
+                        'cloudStatsUpdated',
+                        async ({ stats }) => {
+                            console.log('stats', stats)
+                            if (
+                                stats.pendingDownloads === 0 &&
+                                stats.pendingUploads === 0
+                            ) {
+                                setTimeout(() => {
+                                    if (
+                                        stats.pendingDownloads === 0 &&
+                                        stats.pendingUploads === 0
+                                    ) {
+                                        this.dependencies.navToDashboard()
+                                    }
+                                }, 5000)
+                            }
+                        },
+                    )
                 } else {
                     this.dependencies.navToGuidedTutorial()
                     this.dependencies.navToDashboard()
