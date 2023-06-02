@@ -30,13 +30,17 @@ import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill'
 import { createServices } from 'src/services'
 import { MemoryUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/memory'
-import { PersonalCloudBackend } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import {
+    PersonalCloudBackend,
+    PersonalCloudMediaBackend,
+} from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { createPersistentStorageManager } from 'src/storage/persistent-storage'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
 import {
     PersonalCloudHub,
     StorexPersonalCloudBackend,
+    StorexPersonalCloudMediaBackend,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { clearRemotelyCallableFunctions } from 'src/util/webextensionRPC'
@@ -51,6 +55,7 @@ export interface BackgroundIntegrationTestSetupOpts {
     customMiddleware?: StorageMiddleware[]
     getServerStorage?: () => Promise<ServerStorage>
     personalCloudBackend?: PersonalCloudBackend
+    personalCloudMediaBackend?: PersonalCloudMediaBackend
     browserLocalStorage?: MemoryBrowserStorage
     debugStorageOperations?: boolean
     includePostSyncProcessor?: boolean
@@ -184,6 +189,9 @@ export async function setupBackgroundIntegrationTest(
         options?.pushMessagingService ?? new MockPushMessagingService()
     let nextServerId = 1337
     const userMessages = new MemoryUserMessageService()
+    const getUserId = async () =>
+        (await backgroundModules.auth.authService.getCurrentUser())?.id
+    const personalCloudHub = new PersonalCloudHub()
     const backgroundModules = createBackgroundModules({
         manifestVersion: '3',
         getNow,
@@ -202,9 +210,19 @@ export async function setupBackgroundIntegrationTest(
         callFirebaseFunction: (name, ...args) => {
             return callFirebaseFunction(name, ...args)
         },
+        personalCloudMediaBackend:
+            options?.personalCloudMediaBackend ??
+            new StorexPersonalCloudMediaBackend({
+                getNow,
+                getUserId,
+                storageManager: serverStorage.manager,
+                view: personalCloudHub.getView(),
+            }),
         personalCloudBackend:
             options?.personalCloudBackend ??
             new StorexPersonalCloudBackend({
+                getNow,
+                getUserId,
                 services: {
                     activityStreams: services.activityStreams,
                     pushMessaging: new MockPushMessagingService(),
@@ -212,11 +230,7 @@ export async function setupBackgroundIntegrationTest(
                 storageManager: serverStorage.manager,
                 storageModules: serverStorage.modules,
                 clientSchemaVersion: STORAGE_VERSIONS[25].version,
-                view: new PersonalCloudHub().getView(),
-                getUserId: async () =>
-                    (await backgroundModules.auth.authService.getCurrentUser())
-                        ?.id,
-                getNow,
+                view: personalCloudHub.getView(),
                 useDownloadTranslationLayer:
                     options?.useDownloadTranslationLayer ?? true,
                 getDeviceId: async () =>
@@ -231,8 +245,7 @@ export async function setupBackgroundIntegrationTest(
             storageManager: serverStorage.manager,
             storageModules: serverStorage.modules,
             getConfig: () => ({ content_sharing: {} }),
-            getCurrentUserId: async () =>
-                (await auth.authService.getCurrentUser()).id,
+            getCurrentUserId: getUserId,
             services: { pushMessaging: pushMessagingService },
             captureException: async (err) => {
                 console.warn(

@@ -17,6 +17,7 @@ import { createLazyTestServerStorage } from 'src/storage/server'
 import {
     PersonalCloudHub,
     StorexPersonalCloudBackend,
+    StorexPersonalCloudMediaBackend,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/storex'
 import {
     ChangeWatchMiddlewareSettings,
@@ -387,6 +388,12 @@ export async function setupSyncBackgroundTest(
                     .personalCloud.deviceId,
             clientDeviceType: PersonalDeviceType.DesktopBrowser,
         })
+        const personalCloudMediaBackend = new StorexPersonalCloudMediaBackend({
+            getNow,
+            view: cloudHub.getView(),
+            getUserId: async () => userId,
+            storageManager: serverStorage.manager,
+        })
 
         const setup: BackgroundIntegrationTestSetup = await setupBackgroundIntegrationTest(
             {
@@ -396,6 +403,7 @@ export async function setupSyncBackgroundTest(
                 getServerStorage,
                 pushMessagingService,
                 personalCloudBackend,
+                personalCloudMediaBackend,
             },
         )
         setup.backgroundModules.personalCloud.actionQueue.forceQueueSkip = true
