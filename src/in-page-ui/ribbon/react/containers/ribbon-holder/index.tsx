@@ -11,8 +11,9 @@ import RibbonContainer from '../ribbon'
 import { SharedInPageUIEvents } from 'src/in-page-ui/shared-state/types'
 import PageActivityIndicator from 'src/page-activity-indicator/ui/indicator'
 import styled, { css } from 'styled-components'
+import { TOOLTIP_HEIGHT, TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
 
-const RIBBON_HIDE_TIMEOUT = 700
+const RIBBON_HIDE_TIMEOUT = 400
 
 export interface RibbonHolderProps extends RibbonHolderDependencies {}
 
@@ -219,7 +220,8 @@ const RibbonHolderBox = styled.div<{
             display: flex;
             box-shadow: none;
             justify-content: flex-end;
-            width: ${(props) => (props.isSidebarOpen ? 'fit-content' : '40px')};
+            width: ${(props) =>
+                props.isSidebarOpen ? 'fit-content' : TOOLTIP_WIDTH};
             align-items: flex-start;
             transition: unset;
 
@@ -233,8 +235,8 @@ const RibbonHolderBox = styled.div<{
         css<{ isSidebarOpen }>`
             right: 0px;
             top: 0px;
-            align-items: flex-start;
-            height: 34px;
+            align-items: flex-end;
+            height: ${TOOLTIP_HEIGHT};
         `}
     ${(props) =>
         props.ribbonPosition === 'bottomRight' &&
@@ -243,7 +245,7 @@ const RibbonHolderBox = styled.div<{
             bottom: 0px;
             top: unset;
             align-items: flex-end;
-            height: 34px;
+            height: ${TOOLTIP_HEIGHT};
         `}
 
     ${(props) =>
