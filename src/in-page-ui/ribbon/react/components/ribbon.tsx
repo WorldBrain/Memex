@@ -1558,7 +1558,7 @@ export default class Ribbon extends Component<Props, State> {
                     <Icon
                         icon={logoNoText}
                         heightAndWidth="18px"
-                        originalImage
+                        color="prime2"
                     />
                 </IconContainer>
             )
@@ -1861,7 +1861,7 @@ const IconContainer = styled.div<{ ribbonPosition }>`
         props.ribbonPosition === 'topRight' &&
         css`
             border-radius: 0 0 0 8px;
-            margin-top: -2px;
+            margin-top: -4px;
         `}
 `
 
@@ -2174,13 +2174,13 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
             props.ribbonPosition === 'topRight' &&
             css`
                 border-radius: 0 0 0 8px;
-                height: 36px;
+                height: 28px;
             `}
         ${(props) =>
             props.ribbonPosition === 'bottomRight' &&
             css`
                 border-radius: 8px 0 0 0;
-                height: 52px;
+                height: 58px;
             `}
 
             ${(props) =>

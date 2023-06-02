@@ -265,7 +265,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                         </TitleArea>
                         <Description>
                             Hover over the <GreenArea>green area</GreenArea> in
-                            the top right to get started.
+                            the bottom right to get started.
                         </Description>
                     </ContentArea>
                 </FirstCardContainer>
