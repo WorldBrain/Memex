@@ -2,7 +2,7 @@ import { StorageBackendPlugin } from '@worldbrain/storex'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 import type { AnnotSearchParams } from './types'
-import { transformUrl } from '../pipeline'
+import { extractUrlParts } from '@worldbrain/memex-common/lib/url-utils/extract-parts'
 import AnnotsStorage from 'src/annotations/background/storage'
 import type { Annotation } from 'src/annotations/types'
 import type { AnnotationPrivacyLevel } from 'src/content-sharing/background/types'
@@ -220,7 +220,7 @@ export class AnnotationsListPlugin extends StorageBackendPlugin<
         const exc = new Set(domainsExc)
 
         return urls.filter((url) => {
-            const { domain } = transformUrl(url)
+            const { domain } = extractUrlParts(url)
 
             if (!inc) {
                 return !exc.has(domain)

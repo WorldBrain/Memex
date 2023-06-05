@@ -2,11 +2,9 @@
 // export * from './del'
 // export * from './tags'
 // export * from './bookmarks'
-export { collections, extractContent } from './util'
+export { collections } from './util'
 // export * from './search'
 // export * from './on-demand-indexing'
 export * from './types'
 export * from './models'
 export { default as getDb } from './get-db'
-
-export { PipelineError } from './pipeline'

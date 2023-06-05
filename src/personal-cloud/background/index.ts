@@ -17,6 +17,7 @@ import {
     PersonalCloudUpdate,
     PersonalCloudOverwriteUpdate,
     PersonalCloudDeviceId,
+    PersonalCloudMediaBackend,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
 import {
@@ -49,6 +50,7 @@ import type { AuthChange } from '@worldbrain/memex-common/lib/authentication/typ
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
+    mediaBackend: PersonalCloudMediaBackend
     runtimeAPI: Runtime.Static
     storageManager: StorageManager
     syncSettingsStore: SyncSettingsStore<'dashboard'>
@@ -362,7 +364,7 @@ export class PersonalCloudBackground {
                 async ([fieldName, { path, type }]) => {
                     let fieldValue:
                         | Blob
-                        | string = await this.options.backend.downloadFromMedia(
+                        | string = await this.options.mediaBackend.downloadFromMedia(
                         { path },
                     )
                     if (type === 'text' || type === 'json') {
@@ -610,7 +612,7 @@ export class PersonalCloudBackground {
                             return
                         }
                         try {
-                            await this.options.backend.uploadToMedia({
+                            await this.options.mediaBackend.uploadToMedia({
                                 deviceId: this.deviceId,
                                 mediaPath: instruction.uploadPath,
                                 mediaObject: storageObject,

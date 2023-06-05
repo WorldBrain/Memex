@@ -79,13 +79,17 @@ import {
 import { PersonalCloudBackground } from 'src/personal-cloud/background'
 import {
     PersonalCloudBackend,
+    PersonalCloudMediaBackend,
     PersonalCloudService,
     SyncTriggerSetup,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalPersonalCloudSettings } from 'src/personal-cloud/background/types'
 import { authChangesGeneratorFactory } from '@worldbrain/memex-common/lib/authentication/utils'
-import FirebasePersonalCloudBackend from '@worldbrain/memex-common/lib/personal-cloud/backend/firebase'
+import FirebasePersonalCloudBackend, {
+    CloudBackendFirebaseDeps,
+    FirebasePersonalCloudMediaBackend,
+} from '@worldbrain/memex-common/lib/personal-cloud/backend/firebase'
 import { deviceIdCreatorFactory } from '@worldbrain/memex-common/lib/personal-cloud/storage/device-id'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
 import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
@@ -152,6 +156,7 @@ export function createBackgroundModules(options: {
         ...args: any[]
     ) => Promise<Returns>
     personalCloudBackend?: PersonalCloudBackend
+    personalCloudMediaBackend?: PersonalCloudMediaBackend
     contentSharingBackend?: ContentSharingBackend
     fetchPageDataProcessor?: FetchPageProcessor
     auth?: AuthBackground
@@ -443,6 +448,15 @@ export function createBackgroundModules(options: {
             personalCloudSettingStore.set('deviceId', deviceId),
     })
 
+    const firebase: CloudBackendFirebaseDeps = {
+        ref,
+        getAuth,
+        getStorage,
+        uploadBytes,
+        uploadString,
+        getDownloadURL,
+    }
+
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
         storageManager,
         syncSettingsStore,
@@ -450,17 +464,16 @@ export function createBackgroundModules(options: {
         runtimeAPI: options.browserAPIs.runtime,
         jobScheduler: jobScheduler.scheduler,
         persistentStorageManager: options.persistentStorageManager,
+        mediaBackend:
+            options.personalCloudMediaBackend ??
+            new FirebasePersonalCloudMediaBackend({
+                firebase,
+                getServerStorageManager,
+            }),
         backend:
             options.personalCloudBackend ??
             new FirebasePersonalCloudBackend({
-                firebase: {
-                    ref,
-                    getAuth,
-                    getStorage,
-                    uploadBytes,
-                    uploadString,
-                    getDownloadURL,
-                },
+                firebase,
                 getServerStorageManager,
                 personalCloudService: firebaseService<PersonalCloudService>(
                     'personalCloud',

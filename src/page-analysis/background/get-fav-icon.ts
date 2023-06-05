@@ -1,5 +1,4 @@
-import browser from 'webextension-polyfill'
-import responseToDataUrl from 'response-to-data-url'
+import { blobToDataUrl } from 'src/util/blob-to-data-url'
 
 export async function fetchFavIcon(url: string): Promise<string> {
     if (url == null) {
@@ -12,7 +11,8 @@ export async function fetchFavIcon(url: string): Promise<string> {
         throw new FavIconFetchError(response.statusText)
     }
 
-    return responseToDataUrl(response)
+    const blob = await response.blob()
+    return blobToDataUrl(blob)
 }
 
 export class FavIconFetchError extends Error {}

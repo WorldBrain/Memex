@@ -6,7 +6,8 @@ import {
     setupRpcConnection,
     setupRemoteFunctionsImplementations,
 } from './util/webextensionRPC'
-import fetchPageData from 'src/page-analysis/background/fetch-page-data'
+import { fetchPDFData } from 'src/page-analysis/background/fetch-page-data'
+import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
 import { StorageChangesManager } from './util/storage-changes'
 import initSentry, { captureException } from './util/raven'
 import {
@@ -15,7 +16,7 @@ import {
 } from './storage/server'
 import createNotification from 'src/util/notifications'
 import { FetchPageDataProcessor } from './page-analysis/background/fetch-page-data-processor'
-import pipeline from './search/pipeline'
+import pagePipeline from '@worldbrain/memex-common/lib/page-indexing/pipeline'
 import initStorex from './search/memex-storex'
 import { createPersistentStorageManager } from './storage/persistent-storage'
 import { getFirebase } from './util/firebase-app-initialized'
@@ -71,8 +72,11 @@ async function main() {
         },
     )
     const fetchPageDataProcessor = new FetchPageDataProcessor({
+        runtimeAPI: browser.runtime,
+        domParser: (html) => new DOMParser().parseFromString(html, 'text/html'),
         fetchPageData,
-        pagePipeline: pipeline,
+        fetchPDFData,
+        pagePipeline,
     })
 
     const storageManager = initStorex()

@@ -6,12 +6,12 @@ import { mapChunks } from 'src/util/chunk'
 import { CONCURR_TAB_LOAD } from '../constants'
 import { registerRemoteFunctions, runInTab } from 'src/util/webextensionRPC'
 import type { TabManagementInterface } from './types'
-import type { RawPageContent } from 'src/page-analysis/types'
 import { fetchFavIcon } from 'src/page-analysis/background/get-fav-icon'
 import { isLoggable } from 'src/activity-logger'
 import { captureException } from 'src/util/raven'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { isExtensionTab } from '../utils'
+import type { RawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
 
 const SCROLL_UPDATE_FN = 'updateScrollState'
 const CONTENT_SCRIPTS = ['/lib/browser-polyfill.js', '/content_script.js']

@@ -6,9 +6,9 @@ import {
     PageContent,
 } from 'src/page-analysis/background/types'
 import { ConnectivityCheckerBackground } from 'src/connectivity-checker/background'
-import { FetchPageDataError } from 'src/page-analysis/background/fetch-page-data-error'
 import { PageFetchBacklogStorage } from './storage'
 import { BacklogEntry, BacklogEntryCreateArgs } from './types'
+import { FetchPageDataError } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/errors'
 
 export class PageFetchBacklogBackground {
     static DEF_PROCESSING_INTERVAL = 300000
