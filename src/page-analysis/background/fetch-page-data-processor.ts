@@ -29,7 +29,7 @@ export class FetchPageDataProcessor implements FetchPageProcessor {
     }> {
         const fetchDataDeps: FetchPageDataDeps = {
             url,
-            fetch,
+            fetch: globalThis.fetch.bind(globalThis),
             domParser: this.props.domParser,
             opts: { includePageContent: true, includeFavIcon: true },
         }
