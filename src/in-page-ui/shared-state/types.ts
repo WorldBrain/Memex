@@ -94,4 +94,6 @@ export interface SharedInPageUIInterface {
     showHighlights(): Promise<void>
     hideHighlights(): Promise<void>
     toggleHighlights(): Promise<void>
+
+    toggleErrorMessage(args: { type: 'annotation' }): void
 }

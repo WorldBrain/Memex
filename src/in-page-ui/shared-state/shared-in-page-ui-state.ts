@@ -328,4 +328,8 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
             this.componentsSetUp[component] = true
         }
     }
+
+    toggleErrorMessage: SharedInPageUIInterface['toggleErrorMessage'] = ({
+        type,
+    }) => {}
 }
