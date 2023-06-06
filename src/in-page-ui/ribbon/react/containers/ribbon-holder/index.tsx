@@ -8,7 +8,10 @@ import {
 } from './logic'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import RibbonContainer from '../ribbon'
-import { SharedInPageUIEvents } from 'src/in-page-ui/shared-state/types'
+import type {
+    InPageErrorType,
+    SharedInPageUIEvents,
+} from 'src/in-page-ui/shared-state/types'
 import PageActivityIndicator from 'src/page-activity-indicator/ui/indicator'
 import styled, { css } from 'styled-components'
 import { TOOLTIP_HEIGHT, TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
@@ -39,6 +42,10 @@ export default class RibbonHolder extends StatefulUIElement<
             'stateChanged',
             this.handleInPageUIStateChange,
         )
+        this.props.inPageUI.events.on(
+            'displayErrorMessage',
+            this.handleInPageErrorMessage,
+        )
     }
 
     componentWillUnmount() {
@@ -48,6 +55,17 @@ export default class RibbonHolder extends StatefulUIElement<
         this.props.inPageUI.events.removeListener(
             'stateChanged',
             this.handleInPageUIStateChange,
+        )
+        this.props.inPageUI.events.removeListener(
+            'displayErrorMessage',
+            this.handleInPageErrorMessage,
+        )
+    }
+
+    private get inPageErrorType(): InPageErrorType | undefined {
+        return (
+            this.props.setUpOptions.inPageErrorType ??
+            this.state.inPageErrorType
         )
     }
 
@@ -60,7 +78,7 @@ export default class RibbonHolder extends StatefulUIElement<
         }
     }
 
-    handleInPageUIStateChange: SharedInPageUIEvents['stateChanged'] = ({
+    private handleInPageUIStateChange: SharedInPageUIEvents['stateChanged'] = ({
         changes,
     }) => {
         if ('ribbon' in changes) {
@@ -70,6 +88,12 @@ export default class RibbonHolder extends StatefulUIElement<
                 this.hideRibbon()
             }
         }
+    }
+
+    private handleInPageErrorMessage: SharedInPageUIEvents['displayErrorMessage'] = async ({
+        type,
+    }) => {
+        await this.processEvent('setInPageError', { type })
     }
 
     private handleHolderRef = (ref: HTMLDivElement) => {
@@ -199,10 +223,37 @@ export default class RibbonHolder extends StatefulUIElement<
                             }
                         />
                     )}
+                {this.inPageErrorType && (
+                    <InPageError>
+                        Error of type: {this.inPageErrorType}
+                    </InPageError>
+                )}
             </>
         )
     }
 }
+
+const InPageError = styled.div`
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: fit-content;
+    max-width: 40px;
+    width: 40px;
+    height: 40px;
+    z-index: 30000000000;
+    border-radius: 6px;
+    padding: 10px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale2};
+    background-color: ${(props) => props.theme.colors.warning};
+    box-shadow: 0px 4px 16px rgba(14, 15, 21, 0.3),
+        0px 12px 24px rgba(14, 15, 21, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 20px;
+    transition: max-width 0.2s cubic-bezier(0.4, 0, 0.16, 0.87);
+`
 
 const RibbonHolderBox = styled.div<{
     isSidebarOpen: boolean

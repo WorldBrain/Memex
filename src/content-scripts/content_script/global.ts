@@ -362,8 +362,8 @@ export async function main(
                 shouldShare,
             })
         } catch (err) {
-            inPageUI.toggleErrorMessage({ type: 'annotation' })
             captureException(err)
+            await inPageUI.toggleErrorMessage({ type: 'annotation' })
             throw err
         }
         return highlightId

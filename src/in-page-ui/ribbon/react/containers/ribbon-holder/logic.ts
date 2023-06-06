@@ -4,6 +4,7 @@ import type {
     SharedInPageUIInterface,
     InPageUIComponentShowState,
     ShouldSetUpOptions,
+    InPageErrorType,
 } from 'src/in-page-ui/shared-state/types'
 
 export interface RibbonHolderState {
@@ -12,12 +13,14 @@ export interface RibbonHolderState {
     keepPageActivityIndicatorHidden: boolean
     isRibbonEnabled?: boolean
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
+    inPageErrorType?: InPageErrorType
 }
 
 export type RibbonHolderEvents = UIEvent<{
-    openSidebarToSharedSpaces: null
     show: null
     hide: null
+    setInPageError: { type?: InPageErrorType }
+    openSidebarToSharedSpaces: null
     selectRibbonPositionOption: null
 }>
 
@@ -112,6 +115,10 @@ export class RibbonHolderLogic extends UILogic<
 
     hide: EventHandler<'hide'> = () => {
         return { state: { $set: 'hidden' } }
+    }
+
+    setInPageError: EventHandler<'setInPageError'> = async ({ event }) => {
+        this.emitMutation({ inPageErrorType: { $set: event.type } })
     }
 
     openSidebarToSharedSpaces: EventHandler<
