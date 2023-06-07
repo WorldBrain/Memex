@@ -13,8 +13,9 @@ export class AnalyticsBackground {
 
     constructor(
         private analyticsManager: Analytics,
-        options: {
+        public options: {
             localBrowserStorage: Storage.LocalStorageArea
+            sendBqEvent: (event: AnalyticsEvent) => Promise<void>
         },
     ) {
         this.remoteFunctions = {
@@ -42,5 +43,9 @@ export class AnalyticsBackground {
         } else {
             this.analyticsManager.trackEvent(event)
         }
+    }
+
+    trackBqEvent(event: AnalyticsEvent) {
+        return this.options.sendBqEvent(event)
     }
 }
