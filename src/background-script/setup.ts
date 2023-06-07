@@ -220,6 +220,8 @@ export function createBackgroundModules(options: {
 
     const analytics = new AnalyticsBackground(options.analyticsManager, {
         localBrowserStorage: options.browserAPIs.storage.local,
+        sendBqEvent: (event) =>
+            callFirebaseFunction('analytics-trackEvent', event),
     })
 
     const pages = new PageIndexingBackground({
