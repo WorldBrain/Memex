@@ -118,7 +118,13 @@ export class RibbonHolderLogic extends UILogic<
     }
 
     setInPageError: EventHandler<'setInPageError'> = async ({ event }) => {
-        this.emitMutation({ inPageErrorType: { $set: event.type } })
+        console.log('setInPageError', event)
+
+        if (event == null) {
+            this.emitMutation({ inPageErrorType: { $set: null } })
+        } else {
+            this.emitMutation({ inPageErrorType: { $set: event.type } })
+        }
     }
 
     openSidebarToSharedSpaces: EventHandler<

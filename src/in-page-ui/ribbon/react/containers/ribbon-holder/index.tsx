@@ -15,6 +15,7 @@ import type {
 import PageActivityIndicator from 'src/page-activity-indicator/ui/indicator'
 import styled, { css } from 'styled-components'
 import { TOOLTIP_HEIGHT, TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const RIBBON_HIDE_TIMEOUT = 400
 
@@ -225,7 +226,18 @@ export default class RibbonHolder extends StatefulUIElement<
                     )}
                 {this.inPageErrorType && (
                     <InPageError>
-                        Error of type: {this.inPageErrorType}
+                        <b>Error saving annotation</b>
+                        {this.inPageErrorType}
+                        <IconContainer>
+                            <Icon
+                                filePath="removeX"
+                                heightAndWidth="22px"
+                                onClick={() => {
+                                    this.processEvent('setInPageError', null)
+                                }}
+                                color="greyScale1"
+                            />
+                        </IconContainer>
                     </InPageError>
                 )}
             </>
@@ -233,26 +245,34 @@ export default class RibbonHolder extends StatefulUIElement<
     }
 }
 
+const IconContainer = styled.div`
+    position: absolute;
+    right: 10px;
+    top: 10px;
+`
+
 const InPageError = styled.div`
     position: fixed;
     top: 20px;
     right: 20px;
     width: fit-content;
-    max-width: 40px;
-    width: 40px;
     height: 40px;
     z-index: 30000000000;
     border-radius: 6px;
-    padding: 10px;
-    border: 1px solid ${(props) => props.theme.colors.greyScale2};
-    background-color: ${(props) => props.theme.colors.warning};
+    border: 1px solid ${(props) => props.theme.colors.warning};
+    backdrop-filter: blur(4px);
+    white-space: nowrap;
+    background-color: ${(props) => props.theme.colors.warning}90;
     box-shadow: 0px 4px 16px rgba(14, 15, 21, 0.3),
         0px 12px 24px rgba(14, 15, 21, 0.15);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    grid-gap: 20px;
+    flex-direction: column;
+    grid-gap: 5px;
     transition: max-width 0.2s cubic-bezier(0.4, 0, 0.16, 0.87);
+    padding: 15px 50px 15px 20px;
+    color: ${(props) => props.theme.colors.greyScale1};
 `
 
 const RibbonHolderBox = styled.div<{
