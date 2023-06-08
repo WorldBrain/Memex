@@ -1,4 +1,3 @@
-import browser from 'webextension-polyfill'
 import type { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import * as Global from './global'
 import {
@@ -7,12 +6,8 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import type { GetContentFingerprints } from './types'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
-import { SIDEBAR_WIDTH_STORAGE_KEY } from 'src/sidebar/annotations-sidebar/constants'
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
-import { extractDataFromPDFDocument } from 'src/pdf/util'
-
-// TODO: Properly type the PDFjs-provided globals
+import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
 
 const waitForDocument = async () => {
     while (true) {
@@ -57,7 +52,7 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
                 const pdf: PDFDocumentProxy = await (globalThis as any)[
                     'pdfjsLib'
                 ].getDocument(filePath).promise
-                return extractDataFromPDFDocument(pdf, document.title)
+                return extractDataFromPDFDocument(pdf)
             },
         })
         await inPageUI.showSidebar()

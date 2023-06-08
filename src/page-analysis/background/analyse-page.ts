@@ -4,8 +4,8 @@ import {
 } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
 import type { PageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
 import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import type { ExtractedPDFData } from '@worldbrain/memex-common/lib/page-indexing/types'
 import type TabManagementBackground from 'src/tab-management/background'
-import type { ExtractedPDFData } from './content-extraction/types'
 import { runInTab } from 'src/util/webextensionRPC'
 
 export interface PageAnalysis {

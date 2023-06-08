@@ -2,7 +2,7 @@ import type {
     InPageUIRibbonAction,
     SidebarActionOptions,
 } from '../shared-state/types'
-import type { ExtractedPDFData } from 'src/page-analysis/background/content-extraction/types'
+import type { ExtractedPDFData } from '@worldbrain/memex-common/lib/page-indexing/types'
 import type { UnifiedAnnotation } from 'src/annotations/cache/types'
 
 export interface InPageUIContentScriptRemoteInterface {

@@ -1,5 +1,6 @@
 import path from 'path'
-import type { MemexPDFMetadata } from 'src/page-analysis/background/content-extraction/types'
+import type { MemexPDFMetadata } from '@worldbrain/memex-common/lib/page-indexing/types'
+
 export const TEST_PDF_PATH = path.resolve(__dirname, 'test.pdf')
 export const TEST_PDF_PAGE_TEXTS = [
     'What a wonderful PDF test monkey with banana!',
