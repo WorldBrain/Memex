@@ -17,6 +17,7 @@ import {
     ContentLocator,
 } from '@worldbrain/memex-common/lib/page-indexing/types'
 import {
+    buildBaseLocatorUrl,
     fingerprintsEqual,
     isPagePdf,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
@@ -177,14 +178,16 @@ export class PageIndexingBackground {
             })
 
             if (!stored) {
-                const generatedNormalizedUrl = `memex.cloud/ct/${params.fingerprints[0].fingerprint}.${params.locator.format}`
-                const generatedIdentifier: ContentIdentifier = {
-                    normalizedUrl: generatedNormalizedUrl,
-                    fullUrl: `https://${generatedNormalizedUrl}`,
-                }
+                const baseLocatorUrl = buildBaseLocatorUrl(
+                    params.fingerprints[0].fingerprint,
+                    params.locator.format,
+                )
                 contentInfo = {
                     asOf: Date.now(),
-                    primaryIdentifier: generatedIdentifier,
+                    primaryIdentifier: {
+                        fullUrl: baseLocatorUrl,
+                        normalizedUrl: normalizeUrl(baseLocatorUrl),
+                    },
                     locators: [],
                     aliasIdentifiers: [regularIdentifier],
                 }
