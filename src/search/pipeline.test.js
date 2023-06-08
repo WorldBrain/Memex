@@ -1,5 +1,7 @@
 /* eslint-env jest */
-import pipeline, { extractTerms } from './pipeline'
+import pipeline, {
+    extractTerms,
+} from '@worldbrain/memex-common/lib/page-indexing/pipeline'
 import * as DATA from './pipeline.test.data'
 
 function testExtractTerms({ input, output = DATA.EXPECTED_TERMS }) {

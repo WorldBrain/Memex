@@ -4,8 +4,8 @@ import type { PageActivityIndicatorBackground } from 'src/page-activity-indicato
 import { PersonalCloudClientStorageType } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { StoredContentType } from 'src/page-indexing/background/types'
 import { updateOrCreate } from '@worldbrain/storex/lib/utils'
-import transformPageHTML from 'src/util/transform-page-html'
-import transformPageText from 'src/util/transform-page-text'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html'
+import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
 
 interface IncomingDataInfo {
     storageType: PersonalCloudClientStorageType
@@ -78,9 +78,7 @@ export const handleIncomingData = (deps: {
                 ? transformPageHTML({
                       html: content,
                   }).text
-                : transformPageText({
-                      text: (content.pageTexts ?? []).join(' '),
-                  }).text
+                : transformPageText((content.pageTexts ?? []).join(' ')).text
         await deps.storageManager.backend.operation(
             'updateObjects',
             'pages',

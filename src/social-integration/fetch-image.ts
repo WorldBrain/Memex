@@ -1,4 +1,4 @@
-import responseToDataUrl from 'response-to-data-url'
+import { blobToDataUrl } from 'src/util/blob-to-data-url'
 
 async function fetchImage(url: string): Promise<string> {
     if (url === null) {
@@ -12,7 +12,8 @@ async function fetchImage(url: string): Promise<string> {
         return
     }
 
-    return responseToDataUrl(response)
+    const blob = await response.blob()
+    return blobToDataUrl(blob)
 }
 
 export default fetchImage

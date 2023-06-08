@@ -1,5 +1,5 @@
 import Storex, { FindManyOptions } from '@worldbrain/storex'
-import { Bookmarks } from 'webextension-polyfill'
+export * from '@worldbrain/memex-common/lib/page-indexing/types'
 
 export type DBGet = () => Promise<Storex>
 
@@ -13,7 +13,6 @@ export type SuggestResult<S, P> = Array<{
     pk: P
 }>
 
-export type VisitInput = number
 export type BookmarkInput = number
 export type PageID = string
 export type PageScore = number
@@ -49,55 +48,6 @@ export interface VisitInteraction {
     scrollPerc: number
     scrollMaxPx: number
     scrollMaxPerc: number
-}
-
-export interface PageAddRequest {
-    pageDoc: PageDoc
-    visits: VisitInput[]
-    rejectNoContent?: boolean
-}
-
-export interface PageDoc {
-    content: Partial<PageContent>
-    url: string
-    favIconURI?: string
-    screenshotURI?: string
-    [extra: string]: any
-}
-
-export interface PageContent {
-    fullText: string
-    title: string
-    lang?: string
-    canonicalUrl?: string
-    description?: string
-    keywords?: string[]
-}
-
-export interface PipelineReq {
-    pageDoc: PageDoc
-    rejectNoContent?: boolean
-}
-
-export interface PipelineRes {
-    url: string
-
-    // Display data
-    fullUrl: string
-    fullTitle: string
-
-    // Indexed data
-    domain: string
-    hostname: string
-    tags: string[]
-    terms: string[]
-    urlTerms: string[]
-    titleTerms: string[]
-
-    // Misc.
-    favIconURI?: string
-    screenshotURI?: string
-    text: string
 }
 
 export interface SearchIndex {

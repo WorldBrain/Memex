@@ -1,7 +1,6 @@
 import { HASH_TAG_PATTERN } from '@worldbrain/memex-common/lib/storage/constants'
 import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/lib/constants'
-
-import transformPageText from 'src/util/transform-page-text'
+import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
 import * as constants from '../overview/search-bar/constants'
 import { splitInputIntoTerms } from '../overview/search-bar/utils'
 
@@ -167,12 +166,8 @@ class QueryBuilder {
         }
 
         // STAGE 2: push through index text-processing logic
-        let { text: textInclude } = transformPageText({
-            text: include.join(' '),
-        })
-        let { text: textExclude } = transformPageText({
-            text: exclude.join(' '),
-        })
+        let { text: textInclude } = transformPageText(include.join(' '))
+        let { text: textExclude } = transformPageText(exclude.join(' '))
 
         textInclude = textInclude.trim()
         textExclude = textExclude.trim()

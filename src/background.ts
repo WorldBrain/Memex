@@ -23,8 +23,9 @@ import {
     registerBackgroundModuleCollections,
 } from './background-script/setup'
 import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
-import fetchPageData from 'src/page-analysis/background/fetch-page-data'
-import pipeline from 'src/search/pipeline'
+import { fetchPDFData } from 'src/page-analysis/background/fetch-page-data'
+import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
+import pagePipeline from '@worldbrain/memex-common/lib/page-indexing/pipeline'
 import { setStorageMiddleware } from './storage/middleware'
 import { getFirebase } from './util/firebase-app-initialized'
 import setupDataSeeders from 'src/util/tests/seed-data'
@@ -83,8 +84,11 @@ export async function main(): Promise<void> {
         },
     )
     const fetchPageDataProcessor = new FetchPageDataProcessor({
+        runtimeAPI: browser.runtime,
+        domParser: (html) => new DOMParser().parseFromString(html, 'text/html'),
         fetchPageData,
-        pagePipeline: pipeline,
+        fetchPDFData,
+        pagePipeline,
     })
 
     const storageManager = initStorex()
