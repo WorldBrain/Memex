@@ -48,7 +48,7 @@ async function setupTest(opts: {
 
     const getNow = () => Date.now()
     const processor = new DataFetchActionProcessor({
-        fetch: context.fetch,
+        fetch: context.fetch as any,
         openGraphIOAppId: 'some-app-id',
         captureException: opts.captureException ?? (async () => {}),
         storageManager: serverStorage.manager,

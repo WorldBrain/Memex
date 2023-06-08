@@ -240,7 +240,7 @@ export async function setupBackgroundIntegrationTest(
                 clientDeviceType: PersonalDeviceType.DesktopBrowser,
             }),
         contentSharingBackend: new ContentSharingBackend({
-            fetch,
+            fetch: fetch as any,
             normalizeUrl,
             storageManager: serverStorage.manager,
             storageModules: serverStorage.modules,
