@@ -108,6 +108,7 @@ export interface BackgroundIntegrationTestOptions {
     mark?: boolean
     skipSyncTests?: boolean
     skipConflictTests?: boolean
+    customTestOpts?: BackgroundIntegrationTestSetupOpts
 }
 export function backgroundIntegrationTest(
     description: string,
