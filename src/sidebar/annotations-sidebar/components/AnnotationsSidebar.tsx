@@ -70,6 +70,7 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import { TaskState } from 'ui-logic-core/lib/types'
+import { MemexEditorInstance } from '@worldbrain/memex-common/lib/editor'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -203,6 +204,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     createNewNoteFromAISummary: (summary) => void
     showSharePageTooltip: boolean
     passUpEditorRef: (ref) => void
+    doAItimestampSummary: (editorReference: MemexEditorInstance) => void
 }
 
 interface AnnotationsSidebarState {
@@ -485,6 +487,7 @@ export class AnnotationsSidebar extends React.Component<
                     ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
+                    doAItimestampSummary={() => this.doAItimestampSummary()}
                 />
             </NewAnnotationSection>
         )
@@ -3292,6 +3295,7 @@ const FollowedListNotesContainer = styled(Margin)<{
     justify-content: flex-start;
     align-items: flex-start;
     z-index: ${(props) => 1000 - props.key};
+    height: -webkit-fill-available;
 
     ${(props) =>
         props.isHovered &&
