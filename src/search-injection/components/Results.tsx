@@ -16,11 +16,11 @@ const Results = (props) => {
                 // searchEngine={props.searchEngine}
             >
                 <UpdateNotifBanner
-                    // theme={{
-                    //     width: props.position === 'side' && 'fill-available',
-                    //     position: 'relative',
-                    //     iconSize: '20px',
-                    // }}
+                    theme={{
+                        width: props.position === 'side' && 'fill-available',
+                        position: 'relative',
+                        iconSize: '20px',
+                    }}
                     location="search"
                 />
                 <TopBarArea hideResults={props.hideResults}>
