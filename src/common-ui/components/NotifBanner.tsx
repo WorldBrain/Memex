@@ -5,11 +5,9 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { theme } from './design-library/theme'
 import browser from 'webextension-polyfill'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 const MemexLogo = browser.runtime.getURL('img/memexLogo.svg')
 export interface ThemeProps {
-    variant: MemexThemeVariant
     width?: string
     position?: string
     iconSize?: string
@@ -25,16 +23,17 @@ export interface Props {
 }
 
 export class NotifBanner extends React.PureComponent<Props> {
-    render() {
-        const { theme: themeProps } = this.props
-        themeProps.width = themeProps.width ?? '100%'
-        themeProps.iconSize = '24px'
+    static defaultProps: Partial<Props> = {
+        theme: { width: '100%', iconSize: '24px' },
+    }
 
+    render() {
         return (
             <ThemeProvider
                 theme={{
-                    ...theme({ variant: this.props.theme.variant }),
-                    ...themeProps,
+                    ...theme,
+                    ...NotifBanner.defaultProps.theme,
+                    ...this.props.theme,
                 }}
             >
                 <Banner location={this.props.location}>
