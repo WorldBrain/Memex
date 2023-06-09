@@ -1,6 +1,8 @@
+import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import type { UIServices } from 'src/services/ui/types'
 
 export interface DashboardResultsDependencies {
+    themeVariant: MemexThemeVariant
     services: UIServices
 }
 
