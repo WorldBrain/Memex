@@ -85,7 +85,7 @@ describe('Tags background interface', () => {
 describe.skip('Tag Cache', () => {
     async function setupTest() {
         const setup = await setupBackgroundIntegrationTest({
-            includePostSyncProcessor: true,
+            // includePostSyncProcessor: true,
         })
         const tagsModule = setup.backgroundModules.tags
         return { tagsModule }

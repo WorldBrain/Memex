@@ -7,8 +7,6 @@ import { PersonalCloudAction, PushObjectAction } from './types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { PersonalCloudOverwriteUpdate } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { injectFakeTabs } from 'src/tab-management/background/index.tests'
-import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
-import pagePipeline from '@worldbrain/memex-common/lib/page-indexing/pipeline'
 import { StoredContentType } from 'src/page-indexing/background/types'
 import {
     TEST_PDF_PATH,
@@ -24,6 +22,13 @@ describe('Personal cloud', () => {
     }) => {
         const { setups } = await setupSyncBackgroundTest({
             deviceCount: 2,
+            fetchPageData: async () => ({
+                htmlBody,
+                content: {
+                    fullText,
+                    title: fullTitle,
+                },
+            }),
         })
 
         const fullUrl =
@@ -89,18 +94,7 @@ describe('Personal cloud', () => {
                               ],
                 })
             }
-            setups[0].backgroundModules.pages.options.fetchPageData = new MockFetchPageDataProcessor(
-                await pagePipeline({
-                    pageDoc: {
-                        url: fullUrl,
-                        content: {
-                            fullText,
-                            title: fullTitle,
-                        },
-                    },
-                }),
-                { htmlBody },
-            )
+
             await setups[0].backgroundModules.pages.indexPage({
                 fullUrl,
                 tabId: 667,

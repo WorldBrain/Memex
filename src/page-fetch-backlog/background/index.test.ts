@@ -5,7 +5,6 @@ import * as DATA from './index.test.data'
 import { PageFetchBacklogBackground } from '.'
 import { PageFetchBacklogStorage } from './storage'
 import initStorageManager from 'src/search/memory-storex'
-import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
 import delay from 'src/util/delay'
 import { FetchPageDataError } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/errors'
 
@@ -58,15 +57,12 @@ async function setupTest({
     const storageManager = initStorageManager()
     const backlog = new PageFetchBacklogBackground({
         storageManager,
-        fetchPageData: new FetchPageDataProcessor({
-            fetchPageData: pageFetcher as any,
-            fetchPDFData: pageFetcher as any, // TODO: properly differentiate and test this
-            pagePipeline: mockPagePipeline,
-            runtimeAPI: {
-                getURL: () =>
-                    'moz-extension://64a850fc-2455-bf42-9c3d-1621b3a75480/pdfjs/viewer.html',
-            },
-        }),
+        fetchPageData: null,
+        // fetchPageData: new FetchPageDataProcessor({
+        //     fetchPageData: pageFetcher as any,
+        //     fetchPDFData: pageFetcher as any, // TODO: properly differentiate and test this
+        //     pagePipeline: mockPagePipeline,
+        // }),
         processingInterval,
         retryLimit,
         storePageContent: mockPageStorer,

@@ -22,10 +22,6 @@ import {
     setupBackgroundModules,
     registerBackgroundModuleCollections,
 } from './background-script/setup'
-import { FetchPageDataProcessor } from 'src/page-analysis/background/fetch-page-data-processor'
-import { fetchPDFData } from 'src/page-analysis/background/fetch-page-data'
-import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
-import pagePipeline from '@worldbrain/memex-common/lib/page-indexing/pipeline'
 import { setStorageMiddleware } from './storage/middleware'
 import { getFirebase } from './util/firebase-app-initialized'
 import setupDataSeeders from 'src/util/tests/seed-data'
@@ -45,6 +41,8 @@ import {
 import { initFirestoreSyncTriggerListener } from '@worldbrain/memex-common/lib/personal-cloud/backend/utils'
 import { setupOmnibar } from 'src/omnibar'
 import delay from './util/delay'
+import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
+import fetchAndExtractPdfContent from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-pdf-data.browser'
 
 let __debugCounter = 0
 let __BGInitAttemptCounter = 0
@@ -83,13 +81,6 @@ export async function main(): Promise<void> {
             autoPkType: 'string',
         },
     )
-    const fetchPageDataProcessor = new FetchPageDataProcessor({
-        runtimeAPI: browser.runtime,
-        domParser: (html) => new DOMParser().parseFromString(html, 'text/html'),
-        fetchPageData,
-        fetchPDFData,
-        pagePipeline,
-    })
 
     const storageManager = initStorex()
     const persistentStorageManager = createPersistentStorageManager({
@@ -109,6 +100,8 @@ export async function main(): Promise<void> {
     })
     __debugCounter++
 
+    const fetch = globalThis.fetch.bind(globalThis)
+
     const backgroundModules = createBackgroundModules({
         manifestVersion: '2',
         authServices,
@@ -116,7 +109,20 @@ export async function main(): Promise<void> {
         getServerStorage,
         analyticsManager: analytics,
         localStorageChangesManager,
-        fetchPageDataProcessor,
+        fetchPageData: async (url) =>
+            fetchPageData({
+                url,
+                fetch,
+                domParser: (html) =>
+                    new DOMParser().parseFromString(html, 'text/html'),
+                opts: { includePageContent: true, includeFavIcon: true },
+            }).run(),
+        fetchPdfData: async (url) =>
+            fetchAndExtractPdfContent(url, {
+                fetch,
+                pdfJSWorkerSrc: browser.runtime.getURL('/build/pdf.worker.js'),
+            }),
+        fetch,
         browserAPIs: browser,
         captureException,
         storageManager,

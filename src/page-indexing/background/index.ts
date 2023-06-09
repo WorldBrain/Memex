@@ -15,6 +15,7 @@ import {
 import {
     ContentIdentifier,
     ContentLocator,
+    ExtractedPDFData,
 } from '@worldbrain/memex-common/lib/page-indexing/types'
 import {
     buildBaseLocatorUrl,
@@ -37,7 +38,6 @@ import { DexieUtilsPlugin } from 'src/search/plugins'
 import analysePage, {
     PageAnalysis,
 } from 'src/page-analysis/background/analyse-page'
-import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import TabManagementBackground from 'src/tab-management/background'
 import PersistentPageStorage from './persistent-storage'
 import {
@@ -54,8 +54,10 @@ import {
 } from '../../util/webextensionRPC'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import { isUrlSupported } from '../utils'
-
 import { updatePageCounter } from 'src/util/subscriptions/storage'
+import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
+import { docIsPdf } from '@worldbrain/memex-common/lib/personal-cloud/backend/utils'
+import { PageDoc } from '@worldbrain/memex-stemmer/lib/types'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -94,7 +96,8 @@ export class PageIndexingBackground {
             pageIndexingSettingsStore: BrowserSettingsStore<
                 LocalPageIndexingSettings
             >
-            fetchPageData?: FetchPageProcessor
+            fetchPageData: (fullPageUrl: string) => Promise<PageDataResult>
+            fetchPdfData: (fullPageUrl: string) => Promise<ExtractedPDFData>
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
             getNow: () => number
         },
@@ -348,11 +351,9 @@ export class PageIndexingBackground {
     async addPage({
         visits = [],
         pageDoc,
-        rejectNoContent,
     }: Partial<PageAddRequest>): Promise<void> {
         const { favIconURI, ...pageData } = await pagePipeline({
             pageDoc,
-            rejectNoContent,
         })
 
         await this.createOrUpdatePage(pageData)
@@ -527,16 +528,13 @@ export class PageIndexingBackground {
             tabId: props.tabId,
             tabManagement: this.options.tabManagement,
             fetch: this.fetch,
-            includeContent: props.stubOnly
-                ? 'metadata-only'
-                : 'metadata-with-full-text',
+            includeContent: 'metadata-with-full-text',
             includeFavIcon,
             url: props.fullUrl,
         })
 
         const pageData = await pagePipeline({
             pageDoc: { ...analysis, url: props.fullUrl },
-            rejectNoContent: !props.stubOnly,
         })
         await this.storeDocContent(normalizeUrl(pageData.url), analysis)
 
@@ -550,7 +548,7 @@ export class PageIndexingBackground {
         return pageData
     }
 
-    async storeDocContent(
+    private async storeDocContent(
         normalizedUrl: string,
         analysis: Pick<
             PageAnalysis,
@@ -583,39 +581,48 @@ export class PageIndexingBackground {
 
     private async processPageDataFromUrl(
         props: PageCreationProps,
-    ): Promise<PipelineRes | null> {
-        if (!this.options.fetchPageData) {
-            throw new Error(
-                'Instantiation error: fetch-page-data implementation was not given to constructor',
-            )
-        }
+    ): Promise<PipelineRes> {
+        const pageDoc: PageDoc = { url: props.fullUrl, content: {} }
 
-        const processed = await this.options.fetchPageData.process(
-            props.fullUrl,
-        )
-        const { content: pageData } = processed
-        if (processed.pdfFingerprints) {
-            await this.initContentIdentifier({
+        if (!docIsPdf({ normalizedUrl: props.fullUrl })) {
+            const {
+                content,
+                htmlBody,
+                favIconURI,
+            } = await this.options.fetchPageData(props.fullUrl)
+            await this.storeDocContent(normalizeUrl(props.fullUrl), {
+                htmlBody,
+            })
+
+            pageDoc.favIconURI = favIconURI
+            pageDoc.content.title = content.title
+            pageDoc.content.fullText = content.fullText
+        } else {
+            const pdfData = await this.options.fetchPdfData(props.fullUrl)
+            const primaryIdentifier = await this.initContentIdentifier({
                 locator: {
                     format: ContentLocatorFormat.PDF,
                     originalLocation: props.fullUrl,
                 },
-                fingerprints: processed.pdfFingerprints.map(
-                    (fingerprint): ContentFingerprint => ({
+                fingerprints: pdfData.pdfMetadata.fingerprints.map(
+                    (fingerprint) => ({
                         fingerprintScheme: FingerprintSchemeType.PdfV1,
                         fingerprint,
                     }),
                 ),
             })
-        }
-        await this.storeDocContent(normalizeUrl(pageData.url), processed)
 
-        if (props.stubOnly && pageData.text && pageData.terms?.length) {
-            delete pageData.text
-            delete pageData.terms
+            await this.storeDocContent(primaryIdentifier.normalizedUrl, {
+                pdfMetadata: pdfData.pdfMetadata,
+                pdfPageTexts: pdfData.pdfPageTexts,
+            })
+            await this.storeLocators(primaryIdentifier)
+
+            pageDoc.content.title = pdfData.title
+            pageDoc.content.fullText = pdfData.fullText
         }
 
-        return pageData
+        return pagePipeline({ pageDoc })
     }
 
     indexPage = async (
@@ -684,7 +691,6 @@ export class PageIndexingBackground {
     async indexTestPage(props: PageCreationProps) {
         const pageData = await pagePipeline({
             pageDoc: { url: props.fullUrl, content: {} },
-            rejectNoContent: false,
         })
 
         await this.storage.createPageIfNotExists(pageData)

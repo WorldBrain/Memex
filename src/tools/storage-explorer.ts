@@ -7,7 +7,6 @@ import {
     getBackgroundStorageModules,
 } from 'src/background-script/setup'
 import { MemoryLocalStorage } from 'src/util/tests/local-storage'
-import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 import { createServices } from 'src/services'
 import { createPersistentStorageManager } from 'src/storage/persistent-storage'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
@@ -86,8 +85,11 @@ async function main() {
                 onRemoved: { addListener: () => {} },
             },
         } as any,
-        fetchPageDataProcessor: new MockFetchPageDataProcessor(),
         callFirebaseFunction: () => null as any,
+        fetch: globalThis.fetch.bind(globalThis),
+        // TODO: Implement these
+        fetchPdfData: null,
+        fetchPageData: null,
     })
     const storageModules = getBackgroundStorageModules(
         backgroundModules,

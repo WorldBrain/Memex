@@ -21,7 +21,6 @@ import { setStorex } from 'src/search/get-db'
 import { registerSyncBackgroundIntegrationTests } from 'src/personal-cloud/background/index.tests'
 import { AuthBackground } from 'src/authentication/background'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
-import { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 import { FakeAnalytics } from 'src/analytics/mock'
 import AnalyticsManager from 'src/analytics/analytics'
 import { setStorageMiddleware } from 'src/storage/middleware'
@@ -49,16 +48,32 @@ import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { createAuthServices } from 'src/services/local-services'
 import { MockPushMessagingService } from './push-messaging'
+import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
+import type { ExtractedPDFData } from 'src/search'
+
+export const DEF_PAGE = {
+    url: 'test.com',
+    domain: 'test.com',
+    hostname: 'test.com',
+    fullTitle: 'Test',
+    fullUrl: 'http://test.com',
+    tags: [],
+    terms: [],
+    urlTerms: [],
+    titleTerms: [],
+    text: 'test',
+}
 
 fetchMock.restore()
 export interface BackgroundIntegrationTestSetupOpts {
     customMiddleware?: StorageMiddleware[]
     getServerStorage?: () => Promise<ServerStorage>
+    fetchPageData?: (fullPageUrl: string) => Promise<PageDataResult>
+    fetchPdfData?: (fullPageUrl: string) => Promise<ExtractedPDFData>
     personalCloudBackend?: PersonalCloudBackend
     personalCloudMediaBackend?: PersonalCloudMediaBackend
     browserLocalStorage?: MemoryBrowserStorage
     debugStorageOperations?: boolean
-    includePostSyncProcessor?: boolean
     enableSyncEncyption?: boolean
     startWithSyncDisabled?: boolean
     useDownloadTranslationLayer?: boolean
@@ -175,10 +190,6 @@ export async function setupBackgroundIntegrationTest(
         shouldTrack: async () => true,
     })
 
-    const fetchPageDataProcessor = options?.includePostSyncProcessor
-        ? new MockFetchPageDataProcessor()
-        : null
-
     let callFirebaseFunction = async (name: string, ...args: any[]) => {
         throw new Error(
             `Tried to call Firebase function, but no mock was for that`,
@@ -201,9 +212,8 @@ export async function setupBackgroundIntegrationTest(
         localStorageChangesManager: null,
         getServerStorage,
         browserAPIs,
-        fetchPageDataProcessor,
-        auth,
         servicesPromise: new Promise((res) => res(services)),
+
         authServices,
         fetch,
         userMessageService: userMessages,
@@ -255,6 +265,28 @@ export async function setupBackgroundIntegrationTest(
             },
         }),
         generateServerId: () => nextServerId++,
+        // TODO: Move these defaults somewhere - find a more elegant way of handling data fetch in tests
+        fetchPageData:
+            options.fetchPageData ??
+            (async (url) => ({
+                content: {
+                    canonicalUrl: DEF_PAGE.fullUrl,
+                    fullText: DEF_PAGE.text,
+                    title: DEF_PAGE.fullTitle,
+                },
+            })),
+        fetchPdfData:
+            options.fetchPdfData ??
+            (async (url) => ({
+                fullText: DEF_PAGE.text,
+                title: DEF_PAGE.fullTitle,
+                pdfPageTexts: [DEF_PAGE.text],
+                pdfMetadata: {
+                    fingerprints: ['test-fingerprint'],
+                    memexIncludedPages: 1,
+                    memexTotalPages: 1,
+                },
+            })),
     })
 
     registerBackgroundModuleCollections({
@@ -314,7 +346,6 @@ export async function setupBackgroundIntegrationTest(
         subscriptionService: authServices.subscriptions as MemorySubscriptionsService,
         getServerStorage,
         browserAPIs,
-        fetchPageDataProcessor,
         injectTime: (injected) => (getTime = injected),
         services,
         injectCallFirebaseFunction: (injected) => {

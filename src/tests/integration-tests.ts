@@ -16,7 +16,6 @@ import type { MemoryAuthService } from '@worldbrain/memex-common/lib/authenticat
 import type { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import type { ServerStorage } from 'src/storage/types'
 import type { Browser } from 'webextension-polyfill'
-import type { MockFetchPageDataProcessor } from 'src/page-analysis/background/mock-fetch-page-data-processor'
 import type fetchMock from 'fetch-mock'
 import type { Services } from 'src/services/types'
 import type { MockPushMessagingService } from './push-messaging'
@@ -66,7 +65,6 @@ export interface BackgroundIntegrationTestSetup {
     backgroundModules: BackgroundModules
     browserAPIs: Browser
     services: Services
-    fetchPageDataProcessor: MockFetchPageDataProcessor | null
     browserLocalStorage: MemoryBrowserStorage
     storageChangeDetector: StorageChangeDetector
     storageOperationLogger: StorageOperationLogger

@@ -3,7 +3,7 @@ import { setupTest } from '../../logic.test.util'
 
 describe('Dashboard sync menu logic', () => {
     const it = makeSingleDeviceUILogicTestFactory({
-        includePostSyncProcessor: true,
+        // includePostSyncProcessor: true,
     })
 
     it('should be able to set display state', async ({ device }) => {
