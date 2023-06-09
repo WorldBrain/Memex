@@ -2,7 +2,7 @@ import React from 'react'
 import styled, { ThemeProvider, css } from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { theme } from './design-library/theme'
+import { loadThemeVariant, theme } from './design-library/theme'
 import browser from 'webextension-polyfill'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
@@ -24,16 +24,26 @@ export interface Props {
     location: string
 }
 
-export class NotifBanner extends React.PureComponent<Props> {
+export interface NotifBannerState {
+    themeVariant?: MemexThemeVariant
+}
+
+export class NotifBanner extends React.PureComponent<Props, NotifBannerState> {
+    async componentDidMount() {
+        this.setState({
+            themeVariant: await loadThemeVariant(),
+        })
+    }
+
     render() {
-        const { theme: themeProps } = this.props
-        themeProps.width = themeProps.width ?? '100%'
-        themeProps.iconSize = '24px'
+        const themeProps = this.props.theme ?? {}
+        // themeProps.width = themeProps.width ?? '100%'
+        // themeProps.iconSize = '24px'
 
         return (
             <ThemeProvider
                 theme={{
-                    ...theme({ variant: this.props.theme.variant }),
+                    ...theme({ variant: this.state?.themeVariant }),
                     ...themeProps,
                 }}
             >
@@ -62,6 +72,7 @@ export class NotifBanner extends React.PureComponent<Props> {
                         </ButtonBox>
                     </MainContent>
                 </Banner>
+                //{' '}
             </ThemeProvider>
         )
     }

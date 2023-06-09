@@ -70,6 +70,11 @@ import {
     getListShareUrl,
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
+import {
+    MemexTheme,
+    MemexThemeVariant,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -206,6 +211,7 @@ interface AnnotationsSidebarState {
     showAIhighlight: boolean
     showAISuggestionsDropDown: boolean
     AIsuggestions: []
+    themeVariant: MemexThemeVariant | null
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -238,6 +244,7 @@ export class AnnotationsSidebar extends React.Component<
         showAIhighlight: false,
         showAISuggestionsDropDown: false,
         AIsuggestions: [],
+        themeVariant: null,
     }
 
     private maybeCreateContextBtnRef({
@@ -251,6 +258,9 @@ export class AnnotationsSidebar extends React.Component<
 
     async componentDidMount() {
         //setLocalStorage(SHOW_ISOLATED_VIEW_KEY, true)
+        this.setState({
+            themeVariant: await loadThemeVariant(),
+        })
         const isolatedViewNotifVisible = await getLocalStorage(
             SHOW_ISOLATED_VIEW_KEY,
         )
@@ -1521,7 +1531,10 @@ export class AnnotationsSidebar extends React.Component<
                 )}
                 <UpdateNotifBanner
                     location={'sidebar'}
-                    theme={{ position: 'fixed' }}
+                    theme={{
+                        variant: this.state.themeVariant,
+                        position: 'fixed',
+                    }}
                     sidebarContext={this.props.sidebarContext}
                 />
             </>
