@@ -360,13 +360,16 @@ export function registerBackgroundIntegrationTest(
     options: BackgroundIntegrationTestSetupOpts = {},
 ) {
     it(test.description + ' - single device', async () => {
-        await runBackgroundIntegrationTest(test, options)
+        await runBackgroundIntegrationTest(test, {
+            ...options,
+            ...(test.customTestOpts ?? {}),
+        })
     })
     const skipSyncTests = process.env.SKIP_SYNC_TESTS === 'true'
     if (!skipSyncTests && !test.skipSyncTests) {
         registerSyncBackgroundIntegrationTests(test, {
-            ...(test.customTestOpts ?? {}),
             ...options,
+            ...(test.customTestOpts ?? {}),
         })
     }
 }
