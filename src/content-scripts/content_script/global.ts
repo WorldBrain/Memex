@@ -1,6 +1,6 @@
 import 'core-js'
-import { EventEmitter } from 'events'
 import hexToRgb from 'hex-to-rgb'
+import { EventEmitter } from 'events'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
 import {
@@ -83,9 +83,8 @@ import {
     shareOptsToPrivacyLvl,
 } from 'src/annotations/utils'
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
-import type { SaveAndRenderHighlightDeps } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
-import { isSidebarOpen } from 'src/overview/sidebar-left/selectors'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -229,6 +228,11 @@ export async function main(
                 }
             })
         },
+        rollbackAnnotationCreation: (unifiedAnnotationId) => {
+            annotationsCache.removeAnnotation({
+                unifiedId: unifiedAnnotationId.toString(),
+            })
+        },
         scheduleAnnotationCreation: (data) => {
             const localId = generateAnnotationUrl({
                 pageUrl: data.fullPageUrl,
@@ -258,7 +262,7 @@ export async function main(
             })
 
             const createPromise = (async () => {
-                await createAnnotation({
+                const { savePromise } = await createAnnotation({
                     shareOpts: {
                         shouldShare: data.shouldShare,
                         shouldCopyShareLink: data.shouldShare,
@@ -277,6 +281,7 @@ export async function main(
                         createdWhen: new Date(data.createdWhen),
                     },
                 })
+                await savePromise
             })()
             return { annotationId: unifiedId, createPromise }
         },
@@ -339,16 +344,31 @@ export async function main(
         },
     })
 
-    const annotationFunctionsParams: SaveAndRenderHighlightDeps = {
-        currentUser,
-        onClick: ({ annotationId, openInEdit }) =>
-            inPageUI.showSidebar({
-                annotationCacheId: annotationId.toString(),
-                action: openInEdit ? 'edit_annotation' : 'show_annotation',
-            }),
-        getSelection: () => document.getSelection(),
-        getFullPageUrl: async () => pageInfo.getFullPageUrl(),
+    async function saveHighlight(shouldShare: boolean): Promise<AutoPk> {
+        let highlightId: AutoPk
+        try {
+            highlightId = await highlightRenderer.saveAndRenderHighlight({
+                currentUser,
+                onClick: ({ annotationId, openInEdit }) =>
+                    inPageUI.showSidebar({
+                        annotationCacheId: annotationId.toString(),
+                        action: openInEdit
+                            ? 'edit_annotation'
+                            : 'show_annotation',
+                    }),
+                getSelection: () => document.getSelection(),
+                getFullPageUrl: async () => pageInfo.getFullPageUrl(),
+                isPdf: pageInfo.isPdf,
+                shouldShare,
+            })
+        } catch (err) {
+            captureException(err)
+            await inPageUI.toggleErrorMessage({ type: 'annotation' })
+            throw err
+        }
+        return highlightId
     }
+
     const annotationsFunctions = {
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
@@ -356,11 +376,7 @@ export async function main(
             if (!(await pageActionAllowed())) {
                 return
             }
-            await highlightRenderer.saveAndRenderHighlight({
-                ...annotationFunctionsParams,
-                isPdf: pageInfo.isPdf,
-                shouldShare,
-            })
+            await saveHighlight(shouldShare)
             if (inPageUI.componentsShown.sidebar) {
                 inPageUI.showSidebar({
                     action: 'show_annotation',
@@ -378,13 +394,7 @@ export async function main(
             if (!(await pageActionAllowed())) {
                 return
             }
-            const annotationId = await highlightRenderer.saveAndRenderHighlight(
-                {
-                    ...annotationFunctionsParams,
-                    isPdf: pageInfo.isPdf,
-                    shouldShare,
-                },
-            )
+            const annotationId = await saveHighlight(shouldShare)
             await inPageUI.showSidebar(
                 annotationId
                     ? {
