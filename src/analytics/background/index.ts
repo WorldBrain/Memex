@@ -6,6 +6,7 @@ import ActivityPings from './activity-pings'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { ActivityPingSettings } from './activity-pings/types'
 import { AnalyticsEvent, AnalyticsEvents, Analytics } from '../types'
+import { ClientAnalyticsEvent } from '@worldbrain/memex-common/lib/analytics/types'
 
 export class AnalyticsBackground {
     remoteFunctions: AnalyticsInterface
@@ -15,11 +16,12 @@ export class AnalyticsBackground {
         private analyticsManager: Analytics,
         public options: {
             localBrowserStorage: Storage.LocalStorageArea
-            sendBqEvent: (event: AnalyticsEvent) => Promise<void>
+            sendBqEvent: (event: ClientAnalyticsEvent) => Promise<void>
         },
     ) {
         this.remoteFunctions = {
             trackEvent: bindMethod(this, 'trackEvent'),
+            trackBqEvent: this.trackBqEvent,
             updateLastActive,
         }
         this.activityPings = new ActivityPings({
@@ -45,7 +47,9 @@ export class AnalyticsBackground {
         }
     }
 
-    trackBqEvent(event: AnalyticsEvent) {
-        return this.options.sendBqEvent(event)
+    trackBqEvent: AnalyticsInterface['trackBqEvent'] = async (
+        event: ClientAnalyticsEvent,
+    ) => {
+        this.options.sendBqEvent(event)
     }
 }
