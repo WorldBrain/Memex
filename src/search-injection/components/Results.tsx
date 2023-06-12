@@ -1,13 +1,36 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import Dropdown from './Dropdown'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 
 const Results = (props) => {
     // const searchEngineClass = `${props.searchEngine}_${props.position}`
+
+    const [themeVariant, setThemeVariant] = useState<MemexThemeVariant | null>(
+        null,
+    )
+    useEffect(() => {
+        async function load() {
+            let loaded: MemexThemeVariant = 'dark'
+            try {
+                loaded = await loadThemeVariant()
+            } catch (err) {
+                console.error('Could not load theme, falling back to dark mode')
+            }
+            setThemeVariant(loaded)
+        }
+
+        load()
+    })
+    if (!themeVariant) {
+        return null
+    }
+
     return (
         <>
             <MemexContainer
@@ -17,6 +40,7 @@ const Results = (props) => {
             >
                 <UpdateNotifBanner
                     theme={{
+                        variant: themeVariant,
                         width: props.position === 'side' && 'fill-available',
                         position: 'relative',
                         iconSize: '20px',
