@@ -543,7 +543,7 @@ export class PageIndexingBackground {
     indexPage = async (
         props: PageCreationProps,
         opts: PageCreationOpts = {},
-    ): Promise<{ normalizedUrl: string; fullUrl: string }> => {
+    ): Promise<{ fullUrl: string }> => {
         // PDF pages should always have their tab IDs set, so don't fetch them from the tabs API
         //   TODO: have PDF pages pass down their original URLs here, instead of the memex.cloud/ct/ ones,
         //     so we don't have to do this dance
@@ -560,8 +560,8 @@ export class PageIndexingBackground {
             ? this.processPageDataFromTab(props)
             : this.processPageDataFromUrl(props))
 
-        if (!pageData) {
-            return
+        if (pageData.isExisting) {
+            return { fullUrl: pageData.fullUrl }
         }
         await this.createOrUpdatePage(pageData, opts)
 
@@ -579,23 +579,22 @@ export class PageIndexingBackground {
         await updatePageCounter()
         // Note that we're returning URLs as they could have changed in the case of PDFs
         return {
-            normalizedUrl: pageData.url,
             fullUrl: pageData.fullUrl,
         }
     }
 
     private async processPageDataFromTab(
         props: PageCreationProps,
-    ): Promise<PipelineRes | null> {
+    ): Promise<PipelineRes & { isExisting?: boolean }> {
         if (props.tabId == null) {
             throw new Error(
                 `No tabID provided to extract content: ${props.fullUrl}`,
             )
         }
 
-        const needsIndexing = !(await this.storage.getPage(props.fullUrl))
-        if (!needsIndexing) {
-            return null
+        const existingPage = await this.storage.getPage(props.fullUrl)
+        if (existingPage) {
+            return { ...existingPage, isExisting: true }
         }
 
         const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
@@ -625,7 +624,7 @@ export class PageIndexingBackground {
 
     private async processPageDataFromUrl(
         props: PageCreationProps,
-    ): Promise<PipelineRes | null> {
+    ): Promise<PipelineRes & { isExisting?: boolean }> {
         const pageDoc: PageDoc = {
             url: props.fullUrl,
             originalUrl: props.fullUrl,
@@ -634,9 +633,9 @@ export class PageIndexingBackground {
         const isPdf = docIsPdf({ normalizedUrl: props.fullUrl }) // TODO: Rename this fn + inputs
 
         if (!isPdf) {
-            const needsIndexing = !(await this.storage.getPage(props.fullUrl))
-            if (!needsIndexing) {
-                return null
+            const existingPage = await this.storage.getPage(props.fullUrl)
+            if (existingPage) {
+                return { ...existingPage, isExisting: true }
             }
 
             const {
@@ -666,11 +665,9 @@ export class PageIndexingBackground {
                 ),
             })
 
-            const needsIndexing = !(await this.storage.getPage(
-                baseLocator.fullUrl,
-            ))
-            if (!needsIndexing) {
-                return null
+            const existingPage = await this.storage.getPage(baseLocator.fullUrl)
+            if (existingPage) {
+                return { ...existingPage, isExisting: true }
             }
 
             await this.storeDocContent(baseLocator.normalizedUrl, {

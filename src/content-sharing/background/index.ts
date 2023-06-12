@@ -31,6 +31,7 @@ import ListSharingService from '@worldbrain/memex-common/lib/content-sharing/ser
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { BackgroundModules } from 'src/background-script/setup'
 import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 export interface LocalContentSharingSettings {
     remotePageIdLookup: {
@@ -910,7 +911,7 @@ export default class ContentSharingBackground {
         await bgModules.pageActivityIndicator.createFollowedListEntry(
             {
                 creator,
-                normalizedPageUrl: indexedPage.normalizedUrl,
+                normalizedPageUrl: normalizeUrl(indexedPage.fullUrl),
                 entryTitle: pageTitle,
                 followedList: remoteListId,
                 hasAnnotationsFromOthers: false,
