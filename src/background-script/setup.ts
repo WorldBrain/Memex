@@ -156,7 +156,7 @@ export function createBackgroundModules(options: {
     personalCloudMediaBackend?: PersonalCloudMediaBackend
     contentSharingBackend?: ContentSharingBackend
     fetchPageData: (fullPageUrl: string) => Promise<PageDataResult>
-    fetchPdfData: (fullPageUrl: string) => Promise<ExtractedPDFData>
+    fetchPDFData: (fullPageUrl: string) => Promise<ExtractedPDFData>
     auth?: AuthBackground
     analyticsManager: Analytics
     captureException?: typeof captureException
@@ -227,7 +227,7 @@ export function createBackgroundModules(options: {
             { prefix: 'pageIndexing.' },
         ),
         fetchPageData: options.fetchPageData,
-        fetchPdfData: options.fetchPdfData,
+        fetchPdfData: options.fetchPDFData,
         createInboxEntry,
         storageManager,
         tabManagement,

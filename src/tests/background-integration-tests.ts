@@ -196,6 +196,19 @@ export async function setupBackgroundIntegrationTest(
         )
     }
 
+    const fetchPDFData =
+        options.fetchPdfData ??
+        (async (url) => ({
+            fullText: DEF_PAGE.text,
+            title: DEF_PAGE.fullTitle,
+            pdfPageTexts: [DEF_PAGE.text],
+            pdfMetadata: {
+                fingerprints: ['test-fingerprint'],
+                memexIncludedPages: 1,
+                memexTotalPages: 1,
+            },
+        }))
+
     const pushMessagingService =
         options?.pushMessagingService ?? new MockPushMessagingService()
     let nextServerId = 1337
@@ -252,6 +265,7 @@ export async function setupBackgroundIntegrationTest(
         contentSharingBackend: new ContentSharingBackend({
             fetch: fetch as any,
             normalizeUrl,
+            fetchPDFData,
             storageManager: serverStorage.manager,
             storageModules: serverStorage.modules,
             getConfig: () => ({ content_sharing: {} }),
@@ -266,6 +280,7 @@ export async function setupBackgroundIntegrationTest(
         }),
         generateServerId: () => nextServerId++,
         // TODO: Move these defaults somewhere - find a more elegant way of handling data fetch in tests
+        fetchPDFData,
         fetchPageData:
             options.fetchPageData ??
             (async (url) => ({
@@ -273,18 +288,6 @@ export async function setupBackgroundIntegrationTest(
                     canonicalUrl: DEF_PAGE.fullUrl,
                     fullText: DEF_PAGE.text,
                     title: DEF_PAGE.fullTitle,
-                },
-            })),
-        fetchPdfData:
-            options.fetchPdfData ??
-            (async (url) => ({
-                fullText: DEF_PAGE.text,
-                title: DEF_PAGE.fullTitle,
-                pdfPageTexts: [DEF_PAGE.text],
-                pdfMetadata: {
-                    fingerprints: ['test-fingerprint'],
-                    memexIncludedPages: 1,
-                    memexTotalPages: 1,
                 },
             })),
     })

@@ -117,7 +117,7 @@ export async function main(): Promise<void> {
                     new DOMParser().parseFromString(html, 'text/html'),
                 opts: { includePageContent: true, includeFavIcon: true },
             }).run(),
-        fetchPdfData: async (url) =>
+        fetchPDFData: async (url) =>
             fetchAndExtractPdfContent(url, {
                 fetch,
                 pdfJSWorkerSrc: browser.runtime.getURL('/build/pdf.worker.js'),

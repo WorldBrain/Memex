@@ -88,7 +88,7 @@ async function main() {
         callFirebaseFunction: () => null as any,
         fetch: globalThis.fetch.bind(globalThis),
         // TODO: Implement these
-        fetchPdfData: null,
+        fetchPDFData: null,
         fetchPageData: null,
     })
     const storageModules = getBackgroundStorageModules(

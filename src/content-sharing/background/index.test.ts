@@ -2933,7 +2933,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     fullBaseLocatorUrl,
                                 )
                                 const userId = TEST_USER.id
-                                const fetchPDFData = (async () => ({
+
+                                contentSharing.options.backend[
+                                    'dependencies'
+                                ].fetchPDFData = (async () => ({
                                     title: pdfTitle,
                                     pdfMetadata: {
                                         fingerprints: [
@@ -2982,7 +2985,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 const {
                                     link: linkA,
                                 } = await contentSharing.options.backend.createPageLink(
-                                    { now, fullPageUrl, fetchPDFData },
+                                    { now, fullPageUrl },
                                 )
 
                                 // Shared cloud DB data
@@ -3367,7 +3370,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 } = await contentSharing.options.backend.createPageLink(
                                     {
                                         fullPageUrl,
-                                        fetchPDFData,
                                         now: now + 10,
                                     },
                                 )
