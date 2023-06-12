@@ -16,7 +16,7 @@ export class AnalyticsBackground {
         private analyticsManager: Analytics,
         public options: {
             localBrowserStorage: Storage.LocalStorageArea
-            sendBqEvent: (event: AnalyticsEvent) => Promise<void>
+            sendBqEvent: (event: ClientAnalyticsEvent) => Promise<void>
         },
     ) {
         this.remoteFunctions = {
@@ -47,7 +47,9 @@ export class AnalyticsBackground {
         }
     }
 
-    trackBqEvent(event: AnalyticsEvent) {
-        return this.options.sendBqEvent(event)
+    trackBqEvent: AnalyticsInterface['trackBqEvent'] = async (
+        event: ClientAnalyticsEvent,
+    ) => {
+        this.options.sendBqEvent(event)
     }
 }
