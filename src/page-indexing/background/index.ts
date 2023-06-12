@@ -16,6 +16,7 @@ import {
     ContentIdentifier,
     ContentLocator,
     ExtractedPDFData,
+    PageDoc,
 } from '@worldbrain/memex-common/lib/page-indexing/types'
 import {
     buildBaseLocatorUrl,
@@ -57,7 +58,6 @@ import { isUrlSupported } from '../utils'
 import { updatePageCounter } from 'src/util/subscriptions/storage'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 import { docIsPdf } from '@worldbrain/memex-common/lib/personal-cloud/backend/utils'
-import { PageDoc } from '@worldbrain/memex-stemmer/lib/types'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -509,6 +509,78 @@ export class PageIndexingBackground {
         })
     }
 
+    private async storeDocContent(
+        normalizedUrl: string,
+        analysis: Pick<
+            PageAnalysis,
+            'htmlBody' | 'pdfMetadata' | 'pdfPageTexts'
+        >,
+    ) {
+        if (analysis.htmlBody) {
+            await this.persistentStorage.createOrUpdatePage({
+                normalizedUrl,
+                storedContentType: StoredContentType.HtmlBody,
+                content: analysis.htmlBody,
+            })
+        } else if (analysis.pdfMetadata && analysis.pdfPageTexts) {
+            for (const key of Object.keys(analysis.pdfMetadata)) {
+                if (analysis.pdfMetadata[key] === null) {
+                    delete analysis.pdfMetadata[key]
+                }
+            }
+
+            await this.persistentStorage.createOrUpdatePage({
+                normalizedUrl,
+                storedContentType: StoredContentType.PdfContent,
+                content: {
+                    metadata: analysis.pdfMetadata,
+                    pageTexts: analysis.pdfPageTexts,
+                },
+            })
+        }
+    }
+
+    indexPage = async (
+        props: PageCreationProps,
+        opts: PageCreationOpts = {},
+    ): Promise<{ normalizedUrl: string; fullUrl: string }> => {
+        // PDF pages should always have their tab IDs set, so don't fetch them from the tabs API
+        //   TODO: have PDF pages pass down their original URLs here, instead of the memex.cloud/ct/ ones,
+        //     so we don't have to do this dance
+        if (!isPagePdf({ url: props.fullUrl })) {
+            const foundTabId = await this._findTabId(props.fullUrl)
+            if (foundTabId) {
+                props.tabId = foundTabId
+            } else {
+                delete props.tabId
+            }
+        }
+
+        const pageData = await (props.tabId != null
+            ? this.processPageDataFromTab(props)
+            : this.processPageDataFromUrl(props))
+
+        if (!pageData) {
+            return
+        }
+        await this.createOrUpdatePage(pageData, opts)
+
+        if (props.visitTime) {
+            await this.storage.addPageVisit(
+                pageData.url,
+                this._getTime(props.visitTime),
+            )
+            // await this.markTabPageAsIndexed({
+            //     tabId: props.tabId,
+            //     fullPageUrl: pageData.fullUrl,
+            // })
+        }
+
+        await updatePageCounter()
+        // Note that we're returning URLs as they could have changed in the case of PDFs
+        return { normalizedUrl: pageData.url, fullUrl: pageData.fullUrl }
+    }
+
     private async processPageDataFromTab(
         props: PageCreationProps,
     ): Promise<PipelineRes | null> {
@@ -548,43 +620,17 @@ export class PageIndexingBackground {
         return pageData
     }
 
-    private async storeDocContent(
-        normalizedUrl: string,
-        analysis: Pick<
-            PageAnalysis,
-            'htmlBody' | 'pdfMetadata' | 'pdfPageTexts'
-        >,
-    ) {
-        if (analysis.htmlBody) {
-            await this.persistentStorage.createOrUpdatePage({
-                normalizedUrl,
-                storedContentType: StoredContentType.HtmlBody,
-                content: analysis.htmlBody,
-            })
-        } else if (analysis.pdfMetadata && analysis.pdfPageTexts) {
-            for (const key of Object.keys(analysis.pdfMetadata)) {
-                if (analysis.pdfMetadata[key] === null) {
-                    delete analysis.pdfMetadata[key]
-                }
-            }
-
-            await this.persistentStorage.createOrUpdatePage({
-                normalizedUrl,
-                storedContentType: StoredContentType.PdfContent,
-                content: {
-                    metadata: analysis.pdfMetadata,
-                    pageTexts: analysis.pdfPageTexts,
-                },
-            })
-        }
-    }
-
     private async processPageDataFromUrl(
         props: PageCreationProps,
     ): Promise<PipelineRes> {
-        const pageDoc: PageDoc = { url: props.fullUrl, content: {} }
+        const pageDoc: PageDoc = {
+            url: props.fullUrl,
+            originalUrl: props.fullUrl,
+            content: {},
+        }
+        const isPdf = docIsPdf({ normalizedUrl: props.fullUrl }) // TODO: Rename this fn + inputs
 
-        if (!docIsPdf({ normalizedUrl: props.fullUrl })) {
+        if (!isPdf) {
             const {
                 content,
                 htmlBody,
@@ -599,7 +645,7 @@ export class PageIndexingBackground {
             pageDoc.content.fullText = content.fullText
         } else {
             const pdfData = await this.options.fetchPdfData(props.fullUrl)
-            const primaryIdentifier = await this.initContentIdentifier({
+            const baseLocator = await this.initContentIdentifier({
                 locator: {
                     format: ContentLocatorFormat.PDF,
                     originalLocation: props.fullUrl,
@@ -612,41 +658,20 @@ export class PageIndexingBackground {
                 ),
             })
 
-            await this.storeDocContent(primaryIdentifier.normalizedUrl, {
+            await this.storeDocContent(baseLocator.normalizedUrl, {
                 pdfMetadata: pdfData.pdfMetadata,
                 pdfPageTexts: pdfData.pdfPageTexts,
             })
-            await this.storeLocators(primaryIdentifier)
+            await this.storeLocators(baseLocator)
 
+            // Replace the remote PDF URL with the base locator's memex.cloud/ct/ URL
+            pageDoc.url = baseLocator.fullUrl
             pageDoc.content.title = pdfData.title
             pageDoc.content.fullText = pdfData.fullText
         }
 
-        return pagePipeline({ pageDoc })
-    }
-
-    indexPage = async (
-        props: PageCreationProps,
-        opts: PageCreationOpts = {},
-    ) => {
-        const pageData = await this._getPageData(props)
-        if (!pageData) {
-            return
-        }
-        await this.createOrUpdatePage(pageData, opts)
-
-        if (props.visitTime) {
-            await this.storage.addPageVisit(
-                pageData.url,
-                this._getTime(props.visitTime),
-            )
-            // await this.markTabPageAsIndexed({
-            //     tabId: props.tabId,
-            //     fullPageUrl: pageData.fullUrl,
-            // })
-        }
-
-        await updatePageCounter()
+        const processedPageDoc = pagePipeline({ pageDoc })
+        return processedPageDoc
     }
 
     private async _findTabId(fullUrl: string) {
@@ -668,24 +693,6 @@ export class PageIndexingBackground {
             }
         }
         return null
-    }
-
-    private async _getPageData(props: PageCreationProps) {
-        // PDF pages should always have their tab IDs set, so don't fetch them from the tabs API
-        //   TODO: have PDF pages pass down their original URLs here, instead of the memex.cloud/ct/ ones,
-        //     so we don't have to do this dance
-        if (!isPagePdf({ url: props.fullUrl })) {
-            const foundTabId = await this._findTabId(props.fullUrl)
-            if (foundTabId) {
-                props.tabId = foundTabId
-            } else {
-                delete props.tabId
-            }
-        }
-
-        return props.tabId != null
-            ? this.processPageDataFromTab(props)
-            : this.processPageDataFromUrl(props)
     }
 
     async indexTestPage(props: PageCreationProps) {

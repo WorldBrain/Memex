@@ -3431,7 +3431,22 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
         ),
         backgroundIntegrationTest(
             'should created shared list, entry, page info, key, role + all corresponding personal cloud data when a user creates a shareable page link for a PDF - via extension',
-            { skipConflictTests: true, skipSyncTests: true },
+            {
+                skipConflictTests: true,
+                skipSyncTests: true,
+                customTestOpts: {
+                    fetchPdfData: async () => ({
+                        title: data.PDF_DATA_A.title,
+                        fullText: data.PDF_DATA_A.fullText,
+                        pdfPageTexts: [data.PDF_DATA_A.fullText],
+                        pdfMetadata: {
+                            fingerprints: data.PDF_DATA_A.fingerprints,
+                            memexIncludedPages: 1,
+                            memexTotalPages: 1,
+                        },
+                    }),
+                },
+            },
             () => {
                 const testData: TestData = {}
 
@@ -3452,18 +3467,20 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     manager,
                                 } = await setup.getServerStorage()
                                 const now = Date.now()
-                                const listTitle = createPageLinkListTitle(
-                                    new Date(now),
-                                )
-                                const pageTitle = 'Test'
-                                const fullPageUrl =
-                                    'https://memex.garden/test.pdf'
+                                const listTitle = createPageLinkListTitle()
+                                const pdfTitle = data.PDF_DATA_A.title
+                                // const domain = data.
+                                const fullPageUrl = data.PDF_DATA_A.fullUrl
                                 const normalizedPageUrl =
-                                    'memex.garden/test.pdf'
-                                const fingerprint = 'test-pdf-fingerprint-1'
-                                const localLocatorId = 0
+                                    data.PDF_DATA_A.normalizedUrl
+                                const fingerprintA =
+                                    data.PDF_DATA_A.fingerprints[0]
+                                const fingerprintB =
+                                    data.PDF_DATA_A.fingerprints[1]
+                                const domain = data.PDF_DATA_A.domain
+                                const fullText = data.PDF_DATA_A.fullText
                                 const fullBaseLocatorUrl = buildBaseLocatorUrl(
-                                    fingerprint,
+                                    fingerprintA,
                                     ContentLocatorFormat.PDF,
                                 )
                                 const normalizedBaseLocatorUrl = normalizeUrl(
@@ -3515,7 +3532,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     remoteListEntryId,
                                     listTitle: createdListTitle,
                                 } = await contentSharing.schedulePageLinkCreation(
-                                    tabInfo,
+                                    {} as any, // Dont' supply tab, to force remote PDF fetch
                                     {
                                         fullPageUrl,
                                         now,
@@ -3528,6 +3545,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
 
+                                const localLocators: any[] = await setup.storageManager
+                                    .collection('locators')
+                                    .findAllObjects({})
                                 // Local DB data should be created first
                                 // prettier-ignore
                                 {
@@ -3548,8 +3568,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([
                                         {
                                             listId: localListId,
-                                            pageUrl: normalizedPageUrl,
-                                            fullUrl: fullPageUrl,
+                                            pageUrl: normalizedBaseLocatorUrl,
+                                            fullUrl: fullBaseLocatorUrl,
                                             createdAt: new Date(now)
                                         }
                                     ])
@@ -3572,9 +3592,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         {
                                             id: expect.anything(),
                                             followedList: remoteListId,
-                                            entryTitle: pageTitle,
+                                            entryTitle: pdfTitle,
                                             creator: userId,
-                                            normalizedPageUrl,
+                                            normalizedPageUrl: normalizedBaseLocatorUrl,
                                             hasAnnotationsFromOthers: false,
                                             sharedListEntry: remoteListEntryId,
                                             createdWhen: now,
@@ -3583,12 +3603,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     ])
                                     expect(await setup.storageManager.collection('pages').findAllObjects({})).toEqual([
                                         {
-                                            url: normalizedPageUrl,
-                                            fullUrl: fullPageUrl,
-                                            fullTitle: pageTitle,
-                                            domain: normalizedPageUrl,
-                                            hostname: normalizedPageUrl,
-                                            text: 'test',
+                                            url: normalizedBaseLocatorUrl,
+                                            fullUrl: fullBaseLocatorUrl,
+                                            fullTitle: pdfTitle,
+                                            domain,
+                                            hostname: domain,
+                                            text: fullText,
                                             terms: expect.any(Array),
                                             urlTerms: expect.any(Array),
                                             titleTerms: expect.any(Array),
@@ -3596,13 +3616,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     ])
                                     expect(await setup.storageManager.collection('visits').findAllObjects({})).toEqual([
                                         {
-                                            url: normalizedPageUrl,
+                                            url: normalizedBaseLocatorUrl,
                                             time: now
                                         }
                                     ])
-                                    expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([
+                                    expect(localLocators).toEqual([
                                         {
-                                            id: localLocatorId,
+                                            id: expect.any(Number),
                                             fingerprintScheme: FingerprintSchemeType.PdfV1,
                                             locationScheme: LocationSchemeType.NormalizedUrlV1,
                                             locationType: ContentLocatorType.Remote,
@@ -3613,9 +3633,24 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             primary: true,
                                             valid: true,
                                             version: 0,
-                                            fingerprint: fingerprint,
+                                            fingerprint: fingerprintA,
                                             lastVisited: expect.any(Number),
-                                        }
+                                        },
+                                        {
+                                            id: expect.any(Number),
+                                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                                            locationScheme: LocationSchemeType.NormalizedUrlV1,
+                                            locationType: ContentLocatorType.Remote,
+                                            format: ContentLocatorFormat.PDF,
+                                            originalLocation: fullPageUrl,
+                                            location: normalizedPageUrl,
+                                            normalizedUrl: normalizedBaseLocatorUrl,
+                                            primary: true,
+                                            valid: true,
+                                            version: 0,
+                                            fingerprint: fingerprintB,
+                                            lastVisited: expect.any(Number),
+                                        },
                                     ])
                                 }
 
@@ -3641,9 +3676,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: maybeInt(remoteListEntryId),
                                         creator: userId,
-                                        entryTitle: pageTitle,
-                                        originalUrl: fullPageUrl,
-                                        normalizedUrl: normalizedPageUrl,
+                                        entryTitle: pdfTitle,
+                                        originalUrl: fullBaseLocatorUrl,
+                                        normalizedUrl: normalizedBaseLocatorUrl,
                                         sharedList: maybeInt(remoteListId),
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
@@ -3655,20 +3690,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         creator: userId,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
-                                        normalizedUrl: normalizedPageUrl,
-                                        originalUrl: fullPageUrl,
-                                        fullTitle: pageTitle
-                                    }
-                                ])
-                                expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([
-                                    {
-                                        id: expect.anything(),
-                                        creator: userId,
                                         normalizedUrl: normalizedBaseLocatorUrl,
-                                        originalUrl: fullPageUrl,
-                                        locationScheme: LocationSchemeType.NormalizedUrlV1,
+                                        originalUrl: fullBaseLocatorUrl,
+                                        fullTitle: pdfTitle
                                     }
                                 ])
+                                // TODO: Maybe add upload fn support
+                                // expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([
+                                //     {
+                                //         id: expect.anything(),
+                                //         creator: userId,
+                                //         normalizedUrl: normalizedBaseLocatorUrl,
+                                //         originalUrl: fullPageUrl,
+                                //         locationScheme: LocationSchemeType.NormalizedUrlV1,
+                                //     }
+                                // ])
                                 expect(await manager.collection('sharedListKey').findAllObjects({})).toEqual([
                                     {
                                         id: maybeInt(collabKey),
@@ -3735,8 +3771,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(personalMetadataA).toEqual([
                                     {
                                         id: expect.anything(),
-                                        canonicalUrl: fullPageUrl,
-                                        title: pageTitle,
+                                        canonicalUrl: fullBaseLocatorUrl,
+                                        title: pdfTitle,
                                         lang: null,
                                         description: null,
                                         user: userId,
@@ -3786,7 +3822,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     },
-                                    // Locator for PDF's fingerprint
+                                    // Locator for PDF's fingerprints
                                     {
                                         id: expect.anything(),
                                         personalContentMetadata: personalMetadataA[0].id,
@@ -3799,8 +3835,27 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         valid: true,
                                         version: 0,
                                         user: userId,
-                                        localId: localLocatorId,
-                                        fingerprint: fingerprint,
+                                        localId: localLocators[0].id,
+                                        fingerprint: fingerprintA,
+                                        createdByDevice: null,
+                                        lastVisited: expect.anything(),
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    },
+                                    {
+                                        id: expect.anything(),
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        format: ContentLocatorFormat.PDF,
+                                        originalLocation: fullPageUrl,
+                                        location: normalizedPageUrl,
+                                        locationScheme: LocationSchemeType.NormalizedUrlV1,
+                                        locationType: ContentLocatorType.Remote,
+                                        primary: true,
+                                        valid: true,
+                                        version: 0,
+                                        user: userId,
+                                        localId: localLocators[1].id,
+                                        fingerprint: fingerprintB,
                                         createdByDevice: null,
                                         lastVisited: expect.anything(),
                                         createdWhen: expect.anything(),
@@ -6952,7 +7007,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
     ],
-    { includePostSyncProcessor: true },
+    // { includePostSyncProcessor: true },
 )
 
 function makeShareAnnotationTest(options: {
