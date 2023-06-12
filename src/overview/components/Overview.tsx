@@ -15,7 +15,9 @@ class Overview extends PureComponent<Props> {
             <DashboardContainer
                 services={this.props.services}
                 renderUpdateNotifBanner={() => (
-                    <UpdateNotifBanner theme={{ position: 'fixed' }} />
+                    <UpdateNotifBanner
+                        theme={{ variant: 'dark', position: 'fixed' }}
+                    />
                 )}
                 analyticsBG={this.props.analyticsBG}
             />
