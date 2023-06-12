@@ -572,13 +572,16 @@ export class PageIndexingBackground {
             )
             // await this.markTabPageAsIndexed({
             //     tabId: props.tabId,
-            //     fullPageUrl: pageData.fullUrl,
+            //     fullPageUrl: processedPageData.fullUrl,
             // })
         }
 
         await updatePageCounter()
         // Note that we're returning URLs as they could have changed in the case of PDFs
-        return { normalizedUrl: pageData.url, fullUrl: pageData.fullUrl }
+        return {
+            normalizedUrl: pageData.url,
+            fullUrl: pageData.fullUrl,
+        }
     }
 
     private async processPageDataFromTab(
@@ -622,7 +625,7 @@ export class PageIndexingBackground {
 
     private async processPageDataFromUrl(
         props: PageCreationProps,
-    ): Promise<PipelineRes> {
+    ): Promise<PipelineRes | null> {
         const pageDoc: PageDoc = {
             url: props.fullUrl,
             originalUrl: props.fullUrl,
@@ -631,6 +634,11 @@ export class PageIndexingBackground {
         const isPdf = docIsPdf({ normalizedUrl: props.fullUrl }) // TODO: Rename this fn + inputs
 
         if (!isPdf) {
+            const needsIndexing = !(await this.storage.getPage(props.fullUrl))
+            if (!needsIndexing) {
+                return null
+            }
+
             const {
                 content,
                 htmlBody,
@@ -658,11 +666,17 @@ export class PageIndexingBackground {
                 ),
             })
 
+            const needsIndexing = !(await this.storage.getPage(
+                baseLocator.fullUrl,
+            ))
+            if (!needsIndexing) {
+                return null
+            }
+
             await this.storeDocContent(baseLocator.normalizedUrl, {
                 pdfMetadata: pdfData.pdfMetadata,
                 pdfPageTexts: pdfData.pdfPageTexts,
             })
-            await this.storeLocators(baseLocator)
 
             // Replace the remote PDF URL with the base locator's memex.cloud/ct/ URL
             pageDoc.url = baseLocator.fullUrl
@@ -670,8 +684,7 @@ export class PageIndexingBackground {
             pageDoc.content.fullText = pdfData.fullText
         }
 
-        const processedPageDoc = pagePipeline({ pageDoc })
-        return processedPageDoc
+        return pagePipeline({ pageDoc })
     }
 
     private async _findTabId(fullUrl: string) {

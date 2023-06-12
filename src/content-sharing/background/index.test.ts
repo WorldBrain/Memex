@@ -2339,6 +2339,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         localId: null,
                                         contentSize: null,
                                         fingerprint: null,
+                                        fingerprintScheme: null,
                                         user: userId,
                                         createdByDevice: null,
                                         createdWhen: expect.anything(),
@@ -3532,7 +3533,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     remoteListEntryId,
                                     listTitle: createdListTitle,
                                 } = await contentSharing.schedulePageLinkCreation(
-                                    {} as any, // Dont' supply tab, to force remote PDF fetch
+                                    tabInfo,
                                     {
                                         fullPageUrl,
                                         now,
@@ -3695,16 +3696,24 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         fullTitle: pdfTitle
                                     }
                                 ])
-                                // TODO: Maybe add upload fn support
-                                // expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([
-                                //     {
-                                //         id: expect.anything(),
-                                //         creator: userId,
-                                //         normalizedUrl: normalizedBaseLocatorUrl,
-                                //         originalUrl: fullPageUrl,
-                                //         locationScheme: LocationSchemeType.NormalizedUrlV1,
-                                //     }
-                                // ])
+                                expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: userId,
+                                        originalUrl: fullPageUrl,
+                                        sharedList: maybeInt(remoteListId),
+                                        normalizedUrl: normalizedBaseLocatorUrl,
+                                        locationScheme: LocationSchemeType.NormalizedUrlV1,
+                                    },
+                                    {
+                                        id: expect.anything(),
+                                        creator: userId,
+                                        originalUrl: fullPageUrl,
+                                        sharedList: maybeInt(remoteListId),
+                                        normalizedUrl: normalizedBaseLocatorUrl,
+                                        locationScheme: LocationSchemeType.NormalizedUrlV1,
+                                    },
+                                ])
                                 expect(await manager.collection('sharedListKey').findAllObjects({})).toEqual([
                                     {
                                         id: maybeInt(collabKey),
@@ -3817,7 +3826,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         user: userId,
                                         localId: null,
                                         fingerprint: null,
-                                        createdByDevice: null,
+                                        contentSize: null,
+                                        createdByDevice: data.DEVICE_ID_A,
                                         lastVisited: expect.anything(),
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
@@ -3837,7 +3847,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         user: userId,
                                         localId: localLocators[0].id,
                                         fingerprint: fingerprintA,
-                                        createdByDevice: null,
+                                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                                        contentSize: null,
+                                        createdByDevice: data.DEVICE_ID_A,
                                         lastVisited: expect.anything(),
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
@@ -3856,7 +3868,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         user: userId,
                                         localId: localLocators[1].id,
                                         fingerprint: fingerprintB,
-                                        createdByDevice: null,
+                                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                                        contentSize: null,
+                                        createdByDevice: data.DEVICE_ID_A,
                                         lastVisited: expect.anything(),
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
