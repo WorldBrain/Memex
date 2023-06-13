@@ -21,7 +21,7 @@ import {
 import {
     buildBaseLocatorUrl,
     fingerprintsEqual,
-    isPagePdf,
+    isMemexPageAPdf,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 import PageStorage from './storage'
@@ -57,7 +57,7 @@ import type { BrowserSettingsStore } from 'src/util/settings'
 import { isUrlSupported } from '../utils'
 import { updatePageCounter } from 'src/util/subscriptions/storage'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
-import { docIsPdf } from '@worldbrain/memex-common/lib/personal-cloud/backend/utils'
+import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -547,7 +547,7 @@ export class PageIndexingBackground {
         // PDF pages should always have their tab IDs set, so don't fetch them from the tabs API
         //   TODO: have PDF pages pass down their original URLs here, instead of the memex.cloud/ct/ ones,
         //     so we don't have to do this dance
-        if (!isPagePdf({ url: props.fullUrl })) {
+        if (!isMemexPageAPdf({ url: props.fullUrl })) {
             const foundTabId = await this._findTabId(props.fullUrl)
             if (foundTabId) {
                 props.tabId = foundTabId
@@ -630,7 +630,7 @@ export class PageIndexingBackground {
             originalUrl: props.fullUrl,
             content: {},
         }
-        const isPdf = docIsPdf({ normalizedUrl: props.fullUrl }) // TODO: Rename this fn + inputs
+        const isPdf = doesUrlPointToPdf(props.fullUrl)
 
         if (!isPdf) {
             const existingPage = await this.storage.getPage(props.fullUrl)
