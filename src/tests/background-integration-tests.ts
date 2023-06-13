@@ -268,7 +268,9 @@ export async function setupBackgroundIntegrationTest(
             fetchPDFData,
             storageManager: serverStorage.manager,
             storageModules: serverStorage.modules,
-            getConfig: () => ({ content_sharing: {} }),
+            getConfig: () => ({
+                content_sharing: { opengraph_app_id: 'test-og-app-id' },
+            }),
             getCurrentUserId: getUserId,
             services: { pushMessaging: pushMessagingService },
             captureException: async (err) => {

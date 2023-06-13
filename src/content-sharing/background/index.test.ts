@@ -39,6 +39,7 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { getSinglePageShareUrl } from '../utils'
 import { buildBaseLocatorUrl } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import type { OpenGraphSiteLookupResponse } from '@worldbrain/memex-common/lib/opengraph/types'
 
 async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
     setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
@@ -2128,10 +2129,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     manager,
                                 } = await setup.getServerStorage()
                                 const listTitle = createPageLinkListTitle()
-                                const pageTitle = null // TODO: Do we fetch page titles?
+                                const pageTitle = 'test page title'
                                 const fullPageUrl = 'https://memex.garden'
                                 const normalizedPageUrl = 'memex.garden'
                                 const userId = TEST_USER.id
+
+                                const mockResponse: OpenGraphSiteLookupResponse = {
+                                    url: normalizedPageUrl,
+                                    hybridGraph: { title: pageTitle },
+                                }
+                                setup.fetch.mock('*', 200, {
+                                    response: JSON.stringify(mockResponse),
+                                    sendAsJson: true,
+                                })
 
                                 // Shared cloud DB data
                                 // prettier-ignore
@@ -2436,7 +2446,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             id: expect.anything(),
                                             followedList: sharedListDataA[0].id,
                                             sharedListEntry: sharedListEntryDataA[0].id,
-                                            entryTitle: '',
+                                            entryTitle: pageTitle,
                                             creator: userId,
                                             normalizedPageUrl,
                                             hasAnnotationsFromOthers: false,
@@ -2449,12 +2459,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             url: normalizedPageUrl,
                                             fullUrl: fullPageUrl,
                                             canonicalUrl: fullPageUrl,
-                                            // fullTitle: pageTitle,
+                                            fullTitle: pageTitle,
                                             domain: 'memex.garden',
                                             hostname: 'memex.garden',
                                             text: '',
                                             urlTerms: expect.anything(),
-                                            // titleTerms: expect.anything(),
+                                            titleTerms: expect.anything(),
                                         }
                                     ])
                                     expect(await setup.storageManager.collection('visits').findAllObjects({})).toEqual([
