@@ -92,6 +92,8 @@ import type {
 } from 'src/annotations/cache/types'
 import { page } from 'src/sidebar-overlay/sidebar/selectors'
 import { AnalyticsInterface } from 'src/analytics/background/types'
+import type { UnifiedList } from 'src/annotations/cache/types'
+import { AnalyticsInterface } from 'src/analytics/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
