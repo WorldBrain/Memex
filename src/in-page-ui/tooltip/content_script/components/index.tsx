@@ -5,8 +5,52 @@ import { StyleSheetManager, ThemeProvider } from 'styled-components'
 import TooltipContainer, {
     Props,
 } from '@worldbrain/memex-common/lib/in-page-ui/tooltip/container'
-import { theme } from 'src/common-ui/components/design-library/theme'
+import {
+    loadThemeVariant,
+    theme,
+} from 'src/common-ui/components/design-library/theme'
 import type { InPageUIRootMount } from 'src/in-page-ui/types'
+import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+
+interface TooltipRootProps {
+    mount: InPageUIRootMount
+    params: Omit<Props, 'onTooltipInit'>
+    onTooltipInit: (showTooltip: () => void) => void
+}
+
+interface TooltipRootState {
+    themeVariant?: MemexThemeVariant
+}
+
+class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
+    state: TooltipRootState = {}
+
+    async componentDidMount() {
+        this.setState({
+            themeVariant: await loadThemeVariant(),
+        })
+    }
+
+    render() {
+        const { themeVariant } = this.state
+        if (!themeVariant) {
+            return null
+        }
+        const { props } = this
+
+        return (
+            <StyleSheetManager target={props.mount.shadowRoot as any}>
+                <ThemeProvider theme={theme({ variant: themeVariant })}>
+                    <TooltipContainer
+                        onTooltipInit={props.onTooltipInit}
+                        {...props.params}
+                        context="extension"
+                    />
+                </ThemeProvider>
+            </StyleSheetManager>
+        )
+    }
+}
 
 export function setupUIContainer(
     mount: InPageUIRootMount,
@@ -14,15 +58,11 @@ export function setupUIContainer(
 ): Promise<() => void> {
     return new Promise(async (resolve) => {
         ReactDOM.render(
-            <StyleSheetManager target={mount.shadowRoot as any}>
-                <ThemeProvider theme={theme}>
-                    <TooltipContainer
-                        onTooltipInit={(showTooltip) => resolve(showTooltip)}
-                        {...params}
-                        context="extension"
-                    />
-                </ThemeProvider>
-            </StyleSheetManager>,
+            <TooltipRoot
+                mount={mount}
+                params={params}
+                onTooltipInit={resolve}
+            />,
             mount.rootElement,
         )
     })

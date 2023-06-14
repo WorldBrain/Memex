@@ -68,7 +68,7 @@ export interface SidebarContainerDependencies {
     pageIndexingBG: PageIndexingInterface<'caller'>
     authBG: AuthRemoteFunctionsInterface
     subscription: SubscriptionsService
-    theme?: MemexTheme & Partial<SidebarTheme>
+    theme: MemexTheme & Partial<SidebarTheme>
 
     getCurrentUser: () => UserReference | null
     // search: SearchInterface

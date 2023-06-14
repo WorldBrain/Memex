@@ -1,14 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import PropTypes from 'prop-types'
-import classNames from 'classnames'
-import { reactEventHandler } from 'src/util/ui-logic'
-import * as icons from 'src/common-ui/components/design-library/icons'
 
-import { ThemeProvider } from 'styled-components'
 import styled, { css } from 'styled-components'
-import { theme } from 'src/common-ui/components/design-library/theme'
-import { tutorialContents, TutorialCardContent } from './tutorial-cards-content'
+import { TutorialCardContent } from './tutorial-cards-content'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 // card container (hold cycling logic)

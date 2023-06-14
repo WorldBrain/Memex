@@ -70,6 +70,8 @@ import {
     getListShareUrl,
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
+import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -205,6 +207,7 @@ interface AnnotationsSidebarState {
     }
     showAIhighlight: boolean
     showAISuggestionsDropDown: boolean
+    themeVariant?: MemexThemeVariant
     AIsuggestions: []
 }
 
@@ -265,6 +268,14 @@ export class AnnotationsSidebar extends React.Component<
                 showIsolatedViewNotif: isolatedViewNotifVisible,
             })
         }
+
+        let themeVariant: MemexThemeVariant = 'dark'
+        try {
+            themeVariant = await loadThemeVariant()
+        } catch (err) {
+            console.error('Could not load theme, falling back to dark mode')
+        }
+        this.setState({ themeVariant })
     }
 
     componentWillUnmount() {}
@@ -1197,7 +1208,7 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderResultsBody() {
+    private renderResultsBody(themeVariant: MemexThemeVariant) {
         const listData = this.props.lists.byId[this.props.selectedListId]
 
         if (this.props.activeTab === 'feed') {
@@ -1521,7 +1532,7 @@ export class AnnotationsSidebar extends React.Component<
                 )}
                 <UpdateNotifBanner
                     location={'sidebar'}
-                    theme={{ position: 'fixed' }}
+                    theme={{ variant: themeVariant, position: 'fixed' }}
                     sidebarContext={this.props.sidebarContext}
                 />
             </>
@@ -2287,6 +2298,10 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     render() {
+        if (!this.state.themeVariant) {
+            return null
+        }
+
         return (
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
                 <TopBar sidebarContext={this.props.sidebarContext}>
@@ -2295,7 +2310,7 @@ export class AnnotationsSidebar extends React.Component<
                     {/* {this.props.sidebarActions()} */}
                 </TopBar>
                 {this.renderPageShareModal()}
-                {this.renderResultsBody()}
+                {this.renderResultsBody(this.state.themeVariant)}
             </ResultBodyContainer>
         )
     }

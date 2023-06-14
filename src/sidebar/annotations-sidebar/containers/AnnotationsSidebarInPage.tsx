@@ -2,7 +2,6 @@ import * as React from 'react'
 import styled, { css } from 'styled-components'
 import ReactDOM from 'react-dom'
 
-import { theme } from 'src/common-ui/components/design-library/theme'
 import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -38,18 +37,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 > {
     static defaultProps: Pick<
         Props,
-        'isLockable' | 'theme' | 'sidebarContext' | 'runtimeAPI' | 'storageAPI'
+        'isLockable' | 'sidebarContext' | 'runtimeAPI' | 'storageAPI'
     > = {
         runtimeAPI: browser.runtime,
         storageAPI: browser.storage,
         sidebarContext: 'in-page',
         isLockable: true,
-        theme: {
-            ...theme,
-            rightOffsetPx: 0,
-            canClickAnnotations: true,
-            paddingRight: 0,
-        },
     }
 
     popoutOpen = false
@@ -58,6 +51,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     constructor(props: Props) {
         super({
             ...props,
+            theme: {
+                ...props.theme,
+                rightOffsetPx: 0,
+                canClickAnnotations: true,
+                paddingRight: 0,
+            },
             showAnnotationShareModal: () =>
                 this.processEvent('setAnnotationShareModalShown', {
                     shown: true,

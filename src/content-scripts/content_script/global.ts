@@ -85,6 +85,8 @@ import {
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
