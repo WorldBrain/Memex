@@ -4,19 +4,33 @@ import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 import { ThemeProvider } from 'styled-components'
 
-import { theme } from 'src/common-ui/components/design-library/theme'
+import {
+    loadThemeVariant,
+    theme,
+} from 'src/common-ui/components/design-library/theme'
 import ErrorBoundary from 'src/common-ui/components/ErrorBoundary'
 import RuntimeError from 'src/common-ui/components/RuntimeError'
 import Popup from './container'
 import configureStore from './store'
 import { setupRpcConnection } from 'src/util/webextensionRPC'
+import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
-setupRpcConnection({ sideName: 'content-script-popup', role: 'content' })
+interface RootProps {
+    store: ReturnType<typeof configureStore>
+}
 
-const store = configureStore()
+interface RootState {
+    themeVariant?: MemexThemeVariant
+}
 
-document.getElementById('loader').remove()
+class Root extends React.Component<RootProps, RootState> {
+    state: RootState = {}
 
+    async componentDidMount() {
+        this.setState({
+            themeVariant: await loadThemeVariant(),
+        })
+    }
 ReactDOM.render(
     <Provider store={store}>
         <ThemeProvider theme={theme}>
@@ -27,3 +41,32 @@ ReactDOM.render(
     </Provider>,
     document.getElementById('app'),
 )
+
+    render() {
+        const { themeVariant } = this.state
+        if (!themeVariant) {
+            return null
+        }
+        return (
+            <Provider store={this.props.store}>
+                <ThemeProvider theme={theme({ variant: themeVariant })}>
+                    <ErrorBoundary component={RuntimeError}>
+                        <Popup />
+                    </ErrorBoundary>
+                </ThemeProvider>
+            </Provider>
+        )
+    }
+}
+
+function main() {
+    setupRpcConnection({ sideName: 'content-script-popup', role: 'content' })
+
+    const store = configureStore()
+
+    document.getElementById('loader').remove()
+
+    ReactDOM.render(<Root store={store} />, document.getElementById('app'))
+}
+
+main()

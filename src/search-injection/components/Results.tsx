@@ -8,108 +8,127 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 
-const Results = (props) => {
-    // const searchEngineClass = `${props.searchEngine}_${props.position}`
+interface ResultsProps {
+    position: string
+    searchEngine: string
+    totalCount: number
+    seeMoreResults: Function
+    toggleHideResults: Function
+    hideResults: boolean
+    toggleDropdown: Function
+    closeDropdown: Function
+    dropdown: boolean
+    removeResults: Function
+    changePosition: Function
+    renderResultItems: Function
+    renderNotification: React.ReactNode
+}
+interface ResultsState {
+    themeVariant?: MemexThemeVariant
+}
 
-    const [themeVariant, setThemeVariant] = useState<MemexThemeVariant | null>(
-        null,
-    )
-    useEffect(() => {
-        async function load() {
-            let loaded: MemexThemeVariant = 'dark'
-            try {
-                loaded = await loadThemeVariant()
-            } catch (err) {
-                console.error('Could not load theme, falling back to dark mode')
-            }
-            setThemeVariant(loaded)
+class Results extends React.Component<ResultsProps, ResultsState> {
+    state: ResultsState = {}
+
+    async componentDidMount() {
+        let loaded: MemexThemeVariant = 'dark'
+        try {
+            loaded = await loadThemeVariant()
+        } catch (err) {
+            console.error('Could not load theme, falling back to dark mode')
         }
-
-        load()
-    })
-    if (!themeVariant) {
-        return null
+        this.setState({ themeVariant: loaded })
     }
 
-    return (
-        <>
-            <MemexContainer
-                position={props.position}
-                hideResults={props.hideResults}
-                // searchEngine={props.searchEngine}
-            >
-                <UpdateNotifBanner
-                    theme={{
-                        variant: themeVariant,
-                        width: props.position === 'side' && 'fill-available',
-                        position: 'relative',
-                        iconSize: '20px',
-                    }}
-                    location="search"
-                />
-                <TopBarArea hideResults={props.hideResults}>
-                    <ResultsBox>
-                        <TooltipBox
-                            placement={'bottom'}
-                            tooltipText={
-                                props.hideResults
-                                    ? 'Show Results'
-                                    : 'Hide Results'
-                            }
-                        >
-                            <Icon
-                                filePath={
-                                    props.hideResults ? 'expand' : 'compress'
-                                }
-                                heightAndWidth="22px"
-                                onClick={props.toggleHideResults}
-                            />
-                        </TooltipBox>
-                        <TotalCount>{props.totalCount}</TotalCount>
-                        <ResultsText>Memex Results</ResultsText>
-                    </ResultsBox>
-                    <IconArea>
-                        <TooltipBox
-                            placement={'bottom'}
-                            tooltipText={'Go to Dashboard'}
-                        >
-                            <Icon
-                                filePath={'searchIcon'}
-                                heightAndWidth="18px"
-                                padding="5px"
-                                onClick={props.seeMoreResults}
-                            />
-                        </TooltipBox>
-                        <SettingsButtonContainer>
+    render() {
+        if (!this.state.themeVariant) {
+            return null
+        }
+        const { props } = this
+
+        return (
+            <>
+                <MemexContainer
+                    position={props.position}
+                    hideResults={props.hideResults}
+                    // searchEngine={props.searchEngine}
+                >
+                    <UpdateNotifBanner
+                        theme={{
+                            variant: this.state.themeVariant,
+                            width:
+                                props.position === 'side' && 'fill-available',
+                            position: 'relative',
+                            iconSize: '20px',
+                        }}
+                        location="search"
+                    />
+                    <TopBarArea hideResults={props.hideResults}>
+                        <ResultsBox>
                             <TooltipBox
                                 placement={'bottom'}
-                                tooltipText={'Settings'}
+                                tooltipText={
+                                    props.hideResults
+                                        ? 'Show Results'
+                                        : 'Hide Results'
+                                }
                             >
                                 <Icon
-                                    filePath={'settings'}
-                                    heightAndWidth="18px"
-                                    padding="5px"
-                                    onClick={props.toggleDropdown}
+                                    filePath={
+                                        props.hideResults
+                                            ? 'expand'
+                                            : 'compress'
+                                    }
+                                    heightAndWidth="22px"
+                                    onClick={props.toggleHideResults}
                                 />
                             </TooltipBox>
-                            {props.dropdown && (
-                                <Dropdown
-                                    remove={props.removeResults}
-                                    rerender={props.changePosition}
-                                    closeDropdown={props.closeDropdown}
+                            <TotalCount>{props.totalCount}</TotalCount>
+                            <ResultsText>Memex Results</ResultsText>
+                        </ResultsBox>
+                        <IconArea>
+                            <TooltipBox
+                                placement={'bottom'}
+                                tooltipText={'Go to Dashboard'}
+                            >
+                                <Icon
+                                    filePath={'searchIcon'}
+                                    heightAndWidth="18px"
+                                    padding="5px"
+                                    onClick={props.seeMoreResults}
                                 />
-                            )}
-                        </SettingsButtonContainer>
-                    </IconArea>
-                </TopBarArea>
-                {!props.hideResults && (
-                    <ResultsContainer>
-                        {props.renderResultItems()}
-                    </ResultsContainer>
-                )}
-            </MemexContainer>
-        </>
-    )
+                            </TooltipBox>
+                            <SettingsButtonContainer>
+                                <TooltipBox
+                                    placement={'bottom'}
+                                    tooltipText={'Settings'}
+                                >
+                                    <Icon
+                                        filePath={'settings'}
+                                        heightAndWidth="18px"
+                                        padding="5px"
+                                        onClick={props.toggleDropdown}
+                                    />
+                                </TooltipBox>
+                                {props.dropdown && (
+                                    <Dropdown
+                                        remove={props.removeResults}
+                                        rerender={props.changePosition}
+                                        closeDropdown={props.closeDropdown}
+                                    />
+                                )}
+                            </SettingsButtonContainer>
+                        </IconArea>
+                    </TopBarArea>
+                    {!props.hideResults && (
+                        <ResultsContainer>
+                            {props.renderResultItems()}
+                        </ResultsContainer>
+                    )}
+                </MemexContainer>
+            </>
+        )
+    }
 }
 
 const SettingsButtonContainer = styled.div``
@@ -201,21 +220,5 @@ const UpdateNotifBannerBox = styled.div`
     overflow: hidden;
     height: 120px;
 `
-
-Results.propTypes = {
-    position: PropTypes.string.isRequired,
-    searchEngine: PropTypes.string.isRequired,
-    totalCount: PropTypes.number,
-    seeMoreResults: PropTypes.func.isRequired,
-    toggleHideResults: PropTypes.func.isRequired,
-    hideResults: PropTypes.bool.isRequired,
-    toggleDropdown: PropTypes.func.isRequired,
-    closeDropdown: PropTypes.func.isRequired,
-    dropdown: PropTypes.bool.isRequired,
-    removeResults: PropTypes.func.isRequired,
-    changePosition: PropTypes.func.isRequired,
-    renderResultItems: PropTypes.func.isRequired,
-    renderNotification: PropTypes.node,
-}
 
 export default Results

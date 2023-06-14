@@ -28,6 +28,7 @@ import type {
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
 import { createPageLinkListTitle } from 'src/content-sharing/utils'
+import { theme } from 'src/common-ui/components/design-library/theme'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -99,6 +100,7 @@ const setupLogicHelper = async ({
 
     const analytics = new FakeAnalytics()
     const sidebarLogic = new SidebarContainerLogic({
+        theme: theme({ variant: 'dark' }),
         fullPageUrl,
         sidebarContext: 'in-page',
         shouldHydrateCacheOnInit: true,

@@ -56,10 +56,13 @@ interface RootProps {
     ReduxDevTools: any
 }
 
-class Root extends React.Component<
-    RootProps,
-    { themeVariant?: MemexThemeVariant }
-> {
+interface RootState {
+    themeVariant?: MemexThemeVariant
+}
+
+class Root extends React.Component<RootProps, RootState> {
+    state: RootState = {}
+
     async componentDidMount() {
         this.setState({
             themeVariant: await loadThemeVariant(),
