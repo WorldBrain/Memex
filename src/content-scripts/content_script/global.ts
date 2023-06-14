@@ -85,6 +85,7 @@ import {
 import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { AnalyticsInterface } from 'src/analytics/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -183,6 +184,7 @@ export async function main(
     } = {}
 
     // 2. Initialise dependencies required by content scripts
+    const analyticsBG = runInBackground<AnalyticsInterface>()
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
     const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()
@@ -547,6 +549,7 @@ export async function main(
                 getCurrentUser: () => currentUser,
                 annotationsCache,
                 highlighter: highlightRenderer,
+                analyticsBG,
                 authBG,
                 annotationsBG,
                 summarizeBG,

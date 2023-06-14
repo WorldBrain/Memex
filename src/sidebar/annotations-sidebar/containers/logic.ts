@@ -2447,6 +2447,10 @@ export class SidebarContainerLogic extends UILogic<
             throw new Error('Cannot create page link - User not logged in')
         }
 
+        await this.options.analyticsBG.trackBqEvent({
+            eventName: 'createPageLink',
+        })
+
         await executeUITask(this, 'pageLinkCreateState', async () => {
             const {
                 collabKey,
