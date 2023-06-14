@@ -28,6 +28,8 @@ interface RootState {
     theme?: MemexTheme
 }
 class Root extends React.Component<RootProps, RootState> {
+    state: RootState = {}
+
     async componentDidMount() {
         let themeVariant: MemexThemeVariant = 'dark'
         try {
