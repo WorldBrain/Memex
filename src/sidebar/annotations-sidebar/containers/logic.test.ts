@@ -102,6 +102,7 @@ const setupLogicHelper = async ({
         fullPageUrl,
         sidebarContext: 'in-page',
         shouldHydrateCacheOnInit: true,
+        analyticsBG: backgroundModules.analyticsBG,
         authBG: backgroundModules.auth.remoteFunctions,
         subscription: backgroundModules.auth.subscriptionService,
         copyPaster: backgroundModules.copyPaster.remoteFunctions,
