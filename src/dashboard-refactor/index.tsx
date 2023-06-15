@@ -62,8 +62,11 @@ import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/u
 import * as cacheUtils from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
+import { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
-export interface Props extends DashboardDependencies {}
+export interface Props extends DashboardDependencies {
+    theme: MemexTheme
+}
 
 export class DashboardContainer extends StatefulUIElement<
     Props,
@@ -1448,6 +1451,7 @@ export class DashboardContainer extends StatefulUIElement<
                             )}
                         </MainContent>
                         <NotesSidebar
+                            theme={this.props.theme}
                             hasFeedActivity={listsSidebar.hasFeedActivity}
                             clickFeedActivityIndicator={() =>
                                 this.processEvent('switchToFeed', null)

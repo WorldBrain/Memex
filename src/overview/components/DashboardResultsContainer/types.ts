@@ -1,9 +1,10 @@
+import { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import type { UIServices } from 'src/services/ui/types'
 
 export interface DashboardResultsDependencies {
-    themeVariant: MemexThemeVariant
+    theme: MemexTheme
     services: UIServices
     analyticsBG: AnalyticsCoreInterface
 }

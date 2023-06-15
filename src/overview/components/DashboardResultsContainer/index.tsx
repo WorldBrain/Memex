@@ -49,10 +49,11 @@ export default class DashboardResultsContainer extends StatefulUIElement<
             <>
                 <DashboardContainer
                     services={this.props.services}
+                    theme={this.props.theme}
                     renderUpdateNotifBanner={() => (
                         <UpdateNotifBanner
                             theme={{
-                                variant: this.props.themeVariant,
+                                ...this.props.theme,
                                 position: 'fixed',
                             }}
                         />
