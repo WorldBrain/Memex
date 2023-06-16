@@ -20,7 +20,7 @@ import {
     sharedListToFollowedList,
 } from './utils'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
-import { LIST_TIMESTAMP_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import type {
     SharedListTimestamp,
     SharedListTimestampGetRequest,
@@ -74,8 +74,8 @@ export class PageActivityIndicatorBackground {
 
         const workerUrl =
             process.env.NODE_ENV === 'production'
-                ? LIST_TIMESTAMP_WORKER_URLS.production
-                : LIST_TIMESTAMP_WORKER_URLS.staging
+                ? CLOUDFLARE_WORKER_URLS.production
+                : CLOUDFLARE_WORKER_URLS.staging
         const requestBody: SharedListTimestampGetRequest = {
             sharedListIds: [...existingFollowedListsLookup.keys()].map((id) =>
                 id.toString(),
