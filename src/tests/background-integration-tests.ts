@@ -196,8 +196,9 @@ export async function setupBackgroundIntegrationTest(
         )
     }
 
+    // TODO: Move these defaults somewhere - find a more elegant way of handling data fetch in tests
     const fetchPDFData =
-        options.fetchPdfData ??
+        options?.fetchPdfData ??
         (async (url) => ({
             fullText: DEF_PAGE.text,
             title: DEF_PAGE.fullTitle,
@@ -206,6 +207,15 @@ export async function setupBackgroundIntegrationTest(
                 fingerprints: ['test-fingerprint'],
                 memexIncludedPages: 1,
                 memexTotalPages: 1,
+            },
+        }))
+    const fetchPageData =
+        options?.fetchPageData ??
+        (async (url) => ({
+            content: {
+                canonicalUrl: DEF_PAGE.fullUrl,
+                fullText: DEF_PAGE.text,
+                title: DEF_PAGE.fullTitle,
             },
         }))
 
@@ -281,17 +291,8 @@ export async function setupBackgroundIntegrationTest(
             },
         }),
         generateServerId: () => nextServerId++,
-        // TODO: Move these defaults somewhere - find a more elegant way of handling data fetch in tests
+        fetchPageData,
         fetchPDFData,
-        fetchPageData:
-            options.fetchPageData ??
-            (async (url) => ({
-                content: {
-                    canonicalUrl: DEF_PAGE.fullUrl,
-                    fullText: DEF_PAGE.text,
-                    title: DEF_PAGE.fullTitle,
-                },
-            })),
     })
 
     registerBackgroundModuleCollections({

@@ -22,7 +22,6 @@ export type PageAnalyzer = (args: {
         TabManagementBackground,
         'extractRawPageContent' | 'getFavIcon'
     >
-    fetch?: typeof fetch
     includeContent?: 'metadata-only' | 'metadata-with-full-text'
     includeFavIcon?: boolean
     url?: string
@@ -34,7 +33,6 @@ export type PageAnalyzer = (args: {
  * CONTEXT: This needs to be called on a tab that is ready to be indexed.
  */
 const analysePage: PageAnalyzer = async (options) => {
-    const { tabId, url } = options
     options.includeFavIcon = options.includeFavIcon ?? true
 
     let pdfMetadata: PageAnalysis['pdfMetadata']
@@ -102,7 +100,7 @@ const analysePage: PageAnalyzer = async (options) => {
     }
     const favIconURI =
         options.includeFavIcon && rawContent.type !== 'pdf'
-            ? await options.tabManagement.getFavIcon({ tabId })
+            ? await options.tabManagement.getFavIcon({ tabId: options.tabId })
             : undefined
     const htmlBody = rawContent.type === 'html' ? rawContent.body : undefined
 

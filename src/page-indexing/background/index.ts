@@ -79,7 +79,6 @@ export class PageIndexingBackground {
 
     storage: PageStorage
     persistentStorage: PersistentPageStorage
-    fetch?: typeof fetch
     remoteFunctions: PageIndexingInterface<'provider'>
 
     _identifiersForTabPages: {
@@ -591,24 +590,44 @@ export class PageIndexingBackground {
                 `No tabID provided to extract content: ${props.fullUrl}`,
             )
         }
+        const isPdf = doesUrlPointToPdf(props.fullUrl)
 
         const existingPage = await this.storage.getPage(props.fullUrl)
         if (existingPage) {
             return { ...existingPage, isExisting: true }
         }
 
+        let originalUrl = props.fullUrl
+        // PDFs have their fullUrl set to the memex.cloud/ct/ URL, so we need to get the underlying
+        //  URL from stored page content info locators to properly process URL data
+        if (isPdf) {
+            const pageContentInfo = await this.getContentInfoForPages()
+            let contentInfo = pageContentInfo[normalizeUrl(props.fullUrl)]
+            if (!contentInfo?.locators.length) {
+                throw new Error('Could not find content info for PDF page')
+            }
+            const latestLocator = contentInfo.locators.sort(
+                (a, b) => (b.lastVisited ?? 0) - (a.lastVisited ?? 0),
+            )[0]
+
+            // Only take the original location for remote PDFs
+            //  - local PDFs use an in-memory location, which we'd rather use the memex.cloud/ct/ for URL data
+            if (!latestLocator.originalLocation.startsWith('blob:')) {
+                originalUrl = latestLocator.originalLocation
+            }
+        }
+
         const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
         const analysis = await analysePage({
             tabId: props.tabId,
             tabManagement: this.options.tabManagement,
-            fetch: this.fetch,
             includeContent: 'metadata-with-full-text',
             includeFavIcon,
             url: props.fullUrl,
         })
 
         const pageData = await pagePipeline({
-            pageDoc: { ...analysis, url: props.fullUrl },
+            pageDoc: { ...analysis, url: props.fullUrl, originalUrl },
         })
         await this.storeDocContent(normalizeUrl(pageData.url), analysis)
 

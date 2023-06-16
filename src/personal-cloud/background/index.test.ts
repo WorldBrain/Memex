@@ -56,20 +56,20 @@ describe('Personal cloud', () => {
             }
 
             if (testOptions.source === 'tab') {
-                if (testOptions.type === 'pdf') {
-                    const pdfContent = new Uint8Array(
-                        fs.readFileSync(TEST_PDF_PATH),
-                    )
-                    const pdfBlob = new Blob([pdfContent], {
-                        type: 'application/pdf',
-                    })
-                    setups[0].backgroundModules.pages.fetch = async (url) => {
-                        return {
-                            status: 200,
-                            blob: async () => pdfBlob,
-                        } as any
-                    }
-                }
+                // if (testOptions.type === 'pdf') {
+                //     const pdfContent = new Uint8Array(
+                //         fs.readFileSync(TEST_PDF_PATH),
+                //     )
+                //     const pdfBlob = new Blob([pdfContent], {
+                //         type: 'application/pdf',
+                //     })
+                //     setups[0].backgroundModules.pages.fetch = async (url) => {
+                //         return {
+                //             status: 200,
+                //             blob: async () => pdfBlob,
+                //         } as any
+                //     }
+                // }
                 injectFakeTabs({
                     tabManagement: setups[0].backgroundModules.tabManagement,
                     tabsAPI: setups[0].browserAPIs.tabs,
