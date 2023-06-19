@@ -1,3 +1,4 @@
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { SummarizationService } from '@worldbrain/memex-common/lib/summarization/index'
 import {
     SyncSettingsStore,
@@ -35,7 +36,12 @@ export interface summarizePageBackgroundOptions {
 
 export default class SummarizeBackground {
     remoteFunctions: SummarizationInterface<'provider'>
-    private summarizationService = new SummarizationService()
+    private summarizationService = new SummarizationService({
+        serviceURL:
+            process.env.NODE_ENV === 'production'
+                ? CLOUDFLARE_WORKER_URLS.production
+                : CLOUDFLARE_WORKER_URLS.staging,
+    })
 
     constructor(public options: summarizePageBackgroundOptions) {
         this.remoteFunctions = {
