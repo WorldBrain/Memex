@@ -3036,8 +3036,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         id: expect.anything(),
                                         creator: userId,
                                         entryTitle: pdfTitle,
-                                        originalUrl: fullPageUrl,
-                                        normalizedUrl: normalizedPageUrl,
+                                        originalUrl: fullBaseLocatorUrl,
+                                        normalizedUrl: normalizedBaseLocatorUrl,
                                         sharedList: sharedListDataA[0].id,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
@@ -3049,8 +3049,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         creator: userId,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
-                                        normalizedUrl: normalizedPageUrl,
-                                        originalUrl: fullPageUrl,
+                                        normalizedUrl: normalizedBaseLocatorUrl,
+                                        originalUrl: fullBaseLocatorUrl,
                                         fullTitle: pdfTitle
                                     }
                                 ])
@@ -3313,7 +3313,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             sharedListEntry: sharedListEntryDataA[0].id,
                                             entryTitle: pdfTitle,
                                             creator: userId,
-                                            normalizedPageUrl,
+                                            normalizedPageUrl: normalizedBaseLocatorUrl,
                                             hasAnnotationsFromOthers: false,
                                             createdWhen: expect.anything(),
                                             updatedWhen: expect.anything(),
