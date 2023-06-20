@@ -3058,6 +3058,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         creator: userId,
+                                        sharedList: sharedListDataA[0].id,
                                         normalizedUrl: normalizedBaseLocatorUrl,
                                         originalUrl: fullPageUrl,
                                         locationScheme: LocationSchemeType.NormalizedUrlV1,
