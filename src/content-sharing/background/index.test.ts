@@ -3133,7 +3133,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(personalMetadataA).toEqual([
                                     {
                                         id: expect.anything(),
-                                        canonicalUrl: fullPageUrl,
+                                        canonicalUrl: fullBaseLocatorUrl,
                                         title: pdfTitle,
                                         lang: null,
                                         description: null,
@@ -3323,8 +3323,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     expect(await setup.storageManager.collection('pages').findAllObjects({})).toEqual([
                                         {
                                             url: normalizedBaseLocatorUrl,
-                                            fullUrl:fullBaseLocatorUrl,
-                                            canonicalUrl: fullPageUrl,
+                                            fullUrl: fullBaseLocatorUrl,
+                                            canonicalUrl: fullBaseLocatorUrl,
                                             fullTitle: pdfTitle,
                                             domain: 'memex.cloud',
                                             hostname: 'memex.cloud',
