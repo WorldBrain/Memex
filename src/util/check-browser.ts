@@ -7,7 +7,7 @@ export type BrowserName = 'chrome' | 'firefox' | 'brave'
  */
 function checkBrowser(): BrowserName {
     // `runtime.getBrowserInfo` is only available on FF web ext API
-    if (typeof browser.runtime.getBrowserInfo !== 'undefined') {
+    if (navigator.userAgent.search('Firefox') != null) {
         return 'firefox'
     }
 

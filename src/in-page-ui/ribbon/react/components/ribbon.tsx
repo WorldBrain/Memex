@@ -2207,7 +2207,7 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                     display: flex;
                     box-shadow: none;
                     justify-content: center;
-                    height: 100vh;
+                    height: 100%;
                     width: 28px;
                     align-items: flex-start;
                     padding: 0px 7px 0px 5px;
@@ -2215,7 +2215,6 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                     transition: unset;
                     background: ${(props) => props.theme.colors.black};
                     border-radius: 0px;
-                    height: fill-available;
 
                     & .removeSidebar {
                         visibility: hidden;
