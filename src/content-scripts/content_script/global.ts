@@ -96,7 +96,10 @@ export async function main(
         getContentFingerprints?: GetContentFingerprints
     } = {},
 ): Promise<SharedInPageUIState> {
-    initSentry({})
+    const isRunningInFirefox = typeof window['InstallTrigger'] !== 'undefined'
+    if (!isRunningInFirefox) {
+        initSentry({})
+    }
     params.loadRemotely = params.loadRemotely ?? true
 
     const isPdfViewerRunning = params.getContentFingerprints != null
