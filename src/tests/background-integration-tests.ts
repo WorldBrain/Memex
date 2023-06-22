@@ -280,6 +280,7 @@ export async function setupBackgroundIntegrationTest(
             storageModules: serverStorage.modules,
             getConfig: () => ({
                 content_sharing: { opengraph_app_id: 'test-og-app-id' },
+                deployment: { environment: 'staging' },
             }),
             getCurrentUserId: getUserId,
             services: { pushMessaging: pushMessagingService },
