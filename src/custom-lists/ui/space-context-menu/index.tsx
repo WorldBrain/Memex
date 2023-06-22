@@ -72,7 +72,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         e.stopPropagation()
     }
 
-    private renderShareLinks() {
+    private renderShareLinks(isPageLink: boolean) {
         if (!this.state.inviteLinks.length) {
             return (
                 <ShareSectionContainer onClick={wrapClick}>
@@ -154,7 +154,12 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                             heightAndWidth="20px"
                                             filePath={'goTo'}
                                             onClick={wrapClick(() =>
-                                                window.open(link),
+                                                window.open(
+                                                    isPageLink
+                                                        ? link +
+                                                              '?noAutoOpen=true'
+                                                        : link,
+                                                ),
                                             )}
                                         />
                                     </IconContainer>
@@ -225,17 +230,19 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             )
         }
 
+        const isPageLink = this.props.listData.type === 'page-link'
+
         return (
             <ContextMenuContainer>
                 {this.props.listData.remoteId != null && (
                     <SectionTitle>Sharing Links</SectionTitle>
                 )}
-                {this.renderShareLinks()}
+                {this.renderShareLinks(isPageLink)}
 
                 {this.props.listData.type !== 'special-list' && (
                     <>
                         <SectionTitle>
-                            {this.props.listData.type === 'page-link'
+                            {isPageLink
                                 ? 'Edit Page Link Name'
                                 : 'Edit Space Name'}
                         </SectionTitle>
