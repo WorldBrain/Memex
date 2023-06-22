@@ -143,6 +143,19 @@ export class ContentScriptsBackground {
         { tab },
         { fullPageUrl, sharedListId },
     ) => {
+        let allTabs = await this.options.browserAPIs.tabs.query({
+            currentWindow: true,
+            active: true,
+        })
+        allTabs.forEach((tab) => {
+            if (
+                tab.url.includes(sharedListId) &&
+                tab.url.includes('/p/') &&
+                !tab.url.includes('?dono')
+            ) {
+                this.options.browserAPIs.tabs.remove(tab.id)
+            }
+        })
         await this.doSomethingInNewTab(
             fullPageUrl,
             async (tabId) => {

@@ -829,7 +829,7 @@ export class SidebarContainerLogic extends UILogic<
                 ? getSinglePageShareUrl({
                       remoteListId: listData.remoteId,
                       remoteListEntryId: listData.sharedListEntryId,
-                  })
+                  }) + '?noAutoOpen=true'
                 : getListShareUrl({
                       remoteListId: listData.remoteId,
                   })
