@@ -1099,7 +1099,15 @@ export default class Ribbon extends Component<Props, State> {
                     <PrimaryAction
                         size={'medium'}
                         type="tertiary"
-                        label={'Save'}
+                        label={
+                            this.props.bookmark.isBookmarked ? (
+                                <SavedButtonBox>
+                                    Saved<DateText>{bookmarkDate}</DateText>
+                                </SavedButtonBox>
+                            ) : (
+                                'Save'
+                            )
+                        }
                         fontColor={'greyScale7'}
                         onClick={() => this.props.bookmark.toggleBookmark()}
                         icon={
@@ -1964,7 +1972,17 @@ const ChatFrame = styled.iframe`
 `
 
 const DateText = styled.span`
-    color: ${(props) => props.theme.colors.white};
+    color: ${(props) => props.theme.colors.greyScale6};
+`
+const SavedButtonBox = styled.span`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color: ${(props) => props.theme.colors.greyScale7};
+
+    & > ${DateText} {
+        font-size: 12px;
+    }
 `
 
 const ColorPickerCircle = styled.div<{ backgroundColor: string }>`
@@ -2189,7 +2207,7 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                     display: flex;
                     box-shadow: none;
                     justify-content: center;
-                    height: 100vh;
+                    height: 100%;
                     width: 28px;
                     align-items: flex-start;
                     padding: 0px 7px 0px 5px;
@@ -2197,7 +2215,6 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                     transition: unset;
                     background: ${(props) => props.theme.colors.black};
                     border-radius: 0px;
-                    height: fill-available;
 
                     & .removeSidebar {
                         visibility: hidden;

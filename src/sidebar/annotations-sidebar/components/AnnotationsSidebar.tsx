@@ -1996,7 +1996,7 @@ export class AnnotationsSidebar extends React.Component<
                                                       selectedList.remoteId,
                                                   remoteListEntryId:
                                                       selectedList.sharedListEntryId,
-                                              })
+                                              }) + '?noAutoOpen=true'
                                             : getListShareUrl({
                                                   remoteListId:
                                                       selectedList.remoteId,
