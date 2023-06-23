@@ -50,11 +50,10 @@ async function insertTestData({
 
 async function setupTest({ skipTestData }: { skipTestData?: boolean } = {}) {
     const {
-        fetchPageDataProcessor,
         backgroundModules,
         storageManager,
     } = await setupBackgroundIntegrationTest({
-        includePostSyncProcessor: true,
+        // includePostSyncProcessor: true,
     })
     const customLists: CustomListBackground = backgroundModules.customLists
     const searchIndex: SearchIndex = backgroundModules.search.searchIndex
@@ -72,7 +71,6 @@ async function setupTest({ skipTestData }: { skipTestData?: boolean } = {}) {
         customLists,
         searchIndex,
         storageManager,
-        fetchPageDataProcessor,
     }
 }
 
@@ -355,7 +353,6 @@ describe('Custom List Integrations', () => {
                 bookmarks,
                 customLists,
                 directLinking,
-                fetchPageDataProcessor,
             } = await setupTest({
                 skipTestData: true,
             })
@@ -393,10 +390,11 @@ describe('Custom List Integrations', () => {
                 })
             }
             const setMockFetchPage = (url: string) => {
-                fetchPageDataProcessor.mockPage = {
-                    fullUrl: url,
-                    url: normalizeUrl(url),
-                } as any
+                // TODO: This data might need to move to fetchPageData return val
+                // fetchPageDataProcessor.mockPage = {
+                //     fullUrl: url,
+                //     url: normalizeUrl(url),
+                // } as any
             }
 
             // Tag a page - new inbox entry should be created - tag again after deleting entry - no new entry created
@@ -618,7 +616,7 @@ describe('Custom List Integrations', () => {
 describe('Collection Cache', () => {
     async function setupCacheTest(args: { skipTestData?: boolean }) {
         const setup = await setupBackgroundIntegrationTest({
-            includePostSyncProcessor: true,
+            // includePostSyncProcessor: true,
         })
 
         if (!args?.skipTestData) {

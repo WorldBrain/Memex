@@ -83,7 +83,6 @@ export interface SearchIndex {
 export interface PageCreationProps {
     fullUrl: string
     tabId?: number
-    stubOnly?: boolean
     allowScreenshot?: boolean
     visitTime?: number | '$now'
 }

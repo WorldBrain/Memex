@@ -15,10 +15,13 @@ import {
 import {
     ContentIdentifier,
     ContentLocator,
+    ExtractedPDFData,
+    PageDoc,
 } from '@worldbrain/memex-common/lib/page-indexing/types'
 import {
+    buildBaseLocatorUrl,
     fingerprintsEqual,
-    isPagePdf,
+    isMemexPageAPdf,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 import PageStorage from './storage'
@@ -36,7 +39,6 @@ import { DexieUtilsPlugin } from 'src/search/plugins'
 import analysePage, {
     PageAnalysis,
 } from 'src/page-analysis/background/analyse-page'
-import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import TabManagementBackground from 'src/tab-management/background'
 import PersistentPageStorage from './persistent-storage'
 import {
@@ -53,8 +55,9 @@ import {
 } from '../../util/webextensionRPC'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import { isUrlSupported } from '../utils'
-
 import { updatePageCounter } from 'src/util/subscriptions/storage'
+import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
+import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -76,7 +79,6 @@ export class PageIndexingBackground {
 
     storage: PageStorage
     persistentStorage: PersistentPageStorage
-    fetch?: typeof fetch
     remoteFunctions: PageIndexingInterface<'provider'>
 
     _identifiersForTabPages: {
@@ -93,7 +95,8 @@ export class PageIndexingBackground {
             pageIndexingSettingsStore: BrowserSettingsStore<
                 LocalPageIndexingSettings
             >
-            fetchPageData?: FetchPageProcessor
+            fetchPageData: (fullPageUrl: string) => Promise<PageDataResult>
+            fetchPdfData: (fullPageUrl: string) => Promise<ExtractedPDFData>
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
             getNow: () => number
         },
@@ -177,14 +180,16 @@ export class PageIndexingBackground {
             })
 
             if (!stored) {
-                const generatedNormalizedUrl = `memex.cloud/ct/${params.fingerprints[0].fingerprint}.${params.locator.format}`
-                const generatedIdentifier: ContentIdentifier = {
-                    normalizedUrl: generatedNormalizedUrl,
-                    fullUrl: `https://${generatedNormalizedUrl}`,
-                }
+                const baseLocatorUrl = buildBaseLocatorUrl(
+                    params.fingerprints[0].fingerprint,
+                    params.locator.format,
+                )
                 contentInfo = {
                     asOf: Date.now(),
-                    primaryIdentifier: generatedIdentifier,
+                    primaryIdentifier: {
+                        fullUrl: baseLocatorUrl,
+                        normalizedUrl: normalizeUrl(baseLocatorUrl),
+                    },
                     locators: [],
                     aliasIdentifiers: [regularIdentifier],
                 }
@@ -345,11 +350,9 @@ export class PageIndexingBackground {
     async addPage({
         visits = [],
         pageDoc,
-        rejectNoContent,
     }: Partial<PageAddRequest>): Promise<void> {
         const { favIconURI, ...pageData } = await pagePipeline({
             pageDoc,
-            rejectNoContent,
         })
 
         await this.createOrUpdatePage(pageData)
@@ -505,49 +508,7 @@ export class PageIndexingBackground {
         })
     }
 
-    private async processPageDataFromTab(
-        props: PageCreationProps,
-    ): Promise<PipelineRes | null> {
-        if (props.tabId == null) {
-            throw new Error(
-                `No tabID provided to extract content: ${props.fullUrl}`,
-            )
-        }
-
-        const needsIndexing = !(await this.storage.getPage(props.fullUrl))
-        if (!needsIndexing) {
-            return null
-        }
-
-        const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
-        const analysis = await analysePage({
-            tabId: props.tabId,
-            tabManagement: this.options.tabManagement,
-            fetch: this.fetch,
-            includeContent: props.stubOnly
-                ? 'metadata-only'
-                : 'metadata-with-full-text',
-            includeFavIcon,
-            url: props.fullUrl,
-        })
-
-        const pageData = await pagePipeline({
-            pageDoc: { ...analysis, url: props.fullUrl },
-            rejectNoContent: !props.stubOnly,
-        })
-        await this.storeDocContent(normalizeUrl(pageData.url), analysis)
-
-        if (analysis.favIconURI) {
-            await this.storage.createFavIconIfNeeded(
-                pageData.hostname,
-                analysis.favIconURI,
-            )
-        }
-
-        return pageData
-    }
-
-    async storeDocContent(
+    private async storeDocContent(
         normalizedUrl: string,
         analysis: Pick<
             PageAnalysis,
@@ -578,50 +539,28 @@ export class PageIndexingBackground {
         }
     }
 
-    private async processPageDataFromUrl(
-        props: PageCreationProps,
-    ): Promise<PipelineRes | null> {
-        if (!this.options.fetchPageData) {
-            throw new Error(
-                'Instantiation error: fetch-page-data implementation was not given to constructor',
-            )
-        }
-
-        const processed = await this.options.fetchPageData.process(
-            props.fullUrl,
-        )
-        const { content: pageData } = processed
-        if (processed.pdfFingerprints) {
-            await this.initContentIdentifier({
-                locator: {
-                    format: ContentLocatorFormat.PDF,
-                    originalLocation: props.fullUrl,
-                },
-                fingerprints: processed.pdfFingerprints.map(
-                    (fingerprint): ContentFingerprint => ({
-                        fingerprintScheme: FingerprintSchemeType.PdfV1,
-                        fingerprint,
-                    }),
-                ),
-            })
-        }
-        await this.storeDocContent(normalizeUrl(pageData.url), processed)
-
-        if (props.stubOnly && pageData.text && pageData.terms?.length) {
-            delete pageData.text
-            delete pageData.terms
-        }
-
-        return pageData
-    }
-
     indexPage = async (
         props: PageCreationProps,
         opts: PageCreationOpts = {},
-    ) => {
-        const pageData = await this._getPageData(props)
-        if (!pageData) {
-            return
+    ): Promise<{ fullUrl: string }> => {
+        // PDF pages should always have their tab IDs set, so don't fetch them from the tabs API
+        //   TODO: have PDF pages pass down their original URLs here, instead of the memex.cloud/ct/ ones,
+        //     so we don't have to do this dance
+        if (!isMemexPageAPdf({ url: props.fullUrl })) {
+            const foundTabId = await this._findTabId(props.fullUrl)
+            if (foundTabId) {
+                props.tabId = foundTabId
+            } else {
+                delete props.tabId
+            }
+        }
+
+        const pageData = await (props.tabId != null
+            ? this.processPageDataFromTab(props)
+            : this.processPageDataFromUrl(props))
+
+        if (pageData.isExisting) {
+            return { fullUrl: pageData.fullUrl }
         }
         await this.createOrUpdatePage(pageData, opts)
 
@@ -632,11 +571,136 @@ export class PageIndexingBackground {
             )
             // await this.markTabPageAsIndexed({
             //     tabId: props.tabId,
-            //     fullPageUrl: pageData.fullUrl,
+            //     fullPageUrl: processedPageData.fullUrl,
             // })
         }
 
         await updatePageCounter()
+        // Note that we're returning URLs as they could have changed in the case of PDFs
+        return {
+            fullUrl: pageData.fullUrl,
+        }
+    }
+
+    private async processPageDataFromTab(
+        props: PageCreationProps,
+    ): Promise<PipelineRes & { isExisting?: boolean }> {
+        if (props.tabId == null) {
+            throw new Error(
+                `No tabID provided to extract content: ${props.fullUrl}`,
+            )
+        }
+        const isPdf = doesUrlPointToPdf(props.fullUrl)
+
+        const existingPage = await this.storage.getPage(props.fullUrl)
+        if (existingPage) {
+            return { ...existingPage, isExisting: true }
+        }
+
+        let originalUrl = props.fullUrl
+        // PDFs have their fullUrl set to the memex.cloud/ct/ URL, so we need to get the underlying
+        //  URL from stored page content info locators to properly process URL data
+        if (isPdf) {
+            const pageContentInfo = await this.getContentInfoForPages()
+            let contentInfo = pageContentInfo[normalizeUrl(props.fullUrl)]
+            if (!contentInfo?.locators.length) {
+                throw new Error('Could not find content info for PDF page')
+            }
+            const latestLocator = contentInfo.locators.sort(
+                (a, b) => (b.lastVisited ?? 0) - (a.lastVisited ?? 0),
+            )[0]
+
+            // Only take the original location for remote PDFs
+            //  - local PDFs use an in-memory location, which we'd rather use the memex.cloud/ct/ for URL data
+            if (!latestLocator.originalLocation.startsWith('blob:')) {
+                originalUrl = latestLocator.originalLocation
+            }
+        }
+
+        const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
+        const analysis = await analysePage({
+            tabId: props.tabId,
+            tabManagement: this.options.tabManagement,
+            includeContent: 'metadata-with-full-text',
+            includeFavIcon,
+            url: props.fullUrl,
+        })
+
+        const pageData = await pagePipeline({
+            pageDoc: { ...analysis, url: props.fullUrl, originalUrl },
+        })
+        await this.storeDocContent(normalizeUrl(pageData.url), analysis)
+
+        if (analysis.favIconURI) {
+            await this.storage.createFavIconIfNeeded(
+                pageData.hostname,
+                analysis.favIconURI,
+            )
+        }
+
+        return pageData
+    }
+
+    private async processPageDataFromUrl(
+        props: PageCreationProps,
+    ): Promise<PipelineRes & { isExisting?: boolean }> {
+        const pageDoc: PageDoc = {
+            url: props.fullUrl,
+            originalUrl: props.fullUrl,
+            content: {},
+        }
+        const isPdf = doesUrlPointToPdf(props.fullUrl)
+
+        if (!isPdf) {
+            const existingPage = await this.storage.getPage(props.fullUrl)
+            if (existingPage) {
+                return { ...existingPage, isExisting: true }
+            }
+
+            const {
+                content,
+                htmlBody,
+                favIconURI,
+            } = await this.options.fetchPageData(props.fullUrl)
+            await this.storeDocContent(normalizeUrl(props.fullUrl), {
+                htmlBody,
+            })
+
+            pageDoc.favIconURI = favIconURI
+            pageDoc.content.title = content.title
+            pageDoc.content.fullText = content.fullText
+        } else {
+            const pdfData = await this.options.fetchPdfData(props.fullUrl)
+            const baseLocator = await this.initContentIdentifier({
+                locator: {
+                    format: ContentLocatorFormat.PDF,
+                    originalLocation: props.fullUrl,
+                },
+                fingerprints: pdfData.pdfMetadata.fingerprints.map(
+                    (fingerprint) => ({
+                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                        fingerprint,
+                    }),
+                ),
+            })
+
+            const existingPage = await this.storage.getPage(baseLocator.fullUrl)
+            if (existingPage) {
+                return { ...existingPage, isExisting: true }
+            }
+
+            await this.storeDocContent(baseLocator.normalizedUrl, {
+                pdfMetadata: pdfData.pdfMetadata,
+                pdfPageTexts: pdfData.pdfPageTexts,
+            })
+
+            // Replace the remote PDF URL with the base locator's memex.cloud/ct/ URL
+            pageDoc.url = baseLocator.fullUrl
+            pageDoc.content.title = pdfData.title
+            pageDoc.content.fullText = pdfData.fullText
+        }
+
+        return pagePipeline({ pageDoc })
     }
 
     private async _findTabId(fullUrl: string) {
@@ -660,28 +724,9 @@ export class PageIndexingBackground {
         return null
     }
 
-    private async _getPageData(props: PageCreationProps) {
-        // PDF pages should always have their tab IDs set, so don't fetch them from the tabs API
-        //   TODO: have PDF pages pass down their original URLs here, instead of the memex.cloud/ct/ ones,
-        //     so we don't have to do this dance
-        if (!isPagePdf({ url: props.fullUrl })) {
-            const foundTabId = await this._findTabId(props.fullUrl)
-            if (foundTabId) {
-                props.tabId = foundTabId
-            } else {
-                delete props.tabId
-            }
-        }
-
-        return props.tabId != null
-            ? this.processPageDataFromTab(props)
-            : this.processPageDataFromUrl(props)
-    }
-
     async indexTestPage(props: PageCreationProps) {
         const pageData = await pagePipeline({
             pageDoc: { url: props.fullUrl, content: {} },
-            rejectNoContent: false,
         })
 
         await this.storage.createPageIfNotExists(pageData)

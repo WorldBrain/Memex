@@ -3,7 +3,6 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import * as DATA from './index.test.data'
 import { PageUrlsByDay, AnnotationsSearchResponse } from './types'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { Annotation } from 'src/annotations/types'
 import { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
@@ -40,23 +39,23 @@ describe('Annotations search', () => {
     async function insertTestData({
         storageManager,
         backgroundModules,
-        fetchPageDataProcessor,
     }: BackgroundIntegrationTestSetup) {
         const annotsStorage = backgroundModules.directLinking.annotationStorage
         const customListsBg = backgroundModules.customLists
         const contentSharingBg = backgroundModules.contentSharing
-        fetchPageDataProcessor.mockPage = {
-            url: DATA.highlight.object.pageUrl,
-            hostname: normalizeUrl(DATA.highlight.object.pageUrl),
-            domain: normalizeUrl(DATA.highlight.object.pageUrl),
-            fullTitle: DATA.highlight.object.pageTitle,
-            text: DATA.highlight.object.body,
-            fullUrl: DATA.highlight.object.url,
-            tags: [],
-            terms: [],
-            titleTerms: [],
-            urlTerms: [],
-        }
+        // TODO: This data might need to move to fetchPageData return val
+        // fetchPageDataProcessor.mockPage = {
+        //     url: DATA.highlight.object.pageUrl,
+        //     hostname: normalizeUrl(DATA.highlight.object.pageUrl),
+        //     domain: normalizeUrl(DATA.highlight.object.pageUrl),
+        //     fullTitle: DATA.highlight.object.pageTitle,
+        //     text: DATA.highlight.object.body,
+        //     fullUrl: DATA.highlight.object.url,
+        //     tags: [],
+        //     terms: [],
+        //     titleTerms: [],
+        //     urlTerms: [],
+        // }
 
         for (const annot of [
             DATA.highlight,
@@ -160,7 +159,7 @@ describe('Annotations search', () => {
 
     async function setupTest() {
         const setup = await setupBackgroundIntegrationTest({
-            includePostSyncProcessor: true,
+            // includePostSyncProcessor: true,
         })
         await insertTestData(setup)
 

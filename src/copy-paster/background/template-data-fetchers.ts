@@ -7,7 +7,7 @@ import fromPairs from 'lodash/fromPairs'
 import flatten from 'lodash/flatten'
 import type { ContentLocator } from '@worldbrain/memex-common/lib/page-indexing/types'
 import {
-    isPagePdf,
+    isMemexPageAPdf,
     pickBestLocator,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { PageListEntry } from 'src/custom-lists/background/types'
@@ -98,7 +98,7 @@ export function getTemplateDataFetchers({
 
             return pages.reduce((acc, page) => {
                 let fullUrl = page.fullUrl
-                if (isPagePdf(page)) {
+                if (isMemexPageAPdf(page)) {
                     const pageLocators = allLocators.filter(
                         (l) => l.normalizedUrl === page.url,
                     )

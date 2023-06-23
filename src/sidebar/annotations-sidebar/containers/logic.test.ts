@@ -211,7 +211,7 @@ async function setupTestData({
 
 describe('SidebarContainerLogic', () => {
     const it = makeSingleDeviceUILogicTestFactory({
-        includePostSyncProcessor: true,
+        // includePostSyncProcessor: true,
     })
 
     describe('misc sidebar functionality', () => {

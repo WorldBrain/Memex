@@ -5,12 +5,9 @@ import type { ContentSharingBackend } from '@worldbrain/memex-common/lib/content
 import {
     makeAnnotationPrivacyLevel,
     getAnnotationPrivacyState,
-    extractIdsFromSinglePageShareUrl,
     createPageLinkListTitle,
     getListShareUrl,
 } from '@worldbrain/memex-common/lib/content-sharing/utils'
-import type CustomListBG from 'src/custom-lists/background'
-import type { AuthBackground } from 'src/authentication/background'
 import type { Analytics } from 'src/analytics/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { getNoteShareUrl } from 'src/content-sharing/utils'
@@ -28,14 +25,13 @@ import type {
 } from './types'
 import { ContentSharingClientStorage } from './storage'
 import type { GenerateServerID } from '../../background-script/types'
-import type AnnotationStorage from 'src/annotations/background/storage'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import AnnotationSharingService from '@worldbrain/memex-common/lib/content-sharing/service/annotation-sharing'
 import ListSharingService from '@worldbrain/memex-common/lib/content-sharing/service/list-sharing'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { BackgroundModules } from 'src/background-script/setup'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 export interface LocalContentSharingSettings {
     remotePageIdLookup: {
@@ -867,10 +863,9 @@ export default class ContentSharingBackground {
         now?: number
     }): Promise<void> {
         const bgModules = this.options.getBgModules()
-        const normalizedPageUrl = normalizeUrl(fullPageUrl)
 
         // Create all the local data needed for a page link
-        await bgModules.pages.indexPage(
+        const indexedPage = await bgModules.pages.indexPage(
             {
                 fullUrl: fullPageUrl,
                 visitTime: now,
@@ -879,7 +874,7 @@ export default class ContentSharingBackground {
             { addInboxEntryOnCreate: false },
         )
         const pageTitle = await bgModules.pages.lookupPageTitleForUrl({
-            fullPageUrl,
+            fullPageUrl: indexedPage.fullUrl,
         })
 
         await bgModules.customLists.createCustomList({
@@ -891,7 +886,7 @@ export default class ContentSharingBackground {
 
         await bgModules.customLists.insertPageToList({
             id: localListId,
-            url: fullPageUrl,
+            url: indexedPage.fullUrl,
             createdAt: new Date(now),
             skipPageIndexing: true,
             suppressInboxEntry: true,
@@ -916,7 +911,7 @@ export default class ContentSharingBackground {
         await bgModules.pageActivityIndicator.createFollowedListEntry(
             {
                 creator,
-                normalizedPageUrl,
+                normalizedPageUrl: normalizeUrl(indexedPage.fullUrl),
                 entryTitle: pageTitle,
                 followedList: remoteListId,
                 hasAnnotationsFromOthers: false,

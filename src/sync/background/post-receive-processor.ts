@@ -6,11 +6,13 @@ import { SharedSyncLogEntry } from '@worldbrain/storex-sync/lib/shared-sync-log/
 import { PageFetchBacklogBackground } from 'src/page-fetch-backlog/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 
+// TODO: get rid of this class
 export class PostReceiveProcessor {
     constructor(
         private props: {
             pages: PageIndexingBackground
-            fetchPageData: FetchPageProcessor
+            // fetchPageData: FetchPageProcessor
+            fetchPageData: any
             pageFetchBacklog?: PageFetchBacklogBackground
         },
     ) {}

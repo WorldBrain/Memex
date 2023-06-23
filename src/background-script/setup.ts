@@ -36,7 +36,6 @@ import { setupNotificationClickListener } from 'src/util/notifications'
 import { StorageChangesManager } from 'src/util/storage-changes'
 import { AuthBackground } from 'src/authentication/background'
 import { FeaturesBeta } from 'src/features/background/feature-beta'
-import { FetchPageProcessor } from 'src/page-analysis/background/types'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import { combineSearchIndex } from 'src/search/search-index'
 import { StorexHubBackground } from 'src/storex-hub/background'
@@ -46,7 +45,7 @@ import { ContentScriptsBackground } from 'src/content-scripts/background'
 import { InPageUIBackground } from 'src/in-page-ui/background'
 import { AnalyticsBackground } from 'src/analytics/background'
 import { Analytics } from 'src/analytics/types'
-import { PipelineRes } from 'src/search'
+import type { ExtractedPDFData, PipelineRes } from 'src/search'
 import CopyPasterBackground from 'src/copy-paster/background'
 import { ReaderBackground } from 'src/reader/background'
 import { ServerStorage } from 'src/storage/types'
@@ -101,6 +100,7 @@ import DeprecatedStorageModules from './deprecated-storage-modules'
 import { PageActivityIndicatorBackground } from 'src/page-activity-indicator/background'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { handleIncomingData } from 'src/personal-cloud/background/handle-incoming-data'
+import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 
 export interface BackgroundModules {
     auth: AuthBackground
@@ -139,9 +139,6 @@ export interface BackgroundModules {
     personalCloud: PersonalCloudBackground
 }
 
-const globalFetch: typeof fetch =
-    typeof fetch !== 'undefined' ? fetch.bind(globalThis) : null
-
 export function createBackgroundModules(options: {
     manifestVersion: '2' | '3'
     storageManager: StorageManager
@@ -158,13 +155,14 @@ export function createBackgroundModules(options: {
     personalCloudBackend?: PersonalCloudBackend
     personalCloudMediaBackend?: PersonalCloudMediaBackend
     contentSharingBackend?: ContentSharingBackend
-    fetchPageDataProcessor?: FetchPageProcessor
+    fetchPageData: (fullPageUrl: string) => Promise<PageDataResult>
+    fetchPDFData: (fullPageUrl: string) => Promise<ExtractedPDFData>
     auth?: AuthBackground
     analyticsManager: Analytics
     captureException?: typeof captureException
     userMessageService?: UserMessageService
     getNow?: () => number
-    fetch?: typeof fetch
+    fetch: typeof fetch
     generateServerId?: (collectionName: string) => number | string
     createRemoteEventEmitter?<ModuleName extends keyof RemoteEvents>(
         name: ModuleName,
@@ -181,7 +179,7 @@ export function createBackgroundModules(options: {
     const createRemoteEventEmitter =
         options.createRemoteEventEmitter ?? remoteEventEmitter
     const getNow = options.getNow ?? (() => Date.now())
-    const fetch = options.fetch ?? globalFetch
+    const fetch = options.fetch
     const generateServerId =
         options.generateServerId ??
         ((collectionName) =>
@@ -224,11 +222,12 @@ export function createBackgroundModules(options: {
 
     const pages = new PageIndexingBackground({
         persistentStorageManager: options.persistentStorageManager,
-        fetchPageData: options.fetchPageDataProcessor,
         pageIndexingSettingsStore: new BrowserSettingsStore(
             options.browserAPIs.storage.local,
             { prefix: 'pageIndexing.' },
         ),
+        fetchPageData: options.fetchPageData,
+        fetchPdfData: options.fetchPDFData,
         createInboxEntry,
         storageManager,
         tabManagement,
@@ -598,7 +597,6 @@ export function createBackgroundModules(options: {
         storexHub: new StorexHubBackground({
             storageManager,
             localBrowserStorage: options.browserAPIs.storage.local,
-            fetchPageData: options.fetchPageDataProcessor,
             storePageContent,
             addVisit: (visit) =>
                 pages.addVisit(visit.normalizedUrl, visit.time),

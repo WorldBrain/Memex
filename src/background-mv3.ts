@@ -6,8 +6,6 @@ import {
     setupRpcConnection,
     setupRemoteFunctionsImplementations,
 } from './util/webextensionRPC'
-import { fetchPDFData } from 'src/page-analysis/background/fetch-page-data'
-import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
 import { StorageChangesManager } from './util/storage-changes'
 import initSentry, { captureException } from './util/raven'
 import {
@@ -15,8 +13,6 @@ import {
     createServerStorageManager,
 } from './storage/server'
 import createNotification from 'src/util/notifications'
-import { FetchPageDataProcessor } from './page-analysis/background/fetch-page-data-processor'
-import pagePipeline from '@worldbrain/memex-common/lib/page-indexing/pipeline'
 import initStorex from './search/memex-storex'
 import { createPersistentStorageManager } from './storage/persistent-storage'
 import { getFirebase } from './util/firebase-app-initialized'
@@ -37,6 +33,8 @@ import type {
 import type { PushMessagePayload } from '@worldbrain/memex-common/lib/push-messaging/types'
 import PushMessagingClient from './push-messaging/background'
 import { setupOmnibar } from 'src/omnibar'
+import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
+import fetchAndExtractPdfContent from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-pdf-data.browser'
 
 // This is here so the correct Service Worker `self` context is available. Maybe there's a better way to set this via tsconfig.
 declare var self: ServiceWorkerGlobalScope & {
@@ -71,13 +69,6 @@ async function main() {
             autoPkType: 'string',
         },
     )
-    const fetchPageDataProcessor = new FetchPageDataProcessor({
-        runtimeAPI: browser.runtime,
-        domParser: (html) => new DOMParser().parseFromString(html, 'text/html'),
-        fetchPageData,
-        fetchPDFData,
-        pagePipeline,
-    })
 
     const storageManager = initStorex()
     const persistentStorageManager = createPersistentStorageManager({
@@ -96,13 +87,28 @@ async function main() {
         authService: authServices.auth,
     })
 
+    const fetch = globalThis.fetch.bind(globalThis)
+
     const backgroundModules = createBackgroundModules({
         manifestVersion: '3',
         servicesPromise,
         getServerStorage,
         analyticsManager: analytics,
         localStorageChangesManager,
-        fetchPageDataProcessor,
+        fetchPageData: async (url) =>
+            fetchPageData({
+                url,
+                fetch,
+                domParser: (html) =>
+                    new DOMParser().parseFromString(html, 'text/html'),
+                opts: { includePageContent: true, includeFavIcon: true },
+            }).run(),
+        fetchPDFData: async (url) =>
+            fetchAndExtractPdfContent(url, {
+                fetch,
+                pdfJSWorkerSrc: browser.runtime.getURL('/build/pdf.worker.js'),
+            }),
+        fetch,
         browserAPIs: browser,
         captureException,
         authServices,

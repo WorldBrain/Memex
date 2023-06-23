@@ -122,7 +122,7 @@ const expectStateToEqual = (
 
 describe('GenericPickerLogic', () => {
     const it = makeSingleDeviceUILogicTestFactory({
-        includePostSyncProcessor: true,
+        // includePostSyncProcessor: true,
     })
 
     it('should correctly load initial entries', async ({ device }) => {

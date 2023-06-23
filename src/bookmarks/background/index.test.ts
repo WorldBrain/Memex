@@ -20,7 +20,7 @@ import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 
 describe('bookmarks background unit tests', () => {
     const it = makeSingleDeviceUILogicTestFactory({
-        includePostSyncProcessor: true,
+        // includePostSyncProcessor: true,
     })
 
     it('should be able to create a map of tab URLs to bookmark flags', async ({
@@ -50,28 +50,6 @@ describe('bookmarks background unit tests', () => {
                 ]),
             ),
         )
-    })
-
-    it('bookmark add should attempt to create a page via XHR if missing and no tab ID provided', async ({
-        device: { backgroundModules, fetchPageDataProcessor },
-    }) => {
-        // const { addBookmark, fetchPageData, pages } = await setup()
-        const testUrl = 'test.com'
-        const testFullUrl = 'http://test.com'
-
-        await backgroundModules.pages.addPage({
-            pageDoc: { url: testUrl, content: {} },
-            rejectNoContent: false,
-        })
-
-        try {
-            await backgroundModules.bookmarks.addPageBookmark({
-                fullUrl: testFullUrl,
-            })
-        } catch (err) {
-        } finally {
-            expect(fetchPageDataProcessor.lastProcessedUrl).toEqual(testFullUrl)
-        }
     })
 })
 
