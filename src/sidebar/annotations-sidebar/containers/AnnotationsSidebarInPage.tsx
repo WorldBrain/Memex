@@ -295,18 +295,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         this.props.inPageUI.hideSidebar()
     }
 
-    protected getCreateProps() {
-        const props = super.getCreateProps()
-
-        return {
-            ...props,
-            onCancel: () => {
-                props.onCancel()
-                this.props.highlighter.removeTempHighlights()
-            },
-        }
-    }
-
     protected bindAnnotationFooterEventProps(
         annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'body'>,
         instanceLocation: AnnotationCardInstanceLocation,

@@ -97,3 +97,12 @@ export async function createContentSharingTestList(
 
     return localListId
 }
+
+export const PDF_DATA_A = {
+    domain: 'test.com',
+    title: 'Test PDF A',
+    fullUrl: 'https://test.com/test.pdf',
+    normalizedUrl: 'test.com/test.pdf',
+    fullText: 'this is some test PDF text',
+    fingerprints: ['test-pdf-a-fingerprint-a', 'test-pdf-a-fingerprint-b'],
+}

@@ -17,7 +17,7 @@ import type { SearchIndex } from '../types'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
 import type BookmarksBackground from 'src/bookmarks/background'
 import {
-    isPagePdf,
+    isMemexPageAPdf,
     pickBestLocator,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import { ContentLocatorType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
@@ -159,7 +159,7 @@ export default class SearchBackground {
     ): Promise<AnnotPage[]> {
         const toReturn: AnnotPage[] = []
         for (const doc of docs) {
-            if (!isPagePdf(doc)) {
+            if (!isMemexPageAPdf(doc)) {
                 toReturn.push(doc)
                 continue
             }

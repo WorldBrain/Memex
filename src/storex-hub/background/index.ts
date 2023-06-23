@@ -8,10 +8,7 @@ import {
     HandleRemoteCallResult_v0,
 } from '@worldbrain/storex-hub/lib/public-api'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import {
-    FetchPageProcessor,
-    PageContent,
-} from 'src/page-analysis/background/types'
+import type { PageContent } from 'src/page-analysis/background/types'
 import { IndexPageArgs } from './types'
 import { PipelineRes } from 'src/search'
 import { Storage } from 'webextension-polyfill'
@@ -30,7 +27,7 @@ export class StorexHubBackground {
     constructor(
         private dependencies: {
             storageManager: StorageManager
-            fetchPageData?: FetchPageProcessor
+            // fetchPageData?: FetchPageProcessor
             storePageContent: (content: PageContent) => Promise<void>
             localBrowserStorage: Storage.LocalStorageArea
             addVisit: (visit: {
@@ -124,9 +121,9 @@ export class StorexHubBackground {
 
         let processedData: PipelineRes
         try {
-            processedData = (
-                await this.dependencies.fetchPageData.process(fullUrl)
-            ).content
+            // processedData = (
+            //     await this.dependencies.fetchPageData.process(fullUrl)
+            // ).content
         } catch (e) {
             return {
                 status: 'internal-error',

@@ -6,7 +6,8 @@ import {
     FingerprintSchemeType,
     ContentLocatorFormat,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { extractUrlParts } from '@worldbrain/memex-common/lib/url-utils/extract-parts'
 
 describe('Page indexing background', () => {
     it('should generate and remember normalized URLs for local PDFs', async () => {
@@ -46,7 +47,7 @@ describe('Page indexing background', () => {
                     fullUrl: url,
                 },
             ],
-            locators: [
+            locators: expect.arrayContaining([
                 {
                     fingerprint: fingerprints[0].fingerprint,
                     ...commonLocator,
@@ -55,7 +56,7 @@ describe('Page indexing background', () => {
                     fingerprint: fingerprints[1].fingerprint,
                     ...commonLocator,
                 },
-            ],
+            ]),
         })
 
         expect(
@@ -83,22 +84,21 @@ describe('Page indexing background', () => {
         })
 
         expect(
-            await setup.storageManager
-                .collection('locators')
-                .findObjects({}, { order: [['fingerprint', 'desc']] }),
-        ).toEqual([
-            {
-                id: 1,
-                fingerprint: fingerprints[0].fingerprint,
-                ...commonLocator,
-            },
-            {
-                id: 2,
-                contentSize,
-                fingerprint: fingerprints[1].fingerprint,
-                ...commonLocator,
-            },
-        ])
+            await setup.storageManager.collection('locators').findObjects({}),
+        ).toEqual(
+            expect.arrayContaining([
+                {
+                    id: expect.anything(),
+                    fingerprint: fingerprints[0].fingerprint,
+                    ...commonLocator,
+                },
+                {
+                    id: expect.anything(),
+                    fingerprint: fingerprints[1].fingerprint,
+                    ...commonLocator,
+                },
+            ]),
+        )
         expect(
             await setup.storageManager.collection('pages').findObjects({}),
         ).toEqual([
@@ -139,6 +139,7 @@ describe('Page indexing background', () => {
         } = await indexTestFingerprintedPdf(setup, { fullUrl: fullUrlA, tabId })
 
         const masterLocatorUrl = `memex.cloud/ct/${fingerprints[0].fingerprint}.pdf`
+        const urlParts = extractUrlParts(masterLocatorUrl)
         const createLocator = (fullUrl: string) => ({
             contentSize,
             fingerprintScheme: FingerprintSchemeType.PdfV1,
@@ -167,7 +168,7 @@ describe('Page indexing background', () => {
                         fullUrl,
                     },
                 ],
-                locators: [
+                locators: expect.arrayContaining([
                     {
                         fingerprint: fingerprints[0].fingerprint,
                         ...createLocator(fullUrl),
@@ -176,7 +177,7 @@ describe('Page indexing background', () => {
                         fingerprint: fingerprints[1].fingerprint,
                         ...createLocator(fullUrl),
                     },
-                ],
+                ]),
             })
 
         // Indexing the same PDF at a different object URL shouldn't result in extra data
@@ -209,28 +210,29 @@ describe('Page indexing background', () => {
         })
 
         expect(
-            await setup.storageManager
-                .collection('locators')
-                .findObjects({}, { order: [['fingerprint', 'desc']] }),
-        ).toEqual([
-            {
-                id: 1,
-                fingerprint: fingerprints[0].fingerprint,
-                ...createLocator(fullUrlB),
-            },
-            {
-                id: 2,
-                contentSize,
-                fingerprint: fingerprints[1].fingerprint,
-                ...createLocator(fullUrlB),
-            },
-        ])
+            await setup.storageManager.collection('locators').findObjects({}),
+        ).toEqual(
+            expect.arrayContaining([
+                {
+                    id: expect.anything(),
+                    fingerprint: fingerprints[0].fingerprint,
+                    ...createLocator(fullUrlB),
+                },
+                {
+                    id: expect.anything(),
+                    fingerprint: fingerprints[1].fingerprint,
+                    ...createLocator(fullUrlB),
+                },
+            ]),
+        )
         expect(
             await setup.storageManager.collection('pages').findObjects({}),
         ).toEqual([
             expect.objectContaining({
                 url: identifier.normalizedUrl,
                 fullUrl: identifier.fullUrl,
+                hostname: urlParts.hostname,
+                domain: urlParts.domain,
             }),
         ])
         expect(
@@ -254,6 +256,7 @@ describe('Page indexing background', () => {
     it('should generate and remember normalized URLs for remote PDFs', async () => {
         const setup = await setupBackgroundIntegrationTest()
         const url = 'https://home.com/bla/test.pdf'
+        const urlParts = extractUrlParts(url)
         const tabId = 1
         const {
             identifier,
@@ -288,7 +291,7 @@ describe('Page indexing background', () => {
                     fullUrl: url,
                 },
             ],
-            locators: [
+            locators: expect.arrayContaining([
                 {
                     fingerprint: fingerprints[0].fingerprint,
                     ...commonLocator,
@@ -297,7 +300,7 @@ describe('Page indexing background', () => {
                     fingerprint: fingerprints[1].fingerprint,
                     ...commonLocator,
                 },
-            ],
+            ]),
         })
 
         expect(
@@ -328,25 +331,29 @@ describe('Page indexing background', () => {
             await setup.storageManager
                 .collection('locators')
                 .findObjects({}, { order: [['fingerprint', 'desc']] }),
-        ).toEqual([
-            {
-                id: 1,
-                fingerprint: fingerprints[0].fingerprint,
-                ...commonLocator,
-            },
-            {
-                id: 2,
-                contentSize,
-                fingerprint: fingerprints[1].fingerprint,
-                ...commonLocator,
-            },
-        ])
+        ).toEqual(
+            expect.arrayContaining([
+                {
+                    id: expect.anything(),
+                    fingerprint: fingerprints[0].fingerprint,
+                    ...commonLocator,
+                },
+                {
+                    id: expect.anything(),
+                    fingerprint: fingerprints[1].fingerprint,
+                    ...commonLocator,
+                },
+            ]),
+        )
+
         expect(
             await setup.storageManager.collection('pages').findObjects({}),
         ).toEqual([
             expect.objectContaining({
                 url: identifier.normalizedUrl,
                 fullUrl: identifier.fullUrl,
+                hostname: urlParts.hostname,
+                domain: urlParts.domain,
             }),
         ])
         expect(

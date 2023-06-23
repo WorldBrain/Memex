@@ -41,7 +41,7 @@ async function setupTest(ops: { withDefaultList: boolean }) {
         chatEventActionCollection: 'discordEventAction',
         chatEventCollection: 'discordEvent',
         storageManager: serverStorage.manager,
-        fetch: setup.fetch,
+        fetch: setup.fetch as any,
     })
 
     return {

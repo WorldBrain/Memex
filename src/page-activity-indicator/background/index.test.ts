@@ -1,6 +1,5 @@
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { LIST_TIMESTAMP_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import * as DATA from './index.test.data'
 import {

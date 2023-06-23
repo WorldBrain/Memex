@@ -17,7 +17,7 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 
 describe('Dashboard search results logic', () => {
     const it = makeSingleDeviceUILogicTestFactory({
-        includePostSyncProcessor: true,
+        // includePostSyncProcessor: true,
     })
 
     it('should be able to copy note links', async ({ device }) => {

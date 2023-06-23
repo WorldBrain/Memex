@@ -69,7 +69,7 @@ import type {
 import { UNDO_HISTORY } from 'src/constants'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
-import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { pageActionAllowed, upgradePlan } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
@@ -1016,7 +1016,7 @@ export function setupWebUIActions(args: {
         confirmRequest(detail.requestId)
 
         // Handle local PDFs first (memex.cloud URLs)
-        if (isPagePdf({ url: detail.originalPageUrl })) {
+        if (isMemexPageAPdf({ url: detail.originalPageUrl })) {
             await args.bgScriptBG.openOverviewTab({ missingPdf: true })
             return
         }

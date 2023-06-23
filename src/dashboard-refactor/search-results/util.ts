@@ -23,7 +23,7 @@ import {
     initNormalizedState,
     mergeNormalizedStates,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { isPagePdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import { formateCalendarTime } from '@worldbrain/memex-common/lib/utils/date-time'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
@@ -129,7 +129,7 @@ const pageResultToPageData = (
     pageResult: AnnotPage,
     cache: PageAnnotationsCacheInterface,
 ): PageData => {
-    const isPdf = isPagePdf(pageResult)
+    const isPdf = isMemexPageAPdf(pageResult)
     const lists = pageResult.lists
         .map((localListId) => cache.getListByLocalId(localListId)?.unifiedId)
         .filter((id) => id != null)
