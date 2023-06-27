@@ -15,7 +15,11 @@ export interface ContentScriptsInterface<Role extends 'provider' | 'caller'> {
     openPdfInViewer: RemoteFunction<Role, { fullPdfUrl: string }>
     openPageWithSidebarInSelectedListMode: RemoteFunction<
         Role,
-        { fullPageUrl: string; sharedListId: string }
+        {
+            fullPageUrl: string
+            sharedListId: string
+            checkPermissions?: boolean
+        }
     >
     goToAnnotationFromDashboardSidebar: RemoteFunction<
         Role,

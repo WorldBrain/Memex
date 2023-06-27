@@ -1130,7 +1130,7 @@ export class AnnotationsSidebar extends React.Component<
         await setLocalStorage(SHOW_ISOLATED_VIEW_KEY, false)
     }
 
-    private renderFocusModeNotif(listData) {
+    private renderFocusModeNotif(listData: UnifiedList) {
         const ownershipStatus = cacheUtils.deriveListOwnershipStatus(
             listData,
             this.props.currentUser,

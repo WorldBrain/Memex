@@ -299,7 +299,10 @@ interface SidebarEvents {
 
     // Selected space management
     setSelectedList: { unifiedListId: UnifiedList['unifiedId'] | null }
-    setSelectedListFromWebUI: { sharedListId: string }
+    setSelectedListFromWebUI: {
+        sharedListId: string
+        manuallyPullLocalListData?: boolean
+    }
 
     openContextMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
     editListName: { unifiedListId: UnifiedList['unifiedId']; newName: string }

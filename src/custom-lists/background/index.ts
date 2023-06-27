@@ -1,6 +1,6 @@
-import Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex'
 import fromPairs from 'lodash/fromPairs'
-import { Windows, Tabs, Storage } from 'webextension-polyfill'
+import type { Windows, Tabs, Storage } from 'webextension-polyfill'
 import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
 
 import CustomListStorage from './storage'
@@ -17,13 +17,21 @@ import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from '@worldbrain/memex-common/lib/utils/suggestions-cache'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import type TabManagementBackground from 'src/tab-management/background'
-import type { ServerStorageModules } from 'src/storage/types'
+import type { ServerStorage } from 'src/storage/types'
 import type { AuthServices } from 'src/services/types'
-import type { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type {
+    SharedListEntry,
+    SharedListReference,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { isExtensionTab } from 'src/tab-management/utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
+import type {
+    PersonalList,
+    PersonalListShare,
+} from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 25
@@ -50,9 +58,7 @@ export default class CustomListBackground {
                 normalizedPageUrl: string,
                 listId: number,
             ) => Promise<void>
-            getServerStorage: () => Promise<
-                Pick<ServerStorageModules, 'activityFollows' | 'contentSharing'>
-            >
+            getServerStorage: () => Promise<ServerStorage>
         },
     ) {
         // Makes the custom list Table in indexed DB.
@@ -99,6 +105,8 @@ export default class CustomListBackground {
             fetchListDescriptions: this.fetchListDescriptions,
             updateListDescription: this.updateListDescription,
             getInboxUnreadCount: this.getInboxUnreadCount,
+            fetchLocalDataForRemoteListEntryFromServer: this
+                .fetchLocalDataForRemoteListEntryFromServer,
         }
 
         this.localStorage = new BrowserSettingsStore(
@@ -115,7 +123,9 @@ export default class CustomListBackground {
         SharedListReference[]
     > => {
         const { auth } = this.options.authServices
-        const { contentSharing } = await this.options.getServerStorage()
+        const {
+            modules: { contentSharing },
+        } = await this.options.getServerStorage()
 
         const currentUser = await auth.getCurrentUser()
         if (!currentUser) {
@@ -132,7 +142,9 @@ export default class CustomListBackground {
         SharedListReference[]
     > => {
         const { auth } = this.options.authServices
-        const { activityFollows } = await this.options.getServerStorage()
+        const {
+            modules: { activityFollows },
+        } = await this.options.getServerStorage()
 
         const currentUser = await auth.getCurrentUser()
         if (!currentUser) {
@@ -160,7 +172,9 @@ export default class CustomListBackground {
         SharedListReference[]
     > => {
         const { auth } = this.options.authServices
-        const { contentSharing } = await this.options.getServerStorage()
+        const {
+            modules: { contentSharing },
+        } = await this.options.getServerStorage()
 
         const currentUser = await auth.getCurrentUser()
         if (!currentUser) {
@@ -192,7 +206,9 @@ export default class CustomListBackground {
         sharedListIds,
         normalizedPageUrl,
     }) => {
-        const { contentSharing } = await this.options.getServerStorage()
+        const {
+            modules: { contentSharing },
+        } = await this.options.getServerStorage()
 
         const listEntriesByPageByList = await contentSharing.getAnnotationListEntriesForListsOnPage(
             {
@@ -215,7 +231,9 @@ export default class CustomListBackground {
     fetchFollowedListsWithAnnotations: RemoteCollectionsInterface['fetchFollowedListsWithAnnotations'] = async ({
         normalizedPageUrl,
     }) => {
-        const { contentSharing } = await this.options.getServerStorage()
+        const {
+            modules: { contentSharing },
+        } = await this.options.getServerStorage()
         const seenListIds = new Set()
         const allListReferences = [
             ...(await this.fetchOwnListReferences()),
@@ -293,7 +311,9 @@ export default class CustomListBackground {
         references: SharedListReference[],
     ): Promise<PageList[]> => {
         const { auth } = this.options.authServices
-        const { contentSharing } = await this.options.getServerStorage()
+        const {
+            modules: { contentSharing },
+        } = await this.options.getServerStorage()
 
         const sharedLists = await contentSharing.getListsByReferences(
             references,
@@ -321,11 +341,58 @@ export default class CustomListBackground {
             }))
     }
 
+    fetchLocalDataForRemoteListEntryFromServer: RemoteCollectionsInterface['fetchLocalDataForRemoteListEntryFromServer'] = async ({
+        normalizedPageUrl,
+        remoteListId,
+    }) => {
+        const user = await this.options.authServices.auth.getCurrentUser()
+        if (!user) {
+            throw new Error(
+                'Cannot get user data from server when unauthorized',
+            )
+        }
+
+        const {
+            manager,
+            modules: { contentSharing },
+        } = await this.options.getServerStorage()
+        const personalListShare: PersonalListShare & {
+            personalList: AutoPk
+        } = await manager
+            .collection('personalListShare')
+            .findObject({ user: user.id, remoteId: remoteListId })
+        if (!personalListShare) {
+            return null
+        }
+
+        const personalList: PersonalList = await manager
+            .collection('personalList')
+            .findObject({ user: user.id, id: personalListShare.personalList })
+        if (personalList?.localId == null) {
+            return null
+        }
+
+        const sharedListEntry = await contentSharing.getListEntryByListAndUrl({
+            listReference: { type: 'shared-list-reference', id: remoteListId },
+            normalizedPageUrl,
+        })
+        if (!sharedListEntry) {
+            return null
+        }
+
+        return {
+            localListId: personalList.localId,
+            sharedListEntryId: sharedListEntry.reference.id.toString(),
+        }
+    }
+
     fetchSharedListDataWithPageAnnotations: RemoteCollectionsInterface['fetchSharedListDataWithPageAnnotations'] = async ({
         normalizedPageUrl,
         remoteListId,
     }) => {
-        const { contentSharing } = await this.options.getServerStorage()
+        const {
+            modules: { contentSharing },
+        } = await this.options.getServerStorage()
         const listReference: SharedListReference = {
             id: remoteListId,
             type: 'shared-list-reference',
@@ -373,7 +440,9 @@ export default class CustomListBackground {
             return null
         }
 
-        const { contentSharing } = await this.options.getServerStorage()
+        const {
+            modules: { contentSharing },
+        } = await this.options.getServerStorage()
         const sharedList = await contentSharing.getListByReference({
             id: remoteListId,
             type: 'shared-list-reference',
