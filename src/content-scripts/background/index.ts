@@ -141,7 +141,7 @@ export class ContentScriptsBackground {
         'provider'
     >['openPageWithSidebarInSelectedListMode'] = async (
         { tab },
-        { fullPageUrl, sharedListId, checkPermissions },
+        { fullPageUrl, sharedListId, manuallyPullLocalListData },
     ) => {
         const allTabs = await this.options.browserAPIs.tabs.query({
             currentWindow: true,
@@ -168,7 +168,7 @@ export class ContentScriptsBackground {
                 ).showSidebar({
                     action: 'selected_list_mode_from_web_ui',
                     sharedListId,
-                    manuallyPullLocalListData: checkPermissions,
+                    manuallyPullLocalListData,
                 })
                 return true
             },

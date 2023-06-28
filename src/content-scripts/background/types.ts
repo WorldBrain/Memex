@@ -18,7 +18,7 @@ export interface ContentScriptsInterface<Role extends 'provider' | 'caller'> {
         {
             fullPageUrl: string
             sharedListId: string
-            checkPermissions?: boolean
+            manuallyPullLocalListData?: boolean
         }
     >
     goToAnnotationFromDashboardSidebar: RemoteFunction<

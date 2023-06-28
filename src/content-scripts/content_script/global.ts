@@ -1033,7 +1033,8 @@ export function setupWebUIActions(args: {
         await args.contentScriptsBG.openPageWithSidebarInSelectedListMode({
             fullPageUrl: detail.originalPageUrl,
             sharedListId: detail.sharedListId,
-            checkPermissions: detail.isCollaboratorLink || detail.isOwnLink,
+            manuallyPullLocalListData:
+                detail.isCollaboratorLink || detail.isOwnLink,
         })
     })
 }
