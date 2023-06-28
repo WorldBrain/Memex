@@ -941,6 +941,9 @@ export class AnnotationsSidebarContainer<
                                     }
                                     spacesBG={this.props.customListsBG}
                                     listData={listData}
+                                    disableWriteOps={
+                                        this.state.hasListDataBeenManuallyPulled
+                                    }
                                     onConfirmSpaceNameEdit={(newName) =>
                                         this.processEvent('editListName', {
                                             unifiedListId: listData.unifiedId,

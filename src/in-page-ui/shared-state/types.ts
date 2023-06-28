@@ -38,6 +38,7 @@ export interface SidebarActionOptions {
     annotationLocalId?: string
     /** Set this for 'selected_list_mode_from_web_ui' */
     sharedListId?: string
+    manuallyPullLocalListData?: boolean
     annotationCacheId?: UnifiedAnnotation['unifiedId']
     annotationData?: IncomingAnnotationData
     annotationSharingAccess?: AnnotationSharingAccess

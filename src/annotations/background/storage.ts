@@ -298,8 +298,13 @@ export default class AnnotationStorage extends StorageModule {
         return list.id
     }
 
-    async insertAnnotToList({ listId, url }: AnnotListEntry) {
-        await this.getListById({ listId })
+    async insertAnnotToList(
+        { listId, url }: AnnotListEntry,
+        opts?: { skipListExistenceCheck?: boolean },
+    ) {
+        if (!opts?.skipListExistenceCheck) {
+            await this.getListById({ listId })
+        }
 
         await this.operation('createAnnotationForList', {
             listId,
@@ -308,10 +313,13 @@ export default class AnnotationStorage extends StorageModule {
         })
     }
 
-    async ensureAnnotInList({ listId, url }: AnnotListEntry) {
+    async ensureAnnotInList(
+        { listId, url }: AnnotListEntry,
+        opts?: { skipListExistenceCheck?: boolean },
+    ) {
         const existing = await this.operation('findListEntry', { listId, url })
         if (!existing) {
-            await this.insertAnnotToList({ listId, url })
+            await this.insertAnnotToList({ listId, url }, opts)
         }
     }
 

@@ -195,6 +195,12 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     immediatelyShareNotes: boolean
     pageHasNetworkAnnotations: boolean
     hasFeedActivity?: boolean
+    /**
+     * In the case of a page being opened from the web UI for a page link, data
+     * may need to be manually pulled as sync might not have finished by the time the
+     * sidebar loads. This state signifies that condition.
+     */
+    hasListDataBeenManuallyPulled?: boolean
 }
 
 export type AnnotationEvent<T> = {
@@ -299,7 +305,10 @@ interface SidebarEvents {
 
     // Selected space management
     setSelectedList: { unifiedListId: UnifiedList['unifiedId'] | null }
-    setSelectedListFromWebUI: { sharedListId: string }
+    setSelectedListFromWebUI: {
+        sharedListId: string
+        manuallyPullLocalListData?: boolean
+    }
 
     openContextMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
     editListName: { unifiedListId: UnifiedList['unifiedId']; newName: string }

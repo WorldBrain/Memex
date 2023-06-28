@@ -82,6 +82,7 @@ import {
     getListShareUrl,
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -1237,6 +1238,8 @@ export class SidebarContainerLogic extends UILogic<
                 },
                 annotationsBG: this.options.annotationsBG,
                 contentSharingBG: this.options.contentSharingBG,
+                skipListExistenceCheck:
+                    previousState.hasListDataBeenManuallyPulled,
                 shareOpts: {
                     shouldShare: event.shouldShare,
                     shouldCopyShareLink: event.shouldShare,
@@ -2205,42 +2208,78 @@ export class SidebarContainerLogic extends UILogic<
                 'Could not load remote list data for selected list mode without `props.fullPageUrl` being set in sidebar',
             )
         }
+        const normalizedPageUrl = normalizeUrl(this.fullPageUrl)
 
         // Else we're dealing with a foreign list which we need to load remotely
         await executeUITask(this, 'foreignSelectedListLoadState', async () => {
             const sharedList = await customListsBG.fetchSharedListDataWithPageAnnotations(
                 {
                     remoteListId: event.sharedListId,
-                    normalizedPageUrl: normalizeUrl(this.fullPageUrl),
+                    normalizedPageUrl,
                 },
             )
-
-            // check ownership status of current list for the case that we don't yet have the data synced up and people can start collaborating
-
             if (!sharedList) {
                 throw new Error(
                     `Could not load remote list data for selected list mode - ID: ${event.sharedListId}`,
                 )
             }
 
-            const unifiedList = annotationsCache.addList({
-                type: 'user-list',
+            let localListData: {
+                localListId: number
+                sharedListEntryId: AutoPk
+            }
+            if (event.manuallyPullLocalListData) {
+                localListData = await customListsBG.fetchLocalDataForRemoteListEntryFromServer(
+                    {
+                        remoteListId: event.sharedListId,
+                        normalizedPageUrl,
+                    },
+                )
+                if (!localListData) {
+                    throw new Error(
+                        'Could not find data for local list on cloud',
+                    )
+                }
+                this.emitMutation({
+                    hasListDataBeenManuallyPulled: { $set: true },
+                })
+            }
+
+            let unifiedListId: string
+            const listCommon = {
                 remoteId: event.sharedListId,
                 name: sharedList.title,
                 creator: sharedList.creator,
                 description: sharedList.description,
-                isForeignList: true,
+                localId: localListData?.localListId ?? undefined,
+                isForeignList: localListData == null,
                 hasRemoteAnnotationsToLoad:
                     sharedList.sharedAnnotations == null ? false : true,
                 unifiedAnnotationIds: [], // Will be populated soon when annots get cached
-            })
+            }
+
+            if (sharedList.type === 'page-link') {
+                const { unifiedId } = annotationsCache.addList<'page-link'>({
+                    type: 'page-link',
+                    ...listCommon,
+                    normalizedPageUrl,
+                    sharedListEntryId: localListData?.sharedListEntryId.toString(),
+                })
+                unifiedListId = unifiedId
+            } else {
+                const { unifiedId } = annotationsCache.addList<'user-list'>({
+                    type: 'user-list',
+                    ...listCommon,
+                })
+                unifiedListId = unifiedId
+            }
 
             if (sharedList.sharedAnnotations == null) {
                 this.emitMutation({
-                    selectedListId: { $set: unifiedList.unifiedId },
+                    selectedListId: { $set: unifiedListId },
                     // NOTE: this is the only time we're manually mutating the listInstances state outside the cache subscription - maybe there's a "cleaner" way to do this
                     listInstances: {
-                        [unifiedList.unifiedId]: {
+                        [unifiedListId]: {
                             annotationRefsLoadState: { $set: 'success' },
                             conversationsLoadState: { $set: 'success' },
                             annotationsLoadState: { $set: 'success' },
@@ -2259,7 +2298,7 @@ export class SidebarContainerLogic extends UILogic<
                 loadState: { $set: 'success' },
             })
 
-            let sharedAnnotationReferences: SharedAnnotationReference[] = []
+            const sharedAnnotationReferences: SharedAnnotationReference[] = []
             const sharedAnnotationUnifiedIds: string[] = []
 
             sharedList.sharedAnnotations.forEach((sharedAnnot) => {
@@ -2276,7 +2315,7 @@ export class SidebarContainerLogic extends UILogic<
                             : undefined,
                     remoteId: sharedAnnot.reference.id.toString(),
                     normalizedPageUrl: sharedAnnot.normalizedPageUrl,
-                    unifiedListIds: [unifiedList.unifiedId],
+                    unifiedListIds: [unifiedListId],
                     privacyLevel: AnnotationPrivacyLevels.SHARED,
                     localListIds: [],
                 })
@@ -2284,10 +2323,10 @@ export class SidebarContainerLogic extends UILogic<
             })
 
             this.emitMutation({
-                selectedListId: { $set: unifiedList.unifiedId },
+                selectedListId: { $set: unifiedListId },
                 // NOTE: this is the only time we're manually mutating the listInstances state outside the cache subscription - maybe there's a "cleaner" way to do this
                 listInstances: {
-                    [unifiedList.unifiedId]: {
+                    [unifiedListId]: {
                         annotationRefsLoadState: { $set: 'success' },
                         conversationsLoadState: { $set: 'success' },
                         annotationsLoadState: { $set: 'success' },
@@ -2301,7 +2340,7 @@ export class SidebarContainerLogic extends UILogic<
                         sharedAnnotationUnifiedIds.map((unifiedId) => [
                             generateAnnotationCardInstanceId(
                                 { unifiedId },
-                                unifiedList.unifiedId,
+                                unifiedListId,
                             ),
                             getInitialAnnotationConversationState(),
                         ]),
@@ -2312,12 +2351,12 @@ export class SidebarContainerLogic extends UILogic<
             this.options.events?.emit('renderHighlights', {
                 highlights: cacheUtils.getListHighlightsArray(
                     this.options.annotationsCache,
-                    unifiedList.unifiedId,
+                    unifiedListId,
                 ),
             })
 
             await this.detectConversationThreads(
-                unifiedList.unifiedId,
+                unifiedListId,
                 event.sharedListId,
                 sharedAnnotationReferences,
             )

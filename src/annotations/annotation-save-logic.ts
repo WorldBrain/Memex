@@ -35,6 +35,7 @@ export interface SaveAnnotationParams<
     shareOpts?: AnnotationShareOpts
     skipPageIndexing?: boolean
     keepListsIfUnsharing?: boolean
+    skipListExistenceCheck?: boolean
 }
 
 export interface SaveAnnotationReturnValue {
@@ -48,6 +49,7 @@ export async function createAnnotation({
     annotationsBG,
     contentSharingBG,
     skipPageIndexing,
+    skipListExistenceCheck,
     shareOpts,
 }: SaveAnnotationParams<AnnotationCreateData>): Promise<
     SaveAnnotationReturnValue
@@ -98,6 +100,7 @@ export async function createAnnotation({
             if (annotationData.localListIds?.length) {
                 await contentSharingBG.shareAnnotationToSomeLists({
                     annotationUrl,
+                    skipListExistenceCheck,
                     localListIds: annotationData.localListIds,
                 })
             }
