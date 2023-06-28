@@ -12,7 +12,9 @@ import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { getListShareUrl } from 'src/content-sharing/utils'
 
-export interface Props extends Dependencies {}
+export interface Props extends Dependencies {
+    disableWriteOps?: boolean
+}
 
 // NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
 //  from opening when you use the context menu in the dashboard.
@@ -258,8 +260,9 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                         e.preventDefault()
                                         e.stopPropagation()
                                     }}
-                                    onChange={this.handleNameChange}
                                     value={this.state.nameValue}
+                                    onChange={this.handleNameChange}
+                                    disabled={this.props.disableWriteOps}
                                     onKeyDown={this.handleNameEditInputKeyDown}
                                 />
                             </Container>
@@ -276,6 +279,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                 reactEvent,
                             }),
                         )}
+                        disabled={this.props.disableWriteOps}
                         icon={'trash'}
                         size={'medium'}
                         type={'tertiary'}
