@@ -70,7 +70,7 @@ export class ContentScriptsBackground {
     private async doSomethingInNewTab(
         fullPageUrl: string,
         openIsolatedView: (tabId: number) => Promise<true>,
-        checkIfSidebarWorks: (tabId) => Promise<boolean>,
+        checkIfSidebarWorks: (tabId: number) => Promise<boolean>,
         retryDelay = 150,
         delayBeforeExecution = 1,
     ) {
@@ -141,21 +141,25 @@ export class ContentScriptsBackground {
         'provider'
     >['openPageWithSidebarInSelectedListMode'] = async (
         { tab },
-        { fullPageUrl, sharedListId },
+        { fullPageUrl, sharedListId, manuallyPullLocalListData },
     ) => {
-        let allTabs = await this.options.browserAPIs.tabs.query({
+        const allTabs = await this.options.browserAPIs.tabs.query({
             currentWindow: true,
             active: true,
         })
-        allTabs.forEach((tab) => {
-            if (
-                tab.url.includes(sharedListId) &&
-                tab.url.includes('/p/') &&
-                !tab.url.includes('?dono')
-            ) {
-                this.options.browserAPIs.tabs.remove(tab.id)
-            }
-        })
+        await Promise.all(
+            allTabs.map((tab) => {
+                if (
+                    tab.url.includes(sharedListId) &&
+                    tab.url.includes('/p/') &&
+                    !tab.url.includes('?dono')
+                ) {
+                    return this.options.browserAPIs.tabs.remove(tab.id)
+                }
+                return Promise.resolve()
+            }),
+        )
+
         await this.doSomethingInNewTab(
             fullPageUrl,
             async (tabId) => {
@@ -164,6 +168,7 @@ export class ContentScriptsBackground {
                 ).showSidebar({
                     action: 'selected_list_mode_from_web_ui',
                     sharedListId,
+                    manuallyPullLocalListData,
                 })
                 return true
             },

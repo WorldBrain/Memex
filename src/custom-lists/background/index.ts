@@ -1,10 +1,10 @@
-import Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex'
 import fromPairs from 'lodash/fromPairs'
-import { Windows, Tabs, Storage } from 'webextension-polyfill'
+import type { Windows, Tabs, Storage } from 'webextension-polyfill'
 import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
 
 import CustomListStorage from './storage'
-import { SearchIndex } from 'src/search'
+import type { SearchIndex } from 'src/search'
 import type {
     RemoteCollectionsInterface,
     CollectionsSettings,
@@ -15,7 +15,7 @@ import { maybeIndexTabs } from 'src/page-indexing/utils'
 import { Analytics } from 'src/analytics/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from '@worldbrain/memex-common/lib/utils/suggestions-cache'
-import { PageIndexingBackground } from 'src/page-indexing/background'
+import type { PageIndexingBackground } from 'src/page-indexing/background'
 import type TabManagementBackground from 'src/tab-management/background'
 import type { ServerStorageModules } from 'src/storage/types'
 import type { AuthServices } from 'src/services/types'
@@ -99,6 +99,8 @@ export default class CustomListBackground {
             fetchListDescriptions: this.fetchListDescriptions,
             updateListDescription: this.updateListDescription,
             getInboxUnreadCount: this.getInboxUnreadCount,
+            fetchLocalDataForRemoteListEntryFromServer: this
+                .fetchLocalDataForRemoteListEntryFromServer,
         }
 
         this.localStorage = new BrowserSettingsStore(
@@ -319,6 +321,46 @@ export default class CustomListBackground {
                 isFollowed: true,
                 createdAt: new Date(sharedList.createdWhen),
             }))
+    }
+
+    fetchLocalDataForRemoteListEntryFromServer: RemoteCollectionsInterface['fetchLocalDataForRemoteListEntryFromServer'] = async ({
+        normalizedPageUrl,
+        remoteListId,
+    }) => {
+        const user = await this.options.authServices.auth.getCurrentUser()
+        if (!user) {
+            throw new Error(
+                'Cannot get user data from server when unauthorized',
+            )
+        }
+
+        const { contentSharing } = await this.options.getServerStorage()
+        const listReference: SharedListReference = {
+            type: 'shared-list-reference',
+            id: remoteListId,
+        }
+
+        const [personalList, sharedListEntry] = await Promise.all([
+            contentSharing.getUserPersonalListBySharedListRef({
+                listReference,
+                userReference: {
+                    type: 'user-reference',
+                    id: user.id,
+                },
+            }),
+            contentSharing.getListEntryByListAndUrl({
+                listReference,
+                normalizedPageUrl,
+            }),
+        ])
+        if (personalList?.localId == null || !sharedListEntry) {
+            return null
+        }
+
+        return {
+            localListId: personalList.localId,
+            sharedListEntryId: sharedListEntry.reference.id.toString(),
+        }
     }
 
     fetchSharedListDataWithPageAnnotations: RemoteCollectionsInterface['fetchSharedListDataWithPageAnnotations'] = async ({

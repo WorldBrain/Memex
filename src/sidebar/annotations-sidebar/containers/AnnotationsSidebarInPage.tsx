@@ -236,6 +236,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         } else if (event.action === 'selected_list_mode_from_web_ui') {
             await this.processEvent('setSelectedListFromWebUI', {
                 sharedListId: event.sharedListId,
+                manuallyPullLocalListData: event.manuallyPullLocalListData,
             })
         } else if (event.action === 'show_annotation') {
             await this.processEvent('setActiveSidebarTab', {

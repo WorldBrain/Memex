@@ -911,10 +911,9 @@ export class AnnotationsSidebar extends React.Component<
                                     />
                                 </TooltipBox>
                             )}
-                        {listInstance.annotationRefsLoadState !== 'success' &&
-                        listData.hasRemoteAnnotationsToLoad ? (
+                        {listInstance.annotationRefsLoadState === 'running' ? (
                             this.renderLoader(undefined, 20)
-                        ) : (
+                        ) : listData.hasRemoteAnnotationsToLoad ? (
                             <FollowedListNoteCount active left="5px">
                                 <TooltipBox
                                     tooltipText={'Has annotations by others'}
@@ -928,7 +927,7 @@ export class AnnotationsSidebar extends React.Component<
                                     </TotalAnnotationsCounter>
                                 </TooltipBox>
                             </FollowedListNoteCount>
-                        )}
+                        ) : null}
                     </ButtonContainer>
                 </FollowedListRow>
                 {this.renderListAnnotations(listData.unifiedId)}
@@ -1130,7 +1129,7 @@ export class AnnotationsSidebar extends React.Component<
         await setLocalStorage(SHOW_ISOLATED_VIEW_KEY, false)
     }
 
-    private renderFocusModeNotif(listData) {
+    private renderFocusModeNotif(listData: UnifiedList) {
         const ownershipStatus = cacheUtils.deriveListOwnershipStatus(
             listData,
             this.props.currentUser,
