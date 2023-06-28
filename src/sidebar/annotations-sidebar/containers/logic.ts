@@ -1238,6 +1238,8 @@ export class SidebarContainerLogic extends UILogic<
                 },
                 annotationsBG: this.options.annotationsBG,
                 contentSharingBG: this.options.contentSharingBG,
+                skipListExistenceCheck:
+                    previousState.hasListDataBeenManuallyPulled,
                 shareOpts: {
                     shouldShare: event.shouldShare,
                     shouldCopyShareLink: event.shouldShare,
@@ -2238,6 +2240,9 @@ export class SidebarContainerLogic extends UILogic<
                         'Could not find data for local list on cloud',
                     )
                 }
+                this.emitMutation({
+                    hasListDataBeenManuallyPulled: { $set: true },
+                })
             }
 
             let unifiedListId: string

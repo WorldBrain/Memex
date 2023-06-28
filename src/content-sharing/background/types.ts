@@ -61,6 +61,7 @@ export interface ContentSharingInterface
         annotationUrl: string
         localListIds: number[]
         protectAnnotation?: boolean
+        skipListExistenceCheck?: boolean
     }): Promise<{ sharingState: AnnotationSharingState }>
     unshareAnnotationFromList(options: {
         annotationUrl: string

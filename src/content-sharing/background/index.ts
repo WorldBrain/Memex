@@ -134,20 +134,26 @@ export default class ContentSharingBackground {
                         .directLinking.annotationStorage.findListEntriesByUrls({
                             annotationUrls,
                         }),
-                ensureAnnotationInList: (entry) =>
+                ensureAnnotationInList: (entry, opts) =>
                     options
                         .getBgModules()
-                        .directLinking.annotationStorage.ensureAnnotInList({
-                            listId: entry.listId,
-                            url: entry.annotationUrl,
-                        }),
-                insertAnnotationToList: async (entry) =>
+                        .directLinking.annotationStorage.ensureAnnotInList(
+                            {
+                                listId: entry.listId,
+                                url: entry.annotationUrl,
+                            },
+                            opts,
+                        ),
+                insertAnnotationToList: async (entry, opts) =>
                     options
                         .getBgModules()
-                        .directLinking.annotationStorage.insertAnnotToList({
-                            listId: entry.listId,
-                            url: entry.annotationUrl,
-                        }),
+                        .directLinking.annotationStorage.insertAnnotToList(
+                            {
+                                listId: entry.listId,
+                                url: entry.annotationUrl,
+                            },
+                            opts,
+                        ),
                 removeAnnotationFromList: async (entry) =>
                     options
                         .getBgModules()
@@ -575,6 +581,7 @@ export default class ContentSharingBackground {
                 annotationUrl: options.annotationUrl,
                 listIds: options.localListIds,
                 protectAnnotation: options.protectAnnotation,
+                skipListExistenceCheck: options.skipListExistenceCheck,
             },
         )
         return { sharingState }
