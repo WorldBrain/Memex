@@ -1023,12 +1023,15 @@ export function setupWebUIActions(args: {
 
         // TODO: more robust way of checking this?
         // Handle remote PDFs next (non-memex.cloud URLs with .pdf ext)
-        if (detail.originalPageUrl.endsWith('.pdf')) {
-            await args.contentScriptsBG.openPdfInViewer({
-                fullPdfUrl: detail.originalPageUrl,
-            })
-            return
-        }
+        // if (detail.originalPageUrl.endsWith('.pdf')) {
+        //     await args.contentScriptsBG.openPdfInViewer({
+        //         fullPageUrl: detail.originalPageUrl,
+        //         sharedListId: detail.sharedListId,
+        //         manuallyPullLocalListData:
+        //             detail.isCollaboratorLink || detail.isOwnLink,
+        //     })
+        //     return
+        // }
 
         await args.contentScriptsBG.openPageWithSidebarInSelectedListMode({
             fullPageUrl: detail.originalPageUrl,

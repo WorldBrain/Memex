@@ -75,16 +75,29 @@ export class ContentScriptsBackground {
         delayBeforeExecution = 1,
     ) {
         const { browserAPIs } = this.options
-        const activeTab = await browserAPIs.tabs.create({
-            active: true,
-            url: fullPageUrl,
-        })
+        let activeTab
+        if (fullPageUrl.endsWith('.pdf')) {
+            await openPDFInViewer(fullPageUrl, {
+                tabsAPI: this.options.browserAPIs.tabs,
+                runtimeAPI: this.options.browserAPIs.runtime,
+            })
+            let activeTabArray = await this.options.browserAPIs.tabs.query({
+                currentWindow: true,
+                active: true,
+            })
+            activeTab = activeTabArray[0] ?? null
+        } else {
+            activeTab = await browserAPIs.tabs.create({
+                active: true,
+                url: fullPageUrl,
+            })
+        }
 
         const listener = async (
             tabId: number,
             changeInfo: Tabs.OnUpdatedChangeInfoType,
         ) => {
-            if (tabId === activeTab.id && changeInfo.status === 'complete') {
+            if (tabId === activeTab?.id && changeInfo.status === 'complete') {
                 await delay(delayBeforeExecution)
                 try {
                     // Continues to retry `something` every `retryDelay` ms until it resolves
@@ -130,8 +143,11 @@ export class ContentScriptsBackground {
 
     openPdfInViewer: ContentScriptsInterface<
         'provider'
-    >['openPdfInViewer'] = async ({ tab }, { fullPdfUrl }) => {
-        await openPDFInViewer(fullPdfUrl, {
+    >['openPdfInViewer'] = async (
+        { tab },
+        { fullPageUrl, sharedListId, manuallyPullLocalListData },
+    ) => {
+        await openPDFInViewer(fullPageUrl, {
             tabsAPI: this.options.browserAPIs.tabs,
             runtimeAPI: this.options.browserAPIs.runtime,
         })
@@ -147,18 +163,6 @@ export class ContentScriptsBackground {
             currentWindow: true,
             active: true,
         })
-        await Promise.all(
-            allTabs.map((tab) => {
-                if (
-                    tab.url.includes(sharedListId) &&
-                    tab.url.includes('/p/') &&
-                    !tab.url.includes('?dono')
-                ) {
-                    return this.options.browserAPIs.tabs.remove(tab.id)
-                }
-                return Promise.resolve()
-            }),
-        )
 
         await this.doSomethingInNewTab(
             fullPageUrl,
@@ -178,6 +182,18 @@ export class ContentScriptsBackground {
                 ).testIfSidebarSetup()
                 return true
             },
+        )
+        await Promise.all(
+            allTabs.map((tab) => {
+                if (
+                    tab.url.includes(sharedListId) &&
+                    tab.url.includes('/p/') &&
+                    !tab.url.includes('?dono')
+                ) {
+                    return this.options.browserAPIs.tabs.remove(tab.id)
+                }
+                return Promise.resolve()
+            }),
         )
     }
 
