@@ -525,7 +525,7 @@ export async function main(
                 getFullPageUrl: pageInfo.getFullPageUrl,
                 openPDFinViewer: async (originalPageURL) => {
                     await contentScriptsBG.openPdfInViewer({
-                        fullPdfUrl: originalPageURL,
+                        fullPageUrl: originalPageURL,
                     })
                 },
             })

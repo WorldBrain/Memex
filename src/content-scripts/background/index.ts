@@ -143,10 +143,7 @@ export class ContentScriptsBackground {
 
     openPdfInViewer: ContentScriptsInterface<
         'provider'
-    >['openPdfInViewer'] = async (
-        { tab },
-        { fullPageUrl, sharedListId, manuallyPullLocalListData },
-    ) => {
+    >['openPdfInViewer'] = async ({ tab }, { fullPageUrl }) => {
         await openPDFInViewer(fullPageUrl, {
             tabsAPI: this.options.browserAPIs.tabs,
             runtimeAPI: this.options.browserAPIs.runtime,

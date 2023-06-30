@@ -16,8 +16,6 @@ export interface ContentScriptsInterface<Role extends 'provider' | 'caller'> {
         Role,
         {
             fullPageUrl: string
-            sharedListId: string
-            manuallyPullLocalListData?: boolean
         }
     >
     openPageWithSidebarInSelectedListMode: RemoteFunction<
