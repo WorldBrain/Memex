@@ -74,20 +74,19 @@ export class ContentScriptsBackground {
         retryDelay = 150,
         delayBeforeExecution = 1,
     ) {
-        const { browserAPIs } = this.options
-        let activeTab
+        let activeTab: Tabs.Tab
         if (fullPageUrl.endsWith('.pdf')) {
             await openPDFInViewer(fullPageUrl, {
                 tabsAPI: this.options.browserAPIs.tabs,
                 runtimeAPI: this.options.browserAPIs.runtime,
             })
-            let activeTabArray = await this.options.browserAPIs.tabs.query({
+            const activeTabArray = await this.options.browserAPIs.tabs.query({
                 currentWindow: true,
                 active: true,
             })
             activeTab = activeTabArray[0] ?? null
         } else {
-            activeTab = await browserAPIs.tabs.create({
+            activeTab = await this.options.browserAPIs.tabs.create({
                 active: true,
                 url: fullPageUrl,
             })
@@ -126,12 +125,14 @@ export class ContentScriptsBackground {
                 } catch (err) {
                     throw err
                 } finally {
-                    browserAPIs.tabs.onUpdated.removeListener(listener)
+                    this.options.browserAPIs.tabs.onUpdated.removeListener(
+                        listener,
+                    )
                 }
             }
         }
 
-        browserAPIs.tabs.onUpdated.addListener(listener)
+        this.options.browserAPIs.tabs.onUpdated.addListener(listener)
     }
 
     reloadTab: ContentScriptsInterface<'provider'>['reloadTab'] = async (

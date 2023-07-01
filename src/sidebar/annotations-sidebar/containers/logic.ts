@@ -1917,14 +1917,10 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     private async maybeLoadListRemoteAnnotations(
-        state: SidebarContainerState,
+        state: Pick<SidebarContainerState, 'lists' | 'listInstances'>,
         unifiedListId: UnifiedList['unifiedId'],
     ) {
-        const {
-            contentConversationsBG,
-            annotationsCache,
-            annotationsBG,
-        } = this.options
+        const { annotationsCache, annotationsBG } = this.options
         const list = state.lists.byId[unifiedListId]
         const listInstance = state.listInstances[unifiedListId]
 
@@ -2189,6 +2185,7 @@ export class SidebarContainerLogic extends UILogic<
         const cachedList = annotationsCache.getListByRemoteId(
             event.sharedListId,
         )
+        const normalizedPageUrl = normalizeUrl(this.fullPageUrl)
 
         // If locally available, proceed as usual
         if (cachedList) {
@@ -2200,6 +2197,45 @@ export class SidebarContainerLogic extends UILogic<
                 loadState: { $set: 'success' },
             })
 
+            // This covers the case where the associated followedListEntry hasn't been synced yet (via periodic sync, not cloud sync)
+            //  for a newly joined page link list
+            if (
+                event.manuallyPullLocalListData &&
+                cachedList.type === 'page-link' &&
+                !cachedList.sharedListEntryId
+            ) {
+                const localData = await customListsBG.fetchLocalDataForRemoteListEntryFromServer(
+                    {
+                        remoteListId: event.sharedListId,
+                        normalizedPageUrl,
+                        opts: { needAnnotsFlag: true },
+                    },
+                )
+
+                if (localData != null) {
+                    annotationsCache.updateList({
+                        normalizedPageUrl,
+                        unifiedId: cachedList.unifiedId,
+                        sharedListEntryId: localData.sharedListEntryId,
+                        hasRemoteAnnotationsToLoad:
+                            localData.hasAnnotationsFromOthers,
+                    })
+                    // TODO: This shouldn't need to be called; it's already being triggered by the init logic, but that
+                    //  doesn't finish by the time this runs thus the state isn't ready by the time we're here so we need to call it again.
+                    //  Such a mess!!! :(
+                    const nextState = await this.loadRemoteAnnotationReferencesForSpecificLists(
+                        previousState,
+                        [cachedList],
+                    )
+                    await this.maybeLoadListRemoteAnnotations(
+                        {
+                            lists: annotationsCache.lists,
+                            listInstances: nextState.listInstances,
+                        },
+                        cachedList.unifiedId,
+                    )
+                }
+            }
             return
         }
 
@@ -2208,7 +2244,6 @@ export class SidebarContainerLogic extends UILogic<
                 'Could not load remote list data for selected list mode without `props.fullPageUrl` being set in sidebar',
             )
         }
-        const normalizedPageUrl = normalizeUrl(this.fullPageUrl)
 
         // Else we're dealing with a foreign list which we need to load remotely
         await executeUITask(this, 'foreignSelectedListLoadState', async () => {
@@ -2225,7 +2260,7 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             let localListData: {
-                localListId: number
+                localListId?: number
                 sharedListEntryId: AutoPk
             }
             if (event.manuallyPullLocalListData) {
@@ -2233,6 +2268,7 @@ export class SidebarContainerLogic extends UILogic<
                     {
                         remoteListId: event.sharedListId,
                         normalizedPageUrl,
+                        opts: { needLocalListd: true },
                     },
                 )
                 if (!localListData) {

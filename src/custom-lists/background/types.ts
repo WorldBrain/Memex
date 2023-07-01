@@ -110,7 +110,15 @@ export interface RemoteCollectionsInterface {
     fetchLocalDataForRemoteListEntryFromServer(args: {
         remoteListId: string
         normalizedPageUrl: string
-    }): Promise<{ localListId: number; sharedListEntryId: string } | null>
+        opts: {
+            needAnnotsFlag?: boolean
+            needLocalListd?: boolean
+        }
+    }): Promise<{
+        hasAnnotationsFromOthers?: boolean
+        localListId?: number
+        sharedListEntryId: string
+    } | null>
     fetchCollaborativeLists(args: {
         skip?: number
         limit?: number
