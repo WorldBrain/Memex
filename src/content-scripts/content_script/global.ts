@@ -431,10 +431,11 @@ export async function main(
     //     injectYoutubeContextMenu(annotationsFunctions)
     // }
 
+    const isStaging =
+        process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+        process.env.NODE_ENV === 'development'
+
     if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
-        const isStaging =
-            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-            process.env.NODE_ENV === 'development'
         const email = _currentUser.email
 
         const baseUrl = isStaging
@@ -482,6 +483,46 @@ export async function main(
                 }
             }
         }, 200)
+    }
+
+    if (fullPageUrl.startsWith('https://arxiv.org/list/')) {
+        const listIdentifiers = document.querySelectorAll('.list-identifier')
+
+        console.log(listIdentifiers)
+
+        // Iterate over each 'list-identifiers' element
+        listIdentifiers.forEach((identifier) => {
+            // Find <a> elements with content 'pdf'
+            const pdfLinks = Array.from(
+                identifier.getElementsByTagName('a'),
+            ).filter((link) => link.textContent === 'pdf')
+
+            // Iterate over each 'pdf' link and add a Discuss button
+            pdfLinks.forEach((link) => {
+                // Create a new Discuss button
+                const discussButton = document.createElement('button')
+                discussButton.textContent = 'Discuss'
+
+                // Get the link of the <a> element
+                const linkUrl = link.href
+                let baseUrl = isStaging
+                    ? 'https://staging.memex.social'
+                    : 'https://memex.social'
+
+                // Add an event listener to open the discussion link
+                discussButton.addEventListener('click', () => {
+                    window.open(
+                        baseUrl + '/new?url=' + encodeURIComponent(linkUrl),
+                    )
+                })
+
+                // Append the Discuss button after the 'pdf' link
+                identifier.parentNode.insertBefore(
+                    discussButton,
+                    identifier.nextSibling,
+                )
+            })
+        })
     }
 
     if (
