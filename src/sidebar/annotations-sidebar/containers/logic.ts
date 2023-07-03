@@ -47,7 +47,6 @@ import {
     getInitialAnnotationConversationStates,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { resolvablePromise } from 'src/util/promises'
 import type {
     PageAnnotationsCacheEvents,
     UnifiedList,
@@ -127,14 +126,6 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
     SidebarContainerEvents
 > {
-    /**
-     * This exists so the "external action" handling logic (see `AnnotationsSidebarInPage.handleExternalAction`)
-     * can trigger mutation events touching the annotation state early, ensuring that they are delayed at least until
-     * the annotations data has time to be loaded.
-     * The bug that prompted this: shift+clicking newly created highlights on empty pages attempts to activate an annotation
-     * before the sidebar script had been loaded before, let alone the annotations data.
-     */
-    annotationsLoadComplete = resolvablePromise()
     syncSettings: SyncSettingsStore<'contentSharing' | 'extension' | 'openAI'>
     resizeObserver
     sidebar
@@ -486,7 +477,6 @@ export class SidebarContainerLogic extends UILogic<
             this.syncCachePageListsState(this.fullPageUrl)
             await this.setPageActivityState(this.fullPageUrl)
         })
-        this.annotationsLoadComplete.resolve()
 
         if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
             const width = SIDEBAR_WIDTH_STORAGE_KEY
@@ -1516,10 +1506,9 @@ export class SidebarContainerLogic extends UILogic<
                     }
                 }
 
-                nextState = this.withMutation(nextState, {
+                nextState = this.applyAndEmitMutation(nextState, {
                     listInstances: mutation,
                 })
-                this.emitMutation({ listInstances: mutation })
             },
         )
         return nextState
@@ -1917,12 +1906,13 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     private async maybeLoadListRemoteAnnotations(
-        state: Pick<SidebarContainerState, 'lists' | 'listInstances'>,
+        state: SidebarContainerState,
         unifiedListId: UnifiedList['unifiedId'],
-    ) {
+    ): Promise<SidebarContainerState> {
         const { annotationsCache, annotationsBG } = this.options
         const list = state.lists.byId[unifiedListId]
         const listInstance = state.listInstances[unifiedListId]
+        let nextState = state
 
         if (
             !list ||
@@ -1930,7 +1920,7 @@ export class SidebarContainerLogic extends UILogic<
             list.remoteId == null ||
             listInstance.annotationsLoadState !== 'pristine' // Means already loaded previously
         ) {
-            return
+            return nextState
         }
 
         let sharedAnnotationReferences: SharedAnnotationReference[]
@@ -1953,7 +1943,7 @@ export class SidebarContainerLogic extends UILogic<
                 }),
             )
 
-            this.emitMutation({
+            nextState = this.applyAndEmitMutation(nextState, {
                 conversations: {
                     $merge: fromPairs(
                         sharedAnnotationUnifiedIds.map((unifiedId) => [
@@ -2004,7 +1994,13 @@ export class SidebarContainerLogic extends UILogic<
                         )
                     }
 
-                    this.emitMutation({
+                    // Ensure cache added annotations are set in latest state
+                    nextState = {
+                        ...nextState,
+                        annotations: annotationsCache.annotations,
+                    }
+
+                    nextState = this.applyAndEmitMutation(nextState, {
                         users: { $merge: usersData },
                         conversations: {
                             $merge: getInitialAnnotationConversationStates(
@@ -2030,6 +2026,7 @@ export class SidebarContainerLogic extends UILogic<
             list.remoteId,
             sharedAnnotationReferences,
         )
+        return nextState
     }
 
     async detectConversationThreads(
@@ -2109,7 +2106,7 @@ export class SidebarContainerLogic extends UILogic<
     private async setLocallyAvailableSelectedList(
         state: SidebarContainerState,
         unifiedListId: UnifiedList['unifiedId'],
-    ) {
+    ): Promise<SidebarContainerState> {
         this.options.events?.emit('setSelectedList', unifiedListId)
 
         const list = state.lists.byId[unifiedListId]
@@ -2119,10 +2116,10 @@ export class SidebarContainerLogic extends UILogic<
                 'setSelectedList: could not find matching list for cache ID:',
                 unifiedListId,
             )
-            return
+            return state
         }
 
-        this.emitMutation({
+        let nextState = this.applyAndEmitMutation(state, {
             activeTab: { $set: 'spaces' },
             selectedListId: { $set: unifiedListId },
         })
@@ -2135,14 +2132,16 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         if (list.remoteId != null) {
-            let nextState = state
             nextState = await this.loadRemoteAnnotationReferencesForSpecificLists(
-                state,
+                nextState,
                 [list],
             )
-
-            await this.maybeLoadListRemoteAnnotations(nextState, unifiedListId)
+            nextState = await this.maybeLoadListRemoteAnnotations(
+                nextState,
+                unifiedListId,
+            )
         }
+        return nextState
     }
 
     setSelectedList: EventHandler<'setSelectedList'> = async ({
@@ -2172,7 +2171,7 @@ export class SidebarContainerLogic extends UILogic<
     setSelectedListFromWebUI: EventHandler<
         'setSelectedListFromWebUI'
     > = async ({ event, previousState }) => {
-        this.emitMutation({
+        let nextState = this.applyAndEmitMutation(previousState, {
             activeTab: { $set: 'spaces' },
             loadState: { $set: 'running' },
         })
@@ -2182,18 +2181,18 @@ export class SidebarContainerLogic extends UILogic<
 
         const { annotationsCache, customListsBG } = this.options
 
+        const normalizedPageUrl = normalizeUrl(this.fullPageUrl)
         const cachedList = annotationsCache.getListByRemoteId(
             event.sharedListId,
         )
-        const normalizedPageUrl = normalizeUrl(this.fullPageUrl)
 
         // If locally available, proceed as usual
         if (cachedList) {
-            await this.setLocallyAvailableSelectedList(
-                previousState,
+            nextState = await this.setLocallyAvailableSelectedList(
+                nextState,
                 cachedList.unifiedId,
             )
-            this.emitMutation({
+            nextState = this.applyAndEmitMutation(nextState, {
                 loadState: { $set: 'success' },
             })
 
@@ -2212,29 +2211,21 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 )
 
-                if (localData != null) {
-                    annotationsCache.updateList({
-                        normalizedPageUrl,
-                        unifiedId: cachedList.unifiedId,
-                        sharedListEntryId: localData.sharedListEntryId,
-                        hasRemoteAnnotationsToLoad:
-                            localData.hasAnnotationsFromOthers,
-                    })
-                    // TODO: This shouldn't need to be called; it's already being triggered by the init logic, but that
-                    //  doesn't finish by the time this runs thus the state isn't ready by the time we're here so we need to call it again.
-                    //  Such a mess!!! :(
-                    const nextState = await this.loadRemoteAnnotationReferencesForSpecificLists(
-                        previousState,
-                        [cachedList],
-                    )
-                    await this.maybeLoadListRemoteAnnotations(
-                        {
-                            lists: annotationsCache.lists,
-                            listInstances: nextState.listInstances,
-                        },
-                        cachedList.unifiedId,
-                    )
+                if (localData == null) {
+                    return
                 }
+
+                annotationsCache.updateList({
+                    normalizedPageUrl,
+                    unifiedId: cachedList.unifiedId,
+                    sharedListEntryId: localData.sharedListEntryId,
+                    hasRemoteAnnotationsToLoad:
+                        localData.hasAnnotationsFromOthers,
+                })
+                await this.maybeLoadListRemoteAnnotations(
+                    { ...nextState, lists: annotationsCache.lists },
+                    cachedList.unifiedId,
+                )
             }
             return
         }

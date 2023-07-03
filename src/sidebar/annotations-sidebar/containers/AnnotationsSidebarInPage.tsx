@@ -2,6 +2,7 @@ import * as React from 'react'
 import styled, { css } from 'styled-components'
 import ReactDOM from 'react-dom'
 
+import { resolvablePromise } from 'src/util/resolvable'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
@@ -52,8 +53,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         },
     }
 
-    popoutOpen = false
-    // rootNode?: ShadowRoot | Document
+    private initLogicPromise = resolvablePromise()
 
     constructor(props: Props) {
         super({
@@ -78,6 +78,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         ) {
             document.getElementById('viewer').style.width = 'inherit'
         }
+
+        this.initLogicPromise.resolve()
     }
 
     async componentWillUnmount() {
@@ -223,7 +225,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     private handleExternalAction = async (event: SidebarActionOptions) => {
-        await (this.logic as SidebarContainerLogic).annotationsLoadComplete
+        await this.initLogicPromise // Don't handle any external action until init logic has completed
 
         if (event.action === 'comment') {
             await this.processEvent('setActiveSidebarTab', {
