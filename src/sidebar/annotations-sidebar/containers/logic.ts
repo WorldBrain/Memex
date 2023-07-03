@@ -2227,6 +2227,13 @@ export class SidebarContainerLogic extends UILogic<
                     cachedList.unifiedId,
                 )
             }
+
+            this.options.events?.emit('renderHighlights', {
+                highlights: cacheUtils.getListHighlightsArray(
+                    annotationsCache,
+                    cachedList.unifiedId,
+                ),
+            })
             return
         }
 
@@ -2377,7 +2384,7 @@ export class SidebarContainerLogic extends UILogic<
 
             this.options.events?.emit('renderHighlights', {
                 highlights: cacheUtils.getListHighlightsArray(
-                    this.options.annotationsCache,
+                    annotationsCache,
                     unifiedListId,
                 ),
             })
@@ -2388,42 +2395,6 @@ export class SidebarContainerLogic extends UILogic<
                 sharedAnnotationReferences,
             )
         })
-
-        // const list = previousState.lists.byId[event.unifiedListId]
-        // const listInstance = previousState.listInstances[event.unifiedListId]
-        // if (!list || !listInstance) {
-        //     console.warn(
-        //         'setSelectedList: could not find matching list for cache ID:',
-        //         event.unifiedListId,
-        //     )
-        //     return
-        // }
-
-        // this.emitMutation({
-        //     activeTab: { $set: 'spaces' },
-        //     selectedListId: { $set: event.unifiedListId },
-        // })
-
-        // if (list.remoteId != null) {
-        //     let nextState = previousState
-        //     if (listInstance.annotationRefsLoadState === 'pristine') {
-        //         nextState = await this.loadRemoteAnnotationReferencesForLists(
-        //             previousState,
-        //             [list],
-        //         )
-        //     }
-        //     await this.maybeLoadListRemoteAnnotations(
-        //         nextState,
-        //         event.unifiedListId,
-        //     )
-        // }
-
-        // this.options.events?.emit('renderHighlights', {
-        //     highlights: cacheUtils.getListHighlightsArray(
-        //         this.options.annotationsCache,
-        //         event.unifiedListId,
-        //     ),
-        // })
     }
 
     setAnnotationShareModalShown: EventHandler<

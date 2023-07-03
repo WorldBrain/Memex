@@ -2861,6 +2861,15 @@ describe('SidebarContainerLogic', () => {
                         ),
                     },
                 },
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            followedCacheList.unifiedId,
+                        ),
+                    },
+                },
             )
             expect(sidebar.state.activeTab).toEqual('spaces')
             expect(sidebar.state.selectedListId).toEqual(
