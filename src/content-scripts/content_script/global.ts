@@ -512,7 +512,9 @@ export async function main(
                 // Add an event listener to open the discussion link
                 discussButton.addEventListener('click', () => {
                     window.open(
-                        baseUrl + '/new?url=' + encodeURIComponent(linkUrl),
+                        baseUrl +
+                            '/new?url=' +
+                            encodeURIComponent(linkUrl + '.pdf'),
                     )
                 })
 
