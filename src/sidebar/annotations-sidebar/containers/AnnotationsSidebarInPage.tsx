@@ -2,6 +2,7 @@ import * as React from 'react'
 import styled, { css } from 'styled-components'
 import ReactDOM from 'react-dom'
 
+import { resolvablePromise } from 'src/util/resolvable'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
@@ -52,8 +53,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         },
     }
 
-    popoutOpen = false
-    // rootNode?: ShadowRoot | Document
+    private initLogicPromise = resolvablePromise()
 
     constructor(props: Props) {
         super({
@@ -66,7 +66,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     async componentDidMount() {
-        super.componentDidMount()
         document.addEventListener('keydown', this.listenToEsc)
         document.addEventListener('mousedown', this.listenToOutsideClick)
         this.setupEventForwarding()
@@ -78,14 +77,16 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         ) {
             document.getElementById('viewer').style.width = 'inherit'
         }
+
+        await super.componentDidMount()
+        this.initLogicPromise.resolve()
     }
 
-    componentWillUnmount() {
-        super.componentWillUnmount()
-
+    async componentWillUnmount() {
         document.removeEventListener('keydown', this.listenToEsc)
         document.removeEventListener('mousedown', this.listenToOutsideClick)
         this.cleanupEventForwarding()
+        await super.componentWillUnmount()
     }
 
     listenToEsc = (event) => {
@@ -224,7 +225,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     private handleExternalAction = async (event: SidebarActionOptions) => {
-        await (this.logic as SidebarContainerLogic).annotationsLoadComplete
+        // Don't handle any external action until init logic has completed
+        await Promise.all([
+            this.initLogicPromise,
+            this.props.inPageUI.cacheLoadPromise,
+        ])
 
         if (event.action === 'comment') {
             await this.processEvent('setActiveSidebarTab', {

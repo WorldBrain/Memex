@@ -545,6 +545,19 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             description: updates.description ?? previousList.description,
         }
 
+        if (
+            previousList.type === 'page-link' &&
+            nextList.type === 'page-link'
+        ) {
+            nextList.normalizedPageUrl =
+                updates.normalizedPageUrl ?? previousList.normalizedPageUrl
+            nextList.sharedListEntryId =
+                updates.sharedListEntryId ?? previousList.sharedListEntryId
+            nextList.hasRemoteAnnotationsToLoad =
+                updates.hasRemoteAnnotationsToLoad ??
+                previousList.hasRemoteAnnotationsToLoad
+        }
+
         if (previousList.remoteId !== nextList.remoteId) {
             this.remoteListIdsToCacheIds.set(
                 nextList.remoteId,

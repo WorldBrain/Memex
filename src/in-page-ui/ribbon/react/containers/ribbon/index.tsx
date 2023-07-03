@@ -44,13 +44,13 @@ export default class RibbonContainer extends StatefulUIElement<
             : null
     }
 
-    componentDidMount() {
-        super.componentDidMount()
+    async componentDidMount() {
+        await super.componentDidMount()
         this.props.inPageUI.events.on('ribbonAction', this.handleExternalAction)
     }
 
-    componentWillUnmount() {
-        super.componentWillUnmount()
+    async componentWillUnmount() {
+        await super.componentWillUnmount()
         this.props.inPageUI.events.removeListener(
             'ribbonAction',
             this.handleExternalAction,

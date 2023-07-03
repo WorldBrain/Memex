@@ -525,7 +525,7 @@ export async function main(
                 getFullPageUrl: pageInfo.getFullPageUrl,
                 openPDFinViewer: async (originalPageURL) => {
                     await contentScriptsBG.openPdfInViewer({
-                        fullPdfUrl: originalPageURL,
+                        fullPageUrl: originalPageURL,
                     })
                 },
             })
@@ -597,9 +597,12 @@ export async function main(
 
     globalThis['contentScriptRegistry'] = contentScriptRegistry
 
+    await loadCacheDataPromise
+        .then(inPageUI.cacheLoadPromise.resolve)
+        .catch(inPageUI.cacheLoadPromise.reject)
+
     // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
     // so it is included in this global content script where it adds less than 500kb.
-    await loadCacheDataPromise
     await contentScriptRegistry.registerHighlightingScript(highlightMain)
 
     // 5. Registers remote functions that can be used to interact with components
@@ -1018,15 +1021,6 @@ export function setupWebUIActions(args: {
         // Handle local PDFs first (memex.cloud URLs)
         if (isMemexPageAPdf({ url: detail.originalPageUrl })) {
             await args.bgScriptBG.openOverviewTab({ missingPdf: true })
-            return
-        }
-
-        // TODO: more robust way of checking this?
-        // Handle remote PDFs next (non-memex.cloud URLs with .pdf ext)
-        if (detail.originalPageUrl.endsWith('.pdf')) {
-            await args.contentScriptsBG.openPdfInViewer({
-                fullPdfUrl: detail.originalPageUrl,
-            })
             return
         }
 

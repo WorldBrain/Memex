@@ -24,6 +24,7 @@ import type { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/l
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { isExtensionTab } from 'src/tab-management/utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
+import type { PersonalList } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
 
 const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 25
@@ -326,6 +327,7 @@ export default class CustomListBackground {
     fetchLocalDataForRemoteListEntryFromServer: RemoteCollectionsInterface['fetchLocalDataForRemoteListEntryFromServer'] = async ({
         normalizedPageUrl,
         remoteListId,
+        opts,
     }) => {
         const user = await this.options.authServices.auth.getCurrentUser()
         if (!user) {
@@ -340,26 +342,52 @@ export default class CustomListBackground {
             id: remoteListId,
         }
 
-        const [personalList, sharedListEntry] = await Promise.all([
-            contentSharing.getUserPersonalListBySharedListRef({
-                listReference,
-                userReference: {
-                    type: 'user-reference',
-                    id: user.id,
-                },
-            }),
+        const [
+            personalList,
+            sharedListEntry,
+            annotationListEntries,
+        ] = await Promise.all([
+            opts.needLocalListd
+                ? contentSharing.getUserPersonalListBySharedListRef({
+                      listReference,
+                      userReference: {
+                          type: 'user-reference',
+                          id: user.id,
+                      },
+                  })
+                : Promise.resolve(),
             contentSharing.getListEntryByListAndUrl({
                 listReference,
                 normalizedPageUrl,
             }),
+            opts.needAnnotsFlag
+                ? contentSharing.getAnnotationListEntriesForListsOnPage({
+                      listReferences: [listReference],
+                      normalizedPageUrl,
+                  })
+                : Promise.resolve(),
         ])
-        if (personalList?.localId == null || !sharedListEntry) {
+
+        if (
+            (opts.needLocalListd &&
+                (personalList as PersonalList)?.localId == null) ||
+            (opts.needAnnotsFlag &&
+                !annotationListEntries[remoteListId]?.length) ||
+            !sharedListEntry
+        ) {
             return null
         }
 
         return {
-            localListId: personalList.localId,
             sharedListEntryId: sharedListEntry.reference.id.toString(),
+            localListId: opts.needLocalListd
+                ? (personalList as PersonalList).localId
+                : undefined,
+            hasAnnotationsFromOthers: opts.needAnnotsFlag
+                ? annotationListEntries[remoteListId].some(
+                      (entry) => entry.creator.id !== user.id,
+                  )
+                : undefined,
         }
     }
 

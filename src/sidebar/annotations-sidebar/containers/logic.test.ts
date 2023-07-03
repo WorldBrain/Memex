@@ -2861,6 +2861,15 @@ describe('SidebarContainerLogic', () => {
                         ),
                     },
                 },
+                {
+                    event: 'renderHighlights',
+                    args: {
+                        highlights: cacheUtils.getListHighlightsArray(
+                            annotationsCache,
+                            followedCacheList.unifiedId,
+                        ),
+                    },
+                },
             )
             expect(sidebar.state.activeTab).toEqual('spaces')
             expect(sidebar.state.selectedListId).toEqual(
@@ -3015,10 +3024,10 @@ describe('SidebarContainerLogic', () => {
             const unifiedForeignListId = annotationsCache.getLastAssignedListId()
 
             expectedEvents.push(
-                // {
-                //     event: 'setSelectedList',
-                //     args: followedCacheList.unifiedId,
-                // },
+                {
+                    event: 'setSelectedList',
+                    args: unifiedForeignListId,
+                },
                 {
                     event: 'renderHighlights',
                     args: {
