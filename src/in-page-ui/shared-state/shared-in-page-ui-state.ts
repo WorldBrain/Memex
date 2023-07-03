@@ -17,6 +17,7 @@ import {
 } from 'src/util/webextensionRPC'
 import type { ContentSharingEvents } from 'src/content-sharing/background/types'
 import * as sidebarUtils from 'src/sidebar-overlay/utils'
+import { resolvablePromise } from 'src/util/resolvable'
 
 export interface SharedInPageUIDependencies {
     getNormalizedPageUrl: () => MaybePromise<string>
@@ -63,6 +64,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
      *
      */
     selectedList: SharedInPageUIInterface['selectedList'] = null
+    cacheLoadPromise: SharedInPageUIInterface['cacheLoadPromise'] = resolvablePromise()
 
     _pendingEvents: {
         sidebarAction?: {

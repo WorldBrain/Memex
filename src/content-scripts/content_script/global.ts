@@ -597,9 +597,12 @@ export async function main(
 
     globalThis['contentScriptRegistry'] = contentScriptRegistry
 
+    await loadCacheDataPromise
+        .then(inPageUI.cacheLoadPromise.resolve)
+        .catch(inPageUI.cacheLoadPromise.reject)
+
     // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
     // so it is included in this global content script where it adds less than 500kb.
-    await loadCacheDataPromise
     await contentScriptRegistry.registerHighlightingScript(highlightMain)
 
     // 5. Registers remote functions that can be used to interact with components

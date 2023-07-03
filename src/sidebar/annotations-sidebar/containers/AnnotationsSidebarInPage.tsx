@@ -66,7 +66,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     async componentDidMount() {
-        await super.componentDidMount()
         document.addEventListener('keydown', this.listenToEsc)
         document.addEventListener('mousedown', this.listenToOutsideClick)
         this.setupEventForwarding()
@@ -79,6 +78,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             document.getElementById('viewer').style.width = 'inherit'
         }
 
+        await super.componentDidMount()
         this.initLogicPromise.resolve()
     }
 
@@ -225,7 +225,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     private handleExternalAction = async (event: SidebarActionOptions) => {
-        await this.initLogicPromise // Don't handle any external action until init logic has completed
+        // Don't handle any external action until init logic has completed
+        await Promise.all([
+            this.initLogicPromise,
+            this.props.inPageUI.cacheLoadPromise,
+        ])
 
         if (event.action === 'comment') {
             await this.processEvent('setActiveSidebarTab', {

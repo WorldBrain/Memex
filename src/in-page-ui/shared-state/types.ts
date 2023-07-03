@@ -5,6 +5,7 @@ import type {
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
+import type { Resolvable } from 'src/util/resolvable'
 
 export type InPageUISidebarAction =
     | 'comment'
@@ -74,7 +75,11 @@ export interface ShouldSetUpOptions {
 export interface SharedInPageUIInterface {
     events: TypedEventEmitter<SharedInPageUIEvents>
     componentsShown: InPageUIComponentShowState
+
+    // Misc. states that need to be shared between content scripts
     selectedList: UnifiedList['unifiedId'] | null
+    /** Resolves when all data is loaded to hydate UI annotations/lists cache. */
+    cacheLoadPromise: Resolvable<void>
 
     // Ribbon
     showRibbon(options?: { action?: InPageUIRibbonAction }): Promise<void>
