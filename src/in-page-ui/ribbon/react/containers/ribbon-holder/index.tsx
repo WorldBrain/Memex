@@ -37,8 +37,7 @@ export default class RibbonHolder extends StatefulUIElement<
         super(props, new RibbonHolderLogic(props))
     }
 
-    componentDidMount() {
-        super.componentDidMount()
+    async componentDidMount() {
         this.props.inPageUI.events.on(
             'stateChanged',
             this.handleInPageUIStateChange,
@@ -47,11 +46,11 @@ export default class RibbonHolder extends StatefulUIElement<
             'displayErrorMessage',
             this.handleInPageErrorMessage,
         )
+        await super.componentDidMount()
     }
 
-    componentWillUnmount() {
+    async componentWillUnmount() {
         clearTimeout(this.hideTimeout)
-        super.componentWillUnmount()
         this.removeEventListeners()
         this.props.inPageUI.events.removeListener(
             'stateChanged',
@@ -61,6 +60,7 @@ export default class RibbonHolder extends StatefulUIElement<
             'displayErrorMessage',
             this.handleInPageErrorMessage,
         )
+        await super.componentWillUnmount()
     }
 
     private get inPageErrorType(): InPageErrorType | undefined {

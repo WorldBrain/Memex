@@ -66,7 +66,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     async componentDidMount() {
-        super.componentDidMount()
+        await super.componentDidMount()
         document.addEventListener('keydown', this.listenToEsc)
         document.addEventListener('mousedown', this.listenToOutsideClick)
         this.setupEventForwarding()
@@ -80,12 +80,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         }
     }
 
-    componentWillUnmount() {
-        super.componentWillUnmount()
-
+    async componentWillUnmount() {
         document.removeEventListener('keydown', this.listenToEsc)
         document.removeEventListener('mousedown', this.listenToOutsideClick)
         this.cleanupEventForwarding()
+        await super.componentWillUnmount()
     }
 
     listenToEsc = (event) => {
