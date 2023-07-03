@@ -3024,10 +3024,10 @@ describe('SidebarContainerLogic', () => {
             const unifiedForeignListId = annotationsCache.getLastAssignedListId()
 
             expectedEvents.push(
-                // {
-                //     event: 'setSelectedList',
-                //     args: followedCacheList.unifiedId,
-                // },
+                {
+                    event: 'setSelectedList',
+                    args: unifiedForeignListId,
+                },
                 {
                     event: 'renderHighlights',
                     args: {

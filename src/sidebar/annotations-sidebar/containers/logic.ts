@@ -2308,35 +2308,34 @@ export class SidebarContainerLogic extends UILogic<
                 unifiedListId = unifiedId
             }
 
-            if (sharedList.sharedAnnotations == null) {
-                this.emitMutation({
-                    selectedListId: { $set: unifiedListId },
-                    // NOTE: this is the only time we're manually mutating the listInstances state outside the cache subscription - maybe there's a "cleaner" way to do this
-                    listInstances: {
-                        [unifiedListId]: {
-                            annotationRefsLoadState: { $set: 'success' },
-                            conversationsLoadState: { $set: 'success' },
-                            annotationsLoadState: { $set: 'success' },
-                            sharedAnnotationReferences: {
-                                $set: [],
-                            },
+            this.options.events?.emit('setSelectedList', unifiedListId)
+
+            const buildCoreMutation = (
+                sharedAnnotationReferences: SharedAnnotationReference[],
+            ): UIMutation<SidebarContainerState> => ({
+                loadState: { $set: 'success' },
+                selectedListId: { $set: unifiedListId },
+                // NOTE: this is the only time we're manually mutating the listInstances state outside the cache subscription - maybe there's a "cleaner" way to do this
+                listInstances: {
+                    [unifiedListId]: {
+                        annotationRefsLoadState: { $set: 'success' },
+                        conversationsLoadState: { $set: 'success' },
+                        annotationsLoadState: { $set: 'success' },
+                        sharedAnnotationReferences: {
+                            $set: sharedAnnotationReferences,
                         },
                     },
-                    loadState: { $set: 'success' },
-                })
+                },
+            })
 
+            if (sharedList.sharedAnnotations == null) {
+                this.emitMutation(buildCoreMutation([]))
                 return
             }
 
-            this.emitMutation({
-                loadState: { $set: 'success' },
-            })
-
-            const sharedAnnotationReferences: SharedAnnotationReference[] = []
             const sharedAnnotationUnifiedIds: string[] = []
-
-            sharedList.sharedAnnotations.forEach((sharedAnnot) => {
-                sharedAnnotationReferences.push(sharedAnnot.reference)
+            const sharedAnnotationReferences: SharedAnnotationReference[] = []
+            for (const sharedAnnot of sharedList.sharedAnnotations) {
                 const { unifiedId } = annotationsCache.addAnnotation({
                     body: sharedAnnot.body,
                     creator: sharedAnnot.creator,
@@ -2354,21 +2353,11 @@ export class SidebarContainerLogic extends UILogic<
                     localListIds: [],
                 })
                 sharedAnnotationUnifiedIds.push(unifiedId)
-            })
+                sharedAnnotationReferences.push(sharedAnnot.reference)
+            }
 
             this.emitMutation({
-                selectedListId: { $set: unifiedListId },
-                // NOTE: this is the only time we're manually mutating the listInstances state outside the cache subscription - maybe there's a "cleaner" way to do this
-                listInstances: {
-                    [unifiedListId]: {
-                        annotationRefsLoadState: { $set: 'success' },
-                        conversationsLoadState: { $set: 'success' },
-                        annotationsLoadState: { $set: 'success' },
-                        sharedAnnotationReferences: {
-                            $set: sharedAnnotationReferences,
-                        },
-                    },
-                },
+                ...buildCoreMutation(sharedAnnotationReferences),
                 conversations: {
                     $merge: fromPairs(
                         sharedAnnotationUnifiedIds.map((unifiedId) => [
