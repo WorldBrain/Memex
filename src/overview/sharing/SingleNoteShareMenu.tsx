@@ -20,6 +20,7 @@ import {
     SELECT_SPACE_NEGATIVE_LABEL,
 } from './constants'
 import type { AnnotationSharingState } from 'src/content-sharing/background/types'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 type SelectType = 'select' | 'unselect'
 
@@ -33,6 +34,7 @@ interface State extends ShareMenuCommonState {
               listId: number
               selectType: SelectType
           }
+    autoShareState: TaskState
 }
 
 export interface Props extends ShareMenuCommonProps {
@@ -40,6 +42,7 @@ export interface Props extends ShareMenuCommonProps {
     isShared?: boolean
     annotationUrl: string
     shareImmediately?: boolean
+    annotationData?: any
     getRemoteListIdForLocalId: (localListId: number) => string | null
     postShareHook?: (
         state: AnnotationSharingState,
@@ -87,6 +90,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         showLink: false,
         loadState: 'pristine',
         shareState: 'pristine',
+        autoShareState: 'pristine',
         confirmationMode: null,
     }
 
@@ -170,9 +174,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     }
 
     private handleSetShared = async (isBulkShareProtected?: boolean) => {
-        const p = executeReactStateUITask<State, 'shareState'>(
+        const p = executeReactStateUITask<State, 'autoShareState'>(
             this,
-            'shareState',
+            'autoShareState',
             async () => {
                 await this.shareAnnotation(isBulkShareProtected)
             },
@@ -205,9 +209,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     }) {
         const { annotationUrl, contentSharingBG } = this.props
 
-        const p = executeReactStateUITask<State, 'shareState'>(
+        const p = executeReactStateUITask<State, 'autoShareState'>(
             this,
-            'shareState',
+            'autoShareState',
             async () => {
                 const sharingState = await contentSharingBG.setAnnotationPrivacyLevel(
                     {
@@ -229,20 +233,33 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         await p
     }
 
+    private getAnnotationSharedLists = async (): Promise<string[]> => {
+        let lists = []
+        for (const listId of this.props.annotationData.unifiedListIds) {
+            const list = await this.props.spacePickerProps.annotationsCache
+                .lists.byId[listId]
+            if (list.remoteId != null) {
+                lists.push(list)
+            }
+        }
+
+        return lists
+    }
+
     private handleSetPrivate = async (isBulkShareProtected: boolean) => {
         if (this.props.isShared) {
-            this.setState({
-                confirmationMode: {
-                    type: 'public-to-private',
-                    isBulkShareProtected,
-                },
-            })
+            const hasSharedLists = await this.getAnnotationSharedLists()
+            if (hasSharedLists.length > 0) {
+                this.setState({
+                    confirmationMode: {
+                        type: 'public-to-private',
+                        isBulkShareProtected,
+                    },
+                })
+            } else {
+                this.handleUnshare({ isBulkShareProtected })
+            }
         } else {
-            console.log(
-                this.props.spacePickerProps.annotationsCache.lists.byId[
-                    this.props.annotationUrl
-                ],
-            )
             return this.handleUnshare({ isBulkShareProtected })
         }
     }
@@ -335,6 +352,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                 this.state.shareState === 'running' ||
                                 this.state.loadState === 'running'
                             }
+                            autoShareState={this.state.autoShareState}
                             handleCreateLink={this.handleCreateLink}
                             privacyOptions={[
                                 {

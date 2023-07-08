@@ -13,6 +13,8 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { Checkbox } from 'src/common-ui/components'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 const COPY_TIMEOUT = 2000
 
@@ -33,6 +35,7 @@ export interface Props {
     link: string
     context?: string
     handleCreateLink: () => Promise<void>
+    autoShareState: TaskState
 }
 
 interface State {
@@ -91,7 +94,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
     private renderLinkContent() {
         const { copyState } = this.state
-        console.log('link', this.props.link)
         return (
             <PrimaryAction
                 onClick={() =>
@@ -127,7 +129,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
             <Menu ref={this.menuRef} context={this.props.context}>
                 {this.props.context === 'AllNotesShare' ? (
                     this.props.isLoading ? (
-                        <LoadingBox>
+                        <LoadingBox height={'80px'}>
                             <LoadingIndicator size={30} />
                         </LoadingBox>
                     ) : (
@@ -168,22 +170,53 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                         <PrivacyContainer isLinkShown={this.props.showLink}>
                             <SubtitleSection>
                                 <SectionTitle>Add to Spaces</SectionTitle>
-                                <Checkbox
-                                    key={1}
-                                    id={1}
-                                    isChecked={
-                                        this.props.privacyOptions[1].isSelected
+                                {/* {this.props.autoShareState === 'running' ? (
+                                    <LoadingBox
+                                        padding={'0 10px 0 0'}
+                                        loaderPosition={'flex-end'}
+                                    >
+                                        <LoadingIndicator size={16} />
+                                    </LoadingBox>
+                                ) : ( */}
+                                <TooltipBox
+                                    tooltipText={
+                                        <TooltipTextBox>
+                                            Added to all Spaces you put the page
+                                            into <br />
+                                            <KeyboardShortcuts
+                                                keys={this.props.privacyOptions[1].shortcut.split(
+                                                    '+',
+                                                )}
+                                                size={'small'}
+                                            />
+                                        </TooltipTextBox>
                                     }
-                                    handleChange={() =>
-                                        this.props.privacyOptions[1].isSelected
-                                            ? this.props.privacyOptions[0].onClick()
-                                            : this.props.privacyOptions[1].onClick()
-                                    }
-                                    // isDisabled={!this.state.shortcutsEnabled}
-                                    name={'Auto Share'}
-                                    label={'Auto Share'}
-                                    size={14}
-                                />
+                                    placement={'bottom-end'}
+                                >
+                                    <Checkbox
+                                        key={1}
+                                        id={1}
+                                        isChecked={
+                                            this.props.privacyOptions[1]
+                                                .isSelected
+                                        }
+                                        handleChange={() =>
+                                            this.props.privacyOptions[1]
+                                                .isSelected
+                                                ? this.props.privacyOptions[0].onClick()
+                                                : this.props.privacyOptions[1].onClick()
+                                        }
+                                        // isDisabled={!this.state.shortcutsEnabled}
+                                        name={'Auto Share'}
+                                        label={'Auto Share'}
+                                        size={14}
+                                        isLoading={
+                                            this.props.autoShareState ===
+                                            'running'
+                                        }
+                                    />
+                                </TooltipBox>
+                                {/* )} */}
                             </SubtitleSection>
                             {/* <TopArea>
                                     {this.props.privacyOptionsTitleCopy ? (
@@ -287,12 +320,17 @@ const LinkCopierBox = styled.div`
     border-radius: 5px;
 `
 
-const LoadingBox = styled.div`
+const LoadingBox = styled.div<{
+    height?: string
+    loaderPosition?: string
+    padding?: string
+}>`
     width: 100%;
     display: flex;
-    height: 80px;
+    height: ${(props) => props.height || '100%'};
     align-items: center;
-    justify-content: center;
+    justify-content: ${(props) => props.loaderPosition || 'center'};
+    padding: ${(props) => props.padding || 'unset'};
 `
 
 const LinkCopier = styled.button`
@@ -359,4 +397,11 @@ const PrivacyOptionContainer = styled(Margin)`
     flex-direction: row;
     align-items: center;
     grid-gap: 4px;
+`
+const TooltipTextBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    grid-gap: 5px;
+    justify-content: center;
 `

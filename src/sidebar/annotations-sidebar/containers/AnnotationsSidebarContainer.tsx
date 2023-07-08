@@ -500,6 +500,7 @@ export class AnnotationsSidebarContainer<
                 ].includes(annotation.privacyLevel)}
                 shareImmediately={this.state.immediatelyShareNotes}
                 contentSharingBG={this.props.contentSharingBG}
+                annotationData={annotation}
                 annotationsBG={this.props.annotationsBG}
                 copyLink={(link) => this.processEvent('copyNoteLink', { link })}
                 annotationUrl={annotation.localId}

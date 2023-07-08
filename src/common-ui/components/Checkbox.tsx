@@ -5,6 +5,7 @@ import styled from 'styled-components'
 const styles = require('./Checkbox.css')
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 export type CheckboxToggle = (
     event: React.SyntheticEvent<HTMLInputElement>,
@@ -25,6 +26,7 @@ export interface Props {
     label?: string
     subLabel?: string
     zIndex?: number
+    isLoading?: boolean
 }
 
 class Checkbox extends React.PureComponent<Props> {
@@ -44,29 +46,33 @@ class Checkbox extends React.PureComponent<Props> {
     render() {
         return (
             <LabelContainer zIndex={this.props.zIndex} htmlFor={this.props.id}>
-                <InputContainer
-                    type="checkbox"
-                    checked={this.props.isChecked}
-                    onChange={this.props.handleChange}
-                    id={this.props.id}
-                    disabled={this.props.isDisabled}
-                    name={this.props.name}
-                />
                 <LabelText>
-                    <LabelCheck
-                        size={this.props.size}
-                        mode={this.props.mode}
-                        isChecked={this.props.isChecked}
-                    >
-                        {this.props.isChecked && (
-                            <Icon
-                                filePath={icons.check}
-                                color="black"
-                                heightAndWidth={'14px'}
-                                hoverOff
-                            />
-                        )}
-                    </LabelCheck>
+                    <InputContainer
+                        type="checkbox"
+                        checked={this.props.isChecked}
+                        onChange={this.props.handleChange}
+                        id={this.props.id}
+                        disabled={this.props.isDisabled}
+                        name={this.props.name}
+                    />
+                    {this.props.isLoading ? (
+                        <LoadingIndicator size={16} />
+                    ) : (
+                        <LabelCheck
+                            size={this.props.size}
+                            mode={this.props.mode}
+                            isChecked={this.props.isChecked}
+                        >
+                            {this.props.isChecked && (
+                                <Icon
+                                    filePath={icons.check}
+                                    color="black"
+                                    heightAndWidth={'14px'}
+                                    hoverOff
+                                />
+                            )}
+                        </LabelCheck>
+                    )}
                     {this.props.label && (
                         <LabelContentBox>
                             <LabelTitle>{this.props.label}</LabelTitle>
