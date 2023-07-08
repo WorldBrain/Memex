@@ -358,6 +358,7 @@ export default class SearchResultsContainer extends React.Component<
                         isShared={
                             noteData.isShared || noteData.lists.length > 0
                         }
+                        annotationData={noteData}
                         shareImmediately={
                             noteData.shareMenuShowStatus === 'show-n-share'
                         }

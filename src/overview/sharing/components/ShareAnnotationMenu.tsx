@@ -34,8 +34,8 @@ export interface Props {
     showLink: boolean
     link: string
     context?: string
-    handleCreateLink: () => Promise<void>
-    autoShareState: TaskState
+    handleCreateLink?: () => Promise<void>
+    autoShareState?: TaskState
 }
 
 interface State {
@@ -195,7 +195,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                 >
                                     <Checkbox
                                         key={1}
-                                        id={1}
+                                        id={'1'}
                                         isChecked={
                                             this.props.privacyOptions[1]
                                                 .isSelected

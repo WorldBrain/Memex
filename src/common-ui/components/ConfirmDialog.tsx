@@ -58,7 +58,7 @@ const TextContainer = styled.div`
 
 const TitleText = styled.div`
     font-size: 20px;
-    color: ${(props) => props.theme.colors.greyScale6};
+    color: ${(props) => props.theme.colors.greyScale7};
     text-align: center;
     font-weight: 500;
     line-height: 30px;
