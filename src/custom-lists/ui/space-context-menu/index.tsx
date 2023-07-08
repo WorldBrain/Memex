@@ -107,12 +107,13 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                         sharedListRoleIDToString(roleID) ===
                                         'Contributor' ? (
                                             <span>
-                                                Add highlights,
+                                                Permission to add highlights,
                                                 <br /> pages & replies
                                             </span>
                                         ) : (
                                             <span>
-                                                View & reply <br />
+                                                Permission to read & reply{' '}
+                                                <br />
                                                 to highlights & pages
                                             </span>
                                         )
@@ -122,8 +123,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                         title={null}
                                         viewportBreakpoint="normal"
                                     >
-                                        {sharedListRoleIDToString(roleID) +
-                                            ' Access'}
+                                        {sharedListRoleIDToString(roleID)}
                                     </PermissionText>
                                 </TooltipBox>
                             </PermissionArea>

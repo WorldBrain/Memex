@@ -36,6 +36,7 @@ interface State extends ShareMenuCommonState {
 }
 
 export interface Props extends ShareMenuCommonProps {
+    showLink?: boolean
     isShared?: boolean
     annotationUrl: string
     shareImmediately?: boolean
@@ -106,14 +107,19 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     private handleLinkCopy = () => this.props.copyLink(this.state.link)
 
     private setRemoteLinkIfExists = async (): Promise<boolean> => {
-        const { annotationUrl, contentSharingBG, isShared } = this.props
+        const {
+            annotationUrl,
+            contentSharingBG,
+            isShared,
+            showLink,
+        } = this.props
         const link = await contentSharingBG.getRemoteAnnotationLink({
             annotationUrl,
         })
         if (!link) {
             return false
         }
-        this.setState({ link, showLink: isShared })
+        this.setState({ link, showLink: showLink })
         return true
     }
 
@@ -140,6 +146,29 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         this.props.postShareHook?.(sharingState)
     }
 
+    private createAnnotationLink = async (isBulkShareProtected?: boolean) => {
+        const { annotationUrl, contentSharingBG } = this.props
+        await contentSharingBG.shareAnnotation({
+            annotationUrl,
+            shareToLists: false,
+            skipPrivacyLevelUpdate: true,
+        })
+
+        const sharingState = await contentSharingBG.setAnnotationPrivacyLevel({
+            annotationUrl,
+            privacyLevel: shareOptsToPrivacyLvl({
+                shouldShare: false,
+                isBulkShareProtected,
+            }),
+        })
+        const link = await contentSharingBG.getRemoteAnnotationLink({
+            annotationUrl,
+        })
+        await this.props.copyLink(link)
+
+        this.props.postShareHook?.(sharingState)
+    }
+
     private handleSetShared = async (isBulkShareProtected?: boolean) => {
         const p = executeReactStateUITask<State, 'shareState'>(
             this,
@@ -150,6 +179,24 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         )
 
         await p
+    }
+    private handleCreateLink = async (isBulkShareProtected?: boolean) => {
+        this.setState({
+            shareState: 'running',
+        })
+        const p = executeReactStateUITask<State, 'shareState'>(
+            this,
+            'shareState',
+            async () => {
+                await this.createAnnotationLink(isBulkShareProtected)
+            },
+        )
+
+        await p
+
+        this.setState({
+            shareState: 'success',
+        })
     }
 
     private async handleUnshare(options: {
@@ -162,8 +209,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             this,
             'shareState',
             async () => {
-                this.setState({ showLink: false })
-
                 const sharingState = await contentSharingBG.setAnnotationPrivacyLevel(
                     {
                         annotationUrl,
@@ -193,6 +238,11 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                 },
             })
         } else {
+            console.log(
+                this.props.spacePickerProps.annotationsCache.lists.byId[
+                    this.props.annotationUrl
+                ],
+            )
             return this.handleUnshare({ isBulkShareProtected })
         }
     }
@@ -277,7 +327,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                     <>
                         <ShareAnnotationMenu
                             link={this.state.link}
-                            showLink={this.state.showLink}
+                            showLink={true}
                             onCopyLinkClick={this.handleLinkCopy}
                             linkTitleCopy="Link to this annotation"
                             privacyOptionsTitleCopy={undefined}
@@ -285,6 +335,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                 this.state.shareState === 'running' ||
                                 this.state.loadState === 'running'
                             }
+                            handleCreateLink={this.handleCreateLink}
                             privacyOptions={[
                                 {
                                     icon: 'personFine',
@@ -326,7 +377,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                             }}
                         />
 
-                        <SectionTitle>Add to Spaces</SectionTitle>
                         <SpacePicker
                             {...this.props.spacePickerProps}
                             showPageLinks
@@ -347,12 +397,3 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         )
     }
 }
-
-const SectionTitle = styled.div`
-    font-size: 14px;
-    font-weight: 700;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    padding: 0 20px;
-    color: ${(props) => props.theme.colors.white};
-`

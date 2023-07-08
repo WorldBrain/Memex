@@ -11,6 +11,8 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { Checkbox } from 'src/common-ui/components'
 
 const COPY_TIMEOUT = 2000
 
@@ -30,6 +32,7 @@ export interface Props {
     showLink: boolean
     link: string
     context?: string
+    handleCreateLink: () => Promise<void>
 }
 
 interface State {
@@ -66,10 +69,19 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     }
 
     private handleLinkCopy = async () => {
+        await this.props.onCopyLinkClick()
+        this.setState({ copyState: 'success' })
+        this.copyTimeout = setTimeout(
+            () => this.setState({ copyState: 'pristine' }),
+            COPY_TIMEOUT,
+        )
+    }
+
+    private handleCreateLink = async () => {
         await executeReactStateUITask<State, 'copyState'>(
             this,
             'copyState',
-            () => this.props.onCopyLinkClick(),
+            () => this.props.handleCreateLink(),
         )
         this.copyTimeout = setTimeout(
             () => this.setState({ copyState: 'pristine' }),
@@ -79,104 +91,121 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
     private renderLinkContent() {
         const { copyState } = this.state
-
-        if (copyState === 'running' || this.props.isLoading) {
-            return (
-                <LoadingBox>
-                    <LoadingIndicator size={16} />
-                </LoadingBox>
-            )
-        } else if (copyState === 'success') {
-            return <LinkContent>Copied to Clipboard</LinkContent>
-        } else {
-            return (
-                <LinkBox>
-                    <LinkContent>{this.props.link.split('://')[1]}</LinkContent>
-                    <Icon filePath={icons.copy} heightAndWidth="14px" />
-                </LinkBox>
-            )
-        }
+        console.log('link', this.props.link)
+        return (
+            <PrimaryAction
+                onClick={() =>
+                    this.props.link
+                        ? this.handleLinkCopy()
+                        : this.handleCreateLink()
+                }
+                label={
+                    copyState === 'running' ? (
+                        <LoadingIndicator size={14} />
+                    ) : copyState === 'success' ? (
+                        'Link copied to clipboard'
+                    ) : (
+                        'Share Annotation'
+                    )
+                }
+                icon={
+                    copyState === 'running'
+                        ? null
+                        : copyState === 'success'
+                        ? 'copy'
+                        : 'link'
+                }
+                type="secondary"
+                size="medium"
+                fullWidth
+            />
+        )
     }
 
     private renderMain() {
         return (
             <Menu ref={this.menuRef} context={this.props.context}>
-                {this.props.isLoading ? (
-                    <LoadingBox>
-                        <LoadingIndicator size={30} />
-                    </LoadingBox>
+                {this.props.context === 'AllNotesShare' ? (
+                    this.props.isLoading ? (
+                        <LoadingBox>
+                            <LoadingIndicator size={30} />
+                        </LoadingBox>
+                    ) : (
+                        <>
+                            <PrivacyContainer isLinkShown={this.props.showLink}>
+                                <TopArea context={this.props.context}>
+                                    {this.props.privacyOptionsTitleCopy ? (
+                                        <PrivacyTitle>
+                                            {this.props.privacyOptionsTitleCopy}
+                                        </PrivacyTitle>
+                                    ) : undefined}
+                                    <PrivacyOptionContainer>
+                                        {this.props.privacyOptions.map(
+                                            (props, i) => (
+                                                <SharePrivacyOption
+                                                    key={i}
+                                                    {...props}
+                                                />
+                                            ),
+                                        )}
+                                    </PrivacyOptionContainer>
+                                </TopArea>
+                            </PrivacyContainer>
+                        </>
+                    )
                 ) : (
                     <>
-                        {this.props.context === 'AllNotesShare' ? (
-                            <>
-                                <PrivacyContainer
-                                    isLinkShown={this.props.showLink}
-                                >
-                                    <TopArea context={this.props.context}>
-                                        {this.props.privacyOptionsTitleCopy ? (
-                                            <PrivacyTitle>
-                                                {
-                                                    this.props
-                                                        .privacyOptionsTitleCopy
-                                                }
-                                            </PrivacyTitle>
-                                        ) : undefined}
-                                        <PrivacyOptionContainer>
-                                            {this.props.privacyOptions.map(
-                                                (props, i) => (
-                                                    <SharePrivacyOption
-                                                        key={i}
-                                                        {...props}
-                                                    />
-                                                ),
-                                            )}
-                                        </PrivacyOptionContainer>
-                                    </TopArea>
-                                </PrivacyContainer>
-                            </>
-                        ) : (
-                            <>
-                                {this.props.showLink && this.props.link && (
-                                    <TopArea>
-                                        <PrivacyTitle>
-                                            {this.props.linkTitleCopy}
-                                        </PrivacyTitle>
-                                        <LinkCopierBox>
-                                            <LinkCopier
-                                                state={this.state.copyState}
-                                                onClick={this.handleLinkCopy}
-                                            >
-                                                {this.renderLinkContent()}
-                                            </LinkCopier>
-                                        </LinkCopierBox>
-                                    </TopArea>
-                                )}
-                                <PrivacyContainer
-                                    isLinkShown={this.props.showLink}
-                                >
-                                    <TopArea>
-                                        {this.props.privacyOptionsTitleCopy ? (
-                                            <PrivacyTitle>
-                                                {
-                                                    this.props
-                                                        .privacyOptionsTitleCopy
-                                                }
-                                            </PrivacyTitle>
-                                        ) : undefined}
-                                        <PrivacyOptionContainer>
-                                            {this.props.privacyOptions.map(
-                                                (props, i) => (
-                                                    <SharePrivacyOption
-                                                        key={i}
-                                                        {...props}
-                                                    />
-                                                ),
-                                            )}
-                                        </PrivacyOptionContainer>
-                                    </TopArea>
-                                </PrivacyContainer>
-                            </>
+                        {this.props.showLink && (
+                            <TopArea>
+                                {/* <PrivacyTitle>
+                                        {this.props.linkTitleCopy}
+                                    </PrivacyTitle> */}
+                                <LinkCopierBox>
+                                    {this.renderLinkContent()}
+                                </LinkCopierBox>
+                            </TopArea>
                         )}
+                        <PrivacyContainer isLinkShown={this.props.showLink}>
+                            <SubtitleSection>
+                                <SectionTitle>Add to Spaces</SectionTitle>
+                                <Checkbox
+                                    key={1}
+                                    id={1}
+                                    isChecked={
+                                        this.props.privacyOptions[1].isSelected
+                                    }
+                                    handleChange={() =>
+                                        this.props.privacyOptions[1].isSelected
+                                            ? this.props.privacyOptions[0].onClick()
+                                            : this.props.privacyOptions[1].onClick()
+                                    }
+                                    // isDisabled={!this.state.shortcutsEnabled}
+                                    name={'Auto Share'}
+                                    label={'Auto Share'}
+                                    size={14}
+                                />
+                            </SubtitleSection>
+                            {/* <TopArea>
+                                    {this.props.privacyOptionsTitleCopy ? (
+                                        <PrivacyTitle>
+                                            {
+                                                this.props
+                                                    .privacyOptionsTitleCopy
+                                            }
+                                        </PrivacyTitle>
+                                    ) : undefined}
+                                    <PrivacyOptionContainer>
+                                        {this.props.privacyOptions.map(
+                                            (props, i) => (
+                                                <SharePrivacyOption
+                                                    key={i}
+                                                    {...props}
+                                                />
+                                            ),
+                                        )}
+                                    </PrivacyOptionContainer>
+                                </TopArea> */}
+                        </PrivacyContainer>
                     </>
                 )}
             </Menu>
@@ -219,9 +248,19 @@ const Menu = styled.div<{ context: string }>`
         `};
 `
 
+const SubtitleSection = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    padding: 0 15px;
+`
+
 const TopArea = styled.div<{ context: string }>`
     padding: 10px 15px 10px 15px;
-    height: 80px;
+    height: fit-content;
+    margin-bottom: 20px;
 
     &:first-child {
         padding: 0px 15px 0px 15px;
@@ -295,10 +334,13 @@ const LinkContent = styled.div`
 
 const PrivacyContainer = styled.div<{ isLinkShown: boolean }>`
     width: 100%;
+`
 
-    & * {
-        cursor: pointer;
-    }
+const SectionTitle = styled.div`
+    font-size: 14px;
+    font-weight: 700;
+    color: ${(props) => props.theme.colors.white};
+    white-space: nowrap;
 `
 
 const PrivacyTitle = styled.div`

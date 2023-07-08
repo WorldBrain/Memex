@@ -456,8 +456,8 @@ class SpacePicker extends StatefulUIElement<
 const OutputSwitcherContainer = styled.div`
     display: flex;
     border-radius: 6px;
-    border: 1px solid ${(props) => props.theme.colors.greyScale2};
-    margin-bottom: 5px;
+    //border: 1px solid ${(props) => props.theme.colors.greyScale2};
+    margin-bottom: 10px;
     width: fill-available;
 `
 
@@ -471,16 +471,18 @@ const OutputSwitcher = styled.div<{
     cursor: pointer;
     justify-content: center;
     width: 50%;
+    border-radius: 4px;
 
     ${(props) =>
         props.active &&
         css`
-            background: ${(props) => props.theme.colors.greyScale2};
+            /* background: ${(props) => props.theme.colors.greyScale2}; */
+            outline: 1px solid ${(props) => props.theme.colors.greyScale2};
         `}
 `
 
 const SearchContainer = styled.div`
-    margin: 5px 5px 0px 5px;
+    margin: 5px 10px 0px 10px;
 `
 
 const PrimaryActionBox = styled.div`
@@ -504,7 +506,7 @@ const EntryList = styled.div`
     position: relative;
     overflow-y: auto;
     max-height: 280px;
-    padding: 10px;
+    padding: 5px 10px 10px 10px;
 
     scrollbar-width: none;
 
@@ -576,7 +578,7 @@ const EntryRowContainer = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin: 0 2px;
+    margin: 0 5px;
     border-radius: 6px;
 `
 
