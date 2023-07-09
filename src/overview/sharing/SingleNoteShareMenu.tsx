@@ -247,21 +247,28 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     }
 
     private handleSetPrivate = async (isBulkShareProtected: boolean) => {
-        if (this.props.isShared) {
-            const hasSharedLists = await this.getAnnotationSharedLists()
-            if (hasSharedLists.length > 0) {
-                this.setState({
-                    confirmationMode: {
-                        type: 'public-to-private',
-                        isBulkShareProtected,
-                    },
-                })
-            } else {
-                this.handleUnshare({ isBulkShareProtected })
-            }
-        } else {
-            return this.handleUnshare({ isBulkShareProtected })
-        }
+        return this.handleUnshare({
+            isBulkShareProtected,
+            keepListsIfUnsharing: true,
+        })
+
+        // may bring it back so lets leave this here
+
+        // if (this.props.isShared) {
+        //     const hasSharedLists = await this.getAnnotationSharedLists()
+        //     if (hasSharedLists.length > 0) {
+        //         this.setState({
+        //             confirmationMode: {
+        //                 type: 'public-to-private',
+        //                 isBulkShareProtected,
+        //             },
+        //         })
+        //     } else {
+        //         this.handleUnshare({ isBulkShareProtected })
+        //     }
+        // } else {
+        //     return this.handleUnshare({ isBulkShareProtected })
+        // }
     }
 
     private handleSpacePickerSelection = (
@@ -340,77 +347,70 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     render() {
         return (
             <>
-                {this.state.confirmationMode == null ? (
-                    <>
-                        <ShareAnnotationMenu
-                            link={this.state.link}
-                            showLink={true}
-                            onCopyLinkClick={this.handleLinkCopy}
-                            linkTitleCopy="Link to this annotation"
-                            privacyOptionsTitleCopy={undefined}
-                            isLoading={
-                                this.state.shareState === 'running' ||
-                                this.state.loadState === 'running'
-                            }
-                            autoShareState={this.state.autoShareState}
-                            handleCreateLink={this.handleCreateLink}
-                            privacyOptions={[
-                                {
-                                    icon: 'personFine',
-                                    title: 'Private',
-                                    hasProtectedOption: true,
-                                    onClick: this.handleSetPrivate,
-                                    isSelected: !this.props.isShared,
-                                    shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
-                                    description: (
-                                        <>
-                                            Private to you <br /> unless shared
-                                            in specific Spaces
-                                        </>
-                                    ),
-                                },
-                                {
-                                    icon: 'globe',
-                                    title: 'Auto-Shared',
-                                    hasProtectedOption: true,
-                                    onClick: this.handleSetShared,
-                                    isSelected: this.props.isShared,
-                                    shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
-                                    description: (
-                                        <>
-                                            Auto-shared to Spaces <br /> the
-                                            page is added to{' '}
-                                        </>
-                                    ),
-                                },
-                            ]}
-                            shortcutHandlerDict={{
-                                // 'mod+shift+enter': this.handleSetProtected,
-                                'mod+shift+enter': () =>
-                                    this.handleSetShared(false),
-                                'mod+enter': () => this.handleSetPrivate(false),
-                                'alt+enter': () => this.handleSetPrivate(true),
-                                'alt+shift+enter': () =>
-                                    this.handleSetShared(true),
-                            }}
-                        />
+                <>
+                    <ShareAnnotationMenu
+                        link={this.state.link}
+                        showLink={true}
+                        onCopyLinkClick={this.handleLinkCopy}
+                        linkTitleCopy="Link to this annotation"
+                        privacyOptionsTitleCopy={undefined}
+                        isLoading={
+                            this.state.shareState === 'running' ||
+                            this.state.loadState === 'running'
+                        }
+                        autoShareState={this.state.autoShareState}
+                        handleCreateLink={this.handleCreateLink}
+                        privacyOptions={[
+                            {
+                                icon: 'personFine',
+                                title: 'Private',
+                                hasProtectedOption: true,
+                                onClick: this.handleSetPrivate,
+                                isSelected: !this.props.isShared,
+                                shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
+                                description: (
+                                    <>
+                                        Private to you <br /> unless shared in
+                                        specific Spaces
+                                    </>
+                                ),
+                            },
+                            {
+                                icon: 'globe',
+                                title: 'Auto-Shared',
+                                hasProtectedOption: true,
+                                onClick: this.handleSetShared,
+                                isSelected: this.props.isShared,
+                                shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
+                                description: (
+                                    <>
+                                        Auto-shared to Spaces <br /> the page is
+                                        added to{' '}
+                                    </>
+                                ),
+                            },
+                        ]}
+                        shortcutHandlerDict={{
+                            // 'mod+shift+enter': this.handleSetProtected,
+                            'mod+shift+enter': () =>
+                                this.handleSetShared(false),
+                            'mod+enter': () => this.handleSetPrivate(false),
+                            'alt+enter': () => this.handleSetPrivate(true),
+                            'alt+shift+enter': () => this.handleSetShared(true),
+                        }}
+                    />
 
-                        <SpacePicker
-                            {...this.props.spacePickerProps}
-                            showPageLinks
-                            selectEntry={this.handleSpacePickerSelection(
-                                'select',
-                            )}
-                            unselectEntry={this.handleSpacePickerSelection(
-                                'unselect',
-                            )}
-                            width={'fill-available'}
-                            autoFocus={false}
-                        />
-                    </>
-                ) : (
-                    this.renderConfirmationMode()
-                )}
+                    <SpacePicker
+                        {...this.props.spacePickerProps}
+                        showPageLinks
+                        selectEntry={this.handleSpacePickerSelection('select')}
+                        unselectEntry={this.handleSpacePickerSelection(
+                            'unselect',
+                        )}
+                        width={'fill-available'}
+                        autoFocus={false}
+                    />
+                </>
             </>
         )
     }

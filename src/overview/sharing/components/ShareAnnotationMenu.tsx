@@ -258,7 +258,7 @@ export default ShareAnnotationMenu
 
 const Menu = styled.div<{ context: string }>`
     padding: 5px 0px;
-    width: 370px;
+    width: 310px;
     z-index: 10;
     position: relative;
 

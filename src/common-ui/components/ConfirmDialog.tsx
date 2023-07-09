@@ -34,6 +34,7 @@ export default class ConfirmDialog extends React.PureComponent<Props> {
                         type={'primary'}
                         size={'medium'}
                         width={'210px'}
+                        icon={'check'}
                     />
                     <PrimaryAction
                         label={affirmativeLabel ?? 'Yes'}
@@ -41,6 +42,7 @@ export default class ConfirmDialog extends React.PureComponent<Props> {
                         type={'forth'}
                         size={'medium'}
                         width={'210px'}
+                        icon={'removeX'}
                     />
                 </ConfirmBtnRow>
             </Container>
