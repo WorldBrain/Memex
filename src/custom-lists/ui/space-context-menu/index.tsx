@@ -11,6 +11,7 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { getListShareUrl } from 'src/content-sharing/utils'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
@@ -96,78 +97,77 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             <ShareSectionContainer onClick={wrapClick}>
                 {this.state.inviteLinks.map(
                     ({ link, showCopyMsg, roleID }, linkIndex) => (
-                        <LinkAndRoleBox
-                            key={roleID}
-                            viewportBreakpoint="normal"
-                        >
-                            <PermissionArea>
-                                <TooltipBox
-                                    placement={'right'}
-                                    tooltipText={
-                                        sharedListRoleIDToString(roleID) ===
-                                        'Contributor' ? (
-                                            <span>
-                                                Permission to add highlights,
-                                                <br /> pages & replies
-                                            </span>
-                                        ) : (
-                                            <span>
-                                                Permission to read & reply{' '}
-                                                <br />
-                                                to highlights & pages
-                                            </span>
-                                        )
-                                    }
+                        <ListItem zIndex={10 - linkIndex}>
+                            <TooltipBox
+                                placement={'bottom'}
+                                tooltipText={
+                                    roleID === SharedListRoleID.ReadWrite ? (
+                                        <span>
+                                            Permission to add highlights,
+                                            <br /> pages & replies
+                                        </span>
+                                    ) : (
+                                        <span>
+                                            Permission to read & reply <br />
+                                            to highlights & pages
+                                        </span>
+                                    )
+                                }
+                                fullWidthTarget
+                            >
+                                <LinkAndRoleBox
+                                    key={roleID}
+                                    viewportBreakpoint="normal"
                                 >
-                                    <PermissionText
-                                        title={null}
-                                        viewportBreakpoint="normal"
-                                    >
-                                        {sharedListRoleIDToString(roleID)}
-                                    </PermissionText>
-                                </TooltipBox>
-                            </PermissionArea>
-                            <CopyLinkBox>
-                                <LinkBox
-                                    left="small"
-                                    onClick={wrapClick((e) =>
-                                        this.processEvent('copyInviteLink', {
-                                            linkIndex,
-                                        }),
-                                    )}
-                                >
-                                    <Link>
-                                        {showCopyMsg
-                                            ? 'Copied to clipboard'
-                                            : link.split('https://')[1]}
-                                    </Link>
-                                    <IconContainer id={'iconContainer'}>
-                                        <Icon
-                                            heightAndWidth="20px"
-                                            filePath={'copy'}
-                                            onClick={wrapClick(() =>
+                                    <CopyLinkBox>
+                                        <LinkBox
+                                            left="small"
+                                            onClick={wrapClick((e) =>
                                                 this.processEvent(
                                                     'copyInviteLink',
-                                                    { linkIndex },
+                                                    {
+                                                        linkIndex,
+                                                    },
                                                 ),
                                             )}
-                                        />
-                                        <Icon
-                                            heightAndWidth="20px"
-                                            filePath={'goTo'}
-                                            onClick={wrapClick(() =>
-                                                window.open(
-                                                    isPageLink
-                                                        ? link +
-                                                              '?noAutoOpen=true'
-                                                        : link,
-                                                ),
-                                            )}
-                                        />
-                                    </IconContainer>
-                                </LinkBox>
-                            </CopyLinkBox>
-                        </LinkAndRoleBox>
+                                        >
+                                            <Link>
+                                                {showCopyMsg
+                                                    ? 'Copied to clipboard'
+                                                    : sharedListRoleIDToString(
+                                                          roleID,
+                                                      )}
+                                            </Link>
+
+                                            <IconContainer id={'iconContainer'}>
+                                                <Icon
+                                                    heightAndWidth="20px"
+                                                    filePath={'copy'}
+                                                    onClick={wrapClick(() =>
+                                                        this.processEvent(
+                                                            'copyInviteLink',
+                                                            { linkIndex },
+                                                        ),
+                                                    )}
+                                                />
+                                                <Icon
+                                                    heightAndWidth="20px"
+                                                    filePath={'goTo'}
+                                                    onClick={wrapClick(() =>
+                                                        window.open(
+                                                            isPageLink
+                                                                ? link +
+                                                                      '?noAutoOpen=true'
+                                                                : link,
+                                                        ),
+                                                    )}
+                                                />
+                                            </IconContainer>
+                                        </LinkBox>
+                                    </CopyLinkBox>
+                                </LinkAndRoleBox>
+                            </TooltipBox>
+                        </ListItem>
                     ),
                 )}
             </ShareSectionContainer>
@@ -237,7 +237,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         return (
             <ContextMenuContainer>
                 {this.props.listData.remoteId != null && (
-                    <SectionTitle>Sharing Links</SectionTitle>
+                    <SectionTitle>Invite Links</SectionTitle>
                 )}
                 {this.renderShareLinks(isPageLink)}
 
@@ -390,42 +390,6 @@ const ShareSectionContainer = styled.div`
     width: fill-available;
 `
 
-const ButtonLabel = styled.div`
-    display: grid;
-    grid-auto-flow: column;
-    grid-gap: 5px;
-    align-items: center;
-
-    & * {
-        cursor: pointer;
-    }
-`
-
-const ModalRoot = styled.div<{ fixedPosition: boolean }>`
-    ${(props) =>
-        props.fixedPosition
-            ? ''
-            : `
-    border-radius: 12px;
-`}
-    background-color: ${(props) => props.theme.colors.greyScale1};
-    ${(props) =>
-        props.x || props.y
-            ? ''
-            : `
-            display: flex;
-            justify-content: center;
-            `}
-`
-
-/* Modal content */
-
-const ModalContent = styled.div<{
-    fixedPosition: boolean
-}>`
-    text-align: center;
-`
-
 const MenuContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -446,13 +410,19 @@ const TitleBox = styled.div`
 
 const LinkAndRoleBox = styled.div<{
     viewportBreakpoint: string
+    zIndex: number
 }>`
     width: fill-available;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     grid-gap: 5px;
+    // z-index: ${(props) => props['zIndex']};
+    height: 40px;
+    margin: 0 -10px 5px -10px;
+    padding: 0px 5px;
+
 
     ${(props) =>
         (props.viewportBreakpoint === 'small' ||
@@ -473,7 +443,6 @@ const LinkAndRoleBox = styled.div<{
             grid-gap: 5px;
             grid-auto-flow: row;
             border-radius: 6px;
-            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         }
 
 `
@@ -484,11 +453,15 @@ const LinkBox = styled(Margin)`
     font-size: 14px;
     border-radius: 3px;
     text-align: left;
-    height: 30px;
+    height: 40px;
     cursor: pointer;
     color: ${(props) => props.theme.colors.white};
-    border: 1px solid ${(props) => props.theme.colors.greyScale3};
-    background: ${(props) => props.theme.colors.greyScale2};
+    justify-content: space-between;
+    padding-right: 10px;
+
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+    }
 `
 
 const Link = styled.span`
@@ -500,6 +473,7 @@ const Link = styled.span`
     white-space: nowrap;
     overflow-x: scroll;
     scrollbar-width: none;
+    justify-content: space-between;
 
     &::-webkit-scrollbar {
         display: none;
@@ -577,4 +551,11 @@ const Container = styled.div`
     justify-content: center;
     align-items: flex-start;
     background-color: transparent;
+`
+
+const ListItem = styled.div<{ zIndex }>`
+    display: flex;
+    position: relative;
+    z-index: ${(props) => props.zIndex};
+    width: 100%;
 `
