@@ -170,6 +170,29 @@ class SpacePicker extends StatefulUIElement<
             )
         }
 
+        if (
+            !this.state.query.trim().length &&
+            !this.state.filteredListIds &&
+            this.state.currentTab === 'page-links'
+        ) {
+            return (
+                <EmptyListsView>
+                    <SectionCircle>
+                        <Icon
+                            filePath={icons.collectionsEmpty}
+                            heightAndWidth="16px"
+                            color="prime1"
+                            hoverOff
+                        />
+                    </SectionCircle>
+                    <SectionTitle>Create your first page link</SectionTitle>
+                    <InfoText>
+                        by clicking on "Share Page" <br />
+                        in the top right of the sidebar.
+                    </InfoText>
+                </EmptyListsView>
+            )
+        }
         if (!this.state.query.trim().length && !this.state.filteredListIds) {
             return (
                 <EmptyListsView>
