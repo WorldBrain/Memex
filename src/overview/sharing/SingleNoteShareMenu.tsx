@@ -407,7 +407,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         unselectEntry={this.handleSpacePickerSelection(
                             'unselect',
                         )}
-                        width={'fill-available'}
+                        width={'300px'}
                         autoFocus={false}
                     />
                 </>
