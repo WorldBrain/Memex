@@ -255,6 +255,11 @@ export default class SearchResultsContainer extends React.Component<
             .map((listId) => this.props.listData.byId[listId]?.localId)
             .filter((listId) => listId != null)
 
+    private getRemoteIdsForCacheIds = (listIds: string[]): string[] =>
+        listIds
+            .map((listId) => this.props.listData.byId[listId]?.remoteId)
+            .filter((listId) => listId != null)
+
     private renderNoteResult = (
         day: number,
         pageId: string,
@@ -283,6 +288,7 @@ export default class SearchResultsContainer extends React.Component<
               ]
             : noteData.lists
         const localListIds = this.getLocalListIdsForCacheIds(cachedListIds)
+        const hasSharedLists = this.getRemoteIdsForCacheIds(cachedListIds)
 
         return (
             <AnnotationEditable
@@ -349,7 +355,10 @@ export default class SearchResultsContainer extends React.Component<
                         getRemoteListIdForLocalId={(localListId) =>
                             this.props.listData[localListId]?.remoteId ?? null
                         }
-                        isShared={noteData.isShared}
+                        isShared={
+                            noteData.isShared || noteData.lists.length > 0
+                        }
+                        annotationData={noteData}
                         shareImmediately={
                             noteData.shareMenuShowStatus === 'show-n-share'
                         }

@@ -201,7 +201,6 @@ export default class Logic extends UILogic<State, Event> {
                     this.personalCloudEvents.on(
                         'cloudStatsUpdated',
                         async ({ stats }) => {
-                            console.log('stats', stats)
                             if (
                                 stats.pendingDownloads === 0 &&
                                 stats.pendingUploads === 0

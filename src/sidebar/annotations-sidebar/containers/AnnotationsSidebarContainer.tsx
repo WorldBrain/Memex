@@ -471,6 +471,14 @@ export class AnnotationsSidebarContainer<
         )
     }
 
+    private getRemoteIdsForCacheIds = (listIds: string[]): string[] =>
+        listIds
+            .map(
+                (listId) =>
+                    this.props.annotationsCache.lists.byId[listId]?.remoteId,
+            )
+            .filter((listId) => listId != null)
+
     private renderShareMenuForAnnotation = () => (
         unifiedId: UnifiedAnnotation['unifiedId'],
     ) => {
@@ -492,6 +500,7 @@ export class AnnotationsSidebarContainer<
                 ].includes(annotation.privacyLevel)}
                 shareImmediately={this.state.immediatelyShareNotes}
                 contentSharingBG={this.props.contentSharingBG}
+                annotationData={annotation}
                 annotationsBG={this.props.annotationsBG}
                 copyLink={(link) => this.processEvent('copyNoteLink', { link })}
                 annotationUrl={annotation.localId}
@@ -505,6 +514,14 @@ export class AnnotationsSidebarContainer<
                 spacePickerProps={this.getSpacePickerProps({
                     annotation,
                 })}
+                showLink={
+                    [
+                        AnnotationPrivacyLevels.SHARED,
+                        AnnotationPrivacyLevels.SHARED_PROTECTED,
+                    ].includes(annotation.privacyLevel) ||
+                    this.getRemoteIdsForCacheIds(annotation.unifiedListIds)
+                        .length !== null
+                }
             />
         )
     }

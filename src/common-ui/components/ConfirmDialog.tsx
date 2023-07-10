@@ -34,6 +34,7 @@ export default class ConfirmDialog extends React.PureComponent<Props> {
                         type={'primary'}
                         size={'medium'}
                         width={'210px'}
+                        icon={'check'}
                     />
                     <PrimaryAction
                         label={affirmativeLabel ?? 'Yes'}
@@ -41,6 +42,7 @@ export default class ConfirmDialog extends React.PureComponent<Props> {
                         type={'forth'}
                         size={'medium'}
                         width={'210px'}
+                        icon={'removeX'}
                     />
                 </ConfirmBtnRow>
             </Container>
@@ -58,7 +60,7 @@ const TextContainer = styled.div`
 
 const TitleText = styled.div`
     font-size: 20px;
-    color: ${(props) => props.theme.colors.greyScale6};
+    color: ${(props) => props.theme.colors.greyScale7};
     text-align: center;
     font-weight: 500;
     line-height: 30px;
