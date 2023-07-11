@@ -184,6 +184,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
         await p
     }
+
     private handleCreateLink = async (isBulkShareProtected?: boolean) => {
         this.setState({
             shareState: 'running',
