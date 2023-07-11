@@ -134,13 +134,16 @@ describe('Page annotations cache tests', () => {
         })
         expect(emittedEvents).toEqual(expectedEvents)
 
+        const changes = {
+            unifiedId: idA,
+            privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
+            unifiedListIds: testAnnotations[0].unifiedListIds,
+        }
         const updatedAnnotationA = {
             ...testAnnotations[0],
-            unifiedId: idA,
-            comment: 'updated comment',
-            privacyLevel: AnnotationPrivacyLevels.SHARED_PROTECTED,
+            ...changes,
         }
-        cache.updateAnnotation(updatedAnnotationA)
+        cache.updateAnnotation(changes)
         expectedEvents.push({
             event: 'updatedAnnotation',
             args: updatedAnnotationA,

@@ -508,7 +508,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             ...previous,
             privacyLevel,
             unifiedListIds: nextUnifiedListIds,
-            comment: updates.comment,
+            comment: updates.comment ?? previous.comment,
             remoteId: updates.remoteId ?? previous.remoteId,
             lastEdited: opts?.updateLastEditedTimestamp
                 ? opts?.now ?? Date.now()
