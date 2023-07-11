@@ -1284,18 +1284,37 @@ export class SidebarContainerLogic extends UILogic<
         const unifiedListIds = new Set(existing.unifiedListIds)
         let bgPromise: Promise<{ sharingState: AnnotationSharingState }>
         if (event.added != null) {
-            const cacheListId = annotationsCache.getListByLocalId(event.added)
-                ?.unifiedId
-            unifiedListIds.add(cacheListId)
+            const cacheList = annotationsCache.getListByLocalId(event.added)
+            if (!cacheList) {
+                throw new Error(
+                    'Cannot find list to add to annotation in cache',
+                )
+            }
+
+            // Ensure any added shared list becomes part of the page lists
+            if (cacheList.remoteId != null) {
+                const pageUrl = normalizeUrl(this.fullPageUrl)
+                const pageListsSet =
+                    annotationsCache.pageListIds.get(pageUrl) ?? new Set()
+                pageListsSet.add(cacheList.unifiedId)
+                annotationsCache.setPageData(pageUrl, Array.from(pageListsSet))
+            }
+
+            unifiedListIds.add(cacheList.unifiedId)
             bgPromise = contentSharingBG.shareAnnotationToSomeLists({
                 annotationUrl: existing.localId,
                 localListIds: [event.added],
                 protectAnnotation: event.options?.protectAnnotation,
             })
         } else if (event.deleted != null) {
-            const cacheListId = annotationsCache.getListByLocalId(event.deleted)
-                ?.unifiedId
-            unifiedListIds.delete(cacheListId)
+            const cacheList = annotationsCache.getListByLocalId(event.deleted)
+            if (!cacheList) {
+                throw new Error(
+                    'Cannot find list to remove from annotation in cache',
+                )
+            }
+
+            unifiedListIds.delete(cacheList.unifiedId)
             bgPromise = contentSharingBG.unshareAnnotationFromList({
                 annotationUrl: existing.localId,
                 localListId: event.deleted,

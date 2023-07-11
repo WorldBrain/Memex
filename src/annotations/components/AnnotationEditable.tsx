@@ -790,6 +790,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     })
                 }}
                 offsetX={10}
+                width={'310px'}
             >
                 {this.props.renderShareMenuForAnnotation(this.props.unifiedId)}
             </PopoutBox>

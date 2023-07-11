@@ -4,6 +4,7 @@ import type { Storage } from 'webextension-polyfill'
 import type {
     UnifiedList,
     PageAnnotationsCacheInterface,
+    UnifiedAnnotation,
 } from 'src/annotations/cache/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
@@ -54,6 +55,11 @@ export type SpacePickerEvent = UIEvent<{
 }>
 
 export interface SpacePickerDependencies {
+    /**
+     * Set this for annotations space picker to get updates to
+     * annotation lists in the case of auto-shared annotations.
+     */
+    unifiedAnnotationId?: UnifiedAnnotation['unifiedId']
     localStorageAPI: Storage.LocalStorageArea
     shouldHydrateCacheOnInit?: boolean
     annotationsCache: PageAnnotationsCacheInterface

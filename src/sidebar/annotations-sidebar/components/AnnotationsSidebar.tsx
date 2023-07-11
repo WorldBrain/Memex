@@ -1223,7 +1223,9 @@ export class AnnotationsSidebar extends React.Component<
         )
 
         if (this.props.activeTab === 'summary') {
-            const SuggestionsList = ({ suggestions }) => {
+            const SuggestionsList = ({
+                AIsuggestions,
+            }: Pick<AnnotationsSidebarProps, 'AIsuggestions'>) => {
                 return (
                     <ClickAway
                         onClickAway={() =>
@@ -1231,8 +1233,9 @@ export class AnnotationsSidebar extends React.Component<
                         }
                     >
                         <DropDown>
-                            {suggestions.map((suggestion) => (
+                            {AIsuggestions.map((suggestion) => (
                                 <DropDownItem
+                                    key={suggestion.prompt}
                                     onClick={() =>
                                         this.props.selectAISuggestion(
                                             suggestion.prompt,
@@ -1373,9 +1376,7 @@ export class AnnotationsSidebar extends React.Component<
                         />
                         {this.props.showAISuggestionsDropDown &&
                             this.props.AIsuggestions.length > 0 && (
-                                <SuggestionsList
-                                    suggestions={this.props.AIsuggestions}
-                                />
+                                <SuggestionsList {...this.props} />
                             )}
                     </QueryContainer>
                     {!this.props.selectedTextAIPreview && (
@@ -1616,7 +1617,9 @@ export class AnnotationsSidebar extends React.Component<
 
         if (this.props.noteCreateState === 'running') {
             annots.push(
-                <LoaderBox>{this.renderLoader('new-note-spinner')}</LoaderBox>,
+                <LoaderBox key="annot-loading-box">
+                    {this.renderLoader('new-note-spinner')}
+                </LoaderBox>,
             )
         }
 

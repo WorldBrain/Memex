@@ -27,6 +27,7 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     SpacePickerState,
@@ -150,6 +151,44 @@ export default class SpacePickerLogic extends UILogic<
 
     private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState']
 
+    private cacheAnnotationUpdatedSubscription: PageAnnotationsCacheEvents['updatedAnnotation'] = (
+        updatedAnnot,
+    ) => {
+        if (updatedAnnot.unifiedId !== this.dependencies.unifiedAnnotationId) {
+            return
+        }
+
+        const {
+            annotationsCache,
+            normalizedPageUrlToFilterPageLinksBy,
+        } = this.dependencies
+
+        // For Auto-Shared annots, ensure the parent page shared lists are set as selected
+        if (
+            normalizedPageUrlToFilterPageLinksBy != null &&
+            updatedAnnot.privacyLevel === AnnotationPrivacyLevels.SHARED
+        ) {
+            const pageListIdsSet =
+                annotationsCache.pageListIds.get(
+                    normalizedPageUrlToFilterPageLinksBy,
+                ) ?? new Set()
+
+            const localPageListIds: number[] = Array.from(pageListIdsSet)
+                .map(
+                    (unifiedListId) =>
+                        annotationsCache.lists.byId[unifiedListId]?.localId,
+                )
+                .filter((localId) => localId != null)
+
+            this.emitMutation({
+                selectedListIds: {
+                    $apply: (prev: number[]): number[] =>
+                        Array.from(new Set([...prev, ...localPageListIds])),
+                },
+            })
+        }
+    }
+
     private initCacheListsSubscription = (
         currentUser?: UserReference,
     ): PageAnnotationsCacheEvents['newListsState'] => (nextLists) => {
@@ -218,6 +257,10 @@ export default class SpacePickerLogic extends UILogic<
                 'newListsState',
                 this.cacheListsSubscription,
             )
+            this.dependencies.annotationsCache.events.addListener(
+                'updatedAnnotation',
+                this.cacheAnnotationUpdatedSubscription,
+            )
 
             if (this.dependencies.shouldHydrateCacheOnInit) {
                 await hydrateCacheForListUsage({
@@ -267,6 +310,10 @@ export default class SpacePickerLogic extends UILogic<
                 this.cacheListsSubscription,
             )
         }
+        this.dependencies.annotationsCache.events.removeListener(
+            'updatedAnnotation',
+            this.cacheAnnotationUpdatedSubscription,
+        )
     }
 
     setSearchInputRef: EventHandler<'setSearchInputRef'> = ({

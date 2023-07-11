@@ -184,6 +184,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
         await p
     }
+
     private handleCreateLink = async (isBulkShareProtected?: boolean) => {
         this.setState({
             shareState: 'running',
@@ -407,7 +408,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         unselectEntry={this.handleSpacePickerSelection(
                             'unselect',
                         )}
-                        width={'fill-available'}
+                        width={'300px'}
                         autoFocus={false}
                     />
                 </>

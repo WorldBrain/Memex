@@ -132,7 +132,7 @@ const ChildrenBox = styled.span<{ mode }>`
 const LabelContainer = styled.label<{ zIndex?: number }>`
     display: flex;
     align-items: center;
-    width: auto;
+    width: 100%;
     cursor: pointer;
     z-index: ${(props) => props.zIndex};
 `
