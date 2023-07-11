@@ -890,22 +890,23 @@ export default class ContentSharingBackground {
             type: 'page-link',
             createdAt: new Date(now),
         })
+        await Promise.all([
+            bgModules.customLists.insertPageToList({
+                id: localListId,
+                url: indexedPage.fullUrl,
+                createdAt: new Date(now),
+                skipPageIndexing: true,
+                suppressInboxEntry: true,
+                suppressVisitCreation: true,
+            }),
+            this.performListShare({
+                localListId,
+                remoteListId,
+                collabKey,
+            }),
+        ])
 
-        await bgModules.customLists.insertPageToList({
-            id: localListId,
-            url: indexedPage.fullUrl,
-            createdAt: new Date(now),
-            skipPageIndexing: true,
-            suppressInboxEntry: true,
-            suppressVisitCreation: true,
-        })
-        await this.performListShare({
-            localListId,
-            remoteListId,
-            collabKey,
-        })
-
-        // NOTE: These calls to created followList and followedListEntry docs should trigger personal cloud sync upload
+        // NOTE: These calls to create followList and followedListEntry docs should trigger personal cloud sync upload
         await bgModules.pageActivityIndicator.createFollowedList(
             {
                 creator,
