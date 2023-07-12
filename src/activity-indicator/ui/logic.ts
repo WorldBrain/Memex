@@ -6,7 +6,8 @@ export interface Dependencies {
         ActivityIndicatorInterface,
         'checkActivityStatus' | 'markActivitiesAsSeen'
     >
-    openFeedUrl: () => void
+    clickedOn?: () => void
+    // openFeedUrl: () => void
 }
 
 export interface State {

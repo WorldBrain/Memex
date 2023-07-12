@@ -335,7 +335,10 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             <PopupContainerContainer>
                 {this.maybeRenderBlurredNotice()}
                 <FeedActivitySection
-                    onClick={() => window.open(this.whichFeed(), '_blank')}
+                    onClick={async () => {
+                        await this.activityIndicatorBG.markActivitiesAsSeen()
+                        window.open(this.whichFeed(), '_blank')
+                    }}
                 >
                     <FeedActivitySectionInnerContainer>
                         <Icon
@@ -348,9 +351,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <FeedActivityDot
                         key="activity-feed-indicator"
                         activityIndicatorBG={this.activityIndicatorBG}
-                        openFeedUrl={() =>
-                            window.open(this.whichFeed(), '_blank')
-                        }
                     />
                 </FeedActivitySection>
                 <BookmarkButton closePopup={this.closePopup} />

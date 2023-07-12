@@ -4,9 +4,7 @@ import { StatefulUIElement } from 'src/util/ui-logic'
 import { StaticListItem } from 'src/custom-lists/components/overview/sidebar/static-list-item'
 import Logic, { Dependencies, State, Events } from './logic'
 
-export interface Props extends Dependencies {
-    clickedOn: () => void
-}
+export interface Props extends Dependencies {}
 
 export default class FeedActivityIndicator extends StatefulUIElement<
     Props,
