@@ -4,7 +4,9 @@ import { StatefulUIElement } from 'src/util/ui-logic'
 import { StaticListItem } from 'src/custom-lists/components/overview/sidebar/static-list-item'
 import Logic, { Dependencies, State, Events } from './logic'
 
-export interface Props extends Dependencies {}
+export interface Props extends Dependencies {
+    clickedOn: () => void
+}
 
 export default class FeedActivityIndicator extends StatefulUIElement<
     Props,
@@ -40,8 +42,10 @@ export class FeedActivityDot extends StatefulUIElement<Props, State, Events> {
         super(props, new Logic(props))
     }
 
-    private handleFeedIndicatorClick: React.MouseEventHandler = (e) =>
+    private handleFeedIndicatorClick: React.MouseEventHandler = (e) => {
         this.processEvent('clickFeedEntry', null)
+        this.props.clickedOn()
+    }
 
     render() {
         if (this.state.isShown) {
@@ -50,7 +54,7 @@ export class FeedActivityDot extends StatefulUIElement<Props, State, Events> {
                     <OuterRing>
                         <Dot
                             unread={this.state.hasFeedActivity ? 1 : 0}
-                            // onClick={this.handleFeedIndicatorClick}
+                            onClick={this.handleFeedIndicatorClick}
                         />
                     </OuterRing>
                 )

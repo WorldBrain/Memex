@@ -50,7 +50,6 @@ export default class Logic extends UILogic<State, Events> {
     clickFeedEntry: EventHandler<'clickFeedEntry'> = async ({
         previousState,
     }) => {
-        this.dependencies.openFeedUrl()
         this.emitMutation({ hasFeedActivity: { $set: false } })
         await this.dependencies.activityIndicatorBG.markActivitiesAsSeen()
     }

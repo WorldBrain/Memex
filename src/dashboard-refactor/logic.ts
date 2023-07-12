@@ -100,7 +100,7 @@ export const removeAllResultOccurrencesOfPage = (
 export class DashboardLogic extends UILogic<State, Events> {
     personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
     syncSettings: SyncSettingsStore<
-        'contentSharing' | 'dashboard' | 'extension'
+        'contentSharing' | 'dashboard' | 'extension' | 'activityIndicator'
     >
     currentSearchID = 0
 
@@ -538,9 +538,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     private async getFeedActivityStatus() {
-        const hasActivityStored = await getLocalStorage(
-            ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY,
+        const hasActivityStored = await this.syncSettings.activityIndicator.get(
+            'feedHasActivity',
         )
+
         if (hasActivityStored === true) {
             this.emitMutation({
                 listsSidebar: {
