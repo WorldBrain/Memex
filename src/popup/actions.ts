@@ -3,7 +3,6 @@ import { createAction } from 'redux-act'
 import { remoteFunction, runInBackground } from '../util/webextensionRPC'
 import { Thunk } from './types'
 import { acts as bookmarkActs } from './bookmark-button'
-import { acts as tagActs } from './tags-button'
 import { acts as collectionActs } from './collections-button'
 import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
@@ -102,8 +101,6 @@ export const initState: () => Thunk = () => async (dispatch) => {
             notInclude: pageTags,
             type: 'tag',
         })
-        dispatch(tagActs.setInitTagSuggests([...pageTags, ...tags]))
-        dispatch(tagActs.setTags(pageTags))
     } catch (err) {
         // Do nothing; just catch the error - means page doesn't exist for URL
         console.warn('initState - Error', err)

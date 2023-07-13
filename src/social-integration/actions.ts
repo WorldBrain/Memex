@@ -1,4 +1,3 @@
-import { acts as tagActs } from 'src/popup/tags-button'
 import { acts as collectionActs } from 'src/popup/collections-button'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { getTweetInfo } from './observers/get-tweet-data'
@@ -27,8 +26,6 @@ export const initState: (url: string) => Thunk = (url) => async (dispatch) => {
         // Get 20 more tags that are not related related to the list.
         const pageTags = await fetchSocialPostTags({ url })
         const tags = await fetchInitTagSuggRPC(pageTags, 'tag')
-        dispatch(tagActs.setInitTagSuggests([...pageTags, ...tags]))
-        dispatch(tagActs.setTags(pageTags))
     } catch (err) {
         // Do nothing; just catch the error - means page doesn't exist for URL
     }

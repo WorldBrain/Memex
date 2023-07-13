@@ -1,7 +1,6 @@
 import { combineReducers } from 'redux'
 
 import { reducer as collectionsBtn } from 'src/popup/collections-button'
-import { reducer as tagsBtn } from 'src/popup/tags-button'
 import {
     reducer as sidebar,
     State as SidebarState,
@@ -9,7 +8,6 @@ import {
 
 const rootReducer = combineReducers({
     collectionsBtn,
-    tagsBtn,
     sidebar,
 })
 
