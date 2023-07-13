@@ -70,6 +70,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 runtimeAPI: browser.runtime,
                 extensionAPI: browser.extension,
                 customListsBG: collections,
+                pageIndexingBG: runInBackground(),
                 pdfIntegrationBG: runInBackground(),
                 syncSettings: createSyncSettingsStore({
                     syncSettingsBG: runInBackground(),
@@ -125,6 +126,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             added,
             deleted,
             url: this.props.url,
+            tabId: this.props.tabId,
         })
         // Redux actions
         if (added) {
@@ -142,7 +144,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         collections.addOpenTabsToList({ listId })
 
     getPDFLocation = () => {
-        if (this.state.currentPageUrl.startsWith('file://')) {
+        if (this.state.currentTabFullUrl.startsWith('file://')) {
             return 'local'
         } else {
             return 'remote'
@@ -155,7 +157,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
     getPDFMode = () => {
         if (
-            isUrlPDFViewerUrl(this.state.currentPageUrl, {
+            isUrlPDFViewerUrl(this.state.currentTabFullUrl, {
                 runtimeAPI: browser.runtime,
             })
         ) {
@@ -325,7 +327,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 )}
                 {this.getPDFMode() === 'reader' && (
                     <CopyPDFLinkButton
-                        currentPageUrl={this.state.currentPageUrl}
+                        currentPageUrl={this.state.currentTabFullUrl}
                     />
                 )}
                 <LinkButton goToDashboard={this.onSearchClick} />

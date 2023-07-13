@@ -308,7 +308,9 @@ export class PageIndexingBackground {
             timeout,
         ])
         if (result === 'timeout') {
-            throw new Error('Could not resolve identifier in time')
+            throw new Error(
+                `Could not resolve identifier in time for tab: ${params.tabId}, page: ${params.fullUrl}`,
+            )
         }
         return contentIdentifier
     }
