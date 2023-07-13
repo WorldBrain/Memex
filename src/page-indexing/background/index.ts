@@ -81,7 +81,8 @@ export class PageIndexingBackground {
     persistentStorage: PersistentPageStorage
     remoteFunctions: PageIndexingInterface<'provider'>
 
-    _identifiersForTabPages: {
+    // See `this.getIdentifierResolvableForTabPage` for how this is used
+    private identifiersForTabPages: {
         [tabId: number]: {
             [fullPageUrl: string]: Resolvable<ContentIdentifier>
         }
@@ -144,9 +145,10 @@ export class PageIndexingBackground {
     ): Promise<InitContentIdentifierReturns> {
         const resolvable =
             params.tabId &&
-            this._resolvableForIdentifierTabPage({
+            this.getIdentifierResolvableForTabPage({
                 tabId: params.tabId,
                 fullUrl: params.locator.originalLocation,
+                forceNewResolvable: true,
             })
 
         const regularNormalizedUrl = normalizeUrl(
@@ -288,7 +290,7 @@ export class PageIndexingBackground {
         //  that by throwing an error after a timeout.
         const resolvable = new Promise<['resolved', ContentIdentifier]>(
             async (resolve) => {
-                const identifier = await this._resolvableForIdentifierTabPage(
+                const identifier = await this.getIdentifierResolvableForTabPage(
                     params,
                 )
                 resolve(['resolved', identifier])
@@ -775,23 +777,27 @@ export class PageIndexingBackground {
             indexedTabPages,
         )
 
-        delete this._identifiersForTabPages[event.tabId]
+        delete this.identifiersForTabPages[event.tabId]
     }
 
     findLocatorsByNormalizedUrl(normalizedUrl: string) {
         return this.storage.findLocatorsByNormalizedUrl(normalizedUrl)
     }
 
-    private _resolvableForIdentifierTabPage(params: {
+    private getIdentifierResolvableForTabPage(params: {
         tabId: number
         fullUrl: string
+        forceNewResolvable?: boolean
     }) {
         const resolvablesForTab =
-            this._identifiersForTabPages[params.tabId] ?? {}
-        this._identifiersForTabPages[params.tabId] = resolvablesForTab
+            this.identifiersForTabPages[params.tabId] ?? {}
+        this.identifiersForTabPages[params.tabId] = resolvablesForTab
 
-        const resolvable =
-            resolvablesForTab[params.fullUrl] ?? createResolvable()
+        const newResolvable = createResolvable<ContentIdentifier>()
+        const resolvable = params.forceNewResolvable
+            ? newResolvable
+            : resolvablesForTab[params.fullUrl] ?? newResolvable
+
         resolvablesForTab[params.fullUrl] = resolvable
 
         return resolvable
