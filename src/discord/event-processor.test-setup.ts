@@ -4,6 +4,7 @@ import { createDiscordEventProcessor } from '@worldbrain/memex-common/lib/discor
 import { DiscordChannelManager } from '@worldbrain/memex-common/lib/discord/channel-manager'
 import { createLazyMemoryServerStorage } from 'src/storage/server'
 import type { DiscordMessageCreateInfo } from '@worldbrain/memex-common/lib/discord/types'
+import { extractListShareUrlParts } from 'src/content-sharing/utils'
 
 export const makeId = (
     type: 'chl' | 'msg' | 'gld' | 'usr' | 'avt',
@@ -52,7 +53,8 @@ export async function setupDiscordTestContext(options: {
             })
         }
 
-        sharedLists[1] = Number(memexSocialLink.split('/c/')[1])
+        const { remoteListId } = extractListShareUrlParts(memexSocialLink)
+        sharedLists[1] = Number(remoteListId)
     }
 
     return {
