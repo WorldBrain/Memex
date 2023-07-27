@@ -418,7 +418,10 @@ class SpacePicker extends StatefulUIElement<
                     />
                 </SearchContainer>
 
-                <EntryList ref={this.displayListRef}>
+                <EntryList
+                    shouldScroll={this.state.listEntries.allIds.length < 5}
+                    ref={this.displayListRef}
+                >
                     {this.props.showPageLinks && (
                         <OutputSwitcherContainer>
                             <OutputSwitcher
@@ -525,17 +528,24 @@ const EntryListHeader = styled.div`
     margin-bottom: 5px;
 `
 
-const EntryList = styled.div`
+const EntryList = styled.div<{ shouldScroll: boolean }>`
     position: relative;
-    overflow-y: auto;
+
     max-height: 280px;
     padding: 5px 10px 10px 10px;
+    overflow: scroll;
 
     scrollbar-width: none;
 
     &::-webkit-scrollbar {
         display: none;
     }
+
+    ${(props) =>
+        props.shouldScroll &&
+        css`
+            overflow: visible;
+        `};
 `
 
 const SectionCircle = styled.div`
