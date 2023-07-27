@@ -649,7 +649,7 @@ export default class Ribbon extends Component<Props, State> {
                     <TitleContainer>
                         <Icon heightAndWidth="22px" filePath="feed" hoverOff />
                         <TitleContent>
-                            <SectionTitle>Activity Feed</SectionTitle>
+                            <SectionTitle>Notifications</SectionTitle>
                             <SectionDescription>
                                 Updates from Spaces and conversation you follow
                                 or contributed to.
@@ -959,11 +959,12 @@ export default class Ribbon extends Component<Props, State> {
                 <FeedButtonContainer ribbonPosition={this.props.ribbonPosition}>
                     <FeedIndicatorBox
                         isSidebarOpen={this.props.sidebar.isSidebarOpen}
-                        onClick={() => this.props.toggleFeed()}
-                        ref={this.feedButtonRef}
+                        // onClick={() => this.props.toggleFeed()}
                     >
                         <FeedActivityDot
                             key="activity-feed-indicator"
+                            itemRef={this.feedButtonRef}
+                            clickedOn={() => this.props.toggleFeed()}
                             {...this.props.activityIndicator}
                         />
                     </FeedIndicatorBox>
