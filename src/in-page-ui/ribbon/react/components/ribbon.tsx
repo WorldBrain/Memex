@@ -1066,10 +1066,10 @@ export default class Ribbon extends Component<Props, State> {
 
     renderBookmarkButton() {
         let bookmarkDate
-        if (this.props.bookmark.isBookmarked != null) {
-            bookmarkDate = moment(
-                new Date(this.props.bookmark.lastBookmarkTimestamp),
-            ).format('LLL')
+        if (this.props.bookmark.lastBookmarkTimestamp != null) {
+            bookmarkDate = moment
+                .unix(this.props.bookmark.lastBookmarkTimestamp)
+                .format('LLL')
         }
 
         const topRight = this.props.ribbonPosition === 'topRight'
@@ -1080,7 +1080,7 @@ export default class Ribbon extends Component<Props, State> {
                 tooltipText={
                     this.props.bookmark.isBookmarked ? (
                         <span>
-                            Saved on <DateText>{bookmarkDate}</DateText>
+                            First saved on <DateText>{bookmarkDate}</DateText>
                         </span>
                     ) : (
                         this.getTooltipText('createBookmark')
@@ -1105,7 +1105,8 @@ export default class Ribbon extends Component<Props, State> {
                         label={
                             this.props.bookmark.isBookmarked ? (
                                 <SavedButtonBox>
-                                    Saved<DateText>{bookmarkDate}</DateText>
+                                    Saved
+                                    {/* <DateText>{bookmarkDate}</DateText> */}
                                 </SavedButtonBox>
                             ) : (
                                 'Save'
