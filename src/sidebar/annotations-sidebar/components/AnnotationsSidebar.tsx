@@ -949,7 +949,7 @@ export class AnnotationsSidebar extends React.Component<
                 strategy="fixed"
                 placement="bottom-end"
                 offsetX={10}
-                offsetY={50}
+                offsetY={0}
                 targetElementRef={refObject?.current}
                 closeComponent={() =>
                     this.props.openContextMenuForList(listData.unifiedId)
@@ -2981,7 +2981,7 @@ const FollowedNotesContainer = styled.div`
     flex-direction: column;
     width: 100%;
     padding-bottom: 60px;
-    z-index: 30;
+    z-index: 60;
 `
 
 const FollowedListsMsgContainer = styled.div`
