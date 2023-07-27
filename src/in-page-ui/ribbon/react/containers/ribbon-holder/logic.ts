@@ -118,8 +118,6 @@ export class RibbonHolderLogic extends UILogic<
     }
 
     setInPageError: EventHandler<'setInPageError'> = async ({ event }) => {
-        console.log('setInPageError', event)
-
         if (event == null) {
             this.emitMutation({ inPageErrorType: { $set: null } })
         } else {

@@ -155,6 +155,7 @@ export default class RibbonContainer extends StatefulUIElement<
                 showRemoveMenu={this.state.showRemoveMenu}
                 showTutorial={this.state.areTutorialShown}
                 ribbonPosition={this.props.ribbonPosition}
+                hasFeedActivity={this.state.hasFeedActivity}
                 showFeed={this.state.showFeed}
                 toggleFeed={() => {
                     this.processEvent('toggleFeed', null)

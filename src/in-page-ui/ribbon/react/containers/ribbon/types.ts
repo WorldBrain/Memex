@@ -38,7 +38,9 @@ export interface RibbonContainerDependencies {
     bgScriptBG: RemoteBGScriptInterface
     tooltip: FlagSetterInterface
     highlights: FlagSetterInterface
-    syncSettings: SyncSettingsStore<'extension' | 'inPageUI'>
+    syncSettings: SyncSettingsStore<
+        'extension' | 'inPageUI' | 'activityIndicator'
+    >
     currentUser?: UserReference
     openPDFinViewer: (url: string) => Promise<void>
 }

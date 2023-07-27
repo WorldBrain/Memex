@@ -59,6 +59,7 @@ export default class ActivityIndicatorBackground {
 
     checkActivityStatus: ActivityIndicatorInterface['checkActivityStatus'] = async () => {
         await this.options.servicesPromise
+
         return this.service.checkActivityStatus()
     }
 

@@ -59,6 +59,7 @@ export interface RibbonContainerState {
     annotations: number
     search: ValuesOf<componentTypes.RibbonSearchProps>
     pausing: ValuesOf<componentTypes.RibbonPausingProps>
+    hasFeedActivity: boolean
 }
 
 export type RibbonContainerEvents = UIEvent<
@@ -172,6 +173,7 @@ export class RibbonContainerLogic extends UILogic<
             pausing: {
                 isPaused: false,
             },
+            hasFeedActivity: false,
         }
     }
 
@@ -222,7 +224,6 @@ export class RibbonContainerLogic extends UILogic<
     hydrateStateFromDB: EventHandler<'hydrateStateFromDB'> = async ({
         event: { url },
     }) => {
-        const tags = await this.dependencies.tags.fetchPageTags({ url })
         let lists = []
         let fullLists = await this.dependencies.customLists.fetchListPagesByUrl(
             { url: url },
@@ -238,6 +239,9 @@ export class RibbonContainerLogic extends UILogic<
             .allIds.length
 
         const bookmark = await this.dependencies.bookmarks.findBookmark(url)
+        const activityStatus = await this.dependencies.syncSettings.activityIndicator.get(
+            'feedHasActivity',
+        )
 
         this.emitMutation({
             fullPageUrl: { $set: url },
@@ -263,13 +267,9 @@ export class RibbonContainerLogic extends UILogic<
                     $set: await this.dependencies.highlights.getState(),
                 },
             },
-            tagging: {
-                pageHasTags: {
-                    $set: tags.length > 0,
-                },
-            },
             lists: { pageListIds: { $set: lists } },
             annotations: { $set: annotations },
+            hasFeedActivity: { $set: activityStatus },
         })
     }
 

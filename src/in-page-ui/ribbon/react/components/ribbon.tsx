@@ -58,6 +58,7 @@ export interface Props extends RibbonSubcomponentProps {
     toggleAskAI: () => void
     openPDFinViewer: () => void
     selectRibbonPositionOption: (option) => void
+    hasFeedActivity: boolean
 }
 
 interface State {
@@ -959,12 +960,13 @@ export default class Ribbon extends Component<Props, State> {
                 <FeedButtonContainer ribbonPosition={this.props.ribbonPosition}>
                     <FeedIndicatorBox
                         isSidebarOpen={this.props.sidebar.isSidebarOpen}
-                        // onClick={() => this.props.toggleFeed()}
+                        onClick={() => this.props.toggleFeed()}
+                        ref={this.feedButtonRef}
                     >
                         <FeedActivityDot
                             key="activity-feed-indicator"
-                            itemRef={this.feedButtonRef}
-                            clickedOn={() => this.props.toggleFeed()}
+                            // itemRef={this.feedButtonRef}
+                            // clickedOn={() => this.props.toggleFeed()}
                             {...this.props.activityIndicator}
                         />
                     </FeedIndicatorBox>
@@ -1564,11 +1566,33 @@ export default class Ribbon extends Component<Props, State> {
                     isSidebarOpen={this.props.sidebar.isSidebarOpen}
                     ribbonPosition={this.props.ribbonPosition}
                 >
-                    <Icon
-                        icon={logoNoText}
-                        heightAndWidth="18px"
-                        color="prime2"
-                    />
+                    {this.props.hasFeedActivity && (
+                        <FeedActivityDotBox>
+                            <FeedActivityDot
+                                key="activity-feed-indicator"
+                                noRing={true}
+                                {...this.props.activityIndicator}
+                            />
+                        </FeedActivityDotBox>
+                    )}
+                    {this.props.lists.pageListIds.length > 0 && (
+                        <PillCounter>
+                            {this.props.lists.pageListIds.length}
+                        </PillCounter>
+                    )}
+                    {this.props.bookmark.isBookmarked ? (
+                        <Icon
+                            icon={icons.heartFull}
+                            heightAndWidth="18px"
+                            color="prime1"
+                        />
+                    ) : (
+                        <Icon
+                            icon={logoNoText}
+                            heightAndWidth="18px"
+                            color="prime2"
+                        />
+                    )}
                 </IconContainer>
             )
         } else {
@@ -1831,6 +1855,15 @@ const SelectionContainer = styled.div`
     flex: 1;
 `
 
+const FeedActivityDotBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-right: 3px;
+    margin-left: 3px;
+`
+
 const FeedButtonContainer = styled.div<{ ribbonPosition }>`
     display: flex;
     align-items: center;
@@ -1854,10 +1887,12 @@ const IconBox = styled.div`
 const IconContainer = styled.div<{ ribbonPosition }>`
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     cursor: pointer;
+    padding: 0 8px;
+    grid-gap: 5px;
     height: 100%;
-    width: 100%;
+    width: fit-content;
     background: ${(props) => props.theme.colors.greyScale1}90;
     backdrop-filter: blur(4px);
 
@@ -1939,6 +1974,19 @@ const SpacesCounter = styled.div`
     position: absolute;
     bottom: -2px;
     right: -2px;
+    height: 14px;
+    font-size: 12px;
+    width: auto;
+    padding: 0 4px;
+    color: ${(props) => props.theme.colors.black};
+    background-color: ${(props) => props.theme.colors.white};
+    border-radius: 30px;
+    min-width: 10px;
+`
+const PillCounter = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 14px;
     font-size: 12px;
     width: auto;
