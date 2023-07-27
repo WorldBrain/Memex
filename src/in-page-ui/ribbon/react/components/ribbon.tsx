@@ -2356,7 +2356,8 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                     padding: 10px 0px;
                     flex-direction: column;
                     justify-content: space-between;
-                    height: inherit;
+                    height: fill-available;
+                    min-height: 96%;
                 `}
 
 `
