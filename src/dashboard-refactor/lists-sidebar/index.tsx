@@ -59,7 +59,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                     <TopGroup>
                         <StaticSidebarItem
                             icon="feed"
-                            name="Activity Feed"
+                            name="Notifications"
                             isSelected={
                                 this.props.selectedListId ===
                                 SPECIAL_LIST_STRING_IDS.FEED

@@ -58,6 +58,7 @@ export interface Props extends RibbonSubcomponentProps {
     toggleAskAI: () => void
     openPDFinViewer: () => void
     selectRibbonPositionOption: (option) => void
+    hasFeedActivity: boolean
 }
 
 interface State {
@@ -649,7 +650,7 @@ export default class Ribbon extends Component<Props, State> {
                     <TitleContainer>
                         <Icon heightAndWidth="22px" filePath="feed" hoverOff />
                         <TitleContent>
-                            <SectionTitle>Activity Feed</SectionTitle>
+                            <SectionTitle>Notifications</SectionTitle>
                             <SectionDescription>
                                 Updates from Spaces and conversation you follow
                                 or contributed to.
@@ -964,6 +965,8 @@ export default class Ribbon extends Component<Props, State> {
                     >
                         <FeedActivityDot
                             key="activity-feed-indicator"
+                            // itemRef={this.feedButtonRef}
+                            // clickedOn={() => this.props.toggleFeed()}
                             {...this.props.activityIndicator}
                         />
                     </FeedIndicatorBox>
@@ -1063,10 +1066,10 @@ export default class Ribbon extends Component<Props, State> {
 
     renderBookmarkButton() {
         let bookmarkDate
-        if (this.props.bookmark.isBookmarked != null) {
-            bookmarkDate = moment(
-                new Date(this.props.bookmark.lastBookmarkTimestamp),
-            ).format('LLL')
+        if (this.props.bookmark.lastBookmarkTimestamp != null) {
+            bookmarkDate = moment
+                .unix(this.props.bookmark.lastBookmarkTimestamp)
+                .format('LLL')
         }
 
         const topRight = this.props.ribbonPosition === 'topRight'
@@ -1077,7 +1080,7 @@ export default class Ribbon extends Component<Props, State> {
                 tooltipText={
                     this.props.bookmark.isBookmarked ? (
                         <span>
-                            Saved on <DateText>{bookmarkDate}</DateText>
+                            First saved on <DateText>{bookmarkDate}</DateText>
                         </span>
                     ) : (
                         this.getTooltipText('createBookmark')
@@ -1102,7 +1105,8 @@ export default class Ribbon extends Component<Props, State> {
                         label={
                             this.props.bookmark.isBookmarked ? (
                                 <SavedButtonBox>
-                                    Saved<DateText>{bookmarkDate}</DateText>
+                                    Saved
+                                    {/* <DateText>{bookmarkDate}</DateText> */}
                                 </SavedButtonBox>
                             ) : (
                                 'Save'
@@ -1563,11 +1567,33 @@ export default class Ribbon extends Component<Props, State> {
                     isSidebarOpen={this.props.sidebar.isSidebarOpen}
                     ribbonPosition={this.props.ribbonPosition}
                 >
-                    <Icon
-                        icon={logoNoText}
-                        heightAndWidth="18px"
-                        color="prime2"
-                    />
+                    {this.props.hasFeedActivity && (
+                        <FeedActivityDotBox>
+                            <FeedActivityDot
+                                key="activity-feed-indicator"
+                                noRing={true}
+                                {...this.props.activityIndicator}
+                            />
+                        </FeedActivityDotBox>
+                    )}
+                    {this.props.lists.pageListIds.length > 0 && (
+                        <PillCounter>
+                            {this.props.lists.pageListIds.length}
+                        </PillCounter>
+                    )}
+                    {this.props.bookmark.isBookmarked ? (
+                        <Icon
+                            icon={icons.heartFull}
+                            heightAndWidth="18px"
+                            color="prime1"
+                        />
+                    ) : (
+                        <Icon
+                            icon={logoNoText}
+                            heightAndWidth="18px"
+                            color="prime2"
+                        />
+                    )}
                 </IconContainer>
             )
         } else {
@@ -1830,6 +1856,15 @@ const SelectionContainer = styled.div`
     flex: 1;
 `
 
+const FeedActivityDotBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-right: 3px;
+    margin-left: 3px;
+`
+
 const FeedButtonContainer = styled.div<{ ribbonPosition }>`
     display: flex;
     align-items: center;
@@ -1853,10 +1888,12 @@ const IconBox = styled.div`
 const IconContainer = styled.div<{ ribbonPosition }>`
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     cursor: pointer;
+    padding: 0 8px;
+    grid-gap: 5px;
     height: 100%;
-    width: 100%;
+    width: fit-content;
     background: ${(props) => props.theme.colors.greyScale1}90;
     backdrop-filter: blur(4px);
 
@@ -1938,6 +1975,19 @@ const SpacesCounter = styled.div`
     position: absolute;
     bottom: -2px;
     right: -2px;
+    height: 14px;
+    font-size: 12px;
+    width: auto;
+    padding: 0 4px;
+    color: ${(props) => props.theme.colors.black};
+    background-color: ${(props) => props.theme.colors.white};
+    border-radius: 30px;
+    min-width: 10px;
+`
+const PillCounter = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 14px;
     font-size: 12px;
     width: auto;
@@ -2306,7 +2356,8 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                     padding: 10px 0px;
                     flex-direction: column;
                     justify-content: space-between;
-                    height: inherit;
+                    height: fill-available;
+                    min-height: 96%;
                 `}
 
 `

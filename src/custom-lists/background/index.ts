@@ -88,6 +88,7 @@ export default class CustomListBackground {
             fetchSharedListDataWithOwnership: this
                 .fetchSharedListDataWithOwnership,
             fetchListPagesByUrl: this.fetchListPagesByUrl,
+            fetchPageListEntriesByUrl: this.fetchPageListEntriesByUrl,
             fetchListIdsByUrl: this.fetchListIdsByUrl,
             fetchInitialListSuggestions: this.fetchInitialListSuggestions,
             fetchListPagesById: this.fetchListPagesById,
@@ -533,6 +534,11 @@ export default class CustomListBackground {
     fetchListPagesByUrl = async ({ url }: { url: string }) => {
         return this.storage.fetchListPagesByUrl({
             url: normalizeUrl(url),
+        })
+    }
+    fetchPageListEntriesByUrl = async ({ url }: { url: string }) => {
+        return this.storage.fetchPageListEntriesByUrl({
+            normalizedPageUrl: normalizeUrl(url),
         })
     }
 

@@ -16,11 +16,6 @@ import { TooltipButton } from './tooltip-button'
 import { SidebarButton } from './sidebar-button'
 import { SidebarOpenButton } from './sidebar-open-button'
 import {
-    selectors as tagsSelectors,
-    acts as tagActs,
-    TagsButton,
-} from './tags-button'
-import {
     selectors as collectionsSelectors,
     acts as collectionActs,
     CollectionsButton,
@@ -31,8 +26,7 @@ import * as selectors from './selectors'
 import * as acts from './actions'
 import { ClickHandler, RootState } from './types'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import TagPicker from 'src/tags/ui/TagPicker'
-import { tags, collections } from 'src/util/remote-functions-background'
+import { collections } from 'src/util/remote-functions-background'
 import { BackContainer } from 'src/popup/components/BackContainer'
 const styles = require('./components/Popup.css')
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -49,7 +43,6 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 export interface OwnProps {}
 
 interface StateProps {
-    showTagsPicker: boolean
     showCollectionsPicker: boolean
     tabId: number
     url: string
@@ -59,10 +52,7 @@ interface StateProps {
 interface DispatchProps {
     initState: () => Promise<void>
     handleSearchChange: ClickHandler<HTMLInputElement>
-    toggleShowTagsPicker: () => void
     toggleShowCollectionsPicker: () => void
-    onTagAdd: (tag: string) => void
-    onTagDel: (tag: string) => void
     onCollectionAdd: (collection: string) => void
     onCollectionDel: (collection: string) => void
 }
@@ -71,7 +61,7 @@ export type Props = OwnProps & StateProps & DispatchProps
 
 class PopupContainer extends StatefulUIElement<Props, State, Event> {
     private browserName = checkBrowser()
-    private activityIndicatorBG: ActivityIndicatorInterface = runInBackground()
+    private activityIndicatorBG = runInBackground<ActivityIndicatorInterface>()
     constructor(props: Props) {
         super(
             props,
@@ -80,6 +70,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 runtimeAPI: browser.runtime,
                 extensionAPI: browser.extension,
                 customListsBG: collections,
+                pageIndexingBG: runInBackground(),
                 pdfIntegrationBG: runInBackground(),
                 syncSettings: createSyncSettingsStore({
                     syncSettingsBG: runInBackground(),
@@ -130,31 +121,12 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         this.closePopup()
     }
 
-    handleTagUpdate = async ({ added, deleted }) => {
-        const backendResult = tags.updateTagForPage({
-            added,
-            deleted,
-            url: this.props.url,
-        })
-        // Redux actions
-        if (added) {
-            this.props.onTagAdd(added)
-        }
-        if (deleted) {
-            return this.props.onTagDel(deleted)
-        }
-        return backendResult
-    }
-
-    handleTagAllTabs = (tagName: string) =>
-        tags.addTagsToOpenTabs({ name: tagName })
-    fetchTagsForPage = async () => tags.fetchPageTags({ url: this.props.url })
-
     handleListUpdate = async ({ added, deleted }) => {
         const backendResult = collections.updateListForPage({
             added,
             deleted,
             url: this.props.url,
+            tabId: this.props.tabId,
         })
         // Redux actions
         if (added) {
@@ -172,7 +144,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         collections.addOpenTabsToList({ listId })
 
     getPDFLocation = () => {
-        if (this.state.currentPageUrl.startsWith('file://')) {
+        if (this.state.currentTabFullUrl.startsWith('file://')) {
             return 'local'
         } else {
             return 'remote'
@@ -185,7 +157,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
     getPDFMode = () => {
         if (
-            isUrlPDFViewerUrl(this.state.currentPageUrl, {
+            isUrlPDFViewerUrl(this.state.currentTabFullUrl, {
                 runtimeAPI: browser.runtime,
             })
         ) {
@@ -277,22 +249,6 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             )
         }
 
-        if (this.props.showTagsPicker) {
-            return (
-                <SpacePickerContainer>
-                    <BackContainer
-                        onClick={this.props.toggleShowTagsPicker}
-                        header="Add Tags"
-                    />
-                    <TagPicker
-                        onUpdateEntrySelection={this.handleTagUpdate}
-                        initialSelectedEntries={this.fetchTagsForPage}
-                        actOnAllTabs={this.handleTagAllTabs}
-                    ></TagPicker>
-                </SpacePickerContainer>
-            )
-        }
-
         if (this.props.showCollectionsPicker) {
             return (
                 <SpacePickerContainer>
@@ -335,7 +291,10 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             <PopupContainerContainer>
                 {this.maybeRenderBlurredNotice()}
                 <FeedActivitySection
-                    onClick={() => window.open(this.whichFeed(), '_blank')}
+                    onClick={async () => {
+                        await this.activityIndicatorBG.markActivitiesAsSeen()
+                        window.open(this.whichFeed(), '_blank')
+                    }}
                 >
                     <FeedActivitySectionInnerContainer>
                         <Icon
@@ -343,14 +302,11 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                             heightAndWidth="22px"
                             hoverOff
                         />
-                        Activity Feed
+                        Notifications
                     </FeedActivitySectionInnerContainer>
                     <FeedActivityDot
                         key="activity-feed-indicator"
                         activityIndicatorBG={this.activityIndicatorBG}
-                        openFeedUrl={() =>
-                            window.open(this.whichFeed(), '_blank')
-                        }
                     />
                 </FeedActivitySection>
                 <BookmarkButton closePopup={this.closePopup} />
@@ -371,7 +327,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 )}
                 {this.getPDFMode() === 'reader' && (
                     <CopyPDFLinkButton
-                        currentPageUrl={this.state.currentPageUrl}
+                        currentPageUrl={this.state.currentTabFullUrl}
                     />
                 )}
                 <LinkButton goToDashboard={this.onSearchClick} />
@@ -556,7 +512,6 @@ const mapState: MapStateToProps<StateProps, OwnProps, RootState> = (state) => ({
     url: selectors.url(state),
     searchValue: selectors.searchValue(state),
     showCollectionsPicker: collectionsSelectors.showCollectionsPicker(state),
-    showTagsPicker: tagsSelectors.showTagsPicker(state),
 })
 
 const mapDispatch = (dispatch): DispatchProps => ({
@@ -566,11 +521,8 @@ const mapDispatch = (dispatch): DispatchProps => ({
         const input = e.target as HTMLInputElement
         dispatch(acts.setSearchVal(input.value))
     },
-    toggleShowTagsPicker: () => dispatch(tagActs.toggleShowTagsPicker()),
     toggleShowCollectionsPicker: () =>
         dispatch(collectionActs.toggleShowTagsPicker()),
-    onTagAdd: (tag: string) => dispatch(tagActs.addTagToPage(tag)),
-    onTagDel: (tag: string) => dispatch(tagActs.deleteTag(tag)),
     onCollectionAdd: (collection: string) =>
         dispatch(collectionActs.addCollectionToPage(collection)),
     onCollectionDel: (collection: string) =>

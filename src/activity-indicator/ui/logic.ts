@@ -6,7 +6,8 @@ export interface Dependencies {
         ActivityIndicatorInterface,
         'checkActivityStatus' | 'markActivitiesAsSeen'
     >
-    openFeedUrl: () => void
+    clickedOn?: () => void
+    // openFeedUrl: () => void
 }
 
 export interface State {
@@ -50,7 +51,6 @@ export default class Logic extends UILogic<State, Events> {
     clickFeedEntry: EventHandler<'clickFeedEntry'> = async ({
         previousState,
     }) => {
-        this.dependencies.openFeedUrl()
         this.emitMutation({ hasFeedActivity: { $set: false } })
         await this.dependencies.activityIndicatorBG.markActivitiesAsSeen()
     }

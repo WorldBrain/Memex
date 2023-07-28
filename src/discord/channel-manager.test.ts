@@ -2,6 +2,8 @@ import { makeId, setupDiscordTestContext } from './event-processor.test-setup'
 import { DISCORD_LIST_USER_ID } from '@worldbrain/memex-common/lib/chat-bots/constants'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import type { DiscordList } from '@worldbrain/memex-common/lib/discord/types'
+import { SharedListKey } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 const missingGuildId = makeId('gld', 99)
 const missingGuildName = 'test guild'
@@ -77,8 +79,14 @@ describe('Discord channel management module', () => {
         const discordLists: DiscordList[] = await serverStorage.manager
             .collection('discordList')
             .findAllObjects({})
+        const sharedListKeys: Array<
+            SharedListKey & { id: AutoPk }
+        > = await serverStorage.manager
+            .collection('sharedListKey')
+            .findAllObjects({})
         const memexSocialLink = getListShareUrl({
             remoteListId: discordLists[0].sharedList.toString(),
+            collaborationKey: sharedListKeys[0].id.toString(),
         })
 
         expect(discordLists).toEqual([

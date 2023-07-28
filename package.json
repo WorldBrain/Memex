@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.4.19",
+    "version": "3.4.20",
     "homepage": "https://worldbrain.io",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
@@ -96,7 +96,7 @@
         "fathom-web": "^2.1.0",
         "firebase": "9.9.4",
         "firebase-admin": "^10.0.0",
-        "firebase-functions": "^3.16.0",
+        "firebase-functions": "4.4.1",
         "hex-to-rgb": "^1.0.1",
         "history": "^3.2.1",
         "immutability-helper": "^3.0.1",

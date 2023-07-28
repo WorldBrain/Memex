@@ -7,7 +7,6 @@
 import { ThunkAction, ThunkDispatch } from 'redux-thunk'
 
 import { State as BookmarkBtnState } from 'src/popup/bookmark-button/reducer'
-import { State as TagsBtnState } from 'src/popup/tags-button/reducer'
 import { State as CollectionsBtnState } from 'src/popup/collections-button/reducer'
 import { State as PauseBtnState } from 'src/popup/pause-button/reducer'
 import { State as PopupState } from 'src/popup/reducer'
@@ -19,7 +18,6 @@ import { State as CustomListsState } from 'src/custom-lists/types'
 
 export default interface RootState {
     bookmarkBtn: BookmarkBtnState
-    tagsBtn: TagsBtnState
     collectionsBtn: CollectionsBtnState
     pauseBtn: PauseBtnState
     popup: PopupState

@@ -59,12 +59,14 @@ export default class ActivityIndicatorBackground {
 
     checkActivityStatus: ActivityIndicatorInterface['checkActivityStatus'] = async () => {
         await this.options.servicesPromise
+
         return this.service.checkActivityStatus()
     }
 
     markActivitiesAsSeen = async () => {
         await this.options.servicesPromise
-        return this.service.markActivitiesAsSeen()
+        await this.service.markActivitiesAsSeen()
+        return
 
         // Below is the old implementation (not used since first implemented)
         // const { auth } = this.options.services

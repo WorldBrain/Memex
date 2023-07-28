@@ -1,7 +1,6 @@
 import { ThunkAction } from 'redux-thunk'
 
 import { State as BookmarkBtnState } from './bookmark-button/reducer'
-import { State as TagsBtnState } from './tags-button/reducer'
 import { State as CollectionsBtnState } from './collections-button/reducer'
 import { State as PauseBtnState } from './pause-button/reducer'
 import { State as NotifsBtnState } from './notif-button/reducer'
@@ -13,7 +12,6 @@ import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
 
 export interface RootState {
     bookmarkBtn?: BookmarkBtnState
-    tagsBtn: TagsBtnState
     collectionsBtn: CollectionsBtnState
     pauseBtn?: PauseBtnState
     sidebarBtn?: SidebarBtnState

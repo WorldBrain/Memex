@@ -1,13 +1,12 @@
-import browser, { Tabs } from 'webextension-polyfill'
+import browser from 'webextension-polyfill'
 import { createAction } from 'redux-act'
 import { remoteFunction, runInBackground } from '../util/webextensionRPC'
-import { Thunk } from './types'
+import type { Thunk } from './types'
+import { getCurrentTab } from './utils'
 import { acts as bookmarkActs } from './bookmark-button'
-import { acts as tagActs } from './tags-button'
 import { acts as collectionActs } from './collections-button'
-import { BookmarksInterface } from 'src/bookmarks/background/types'
-import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
-import { PageIndexingInterface } from 'src/page-indexing/background/types'
+import type { BookmarksInterface } from 'src/bookmarks/background/types'
+import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { isUrlSupported } from 'src/page-indexing/utils'
 
 const fetchPageTagsRPC = remoteFunction('fetchPageTags')
@@ -20,19 +19,6 @@ const bookmarks = runInBackground<BookmarksInterface>()
 export const setTabId = createAction<number>('popup/setTabId')
 export const setUrl = createAction<string>('popup/setUrl')
 export const setSearchVal = createAction<string>('popup/setSearchVal')
-
-const getCurrentTab = async (): Promise<Tabs.Tab & { originalUrl: string }> => {
-    const [currentTab] = await browser.tabs.query({
-        active: true,
-        currentWindow: true,
-    })
-
-    return {
-        ...currentTab,
-        originalUrl: currentTab.url,
-        url: getUnderlyingResourceUrl(currentTab.url),
-    }
-}
 
 const setTabAndUrl: (id: number, url: string) => Thunk = (id, url) => async (
     dispatch,
@@ -49,7 +35,10 @@ const setTabIsBookmarked: (pageUrl: string) => Thunk = (pageUrl) => async (
 }
 
 async function init() {
-    const currentTab = await getCurrentTab()
+    const currentTab = await getCurrentTab({
+        runtimeAPI: browser.runtime,
+        tabsAPI: browser.tabs,
+    })
 
     // If we can't get the tab data, then can't init action button states
     if (
@@ -102,8 +91,6 @@ export const initState: () => Thunk = () => async (dispatch) => {
             notInclude: pageTags,
             type: 'tag',
         })
-        dispatch(tagActs.setInitTagSuggests([...pageTags, ...tags]))
-        dispatch(tagActs.setTags(pageTags))
     } catch (err) {
         // Do nothing; just catch the error - means page doesn't exist for URL
         console.warn('initState - Error', err)

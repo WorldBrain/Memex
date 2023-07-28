@@ -1,5 +1,6 @@
 import Logic, { State, Event } from './logic'
 import {
+    insertBackgroundFunctionTab,
     makeSingleDeviceUILogicTestFactory,
     UILogicTestDevice,
 } from 'src/tests/ui-logic-tests'
@@ -31,6 +32,9 @@ async function setupTest(
             getURL: () => TEST_EXT_PAGE,
         },
         syncSettings: syncSettingsStore,
+        pageIndexingBG: insertBackgroundFunctionTab(
+            backgroundModules.pages.remoteFunctions,
+        ) as any,
         pdfIntegrationBG: backgroundModules.pdfBg.remoteFunctions,
         customListsBG: backgroundModules.customLists.remoteFunctions,
         extensionAPI: { isAllowedFileSchemeAccess: async () => true },
@@ -73,11 +77,11 @@ describe('Popup UI logic', () => {
 
         await syncSettingsStore.pdfIntegration.set('shouldAutoOpen', true)
         expect(logic.state.isPDFReaderEnabled).toBe(false)
-        expect(logic.state.currentPageUrl).toBe('')
+        expect(logic.state.currentTabFullUrl).toBe('')
         expect(logic.state.loadState).toBe('pristine')
         await logic.init()
         expect(logic.state.isPDFReaderEnabled).toBe(true)
-        expect(logic.state.currentPageUrl).toBe(currentPageUrl)
+        expect(logic.state.currentTabFullUrl).toBe(currentPageUrl)
         expect(logic.state.loadState).toBe('success')
 
         await syncSettingsStore.pdfIntegration.set('shouldAutoOpen', false)

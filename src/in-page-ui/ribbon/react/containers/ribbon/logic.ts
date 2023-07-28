@@ -59,6 +59,7 @@ export interface RibbonContainerState {
     annotations: number
     search: ValuesOf<componentTypes.RibbonSearchProps>
     pausing: ValuesOf<componentTypes.RibbonPausingProps>
+    hasFeedActivity: boolean
 }
 
 export type RibbonContainerEvents = UIEvent<
@@ -172,6 +173,7 @@ export class RibbonContainerLogic extends UILogic<
             pausing: {
                 isPaused: false,
             },
+            hasFeedActivity: false,
         }
     }
 
@@ -192,16 +194,11 @@ export class RibbonContainerLogic extends UILogic<
         //     ?.shadowRoot.getElementById('annotationSidebarContainer')
         this.initReadingViewListeners()
         const fullPageUrl = await getFullPageUrl()
-        const bookmark = await this.dependencies.bookmarks.findBookmark(
-            fullPageUrl,
-        )
-        if (bookmark?.time) {
-            this.emitMutation({
-                bookmark: {
-                    lastBookmarkTimestamp: { $set: bookmark.time },
-                },
-            })
-        }
+
+        await this.hydrateStateFromDB({
+            ...incoming,
+            event: { url: fullPageUrl },
+        })
     }
 
     async initReadingViewListeners() {
@@ -222,11 +219,20 @@ export class RibbonContainerLogic extends UILogic<
     hydrateStateFromDB: EventHandler<'hydrateStateFromDB'> = async ({
         event: { url },
     }) => {
-        const tags = await this.dependencies.tags.fetchPageTags({ url })
         let lists = []
+        let interActionTimestamps = []
+
         let fullLists = await this.dependencies.customLists.fetchListPagesByUrl(
             { url: url },
         )
+        let fullListEntries = await this.dependencies.customLists.fetchPageListEntriesByUrl(
+            { url: url },
+        )
+
+        fullListEntries.map((entry) => {
+            let date = Math.floor(new Date(entry.createdAt).getTime() / 1000)
+            interActionTimestamps.push(date)
+        })
 
         fullLists
             .filter((list) => list.type !== 'page-link')
@@ -235,10 +241,25 @@ export class RibbonContainerLogic extends UILogic<
             })
 
         const annotations = await this.dependencies.annotationsCache.annotations
-            .allIds.length
+        const annotationList = Object.values(annotations.byId)
+        annotationList.map((annotation) => {
+            return interActionTimestamps.push(
+                Math.floor(annotation.createdWhen / 1000),
+            )
+        })
 
         const bookmark = await this.dependencies.bookmarks.findBookmark(url)
+        const isBookmarked =
+            bookmark || annotations.allIds.length > 0 || lists.length > 0
 
+        if (bookmark?.time != null) {
+            interActionTimestamps.push(bookmark.time)
+        }
+        const saveTime = Math.min.apply(Math, interActionTimestamps)
+
+        const activityStatus = await this.dependencies.syncSettings.activityIndicator.get(
+            'feedHasActivity',
+        )
         this.emitMutation({
             fullPageUrl: { $set: url },
             pausing: {
@@ -247,8 +268,8 @@ export class RibbonContainerLogic extends UILogic<
                 },
             },
             bookmark: {
-                isBookmarked: { $set: !!bookmark },
-                lastBookmarkTimestamp: { $set: bookmark?.time },
+                isBookmarked: { $set: !!isBookmarked },
+                lastBookmarkTimestamp: { $set: saveTime },
             },
             isRibbonEnabled: {
                 $set: await this.dependencies.getSidebarEnabled(),
@@ -263,13 +284,9 @@ export class RibbonContainerLogic extends UILogic<
                     $set: await this.dependencies.highlights.getState(),
                 },
             },
-            tagging: {
-                pageHasTags: {
-                    $set: tags.length > 0,
-                },
-            },
             lists: { pageListIds: { $set: lists } },
-            annotations: { $set: annotations },
+            annotations: { $set: annotations.allIds.length },
+            hasFeedActivity: { $set: activityStatus },
         })
     }
 
@@ -510,7 +527,9 @@ export class RibbonContainerLogic extends UILogic<
                 this.emitMutation({
                     bookmark: {
                         isBookmarked: { $set: isBookmarked },
-                        lastBookmarkTimestamp: { $set: Date.now() },
+                        lastBookmarkTimestamp: {
+                            $set: Math.floor(Date.now() / 1000),
+                        },
                     },
                 })
 
@@ -750,6 +769,10 @@ export class RibbonContainerLogic extends UILogic<
         }
         this.emitMutation({
             lists: { pageListIds: { $set: [...pageListsSet] } },
+            bookmark: {
+                isBookmarked: { $set: true },
+                lastBookmarkTimestamp: { $set: Math.floor(Date.now() / 1000) },
+            },
         })
 
         const { annotationsCache } = this.dependencies

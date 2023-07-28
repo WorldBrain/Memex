@@ -9,6 +9,8 @@ import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { PDFRemoteInterface } from 'src/pdf/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
+import type { PageIndexingInterface } from 'src/page-indexing/background/types'
+import { getCurrentTab } from './utils'
 
 export interface Dependencies {
     extensionAPI: Pick<Extension.Static, 'isAllowedFileSchemeAccess'>
@@ -17,6 +19,7 @@ export interface Dependencies {
     syncSettings: SyncSettingsStore<'pdfIntegration' | 'extension'>
     customListsBG: RemoteCollectionsInterface
     pdfIntegrationBG: PDFRemoteInterface
+    pageIndexingBG: PageIndexingInterface<'caller'>
 }
 
 export interface Event {
@@ -29,7 +32,10 @@ export interface Event {
 export interface State {
     pageListIds: number[]
     loadState: UITaskState
-    currentPageUrl: string
+    currentTabFullUrl: string
+    identifierFullUrl: string
+    /** In the case of a PDF, contains the URL to the web-available PDF. Else is just the full tab URL. */
+    underlyingResourceUrl: string
     shouldShowTagsUIs: boolean
     isPDFReaderEnabled: boolean
     isFileAccessAllowed: boolean
@@ -49,7 +55,9 @@ export default class PopupLogic extends UILogic<State, Event> {
 
     getInitialState = (): State => ({
         pageListIds: [],
-        currentPageUrl: '',
+        currentTabFullUrl: '',
+        identifierFullUrl: '',
+        underlyingResourceUrl: '',
         loadState: 'pristine',
         shouldShowTagsUIs: false,
         isPDFReaderEnabled: false,
@@ -61,8 +69,10 @@ export default class PopupLogic extends UILogic<State, Event> {
         const {
             tabsAPI,
             syncSettings,
+            runtimeAPI,
             extensionAPI,
             customListsBG,
+            pageIndexingBG,
         } = this.dependencies
 
         await loadInitial(this, async () => {
@@ -70,22 +80,23 @@ export default class PopupLogic extends UILogic<State, Event> {
                 syncSettings.extension.get('areTagsMigratedToSpaces'),
                 syncSettings.pdfIntegration.get('shouldAutoOpen'),
             ])
-            const [currentTab] = await tabsAPI.query({
-                active: true,
-                currentWindow: true,
+
+            const currentTab = await getCurrentTab({ runtimeAPI, tabsAPI })
+            const identifier = await pageIndexingBG.waitForContentIdentifier({
+                tabId: currentTab.id,
+                fullUrl: currentTab.url,
             })
 
-            const pageListIds =
-                currentTab?.url != null
-                    ? await customListsBG.fetchPageLists({
-                          url: currentTab.url,
-                      })
-                    : []
+            const pageListIds = await customListsBG.fetchPageLists({
+                url: identifier.fullUrl,
+            })
 
             const isFileAccessAllowed = await extensionAPI.isAllowedFileSchemeAccess()
             this.emitMutation({
                 pageListIds: { $set: pageListIds },
-                currentPageUrl: { $set: currentTab?.url },
+                currentTabFullUrl: { $set: currentTab.originalUrl },
+                identifierFullUrl: { $set: identifier.fullUrl },
+                underlyingResourceUrl: { $set: currentTab.url },
                 shouldShowTagsUIs: { $set: !areTagsMigrated },
                 isPDFReaderEnabled: { $set: isPDFReaderEnabled },
                 isFileAccessAllowed: { $set: isFileAccessAllowed },
@@ -94,7 +105,7 @@ export default class PopupLogic extends UILogic<State, Event> {
     }
 
     togglePDFReader: EventHandler<'togglePDFReader'> = async ({
-        previousState: { currentPageUrl },
+        previousState: { currentTabFullUrl },
     }) => {
         const { runtimeAPI, tabsAPI, pdfIntegrationBG } = this.dependencies
         const [currentTab] = await tabsAPI.query({
@@ -103,20 +114,20 @@ export default class PopupLogic extends UILogic<State, Event> {
         })
 
         let nextPageUrl: string
-        if (isUrlPDFViewerUrl(currentPageUrl, { runtimeAPI })) {
+        if (isUrlPDFViewerUrl(currentTabFullUrl, { runtimeAPI })) {
             nextPageUrl = decodeURIComponent(
-                currentPageUrl.split('?file=')[1].toString(),
+                currentTabFullUrl.split('?file=')[1].toString(),
             )
             await pdfIntegrationBG.doNotOpenPdfViewerForNextPdf()
         } else {
-            nextPageUrl = constructPDFViewerUrl(currentPageUrl, {
+            nextPageUrl = constructPDFViewerUrl(currentTabFullUrl, {
                 runtimeAPI,
             })
             await pdfIntegrationBG.openPdfViewerForNextPdf()
         }
 
         await tabsAPI.update(currentTab.id, { url: nextPageUrl })
-        this.emitMutation({ currentPageUrl: { $set: nextPageUrl } })
+        this.emitMutation({ currentTabFullUrl: { $set: nextPageUrl } })
     }
 
     addPageList: EventHandler<'addPageList'> = async ({

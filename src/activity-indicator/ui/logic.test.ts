@@ -4,19 +4,14 @@ import {
 } from 'src/tests/ui-logic-tests'
 import Logic, { Dependencies } from './logic'
 
-async function setupTest(
-    device: UILogicTestDevice,
-    {
-        openFeedUrl = () => undefined,
-    }: { openFeedUrl?: Dependencies['openFeedUrl'] },
-) {
+async function setupTest(device: UILogicTestDevice) {
     await device.authService.loginWithEmailAndPassword(
         'user@user.com',
         'password',
     )
     const logicInstance = new Logic({
         activityIndicatorBG: device.backgroundModules.activityIndicator,
-        openFeedUrl,
+        // openFeedUrl,
     })
 
     const logic = device.createElement(logicInstance)
@@ -30,7 +25,7 @@ describe('Feed activity indicator UI', () => {
     it('Should set state on init depending what activity status is retrieved', async ({
         device,
     }) => {
-        const { logic } = await setupTest(device, {})
+        const { logic } = await setupTest(device)
 
         await device.backgroundModules.activityIndicator[
             'options'
@@ -52,11 +47,7 @@ describe('Feed activity indicator UI', () => {
         device,
     }) => {
         let isFeedOpen = false
-        const { logic } = await setupTest(device, {
-            openFeedUrl: () => {
-                isFeedOpen = true
-            },
-        })
+        const { logic } = await setupTest(device)
 
         await device.backgroundModules.activityIndicator[
             'options'

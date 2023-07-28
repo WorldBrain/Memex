@@ -268,7 +268,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                         <TooltipTextContainer>
                             <TooltipTextTop>
                                 You have <strong>{this.leftOverBlocks}</strong>{' '}
-                                pages left
+                                queries left
                             </TooltipTextTop>
                             <TooltipTextBottom>
                                 Click for more info

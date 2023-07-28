@@ -9,7 +9,6 @@ import { reducer as sidebarOpenBtn } from './sidebar-open-button'
 import { reducer as tooltipBtn } from './tooltip-button'
 import { reducer as notifsBtn } from './notif-button'
 import { reducer as pauseBtn } from './pause-button'
-import { reducer as tagsBtn } from './tags-button'
 import popup from './reducer'
 
 const rootReducer = combineReducers({
@@ -20,7 +19,6 @@ const rootReducer = combineReducers({
     tooltipBtn,
     notifsBtn,
     pauseBtn,
-    tagsBtn,
     popup,
 })
 

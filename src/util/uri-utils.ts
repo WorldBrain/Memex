@@ -1,4 +1,4 @@
-import browser from 'webextension-polyfill'
+import browser, { Runtime } from 'webextension-polyfill'
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 
 /**
@@ -6,8 +6,13 @@ import { isUrlPDFViewerUrl } from 'src/pdf/util'
  * This function will detect special cases and return the underlying resource's URL, if a special case.
  * Should operate like identity function for non-special cases.
  */
-export const getUnderlyingResourceUrl = (url: string) => {
-    if (isUrlPDFViewerUrl(url, { runtimeAPI: browser.runtime })) {
+export const getUnderlyingResourceUrl = (
+    url: string,
+    browserAPIs: { runtimeAPI: Pick<Runtime.Static, 'getURL'> } = {
+        runtimeAPI: browser.runtime,
+    },
+) => {
+    if (isUrlPDFViewerUrl(url, browserAPIs)) {
         return new URL(url).searchParams.get('file')
     }
 

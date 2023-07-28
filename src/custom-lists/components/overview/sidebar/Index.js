@@ -206,7 +206,7 @@ class ListContainer extends Component {
         )),
         <FeedActivityIndicator
             key="activity-feed-indicator"
-            openFeedUrl={() => window.open(this.whichFeed(), '_blank')}
+            // openFeedUrl={() => window.open(this.whichFeed(), '_blank')}
         />,
     ]
 
