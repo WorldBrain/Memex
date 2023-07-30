@@ -525,7 +525,7 @@ export default class Ribbon extends Component<Props, State> {
                                     <ExtraButtonRow
                                         onClick={() =>
                                             window.open(
-                                                'https://worldbrain.io/tutorials',
+                                                'https://tutorials.memex.garden/tutorials',
                                             )
                                         }
                                     >
@@ -1915,10 +1915,18 @@ const SupportContainer = styled.div`
     height: fit-content;
     overflow: scroll;
 
-    &::-webkit-scrollbar {
-        display: none;
+    ::-webkit-scrollbar {
+        -webkit-appearance: none;
+        width: 10px;
+        height: 100%;
+        margin: 10px 0px;
     }
-    scrollbar-width: none;
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 12px;
+        background-color: ${(props) => props.theme.colors.black};
+        margin: 10px 10px;
+    }
 `
 
 const SupportBox = styled.div`
