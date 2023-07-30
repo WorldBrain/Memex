@@ -425,13 +425,14 @@ export class RibbonContainerLogic extends UILogic<
         }
 
         if (!previousState.showFeed) {
-            await this.dependencies.activityIndicatorBG.markActivitiesAsSeen()
             mutation.commentBox = { showCommentBox: { $set: false } }
             mutation.tagging = { showTagsPicker: { $set: false } }
             mutation.lists = { showListsPicker: { $set: false } }
+            this.emitMutation(mutation)
+            await this.dependencies.activityIndicatorBG.markActivitiesAsSeen()
+        } else {
+            this.emitMutation(mutation)
         }
-
-        this.emitMutation(mutation)
     }
 
     toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'> = ({
