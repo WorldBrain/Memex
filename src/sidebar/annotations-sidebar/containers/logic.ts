@@ -1030,7 +1030,6 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        console.log('editAnnotation', event)
         const cardId = getAnnotCardInstanceId(event)
         const {
             annotationCardInstances: { [cardId]: formData },

@@ -232,7 +232,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         ])
 
         if (event.action === 'comment') {
-            console.log('comment')
             await this.processEvent('setActiveSidebarTab', {
                 tab:
                     this.state.selectedListId &&
