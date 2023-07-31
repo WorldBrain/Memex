@@ -233,13 +233,13 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
         if (event.action === 'comment') {
             console.log('comment')
-            // await this.processEvent('setActiveSidebarTab', {
-            //     tab:
-            //         this.state.selectedListId &&
-            //         this.state.activeTab === 'spaces'
-            //             ? 'spaces'
-            //             : 'annotations',
-            // })
+            await this.processEvent('setActiveSidebarTab', {
+                tab:
+                    this.state.selectedListId &&
+                    this.state.activeTab === 'spaces'
+                        ? 'spaces'
+                        : 'annotations',
+            })
             await this.processEvent('setNewPageNoteText', {
                 comment: event.annotationData?.commentText ?? '',
             })
@@ -259,12 +259,29 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.activateAnnotation(event.annotationCacheId, 'show')
         } else if (event.action === 'edit_annotation') {
             await this.processEvent('setActiveSidebarTab', {
-                tab: this.state.selectedListId ? 'spaces' : 'annotations',
+                tab:
+                    this.state.selectedListId &&
+                    this.state.activeTab === 'spaces'
+                        ? 'spaces'
+                        : 'annotations',
             })
             await this.activateAnnotation(event.annotationCacheId, 'edit')
+            await this.processEvent('setAnnotationEditMode', {
+                instanceLocation:
+                    this.state.selectedListId &&
+                    this.state.activeTab === 'spaces'
+                        ? this.state.selectedListId
+                        : 'annotations-tab',
+                unifiedAnnotationId: event.annotationCacheId,
+                isEditing: true,
+            })
         } else if (event.action === 'edit_annotation_spaces') {
             await this.processEvent('setActiveSidebarTab', {
-                tab: this.state.selectedListId ? 'spaces' : 'annotations',
+                tab:
+                    this.state.selectedListId &&
+                    this.state.activeTab === 'spaces'
+                        ? 'spaces'
+                        : 'annotations',
             })
             await this.activateAnnotation(
                 event.annotationCacheId,

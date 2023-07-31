@@ -938,10 +938,6 @@ export class SidebarContainerLogic extends UILogic<
     setAllNotesShareMenuShown: EventHandler<
         'setAllNotesShareMenuShown'
     > = async ({ previousState, event }) => {
-        if (!(await this.ensureLoggedIn())) {
-            return
-        }
-
         this.emitMutation({
             showAllNotesShareMenu: { $set: event.shown },
         })
@@ -1034,6 +1030,7 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        console.log('editAnnotation', event)
         const cardId = getAnnotCardInstanceId(event)
         const {
             annotationCardInstances: { [cardId]: formData },
