@@ -644,18 +644,6 @@ export default class SpacePickerLogic extends UILogic<
         }
     }
 
-    selectedEntryPress: EventHandler<'selectedEntryPress'> = async ({
-        event: { entry },
-        previousState,
-    }) => {
-        this.selectedListIds = previousState.selectedListIds.filter(
-            (id) => id !== entry,
-        )
-        this.emitMutation({ selectedListIds: { $set: this.selectedListIds } })
-
-        await this.dependencies.unselectEntry(entry)
-    }
-
     resultEntryPress: EventHandler<'resultEntryPress'> = async ({
         event: { entry },
         previousState,
@@ -706,7 +694,9 @@ export default class SpacePickerLogic extends UILogic<
             nextState = this.withMutation(previousState, mutation)
 
             // Manually trigger list subscription - which does the list state mutation - as it won't be auto-triggered here
-            this.cacheListsSubscription(previousState.listEntries)
+            this.cacheListsSubscription(
+                this.dependencies.annotationsCache.lists,
+            )
             await entrySelectPromise
         } catch (e) {
             this.selectedListIds = previousState.selectedListIds

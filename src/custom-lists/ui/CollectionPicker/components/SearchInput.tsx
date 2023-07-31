@@ -16,7 +16,6 @@ interface Props {
     onKeyUp: (e: KeyboardEvent) => void
     searchInputPlaceholder: string
     value: string
-    before: JSX.Element
     searchInputRef?: (e: HTMLTextAreaElement | HTMLInputElement) => void
     showPlaceholder?: boolean
     loading?: boolean

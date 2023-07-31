@@ -36,7 +36,6 @@ export interface SpacePickerState {
 export type SpacePickerEvent = UIEvent<{
     setSearchInputRef: { ref: HTMLInputElement }
     searchInputChanged: { query: string; skipDebounce?: boolean }
-    selectedEntryPress: { entry: number }
     resultEntryAllPress: { entry: UnifiedList }
     newEntryAllPress: { entry: string }
     resultEntryPress: { entry: Pick<UnifiedList, 'localId'> }
