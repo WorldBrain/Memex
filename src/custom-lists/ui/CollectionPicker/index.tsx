@@ -14,7 +14,6 @@ import AddNewEntry from './components/AddNewEntry'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import EntryRow from './components/EntryRow'
 import * as Colors from 'src/common-ui/components/design-library/colors'
-import { EntrySelectedList } from './components/EntrySelectedList'
 import { ListResultItem } from './components/ListResultItem'
 import {
     auth,
@@ -30,7 +29,6 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { getListShareUrl } from 'src/content-sharing/utils'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { getEntriesForCurrentPickerTab } from './utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
@@ -117,9 +115,6 @@ class SpacePicker extends StatefulUIElement<
 
     handleSearchInputChanged = (query: string) =>
         this.processEvent('searchInputChanged', { query })
-
-    handleSelectedListPress = (list: number) =>
-        this.processEvent('selectedEntryPress', { entry: list })
 
     handleNewListAllPress: React.MouseEventHandler = (e) => {
         e.stopPropagation()
@@ -408,12 +403,6 @@ class SpacePicker extends StatefulUIElement<
                         onKeyDown={this.handleKeyPress}
                         onKeyUp={this.handleKeyUp}
                         value={this.state.query}
-                        before={
-                            <EntrySelectedList
-                                entries={this.selectedDisplayEntries}
-                                onPress={this.handleSelectedListPress}
-                            />
-                        }
                         autoFocus={this.props.autoFocus}
                     />
                 </SearchContainer>

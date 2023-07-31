@@ -644,18 +644,6 @@ export default class SpacePickerLogic extends UILogic<
         }
     }
 
-    selectedEntryPress: EventHandler<'selectedEntryPress'> = async ({
-        event: { entry },
-        previousState,
-    }) => {
-        this.selectedListIds = previousState.selectedListIds.filter(
-            (id) => id !== entry,
-        )
-        this.emitMutation({ selectedListIds: { $set: this.selectedListIds } })
-
-        await this.dependencies.unselectEntry(entry)
-    }
-
     resultEntryPress: EventHandler<'resultEntryPress'> = async ({
         event: { entry },
         previousState,
