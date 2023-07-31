@@ -694,7 +694,9 @@ export default class SpacePickerLogic extends UILogic<
             nextState = this.withMutation(previousState, mutation)
 
             // Manually trigger list subscription - which does the list state mutation - as it won't be auto-triggered here
-            this.cacheListsSubscription(previousState.listEntries)
+            this.cacheListsSubscription(
+                this.dependencies.annotationsCache.lists,
+            )
             await entrySelectPromise
         } catch (e) {
             this.selectedListIds = previousState.selectedListIds
