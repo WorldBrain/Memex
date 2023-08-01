@@ -302,7 +302,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                             heightAndWidth="22px"
                             hoverOff
                         />
-                        Activity Feed
+                        Notifications
                     </FeedActivitySectionInnerContainer>
                     <FeedActivityDot
                         key="activity-feed-indicator"

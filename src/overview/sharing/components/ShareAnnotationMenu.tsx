@@ -306,6 +306,7 @@ const TopArea = styled.div<{ context: string }>`
 
             &:first-child {
                 padding: unset;
+                margin-bottom: 0px;
             }
         `};
 `

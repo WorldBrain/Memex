@@ -199,7 +199,6 @@ const Menu = styled.div<{ leftPosition: string }>`
     width: max-content;
     list-style: none;
     border-radius: 12px;
-    background: ${(props) => props.theme.colors.greyScale1};
     width: ${(props) => props.width ?? 'max-content'};
     flex-direction: column;
     z-index: 1000;

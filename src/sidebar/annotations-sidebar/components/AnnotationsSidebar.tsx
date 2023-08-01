@@ -502,7 +502,7 @@ export class AnnotationsSidebar extends React.Component<
                     </IconBox>
                     <InfoText>
                         {listData.type === 'page-link'
-                            ? 'Add new annotations to this shareable page link'
+                            ? 'Add new notes to this page link by highlighting text, or by adding existing notes to it via the Space selector on each note.'
                             : 'This page is added to this Space, but has no notes yet.'}
                     </InfoText>
                 </EmptyMessageContainer>
@@ -949,7 +949,7 @@ export class AnnotationsSidebar extends React.Component<
                 strategy="fixed"
                 placement="bottom-end"
                 offsetX={10}
-                offsetY={50}
+                offsetY={0}
                 targetElementRef={refObject?.current}
                 closeComponent={() =>
                     this.props.openContextMenuForList(listData.unifiedId)
@@ -2891,6 +2891,7 @@ const InfoText = styled.div`
     font-size: 14px;
     font-weight: 400;
     text-align: center;
+    max-width: 80%;
 `
 
 const ButtonStyled = styled.button`
@@ -2980,7 +2981,7 @@ const FollowedNotesContainer = styled.div`
     flex-direction: column;
     width: 100%;
     padding-bottom: 60px;
-    z-index: 30;
+    z-index: 60;
 `
 
 const FollowedListsMsgContainer = styled.div`

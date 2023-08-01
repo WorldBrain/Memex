@@ -938,10 +938,6 @@ export class SidebarContainerLogic extends UILogic<
     setAllNotesShareMenuShown: EventHandler<
         'setAllNotesShareMenuShown'
     > = async ({ previousState, event }) => {
-        if (!(await this.ensureLoggedIn())) {
-            return
-        }
-
         this.emitMutation({
             showAllNotesShareMenu: { $set: event.shown },
         })

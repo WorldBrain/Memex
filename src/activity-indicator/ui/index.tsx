@@ -1,10 +1,13 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { StaticListItem } from 'src/custom-lists/components/overview/sidebar/static-list-item'
 import Logic, { Dependencies, State, Events } from './logic'
 
-export interface Props extends Dependencies {}
+export interface Props extends Dependencies {
+    noRing?: boolean
+    itemRef?: React.RefObject<HTMLDivElement>
+}
 
 export default class FeedActivityIndicator extends StatefulUIElement<
     Props,
@@ -49,7 +52,10 @@ export class FeedActivityDot extends StatefulUIElement<Props, State, Events> {
         if (this.state.isShown) {
             if (this.state.hasFeedActivity) {
                 return (
-                    <OuterRing>
+                    <OuterRing
+                        ref={this.props.itemRef}
+                        noRing={this.props.noRing}
+                    >
                         <Dot
                             unread={this.state.hasFeedActivity ? 1 : 0}
                             onClick={this.handleFeedIndicatorClick}
@@ -57,7 +63,7 @@ export class FeedActivityDot extends StatefulUIElement<Props, State, Events> {
                     </OuterRing>
                 )
             } else {
-                return <OuterRing />
+                return <OuterRing noRing={this.props.noRing} />
             }
         }
 
@@ -65,7 +71,9 @@ export class FeedActivityDot extends StatefulUIElement<Props, State, Events> {
     }
 }
 
-const OuterRing = styled.div`
+const OuterRing = styled.div<{
+    noRing?: boolean
+}>`
     width: 14px;
     height: 14px;
     border: 2px solid ${(props) => props.theme.colors.greyScale4};
@@ -74,6 +82,12 @@ const OuterRing = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+
+    ${(props) =>
+        props.noRing &&
+        css`
+            border: none;
+        `};
 `
 
 const Dot = styled.div<{ unread: boolean }>`
