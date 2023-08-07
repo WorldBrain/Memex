@@ -2,8 +2,11 @@ import { makeId, setupDiscordTestContext } from './event-processor.test-setup'
 import { DISCORD_LIST_USER_ID } from '@worldbrain/memex-common/lib/chat-bots/constants'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import type { DiscordList } from '@worldbrain/memex-common/lib/discord/types'
-import { SharedListKey } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import type {
+    SharedListKey,
+    SharedListReference,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 const missingGuildId = makeId('gld', 99)
 const missingGuildName = 'test guild'
@@ -150,6 +153,69 @@ describe('Discord channel management module', () => {
         ])
     })
 
+    it('should generate a collaborative link for an already enabled discordList when enabling it for a second time - prev collab keys were not auto-created on list enable', async () => {
+        const {
+            serverStorage,
+            channelManager,
+        } = await setupDiscordTestContext({ withDefaultList: false })
+
+        // Seed discordList data to simulate a discord list created prior to when collab keys were auto-created
+        const testDiscordList: DiscordList = {
+            sharedList: 1,
+            enabled: true,
+            guildId: 'test-guild-1',
+            guildName: 'test-guild-1',
+            channelId: 'test-channel-id-1',
+            channelName: 'test-channel-name-1',
+        }
+        const listReference: SharedListReference = {
+            type: 'shared-list-reference',
+            id: testDiscordList.sharedList,
+        }
+
+        await serverStorage.manager
+            .collection('discordList')
+            .createObject(testDiscordList)
+
+        expect(
+            await serverStorage.modules.contentSharing.getListKeys({
+                listReference,
+            }),
+        ).toEqual([])
+
+        const enabledChannelResult = await channelManager.enableChannel({
+            channelName: testDiscordList.channelName,
+            channelId: testDiscordList.channelId,
+            guildName: testDiscordList.guildName,
+            guildId: testDiscordList.guildId,
+        })
+
+        const [
+            collabKey,
+        ] = await serverStorage.modules.contentSharing.getListKeys({
+            listReference,
+        })
+        const memexSocialLink = getListShareUrl({
+            remoteListId: testDiscordList.sharedList.toString(),
+            collaborationKey: collabKey.reference.id.toString(),
+        })
+
+        expect(enabledChannelResult).toEqual({
+            changed: 'new-collab-key',
+            memexSocialLink,
+        })
+
+        // Calling it again shouldn't result in any changes
+        expect(
+            await channelManager.enableChannel({
+                channelName: testDiscordList.channelName,
+                channelId: testDiscordList.channelId,
+                guildName: testDiscordList.guildName,
+                guildId: testDiscordList.guildId,
+            }),
+        ).toEqual({ changed: false, memexSocialLink })
+    })
+
     it('should set discordList as disabled when disabling a channel that already exists in the DB', async () => {
         const {
             serverStorage,
@@ -260,9 +326,7 @@ describe('Discord channel management module', () => {
     })
 
     it('should be able to list all enabled discordLists for a given guild, with their memex.social links to the associated sharedLists', async () => {
-        const { channelManager, serverStorage } = await setupDiscordTestContext(
-            {},
-        )
+        const { channelManager } = await setupDiscordTestContext({})
 
         const guildIdA = makeId('gld', 998)
         const guildIdB = makeId('gld', 999)
