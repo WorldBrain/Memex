@@ -200,6 +200,15 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                             </EmailPasswordLogin>
                         </AuthenticationMethods>
                     </AuthBox>
+                    <SocialLogin
+                        onClick={() =>
+                            this.processEvent('socialLogin', {
+                                provider: 'google',
+                            })
+                        }
+                    >
+                        Login with Google
+                    </SocialLogin>
                 </StyledAuthDialog>
             )
         }
@@ -740,6 +749,11 @@ const ModeSwitch = styled.span`
     font-weight: bold;
     color: ${(props) => props.theme.colors.prime1};
     font-weight: 14px;
+`
+
+const SocialLogin = styled.div`
+    background: white;
+    color: black;
 `
 
 function handleEnter(f: () => void) {
