@@ -646,6 +646,7 @@ const AuthErrorMessage = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    max-width: 350px;
 `
 
 const SectionContainer = styled.div`
