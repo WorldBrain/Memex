@@ -73,6 +73,7 @@ export class AuthBackground {
             refreshUserInfo: this.refreshUserInfo,
             registerWithEmailPassword: this.registerWithEmailPassword,
             loginWithEmailPassword: this.loginWithEmailPassword,
+            loginWithProvider: this.loginWithProvider,
             getCurrentUser: () => this.authService.getCurrentUser(),
             signOut: () => {
                 delete this._userProfile
@@ -292,8 +293,8 @@ export class AuthBackground {
                 options.password,
             )
             return { result: { status: 'authenticated' } }
-        } catch (e) {
-            const firebaseError: FirebaseError = e
+        } catch (err) {
+            const firebaseError: FirebaseError = err
             if (firebaseError.code === 'auth/invalid-email') {
                 return { result: { status: 'error', reason: 'invalid-email' } }
             }
@@ -303,6 +304,19 @@ export class AuthBackground {
             if (firebaseError.code === 'auth/wrong-password') {
                 return { result: { status: 'error', reason: 'wrong-password' } }
             }
+            console.error(err)
+            return { result: { status: 'error', reason: 'unknown' } }
+        }
+    }
+
+    loginWithProvider: AuthRemoteFunctionsInterface['loginWithProvider'] = async (
+        provider,
+    ) => {
+        try {
+            await this.authService.loginWithProvider(provider)
+            return { result: { status: 'authenticated' } }
+        } catch (err) {
+            console.error(err)
             return { result: { status: 'error', reason: 'unknown' } }
         }
     }

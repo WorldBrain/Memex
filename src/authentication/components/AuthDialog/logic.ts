@@ -143,4 +143,18 @@ export default class Logic extends UILogic<State, Event> {
             }
         })
     }
+
+    socialLogin: EventHandler<'socialLogin'> = async ({
+        previousState,
+        event,
+    }) => {
+        const { result } = await this.dependencies.authBG.loginWithProvider(
+            event.provider,
+        )
+        if (result.status === 'error') {
+            this.emitMutation({ error: { $set: result.reason } })
+        } else {
+            this.dependencies.onAuth?.({ reason: 'login' })
+        }
+    }
 }

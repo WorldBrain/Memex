@@ -9,6 +9,7 @@ interface MarginProps {
     top?: string
     bottom?: string
     width?: string
+    height?: string
 }
 
 const MarginDiv = styled.div`
@@ -38,6 +39,11 @@ const MarginDiv = styled.div`
             return `width: ${props.width};`
         } else {
             return `width: 100%;`
+        }
+    }};
+    ${(props) => {
+        if (props.height) {
+            return `width: ${props.height};`
         }
     }};
 `
