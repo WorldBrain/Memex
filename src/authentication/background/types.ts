@@ -2,6 +2,7 @@ import type {
     AuthenticatedUser,
     RegistrationResult,
     LoginResult,
+    AuthProvider,
 } from '@worldbrain/memex-common/lib/authentication/types'
 import type {
     UserFeature,
@@ -38,6 +39,10 @@ export interface AuthRemoteFunctionsInterface {
     ): Promise<{ result: RegistrationResult }>
     loginWithEmailPassword(
         options: EmailPasswordCredentials,
+    ): Promise<{ result: LoginResult }>
+    loginWithProvider(
+        provider: AuthProvider,
+        options?: { request?: AuthRequest },
     ): Promise<{ result: LoginResult }>
 }
 
