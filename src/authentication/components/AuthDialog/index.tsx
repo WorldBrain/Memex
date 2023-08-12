@@ -1,7 +1,10 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import { AuthError } from '@worldbrain/memex-common/lib/authentication/types'
+import {
+    AuthError,
+    AuthProvider,
+} from '@worldbrain/memex-common/lib/authentication/types'
 import SimpleTextInput from '@worldbrain/memex-common/lib/common-ui/components/simple-text-input'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { StatefulUIElement } from 'src/util/ui-logic'
@@ -11,7 +14,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import { runInBackground } from 'src/util/webextensionRPC'
 
 import Logic from './logic'
-import type { State, Event, Dependencies } from './types'
+import type { State, Event, Dependencies, AuthDialogMode } from './types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 export interface Props extends Dependencies {}
@@ -50,39 +53,30 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                     <AuthBox top="medium">
                         <AuthenticationMethods>
                             <EmailPasswordLogin>
-                                <DisplayNameContainer>
-                                    <TextInputContainer>
-                                        <Icon
-                                            filePath={icons.personFine}
-                                            heightAndWidth="20px"
-                                            hoverOff
-                                        />
-                                        <TextInput
-                                            type="input"
-                                            placeholder="Display Name"
-                                            value={this.state.displayName}
-                                            onChange={(event) =>
-                                                this.processEvent(
-                                                    'editDisplayName',
-                                                    {
-                                                        value:
-                                                            event.target.value,
-                                                    },
-                                                )
-                                            }
-                                            onKeyDown={handleEnter(() => {
-                                                this.processEvent(
-                                                    'emailPasswordConfirm',
-                                                    null,
-                                                )
-                                            })}
-                                        />
-                                    </TextInputContainer>
-                                    <InfoText>
-                                        Shown on shared Spaces, annotations &
-                                        replies.
-                                    </InfoText>
-                                </DisplayNameContainer>
+                                {this.renderLoginTypeSwitcher()}
+                                <SocialLogins>
+                                    <SocialLogin
+                                        icon={'path to icon'}
+                                        provider="google"
+                                        onClick={() =>
+                                            this.processEvent('socialLogin', {
+                                                provider: 'google',
+                                            })
+                                        }
+                                        mode={this.state.mode}
+                                    />
+                                    <SocialLogin
+                                        icon={'path to icon'}
+                                        provider="twitter"
+                                        onClick={() =>
+                                            this.processEvent('socialLogin', {
+                                                provider: 'twitter',
+                                            })
+                                        }
+                                        mode={this.state.mode}
+                                    />
+                                </SocialLogins>
+                                <OrTitle>or</OrTitle>
                                 <TextInputContainer>
                                     <Icon
                                         filePath={icons.mail}
@@ -106,58 +100,109 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         })}
                                     />
                                 </TextInputContainer>
-                                <TextInputContainer>
-                                    <Icon
-                                        filePath={icons.lock}
-                                        heightAndWidth="20px"
-                                        hoverOff
-                                    />
-                                    <TextInput
-                                        type="password"
-                                        placeholder="Password"
-                                        value={this.state.password}
-                                        onChange={(event) =>
-                                            this.processEvent('editPassword', {
-                                                value: event.target.value,
-                                            })
-                                        }
-                                        onKeyDown={handleEnter(() => {
-                                            this.processEvent(
-                                                'emailPasswordConfirm',
-                                                null,
-                                            )
-                                        })}
-                                    />
-                                </TextInputContainer>
-                                <TextInputContainer>
-                                    <Icon
-                                        filePath={icons.reload}
-                                        heightAndWidth="20px"
-                                        hoverOff
-                                    />
-                                    <TextInput
-                                        type="password"
-                                        placeholder="Confirm Password"
-                                        value={this.state.passwordConfirm}
-                                        onChange={(event) => {
-                                            this.processEvent(
-                                                'editPasswordConfirm',
-                                                {
-                                                    value: event.target.value,
-                                                },
-                                            )
-                                            this.checkPasswordMatch(
-                                                event.target.value,
-                                            )
-                                        }}
-                                        onKeyDown={handleEnter(() => {
-                                            this.processEvent(
-                                                'emailPasswordConfirm',
-                                                null,
-                                            )
-                                        })}
-                                    />
-                                </TextInputContainer>
+                                {this.state.email.length > 0 && (
+                                    <>
+                                        <TextInputContainer>
+                                            <Icon
+                                                filePath={icons.lock}
+                                                heightAndWidth="20px"
+                                                hoverOff
+                                            />
+                                            <TextInput
+                                                type="password"
+                                                placeholder="Password"
+                                                value={this.state.password}
+                                                onChange={(event) =>
+                                                    this.processEvent(
+                                                        'editPassword',
+                                                        {
+                                                            value:
+                                                                event.target
+                                                                    .value,
+                                                        },
+                                                    )
+                                                }
+                                                onKeyDown={handleEnter(() => {
+                                                    this.processEvent(
+                                                        'emailPasswordConfirm',
+                                                        null,
+                                                    )
+                                                })}
+                                            />
+                                        </TextInputContainer>
+                                        <TextInputContainer>
+                                            <Icon
+                                                filePath={icons.reload}
+                                                heightAndWidth="20px"
+                                                hoverOff
+                                            />
+                                            <TextInput
+                                                type="password"
+                                                placeholder="Confirm Password"
+                                                value={
+                                                    this.state.passwordConfirm
+                                                }
+                                                onChange={(event) => {
+                                                    this.processEvent(
+                                                        'editPasswordConfirm',
+                                                        {
+                                                            value:
+                                                                event.target
+                                                                    .value,
+                                                        },
+                                                    )
+                                                    this.checkPasswordMatch(
+                                                        event.target.value,
+                                                    )
+                                                }}
+                                                onKeyDown={handleEnter(() => {
+                                                    this.processEvent(
+                                                        'emailPasswordConfirm',
+                                                        null,
+                                                    )
+                                                })}
+                                            />
+                                        </TextInputContainer>
+                                        <DisplayNameContainer>
+                                            <TextInputContainer>
+                                                <Icon
+                                                    filePath={icons.personFine}
+                                                    heightAndWidth="20px"
+                                                    hoverOff
+                                                />
+                                                <TextInput
+                                                    type="input"
+                                                    placeholder="Display Name"
+                                                    value={
+                                                        this.state.displayName
+                                                    }
+                                                    onChange={(event) =>
+                                                        this.processEvent(
+                                                            'editDisplayName',
+                                                            {
+                                                                value:
+                                                                    event.target
+                                                                        .value,
+                                                            },
+                                                        )
+                                                    }
+                                                    onKeyDown={handleEnter(
+                                                        () => {
+                                                            this.processEvent(
+                                                                'emailPasswordConfirm',
+                                                                null,
+                                                            )
+                                                        },
+                                                    )}
+                                                />
+                                            </TextInputContainer>
+                                            <InfoText>
+                                                Shown on shared Spaces,
+                                                annotations & replies.
+                                            </InfoText>
+                                        </DisplayNameContainer>
+                                    </>
+                                )}
                                 <ConfirmContainer>
                                     <PrimaryAction
                                         onClick={() => {
@@ -196,19 +241,9 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         {this.renderAuthError()}
                                     </AuthErrorMessage>
                                 )}
-                                {this.renderLoginTypeSwitcher()}
                             </EmailPasswordLogin>
                         </AuthenticationMethods>
                     </AuthBox>
-                    <SocialLogin
-                        onClick={() =>
-                            this.processEvent('socialLogin', {
-                                provider: 'google',
-                            })
-                        }
-                    >
-                        Login with Google
-                    </SocialLogin>
                 </StyledAuthDialog>
             )
         }
@@ -218,6 +253,30 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                     <AuthBox top="medium">
                         <AuthenticationMethods>
                             <EmailPasswordLogin>
+                                {this.renderLoginTypeSwitcher()}
+                                <SocialLogins>
+                                    <SocialLogin
+                                        icon={'path to icon'}
+                                        provider="google"
+                                        onClick={() =>
+                                            this.processEvent('socialLogin', {
+                                                provider: 'google',
+                                            })
+                                        }
+                                        mode={this.state.mode}
+                                    />
+                                    <SocialLogin
+                                        icon={'path to icon'}
+                                        provider="twitter"
+                                        onClick={() =>
+                                            this.processEvent('socialLogin', {
+                                                provider: 'twitter',
+                                            })
+                                        }
+                                        mode={this.state.mode}
+                                    />
+                                </SocialLogins>
+                                <OrTitle>or</OrTitle>
                                 <TextInputContainer>
                                     <Icon
                                         filePath={icons.mail}
@@ -241,44 +300,52 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         })}
                                     />
                                 </TextInputContainer>
-                                <TextInputContainer>
+                                {this.state.email.length > 0 && (
                                     <>
-                                        <Icon
-                                            filePath={icons.lock}
-                                            heightAndWidth="20px"
-                                            hoverOff
-                                        />
-                                        <TextInput
-                                            type="password"
-                                            placeholder="Password"
-                                            value={this.state.password}
-                                            onChange={(e) =>
-                                                this.processEvent(
-                                                    'editPassword',
-                                                    {
-                                                        value: e.target.value,
-                                                    },
-                                                )
-                                            }
-                                            onKeyDown={handleEnter(() => {
-                                                this.processEvent(
-                                                    'emailPasswordConfirm',
-                                                    null,
-                                                )
-                                            })}
-                                        />
+                                        <TextInputContainer>
+                                            <>
+                                                <Icon
+                                                    filePath={icons.lock}
+                                                    heightAndWidth="20px"
+                                                    hoverOff
+                                                />
+                                                <TextInput
+                                                    type="password"
+                                                    placeholder="Password"
+                                                    value={this.state.password}
+                                                    onChange={(e) =>
+                                                        this.processEvent(
+                                                            'editPassword',
+                                                            {
+                                                                value:
+                                                                    e.target
+                                                                        .value,
+                                                            },
+                                                        )
+                                                    }
+                                                    onKeyDown={handleEnter(
+                                                        () => {
+                                                            this.processEvent(
+                                                                'emailPasswordConfirm',
+                                                                null,
+                                                            )
+                                                        },
+                                                    )}
+                                                />
+                                            </>
+                                            <ForgotPassword
+                                                onClick={() => {
+                                                    this.processEvent(
+                                                        'passwordResetSwitch',
+                                                        null,
+                                                    )
+                                                }}
+                                            >
+                                                Forgot Password?
+                                            </ForgotPassword>
+                                        </TextInputContainer>
                                     </>
-                                    <ForgotPassword
-                                        onClick={() => {
-                                            this.processEvent(
-                                                'passwordResetSwitch',
-                                                null,
-                                            )
-                                        }}
-                                    >
-                                        Forgot Password?
-                                    </ForgotPassword>
-                                </TextInputContainer>
+                                )}
                                 <ConfirmContainer>
                                     <PrimaryAction
                                         onClick={() =>
@@ -310,7 +377,6 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         {this.renderAuthError()}
                                     </AuthErrorMessage>
                                 )}
-                                {this.renderLoginTypeSwitcher()}
                             </EmailPasswordLogin>
                         </AuthenticationMethods>
                     </AuthBox>
@@ -379,6 +445,26 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                         iconPosition={'right'}
                                         type="primary"
                                         size="large"
+                                        width="100%"
+                                    />
+                                    <Margin
+                                        width={'100%'}
+                                        height="10px"
+                                        vertical="5px"
+                                    />
+                                    <PrimaryAction
+                                        onClick={() => {
+                                            this.processEvent('toggleMode', {
+                                                mode: 'login',
+                                            })
+                                        }}
+                                        label={'Go Back'}
+                                        fontSize={'16px'}
+                                        iconSize={'22px'}
+                                        iconPosition={'right'}
+                                        type="tertiary"
+                                        size="large"
+                                        width="100%"
                                     />
                                 </ConfirmContainer>
                                 {this.state.error && (
@@ -432,7 +518,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
         return (
             <Footer>
                 {this.state.mode === 'login' && (
-                    <>
+                    <InfoText>
                         Don’t have an account?{' '}
                         <ModeSwitch
                             onClick={() =>
@@ -443,7 +529,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                         >
                             Sign up
                         </ModeSwitch>
-                    </>
+                    </InfoText>
                 )}
                 {this.state.mode === 'signup' && (
                     <InfoText>
@@ -499,6 +585,45 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
             return <ContentBox>{this.renderAuthForm()}</ContentBox>
         }
     }
+}
+
+function SocialLogin(props: {
+    icon: string
+    provider: AuthProvider
+    onClick(event: { provider: AuthProvider }): void
+    mode: AuthDialogMode
+}) {
+    let modeName: string
+
+    if (props.mode === 'login') {
+        modeName = 'Login'
+    } else if (props.mode === 'signup') {
+        modeName = 'Sign up'
+    } else {
+        return null
+    }
+
+    let providerName: string
+
+    if (props.provider === 'google') {
+        providerName = 'Google'
+    } else {
+        providerName = 'Twitter'
+    }
+
+    return (
+        <PrimaryAction
+            onClick={() => props.onClick({ provider: props.provider })}
+            label={`${modeName} with ${providerName}`}
+            size="large"
+            backgroundColor={
+                props.provider === 'twitter' ? 'twitter' : undefined
+            }
+            type="secondary"
+            icon={props.provider === 'google' ? 'googleLogo' : 'twitterLogo'}
+            width="100%"
+        />
+    )
 }
 
 const LoadingBox = styled.div`
@@ -573,7 +698,7 @@ const DisplayNameContainer = styled.div`
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
-    text-align: center;
+    text-align: left;
 `
 
 const FeatureInfoBox = styled.div`
@@ -586,11 +711,6 @@ const FeatureInfoBox = styled.div`
 
 const ConfirmContainer = styled.div`
     margin-top: 15px;
-    & > div {
-        width: 100%;
-        border-radius: 8px;
-        height: 50px;
-    }
 `
 const TextInputContainer = styled.div`
     display: flex;
@@ -743,17 +863,14 @@ const Footer = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     opacity: 0.8;
+    margin-top: -10px;
+    margin-bottom: 20px;
 `
 const ModeSwitch = styled.span`
     cursor: pointer;
     font-weight: bold;
     color: ${(props) => props.theme.colors.prime1};
     font-weight: 14px;
-`
-
-const SocialLogin = styled.div`
-    background: white;
-    color: black;
 `
 
 function handleEnter(f: () => void) {
@@ -764,3 +881,26 @@ function handleEnter(f: () => void) {
     }
     return handler
 }
+
+const SocialLogins = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    grid-gap: 10px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
+`
+
+const OrTitle = styled.div`
+    background: ${(props) => props.theme.colors.headerGradient};
+    font-size: 20px;
+    font-weight: 300;
+    margin-bottom: 00px;
+    margin-top: 00px;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    width: 100%;
+`
