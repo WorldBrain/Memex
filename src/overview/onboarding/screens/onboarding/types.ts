@@ -29,6 +29,8 @@ export interface State {
     preventOnboardingFlow: boolean
     autoLoginState: UITaskState
     showSyncNotification?: boolean
+    showOnboardingSelection?: boolean
+    showOnboardingVideo?: boolean
 }
 
 export type Event = UIEvent<{
@@ -37,4 +39,5 @@ export type Event = UIEvent<{
     goToGuidedTutorial: null
     onUserLogIn: { newSignUp?: boolean }
     setAuthDialogMode: { mode: AuthDialogMode }
+    showOnboardingVideo: null
 }>

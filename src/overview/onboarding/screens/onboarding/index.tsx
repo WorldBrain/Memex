@@ -14,6 +14,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { GUIDED_ONBOARDING_URL } from '../../constants'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 const styles = require('../../components/onboarding-box.css')
 
@@ -147,16 +148,192 @@ export default class OnboardingScreen extends StatefulUIElement<
         </WelcomeContainer>
     )
 
+    private renderOnboardingSelection = () => {
+        const OnboardingTitles = [
+            'Interactive Tutorial',
+            'Watch a Video',
+            'Read Docs',
+            '15min Call',
+        ]
+        const OnboardingIcons = ['cursor', 'play', 'filePDF', 'peopleFine']
+
+        return (
+            <OnboardingOptionsContainer>
+                <Title> How would you like to get started?</Title>
+                {this.state.showOnboardingVideo ? (
+                    <>
+                        {' '}
+                        {this.renderOnboardingVideo()}
+                        <PrimaryAction
+                            label="Go Back"
+                            onClick={() =>
+                                this.processEvent('showOnboardingVideo', null)
+                            }
+                            size="medium"
+                            type="tertiary"
+                            icon={'arrowLeft'}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <OnboardingContainer>
+                            <OnboardingOptionBox
+                                onClick={() => this.props.navToGuidedTutorial()}
+                            >
+                                <OnboardingTitle>
+                                    Interactive Tutorial
+                                </OnboardingTitle>
+                                <Icon
+                                    icon={OnboardingIcons[0]}
+                                    heightAndWidth="40px"
+                                    color="prime1"
+                                    hoverOff
+                                />
+                            </OnboardingOptionBox>
+                            <OnboardingOptionBox
+                                onClick={() =>
+                                    this.processEvent(
+                                        'showOnboardingVideo',
+                                        null,
+                                    )
+                                }
+                            >
+                                <OnboardingTitle>Watch a Video</OnboardingTitle>
+                                <Icon
+                                    icon={OnboardingIcons[1]}
+                                    heightAndWidth="40px"
+                                    color="prime1"
+                                    hoverOff
+                                />
+                            </OnboardingOptionBox>
+                            <OnboardingOptionBox
+                                onClick={() =>
+                                    window.open(
+                                        'https://tutorials.memex.garden/tutorials',
+                                        '_blank',
+                                    )
+                                }
+                            >
+                                <OnboardingTitle>Read Docs</OnboardingTitle>
+                                <Icon
+                                    icon={OnboardingIcons[2]}
+                                    heightAndWidth="40px"
+                                    color="prime1"
+                                    hoverOff
+                                />
+                            </OnboardingOptionBox>
+                            <OnboardingOptionBox
+                                onClick={() =>
+                                    window.open(
+                                        'https://calendly.com/worldbrain/memex-onboarding-call',
+                                        '_blank',
+                                    )
+                                }
+                            >
+                                <OnboardingTitle>15min Call</OnboardingTitle>
+                                <Icon
+                                    icon={OnboardingIcons[3]}
+                                    heightAndWidth="40px"
+                                    color="prime1"
+                                    hoverOff
+                                />
+                            </OnboardingOptionBox>
+                        </OnboardingContainer>
+                        <PrimaryAction
+                            type="tertiary"
+                            label="I'll just start by playing around"
+                            onClick={() => this.props.navToDashboard()}
+                            size="large"
+                            icon={'arrowRight'}
+                            iconPosition="right"
+                        />
+                    </>
+                )}
+            </OnboardingOptionsContainer>
+        )
+    }
+
+    private renderOnboardingVideo = () => {
+        return (
+            <OnboardingContainer>
+                <OnboardingVideo
+                    src="https://share.descript.com/embed/QTnFzKBo7XM"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                />
+            </OnboardingContainer>
+        )
+    }
+
     render() {
         return (
             <OnboardingBox>
-                {this.state.showSyncNotification
-                    ? this.renderSyncNotif()
-                    : this.renderLoginStep()}
+                {this.state.showSyncNotification && this.renderSyncNotif()}
+                {this.state.showOnboardingSelection &&
+                    this.renderOnboardingSelection()}
+                {!this.state.showOnboardingSelection &&
+                    !this.state.showSyncNotification &&
+                    this.renderLoginStep()}
             </OnboardingBox>
         )
     }
 }
+
+const OnboardingVideo = styled.iframe`
+    width: 800px;
+    height: 450px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale1};
+    border-radius: 20px;
+`
+
+const OnboardingOptionsContainer = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    grid-gap: 20px;
+    flex-direction: column;
+`
+
+const OnboardingOptionBox = styled.div`
+    border: 1px solid ${(props) => props.theme.colors.greyScale1};
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    height: 200px;
+    width: 200px;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 15px;
+
+    &:hover {
+        background-color: ${(props) => props.theme.colors.greyScale1};
+        border: 1px solid ${(props) => props.theme.colors.greyScale2};
+        cursor: pointer;
+        & * {
+            cursor: pointer;
+        }
+    }
+`
+
+const OnboardingContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: fit-content;
+    gap: 10px;
+`
+const OnboardingTitle = styled.div`
+    background: linear-gradient(225deg, #6ae394 0%, #fff 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 18px;
+    text-align: center;
+`
 
 const AuthErrorMessage = styled.div`
     background-color: ${(props) => props.theme.colors.warning}10;
@@ -170,6 +347,7 @@ const AuthErrorMessage = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    max-width: 350px;
 `
 
 const LoadingIndicatorBox = styled.div`
