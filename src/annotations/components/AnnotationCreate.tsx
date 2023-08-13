@@ -43,6 +43,7 @@ export interface AnnotationCreateEventProps {
 export interface AnnotationCreateGeneralProps {
     hide?: () => void
     autoFocus?: boolean
+    focusEditForm?: boolean
     comment: string
     lists: number[]
     hoverState: NoteResultHoverState
@@ -131,7 +132,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         isProtected?: boolean,
     ) => {
         const saveP = this.props.onSave(shouldShare, isProtected)
-        this.setState({ toggleShowTutorial: false })
+        this.setState({ toggleShowTutorial: false, onEditClick: false })
 
         this.editor?.resetState()
 
@@ -263,7 +264,7 @@ export class AnnotationCreate extends React.Component<Props, State>
             <>
                 <TextBoxContainerStyled>
                     <EditorContainer>
-                        {this.state.onEditClick ? (
+                        {this.state.onEditClick || this.props.autoFocus ? (
                             <MemexEditor
                                 onKeyDown={this.handleInputKeyDown}
                                 onContentUpdate={(content) =>

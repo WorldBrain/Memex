@@ -86,6 +86,7 @@ import { normalizeUrl } from '@worldbrain/memex-url-utils'
 import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import checkBrowser from 'src/util/check-browser'
+import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -394,23 +395,35 @@ export async function main(
             selection: Selection,
             shouldShare: boolean,
             showSpacePicker?: boolean,
+            commentText?: string,
         ) => {
             if (!(await pageActionAllowed())) {
                 return
             }
-            const annotationId = await saveHighlight(shouldShare)
-            await inPageUI.showSidebar(
-                annotationId
-                    ? {
-                          annotationCacheId: annotationId.toString(),
-                          action: showSpacePicker
-                              ? 'edit_annotation_spaces'
-                              : 'edit_annotation',
-                      }
-                    : {
-                          action: 'comment',
-                      },
-            )
+
+            if (selection) {
+                const annotationId = await saveHighlight(shouldShare)
+                await inPageUI.showSidebar(
+                    annotationId
+                        ? {
+                              annotationCacheId: annotationId.toString(),
+                              action: showSpacePicker
+                                  ? 'edit_annotation_spaces'
+                                  : 'edit_annotation',
+                          }
+                        : {
+                              action: 'comment',
+                              commentText: commentText ?? '',
+                          },
+                )
+            } else {
+                console.log('youtube')
+                await inPageUI.showSidebar({
+                    action: 'youtube_timestamp',
+                    commentText: commentText ?? '',
+                })
+            }
+
             await inPageUI.hideTooltip()
         },
         askAI: () => (highlightedText: string) => {
@@ -877,6 +890,7 @@ export function loadYoutubeButtons(annotationsFunctions) {
 export function injectYoutubeContextMenu(annotationsFunctions: any) {
     const config = { attributes: true, childList: true, subtree: true }
     const icon = runtime.getURL('/img/memex-icon.svg')
+
     const observer = new MutationObserver((mutation) => {
         const targetObject = mutation[0]
         if (
@@ -887,7 +901,12 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
             const newEntry = document.createElement('div')
             newEntry.setAttribute('class', 'ytp-menuitem')
             newEntry.onclick = () =>
-                annotationsFunctions.createAnnotation()(false, false)
+                annotationsFunctions.createAnnotation()(
+                    false,
+                    false,
+                    false,
+                    getTimestampNoteContentForYoutubeNotes(),
+                )
             newEntry.innerHTML = `<div class="ytp-menuitem-icon"><img src=${icon} style="height: 23px; padding-left: 2px; display: flex; width: auto"/></div><div class="ytp-menuitem-label" style="white-space: nowrap">Add Note to timestamp with Memex</div>`
             panel.prepend(newEntry)
             // panel.style.height = "320px"
@@ -897,6 +916,23 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
 
     observer.observe(document, config)
 }
+
+export function getTimestampNoteContentForYoutubeNotes() {
+    let videoTimeStampForComment: string | null
+
+    const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
+
+    console.log(videoURLWithTime, humanTimestamp)
+
+    if (videoURLWithTime != null) {
+        videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`
+
+        return videoTimeStampForComment
+    } else {
+        return null
+    }
+}
+
 export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     const YTchapterContainer = document.getElementsByClassName(
         'ytp-chapter-container',
@@ -959,7 +995,12 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     const annotateButton = document.createElement('div')
     annotateButton.setAttribute('class', 'ytp-menuitem')
     annotateButton.onclick = () =>
-        annotationsFunctions.createAnnotation()(false, false)
+        annotationsFunctions.createAnnotation()(
+            false,
+            false,
+            false,
+            getTimestampNoteContentForYoutubeNotes(),
+        )
     annotateButton.style.display = 'flex'
 
     // Summarize Button

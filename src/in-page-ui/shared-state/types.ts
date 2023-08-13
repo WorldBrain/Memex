@@ -18,6 +18,7 @@ export type InPageUISidebarAction =
     | 'show_my_annotations'
     | 'check_sidebar_status'
     | 'show_page_summary'
+    | 'youtube_timestamp'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'
@@ -44,6 +45,7 @@ export interface SidebarActionOptions {
     annotationData?: IncomingAnnotationData
     annotationSharingAccess?: AnnotationSharingAccess
     highlightedText?: string
+    commentText?: string
 }
 
 export type InPageErrorType = 'annotation' // Add more specific error types here

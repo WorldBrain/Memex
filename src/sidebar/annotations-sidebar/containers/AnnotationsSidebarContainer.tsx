@@ -86,10 +86,13 @@ export class AnnotationsSidebarContainer<
                 ...props,
                 analytics,
                 copyToClipboard,
-                focusCreateForm: () =>
-                    (this.sidebarRef?.current[
-                        'instanceRef'
-                    ] as AnnotationsSidebarComponent)?.focusCreateForm(),
+                focusCreateForm: () => {
+                    console.log(
+                        this.sidebarRef?.current as AnnotationsSidebarComponent,
+                    )
+                    ;(this.sidebarRef
+                        ?.current as AnnotationsSidebarComponent)?.focusCreateForm()
+                },
                 focusEditNoteForm: (annotationId) => {
                     ;(this.sidebarRef?.current[
                         'instanceRef'

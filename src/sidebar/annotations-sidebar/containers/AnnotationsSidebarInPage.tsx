@@ -301,6 +301,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 tab: 'summary',
                 textToProcess: event.highlightedText,
             })
+        } else if (event.action === 'youtube_timestamp') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab:
+                    this.state.selectedListId &&
+                    this.state.activeTab === 'spaces'
+                        ? 'spaces'
+                        : 'annotations',
+            })
+            await this.processEvent('setNewPageNoteText', {
+                comment: event.commentText ?? '',
+            })
         } else if (event.action === 'check_sidebar_status') {
             return true
         }
