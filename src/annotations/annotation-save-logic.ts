@@ -59,7 +59,11 @@ export async function createAnnotation({
         remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
 
         if (shareOpts.shouldCopyShareLink) {
-            await copyToClipboard(getNoteShareUrl({ remoteAnnotationId }))
+            try {
+                await copyToClipboard(getNoteShareUrl({ remoteAnnotationId }))
+            } catch (e) {
+                console.error(e)
+            }
         }
     }
 
