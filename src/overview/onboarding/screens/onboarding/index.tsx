@@ -180,6 +180,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                             <OnboardingOptionBox
                                 onClick={() => this.props.navToGuidedTutorial()}
                             >
+                                <RecommendedPill>Recommended</RecommendedPill>
                                 <OnboardingTitle>
                                     Interactive Tutorial
                                 </OnboardingTitle>
@@ -280,6 +281,16 @@ export default class OnboardingScreen extends StatefulUIElement<
     }
 }
 
+const RecommendedPill = styled.div`
+    background-color: ${(props) => props.theme.colors.prime2};
+    color: ${(props) => props.theme.colors.black};
+    border-radius: 20px;
+    padding: 4px 8px;
+    font-size: 10px;
+    position: absolute;
+    bottom: 15px;
+`
+
 const OnboardingVideo = styled.iframe`
     width: 800px;
     height: 450px;
@@ -298,7 +309,7 @@ const OnboardingOptionsContainer = styled.div`
 `
 
 const OnboardingOptionBox = styled.div`
-    border: 1px solid ${(props) => props.theme.colors.greyScale1};
+    border: 1px solid ${(props) => props.theme.colors.greyScale2};
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -307,6 +318,7 @@ const OnboardingOptionBox = styled.div`
     justify-content: center;
     align-items: center;
     grid-gap: 15px;
+    position: relative;
 
     &:hover {
         background-color: ${(props) => props.theme.colors.greyScale1};
