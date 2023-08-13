@@ -403,6 +403,9 @@ export class AnnotationsSidebar extends React.Component<
                         )
                         this.setState({ autoFocusCreateForm: false })
                     }}
+                    onCancel={() =>
+                        this.setState({ autoFocusCreateForm: false })
+                    }
                     ref={this.annotationCreateRef as any}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
