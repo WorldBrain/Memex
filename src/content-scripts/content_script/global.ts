@@ -378,7 +378,10 @@ export async function main(
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
         ) => async (selection: Selection, shouldShare: boolean) => {
-            if (!(await pageActionAllowed())) {
+            if (
+                !(await pageActionAllowed()) ||
+                window.getSelection().toString().length === 0
+            ) {
                 return
             }
             await saveHighlight(shouldShare)
@@ -401,7 +404,7 @@ export async function main(
                 return
             }
 
-            if (selection) {
+            if (selection && window.getSelection().toString().length > 0) {
                 const annotationId = await saveHighlight(shouldShare)
                 await inPageUI.showSidebar(
                     annotationId
@@ -417,10 +420,10 @@ export async function main(
                           },
                 )
             } else {
-                console.log('youtube')
                 await inPageUI.showSidebar({
                     action: 'youtube_timestamp',
-                    commentText: commentText ?? '',
+                    commentText:
+                        commentText ?? getTimestampNoteContentForYoutubeNotes(),
                 })
             }
 

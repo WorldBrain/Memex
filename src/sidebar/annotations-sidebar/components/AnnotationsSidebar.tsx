@@ -395,7 +395,7 @@ export class AnnotationsSidebar extends React.Component<
             <NewAnnotationSection>
                 <AnnotationCreate
                     {...this.props.annotationCreateProps}
-                    onSave={(shouldShare, isProtected) => {
+                    onSave={async (shouldShare, isProtected) => {
                         this.props.annotationCreateProps.onSave(
                             shouldShare,
                             isProtected,
