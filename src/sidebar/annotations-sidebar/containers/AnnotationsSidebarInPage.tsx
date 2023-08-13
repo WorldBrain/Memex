@@ -264,7 +264,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                         ? 'spaces'
                         : 'annotations',
             })
-            await this.activateAnnotation(event.annotationCacheId, 'edit')
             await this.processEvent('setAnnotationEditMode', {
                 instanceLocation:
                     this.state.selectedListId &&
@@ -274,6 +273,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 unifiedAnnotationId: event.annotationCacheId,
                 isEditing: true,
             })
+            await this.activateAnnotation(event.annotationCacheId, 'edit')
         } else if (event.action === 'edit_annotation_spaces') {
             await this.processEvent('setActiveSidebarTab', {
                 tab:
