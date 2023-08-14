@@ -1,6 +1,6 @@
 export const ANNOTATION_DEMO_URL = 'https://en.wikipedia.org/wiki/Memex'
 export const GUIDED_ONBOARDING_URL =
-    'https://links.memex.garden/interactiveTutorial'
+    'https://slatestarcodex.com/2014/07/30/meditations-on-moloch/#memex-tutorial'
 export const BACKUP_URL = '/options.html#/backup'
 
 export const ONBOARDING_QUERY_PARAMS = {
