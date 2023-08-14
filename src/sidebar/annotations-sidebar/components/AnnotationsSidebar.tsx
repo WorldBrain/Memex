@@ -206,6 +206,7 @@ interface AnnotationsSidebarState {
     showAIhighlight: boolean
     showAISuggestionsDropDown: boolean
     AIsuggestions: []
+    autoFocusCreateForm: boolean
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -238,6 +239,7 @@ export class AnnotationsSidebar extends React.Component<
         showAIhighlight: false,
         showAISuggestionsDropDown: false,
         AIsuggestions: [],
+        autoFocusCreateForm: false,
     }
 
     private maybeCreateContextBtnRef({
@@ -269,7 +271,9 @@ export class AnnotationsSidebar extends React.Component<
 
     componentWillUnmount() {}
 
-    focusCreateForm = () => (this.annotationCreateRef?.current as any).focus()
+    focusCreateForm = () => {
+        this.setState({ autoFocusCreateForm: true })
+    }
     focusEditNoteForm = (annotationId: string) =>
         (this.annotationEditRefs[annotationId]?.current).focusEditForm()
 
@@ -391,15 +395,20 @@ export class AnnotationsSidebar extends React.Component<
             <NewAnnotationSection>
                 <AnnotationCreate
                     {...this.props.annotationCreateProps}
-                    onSave={(shouldShare, isProtected) =>
+                    onSave={async (shouldShare, isProtected) => {
                         this.props.annotationCreateProps.onSave(
                             shouldShare,
                             isProtected,
                             toggledListInstanceId,
                         )
+                        this.setState({ autoFocusCreateForm: false })
+                    }}
+                    onCancel={() =>
+                        this.setState({ autoFocusCreateForm: false })
                     }
                     ref={this.annotationCreateRef as any}
                     getYoutubePlayer={this.props.getYoutubePlayer}
+                    autoFocus={this.state.autoFocusCreateForm}
                 />
             </NewAnnotationSection>
         )

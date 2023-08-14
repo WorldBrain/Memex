@@ -264,7 +264,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                         ? 'spaces'
                         : 'annotations',
             })
-            await this.activateAnnotation(event.annotationCacheId, 'edit')
             await this.processEvent('setAnnotationEditMode', {
                 instanceLocation:
                     this.state.selectedListId &&
@@ -274,6 +273,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 unifiedAnnotationId: event.annotationCacheId,
                 isEditing: true,
             })
+            await this.activateAnnotation(event.annotationCacheId, 'edit')
         } else if (event.action === 'edit_annotation_spaces') {
             await this.processEvent('setActiveSidebarTab', {
                 tab:
@@ -300,6 +300,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.processEvent('setActiveSidebarTab', {
                 tab: 'summary',
                 textToProcess: event.highlightedText,
+            })
+        } else if (event.action === 'youtube_timestamp') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab:
+                    this.state.selectedListId &&
+                    this.state.activeTab === 'spaces'
+                        ? 'spaces'
+                        : 'annotations',
+            })
+            await this.processEvent('setNewPageNoteText', {
+                comment: event.commentText ?? '',
             })
         } else if (event.action === 'check_sidebar_status') {
             return true

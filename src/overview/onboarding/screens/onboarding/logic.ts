@@ -45,6 +45,7 @@ export default class Logic extends UILogic<State, Event> {
         preventOnboardingFlow: false,
         autoLoginState: 'pristine',
         showSyncNotification: false,
+        showOnboardingVideo: false,
     })
 
     async init() {
@@ -208,7 +209,10 @@ export default class Logic extends UILogic<State, Event> {
                         (provider === 'google.com' ||
                             provider === 'twitter.com')
                     ) {
-                        this.dependencies.navToDashboard()
+                        this.emitMutation({
+                            showOnboardingSelection: { $set: true },
+                            loadState: { $set: 'success' },
+                        })
                     } else {
                         this.emitMutation({
                             showSyncNotification: { $set: true },
@@ -237,8 +241,9 @@ export default class Logic extends UILogic<State, Event> {
                         )
                     }
                 } else {
-                    this.dependencies.navToGuidedTutorial()
-                    this.dependencies.navToDashboard()
+                    this.emitMutation({
+                        showOnboardingSelection: { $set: true },
+                    })
                 }
             }
         } else {
@@ -246,6 +251,15 @@ export default class Logic extends UILogic<State, Event> {
                 loadState: { $set: 'error' },
             })
         }
+    }
+
+    showOnboardingVideo: EventHandler<'showOnboardingVideo'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            showOnboardingVideo: { $set: !previousState.showOnboardingVideo },
+        })
     }
 
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({ event }) => {

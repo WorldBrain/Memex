@@ -57,7 +57,7 @@ class BookmarkButton extends PureComponent<Props> {
     }
 
     render() {
-        const text = this.props.isBookmarked ? 'Page Saved!' : 'Quick Save Page'
+        const text = this.props.isBookmarked ? 'Page Saved!' : 'Save Page'
 
         return (
             <ButtonItem
