@@ -206,9 +206,22 @@ export class RibbonContainerLogic extends UILogic<
             '@Sidebar-reading_view',
         )
 
-        this.emitMutation({
-            isWidthLocked: { $set: readingViewState['@Sidebar-reading_view'] },
-        })
+        if (readingViewState['@Sidebar-reading_view'] === undefined) {
+            await browser.storage.local.set({
+                '@Sidebar-reading_view': true,
+            })
+            this.emitMutation({
+                isWidthLocked: {
+                    $set: true,
+                },
+            })
+        } else {
+            this.emitMutation({
+                isWidthLocked: {
+                    $set: readingViewState['@Sidebar-reading_view'],
+                },
+            })
+        }
 
         // init listeners to local storage flag for reading view
         await browser.storage.onChanged.addListener((changes) => {

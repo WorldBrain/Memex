@@ -450,7 +450,7 @@ export class SidebarContainerLogic extends UILogic<
             .getElementById('memex-sidebar-container')
             ?.shadowRoot.getElementById('annotationSidebarContainer')
         this.readingViewState =
-            (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
+            (await browser.storage.local.get('@Sidebar-reading_view')) ?? true
         // this.readingViewStorageListener(true)
 
         await loadInitial<SidebarContainerState>(this, async () => {
