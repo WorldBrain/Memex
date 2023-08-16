@@ -99,9 +99,9 @@ class AnnotationEdit extends React.Component<Props> {
                 return this.saveEdit(true, true)
             }
 
-            if (e.key === 'Enter' && e.altKey) {
-                return this.saveEdit(false, true)
-            }
+            // if (e.key === 'Enter' && e.altKey) {
+            //     return this.saveEdit(false, true)
+            // }
 
             if (e.key === 'Enter' && e.ctrlKey) {
                 return this.saveEdit(false, false)

@@ -178,9 +178,9 @@ export class AnnotationCreate extends React.Component<Props, State>
                 return this.handleSave(true, true)
             }
 
-            if (e.key === 'Enter' && e.altKey) {
-                return this.handleSave(false, true)
-            }
+            // if (e.key === 'Enter' && e.altKey) {
+            //     return this.handleSave(false, true)
+            // }
 
             if (e.key === 'Enter' && e.ctrlKey) {
                 return this.handleSave(false, false)
