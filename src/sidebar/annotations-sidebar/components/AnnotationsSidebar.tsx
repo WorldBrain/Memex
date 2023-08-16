@@ -274,7 +274,7 @@ export class AnnotationsSidebar extends React.Component<
         prevProps: Readonly<AnnotationsSidebarProps>,
         prevState: Readonly<AnnotationsSidebarState>,
         snapshot?: any,
-    ): void {
+    ) {
         if (prevProps.pageSummary != this.props.pageSummary) {
             this.pageSummaryText.current.scrollTop = this.pageSummaryText.current.scrollHeight
         }
