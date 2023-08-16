@@ -65,14 +65,14 @@ export default class AnnotationSaveBtn extends React.PureComponent<
             }),
         )
         Mousetrap.bind('alt+shift+enter', () => this.props.onSave(true, true))
-        Mousetrap.bind('alt+enter', () => this.handleSetPrivate(true))
+        // Mousetrap.bind('alt+enter', () => this.handleSetPrivate(true))
     }
 
     componentWillUnmount() {
         Mousetrap.unbind('mod+shift+enter')
         Mousetrap.unbind('mod+enter')
         Mousetrap.unbind('alt+shift+enter')
-        Mousetrap.unbind('alt+enter')
+        // Mousetrap.unbind('alt+enter')
     }
 
     private handleSetPrivate = async (isBulkShareProtected: boolean) => {

@@ -15,6 +15,7 @@ import { COUNTER_STORAGE_KEY, DEFAULT_COUNTER_STORAGE_KEY } from './constants'
 
 export interface Props {
     syncSettingsBG: RemoteSyncSettingsInterface
+    position?: 'top' | 'bottom'
 }
 
 interface State {
@@ -33,7 +34,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
     state: State = {
         currentCount: DEFAULT_COUNTER_STORAGE_KEY.cQ,
         totalCount: DEFAULT_COUNTER_STORAGE_KEY.sQ,
-        shouldShow: false,
+        shouldShow: true,
         showTooltip: false,
         openAIKey: '',
         showSaveButton: false,
@@ -59,7 +60,6 @@ export class AICounterIndicator extends React.Component<Props, State> {
             })
         }
 
-        this.setState({ shouldShow: true })
         browser.storage.onChanged.addListener(this.counterStorageListener)
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
 
@@ -256,6 +256,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
         const progressPercentNumber =
             (100 - (this.state.currentCount / this.state.totalCount) * 100) *
             3.6
+        console.log('show', this.props.position)
 
         if (!this.state.shouldShow) {
             return null
@@ -263,7 +264,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
             return this.state.totalCount < 10000 &&
                 this.state.openAIKey?.length === 0 ? (
                 <TooltipBox
-                    placement="top"
+                    placement={this.props.position === 'top' ? 'bottom' : 'top'}
                     tooltipText={
                         <TooltipTextContainer>
                             <TooltipTextTop>
@@ -348,12 +349,14 @@ const TooltipTextTop = styled.div`
 
 const TooltipTextBottom = styled.div`
     display: flex;
+    text-align: center;
+    width: 100%;
 `
 
 const TooltipTextContainer = styled.div`
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     white-space: nowrap;
     width: fit-content;

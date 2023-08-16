@@ -673,7 +673,9 @@ export async function main(
             } else {
                 await inPageUI.reloadRibbon()
             }
+            console.log('shouldlowadbefore')
             if (window.location.hostname === 'www.youtube.com') {
+                console.log('shouldlowad')
                 loadYoutubeButtons(annotationsFunctions)
             }
             if (inPageUI.componentsShown.sidebar) {
@@ -910,7 +912,7 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
                     false,
                     getTimestampNoteContentForYoutubeNotes(),
                 )
-            newEntry.innerHTML = `<div class="ytp-menuitem-icon"><img src=${icon} style="height: 23px; padding-left: 2px; display: flex; width: auto"/></div><div class="ytp-menuitem-label" style="white-space: nowrap">Add Note to timestamp with Memex</div>`
+            newEntry.innerHTML = `<div class="ytp-menuitem-icon"><img src=${icon} style="height: 23px; padding-left: 2px; display: flex; width: auto"/></div><div class="ytp-menuitem-label" style="white-space: nowrap">Add Note to current time</div>`
             panel.prepend(newEntry)
             // panel.style.height = "320px"
             observer.disconnect()
@@ -955,10 +957,18 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
         existingMemexButtons[0].remove()
     }
 
-    const icon = runtime.getURL('/img/memex-icon.svg')
     const panel = document.getElementsByClassName('ytp-time-display')[0]
     // Memex Button Container
     const memexButtons = document.createElement('div')
+    memexButtons.style.display = 'flex'
+    memexButtons.style.alignItems = 'center'
+    memexButtons.style.margin = '10px 0px'
+    memexButtons.style.borderRadius = '6px'
+    memexButtons.style.border = '1px solid #3E3F47'
+    memexButtons.style.overflow = 'hidden'
+    memexButtons.style.overflowX = 'scroll'
+    memexButtons.style.backgroundColor = '#12131B80'
+    memexButtons.setAttribute('class', 'memex-youtube-buttons no-scrollbar')
     // Create a <style> element
     const style = document.createElement('style')
 
@@ -976,24 +986,6 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
 
     document.head.appendChild(style)
 
-    memexButtons.style.display = 'flex'
-    memexButtons.style.alignItems = 'center'
-    memexButtons.style.margin = '5px'
-    memexButtons.style.borderRadius = '6px'
-    memexButtons.style.border = '1px solid #3E3F47'
-    memexButtons.style.overflow = 'hidden'
-    memexButtons.style.overflowX = 'scroll'
-    memexButtons.style.backgroundColor = '#12131B80'
-
-    // MemexIconDisplay
-    const memexIcon = document.createElement('img')
-    memexButtons.setAttribute('class', 'memex-youtube-buttons no-scrollbar')
-    memexIcon.src = icon
-    memexButtons.appendChild(memexIcon)
-
-    memexIcon.style.height = '20px'
-    memexIcon.style.margin = '0 5px 0 10px'
-
     // Add Note Button
     const annotateButton = document.createElement('div')
     annotateButton.setAttribute('class', 'ytp-menuitem')
@@ -1005,44 +997,61 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
             getTimestampNoteContentForYoutubeNotes(),
         )
     annotateButton.style.display = 'flex'
+    annotateButton.style.alignItems = 'center'
+    annotateButton.style.cursor = 'pointer'
+
+    annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 12px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
 
     // Summarize Button
     const summarizeButton = document.createElement('div')
     summarizeButton.setAttribute('class', 'ytp-menuitem')
     summarizeButton.onclick = () => annotationsFunctions.askAI()(false, false)
     summarizeButton.style.display = 'flex'
+    summarizeButton.style.alignItems = 'center'
+    summarizeButton.style.cursor = 'pointer'
+    summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 12px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
+
+    // MemexIconDisplay
+    const memexIcon = runtime.getURL('/img/memex-icon.svg')
+    const memexIconEl = document.createElement('img')
+    memexIconEl.src = memexIcon
+    memexButtons.appendChild(memexIconEl)
+    memexIconEl.style.height = '20px'
+    memexIconEl.style.margin = '0 5px 0 10px'
+    memexIconEl.style.height = '16px'
+
+    // TimestampIcon
+    const timestampIcon = runtime.getURL('/img/clockForYoutubeInjection.svg')
+    const timeStampEl = document.createElement('img')
+    timeStampEl.src = timestampIcon
+    timeStampEl.style.height = '20px'
+    timeStampEl.style.margin = '0 5px 0 10px'
+    timeStampEl.style.height = '16px'
+    timeStampEl.setAttribute('fill', 'blue')
+    annotateButton.insertBefore(timeStampEl, annotateButton.firstChild)
+
+    // SummarizeIcon
+    const summarizeIcon = runtime.getURL(
+        '/img/summarizeIconForYoutubeInjection.svg',
+    )
+    const summarizeIconEl = document.createElement('img')
+    summarizeIconEl.src = summarizeIcon
+    summarizeIconEl.style.height = '20px'
+    summarizeIconEl.style.margin = '0 5px 0 10px'
+    summarizeIconEl.style.height = '16px'
+    summarizeIconEl.setAttribute('fill', 'blue')
+    summarizeButton.insertBefore(summarizeIconEl, summarizeButton.firstChild)
 
     // Appending the right buttons
     memexButtons.appendChild(annotateButton)
     memexButtons.appendChild(summarizeButton)
+    memexButtons.style.color = '#f4f4f4'
+    memexButtons.style.width = 'fit-content'
 
     const leftControls = document.getElementsByClassName('ytp-left-controls')[0]
-
-    if (leftControls.clientWidth < 500) {
-        const aboveFold = document.getElementById('below')
-        aboveFold.insertAdjacentElement('afterbegin', memexButtons)
-        const elements = document.getElementsByClassName('ytp-menuitem')
-
-        for (var i = 0; i < elements.length; i++) {
-            ;(elements[i] as HTMLElement).style.height = '30px'
-        }
-        memexButtons.style.color = '#f4f4f4'
-        summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 10px;padding: 0px 5px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
-        annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 10px;padding: 0px 5px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
-        memexButtons.style.width = 'fit-content'
-        memexIcon.style.height = '16px'
-    } else {
-        annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
-        summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
-        if (YTchapterContainer.length > 0) {
-            YTchapterContainer[0].insertAdjacentElement(
-                'afterend',
-                memexButtons,
-            )
-        } else {
-            panel.parentNode.insertBefore(memexButtons, panel.nextSibling)
-        }
-    }
+    const aboveFold = document.getElementById('below')
+    const elements = document.getElementsByClassName('ytp-menuitem')
+    aboveFold.insertAdjacentElement('afterbegin', memexButtons)
 }
 
 export function setupWebUIActions(args: {

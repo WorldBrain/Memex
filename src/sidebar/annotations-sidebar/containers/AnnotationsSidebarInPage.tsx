@@ -300,6 +300,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.processEvent('setActiveSidebarTab', {
                 tab: 'summary',
                 textToProcess: event.highlightedText,
+                prompt: 'Summarize this page in 2 sentences',
             })
         } else if (event.action === 'youtube_timestamp') {
             await this.processEvent('setActiveSidebarTab', {
