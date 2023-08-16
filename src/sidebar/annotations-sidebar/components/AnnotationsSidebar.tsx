@@ -2637,7 +2637,7 @@ const SummaryFooter = styled.div`
     background: ${(props) => props.theme.colors.black}20;
     backdrop-filter: blur(8px);
     position: fixed;
-    bottom: 0px;
+    bottom: -1px;
 `
 
 const PoweredBy = styled.div`
