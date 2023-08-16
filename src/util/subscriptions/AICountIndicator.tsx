@@ -33,7 +33,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
     state: State = {
         currentCount: DEFAULT_COUNTER_STORAGE_KEY.cQ,
         totalCount: DEFAULT_COUNTER_STORAGE_KEY.sQ,
-        shouldShow: false,
+        shouldShow: true,
         showTooltip: false,
         openAIKey: '',
         showSaveButton: false,
@@ -59,7 +59,6 @@ export class AICounterIndicator extends React.Component<Props, State> {
             })
         }
 
-        this.setState({ shouldShow: true })
         browser.storage.onChanged.addListener(this.counterStorageListener)
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
 
