@@ -337,7 +337,76 @@ export default class Ribbon extends Component<Props, State> {
                             />
                         </ChatBox>
                     ) : (
-                        <>
+                        <SupportContainerBox>
+                            <TutorialContainerBox>
+                                <PrimaryAction
+                                    onClick={() =>
+                                        this.setState({
+                                            renderLiveChat: true,
+                                        })
+                                    }
+                                    label={'Chat with us'}
+                                    icon={'chatWithUs'}
+                                    type={'forth'}
+                                    size={'medium'}
+                                    fullWidth
+                                    height="40px"
+                                    iconPosition="left"
+                                />
+                                <SupportBox>
+                                    {/* <ExtraButtonRow
+                                        onClick={() =>
+                                            this.setState({
+                                                renderFeedback: true,
+                                            })
+                                        }
+                                    >
+                                        <Icon
+                                            filePath={icons.sadFace}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>
+                                            Feature Requests & Bugs
+                                        </InfoText>
+                                    </ExtraButtonRow> */}
+                                    <ExtraButtonRow
+                                        onClick={async () => {
+                                            this.setState({
+                                                renderChangeLog: true,
+                                                updatesAvailable: false,
+                                            })
+                                            await this.setUpdateFlagToRead()
+                                        }}
+                                    >
+                                        <Icon
+                                            filePath={icons.clock}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>What's new?</InfoText>
+                                        {this.state.updatesAvailable && (
+                                            <UpdateAvailablePill>
+                                                New Updates
+                                            </UpdateAvailablePill>
+                                        )}
+                                    </ExtraButtonRow>
+                                    <ExtraButtonRow
+                                        onClick={() =>
+                                            window.open(
+                                                'https://tutorials.memex.garden/tutorials',
+                                            )
+                                        }
+                                    >
+                                        <Icon
+                                            filePath={icons.helpIcon}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>All Tutorials</InfoText>
+                                    </ExtraButtonRow>
+                                </SupportBox>
+                            </TutorialContainerBox>
                             <TutorialContainerBox>
                                 <SectionTitle>Settings</SectionTitle>
                                 <SupportBox>
@@ -468,76 +537,7 @@ export default class Ribbon extends Component<Props, State> {
                                     </ExtraButtonRow>
                                 </SupportBox>
                             </TutorialContainerBox>
-                            <TutorialContainerBox>
-                                <SectionTitle>Support</SectionTitle>
-                                <SupportBox>
-                                    <ExtraButtonRow
-                                        onClick={() =>
-                                            this.setState({
-                                                renderFeedback: true,
-                                            })
-                                        }
-                                    >
-                                        <Icon
-                                            filePath={icons.sadFace}
-                                            heightAndWidth="22px"
-                                            hoverOff
-                                        />
-                                        <InfoText>
-                                            Feature Requests & Bugs
-                                        </InfoText>
-                                    </ExtraButtonRow>
-                                    <ExtraButtonRow
-                                        onClick={async () => {
-                                            this.setState({
-                                                renderChangeLog: true,
-                                                updatesAvailable: false,
-                                            })
-                                            await this.setUpdateFlagToRead()
-                                        }}
-                                    >
-                                        <Icon
-                                            filePath={icons.clock}
-                                            heightAndWidth="22px"
-                                            hoverOff
-                                        />
-                                        <InfoText>What's new?</InfoText>
-                                        {this.state.updatesAvailable && (
-                                            <UpdateAvailablePill>
-                                                New Updates
-                                            </UpdateAvailablePill>
-                                        )}
-                                    </ExtraButtonRow>
-                                    <ExtraButtonRow
-                                        onClick={() =>
-                                            this.setState({
-                                                renderLiveChat: true,
-                                            })
-                                        }
-                                    >
-                                        <Icon
-                                            filePath={icons.chatWithUs}
-                                            heightAndWidth="22px"
-                                            hoverOff
-                                        />
-                                        <InfoText>Live Chat Support</InfoText>
-                                    </ExtraButtonRow>
-                                    <ExtraButtonRow
-                                        onClick={() =>
-                                            window.open(
-                                                'https://tutorials.memex.garden/tutorials',
-                                            )
-                                        }
-                                    >
-                                        <Icon
-                                            filePath={icons.helpIcon}
-                                            heightAndWidth="22px"
-                                            hoverOff
-                                        />
-                                        <InfoText>All Tutorials</InfoText>
-                                    </ExtraButtonRow>
-                                </SupportBox>
-                            </TutorialContainerBox>
+
                             <QuickTutorial
                                 getKeyboardShortcutsState={
                                     getKeyboardShortcutsState
@@ -549,7 +549,7 @@ export default class Ribbon extends Component<Props, State> {
                                 }
                                 hideEditorTutorials
                             />
-                        </>
+                        </SupportContainerBox>
                     )}
                 </SupportContainer>
             </PopoutBox>
@@ -1914,6 +1914,11 @@ const SupportContainer = styled.div`
     max-height: 600px;
     height: fit-content;
     overflow: scroll;
+`
+const SupportContainerBox = styled.div`
+    max-height: 600px;
+    height: fit-content;
+    overflow: scroll;
 
     ::-webkit-scrollbar {
         -webkit-appearance: none;
@@ -1933,6 +1938,7 @@ const SupportBox = styled.div`
     display: flex;
     flex-direction: column;
     margin-top: 10px;
+    grid-gap: 5px;
 `
 
 const RemoveMenuContainer = styled.div<{
@@ -2379,7 +2385,6 @@ const ExtraButtonRow = styled.div<{ deactivateHover }>`
     cursor: pointer;
     border-radius: 3px;
     padding: 0 10px;
-    margin: 0 -5px;
     position: relative;
 
     &:hover {
@@ -2518,6 +2523,7 @@ const SectionTitle = styled.div`
     font-weight: bold;
     justify-content: space-between;
     align-items: center;
+    margin-top: 20px;
 `
 const SectionDescription = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
