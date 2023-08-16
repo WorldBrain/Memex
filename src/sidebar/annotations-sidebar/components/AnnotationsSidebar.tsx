@@ -2959,6 +2959,7 @@ const TopBarContainer = styled.div`
 const TopBarTabsContainer = styled.div`
     display: flex;
     align-items: center;
+    grid-gap: 2px;
 `
 
 const TopBarBtnsContainer = styled.div``
