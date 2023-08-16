@@ -219,6 +219,7 @@ export class AnnotationsSidebar extends React.Component<
     } = {}
     private sortDropDownButtonRef = React.createRef<HTMLDivElement>()
     private copyButtonRef = React.createRef<HTMLDivElement>()
+    private pageSummaryText = React.createRef<HTMLDivElement>()
     private pageShareButtonRef = React.createRef<HTMLDivElement>()
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
     private sharePageLinkButtonRef = React.createRef<HTMLDivElement>()
@@ -266,6 +267,16 @@ export class AnnotationsSidebar extends React.Component<
             this.setState({
                 showIsolatedViewNotif: isolatedViewNotifVisible,
             })
+        }
+    }
+
+    async componentDidUpdate(
+        prevProps: Readonly<AnnotationsSidebarProps>,
+        prevState: Readonly<AnnotationsSidebarState>,
+        snapshot?: any,
+    ): void {
+        if (prevProps.pageSummary != this.props.pageSummary) {
+            this.pageSummaryText.current.scrollTop = this.pageSummaryText.current.scrollHeight
         }
     }
 
@@ -1188,7 +1199,9 @@ export class AnnotationsSidebar extends React.Component<
                             </ErrorContainer>
                         )}
                     {this.props.pageSummary?.length > 0 ? (
-                        <SummaryText>{this.props.pageSummary}</SummaryText>
+                        <SummaryText ref={this.pageSummaryText}>
+                            {this.props.pageSummary}
+                        </SummaryText>
                     ) : (
                         <AIContainerNotif>
                             <AIContainerNotifTitle>
@@ -2520,7 +2533,7 @@ const QueryContainer = styled.div<{
 const AISidebarContainer = styled.div`
     display: flex;
     height: fill-available;
-    overflow: scroll;
+    /* overflow: scroll; */
     display: flex;
     flex-direction: column;
 
@@ -2610,6 +2623,7 @@ const SummaryContainer = styled.div`
     grid-gap: 10px;
     align-items: flex-start;
     min-height: 60px;
+    height: 100%;
 `
 
 const SummaryFooter = styled.div`
@@ -2646,11 +2660,13 @@ const SummarySection = styled.div`
 `
 
 const SummaryText = styled.div`
-    padding: 0px 20px 100px 20px;
+    padding: 0px 20px 240px 20px;
     color: ${(props) => props.theme.colors.greyScale7};
     font-size: 16px;
     line-height: 22px;
     white-space: break-spaces;
+    overflow: scroll;
+    flex-direction: column-reverse;
 `
 
 const FocusModeNotifContainer = styled.div`
