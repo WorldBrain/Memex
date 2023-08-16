@@ -593,8 +593,11 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderAICounter = () => (
-        <AICounterIndicator syncSettingsBG={this.props.syncSettingsBG} />
+    private renderAICounter = (position) => (
+        <AICounterIndicator
+            position={position}
+            syncSettingsBG={this.props.syncSettingsBG}
+        />
     )
 
     protected renderTopBanner() {
@@ -948,7 +951,9 @@ export class AnnotationsSidebarContainer<
                                 this.state.cacheLoadState === 'running'
                             }
                             theme={this.props.theme}
-                            renderAICounter={this.renderAICounter}
+                            renderAICounter={(position) =>
+                                this.renderAICounter(position)
+                            }
                             renderCopyPasterForAnnotation={
                                 this.renderCopyPasterManagerForAnnotation
                             }

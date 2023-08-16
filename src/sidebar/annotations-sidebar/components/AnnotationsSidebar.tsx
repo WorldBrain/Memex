@@ -112,7 +112,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         [instanceId: string]: AnnotationInstanceRefs
     }
     activeShareMenuNoteId: string
-    renderAICounter: () => JSX.Element
+    renderAICounter: (position) => JSX.Element
     renderShareMenuForAnnotation: (
         instanceLocation: AnnotationCardInstanceLocation,
     ) => (id: string) => JSX.Element
@@ -1187,7 +1187,22 @@ export class AnnotationsSidebar extends React.Component<
                                 per paragraph for better quality.
                             </ErrorContainer>
                         )}
-                    <SummaryText>{this.props.pageSummary}</SummaryText>
+                    {this.props.pageSummary?.length > 0 ? (
+                        <SummaryText>{this.props.pageSummary}</SummaryText>
+                    ) : (
+                        <AIContainerNotif>
+                            <AIContainerNotifTitle>
+                                Summarise or ask questions <br /> about this{' '}
+                                {this.props.fullPageUrl.includes('youtube.com')
+                                    ? 'video'
+                                    : 'article'}
+                            </AIContainerNotifTitle>
+                            <AIContainerNotifSubTitle>
+                                Just type in a question or pick one of the
+                                templates
+                            </AIContainerNotifSubTitle>
+                        </AIContainerNotif>
+                    )}
                 </SummaryContainer>
                 {/* {this.state
                     .summarizeArticleLoadState[
@@ -1337,10 +1352,17 @@ export class AnnotationsSidebar extends React.Component<
                         <TextField
                             placeholder={
                                 this.props.prompt ??
-                                'Summarize this in 2 paragraphs'
+                                'Type a prompt like "Summarize in 2 paragraphs"'
                             }
                             value={this.props.prompt}
-                            icon="openAIicon"
+                            icon={
+                                !this.props.showAICounter ? 'openAIicon' : null
+                            }
+                            element={
+                                this.props.showAICounter
+                                    ? this.props.renderAICounter('top')
+                                    : null
+                            }
                             iconSize="18px"
                             onChange={async (event) => {
                                 await this.props.updatePromptState(
@@ -1462,12 +1484,15 @@ export class AnnotationsSidebar extends React.Component<
                             </TooltipBox>
                         </OptionsContainer>
                     )}
-                    {this.props.loadState === 'running'
-                        ? this.renderLoader()
-                        : this.showSummary()}
+                    {this.props.loadState === 'running' ? (
+                        <LoaderBoxInSummary>
+                            {this.renderLoader()}
+                        </LoaderBoxInSummary>
+                    ) : (
+                        this.showSummary()
+                    )}
                     <SummaryFooter>
                         <RightSideButtons>
-                            {this.props.renderAICounter()}
                             <BetaButton>
                                 <BetaButtonInner>BETA</BetaButtonInner>
                             </BetaButton>
@@ -2312,6 +2337,38 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const AIContainerNotif = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: fit-content;
+    width: 100%;
+    margin: 30px 0px;
+    flex-direction: column;
+`
+
+const AIContainerNotifTitle = styled.div`
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: ${(props) => props.theme.colors.greyScale6};
+    text-align: center;
+`
+
+const AIContainerNotifSubTitle = styled.div`
+    font-size: 14px;
+    font-weight: 300;
+    margin-bottom: 5px;
+    color: ${(props) => props.theme.colors.greyScale5};
+`
+
+const LoaderBoxInSummary = styled.div`
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    padding-top: 50px;
+`
+
 const LoadingPageLinkBox = styled.div`
     display: flex;
     align-items: center;
@@ -2346,14 +2403,14 @@ const SelectionPill = styled.div<{ selected: boolean }>`
     padding: 5px 10px;
     color: ${(props) => props.theme.colors.greyScale6};
     border-radius: 20px;
-    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    border: 1px solid ${(props) => props.theme.colors.greyScale2};
     cursor: pointer;
     font-size: 10px;
 
     ${(props) =>
         props.selected &&
         css`
-            background: ${(props) => props.theme.colors.greyScale2};
+            background: ${(props) => props.theme.colors.greyScale1};
         `}
 `
 
@@ -2561,7 +2618,12 @@ const SummaryFooter = styled.div`
     align-items: center;
     justify-content: space-between;
     grid-gap: 10px;
-    padding: 20px 20px 10px 20px;
+    padding: 10px 20px 10px 20px;
+    margin-right: 1px;
+    background: ${(props) => props.theme.colors.black}20;
+    backdrop-filter: blur(8px);
+    position: fixed;
+    bottom: 0px;
 `
 
 const PoweredBy = styled.div`
@@ -2584,7 +2646,7 @@ const SummarySection = styled.div`
 `
 
 const SummaryText = styled.div`
-    padding: 0px 20px 0px 20px;
+    padding: 0px 20px 100px 20px;
     color: ${(props) => props.theme.colors.greyScale7};
     font-size: 16px;
     line-height: 22px;
