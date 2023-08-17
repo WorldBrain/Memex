@@ -48,6 +48,9 @@ export default class Logic extends UILogic<State, Event> {
 
     async init() {
         const { authBG } = this.dependencies
+        this.emitMutation({
+            loadState: { $set: 'running' },
+        })
 
         this.emitMutation({
             mode: { $set: 'signup' },
@@ -55,6 +58,9 @@ export default class Logic extends UILogic<State, Event> {
 
         await loadInitial(this, async () => {
             const user = await authBG.getCurrentUser()
+            this.emitMutation({
+                loadState: { $set: 'success' },
+            })
             if (user != null) {
                 this.isExistingUser = true
                 await this._onUserLogIn(false)
@@ -89,7 +95,6 @@ export default class Logic extends UILogic<State, Event> {
             loadQRcode: { $set: 'success' },
             loginToken: { $set: token },
         })
-        console.log(token)
     }
 
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({ event }) => {

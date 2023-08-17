@@ -7,6 +7,8 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic from './logic'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
+import { LoadingContainer } from 'src/dashboard-refactor/styled-components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 // interface Props {
 //     initiallyShowSubscriptionModal?: boolean
@@ -87,9 +89,14 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     }
 
     render() {
-        return (
+        return this.state.loadState === 'running' ? (
+            <LoadingContainer>
+                <LoadingIndicator size={50} />
+            </LoadingContainer>
+        ) : (
             <>
-                {this.state.currentUser === null ? (
+                {this.state.currentUser === null &&
+                this.state.loadState === 'success' ? (
                     <div>
                         <SettingSection
                             icon={this.getIcon()}
