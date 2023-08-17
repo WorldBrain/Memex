@@ -14,7 +14,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import QRCanvas from 'src/common-ui/components/qr-canvas'
 
 const styles = require('./styles.css')
 
@@ -186,6 +186,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                     />
                                 )}
                             </FieldsContainer>
+                            <QRCanvas toEncode={'testsetet'} />
                         </SettingSection>
                     </>
                 ) : (
