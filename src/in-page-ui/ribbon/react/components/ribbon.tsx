@@ -203,8 +203,6 @@ export default class Ribbon extends Component<Props, State> {
                 : elData.toggleOn
         }
 
-        console.log('short  ', short)
-
         return short.shortcut && short.enabled ? (
             <TooltipContent>
                 {source}

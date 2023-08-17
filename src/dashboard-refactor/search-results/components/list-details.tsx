@@ -21,6 +21,7 @@ export interface Props {
     isOwnedList?: boolean
     isJoinedList?: boolean
     description: string | null
+    type: 'page-link' | 'user-list' | 'special-list'
     listData: Pick<UnifiedList, 'unifiedId' | 'localId' | 'name'>
     saveDescription: (description: string) => void
     saveTitle: (title: string, listId: string) => void

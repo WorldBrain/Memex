@@ -8,7 +8,12 @@ import { padding } from 'polished'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
     onEditBtnClick: React.MouseEventHandler
-    lists: Array<{ id: number; name: string | JSX.Element; isShared: boolean }>
+    lists: Array<{
+        id: number
+        name: string | JSX.Element
+        isShared: boolean
+        type: 'page-link' | 'user-list' | 'special-list'
+    }>
     onListClick?: (localListId: number) => void
     renderSpacePicker?: () => JSX.Element
     filteredbyListID?: number
@@ -105,14 +110,23 @@ export default function ListsSegment({
                                     title={space.name}
                                 >
                                     {' '}
-                                    {space.isShared && (
+                                    {space.type === 'page-link' && (
                                         <Icon
                                             heightAndWidth="16px"
                                             hoverOff
-                                            icon="peopleFine"
+                                            icon="link"
                                             color="greyScale5"
                                         />
                                     )}
+                                    {space.isShared &&
+                                        space.type !== 'page-link' && (
+                                            <Icon
+                                                heightAndWidth="16px"
+                                                hoverOff
+                                                icon="peopleFine"
+                                                color="greyScale5"
+                                            />
+                                        )}
                                     <SpaceName>{space.name}</SpaceName>
                                 </ListSpaceContainer>
                             )

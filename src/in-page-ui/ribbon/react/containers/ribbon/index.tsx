@@ -134,6 +134,7 @@ export default class RibbonContainer extends StatefulUIElement<
                     return {
                         name: listDetails?.name ?? 'Missing list',
                         isShared: listDetails?.remoteId != null,
+                        type: listDetails?.type ?? null,
                     }
                 }}
                 onListShare={({ localListId, remoteListId }) =>

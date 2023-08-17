@@ -106,7 +106,12 @@ export type SelectionIndices = [number, number]
 
 export type ListDetailsGetter = (
     id: number,
-) => { name: string | JSX.Element; isShared: boolean; description?: string }
+) => {
+    name: string | JSX.Element
+    isShared: boolean
+    description?: string
+    type: 'page-link' | 'user-list' | 'special-list'
+}
 
 export type SharedAnnotationWithRefs = SharedAnnotation & {
     reference: SharedAnnotationReference

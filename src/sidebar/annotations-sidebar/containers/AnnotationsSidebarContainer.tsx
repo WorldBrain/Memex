@@ -141,6 +141,7 @@ export class AnnotationsSidebarContainer<
             name: list?.name ?? 'Missing list',
             isShared: list?.remoteId != null,
             description: list?.description,
+            type: list?.type ?? null,
         }
     }
 

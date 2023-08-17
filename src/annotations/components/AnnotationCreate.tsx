@@ -19,6 +19,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { type } from 'openpgp'
 
 interface State {
     isTagPickerShown: boolean
@@ -97,6 +98,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         id: number
         name: string | JSX.Element
         isShared: boolean
+        type: 'page-link' | 'user-list' | 'special-list'
     }> {
         return this.props.lists.map((id) => ({
             id,

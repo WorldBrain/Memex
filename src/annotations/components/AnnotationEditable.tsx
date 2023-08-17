@@ -255,8 +255,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         id: number
         name: string | JSX.Element
         isShared: boolean
+        type: 'page-link' | 'user-list' | 'special-list'
     }> {
         const { lists, listIdToFilterOut, getListDetailsById } = this.props
+
         return lists
             .filter((id) => id !== listIdToFilterOut)
             .map((id) => ({
