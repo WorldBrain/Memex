@@ -899,6 +899,12 @@ export class AnnotationsSidebarContainer<
                                     null,
                                 )
                             }}
+                            updateListName={(unifiedListId, newName) => {
+                                this.processEvent('editListName', {
+                                    unifiedListId: unifiedListId,
+                                    newName,
+                                })
+                            }}
                             updatePromptState={(prompt) => {
                                 this.processEvent('updatePromptState', {
                                     prompt,
