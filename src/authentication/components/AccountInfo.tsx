@@ -68,9 +68,6 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                 'Scan this code to sign in the mobile app'
                             }
                         >
-                            <Description>
-                                Step 1: Download the mobile app
-                            </Description>
                             <StoreSection>
                                 <StoreImage
                                     onClick={() => {
@@ -91,9 +88,6 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                     src={'img/googlePlay.png'}
                                 />
                             </StoreSection>
-                            <Description>
-                                Step 2: Scan this code on login screen
-                            </Description>
                             {this.state.loadQRcode === 'running' && (
                                 <QRPlaceHolder>
                                     <LoadingIndicatorBox>
@@ -257,6 +251,9 @@ const QRPlaceHolder = styled.div`
     height: 150px;
     width: 150px;
     overflow: hidden;
+    position: absolute;
+    right: 20px;
+    top: 20px;
 `
 
 const Description = styled.div`
