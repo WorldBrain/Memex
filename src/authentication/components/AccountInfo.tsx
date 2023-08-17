@@ -41,6 +41,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
         const user = await this.props.authBG.getCurrentUser()
         this.processEvent('getCurrentUser', { currentUser: user })
         this.processEvent('setSubscriptionStatus', { email: user.email })
+        this.processEvent('generateLoginToken', null)
     }
 
     constructor(props: Props) {
@@ -60,6 +61,52 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
             <FullPage>
                 {this.state.currentUser != null ? (
                     <>
+                        <SettingSection
+                            title={'Pair Mobile Device'}
+                            icon={'phone'}
+                            description={
+                                'Scan this code to sign in the mobile app'
+                            }
+                        >
+                            <Description>
+                                Step 1: Download the mobile app
+                            </Description>
+                            <StoreSection>
+                                <StoreImage
+                                    onClick={() => {
+                                        window.open(
+                                            'https://apps.apple.com/app/id1471860331',
+                                        )
+                                    }}
+                                    className={styles.downloadImg}
+                                    src={'img/appStore.png'}
+                                />
+                                <StoreImage
+                                    onClick={() => {
+                                        window.open(
+                                            'https://play.google.com/store/apps/details?id=io.worldbrain',
+                                        )
+                                    }}
+                                    className={styles.downloadImg}
+                                    src={'img/googlePlay.png'}
+                                />
+                            </StoreSection>
+                            <Description>
+                                Step 2: Scan this code on login screen
+                            </Description>
+                            {this.state.loadQRcode === 'running' && (
+                                <QRPlaceHolder>
+                                    <LoadingIndicatorBox>
+                                        <LoadingIndicator size={30} />
+                                    </LoadingIndicatorBox>
+                                </QRPlaceHolder>
+                            )}
+                            {this.state.loadQRcode === 'success' && (
+                                <QRPlaceHolder>
+                                    <QRCanvas toEncode={'testsetet'} />
+                                </QRPlaceHolder>
+                            )}
+                        </SettingSection>
                         <SettingSection
                             title={'My Account'}
                             icon={'personFine'}
@@ -186,7 +233,6 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                     />
                                 )}
                             </FieldsContainer>
-                            <QRCanvas toEncode={'testsetet'} />
                         </SettingSection>
                     </>
                 ) : (
@@ -200,6 +246,36 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
         )
     }
 }
+
+const QRPlaceHolder = styled.div`
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    box-sizing: border-box;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    width: 150px;
+    overflow: hidden;
+`
+
+const Description = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 14px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+`
+
+const StoreSection = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+`
+
+const StoreImage = styled.img`
+    height: 40px;
+    width: auto;
+`
 
 const SubscriptionActionBox = styled.div`
     display: flex;

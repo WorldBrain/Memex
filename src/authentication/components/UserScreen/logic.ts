@@ -42,6 +42,8 @@ export default class Logic extends UILogic<State, Event> {
         pageLimit: '',
         subscriptionStatus: null,
         subscriptionStatusLoading: 'running',
+        loginToken: null,
+        loadQRcode: 'pristine',
     })
 
     async init() {
@@ -77,6 +79,17 @@ export default class Logic extends UILogic<State, Event> {
         this.emitMutation({
             currentUser: { $set: event.currentUser },
         })
+    }
+    generateLoginToken: EventHandler<'generateLoginToken'> = async ({
+        event,
+    }) => {
+        this.emitMutation({ loadQRcode: { $set: 'running' } })
+        const token = await this.dependencies.authBG.generateLoginToken()
+        this.emitMutation({
+            loadQRcode: { $set: 'success' },
+            loginToken: { $set: token },
+        })
+        console.log(token)
     }
 
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({ event }) => {

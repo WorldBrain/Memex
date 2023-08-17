@@ -87,9 +87,6 @@ export class AnnotationsSidebarContainer<
                 analytics,
                 copyToClipboard,
                 focusCreateForm: () => {
-                    console.log(
-                        this.sidebarRef?.current as AnnotationsSidebarComponent,
-                    )
                     ;(this.sidebarRef
                         ?.current as AnnotationsSidebarComponent)?.focusCreateForm()
                 },

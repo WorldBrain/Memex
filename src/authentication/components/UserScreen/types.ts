@@ -33,6 +33,8 @@ export interface State {
     AILimit: string
     subscriptionStatus: string
     subscriptionStatusLoading: UITaskState
+    loadQRcode: UITaskState
+    loginToken: string
 }
 
 export type Event = UIEvent<{
@@ -43,6 +45,7 @@ export type Event = UIEvent<{
     setAuthDialogMode: { mode: AuthDialogMode }
     getCurrentUser: { currentUser: AuthenticatedUser }
     sendPasswordReset: null
+    generateLoginToken: null
     setSubscriptionStatus: {
         email: string
     }

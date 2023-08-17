@@ -37,6 +37,7 @@ import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { AuthServices } from 'src/services/types'
 import { listenToWebAppMessage } from './auth-sync'
 import type { Runtime } from 'webextension-polyfill'
+import { validGeneratedLoginToken } from '@worldbrain/memex-common/lib/authentication/auth-sync'
 
 export class AuthBackground {
     authService: AuthService
@@ -72,6 +73,7 @@ export class AuthBackground {
         this.remoteFunctions = {
             refreshUserInfo: this.refreshUserInfo,
             registerWithEmailPassword: this.registerWithEmailPassword,
+            generateLoginToken: this.generateLoginToken,
             loginWithEmailPassword: this.loginWithEmailPassword,
             loginWithProvider: this.loginWithProvider,
             getCurrentUser: () => this.authService.getCurrentUser(),
@@ -248,6 +250,15 @@ export class AuthBackground {
                 )
             }
         })
+    }
+
+    generateLoginToken = async () => {
+        const tokenObj = await this.authService.generateLoginToken()
+        const loginToken = tokenObj.token
+        if (!validGeneratedLoginToken(loginToken)) {
+            return
+        }
+        return loginToken
     }
 
     registerWithEmailPassword = async (

@@ -673,9 +673,7 @@ export async function main(
             } else {
                 await inPageUI.reloadRibbon()
             }
-            console.log('shouldlowadbefore')
             if (window.location.hostname === 'www.youtube.com') {
-                console.log('shouldlowad')
                 loadYoutubeButtons(annotationsFunctions)
             }
             if (inPageUI.componentsShown.sidebar) {
@@ -926,8 +924,6 @@ export function getTimestampNoteContentForYoutubeNotes() {
     let videoTimeStampForComment: string | null
 
     const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
-
-    console.log(videoURLWithTime, humanTimestamp)
 
     if (videoURLWithTime != null) {
         videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`
