@@ -200,7 +200,6 @@ class Import extends React.PureComponent<Props> {
 
         return (
             <div>
-                {this.renderDiscord()}
                 <SettingSection
                     title={this.renderSectionTitle()}
                     description={this.renderSectionDescription()}
@@ -219,6 +218,7 @@ class Import extends React.PureComponent<Props> {
                     </div>
                 </SettingSection>
                 {this.renderReadwise()}
+                {/* {this.renderDiscord()} */}
             </div>
         )
     }
