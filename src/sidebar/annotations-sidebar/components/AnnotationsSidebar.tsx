@@ -298,14 +298,14 @@ export class AnnotationsSidebar extends React.Component<
             this.spaceTitleEditFieldRef.current &&
             !this.spaceTitleEditFieldRef.current.contains(event.target)
         ) {
-            this.setState({
-                spaceTitleEditState: false,
-                spaceTitleEditValue: this.state.spaceTitleEditValue, // Reset to the original value
-            })
             this.props.updateListName(
                 this.props.lists.byId[this.props.selectedListId].unifiedId,
                 this.state.spaceTitleEditValue,
             )
+            this.setState({
+                spaceTitleEditState: false,
+                spaceTitleEditValue: null, // Reset to the original value
+            })
         }
     }
     focusCreateForm = () => {
@@ -2025,12 +2025,6 @@ export class AnnotationsSidebar extends React.Component<
 
         const isPageLink = selectedList.type === 'page-link'
 
-        if (this.state.spaceTitleEditValue === null) {
-            this.setState({
-                spaceTitleEditValue: selectedList.name,
-            })
-        }
-
         return (
             <IsolatedViewHeaderContainer>
                 <IsolatedViewHeaderTopBar>
@@ -2125,6 +2119,8 @@ export class AnnotationsSidebar extends React.Component<
                         onClick={() =>
                             this.setState({
                                 spaceTitleEditState: true,
+                                spaceTitleEditValue: this.props.annotationsCache
+                                    .lists.byId[this.props.selectedListId].name,
                             })
                         }
                     >
