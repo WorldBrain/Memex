@@ -288,7 +288,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                 </TooltipBox>
             ) : (
                 <TooltipBox
-                    placement="top"
+                    placement="bottom"
                     tooltipText={
                         <TooltipTextContainer>
                             <TooltipTextTop>Change your API key</TooltipTextTop>
