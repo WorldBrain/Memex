@@ -81,6 +81,10 @@ function getShortcutHandlers({
                 await inPageUI.showRibbon({ action: 'list' })
             }
         },
+        sharePage: () =>
+            inPageUI.showSidebar({
+                action: 'share_page',
+            }),
         createSharedAnnotationAndAddToCollection: async () => {
             if (userSelectedText()) {
                 await annotationFunctions.createAnnotation(

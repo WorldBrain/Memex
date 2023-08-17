@@ -10,6 +10,7 @@ export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
     const defaults = KEYBOARDSHORTCUTS_DEFAULT_STATE
     const keys: (keyof BaseKeyboardShortcuts)[] = [
         'addToCollection',
+        'sharePage',
         'addComment',
         'toggleSidebar',
         'toggleHighlights',
