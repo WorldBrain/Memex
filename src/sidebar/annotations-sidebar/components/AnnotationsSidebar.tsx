@@ -2006,6 +2006,7 @@ export class AnnotationsSidebar extends React.Component<
                                     onClick={this.props.clickCreatePageLinkBtn}
                                     type="secondary"
                                     size="small"
+                                    icon={'invite'}
                                 />
                             )}
                         </>
