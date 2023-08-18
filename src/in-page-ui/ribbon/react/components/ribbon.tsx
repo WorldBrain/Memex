@@ -183,6 +183,9 @@ export default class Ribbon extends Component<Props, State> {
             this.props.sidebar.openSidebar({})
         }
     }
+    private handleSharePageAction = (event) => {
+        this.props.sidebar.sharePage()
+    }
 
     private getTooltipText(name: string): JSX.Element | string {
         const elData = this.shortcutsData.get(name)
@@ -1151,7 +1154,7 @@ export default class Ribbon extends Component<Props, State> {
 
         return (
             <TooltipBox
-                tooltipText={this.getTooltipText('addToCollection')}
+                tooltipText={this.getTooltipText('sharePage')}
                 placement={
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
@@ -1285,6 +1288,42 @@ export default class Ribbon extends Component<Props, State> {
                                 }
                             </SpacesCounter>
                         )}
+                    </IconBox>
+                )}
+            </TooltipBox>
+        )
+    }
+    renderSharePageButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
+        return (
+            <TooltipBox
+                targetElementRef={this.sidebarButtonRef.current}
+                tooltipText={this.getTooltipText('sharePage')}
+                placement={topRight ? 'top' : bottomRight ? 'bottom' : 'left'}
+                offsetX={10}
+            >
+                {(topRight || bottomRight) &&
+                !this.props.sidebar.isSidebarOpen ? (
+                    <IconBox onClick={(e) => this.handleSharePageAction(e)}>
+                        <PrimaryAction
+                            size={'medium'}
+                            type="tertiary"
+                            label={'Share Page'}
+                            fontColor={'greyScale7'}
+                            onClick={null}
+                            icon={'peopleFine'}
+                        />
+                    </IconBox>
+                ) : (
+                    <IconBox onClick={(e) => this.handleSharePageAction(e)}>
+                        <Icon
+                            color={'greyScale6'}
+                            heightAndWidth="20px"
+                            filePath={'peopleFine'}
+                            containerRef={this.sidebarButtonRef}
+                        />
                     </IconBox>
                 )}
             </TooltipBox>
@@ -1695,6 +1734,10 @@ export default class Ribbon extends Component<Props, State> {
                                                 {!this.props.sidebar
                                                     .isSidebarOpen &&
                                                     this.renderAItriggerButton()}
+                                                {!this.props.sidebar
+                                                    .isSidebarOpen &&
+                                                    this.renderSharePageButton()}
+
                                                 {!this.props.sidebar
                                                     .isSidebarOpen &&
                                                     this.renderSidebarToggle()}
@@ -2416,7 +2459,7 @@ const VerticalLine = styled.div<{ sidebaropen: boolean }>`
 
 const PageAction = styled.div<{ ribbonPosition; isSidebarOpen }>`
     display: grid;
-    grid-gap: 10px;
+    grid-gap: 5px;
     grid-auto-flow: row;
     align-items: center;
     justify-content: center;

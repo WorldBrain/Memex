@@ -19,6 +19,7 @@ export type InPageUISidebarAction =
     | 'check_sidebar_status'
     | 'show_page_summary'
     | 'youtube_timestamp'
+    | 'share_page'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'

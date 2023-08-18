@@ -96,6 +96,7 @@ export default class PageResultView extends PureComponent<Props> {
         id: number
         name: string | JSX.Element
         isShared: boolean
+        type: 'page-link' | 'user-list' | 'special-list'
     }> {
         return this.props.lists.map((id) => ({
             id,

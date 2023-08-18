@@ -154,6 +154,7 @@ export class DashboardContainer extends StatefulUIElement<
         return {
             name: listData?.name,
             isShared: listData?.remoteId != null,
+            type: listData?.type,
         }
     }
 
@@ -178,6 +179,7 @@ export class DashboardContainer extends StatefulUIElement<
             isOwnedList,
             isJoinedList: !isOwnedList && listData.localId != null,
             description: listData.description ?? null,
+            type: listData?.type ?? null,
             saveDescription: (description) =>
                 this.processEvent('updateSelectedListDescription', {
                     description,

@@ -87,9 +87,6 @@ export class AnnotationsSidebarContainer<
                 analytics,
                 copyToClipboard,
                 focusCreateForm: () => {
-                    console.log(
-                        this.sidebarRef?.current as AnnotationsSidebarComponent,
-                    )
                     ;(this.sidebarRef
                         ?.current as AnnotationsSidebarComponent)?.focusCreateForm()
                 },
@@ -144,6 +141,7 @@ export class AnnotationsSidebarContainer<
             name: list?.name ?? 'Missing list',
             isShared: list?.remoteId != null,
             description: list?.description,
+            type: list?.type ?? null,
         }
     }
 
@@ -901,6 +899,22 @@ export class AnnotationsSidebarContainer<
                                     null,
                                 )
                             }}
+                            updateListName={async (
+                                unifiedListId,
+                                localId,
+                                oldName,
+                                newName,
+                            ) => {
+                                this.processEvent('editListName', {
+                                    unifiedListId: unifiedListId,
+                                    newName,
+                                })
+                                await this.props.customListsBG.updateListName({
+                                    id: localId,
+                                    oldName: oldName,
+                                    newName: newName,
+                                })
+                            }}
                             updatePromptState={(prompt) => {
                                 this.processEvent('updatePromptState', {
                                     prompt,
@@ -970,12 +984,12 @@ export class AnnotationsSidebarContainer<
                                     disableWriteOps={
                                         this.state.hasListDataBeenManuallyPulled
                                     }
-                                    onConfirmSpaceNameEdit={(newName) =>
+                                    onConfirmSpaceNameEdit={(newName) => {
                                         this.processEvent('editListName', {
                                             unifiedListId: listData.unifiedId,
                                             newName,
                                         })
-                                    }
+                                    }}
                                     onSpaceShare={(remoteListId) =>
                                         this.processEvent('shareList', {
                                             unifiedListId: listData.unifiedId,

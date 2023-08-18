@@ -92,6 +92,11 @@ export default class RibbonContainer extends StatefulUIElement<
             },
         })
     }
+    private handlePageShare = () => {
+        this.props.inPageUI.showSidebar({
+            action: 'share_page',
+        })
+    }
 
     handleExternalAction = (event: { action: InPageUIRibbonAction }) => {
         if (event.action === 'comment') {
@@ -129,6 +134,7 @@ export default class RibbonContainer extends StatefulUIElement<
                     return {
                         name: listDetails?.name ?? 'Missing list',
                         isShared: listDetails?.remoteId != null,
+                        type: listDetails?.type ?? null,
                     }
                 }}
                 onListShare={({ localListId, remoteListId }) =>
@@ -188,6 +194,7 @@ export default class RibbonContainer extends StatefulUIElement<
                     setShowSidebarCommentBox: () =>
                         this.props.inPageUI.showSidebar({ action: 'comment' }),
                     openSidebar: this.handleSidebarOpen,
+                    sharePage: this.handlePageShare,
                     closeSidebar: () => this.props.inPageUI.hideSidebar(),
                     toggleReadingView: () =>
                         this.processEvent('toggleReadingView', null),

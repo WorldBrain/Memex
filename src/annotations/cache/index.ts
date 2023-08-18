@@ -572,9 +572,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 [updates.unifiedId]: nextList,
             },
         }
+
         this.events.emit('updatedList', nextList)
         this.events.emit('newListsState', this.lists)
-
         // If share status changed, reflect updates in any public annotations
         if (previousList.remoteId != nextList.remoteId) {
             this.updateSharedAnnotationsWithSharedPageLists()

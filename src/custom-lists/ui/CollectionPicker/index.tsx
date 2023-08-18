@@ -342,7 +342,7 @@ class SpacePicker extends StatefulUIElement<
                                 type="secondary"
                                 size="small"
                                 label="Open Space"
-                                icon="goTo"
+                                icon="globe"
                                 onClick={() =>
                                     this.processEvent('openListInWebUI', {
                                         unifiedListId: list.unifiedId,

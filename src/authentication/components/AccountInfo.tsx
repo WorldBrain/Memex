@@ -14,7 +14,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import QRCanvas from 'src/common-ui/components/qr-canvas'
 
 const styles = require('./styles.css')
 
@@ -60,6 +60,64 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
             <FullPage>
                 {this.state.currentUser != null ? (
                     <>
+                        <SettingSection
+                            title={'Pair Mobile Device'}
+                            icon={'phone'}
+                            description={
+                                'Generate and scan the QR code to sign in the mobile app'
+                            }
+                        >
+                            <StoreSection>
+                                <StoreImage
+                                    onClick={() => {
+                                        window.open(
+                                            'https://apps.apple.com/app/id1471860331',
+                                        )
+                                    }}
+                                    className={styles.downloadImg}
+                                    src={'img/appStore.png'}
+                                />
+                                <StoreImage
+                                    onClick={() => {
+                                        window.open(
+                                            'https://play.google.com/store/apps/details?id=io.worldbrain',
+                                        )
+                                    }}
+                                    className={styles.downloadImg}
+                                    src={'img/googlePlay.png'}
+                                />
+                            </StoreSection>
+                            {this.state.loadQRCode === 'pristine' && (
+                                <GenerateTokenButtonBox>
+                                    <PrimaryAction
+                                        label={'Generate QR Code'}
+                                        onClick={() => {
+                                            this.processEvent(
+                                                'generateLoginToken',
+                                                null,
+                                            )
+                                        }}
+                                        type="primary"
+                                        icon="reload"
+                                        size="medium"
+                                    />
+                                </GenerateTokenButtonBox>
+                            )}
+                            {this.state.loadQRCode === 'running' && (
+                                <QRPlaceHolder>
+                                    <LoadingIndicatorBox>
+                                        <LoadingIndicator size={30} />
+                                    </LoadingIndicatorBox>
+                                </QRPlaceHolder>
+                            )}
+                            {this.state.loadQRCode === 'success' && (
+                                <QRPlaceHolder>
+                                    <QRCanvas
+                                        toEncode={this.state.loginToken}
+                                    />
+                                </QRPlaceHolder>
+                            )}
+                        </SettingSection>
                         <SettingSection
                             title={'My Account'}
                             icon={'personFine'}
@@ -199,6 +257,46 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
         )
     }
 }
+
+const GenerateTokenButtonBox = styled.div`
+    position: absolute;
+    right: 40px;
+    top: 40px;
+`
+
+const QRPlaceHolder = styled.div`
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    box-sizing: border-box;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    right: 20px;
+    top: 20px;
+    width: 400px;
+    height: 400px;
+    margin-top: 30px;
+`
+
+const Description = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 14px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+`
+
+const StoreSection = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+`
+
+const StoreImage = styled.img`
+    height: 40px;
+    width: auto;
+    cursor: pointer;
+`
 
 const SubscriptionActionBox = styled.div`
     display: flex;

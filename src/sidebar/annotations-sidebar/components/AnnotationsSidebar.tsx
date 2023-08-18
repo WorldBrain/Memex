@@ -188,6 +188,12 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     saveAIPrompt: (prompt) => void
     removeAISuggestion: (prompt) => void
     navigateFocusInList: (direction: 'up' | 'down') => void
+    updateListName: (
+        unifiedId: string,
+        localId: number,
+        oldName: string,
+        newName: string,
+    ) => void
 }
 
 interface AnnotationsSidebarState {
@@ -207,6 +213,8 @@ interface AnnotationsSidebarState {
     showAISuggestionsDropDown: boolean
     AIsuggestions: []
     autoFocusCreateForm: boolean
+    spaceTitleEditState: boolean
+    spaceTitleEditValue: string
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -223,6 +231,7 @@ export class AnnotationsSidebar extends React.Component<
     private pageShareButtonRef = React.createRef<HTMLDivElement>()
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
     private sharePageLinkButtonRef = React.createRef<HTMLDivElement>()
+    private spaceTitleEditFieldRef = React.createRef<HTMLInputElement>()
     private spaceContextBtnRefs: {
         [unifiedListId: string]: React.RefObject<HTMLDivElement>
     } = {}
@@ -241,6 +250,8 @@ export class AnnotationsSidebar extends React.Component<
         showAISuggestionsDropDown: false,
         AIsuggestions: [],
         autoFocusCreateForm: false,
+        spaceTitleEditState: false,
+        spaceTitleEditValue: null,
     }
 
     private maybeCreateContextBtnRef({
@@ -268,6 +279,8 @@ export class AnnotationsSidebar extends React.Component<
                 showIsolatedViewNotif: isolatedViewNotifVisible,
             })
         }
+        document.addEventListener('mousedown', this.handleClickOutside)
+        document.addEventListener('touchstart', this.handleClickOutside)
     }
 
     async componentDidUpdate(
@@ -280,8 +293,33 @@ export class AnnotationsSidebar extends React.Component<
         }
     }
 
-    componentWillUnmount() {}
+    componentWillUnmount() {
+        document.removeEventListener('mousedown', this.handleClickOutside)
+        document.removeEventListener('touchstart', this.handleClickOutside)
+    }
 
+    handleClickOutside = (event) => {
+        if (
+            this.spaceTitleEditFieldRef.current &&
+            !this.spaceTitleEditFieldRef.current.contains(event.target)
+        ) {
+            if (
+                this.props.lists.byId[this.props.selectedListId].name !==
+                this.state.spaceTitleEditValue
+            ) {
+                this.props.updateListName(
+                    this.props.lists.byId[this.props.selectedListId].unifiedId,
+                    this.props.lists.byId[this.props.selectedListId].localId,
+                    this.props.lists.byId[this.props.selectedListId].name,
+                    this.state.spaceTitleEditValue,
+                )
+            }
+            this.setState({
+                spaceTitleEditState: false,
+                spaceTitleEditValue: null, // Reset to the original value
+            })
+        }
+    }
     focusCreateForm = () => {
         this.setState({ autoFocusCreateForm: true })
     }
@@ -1980,6 +2018,7 @@ export class AnnotationsSidebar extends React.Component<
                                     onClick={this.props.clickCreatePageLinkBtn}
                                     type="secondary"
                                     size="small"
+                                    icon={'invite'}
                                 />
                             )}
                         </>
@@ -2008,6 +2047,7 @@ export class AnnotationsSidebar extends React.Component<
                         size="small"
                         label="All Spaces"
                         fontColor="greyScale6"
+                        padding="3px 8px 3px 2px"
                         onClick={() => this.props.onResetSpaceSelect()}
                     />
                     <RightSideButtonsTopBar>
@@ -2057,10 +2097,53 @@ export class AnnotationsSidebar extends React.Component<
                         {this.renderPermissionStatusButton()}
                     </RightSideButtonsTopBar>
                 </IsolatedViewHeaderTopBar>
-                <SpaceTitle>
-                    {selectedList.type === 'page-link' && 'Page link: '}{' '}
-                    {selectedList.name}
-                </SpaceTitle>
+                {this.state.spaceTitleEditState ? (
+                    <SpaceTitleEditField
+                        ref={this.spaceTitleEditFieldRef}
+                        value={this.state.spaceTitleEditValue}
+                        onChange={(event) => {
+                            this.setState({
+                                spaceTitleEditValue: event.target.value,
+                            })
+                        }}
+                        onKeyPress={(event) => {
+                            if (event.key === 'Enter') {
+                                if (selectedList.name !== event.target.value) {
+                                    this.props.updateListName(
+                                        selectedList.unifiedId,
+                                        selectedList.localId,
+                                        selectedList.name,
+                                        event.target.value,
+                                    )
+                                }
+                                this.setState({
+                                    spaceTitleEditState: false,
+                                    spaceTitleEditValue: null,
+                                })
+                            } else if (event.key === 'Escape') {
+                                event.stopPropagation()
+                                event.preventDefault()
+                                this.setState({
+                                    spaceTitleEditState: false,
+                                    spaceTitleEditValue: selectedList.name,
+                                })
+                            }
+                        }}
+                        autoFocus
+                    />
+                ) : (
+                    <SpaceTitle
+                        onClick={() =>
+                            this.setState({
+                                spaceTitleEditState: true,
+                                spaceTitleEditValue: this.props.annotationsCache
+                                    .lists.byId[this.props.selectedListId].name,
+                            })
+                        }
+                    >
+                        {selectedList.name}
+                    </SpaceTitle>
+                )}
                 <SpaceDescription>{selectedList.description}</SpaceDescription>
                 {/* {totalAnnotsCountJSX}
                 {othersAnnotsCountJSX} */}
@@ -2839,6 +2922,31 @@ const SpaceTitle = styled.div`
     width: fill-available;
     color: ${(props) => props.theme.colors.white};
     letter-spacing: 1px;
+    padding: 5px 3px 5px 5px;
+    margin: -5px -3px -5px -5px;
+    border-radius: 5px;
+    outline: 1px solid transparent;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on;
+    border: none;
+
+    &:hover {
+        cursor: pointer;
+        background: ${(props) => props.theme.colors.greyScale1};
+    }
+`
+const SpaceTitleEditField = styled.input`
+    font-size: 18px;
+    font-weight: 500;
+    width: fill-available;
+    color: ${(props) => props.theme.colors.white};
+    letter-spacing: 1px;
+    background: ${(props) => props.theme.colors.greyScale1};
+    border-radius: 5px;
+    padding: 5px 3px 5px 5px;
+    margin: -5px -3px -5px -5px;
+    outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on;
+    border: none;
 `
 
 const SpaceDescription = styled(Markdown)`
@@ -2934,7 +3042,7 @@ const IsolatedViewHeaderContainer = styled.div`
     justify-content: flex-start;
     grid-gap: 10px;
     flex-direction: column;
-    padding: 10px 10px 0 15px;
+    padding: 0px 20px 0 20px;
     z-index: 20;
     background: ${(props) => props.theme.colors.black};
 `
@@ -2943,10 +3051,15 @@ const IsolatedViewHeaderTopBar = styled.div`
     display: flex;
     align-items: center;
     height: 30px;
-    margin: 0px 0px 0px -10px;
+    padding: 5px;
     justify-content: space-between;
     width: fill-available;
     z-index: 100;
+    margin: 3px -8px 0 -3px;
+
+    &:first-child {
+        margin-left: -10px;
+    }
 `
 
 const TopBarContainer = styled.div`

@@ -46,6 +46,7 @@ export interface RibbonTooltipProps {
 export interface RibbonSidebarProps {
     isSidebarOpen: boolean
     openSidebar: (args: any) => void
+    sharePage: () => void
     closeSidebar: () => void
     setShowSidebarCommentBox: (value: boolean) => void
     toggleReadingView: () => void

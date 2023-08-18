@@ -256,7 +256,6 @@ export class AICounterIndicator extends React.Component<Props, State> {
         const progressPercentNumber =
             (100 - (this.state.currentCount / this.state.totalCount) * 100) *
             3.6
-        console.log('show', this.props.position)
 
         if (!this.state.shouldShow) {
             return null
@@ -288,7 +287,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                 </TooltipBox>
             ) : (
                 <TooltipBox
-                    placement="top"
+                    placement="bottom"
                     tooltipText={
                         <TooltipTextContainer>
                             <TooltipTextTop>Change your API key</TooltipTextTop>

@@ -14,6 +14,7 @@ export const KEYBOARDSHORTCUTS_DEFAULT_STATE: SyncSettingsByFeature['extension']
     createHighlightShortcut: altKey + '+a',
     createBookmarkShortcut: altKey + '+s',
     addToCollectionShortcut: altKey + '+c',
+    sharePageShortcut: altKey + '+y',
     askAIShortcut: altKey + '+x',
     addCommentShortcut: altKey + '+e',
     toggleSidebarShortcutEnabled: true,
@@ -25,4 +26,5 @@ export const KEYBOARDSHORTCUTS_DEFAULT_STATE: SyncSettingsByFeature['extension']
     addToCollectionShortcutEnabled: true,
     addCommentShortcutEnabled: true,
     openDashboardShortcutEnabled: true,
+    sharePageShortcutEnabled: true,
 }

@@ -51,6 +51,7 @@ export interface SyncSettingsByFeature {
             createBookmarkShortcutEnabled: boolean
             createHighlightShortcutEnabled: boolean
             addToCollectionShortcutEnabled: boolean
+            sharePageShortcutEnabled: boolean
             toggleHighlightsShortcutEnabled: boolean
             createAnnotationShortcutEnabled: boolean
             askAIShortcutEnabled: boolean
@@ -63,6 +64,7 @@ export interface SyncSettingsByFeature {
             toggleHighlightsShortcut: string
             createAnnotationShortcut: string
             askAIShortcut: string
+            sharePageShortcut: string
         }
     }
     readwise: {

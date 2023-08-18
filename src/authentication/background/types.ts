@@ -44,6 +44,7 @@ export interface AuthRemoteFunctionsInterface {
         provider: AuthProvider,
         options?: { request?: AuthRequest },
     ): Promise<{ result: LoginResult }>
+    generateLoginToken(): Promise<any>
 }
 
 export interface AuthRemoteEvents {
