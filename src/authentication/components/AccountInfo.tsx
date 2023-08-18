@@ -41,7 +41,6 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
         const user = await this.props.authBG.getCurrentUser()
         this.processEvent('getCurrentUser', { currentUser: user })
         this.processEvent('setSubscriptionStatus', { email: user.email })
-        this.processEvent('generateLoginToken', null)
     }
 
     constructor(props: Props) {
@@ -65,7 +64,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                             title={'Pair Mobile Device'}
                             icon={'phone'}
                             description={
-                                'Scan this code to sign in the mobile app'
+                                'Generate and scan the QR code to sign in the mobile app'
                             }
                         >
                             <StoreSection>
@@ -88,6 +87,22 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                     src={'img/googlePlay.png'}
                                 />
                             </StoreSection>
+                            {this.state.loadQRCode === 'pristine' && (
+                                <GenerateTokenButtonBox>
+                                    <PrimaryAction
+                                        label={'Generate QR Code'}
+                                        onClick={() => {
+                                            this.processEvent(
+                                                'generateLoginToken',
+                                                null,
+                                            )
+                                        }}
+                                        type="primary"
+                                        icon="reload"
+                                        size="medium"
+                                    />
+                                </GenerateTokenButtonBox>
+                            )}
                             {this.state.loadQRCode === 'running' && (
                                 <QRPlaceHolder>
                                     <LoadingIndicatorBox>
@@ -243,6 +258,12 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     }
 }
 
+const GenerateTokenButtonBox = styled.div`
+    position: absolute;
+    right: 40px;
+    top: 40px;
+`
+
 const QRPlaceHolder = styled.div`
     border: 1px solid ${(props) => props.theme.colors.greyScale3};
     box-sizing: border-box;
@@ -253,6 +274,9 @@ const QRPlaceHolder = styled.div`
     overflow: hidden;
     right: 20px;
     top: 20px;
+    width: 400px;
+    height: 400px;
+    margin-top: 30px;
 `
 
 const Description = styled.div`
