@@ -303,12 +303,17 @@ export class AnnotationsSidebar extends React.Component<
             this.spaceTitleEditFieldRef.current &&
             !this.spaceTitleEditFieldRef.current.contains(event.target)
         ) {
-            this.props.updateListName(
-                this.props.lists.byId[this.props.selectedListId].unifiedId,
-                this.props.lists.byId[this.props.selectedListId].localId,
-                this.props.lists.byId[this.props.selectedListId].name,
-                this.state.spaceTitleEditValue,
-            )
+            if (
+                this.props.lists.byId[this.props.selectedListId].name !==
+                this.state.spaceTitleEditValue
+            ) {
+                this.props.updateListName(
+                    this.props.lists.byId[this.props.selectedListId].unifiedId,
+                    this.props.lists.byId[this.props.selectedListId].localId,
+                    this.props.lists.byId[this.props.selectedListId].name,
+                    this.state.spaceTitleEditValue,
+                )
+            }
             this.setState({
                 spaceTitleEditState: false,
                 spaceTitleEditValue: null, // Reset to the original value
@@ -2103,12 +2108,14 @@ export class AnnotationsSidebar extends React.Component<
                         }}
                         onKeyPress={(event) => {
                             if (event.key === 'Enter') {
-                                this.props.updateListName(
-                                    selectedList.unifiedId,
-                                    selectedList.localId,
-                                    selectedList.name,
-                                    event.target.value,
-                                )
+                                if (selectedList.name !== event.target.value) {
+                                    this.props.updateListName(
+                                        selectedList.unifiedId,
+                                        selectedList.localId,
+                                        selectedList.name,
+                                        event.target.value,
+                                    )
+                                }
                                 this.setState({
                                     spaceTitleEditState: false,
                                     spaceTitleEditValue: null,
