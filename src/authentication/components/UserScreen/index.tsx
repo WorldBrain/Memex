@@ -89,42 +89,48 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     }
 
     render() {
+        console.log(
+            'UserScreen render',
+            this.state.loadState,
+            this.state.currentUser,
+        )
         return this.state.loadState === 'running' ? (
             <LoadingContainer>
                 <LoadingIndicator size={50} />
             </LoadingContainer>
         ) : (
-            <>
-                {this.state.currentUser === null &&
-                this.state.loadState === 'success' ? (
-                    <div>
-                        <SettingSection
-                            icon={this.getIcon()}
-                            title={this.getTitle()}
-                            description={this.getDescription()}
-                        >
-                            <AuthDialog
-                                onAuth={() => {
-                                    window.location.reload()
-                                }}
-                                onModeChange={({ mode }) => {
-                                    this.processEvent('setAuthDialogMode', {
-                                        mode,
-                                    })
-                                }}
-                            />
-                        </SettingSection>
-                    </div>
-                ) : (
-                    <AccountInfo
-                        setAuthMode={(mode) => {
-                            this.processEvent('setAuthDialogMode', {
-                                mode: mode,
-                            })
-                        }}
-                    />
-                )}
-            </>
+            this.state.loadState === 'success' && (
+                <>
+                    {this.state.currentUser === null ? (
+                        <div>
+                            <SettingSection
+                                icon={this.getIcon()}
+                                title={this.getTitle()}
+                                description={this.getDescription()}
+                            >
+                                <AuthDialog
+                                    onAuth={() => {
+                                        window.location.reload()
+                                    }}
+                                    onModeChange={({ mode }) => {
+                                        this.processEvent('setAuthDialogMode', {
+                                            mode,
+                                        })
+                                    }}
+                                />
+                            </SettingSection>
+                        </div>
+                    ) : (
+                        <AccountInfo
+                            setAuthMode={(mode) => {
+                                this.processEvent('setAuthDialogMode', {
+                                    mode: mode,
+                                })
+                            }}
+                        />
+                    )}
+                </>
+            )
         )
     }
 }

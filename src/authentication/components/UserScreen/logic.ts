@@ -83,6 +83,7 @@ export default class Logic extends UILogic<State, Event> {
     getCurrentUser: EventHandler<'getCurrentUser'> = ({ event }) => {
         this.emitMutation({
             currentUser: { $set: event.currentUser },
+            loadState: { $set: 'success' },
         })
     }
 
