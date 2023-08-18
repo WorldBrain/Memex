@@ -188,7 +188,12 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     saveAIPrompt: (prompt) => void
     removeAISuggestion: (prompt) => void
     navigateFocusInList: (direction: 'up' | 'down') => void
-    updateListName: (listId: string, name: string) => void
+    updateListName: (
+        unifiedId: string,
+        localId: number,
+        oldName: string,
+        newName: string,
+    ) => void
 }
 
 interface AnnotationsSidebarState {
@@ -300,6 +305,8 @@ export class AnnotationsSidebar extends React.Component<
         ) {
             this.props.updateListName(
                 this.props.lists.byId[this.props.selectedListId].unifiedId,
+                this.props.lists.byId[this.props.selectedListId].localId,
+                this.props.lists.byId[this.props.selectedListId].name,
                 this.state.spaceTitleEditValue,
             )
             this.setState({
@@ -2098,6 +2105,8 @@ export class AnnotationsSidebar extends React.Component<
                             if (event.key === 'Enter') {
                                 this.props.updateListName(
                                     selectedList.unifiedId,
+                                    selectedList.localId,
+                                    selectedList.name,
                                     event.target.value,
                                 )
                                 this.setState({
@@ -2125,7 +2134,6 @@ export class AnnotationsSidebar extends React.Component<
                             })
                         }
                     >
-                        {selectedList.type === 'page-link' && 'Page link: '}{' '}
                         {selectedList.name}
                     </SpaceTitle>
                 )}

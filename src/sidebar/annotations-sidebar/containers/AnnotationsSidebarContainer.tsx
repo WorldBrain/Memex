@@ -899,10 +899,20 @@ export class AnnotationsSidebarContainer<
                                     null,
                                 )
                             }}
-                            updateListName={(unifiedListId, newName) => {
+                            updateListName={async (
+                                unifiedListId,
+                                localId,
+                                oldName,
+                                newName,
+                            ) => {
                                 this.processEvent('editListName', {
                                     unifiedListId: unifiedListId,
                                     newName,
+                                })
+                                await this.props.customListsBG.updateListName({
+                                    id: localId,
+                                    oldName: oldName,
+                                    newName: newName,
                                 })
                             }}
                             updatePromptState={(prompt) => {
@@ -974,12 +984,12 @@ export class AnnotationsSidebarContainer<
                                     disableWriteOps={
                                         this.state.hasListDataBeenManuallyPulled
                                     }
-                                    onConfirmSpaceNameEdit={(newName) =>
+                                    onConfirmSpaceNameEdit={(newName) => {
                                         this.processEvent('editListName', {
                                             unifiedListId: listData.unifiedId,
                                             newName,
                                         })
-                                    }
+                                    }}
                                     onSpaceShare={(remoteListId) =>
                                         this.processEvent('shareList', {
                                             unifiedListId: listData.unifiedId,

@@ -848,7 +848,6 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     editListName: EventHandler<'editListName'> = async ({ event }) => {
-        console.log('arrivesherer', event)
         this.options.annotationsCache.updateList({
             unifiedId: event.unifiedListId,
             name: event.newName,
