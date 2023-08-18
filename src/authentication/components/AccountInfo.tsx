@@ -88,16 +88,18 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                     src={'img/googlePlay.png'}
                                 />
                             </StoreSection>
-                            {this.state.loadQRcode === 'running' && (
+                            {this.state.loadQRCode === 'running' && (
                                 <QRPlaceHolder>
                                     <LoadingIndicatorBox>
                                         <LoadingIndicator size={30} />
                                     </LoadingIndicatorBox>
                                 </QRPlaceHolder>
                             )}
-                            {this.state.loadQRcode === 'success' && (
+                            {this.state.loadQRCode === 'success' && (
                                 <QRPlaceHolder>
-                                    <QRCanvas toEncode={'testsetet'} />
+                                    <QRCanvas
+                                        toEncode={this.state.loginToken}
+                                    />
                                 </QRPlaceHolder>
                             )}
                         </SettingSection>
@@ -248,10 +250,7 @@ const QRPlaceHolder = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 150px;
-    width: 150px;
     overflow: hidden;
-    position: absolute;
     right: 20px;
     top: 20px;
 `
@@ -272,6 +271,7 @@ const StoreSection = styled.div`
 const StoreImage = styled.img`
     height: 40px;
     width: auto;
+    cursor: pointer;
 `
 
 const SubscriptionActionBox = styled.div`

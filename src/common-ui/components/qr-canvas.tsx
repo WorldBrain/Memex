@@ -17,12 +17,11 @@ export default class QRCanvas extends React.PureComponent<Props> {
     async componentDidMount() {
         try {
             await QRCode.toCanvas(this.canvasEl!, this.props.toEncode, {
-                scale: 6,
                 color: {
                     dark: '#FAFAFA',
                     light: '#303139',
                 },
-                width: 150,
+                width: 400,
             })
         } catch (err) {
             this.props.errorHandler(err)

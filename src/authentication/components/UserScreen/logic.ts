@@ -5,7 +5,6 @@ import {
     UIEventHandler,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import type { Dependencies, State, Event } from './types'
-import delay from 'src/util/delay'
 import { checkStripePlan } from 'src/util/subscriptions/storage'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -43,7 +42,7 @@ export default class Logic extends UILogic<State, Event> {
         subscriptionStatus: null,
         subscriptionStatusLoading: 'running',
         loginToken: null,
-        loadQRcode: 'pristine',
+        loadQRCode: 'pristine',
     })
 
     async init() {
@@ -86,14 +85,13 @@ export default class Logic extends UILogic<State, Event> {
             currentUser: { $set: event.currentUser },
         })
     }
+
     generateLoginToken: EventHandler<'generateLoginToken'> = async ({
         event,
     }) => {
-        this.emitMutation({ loadQRcode: { $set: 'running' } })
-        const token = await this.dependencies.authBG.generateLoginToken()
-        this.emitMutation({
-            loadQRcode: { $set: 'success' },
-            loginToken: { $set: token },
+        await executeUITask(this, 'loadQRCode', async () => {
+            const token = await this.dependencies.authBG.generateLoginToken()
+            this.emitMutation({ loginToken: { $set: token } })
         })
     }
 
