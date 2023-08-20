@@ -1,5 +1,5 @@
 import * as React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import { FullPage } from 'src/common-ui/components/design-library/FullPage'
 import { auth } from 'src/util/remote-functions-background'
@@ -15,6 +15,8 @@ import { StatefulUIElement } from 'src/util/ui-logic'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 import QRCanvas from 'src/common-ui/components/qr-canvas'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 
 const styles = require('./styles.css')
 
@@ -37,6 +39,8 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
         navToGuidedTutorial: () => {},
     }
 
+    private generateTokenButtonRef = React.createRef<HTMLDivElement>()
+
     async componentDidMount() {
         const user = await this.props.authBG.getCurrentUser()
         this.processEvent('getCurrentUser', { currentUser: user })
@@ -45,6 +49,44 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
 
     constructor(props: Props) {
         super(props, new Logic(props))
+    }
+
+    renderGenerateTokenMenu() {
+        if (this.state.systemSelectMenuState) {
+            return (
+                <PopoutBox
+                    targetElementRef={this.generateTokenButtonRef.current}
+                    placement="bottom-end"
+                    closeComponent={() =>
+                        this.processEvent(
+                            'toggleGenerateTokenSystemSelectMenu',
+                            null,
+                        )
+                    }
+                >
+                    <SystemSelectionMenu>
+                        <SystemSelectionMenuItem
+                            onClick={() => {
+                                this.processEvent('generateLoginToken', {
+                                    system: 'iOs',
+                                })
+                            }}
+                        >
+                            iOS
+                        </SystemSelectionMenuItem>
+                        <SystemSelectionMenuItem
+                            onClick={() => {
+                                this.processEvent('generateLoginToken', {
+                                    system: 'android',
+                                })
+                            }}
+                        >
+                            Android
+                        </SystemSelectionMenuItem>
+                    </SystemSelectionMenu>
+                </PopoutBox>
+            )
+        }
     }
 
     render() {
@@ -90,32 +132,95 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                             {this.state.loadQRCode === 'pristine' && (
                                 <GenerateTokenButtonBox>
                                     <PrimaryAction
-                                        label={'Generate QR Code'}
+                                        label={'Generate Login Code'}
                                         onClick={() => {
                                             this.processEvent(
-                                                'generateLoginToken',
+                                                'toggleGenerateTokenSystemSelectMenu',
                                                 null,
                                             )
                                         }}
                                         type="primary"
                                         icon="reload"
                                         size="medium"
+                                        innerRef={this.generateTokenButtonRef}
                                     />
+                                    {this.renderGenerateTokenMenu()}
                                 </GenerateTokenButtonBox>
                             )}
-                            {this.state.loadQRCode === 'running' && (
-                                <QRPlaceHolder>
+
+                            {this.state.loadQRCode === 'running' &&
+                                this.state.generateTokenDisplay === 'qr' && (
+                                    <QRPlaceHolder>
+                                        <LoadingIndicatorBox>
+                                            <LoadingIndicator size={30} />
+                                        </LoadingIndicatorBox>
+                                    </QRPlaceHolder>
+                                )}
+                            {this.state.loadQRCode === 'running' &&
+                                this.state.generateTokenDisplay === 'text' && (
                                     <LoadingIndicatorBox>
                                         <LoadingIndicator size={30} />
                                     </LoadingIndicatorBox>
-                                </QRPlaceHolder>
-                            )}
+                                )}
                             {this.state.loadQRCode === 'success' && (
-                                <QRPlaceHolder>
-                                    <QRCanvas
-                                        toEncode={this.state.loginToken}
-                                    />
-                                </QRPlaceHolder>
+                                <>
+                                    {this.state.generateTokenDisplay ===
+                                        'text' && (
+                                        <TokenTextDisplayContainer>
+                                            <CopyTokenInstructionText>
+                                                Copy this code and paste it into
+                                                the mobile app
+                                            </CopyTokenInstructionText>
+                                            <TokenTextDisplayBox>
+                                                <TextField
+                                                    value={
+                                                        this.state
+                                                            .copyToClipBoardState ===
+                                                        'success'
+                                                            ? 'Copied to Clipboard'
+                                                            : this.state
+                                                                  .loginToken
+                                                    }
+                                                    disabled
+                                                    onClick={() =>
+                                                        this.processEvent(
+                                                            'copyCodeToClipboard',
+                                                            null,
+                                                        )
+                                                    }
+                                                />
+                                                <PrimaryAction
+                                                    label={
+                                                        this.state
+                                                            .copyToClipBoardState ===
+                                                        'success'
+                                                            ? 'Copied'
+                                                            : 'Copy'
+                                                    }
+                                                    icon={'copy'}
+                                                    onClick={() =>
+                                                        this.processEvent(
+                                                            'copyCodeToClipboard',
+                                                            null,
+                                                        )
+                                                    }
+                                                    size={'medium'}
+                                                    type={'secondary'}
+                                                    height="100%"
+                                                    padding="0 20px"
+                                                />
+                                            </TokenTextDisplayBox>
+                                        </TokenTextDisplayContainer>
+                                    )}
+                                    {this.state.generateTokenDisplay ===
+                                        'qr' && (
+                                        <QRPlaceHolder>
+                                            <QRCanvas
+                                                toEncode={this.state.loginToken}
+                                            />
+                                        </QRPlaceHolder>
+                                    )}
+                                </>
                             )}
                         </SettingSection>
                         <SettingSection
@@ -257,6 +362,71 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
         )
     }
 }
+
+const TokenTextDisplayContainer = styled.div`
+    display: flex;
+    margin: 20px 0px;
+    grid-gap: 10px;
+    flex-direction: column;
+`
+const TokenTextDisplayBox = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    justify-content: space-between;
+`
+
+const SystemSelectionMenu = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 5px;
+    align-items: flex-start;
+    justify-content: flex-start;
+`
+
+const SystemSelectionMenuItem = styled.div`
+    background: ${(props) => props.isSelected && props.theme.colors.greyScale2};
+    padding: 10px 10px;
+    line-height: 20px;
+    width: fill-available;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    white-space: nowrap;
+    border-radius: 6px;
+    margin: 0 10px;
+    cursor: ${(props) => !props.isSelected && 'pointer'};
+    width: 210px;
+    color: ${(props) => props.theme.colors.greyScale6};
+
+    &:first-child {
+        margin-top: 10px;
+    }
+
+    &:last-child {
+        margin-bottom: 10px;
+    }
+
+    ${(props) =>
+        !props.isSelected &&
+        css`
+            cursor: pointer;
+
+            &:hover {
+                outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+            }
+
+            & * {
+                cursor: pointer;
+            }
+        `};
+`
+
+const CopyTokenInstructionText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 16px;
+`
 
 const GenerateTokenButtonBox = styled.div`
     position: absolute;

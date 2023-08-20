@@ -43,6 +43,9 @@ export default class Logic extends UILogic<State, Event> {
         subscriptionStatusLoading: 'running',
         loginToken: null,
         loadQRCode: 'pristine',
+        systemSelectMenuState: false,
+        generateTokenDisplay: null,
+        copyToClipBoardState: 'pristine',
     })
 
     async init() {
@@ -86,10 +89,46 @@ export default class Logic extends UILogic<State, Event> {
             loadState: { $set: 'success' },
         })
     }
+    toggleGenerateTokenSystemSelectMenu: EventHandler<
+        'toggleGenerateTokenSystemSelectMenu'
+    > = ({ event, previousState }) => {
+        this.emitMutation({
+            systemSelectMenuState: {
+                $set: !previousState.systemSelectMenuState,
+            },
+        })
+    }
+    copyCodeToClipboard: EventHandler<'copyCodeToClipboard'> = ({
+        previousState,
+    }) => {
+        this.emitMutation({
+            copyToClipBoardState: {
+                $set: 'success',
+            },
+        })
+        navigator.clipboard.writeText(previousState.loginToken)
+        setTimeout(() => {
+            this.emitMutation({
+                copyToClipBoardState: {
+                    $set: 'pristine',
+                },
+            })
+        }, 3000)
+    }
 
     generateLoginToken: EventHandler<'generateLoginToken'> = async ({
         event,
     }) => {
+        if (event.system === 'iOs') {
+            this.emitMutation({
+                generateTokenDisplay: { $set: 'text' },
+            })
+        }
+        if (event.system === 'android') {
+            this.emitMutation({
+                generateTokenDisplay: { $set: 'qr' },
+            })
+        }
         await executeUITask(this, 'loadQRCode', async () => {
             const token = await this.dependencies.authBG.generateLoginToken()
             this.emitMutation({ loginToken: { $set: token } })

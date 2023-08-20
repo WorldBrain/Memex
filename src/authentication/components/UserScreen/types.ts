@@ -34,6 +34,9 @@ export interface State {
     subscriptionStatusLoading: UITaskState
     loadQRCode: UITaskState
     loginToken: string
+    generateTokenDisplay: string
+    systemSelectMenuState: boolean
+    copyToClipBoardState: UITaskState
 }
 
 export type Event = UIEvent<{
@@ -44,8 +47,10 @@ export type Event = UIEvent<{
     setAuthDialogMode: { mode: AuthDialogMode }
     getCurrentUser: { currentUser: AuthenticatedUser }
     sendPasswordReset: null
-    generateLoginToken: null
+    generateLoginToken: { system: string }
     setSubscriptionStatus: {
         email: string
     }
+    toggleGenerateTokenSystemSelectMenu: null
+    copyCodeToClipboard: null
 }>
