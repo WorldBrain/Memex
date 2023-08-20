@@ -1226,6 +1226,16 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private showSummary() {
+        let contentType: 'highlight' | 'page' | 'video'
+
+        if (this.props.fullPageUrl.includes('youtube.com')) {
+            contentType = 'video'
+        } else if (this.props.selectedTextAIPreview?.length > 0) {
+            contentType = 'highlight'
+        } else {
+            contentType = 'page'
+        }
+
         return (
             <SummarySection>
                 <SummaryContainer>
@@ -1244,8 +1254,10 @@ export class AnnotationsSidebar extends React.Component<
                         <AIContainerNotif>
                             <AIContainerNotifTitle>
                                 Summarise or ask questions <br /> about this{' '}
-                                {this.props.fullPageUrl.includes('youtube.com')
+                                {contentType === 'video'
                                     ? 'video'
+                                    : contentType === 'highlight'
+                                    ? 'highlight'
                                     : 'article'}
                             </AIContainerNotifTitle>
                             <AIContainerNotifSubTitle>

@@ -299,10 +299,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         } else if (event.action === 'share_page') {
             await this.processEvent('createPageLink', null)
         } else if (event.action === 'show_page_summary') {
-            await this.processEvent('setActiveSidebarTab', {
-                tab: 'summary',
+            await this.processEvent('askAIviaInPageInteractions', {
                 textToProcess: event.highlightedText,
-                prompt: 'Summarize this page in 2 sentences',
             })
         } else if (event.action === 'youtube_timestamp') {
             await this.processEvent('setActiveSidebarTab', {
