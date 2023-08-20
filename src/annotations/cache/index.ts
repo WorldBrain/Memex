@@ -583,8 +583,14 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     removeAnnotation: PageAnnotationsCacheInterface['removeAnnotation'] = ({
         unifiedId,
+        localId,
     }) => {
-        const previousAnnotation = this.annotations.byId[unifiedId]
+        let unifiedIdInferred = unifiedId
+        if (localId != null) {
+            unifiedIdInferred = this.localAnnotIdsToCacheIds.get(localId)
+        }
+
+        const previousAnnotation = this.annotations.byId[unifiedIdInferred]
         if (!previousAnnotation) {
             throw new Error('No existing cached annotation found to remove')
         }
@@ -597,7 +603,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
         delete this.annotations.byId[previousAnnotation.unifiedId]
         this.annotations.allIds = this.annotations.allIds.filter(
-            (id) => id !== unifiedId,
+            (id) => id !== unifiedIdInferred,
         )
 
         this.events.emit('removedAnnotation', previousAnnotation)
