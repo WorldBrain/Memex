@@ -2646,6 +2646,7 @@ const SelectedAIText = styled.div`
     color: ${(props) => props.theme.colors.white};
     flex: 1;
     white-space: break-spaces;
+    font-size: 16px;
 `
 
 const RightSideButtons = styled.div`
@@ -2707,6 +2708,7 @@ const SummaryContainer = styled.div`
     align-items: flex-start;
     min-height: 60px;
     height: 100%;
+    overflow: scroll;
 `
 
 const SummaryFooter = styled.div`
@@ -2748,8 +2750,8 @@ const SummaryText = styled.div`
     font-size: 16px;
     line-height: 22px;
     white-space: break-spaces;
-    overflow: scroll;
     flex-direction: column-reverse;
+    margin-bottom: 200px;
 `
 
 const FocusModeNotifContainer = styled.div`
