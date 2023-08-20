@@ -1253,12 +1253,12 @@ export class AnnotationsSidebar extends React.Component<
                     ) : (
                         <AIContainerNotif>
                             <AIContainerNotifTitle>
-                                Summarise or ask questions <br /> about this{' '}
+                                Summarise or ask questions <br /> about{' '}
                                 {contentType === 'video'
-                                    ? 'video'
+                                    ? 'this video'
                                     : contentType === 'highlight'
-                                    ? 'highlight'
-                                    : 'article'}
+                                    ? 'the selected text'
+                                    : 'this article'}
                             </AIContainerNotifTitle>
                             <AIContainerNotifSubTitle>
                                 Just type in a question or pick one of the
@@ -1299,7 +1299,10 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         const addPromptButton = (prompt) => (
-            <TooltipBox tooltipText="Save as template" placement="left">
+            <TooltipBox
+                tooltipText="Save prompt as template"
+                placement="bottom-end"
+            >
                 <Icon
                     onClick={() => this.props.saveAIPrompt(prompt)}
                     filePath={icons.plus}
