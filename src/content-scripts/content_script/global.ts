@@ -154,7 +154,9 @@ export async function main(
                     ])
                     return
                 } else {
-                    highlightRenderer.removeAnnotationHighlight(lastAction.id)
+                    await highlightRenderer.removeAnnotationHighlight({
+                        id: lastAction.id,
+                    })
                     lastActions.shift()
                     await globalThis['browser'].storage.local.set({
                         [`${UNDO_HISTORY}`]: lastActions,
@@ -163,7 +165,9 @@ export async function main(
 
                 const existing =
                     annotationsCache.annotations.byId[lastAction.id]
-                annotationsCache.removeAnnotation({ unifiedId: lastAction.id })
+                annotationsCache.removeAnnotation({
+                    unifiedId: existing.unifiedId,
+                })
 
                 if (existing?.localId != null) {
                     await annotationsBG.deleteAnnotation(existing.localId)
@@ -288,7 +292,7 @@ export async function main(
                 })
                 await savePromise
             })()
-            return { annotationId: unifiedId, createPromise }
+            return { annotationId: unifiedId, localId: localId, createPromise }
         },
     })
     const sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter

@@ -231,6 +231,11 @@ interface SidebarEvents {
         url?: string
         prompt?: string
     }
+    askAIviaInPageInteractions: {
+        textToProcess?: string
+        url?: string
+        prompt?: string
+    }
     selectAISuggestion: { suggestion: string }
     queryAIwithPrompt: {
         prompt: string

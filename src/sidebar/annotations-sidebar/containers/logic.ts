@@ -1862,6 +1862,18 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    askAIviaInPageInteractions: EventHandler<
+        'askAIviaInPageInteractions'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({ activeTab: { $set: 'summary' } })
+
+        this.emitMutation({
+            pageSummary: { $set: '' },
+            selectedTextAIPreview: { $set: event.textToProcess },
+            prompt: { $set: undefined },
+        })
+    }
+
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
         previousState,

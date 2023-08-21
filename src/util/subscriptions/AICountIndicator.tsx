@@ -140,7 +140,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                             <strong>
                                                 {this.leftOverBlocks}
                                             </strong>{' '}
-                                            AI requests left
+                                            AI requests left this month
                                         </InfoTooltipTitle>
                                         <InfoTooltipSubTitle>
                                             Resets on the 1st of every month
@@ -268,7 +268,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                         <TooltipTextContainer>
                             <TooltipTextTop>
                                 You have <strong>{this.leftOverBlocks}</strong>{' '}
-                                queries left
+                                queries left this month
                             </TooltipTextTop>
                             <TooltipTextBottom>
                                 Click for more info
@@ -350,6 +350,7 @@ const TooltipTextBottom = styled.div`
     display: flex;
     text-align: center;
     width: 100%;
+    justify-content: center;
 `
 
 const TooltipTextContainer = styled.div`

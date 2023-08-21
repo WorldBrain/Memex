@@ -1226,6 +1226,16 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private showSummary() {
+        let contentType: 'highlight' | 'page' | 'video'
+
+        if (this.props.fullPageUrl.includes('youtube.com')) {
+            contentType = 'video'
+        } else if (this.props.selectedTextAIPreview?.length > 0) {
+            contentType = 'highlight'
+        } else {
+            contentType = 'page'
+        }
+
         return (
             <SummarySection>
                 <SummaryContainer>
@@ -1243,10 +1253,12 @@ export class AnnotationsSidebar extends React.Component<
                     ) : (
                         <AIContainerNotif>
                             <AIContainerNotifTitle>
-                                Summarise or ask questions <br /> about this{' '}
-                                {this.props.fullPageUrl.includes('youtube.com')
-                                    ? 'video'
-                                    : 'article'}
+                                Summarise or ask questions <br /> about{' '}
+                                {contentType === 'video'
+                                    ? 'this video'
+                                    : contentType === 'highlight'
+                                    ? 'the selected text'
+                                    : 'this article'}
                             </AIContainerNotifTitle>
                             <AIContainerNotifSubTitle>
                                 Just type in a question or pick one of the
@@ -1287,7 +1299,10 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         const addPromptButton = (prompt) => (
-            <TooltipBox tooltipText="Save as template" placement="left">
+            <TooltipBox
+                tooltipText="Save prompt as template"
+                placement="bottom-end"
+            >
                 <Icon
                     onClick={() => this.props.saveAIPrompt(prompt)}
                     filePath={icons.plus}
@@ -2646,6 +2661,7 @@ const SelectedAIText = styled.div`
     color: ${(props) => props.theme.colors.white};
     flex: 1;
     white-space: break-spaces;
+    font-size: 16px;
 `
 
 const RightSideButtons = styled.div`
@@ -2707,6 +2723,7 @@ const SummaryContainer = styled.div`
     align-items: flex-start;
     min-height: 60px;
     height: 100%;
+    overflow: scroll;
 `
 
 const SummaryFooter = styled.div`
@@ -2748,8 +2765,8 @@ const SummaryText = styled.div`
     font-size: 16px;
     line-height: 22px;
     white-space: break-spaces;
-    overflow: scroll;
     flex-direction: column-reverse;
+    margin-bottom: 200px;
 `
 
 const FocusModeNotifContainer = styled.div`
