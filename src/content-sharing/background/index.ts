@@ -43,7 +43,7 @@ export default class ContentSharingBackground {
     static ONE_WEEK_MS = 604800000
 
     private pageLinkCreationPromises: {
-        [fullPageUrl: string]: Promise<void>
+        [fullPageUrl: string, customPageTitle: string]: Promise<void>
     } = {}
     private listSharePromises: {
         [localListId: number]: Promise<void>
@@ -798,7 +798,7 @@ export default class ContentSharingBackground {
         'provider'
     >['schedulePageLinkCreation'] = async (
         { tab },
-        { fullPageUrl, now = Date.now() },
+        { fullPageUrl, now = Date.now(), customPageTitle },
     ) => {
         if (this.pageLinkCreationPromises[fullPageUrl]) {
             throw new Error(
@@ -822,6 +822,9 @@ export default class ContentSharingBackground {
         const collabKey = this.options
             .generateServerId('sharedListKey')
             .toString()
+        const pageTitle = customPageTitle
+
+        console.log('pagetitlefetch', pageTitle)
 
         // Start but don't wait for the storage logic
         this.pageLinkCreationPromises[
@@ -836,6 +839,7 @@ export default class ContentSharingBackground {
             tabId: tab?.id,
             fullPageUrl,
             now,
+            pageTitle,
         })
 
         return {
@@ -844,6 +848,7 @@ export default class ContentSharingBackground {
             listTitle,
             localListId,
             collabKey,
+            pageTitle,
         }
     }
 
@@ -857,6 +862,7 @@ export default class ContentSharingBackground {
         creator,
         tabId,
         now,
+        pageTitle: customPageTitle,
     }: Awaited<
         ReturnType<
             RemoteContentSharingByTabsInterface<
@@ -877,13 +883,22 @@ export default class ContentSharingBackground {
                 fullUrl: fullPageUrl,
                 visitTime: now,
                 tabId,
+                metaData: {
+                    pageTitle: customPageTitle,
+                },
             },
             { addInboxEntryOnCreate: false },
         )
-        const pageTitle = await bgModules.pages.lookupPageTitleForUrl({
-            fullPageUrl: indexedPage.fullUrl,
-        })
 
+        let pageTitle: string
+
+        if (customPageTitle) {
+            pageTitle = customPageTitle
+        } else {
+            pageTitle = await bgModules.pages.lookupPageTitleForUrl({
+                fullPageUrl: indexedPage.fullUrl,
+            })
+        }
         await bgModules.customLists.createCustomList({
             id: localListId,
             name: listTitle,
@@ -898,6 +913,7 @@ export default class ContentSharingBackground {
                 skipPageIndexing: true,
                 suppressInboxEntry: true,
                 suppressVisitCreation: true,
+                pageTitle: pageTitle,
             }),
             this.performListShare({
                 localListId,

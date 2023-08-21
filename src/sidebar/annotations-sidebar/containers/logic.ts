@@ -2525,6 +2525,12 @@ export class SidebarContainerLogic extends UILogic<
             throw new Error('Cannot create page link - User not logged in')
         }
 
+        let title
+
+        if (window.location.href.includes('web.telegram.org')) {
+            title = getTelegramUserDisplayName(document)
+        }
+
         await executeUITask(this, 'pageLinkCreateState', async () => {
             const {
                 collabKey,
@@ -2535,6 +2541,7 @@ export class SidebarContainerLogic extends UILogic<
             } = await this.options.contentSharingByTabsBG.schedulePageLinkCreation(
                 {
                     fullPageUrl,
+                    customPageTitle: title,
                 },
             )
 
