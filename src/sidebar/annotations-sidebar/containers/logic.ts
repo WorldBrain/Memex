@@ -82,6 +82,7 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -1218,14 +1219,7 @@ export class SidebarContainerLogic extends UILogic<
 
             let title: string | null = null
             if (window.location.href.includes('web.telegram.org')) {
-                const titleSpan = document.getElementsByClassName('peer-title')
-                for (let span of titleSpan) {
-                    const parent = span.parentElement
-                    if (!parent.classList.contains('row-title')) {
-                        title = (span as HTMLElement).innerText
-                    }
-                }
-                console.log('title', title)
+                title = getTelegramUserDisplayName(document)
             }
 
             // Adding a new annot in selected space mode should only work on the "Spaces" tab

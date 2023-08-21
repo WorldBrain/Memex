@@ -35,6 +35,7 @@ import type { UnifiedList } from 'src/annotations/cache/types'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
+    pageTitle?: string
 }
 
 class SpacePicker extends StatefulUIElement<
@@ -120,6 +121,7 @@ class SpacePicker extends StatefulUIElement<
         e.stopPropagation()
         this.processEvent('newEntryAllPress', {
             entry: this.state.newEntryName,
+            pageTitle: this.props.pageTitle,
         })
     }
 

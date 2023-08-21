@@ -624,12 +624,6 @@ export class PageIndexingBackground {
             }
         }
 
-        console.log('beforeextract')
-        if (props.fullUrl.includes('telegram.org')) {
-            console.log('isintelegram')
-            console.log('docss', document.getElementsByClassName('peer-title'))
-        }
-
         const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))
         const analysis = await analysePage({
             tabId: props.tabId,

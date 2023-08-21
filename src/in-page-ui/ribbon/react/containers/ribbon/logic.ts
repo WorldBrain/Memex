@@ -16,6 +16,7 @@ import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import browser, { Storage } from 'webextension-polyfill'
 import { pageActionAllowed } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -583,17 +584,10 @@ export class RibbonContainerLogic extends UILogic<
 
             const shouldBeBookmarked = !postInitState.bookmark.isBookmarked
 
-            console.log('before')
             let title: string = null
+
             if (window.location.href.includes('web.telegram.org')) {
-                const titleSpan = document.getElementsByClassName('peer-title')
-                for (let span of titleSpan) {
-                    const parent = span.parentElement
-                    if (!parent.classList.contains('row-title')) {
-                        title = (span as HTMLElement).innerText
-                    }
-                }
-                console.log('titleglobal', title)
+                title = getTelegramUserDisplayName(document)
             }
 
             try {
@@ -851,12 +845,19 @@ export class RibbonContainerLogic extends UILogic<
             unifiedListIds,
         )
 
+        let title
+
+        if (window.location.href.includes('web.telegram.org')) {
+            title = getTelegramUserDisplayName(document)
+        }
+
         return this.dependencies.customLists.updateListForPage({
             added: event.value.added,
             deleted: event.value.deleted,
             url: previousState.fullPageUrl,
             tabId: this.dependencies.currentTab.id,
             skipPageIndexing: event.value.skipPageIndexing,
+            pageTitle: title,
         })
     }
 

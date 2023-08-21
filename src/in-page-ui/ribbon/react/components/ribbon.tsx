@@ -35,6 +35,7 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 import { logoNoText } from 'src/common-ui/components/design-library/icons'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -227,6 +228,11 @@ export default class Ribbon extends Component<Props, State> {
             return
         }
 
+        let pageTitle
+        if (window.location.href.includes('web.telegram.org')) {
+            pageTitle = getTelegramUserDisplayName(document)
+        }
+
         const topRight = this.props.ribbonPosition === 'topRight'
         const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
@@ -262,6 +268,7 @@ export default class Ribbon extends Component<Props, State> {
                     }
                     closePicker={this.hideListPicker}
                     onListShare={this.props.onListShare}
+                    pageTitle={pageTitle}
                 />
             </PopoutBox>
         )

@@ -87,6 +87,7 @@ import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highl
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import checkBrowser from 'src/util/check-browser'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -851,14 +852,7 @@ class PageInfo {
         let title = document.title
 
         if (window.location.href.includes('web.telegram.org')) {
-            const titleSpan = document.getElementsByClassName('peer-title')
-            for (let span of titleSpan) {
-                const parent = span.parentElement
-                if (!parent.classList.contains('row-title')) {
-                    title = (span as HTMLElement).innerText
-                }
-            }
-            console.log('title', title)
+            title = getTelegramUserDisplayName(document)
         }
 
         return title
