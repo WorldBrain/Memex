@@ -81,6 +81,9 @@ export default class BookmarksBackground {
         timestamp?: number
         tabId?: number
         skipIndexing?: boolean
+        metaData?: {
+            pageTitle?: string
+        }
     }) => {
         const fullUrl = params.fullUrl ?? params.url
         if (!isFullUrl(fullUrl)) {
@@ -96,6 +99,7 @@ export default class BookmarksBackground {
                     fullUrl,
                     tabId: params.tabId,
                     visitTime: params.timestamp || '$now',
+                    metaData: params.metaData,
                 },
                 { addInboxEntryOnCreate: true },
             )

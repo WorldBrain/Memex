@@ -566,6 +566,9 @@ export class PageIndexingBackground {
         if (pageData.isExisting) {
             return { fullUrl: pageData.fullUrl }
         }
+        if (props.metaData.pageTitle) {
+            pageData.fullTitle = props.metaData.pageTitle
+        }
         await this.createOrUpdatePage(pageData, opts)
 
         if (props.visitTime) {
@@ -619,6 +622,12 @@ export class PageIndexingBackground {
             if (!latestLocator.originalLocation.startsWith('blob:')) {
                 originalUrl = latestLocator.originalLocation
             }
+        }
+
+        console.log('beforeextract')
+        if (props.fullUrl.includes('telegram.org')) {
+            console.log('isintelegram')
+            console.log('docss', document.getElementsByClassName('peer-title'))
         }
 
         const includeFavIcon = !(await this.domainHasFavIcon(props.fullUrl))

@@ -180,7 +180,17 @@ export class RibbonContainerLogic extends UILogic<
     init: EventHandler<'init'> = async (incoming) => {
         const { getFullPageUrl } = this.dependencies
         await loadInitial<RibbonContainerState>(this, async () => {
-            const fullPageUrl = await getFullPageUrl()
+            let fullPageUrl = await getFullPageUrl()
+
+            // TElegram URL Support
+            if (window.location.href.includes('web.telegram.org')) {
+                try {
+                    fullPageUrl = fullPageUrl.replace('#@', '@')
+                } catch (error) {
+                    console.log('error', error)
+                }
+            }
+            // Telegram URL Support
             this.emitMutation({ fullPageUrl: { $set: fullPageUrl } })
             await this.hydrateStateFromDB({
                 ...incoming,
@@ -193,12 +203,23 @@ export class RibbonContainerLogic extends UILogic<
         //     .getElementById('memex-sidebar-container')
         //     ?.shadowRoot.getElementById('annotationSidebarContainer')
         this.initReadingViewListeners()
-        const fullPageUrl = await getFullPageUrl()
+        // let fullPageUrl = await getFullPageUrl()
 
-        await this.hydrateStateFromDB({
-            ...incoming,
-            event: { url: fullPageUrl },
-        })
+        // // TElegram URL Support
+        // if (window.location.href.includes('web.telegram.org')) {
+        //     try {
+        //         fullPageUrl = fullPageUrl.replace('#@', '@')
+        //     } catch (error) {
+        //         console.log('error', error)
+        //     }
+        // }
+
+        // // Telegram URL Support
+
+        // await this.hydrateStateFromDB({
+        //     ...incoming,
+        //     event: { url: fullPageUrl },
+        // })
     }
 
     async initReadingViewListeners() {
@@ -235,9 +256,23 @@ export class RibbonContainerLogic extends UILogic<
         let lists = []
         let interActionTimestamps = []
 
+        this.emitMutation({
+            bookmark: {
+                isBookmarked: { $set: false },
+                lastBookmarkTimestamp: { $set: null },
+            },
+        })
+
         let fullLists = await this.dependencies.customLists.fetchListPagesByUrl(
             { url: url },
         )
+
+        fullLists
+            .filter((list) => list.type !== 'page-link')
+            .forEach((list) => {
+                lists.push(list.id)
+            })
+
         let fullListEntries = await this.dependencies.customLists.fetchPageListEntriesByUrl(
             { url: url },
         )
@@ -247,23 +282,22 @@ export class RibbonContainerLogic extends UILogic<
             interActionTimestamps.push(date)
         })
 
-        fullLists
-            .filter((list) => list.type !== 'page-link')
-            .forEach((list) => {
-                lists.push(list.id)
-            })
+        const annotationsByURL = await this.dependencies.annotations.listAnnotationsByPageUrl(
+            { pageUrl: normalizeUrl(url) },
+        )
 
-        const annotations = await this.dependencies.annotationsCache.annotations
-        const annotationList = Object.values(annotations.byId)
-        annotationList.map((annotation) => {
+        // this section is there because sometimes when switching pages in web apps, the cache is still the old one when trying to see if the page has annotations
+
+        annotationsByURL.map((annotation) => {
             return interActionTimestamps.push(
                 Math.floor(annotation.createdWhen / 1000),
             )
         })
 
         const bookmark = await this.dependencies.bookmarks.findBookmark(url)
+
         const isBookmarked =
-            bookmark || annotations.allIds.length > 0 || lists.length > 0
+            bookmark || annotationsByURL.length > 0 || lists.length > 0
 
         if (bookmark?.time != null) {
             interActionTimestamps.push(bookmark.time)
@@ -298,7 +332,7 @@ export class RibbonContainerLogic extends UILogic<
                 },
             },
             lists: { pageListIds: { $set: lists } },
-            annotations: { $set: annotations.allIds.length },
+            annotations: { $set: annotationsByURL.length },
             hasFeedActivity: { $set: activityStatus },
         })
     }
@@ -549,12 +583,28 @@ export class RibbonContainerLogic extends UILogic<
 
             const shouldBeBookmarked = !postInitState.bookmark.isBookmarked
 
+            console.log('before')
+            let title: string = null
+            if (window.location.href.includes('web.telegram.org')) {
+                const titleSpan = document.getElementsByClassName('peer-title')
+                for (let span of titleSpan) {
+                    const parent = span.parentElement
+                    if (!parent.classList.contains('row-title')) {
+                        title = (span as HTMLElement).innerText
+                    }
+                }
+                console.log('titleglobal', title)
+            }
+
             try {
                 if (shouldBeBookmarked) {
                     updateState(shouldBeBookmarked)
                     await this.dependencies.bookmarks.addPageBookmark({
                         fullUrl: postInitState.fullPageUrl,
                         tabId: this.dependencies.currentTab.id,
+                        metaData: {
+                            pageTitle: title,
+                        },
                     })
                 }
             } catch (err) {

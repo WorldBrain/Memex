@@ -1215,6 +1215,19 @@ export class SidebarContainerLogic extends UILogic<
                     }
                 }
             }
+
+            let title: string | null = null
+            if (window.location.href.includes('web.telegram.org')) {
+                const titleSpan = document.getElementsByClassName('peer-title')
+                for (let span of titleSpan) {
+                    const parent = span.parentElement
+                    if (!parent.classList.contains('row-title')) {
+                        title = (span as HTMLElement).innerText
+                    }
+                }
+                console.log('title', title)
+            }
+
             // Adding a new annot in selected space mode should only work on the "Spaces" tab
             if (activeTab === 'spaces') {
                 maybeAddLocalListIdForCacheList(selectedListId)
@@ -1228,6 +1241,7 @@ export class SidebarContainerLogic extends UILogic<
                     localListIds,
                     localId: annotationId,
                     createdWhen: new Date(now),
+                    pageTitle: title,
                 },
                 annotationsBG: this.options.annotationsBG,
                 contentSharingBG: this.options.contentSharingBG,

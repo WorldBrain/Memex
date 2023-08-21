@@ -1313,7 +1313,7 @@ export default class Ribbon extends Component<Props, State> {
                             label={'Share Page'}
                             fontColor={'greyScale7'}
                             onClick={null}
-                            icon={'peopleFine'}
+                            icon={'invite'}
                         />
                     </IconBox>
                 ) : (

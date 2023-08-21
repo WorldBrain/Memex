@@ -214,6 +214,29 @@ export async function main(
     const annotationsManager = new AnnotationsManager()
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
+
+    // 2.5 load cache
+
+    const _currentUser = await authBG.getCurrentUser()
+    const currentUser: UserReference = _currentUser
+        ? { type: 'user-reference', id: _currentUser.id }
+        : null
+    const fullPageUrl = await pageInfo.getFullPageUrl()
+    const annotationsCache = new PageAnnotationsCache({})
+    window['__annotationsCache'] = annotationsCache
+
+    const loadCacheDataPromise = hydrateCacheForPageAnnotations({
+        fullPageUrl,
+        user: currentUser,
+        cache: annotationsCache,
+        bgModules: {
+            annotations: annotationsBG,
+            customLists: collectionsBG,
+            contentSharing: contentSharingBG,
+            pageActivityIndicator: pageActivityIndicatorBG,
+        },
+    })
+
     const highlightRenderer = new HighlightRenderer({
         captureException,
         getUndoHistory: async () => {
@@ -295,6 +318,7 @@ export async function main(
             return { annotationId: unifiedId, localId: localId, createPromise }
         },
     })
+
     const sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
     const isSidebarEnabled =
@@ -322,14 +346,10 @@ export async function main(
             delete components[component]
         },
     })
-    const _currentUser = await authBG.getCurrentUser()
-    const currentUser: UserReference = _currentUser
-        ? { type: 'user-reference', id: _currentUser.id }
-        : null
-    const fullPageUrl = await pageInfo.getFullPageUrl()
-    const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
-    const annotationsCache = new PageAnnotationsCache({})
-    window['__annotationsCache'] = annotationsCache
+
+    await loadCacheDataPromise
+        .then(inPageUI.cacheLoadPromise.resolve)
+        .catch(inPageUI.cacheLoadPromise.reject)
 
     const pageHasBookark =
         (await bookmarks.pageHasBookmark(fullPageUrl)) ||
@@ -340,18 +360,6 @@ export async function main(
             .getAllAnnotationsByUrl({ url: fullPageUrl })
             .then((annotations) => annotations.length > 0))
     await bookmarks.setBookmarkStatusInBrowserIcon(pageHasBookark, fullPageUrl)
-
-    const loadCacheDataPromise = hydrateCacheForPageAnnotations({
-        fullPageUrl,
-        user: currentUser,
-        cache: annotationsCache,
-        bgModules: {
-            annotations: annotationsBG,
-            customLists: collectionsBG,
-            contentSharing: contentSharingBG,
-            pageActivityIndicator: pageActivityIndicatorBG,
-        },
-    })
 
     async function saveHighlight(shouldShare: boolean): Promise<AutoPk> {
         let highlightId: AutoPk
@@ -617,10 +625,6 @@ export async function main(
 
     globalThis['contentScriptRegistry'] = contentScriptRegistry
 
-    await loadCacheDataPromise
-        .then(inPageUI.cacheLoadPromise.resolve)
-        .catch(inPageUI.cacheLoadPromise.reject)
-
     // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
     // so it is included in this global content script where it adds less than 500kb.
     await contentScriptRegistry.registerHighlightingScript(highlightMain)
@@ -831,11 +835,33 @@ class PageInfo {
 
     getFullPageUrl = async () => {
         await this.refreshIfNeeded()
-        return this._identifier.fullUrl
+        let fullURL = this._identifier.fullUrl
+
+        if (window.location.href.includes('web.telegram.org')) {
+            try {
+                fullURL = window.location.href.replace('/#@', '?user=')
+            } catch (error) {
+                console.log('error', error)
+            }
+        }
+        return fullURL
     }
 
     getPageTitle = () => {
-        return document.title
+        let title = document.title
+
+        if (window.location.href.includes('web.telegram.org')) {
+            const titleSpan = document.getElementsByClassName('peer-title')
+            for (let span of titleSpan) {
+                const parent = span.parentElement
+                if (!parent.classList.contains('row-title')) {
+                    title = (span as HTMLElement).innerText
+                }
+            }
+            console.log('title', title)
+        }
+
+        return title
     }
 
     getNormalizedPageUrl = async () => {
