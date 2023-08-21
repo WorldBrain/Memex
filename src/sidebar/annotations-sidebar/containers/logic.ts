@@ -816,15 +816,21 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
 
-        const webUIUrl =
+        let webUIUrl =
             listData.type === 'page-link'
                 ? getSinglePageShareUrl({
                       remoteListId: listData.remoteId,
                       remoteListEntryId: listData.sharedListEntryId,
-                  }) + '?noAutoOpen=true'
+                  })
                 : getListShareUrl({
                       remoteListId: listData.remoteId,
                   })
+
+        if (webUIUrl.includes('?') && listData.type === 'page-link') {
+            webUIUrl = webUIUrl + '&noAutoOpen=true'
+        } else if (listData.type === 'page-link') {
+            webUIUrl = webUIUrl + '?noAutoOpen=true'
+        }
         window.open(webUIUrl, '_blank')
     }
 

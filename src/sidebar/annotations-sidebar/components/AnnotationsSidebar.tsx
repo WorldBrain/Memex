@@ -2092,21 +2092,26 @@ export class AnnotationsSidebar extends React.Component<
                             <Icon
                                 icon="goTo"
                                 heightAndWidth="20px"
-                                onClick={() =>
-                                    window.open(
-                                        isPageLink
-                                            ? getSinglePageShareUrl({
-                                                  remoteListId:
-                                                      selectedList.remoteId,
-                                                  remoteListEntryId:
-                                                      selectedList.sharedListEntryId,
-                                              }) + '?noAutoOpen=true'
-                                            : getListShareUrl({
-                                                  remoteListId:
-                                                      selectedList.remoteId,
-                                              }),
-                                    )
-                                }
+                                onClick={() => {
+                                    let webUIUrl = isPageLink
+                                        ? getSinglePageShareUrl({
+                                              remoteListId:
+                                                  selectedList.remoteId,
+                                              remoteListEntryId:
+                                                  selectedList.sharedListEntryId,
+                                          })
+                                        : getListShareUrl({
+                                              remoteListId:
+                                                  selectedList.remoteId,
+                                          })
+
+                                    if (webUIUrl.includes('?') && isPageLink) {
+                                        webUIUrl = webUIUrl + '&noAutoOpen=true'
+                                    } else if (isPageLink) {
+                                        webUIUrl = webUIUrl + '?noAutoOpen=true'
+                                    }
+                                    window.open(webUIUrl, '_blank')
+                                }}
                             />
                         </TooltipBox>
                         {this.renderPermissionStatusButton()}

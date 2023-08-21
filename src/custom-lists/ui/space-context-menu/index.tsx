@@ -153,14 +153,28 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                                 <Icon
                                                     heightAndWidth="20px"
                                                     filePath={'goTo'}
-                                                    onClick={wrapClick(() =>
-                                                        window.open(
+                                                    onClick={wrapClick(() => {
+                                                        let webUIUrl = link
+
+                                                        if (
+                                                            webUIUrl.includes(
+                                                                '?',
+                                                            ) &&
                                                             isPageLink
-                                                                ? link +
-                                                                      '?noAutoOpen=true'
-                                                                : link,
-                                                        ),
-                                                    )}
+                                                        ) {
+                                                            webUIUrl =
+                                                                webUIUrl +
+                                                                '&noAutoOpen=true'
+                                                        } else if (isPageLink) {
+                                                            webUIUrl =
+                                                                webUIUrl +
+                                                                '?noAutoOpen=true'
+                                                        }
+                                                        window.open(
+                                                            webUIUrl,
+                                                            '_blank',
+                                                        )
+                                                    })}
                                                 />
                                             </IconContainer>
                                         </LinkBox>
