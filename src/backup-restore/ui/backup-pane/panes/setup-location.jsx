@@ -93,7 +93,7 @@ export default class SetupLocation extends React.Component {
                         application folder. Then click on "I'm ready!"
                         <a
                             target="_blank"
-                            href="https://worldbrain.io/tutorials/backups"
+                            href="https://links.memex.garden/tutorials/backups"
                         >
                             Learn more ▸
                         </a>
@@ -103,7 +103,9 @@ export default class SetupLocation extends React.Component {
                 <LinkBox>
                     <Icon
                         onClick={() =>
-                            window.open('https://worldbrain.io/download/win')
+                            window.open(
+                                'https://links.memex.garden/download/win',
+                            )
                         }
                         filePath="winLogo"
                         heightAndWidth="30px"
@@ -114,7 +116,9 @@ export default class SetupLocation extends React.Component {
 
                     <Icon
                         onClick={() =>
-                            window.open('https://worldbrain.io/download/mac')
+                            window.open(
+                                'https://links.memex.garden/download/mac',
+                            )
                         }
                         filePath="macLogo"
                         heightAndWidth="30px"
@@ -124,7 +128,9 @@ export default class SetupLocation extends React.Component {
                     />
                     <Icon
                         onClick={() =>
-                            window.open('https://worldbrain.io/download/linux')
+                            window.open(
+                                'https://links.memex.garden/download/linux',
+                            )
                         }
                         filePath="linuxLogo"
                         heightAndWidth="30px"

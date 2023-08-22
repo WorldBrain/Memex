@@ -1,6 +1,6 @@
 import omitBy from 'lodash/omitBy'
 import endsWith from 'lodash/endsWith'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'

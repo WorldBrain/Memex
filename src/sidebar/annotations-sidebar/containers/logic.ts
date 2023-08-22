@@ -82,6 +82,10 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import {
+    convertMemexURLintoTelegramURL,
+    getTelegramUserDisplayName,
+} from '@worldbrain/memex-common/lib/telegram/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -816,15 +820,21 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
 
-        const webUIUrl =
+        let webUIUrl =
             listData.type === 'page-link'
                 ? getSinglePageShareUrl({
                       remoteListId: listData.remoteId,
                       remoteListEntryId: listData.sharedListEntryId,
-                  }) + '?noAutoOpen=true'
+                  })
                 : getListShareUrl({
                       remoteListId: listData.remoteId,
                   })
+
+        if (webUIUrl.includes('?') && listData.type === 'page-link') {
+            webUIUrl = webUIUrl + '&noAutoOpen=true'
+        } else if (listData.type === 'page-link') {
+            webUIUrl = webUIUrl + '?noAutoOpen=true'
+        }
         window.open(webUIUrl, '_blank')
     }
 
@@ -1209,6 +1219,12 @@ export class SidebarContainerLogic extends UILogic<
                     }
                 }
             }
+
+            let title: string | null = null
+            if (window.location.href.includes('web.telegram.org')) {
+                title = getTelegramUserDisplayName(document)
+            }
+
             // Adding a new annot in selected space mode should only work on the "Spaces" tab
             if (activeTab === 'spaces') {
                 maybeAddLocalListIdForCacheList(selectedListId)
@@ -1222,6 +1238,7 @@ export class SidebarContainerLogic extends UILogic<
                     localListIds,
                     localId: annotationId,
                     createdWhen: new Date(now),
+                    pageTitle: title,
                 },
                 annotationsBG: this.options.annotationsBG,
                 contentSharingBG: this.options.contentSharingBG,
@@ -1382,11 +1399,16 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
 
+        let fullPageURL =
+            this.fullPageUrl ?? 'https://' + annotation.normalizedPageUrl
+
+        if (fullPageURL.includes('web.telegram.org')) {
+            fullPageURL = convertMemexURLintoTelegramURL(fullPageURL)
+        }
+
         return this.options.contentScriptsBG.goToAnnotationFromDashboardSidebar(
             {
-                fullPageUrl:
-                    this.fullPageUrl ??
-                    'https://' + annotation.normalizedPageUrl,
+                fullPageUrl: fullPageURL,
                 annotationCacheId: event.unifiedAnnotationId,
             },
         )
@@ -2511,6 +2533,12 @@ export class SidebarContainerLogic extends UILogic<
             throw new Error('Cannot create page link - User not logged in')
         }
 
+        let title
+
+        if (window.location.href.includes('web.telegram.org')) {
+            title = getTelegramUserDisplayName(document)
+        }
+
         await executeUITask(this, 'pageLinkCreateState', async () => {
             const {
                 collabKey,
@@ -2521,6 +2549,7 @@ export class SidebarContainerLogic extends UILogic<
             } = await this.options.contentSharingByTabsBG.schedulePageLinkCreation(
                 {
                     fullPageUrl,
+                    customPageTitle: title,
                 },
             )
 

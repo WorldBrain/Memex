@@ -6,6 +6,9 @@ export interface BookmarksInterface {
         fullUrl: string
         timestamp?: number
         tabId?: number
+        metaData?: {
+            pageTitle?: string
+        }
     }): Promise<any>
 
     delPageBookmark(args: { url: string }): Promise<any>

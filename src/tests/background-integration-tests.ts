@@ -4,7 +4,7 @@ import expect from 'expect'
 import fetchMock from 'fetch-mock'
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
     createBackgroundModules,
     registerBackgroundModuleCollections,

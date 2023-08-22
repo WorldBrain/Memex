@@ -39,6 +39,7 @@ import type { ActivityIndicatorInterface } from 'src/activity-indicator/backgrou
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 
 export interface OwnProps {}
 
@@ -121,12 +122,13 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         this.closePopup()
     }
 
-    handleListUpdate = async ({ added, deleted }) => {
+    handleListUpdate = async ({ added, deleted, pageTitle }) => {
         const backendResult = collections.updateListForPage({
             added,
             deleted,
             url: this.props.url,
             tabId: this.props.tabId,
+            pageTitle: pageTitle,
         })
         // Redux actions
         if (added) {
@@ -249,6 +251,12 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             )
         }
 
+        let title
+
+        if (window.location.href.includes('web.telegram.org')) {
+            title = getTelegramUserDisplayName(document)
+        }
+
         if (this.props.showCollectionsPicker) {
             return (
                 <SpacePickerContainer>
@@ -262,12 +270,14 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                             this.handleListUpdate({
                                 added: listId,
                                 deleted: null,
+                                pageTitle: title,
                             })
                         }
                         unselectEntry={(listId) =>
                             this.handleListUpdate({
                                 added: null,
                                 deleted: listId,
+                                pageTitle: null,
                             })
                         }
                         createNewEntry={async (name) => {
@@ -309,7 +319,10 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         activityIndicatorBG={this.activityIndicatorBG}
                     />
                 </FeedActivitySection>
-                <BookmarkButton closePopup={this.closePopup} />
+                <BookmarkButton
+                    pageUrl={this.state.currentTabFullUrl}
+                    closePopup={this.closePopup}
+                />
                 <CollectionsButton pageListsIds={this.state.pageListIds} />
                 <SpacerLine />
                 {this.isCurrentPagePDF === true && (

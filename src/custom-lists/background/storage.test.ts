@@ -3,7 +3,7 @@ import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import { SearchIndex } from 'src/search'
 import Storex from '@worldbrain/storex'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,

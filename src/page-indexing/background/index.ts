@@ -566,6 +566,9 @@ export class PageIndexingBackground {
         if (pageData.isExisting) {
             return { fullUrl: pageData.fullUrl }
         }
+        if (props.metaData.pageTitle) {
+            pageData.fullTitle = props.metaData.pageTitle
+        }
         await this.createOrUpdatePage(pageData, opts)
 
         if (props.visitTime) {

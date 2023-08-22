@@ -9,7 +9,7 @@ import {
 import * as DATA from './logic.test.data'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import normalizeUrl from '@worldbrain/memex-url-utils/lib/normalize'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import * as cacheUtils from 'src/annotations/cache/utils'
 import {
