@@ -283,7 +283,7 @@ export default class DirectLinkingBackground {
                     fullUrl: fullPageUrl,
                     visitTime: '$now',
                     tabId: tab?.id,
-                    metaData: { pageTitle },
+                    metaData: { pageTitle: pageTitle ?? null },
                 },
                 { addInboxEntryOnCreate: true },
             )
