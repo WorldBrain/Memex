@@ -1317,421 +1317,6 @@ describe('SidebarContainerLogic', () => {
                 expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
             })
 
-            it('should be able to save a new private comment in toggled list instance for a private list', async ({
-                device,
-            }) => {
-                const { sidebar, annotationsCache } = await setupLogicHelper({
-                    device,
-                    withAuth: false,
-                })
-
-                expect(sidebar.state.commentBox.commentText).toEqual('')
-                await sidebar.processEvent('setNewPageNoteText', {
-                    comment: DATA.COMMENT_1,
-                })
-                expect(sidebar.state.commentBox.commentText).toEqual(
-                    DATA.COMMENT_1,
-                )
-
-                expect(sidebar.state.commentBox.lists).toEqual([])
-                await sidebar.processEvent('setNewPageNoteLists', {
-                    lists: [DATA.LOCAL_LISTS[3].id],
-                })
-                expect(sidebar.state.commentBox.lists).toEqual([
-                    DATA.LOCAL_LISTS[3].id,
-                ])
-
-                const [unifiedListIdA, unifiedListIdB] = [
-                    DATA.LOCAL_LISTS[4].id,
-                    DATA.LOCAL_LISTS[3].id,
-                ].map(
-                    (localId) =>
-                        annotationsCache.getListByLocalId(localId).unifiedId,
-                )
-
-                expect(sidebar.state.commentBox.lists).toEqual([
-                    DATA.LOCAL_LISTS[3].id,
-                ])
-
-                const localAnnotId = generateAnnotationUrl({
-                    pageUrl: DATA.TAB_URL_1,
-                    now: () => Date.now(),
-                })
-
-                expect(
-                    await device.storageManager
-                        .collection('annotListEntries')
-                        .findAllObjects({ url: localAnnotId }),
-                ).toEqual([])
-
-                await sidebar.processEvent('saveNewPageNote', {
-                    listInstanceId: unifiedListIdA,
-                    annotationId: localAnnotId,
-                    shouldShare: false,
-                    now: 123,
-                })
-
-                expect(
-                    await device.storageManager
-                        .collection('annotListEntries')
-                        .findAllObjects({ url: localAnnotId }),
-                ).toEqual([
-                    {
-                        listId: DATA.LOCAL_LISTS[3].id,
-                        createdAt: expect.any(Date),
-                        url: localAnnotId,
-                    },
-                    {
-                        listId: DATA.LOCAL_LISTS[4].id,
-                        createdAt: expect.any(Date),
-                        url: localAnnotId,
-                    },
-                ])
-
-                const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
-                expect(
-                    sidebar.state.annotations.byId[latestCachedAnnotId],
-                ).toEqual({
-                    unifiedId: latestCachedAnnotId,
-                    localId: localAnnotId,
-                    remoteId: undefined,
-                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
-                    creator: null, // NOTE: we're not auth'd
-                    comment: DATA.COMMENT_1,
-                    body: undefined,
-                    selector: undefined,
-                    createdWhen: 123,
-                    lastEdited: 123,
-                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                    unifiedListIds: [unifiedListIdB, unifiedListIdA],
-                })
-                expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
-            })
-
-            it('should be able to save a new private comment in selected list mode for a private list', async ({
-                device,
-            }) => {
-                const { sidebar, annotationsCache } = await setupLogicHelper({
-                    device,
-                    withAuth: false,
-                })
-
-                expect(sidebar.state.commentBox.commentText).toEqual('')
-                await sidebar.processEvent('setNewPageNoteText', {
-                    comment: DATA.COMMENT_1,
-                })
-                expect(sidebar.state.commentBox.commentText).toEqual(
-                    DATA.COMMENT_1,
-                )
-
-                expect(sidebar.state.commentBox.lists).toEqual([])
-                await sidebar.processEvent('setNewPageNoteLists', {
-                    lists: [DATA.LOCAL_LISTS[3].id],
-                })
-                expect(sidebar.state.commentBox.lists).toEqual([
-                    DATA.LOCAL_LISTS[3].id,
-                ])
-
-                const [unifiedListIdA, unifiedListIdB] = [
-                    DATA.LOCAL_LISTS[4].id,
-                    DATA.LOCAL_LISTS[3].id,
-                ].map(
-                    (localId) =>
-                        annotationsCache.getListByLocalId(localId).unifiedId,
-                )
-
-                await sidebar.processEvent('setSelectedList', {
-                    unifiedListId: unifiedListIdA,
-                })
-
-                expect(sidebar.state.commentBox.lists).toEqual([
-                    DATA.LOCAL_LISTS[3].id,
-                ])
-
-                const localAnnotId = generateAnnotationUrl({
-                    pageUrl: DATA.TAB_URL_1,
-                    now: () => Date.now(),
-                })
-
-                expect(
-                    await device.storageManager
-                        .collection('annotListEntries')
-                        .findAllObjects({ url: localAnnotId }),
-                ).toEqual([])
-
-                await sidebar.processEvent('saveNewPageNote', {
-                    annotationId: localAnnotId,
-                    shouldShare: false,
-                    now: 123,
-                })
-
-                expect(
-                    await device.storageManager
-                        .collection('annotListEntries')
-                        .findAllObjects({ url: localAnnotId }),
-                ).toEqual([
-                    {
-                        listId: DATA.LOCAL_LISTS[3].id,
-                        createdAt: expect.any(Date),
-                        url: localAnnotId,
-                    },
-                    {
-                        listId: DATA.LOCAL_LISTS[4].id,
-                        createdAt: expect.any(Date),
-                        url: localAnnotId,
-                    },
-                ])
-
-                const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
-                expect(
-                    sidebar.state.annotations.byId[latestCachedAnnotId],
-                ).toEqual({
-                    unifiedId: latestCachedAnnotId,
-                    localId: localAnnotId,
-                    remoteId: undefined,
-                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
-                    creator: null, // NOTE: we're not auth'd
-                    comment: DATA.COMMENT_1,
-                    body: undefined,
-                    selector: undefined,
-                    createdWhen: 123,
-                    lastEdited: 123,
-                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                    unifiedListIds: [unifiedListIdB, unifiedListIdA],
-                })
-                expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
-            })
-
-            it('should be able to save a new private comment in selected list mode for a shared list, making it protected', async ({
-                device,
-            }) => {
-                const { sidebar, annotationsCache } = await setupLogicHelper({
-                    device,
-                    withAuth: true,
-                })
-
-                expect(sidebar.state.commentBox.commentText).toEqual('')
-                await sidebar.processEvent('setNewPageNoteText', {
-                    comment: DATA.COMMENT_1,
-                })
-                expect(sidebar.state.commentBox.commentText).toEqual(
-                    DATA.COMMENT_1,
-                )
-
-                expect(sidebar.state.commentBox.lists).toEqual([])
-                await sidebar.processEvent('setNewPageNoteLists', {
-                    lists: [DATA.LOCAL_LISTS[3].id],
-                })
-                expect(sidebar.state.commentBox.lists).toEqual([
-                    DATA.LOCAL_LISTS[3].id,
-                ])
-
-                const [unifiedListIdA, unifiedListIdB] = [
-                    DATA.LOCAL_LISTS[0].id,
-                    DATA.LOCAL_LISTS[3].id,
-                ].map(
-                    (localId) =>
-                        annotationsCache.getListByLocalId(localId).unifiedId,
-                )
-
-                await sidebar.processEvent('setSelectedList', {
-                    unifiedListId: unifiedListIdA,
-                })
-
-                expect(sidebar.state.commentBox.lists).toEqual([
-                    DATA.LOCAL_LISTS[3].id,
-                ])
-
-                const localAnnotId = generateAnnotationUrl({
-                    pageUrl: DATA.TAB_URL_1,
-                    now: () => Date.now(),
-                })
-
-                expect(
-                    await device.storageManager
-                        .collection('annotListEntries')
-                        .findAllObjects({ url: localAnnotId }),
-                ).toEqual([])
-
-                await sidebar.processEvent('saveNewPageNote', {
-                    annotationId: localAnnotId,
-                    shouldShare: false,
-                    now: 123,
-                })
-
-                expect(
-                    await device.storageManager
-                        .collection('annotListEntries')
-                        .findAllObjects({ url: localAnnotId }),
-                ).toEqual([
-                    {
-                        listId: DATA.LOCAL_LISTS[0].id,
-                        createdAt: expect.any(Date),
-                        url: localAnnotId,
-                    },
-                    {
-                        listId: DATA.LOCAL_LISTS[3].id,
-                        createdAt: expect.any(Date),
-                        url: localAnnotId,
-                    },
-                ])
-
-                const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
-                expect(
-                    sidebar.state.annotations.byId[latestCachedAnnotId],
-                ).toEqual({
-                    unifiedId: latestCachedAnnotId,
-                    localId: localAnnotId,
-                    remoteId: undefined,
-                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
-                    creator: DATA.CREATOR_1,
-                    comment: DATA.COMMENT_1,
-                    body: undefined,
-                    selector: undefined,
-                    createdWhen: 123,
-                    lastEdited: 123,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED, // Saving to a shared list makes it protected
-                    unifiedListIds: [unifiedListIdB, unifiedListIdA],
-                })
-                expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
-            })
-
-            it('should be able to save a new private comment on the "My Annotations" tab while in selected list mode, without adding to that selected list', async ({
-                device,
-            }) => {
-                const { sidebar, annotationsCache } = await setupLogicHelper({
-                    device,
-                    withAuth: false,
-                })
-
-                expect(sidebar.state.commentBox.commentText).toEqual('')
-                await sidebar.processEvent('setNewPageNoteText', {
-                    comment: DATA.COMMENT_1,
-                })
-                expect(sidebar.state.commentBox.commentText).toEqual(
-                    DATA.COMMENT_1,
-                )
-
-                expect(sidebar.state.commentBox.lists).toEqual([])
-                await sidebar.processEvent('setNewPageNoteLists', {
-                    lists: [DATA.LOCAL_LISTS[3].id],
-                })
-                expect(sidebar.state.commentBox.lists).toEqual([
-                    DATA.LOCAL_LISTS[3].id,
-                ])
-
-                const [unifiedListIdA, unifiedListIdB] = [
-                    DATA.LOCAL_LISTS[4].id,
-                    DATA.LOCAL_LISTS[3].id,
-                ].map(
-                    (localId) =>
-                        annotationsCache.getListByLocalId(localId).unifiedId,
-                )
-
-                await sidebar.processEvent('setSelectedList', {
-                    unifiedListId: unifiedListIdA,
-                })
-
-                // Switch back to "My Annotations" tab, while "Spaces" tab remains in selected list mode
-                await sidebar.processEvent('setActiveSidebarTab', {
-                    tab: 'annotations',
-                })
-
-                expect(sidebar.state.commentBox.lists).toEqual([
-                    DATA.LOCAL_LISTS[3].id,
-                ])
-
-                const localAnnotId = generateAnnotationUrl({
-                    pageUrl: DATA.TAB_URL_1,
-                    now: () => Date.now(),
-                })
-
-                expect(
-                    await device.storageManager
-                        .collection('annotListEntries')
-                        .findAllObjects({ url: localAnnotId }),
-                ).toEqual([])
-
-                await sidebar.processEvent('saveNewPageNote', {
-                    annotationId: localAnnotId,
-                    shouldShare: false,
-                    now: 123,
-                })
-
-                expect(
-                    await device.storageManager
-                        .collection('annotListEntries')
-                        .findAllObjects({ url: localAnnotId }),
-                ).toEqual([
-                    {
-                        listId: DATA.LOCAL_LISTS[3].id,
-                        createdAt: expect.any(Date),
-                        url: localAnnotId,
-                    },
-                ])
-
-                const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
-                expect(
-                    sidebar.state.annotations.byId[latestCachedAnnotId],
-                ).toEqual({
-                    unifiedId: latestCachedAnnotId,
-                    localId: localAnnotId,
-                    remoteId: undefined,
-                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
-                    creator: null, // NOTE: we're not auth'd
-                    comment: DATA.COMMENT_1,
-                    body: undefined,
-                    selector: undefined,
-                    createdWhen: 123,
-                    lastEdited: 123,
-                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                    unifiedListIds: [unifiedListIdB],
-                })
-                expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
-            })
-
-            it('should be able to save a new comment, inheriting spaces from parent page, when save has share intent', async ({
-                device,
-            }) => {
-                const fullPageUrl = DATA.TAB_URL_1
-
-                const { sidebar } = await setupLogicHelper({
-                    device,
-                    skipTestData: true,
-                    fullPageUrl: fullPageUrl,
-                    withAuth: true,
-                })
-
-                expect(sidebar.state.commentBox.commentText).toEqual('')
-                await sidebar.processEvent('setNewPageNoteText', {
-                    comment: DATA.COMMENT_1,
-                })
-                expect(sidebar.state.commentBox.commentText).toEqual(
-                    DATA.COMMENT_1,
-                )
-                expect(sidebar.state.commentBox.lists).toEqual([])
-                expect(sidebar.state.annotations).toEqual(initNormalizedState())
-
-                await sidebar.processEvent('saveNewPageNote', {
-                    shouldShare: true,
-                })
-                expect(sidebar.state.annotations).toEqual([
-                    expect.objectContaining({
-                        tags: [],
-                        comment: DATA.COMMENT_1,
-                        lists: [DATA.LOCAL_LISTS[0].id],
-                    }),
-                ])
-                expect(sidebar.state.commentBox).toEqual(
-                    expect.objectContaining({
-                        tags: [],
-                        lists: [],
-                        commentText: '',
-                        isBookmarked: false,
-                    }),
-                )
-            })
-
             it('should block save a new comment with login modal if logged out + share intent set', async ({
                 device,
             }) => {
@@ -3139,6 +2724,492 @@ describe('SidebarContainerLogic', () => {
                 isCommentEditing: false,
                 cardMode: 'none',
                 comment: '',
+            })
+        })
+
+        describe('saving new annotations', () => {
+            const runCreateAnnotationTest = async (
+                device: UILogicTestDevice,
+                opts: {
+                    annotationType: 'private' | 'shared'
+                    listType: 'private' | 'shared'
+                    expectedAnnotationData: {
+                        privacyLevel: AnnotationPrivacyLevels
+                        hasLocalListEntry: boolean
+                        isShared: boolean
+                    }
+                },
+            ) => {
+                const { sidebar, annotationsCache } = await setupLogicHelper({
+                    device,
+                    withAuth: true,
+                })
+
+                const selectedListLocalId =
+                    opts.listType === 'shared'
+                        ? DATA.LOCAL_LISTS[0].id
+                        : DATA.LOCAL_LISTS[4].id
+
+                expect(sidebar.state.commentBox.commentText).toEqual('')
+                await sidebar.processEvent('setNewPageNoteText', {
+                    comment: DATA.COMMENT_1,
+                })
+                expect(sidebar.state.commentBox.commentText).toEqual(
+                    DATA.COMMENT_1,
+                )
+
+                // Add an extra (local) list just to verify this works with selected list mode
+                expect(sidebar.state.commentBox.lists).toEqual([])
+                await sidebar.processEvent('setNewPageNoteLists', {
+                    lists: [DATA.LOCAL_LISTS[3].id],
+                })
+                expect(sidebar.state.commentBox.lists).toEqual([
+                    DATA.LOCAL_LISTS[3].id,
+                ])
+
+                const [unifiedListIdA, unifiedListIdB] = [
+                    selectedListLocalId,
+                    DATA.LOCAL_LISTS[3].id,
+                ].map(
+                    (localId) =>
+                        annotationsCache.getListByLocalId(localId).unifiedId,
+                )
+
+                await sidebar.processEvent('setSelectedList', {
+                    unifiedListId: unifiedListIdA,
+                })
+                expect(sidebar.state.commentBox.lists).toEqual([
+                    DATA.LOCAL_LISTS[3].id,
+                ])
+
+                const localAnnotId = generateAnnotationUrl({
+                    pageUrl: DATA.TAB_URL_1,
+                    now: () => Date.now(),
+                })
+
+                const conversationsBefore = Object.keys(
+                    sidebar.state.conversations,
+                ).length
+                expect(
+                    await device.storageManager
+                        .collection('annotationPrivacyLevels')
+                        .findObject({ annotation: localAnnotId }),
+                ).toEqual(null)
+                expect(
+                    await device.storageManager
+                        .collection('sharedAnnotationMetadata')
+                        .findObject({ localId: localAnnotId }),
+                ).toEqual(null)
+                expect(
+                    await device.storageManager
+                        .collection('annotListEntries')
+                        .findAllObjects({ url: localAnnotId }),
+                ).toEqual([])
+
+                await sidebar.processEvent('saveNewPageNote', {
+                    annotationId: localAnnotId,
+                    shouldShare: opts.annotationType === 'shared',
+                    now: 123,
+                })
+
+                expect(Object.keys(sidebar.state.conversations).length).toBe(
+                    conversationsBefore + 1,
+                )
+                expect(
+                    await device.storageManager
+                        .collection('annotationPrivacyLevels')
+                        .findObject({ annotation: localAnnotId }),
+                ).toEqual({
+                    id: expect.any(Number),
+                    annotation: localAnnotId,
+                    privacyLevel: opts.expectedAnnotationData.privacyLevel,
+                    createdWhen: expect.any(Date),
+                })
+                expect(
+                    await device.storageManager
+                        .collection('sharedAnnotationMetadata')
+                        .findObject({ localId: localAnnotId }),
+                ).toEqual(
+                    opts.expectedAnnotationData.isShared
+                        ? {
+                              localId: localAnnotId,
+                              remoteId: expect.any(String),
+                              excludeFromLists: true,
+                          }
+                        : null,
+                )
+                expect(
+                    await device.storageManager
+                        .collection('annotListEntries')
+                        .findAllObjects({ url: localAnnotId }),
+                ).toEqual([
+                    ...(opts.expectedAnnotationData.hasLocalListEntry
+                        ? [
+                              {
+                                  listId: selectedListLocalId,
+                                  createdAt: expect.any(Date),
+                                  url: localAnnotId,
+                              },
+                          ]
+                        : []),
+                    {
+                        listId: DATA.LOCAL_LISTS[3].id,
+                        createdAt: expect.any(Date),
+                        url: localAnnotId,
+                    },
+                ])
+
+                const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
+                expect(
+                    sidebar.state.annotations.byId[latestCachedAnnotId],
+                ).toEqual({
+                    unifiedId: latestCachedAnnotId,
+                    localId: localAnnotId,
+                    remoteId: expect.any(String),
+                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
+                    creator: DATA.CREATOR_1,
+                    comment: DATA.COMMENT_1,
+                    body: undefined,
+                    selector: undefined,
+                    createdWhen: 123,
+                    lastEdited: 123,
+                    privacyLevel: AnnotationPrivacyLevels.PROTECTED, // Saving to a shared list makes it protected
+                    unifiedListIds: [unifiedListIdB, unifiedListIdA],
+                })
+                expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
+            }
+
+            it('should be able to save a new private comment in selected list mode for a shared list, making it protected', async ({
+                device,
+            }) =>
+                runCreateAnnotationTest(device, {
+                    annotationType: 'private',
+                    listType: 'shared',
+                    expectedAnnotationData: {
+                        isShared: true,
+                        hasLocalListEntry: true,
+                        privacyLevel: AnnotationPrivacyLevels.PROTECTED,
+                    },
+                }))
+
+            it('should be able to save a new auto-shared comment in selected list mode for a shared list, making it shared', async ({
+                device,
+            }) =>
+                runCreateAnnotationTest(device, {
+                    annotationType: 'shared',
+                    listType: 'shared',
+                    expectedAnnotationData: {
+                        isShared: true,
+                        hasLocalListEntry: false,
+                        privacyLevel: AnnotationPrivacyLevels.SHARED,
+                    },
+                }))
+
+            it('should be able to save a new private comment in selected list mode for a private list, making it private', async ({
+                device,
+            }) =>
+                runCreateAnnotationTest(device, {
+                    annotationType: 'private',
+                    listType: 'private',
+                    expectedAnnotationData: {
+                        isShared: false,
+                        hasLocalListEntry: true,
+                        privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                    },
+                }))
+
+            it('should be able to save a new auto-shared comment in selected list mode for a private list, making it shared', async ({
+                device,
+            }) =>
+                runCreateAnnotationTest(device, {
+                    annotationType: 'shared',
+                    listType: 'private',
+                    expectedAnnotationData: {
+                        isShared: true,
+                        hasLocalListEntry: true,
+                        privacyLevel: AnnotationPrivacyLevels.SHARED,
+                    },
+                }))
+
+            ////
+
+            it('should be able to save a new private comment in toggled list instance for a private list', async ({
+                device,
+            }) => {
+                const { sidebar, annotationsCache } = await setupLogicHelper({
+                    device,
+                    withAuth: false,
+                })
+
+                expect(sidebar.state.commentBox.commentText).toEqual('')
+                await sidebar.processEvent('setNewPageNoteText', {
+                    comment: DATA.COMMENT_1,
+                })
+                expect(sidebar.state.commentBox.commentText).toEqual(
+                    DATA.COMMENT_1,
+                )
+
+                expect(sidebar.state.commentBox.lists).toEqual([])
+                await sidebar.processEvent('setNewPageNoteLists', {
+                    lists: [DATA.LOCAL_LISTS[3].id],
+                })
+                expect(sidebar.state.commentBox.lists).toEqual([
+                    DATA.LOCAL_LISTS[3].id,
+                ])
+
+                const [unifiedListIdA, unifiedListIdB] = [
+                    DATA.LOCAL_LISTS[4].id,
+                    DATA.LOCAL_LISTS[3].id,
+                ].map(
+                    (localId) =>
+                        annotationsCache.getListByLocalId(localId).unifiedId,
+                )
+
+                expect(sidebar.state.commentBox.lists).toEqual([
+                    DATA.LOCAL_LISTS[3].id,
+                ])
+
+                const localAnnotId = generateAnnotationUrl({
+                    pageUrl: DATA.TAB_URL_1,
+                    now: () => Date.now(),
+                })
+
+                expect(
+                    await device.storageManager
+                        .collection('annotListEntries')
+                        .findAllObjects({ url: localAnnotId }),
+                ).toEqual([])
+
+                await sidebar.processEvent('saveNewPageNote', {
+                    listInstanceId: unifiedListIdA,
+                    annotationId: localAnnotId,
+                    shouldShare: false,
+                    now: 123,
+                })
+
+                expect(
+                    await device.storageManager
+                        .collection('annotListEntries')
+                        .findAllObjects({ url: localAnnotId }),
+                ).toEqual([
+                    {
+                        listId: DATA.LOCAL_LISTS[3].id,
+                        createdAt: expect.any(Date),
+                        url: localAnnotId,
+                    },
+                    {
+                        listId: DATA.LOCAL_LISTS[4].id,
+                        createdAt: expect.any(Date),
+                        url: localAnnotId,
+                    },
+                ])
+
+                const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
+                expect(
+                    sidebar.state.annotations.byId[latestCachedAnnotId],
+                ).toEqual({
+                    unifiedId: latestCachedAnnotId,
+                    localId: localAnnotId,
+                    remoteId: undefined,
+                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
+                    creator: null, // NOTE: we're not auth'd
+                    comment: DATA.COMMENT_1,
+                    body: undefined,
+                    selector: undefined,
+                    createdWhen: 123,
+                    lastEdited: 123,
+                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                    unifiedListIds: [unifiedListIdB, unifiedListIdA],
+                })
+                expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
+            })
+
+            it('should be able to save a new private comment in selected list mode for a private list', async ({
+                device,
+            }) => {
+                const { sidebar, annotationsCache } = await setupLogicHelper({
+                    device,
+                    withAuth: false,
+                })
+
+                expect(sidebar.state.commentBox.commentText).toEqual('')
+                await sidebar.processEvent('setNewPageNoteText', {
+                    comment: DATA.COMMENT_1,
+                })
+                expect(sidebar.state.commentBox.commentText).toEqual(
+                    DATA.COMMENT_1,
+                )
+
+                expect(sidebar.state.commentBox.lists).toEqual([])
+                await sidebar.processEvent('setNewPageNoteLists', {
+                    lists: [DATA.LOCAL_LISTS[3].id],
+                })
+                expect(sidebar.state.commentBox.lists).toEqual([
+                    DATA.LOCAL_LISTS[3].id,
+                ])
+
+                const [unifiedListIdA, unifiedListIdB] = [
+                    DATA.LOCAL_LISTS[4].id,
+                    DATA.LOCAL_LISTS[3].id,
+                ].map(
+                    (localId) =>
+                        annotationsCache.getListByLocalId(localId).unifiedId,
+                )
+
+                await sidebar.processEvent('setSelectedList', {
+                    unifiedListId: unifiedListIdA,
+                })
+
+                expect(sidebar.state.commentBox.lists).toEqual([
+                    DATA.LOCAL_LISTS[3].id,
+                ])
+
+                const localAnnotId = generateAnnotationUrl({
+                    pageUrl: DATA.TAB_URL_1,
+                    now: () => Date.now(),
+                })
+
+                expect(
+                    await device.storageManager
+                        .collection('annotListEntries')
+                        .findAllObjects({ url: localAnnotId }),
+                ).toEqual([])
+
+                await sidebar.processEvent('saveNewPageNote', {
+                    annotationId: localAnnotId,
+                    shouldShare: false,
+                    now: 123,
+                })
+
+                expect(
+                    await device.storageManager
+                        .collection('annotListEntries')
+                        .findAllObjects({ url: localAnnotId }),
+                ).toEqual([
+                    {
+                        listId: DATA.LOCAL_LISTS[3].id,
+                        createdAt: expect.any(Date),
+                        url: localAnnotId,
+                    },
+                    {
+                        listId: DATA.LOCAL_LISTS[4].id,
+                        createdAt: expect.any(Date),
+                        url: localAnnotId,
+                    },
+                ])
+
+                const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
+                expect(
+                    sidebar.state.annotations.byId[latestCachedAnnotId],
+                ).toEqual({
+                    unifiedId: latestCachedAnnotId,
+                    localId: localAnnotId,
+                    remoteId: undefined,
+                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
+                    creator: null, // NOTE: we're not auth'd
+                    comment: DATA.COMMENT_1,
+                    body: undefined,
+                    selector: undefined,
+                    createdWhen: 123,
+                    lastEdited: 123,
+                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                    unifiedListIds: [unifiedListIdB, unifiedListIdA],
+                })
+                expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
+            })
+
+            it('should be able to save a new private comment on the "My Annotations" tab while in selected list mode, without adding to that selected list', async ({
+                device,
+            }) => {
+                const { sidebar, annotationsCache } = await setupLogicHelper({
+                    device,
+                    withAuth: false,
+                })
+
+                expect(sidebar.state.commentBox.commentText).toEqual('')
+                await sidebar.processEvent('setNewPageNoteText', {
+                    comment: DATA.COMMENT_1,
+                })
+                expect(sidebar.state.commentBox.commentText).toEqual(
+                    DATA.COMMENT_1,
+                )
+
+                expect(sidebar.state.commentBox.lists).toEqual([])
+                await sidebar.processEvent('setNewPageNoteLists', {
+                    lists: [DATA.LOCAL_LISTS[3].id],
+                })
+                expect(sidebar.state.commentBox.lists).toEqual([
+                    DATA.LOCAL_LISTS[3].id,
+                ])
+
+                const [unifiedListIdA, unifiedListIdB] = [
+                    DATA.LOCAL_LISTS[4].id,
+                    DATA.LOCAL_LISTS[3].id,
+                ].map(
+                    (localId) =>
+                        annotationsCache.getListByLocalId(localId).unifiedId,
+                )
+
+                await sidebar.processEvent('setSelectedList', {
+                    unifiedListId: unifiedListIdA,
+                })
+
+                // Switch back to "My Annotations" tab, while "Spaces" tab remains in selected list mode
+                await sidebar.processEvent('setActiveSidebarTab', {
+                    tab: 'annotations',
+                })
+
+                expect(sidebar.state.commentBox.lists).toEqual([
+                    DATA.LOCAL_LISTS[3].id,
+                ])
+
+                const localAnnotId = generateAnnotationUrl({
+                    pageUrl: DATA.TAB_URL_1,
+                    now: () => Date.now(),
+                })
+
+                expect(
+                    await device.storageManager
+                        .collection('annotListEntries')
+                        .findAllObjects({ url: localAnnotId }),
+                ).toEqual([])
+
+                await sidebar.processEvent('saveNewPageNote', {
+                    annotationId: localAnnotId,
+                    shouldShare: false,
+                    now: 123,
+                })
+
+                expect(
+                    await device.storageManager
+                        .collection('annotListEntries')
+                        .findAllObjects({ url: localAnnotId }),
+                ).toEqual([
+                    {
+                        listId: DATA.LOCAL_LISTS[3].id,
+                        createdAt: expect.any(Date),
+                        url: localAnnotId,
+                    },
+                ])
+
+                const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
+                expect(
+                    sidebar.state.annotations.byId[latestCachedAnnotId],
+                ).toEqual({
+                    unifiedId: latestCachedAnnotId,
+                    localId: localAnnotId,
+                    remoteId: undefined,
+                    normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
+                    creator: null, // NOTE: we're not auth'd
+                    comment: DATA.COMMENT_1,
+                    body: undefined,
+                    selector: undefined,
+                    createdWhen: 123,
+                    lastEdited: 123,
+                    privacyLevel: AnnotationPrivacyLevels.PRIVATE,
+                    unifiedListIds: [unifiedListIdB],
+                })
+                expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
             })
         })
     })
