@@ -82,7 +82,10 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
+import {
+    convertMemexURLintoTelegramURL,
+    getTelegramUserDisplayName,
+} from '@worldbrain/memex-common/lib/telegram/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -1396,11 +1399,16 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
 
+        let fullPageURL =
+            this.fullPageUrl ?? 'https://' + annotation.normalizedPageUrl
+
+        if (fullPageURL.includes('web.telegram.org')) {
+            fullPageURL = convertMemexURLintoTelegramURL(fullPageURL)
+        }
+
         return this.options.contentScriptsBG.goToAnnotationFromDashboardSidebar(
             {
-                fullPageUrl:
-                    this.fullPageUrl ??
-                    'https://' + annotation.normalizedPageUrl,
+                fullPageUrl: fullPageURL,
                 annotationCacheId: event.unifiedAnnotationId,
             },
         )

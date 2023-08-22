@@ -16,7 +16,10 @@ import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import browser, { Storage } from 'webextension-polyfill'
 import { pageActionAllowed } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
-import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
+import {
+    convertTelegramURLintoMemexPageURL,
+    getTelegramUserDisplayName,
+} from '@worldbrain/memex-common/lib/telegram/utils'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -186,7 +189,9 @@ export class RibbonContainerLogic extends UILogic<
             // TElegram URL Support
             if (window.location.href.includes('web.telegram.org')) {
                 try {
-                    fullPageUrl = fullPageUrl.replace('#@', '@')
+                    fullPageUrl = convertTelegramURLintoMemexPageURL(
+                        fullPageUrl,
+                    )
                 } catch (error) {
                     console.log('error', error)
                 }
