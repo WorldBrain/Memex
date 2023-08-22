@@ -87,10 +87,7 @@ import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highl
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import checkBrowser from 'src/util/check-browser'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
-import {
-    convertTelegramURLintoMemexPageURL,
-    getTelegramUserDisplayName,
-} from '@worldbrain/memex-common/lib/telegram/utils'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -840,14 +837,6 @@ class PageInfo {
     getFullPageUrl = async () => {
         await this.refreshIfNeeded()
         let fullURL = this._identifier.fullUrl
-
-        if (window.location.href.includes('web.telegram.org')) {
-            try {
-                fullURL = convertTelegramURLintoMemexPageURL(fullURL)
-            } catch (error) {
-                console.log('error', error)
-            }
-        }
         return fullURL
     }
 
