@@ -1,5 +1,5 @@
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { RibbonContainerDependencies } from './types'
 import * as componentTypes from '../../components/types'
 import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'

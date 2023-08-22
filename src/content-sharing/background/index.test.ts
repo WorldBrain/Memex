@@ -1,6 +1,6 @@
 import expect from 'expect'
 import type StorageManager from '@worldbrain/storex'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import {
     backgroundIntegrationTestSuite,
