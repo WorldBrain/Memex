@@ -1,6 +1,8 @@
 import { Tabs, Browser, Bookmarks } from 'webextension-polyfill'
 import Storex from '@worldbrain/storex'
-import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
+import { isFullUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+
 import BookmarksStorage from './storage'
 import { BookmarksInterface } from './types'
 import Raven from 'raven-js'
@@ -81,6 +83,9 @@ export default class BookmarksBackground {
         timestamp?: number
         tabId?: number
         skipIndexing?: boolean
+        metaData?: {
+            pageTitle?: string
+        }
     }) => {
         const fullUrl = params.fullUrl ?? params.url
         if (!isFullUrl(fullUrl)) {
@@ -96,6 +101,7 @@ export default class BookmarksBackground {
                     fullUrl,
                     tabId: params.tabId,
                     visitTime: params.timestamp || '$now',
+                    metaData: params.metaData,
                 },
                 { addInboxEntryOnCreate: true },
             )

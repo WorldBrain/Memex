@@ -1,7 +1,8 @@
 import type Storex from '@worldbrain/storex'
 import fromPairs from 'lodash/fromPairs'
 import type { Windows, Tabs, Storage } from 'webextension-polyfill'
-import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
+import { isFullUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 import CustomListStorage from './storage'
 import type { SearchIndex } from 'src/search'
@@ -25,6 +26,7 @@ import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexi
 import { isExtensionTab } from 'src/tab-management/utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { PersonalList } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 
 const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 25
@@ -638,6 +640,7 @@ export default class CustomListBackground {
             skipPageIndexing?: boolean
             suppressVisitCreation?: boolean
             suppressInboxEntry?: boolean
+            pageTitle?: string
         },
     ): Promise<{ object: PageListEntry }> => {
         const { id } = params
@@ -660,6 +663,9 @@ export default class CustomListBackground {
                     visitTime: !params.suppressVisitCreation
                         ? '$now'
                         : undefined,
+                    metaData: {
+                        pageTitle: params.pageTitle,
+                    },
                 },
                 { addInboxEntryOnCreate: !params.suppressInboxEntry },
             )
@@ -676,6 +682,7 @@ export default class CustomListBackground {
             listId: id,
             fullUrl: url,
             createdAt: params.createdAt,
+            pageTitle: params.pageTitle,
         })
 
         this.options.analytics.trackEvent({
@@ -758,7 +765,11 @@ export default class CustomListBackground {
         }))
     }
 
-    addOpenTabsToList = async (args: { listId: number; time?: number }) => {
+    addOpenTabsToList = async (args: {
+        listId: number
+        time?: number
+        pageTitle?: string
+    }) => {
         if (!(await this.fetchListById({ id: args.listId }))) {
             throw new Error('No list found for ID:' + args.listId)
         }
@@ -803,6 +814,7 @@ export default class CustomListBackground {
                         listId: args.listId,
                         fullUrl,
                         pageUrl: normalizeUrl(fullUrl),
+                        pageTitle: args.pageTitle,
                     })
                 }),
         )
@@ -851,6 +863,7 @@ export default class CustomListBackground {
         url,
         tabId,
         skipPageIndexing,
+        pageTitle,
     }) => {
         const listId = added ?? deleted
 
@@ -860,6 +873,7 @@ export default class CustomListBackground {
                 url,
                 tabId,
                 skipPageIndexing,
+                pageTitle,
             })
         }
 

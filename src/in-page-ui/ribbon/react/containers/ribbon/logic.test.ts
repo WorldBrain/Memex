@@ -13,7 +13,7 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import { SharedInPageUIState } from 'src/in-page-ui/shared-state/shared-in-page-ui-state'
 import { FakeAnalytics } from 'src/analytics/mock'
 import * as DATA from './logic.test.data'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'

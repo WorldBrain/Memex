@@ -83,6 +83,7 @@ export interface RemoteContentSharingByTabsInterface<
         {
             fullPageUrl: string
             now?: number
+            customPageTitle: string
         },
         {
             listTitle: string
@@ -90,6 +91,7 @@ export interface RemoteContentSharingByTabsInterface<
             remoteListId: string
             remoteListEntryId: string
             collabKey: string
+            pageTitle?: string | null
         }
     >
     waitForPageLinkCreation: RemoteFunction<Role, { fullPageUrl: string }, void>

@@ -1,5 +1,5 @@
 import Storex from '@worldbrain/storex'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
 import generateTemplateDocs, {
