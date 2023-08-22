@@ -1,6 +1,8 @@
 import { Tabs, Browser, Bookmarks } from 'webextension-polyfill'
 import Storex from '@worldbrain/storex'
-import { normalizeUrl, isFullUrl } from '@worldbrain/memex-url-utils'
+import { isFullUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+
 import BookmarksStorage from './storage'
 import { BookmarksInterface } from './types'
 import Raven from 'raven-js'
