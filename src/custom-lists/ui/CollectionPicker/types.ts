@@ -38,7 +38,7 @@ export type SpacePickerEvent = UIEvent<{
     searchInputChanged: { query: string; skipDebounce?: boolean }
     resultEntryAllPress: { entry: UnifiedList }
     newEntryAllPress: { entry: string }
-    resultEntryPress: { entry: Pick<UnifiedList, 'localId'>; pageTitle: string }
+    resultEntryPress: { entry: Pick<UnifiedList, 'localId'> }
     resultEntryFocus: { entry: UnifiedList; index: number }
     setListRemoteId: { localListId: number; remoteListId: string }
     toggleEntryContextMenu: { listId: number }

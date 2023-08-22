@@ -681,6 +681,7 @@ export default class CustomListBackground {
             listId: id,
             fullUrl: url,
             createdAt: params.createdAt,
+            pageTitle: params.pageTitle,
         })
 
         this.options.analytics.trackEvent({
@@ -763,7 +764,11 @@ export default class CustomListBackground {
         }))
     }
 
-    addOpenTabsToList = async (args: { listId: number; time?: number }) => {
+    addOpenTabsToList = async (args: {
+        listId: number
+        time?: number
+        pageTitle?: string
+    }) => {
         if (!(await this.fetchListById({ id: args.listId }))) {
             throw new Error('No list found for ID:' + args.listId)
         }
@@ -808,6 +813,7 @@ export default class CustomListBackground {
                         listId: args.listId,
                         fullUrl,
                         pageUrl: normalizeUrl(fullUrl),
+                        pageTitle: args.pageTitle,
                     })
                 }),
         )

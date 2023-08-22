@@ -89,11 +89,6 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     }
 
     render() {
-        console.log(
-            'UserScreen render',
-            this.state.loadState,
-            this.state.currentUser,
-        )
         return this.state.loadState === 'running' ? (
             <LoadingContainer>
                 <LoadingIndicator size={50} />

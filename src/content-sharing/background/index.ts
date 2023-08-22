@@ -43,7 +43,7 @@ export default class ContentSharingBackground {
     static ONE_WEEK_MS = 604800000
 
     private pageLinkCreationPromises: {
-        [fullPageUrl: string, customPageTitle: string]: Promise<void>
+        [fullPageUrl: string]: Promise<void>
     } = {}
     private listSharePromises: {
         [localListId: number]: Promise<void>
@@ -823,8 +823,6 @@ export default class ContentSharingBackground {
             .generateServerId('sharedListKey')
             .toString()
         const pageTitle = customPageTitle
-
-        console.log('pagetitlefetch', pageTitle)
 
         // Start but don't wait for the storage logic
         this.pageLinkCreationPromises[

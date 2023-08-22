@@ -268,7 +268,6 @@ export default class Ribbon extends Component<Props, State> {
                     }
                     closePicker={this.hideListPicker}
                     onListShare={this.props.onListShare}
-                    pageTitle={pageTitle}
                 />
             </PopoutBox>
         )
@@ -683,70 +682,6 @@ export default class Ribbon extends Component<Props, State> {
         }
     }
 
-    renderCommentBox() {
-        if (!this.props.commentBox.showCommentBox) {
-            return
-        }
-
-        const topRight = this.props.ribbonPosition === 'topRight'
-        const bottomRight = this.props.ribbonPosition === 'bottomRight'
-
-        return (
-            <PopoutBox
-                targetElementRef={this.sidebarButtonRef.current}
-                placement={
-                    this.props.sidebar.isSidebarOpen
-                        ? 'left'
-                        : topRight
-                        ? 'bottom'
-                        : bottomRight
-                        ? 'top'
-                        : 'left-start'
-                }
-                offsetX={
-                    topRight ||
-                    (bottomRight && !this.props.sidebar.isSidebarOpen)
-                        ? 18
-                        : 10
-                }
-            >
-                <CommentBoxContainer
-                    hasComment={this.props.commentBox.commentText.length > 0}
-                >
-                    <AnnotationCreate
-                        ref={(ref) => (this.annotationCreateRef = ref)}
-                        hide={() =>
-                            this.props.commentBox.setShowCommentBox(false)
-                        }
-                        onSave={this.props.commentBox.saveComment}
-                        onCancel={this.props.commentBox.cancelComment}
-                        onCommentChange={this.props.commentBox.changeComment}
-                        comment={this.props.commentBox.commentText}
-                        lists={this.props.commentBox.lists}
-                        getListDetailsById={this.props.getListDetailsById}
-                        isRibbonCommentBox
-                        autoFocus
-                        renderSpacePicker={() => (
-                            <CollectionPicker
-                                showPageLinks
-                                shouldHydrateCacheOnInit
-                                localStorageAPI={browser.storage.local}
-                                selectEntry={this.props.lists.selectEntry}
-                                unselectEntry={this.props.lists.unselectEntry}
-                                createNewEntry={this.props.lists.createNewEntry}
-                                pageActivityIndicatorBG={
-                                    this.props.pageActivityIndicatorBG
-                                }
-                                contentSharingBG={this.props.contentSharingBG}
-                                spacesBG={this.props.spacesBG}
-                                authBG={this.props.authBG}
-                            />
-                        )}
-                    />
-                </CommentBoxContainer>
-            </PopoutBox>
-        )
-    }
     renderRemoveMenu() {
         if (!this.props.showRemoveMenu) {
             return
@@ -1762,7 +1697,6 @@ export default class Ribbon extends Component<Props, State> {
                     {this.renderSpacePicker()}
                     {this.renderTutorial()}
                     {this.renderFeedInfo()}
-                    {this.renderCommentBox()}
                     {this.renderRemoveMenu()}
                 </>
             )
@@ -1861,7 +1795,6 @@ export default class Ribbon extends Component<Props, State> {
                 {this.renderSpacePicker()}
                 {this.renderTutorial()}
                 {this.renderFeedInfo()}
-                {this.renderCommentBox()}
                 {this.renderRemoveMenu()}
             </>
         )

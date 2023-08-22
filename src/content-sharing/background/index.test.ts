@@ -2620,6 +2620,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         fullPageUrl,
                                         now,
+                                        customPageTitle: null,
                                     },
                                 )
                                 await contentSharing.waitForPageLinkCreation(
@@ -3550,6 +3551,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         fullPageUrl,
                                         now,
+                                        customPageTitle: null,
                                     },
                                 )
                                 await contentSharing.waitForPageLinkCreation(

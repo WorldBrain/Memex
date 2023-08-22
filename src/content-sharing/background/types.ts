@@ -91,7 +91,7 @@ export interface RemoteContentSharingByTabsInterface<
             remoteListId: string
             remoteListEntryId: string
             collabKey: string
-            pageTitle: string
+            pageTitle?: string | null
         }
     >
     waitForPageLinkCreation: RemoteFunction<Role, { fullPageUrl: string }, void>
