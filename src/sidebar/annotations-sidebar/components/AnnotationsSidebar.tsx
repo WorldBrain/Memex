@@ -2438,9 +2438,33 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
+    private sidebarRef = React.createRef<HTMLDivElement>()
+
     render() {
+        if (this.sidebarRef.current != null) {
+            this.sidebarRef?.current.addEventListener(
+                'keydown',
+                function (event) {
+                    console.log('Key pressed:', event.key)
+
+                    // Prevents the event from bubbling up or capturing down
+                    event.stopPropagation()
+
+                    // Prevents any other event listeners on the same element from being executed
+                    event.stopImmediatePropagation()
+
+                    // Optional: prevent the default action associated with the event (like typing in an input)
+                    // event.preventDefault()
+                },
+                true,
+            )
+        }
+
         return (
-            <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
+            <ResultBodyContainer
+                ref={this.sidebarRef}
+                sidebarContext={this.props.sidebarContext}
+            >
                 <TopBar sidebarContext={this.props.sidebarContext}>
                     {this.renderTopBarSwitcher()}
                     {/* {this.renderSharePageButton()} */}
