@@ -454,6 +454,30 @@ export async function main(
     if (window.location.hostname === 'www.youtube.com') {
         loadYoutubeButtons(annotationsFunctions)
     }
+    if (window.location.href.includes('web.telegram.org/k/')) {
+        const spacesBar = document.getElementById('spacesBar')
+        if (spacesBar) {
+            spacesBar.remove()
+        }
+        const lists = await collectionsBG.fetchPageListEntriesByUrl({
+            url: window.location.href,
+        })
+        if (lists.length > 0) {
+            const updatedLists = await Promise.all(
+                lists
+                    .filter((list) => list.listId !== 20201014)
+                    .map(async (list) => {
+                        const listData = await collectionsBG.fetchListById({
+                            id: list.listId,
+                        })
+                        ;(list as any).name = listData.name // Add the list name to the original list object.
+                        return list
+                    }),
+            )
+
+            loadTelegramUserSpaces(updatedLists, bgScriptBG)
+        }
+    }
 
     // if (window.location.hostname === 'www.youtube.com') {
     //     injectYoutubeButtonMenu(annotationsFunctions)
@@ -676,6 +700,32 @@ export async function main(
             resetKeyboardShortcuts()
         },
         handleHistoryStateUpdate: async (tabId) => {
+            if (window.location.href.includes('web.telegram.org/k/')) {
+                const spacesBar = document.getElementById('spacesBar')
+                if (spacesBar) {
+                    spacesBar.remove()
+                }
+                const lists = await collectionsBG.fetchPageListEntriesByUrl({
+                    url: window.location.href,
+                })
+                if (lists.length > 0) {
+                    const updatedLists = await Promise.all(
+                        lists
+                            .filter((list) => list.listId !== 20201014)
+                            .map(async (list) => {
+                                const listData = await collectionsBG.fetchListById(
+                                    {
+                                        id: list.listId,
+                                    },
+                                )
+                                ;(list as any).name = listData.name // Add the list name to the original list object.
+                                return list
+                            }),
+                    )
+
+                    loadTelegramUserSpaces(updatedLists, bgScriptBG)
+                }
+            }
             const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
             if (isPageBlacklisted || !isSidebarEnabled) {
                 await inPageUI.removeRibbon()
@@ -853,6 +903,72 @@ class PageInfo {
     getNormalizedPageUrl = async () => {
         await this.refreshIfNeeded()
         return this._identifier.normalizedUrl
+    }
+}
+
+export function loadTelegramUserSpaces(
+    lists,
+    bgScriptBG: RemoteBGScriptInterface,
+) {
+    let spacesBarOld = document.getElementById('spacesBar')
+
+    if (spacesBarOld) {
+        spacesBarOld.remove()
+    }
+
+    // Clear out the existing child elements of spacesBar (if any)
+
+    const chatInfoBox = document.getElementsByClassName(
+        'chat-info',
+    )[0] as HTMLElement
+
+    chatInfoBox.style.gap = '10px'
+    chatInfoBox.style.display = 'flex'
+    chatInfoBox.style.flexDirection = 'column'
+    chatInfoBox.style.justifyContent = 'flex-start'
+
+    const contentBox = document.getElementsByClassName(
+        'content',
+    )[0] as HTMLElement
+
+    contentBox.style.maxWidth = 'fit-content'
+    contentBox.style.paddingRight = '30px'
+
+    const personBox = document.getElementsByClassName(
+        'person',
+    )[0] as HTMLElement
+
+    const spacesBar = document.createElement('div')
+
+    spacesBar.id = 'spacesBar'
+
+    spacesBar.style.display = 'flex'
+    spacesBar.style.gap = '10px'
+
+    personBox.appendChild(spacesBar)
+
+    lists.forEach((list) => {
+        const listDiv = document.createElement('div')
+        listDiv.style.background = '#C6F0D4'
+        listDiv.style.padding = '3px 10px'
+        listDiv.style.borderRadius = '5px'
+        listDiv.style.cursor = 'pointer'
+        listDiv.style.color = '#12131B'
+        listDiv.innerText = list.name // assuming 'name' is a property of the list items
+        listDiv.addEventListener('click', (event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            bgScriptBG.openOverviewTab({
+                selectedSpace: list.listId as number,
+            })
+        })
+        spacesBar.appendChild(listDiv)
+    })
+
+    // If spacesBar wasn't part of the DOM already, you might want to append it somewhere.
+    if (!document.getElementById('spacesBar')) {
+        const chatInfoBox = document.getElementsByClassName('person')[0] // gets the first 'person' element
+        chatInfoBox.appendChild(spacesBar)
     }
 }
 

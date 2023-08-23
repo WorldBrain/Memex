@@ -16,10 +16,7 @@ import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import browser, { Storage } from 'webextension-polyfill'
 import { pageActionAllowed } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
-import {
-    convertTelegramURLintoMemexPageURL,
-    getTelegramUserDisplayName,
-} from '@worldbrain/memex-common/lib/telegram/utils'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
