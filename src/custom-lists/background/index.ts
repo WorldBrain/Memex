@@ -26,7 +26,6 @@ import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexi
 import { isExtensionTab } from 'src/tab-management/utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { PersonalList } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
-import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 
 const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 25

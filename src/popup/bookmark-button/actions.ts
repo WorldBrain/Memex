@@ -6,7 +6,6 @@ import * as popup from '../selectors'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications, bookmarks } from 'src/util/remote-functions-background'
 import analytics from 'src/analytics'
-import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 
 export const setIsBookmarked = createAction<boolean>('bookmark/setIsBookmarked')
 

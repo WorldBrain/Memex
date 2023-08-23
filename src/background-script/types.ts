@@ -16,7 +16,10 @@ export interface OpenTabParams {
 export interface RemoteBGScriptInterface {
     openOptionsTab: (query: string, params?: OpenTabParams) => Promise<void>
     openOverviewTab: (
-        params?: OpenTabParams & { missingPdf?: boolean },
+        params?: OpenTabParams & {
+            missingPdf?: boolean
+            selectedSpace?: number
+        },
     ) => Promise<void>
     openLearnMoreTab: (params?: OpenTabParams) => Promise<void>
     confirmBackgroundScriptLoaded: () => Promise<void>
