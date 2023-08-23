@@ -2462,10 +2462,7 @@ export class AnnotationsSidebar extends React.Component<
 
     render() {
         return (
-            <ResultBodyContainer
-                ref={this.sidebarRef}
-                sidebarContext={this.props.sidebarContext}
-            >
+            <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
                 <TopBar sidebarContext={this.props.sidebarContext}>
                     {this.renderTopBarSwitcher()}
                     {/* {this.renderSharePageButton()} */}
