@@ -2170,7 +2170,7 @@ export class AnnotationsSidebar extends React.Component<
                                 spaceTitleEditValue: event.target.value,
                             })
                         }}
-                        onKeyPress={this.handleNameEditInputKeyDown}
+                        onKeyDown={this.handleNameEditInputKeyDown}
                         autoFocus
                     />
                 ) : (
