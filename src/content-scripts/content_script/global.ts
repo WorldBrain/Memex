@@ -727,6 +727,7 @@ export async function main(
             resetKeyboardShortcuts()
         },
         handleHistoryStateUpdate: async (tabId) => {
+            await inPageUI.hideRibbon()
             if (window.location.href.includes('web.telegram.org/k/')) {
                 const spacesBar = document.getElementById('spacesBar')
                 if (spacesBar) {
