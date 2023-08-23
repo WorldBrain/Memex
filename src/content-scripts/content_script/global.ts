@@ -968,6 +968,7 @@ export function loadTelegramUserSpaces(
     )[0] as HTMLElement
 
     contentBox.style.maxWidth = 'fit-content'
+    contentBox.style.minWidth = '210px'
     contentBox.style.paddingRight = '30px'
 
     const personBox = document.getElementsByClassName(
@@ -991,7 +992,7 @@ export function loadTelegramUserSpaces(
         listDiv.style.borderRadius = '5px'
         listDiv.style.cursor = 'pointer'
         listDiv.style.color = '#12131B'
-        listDiv.style.color = '14px'
+        listDiv.style.fontSize = '14px'
         listDiv.style.display = 'flex'
         listDiv.style.alignItems = 'center'
         listDiv.innerText = list.name // assuming 'name' is a property of the list items
