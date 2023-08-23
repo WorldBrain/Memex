@@ -1877,7 +1877,7 @@ const IconContainer = styled.div<{ ribbonPosition }>`
     grid-gap: 5px;
     height: 100%;
     width: fit-content;
-    background: ${(props) => props.theme.colors.greyScale1}90;
+    background: ${(props) => props.theme.colors.greyScale1}95;
     backdrop-filter: blur(4px);
 
     ${(props) =>
