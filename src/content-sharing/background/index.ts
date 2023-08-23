@@ -445,14 +445,14 @@ export default class ContentSharingBackground {
                 localId,
                 remoteId:
                     remoteIds[localId] ?? this.generateRemoteAnnotationId(),
-                excludeFromLists: !options.shareToLists ?? true,
+                excludeFromLists: !options.shareToParentPageLists ?? true,
             })),
         )
 
         await this.storage.setAnnotationPrivacyLevelBulk({
             annotations: nonProtectedAnnotations,
             privacyLevel: makeAnnotationPrivacyLevel({
-                public: options.shareToLists,
+                public: options.shareToParentPageLists,
                 protected: options.setBulkShareProtected,
             }),
         })

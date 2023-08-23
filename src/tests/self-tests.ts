@@ -334,7 +334,7 @@ export function createSelfTests(options: {
                 if (shouldTest('share.note')) {
                     await backgroundModules.contentSharing.shareAnnotation({
                         annotationUrl: publicAnnotationUrl,
-                        shareToLists: true,
+                        shareToParentPageLists: true,
                     })
                     if (shouldTest('share.note.edit')) {
                         await backgroundModules.directLinking.editAnnotation(

@@ -1391,7 +1391,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.shareAnnotation(setup, {
                                     id: 1,
-                                    shareToLists: true,
+                                    shareToParentPageLists: true,
                                     expectedSharingState: {
                                         sharedListIds: [1],
                                         privateListIds: [],
@@ -1487,7 +1487,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.shareAnnotation(setup, {
                                     id: 1,
-                                    shareToLists: true,
+                                    shareToParentPageLists: true,
                                     expectedSharingState: {
                                         sharedListIds: [1],
                                         privateListIds: [],
@@ -1629,7 +1629,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.shareAnnotation(setup, {
                                     id: 1,
-                                    shareToLists: true,
+                                    shareToParentPageLists: true,
                                     expectedSharingState: {
                                         sharedListIds: [1],
                                         privateListIds: [],
@@ -1711,7 +1711,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 await helper.shareAnnotation(setup, {
                                     id: 1,
-                                    shareToLists: true,
+                                    shareToParentPageLists: true,
                                     expectedSharingState: {
                                         sharedListIds: [1, 2],
                                         privateListIds: [],
@@ -1816,7 +1816,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.shareAnnotation(setup, {
                                     id: 1,
-                                    shareToLists: true,
+                                    shareToParentPageLists: true,
                                     expectedSharingState: {
                                         sharedListIds: [1, 2],
                                         privateListIds: [],
@@ -1913,7 +1913,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.shareAnnotation(setup, {
                                     id: 1,
-                                    shareToLists: true,
+                                    shareToParentPageLists: true,
                                     expectedSharingState: {
                                         sharedListIds: [1, 2],
                                         privateListIds: [],

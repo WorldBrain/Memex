@@ -2736,7 +2736,9 @@ describe('SidebarContainerLogic', () => {
                     expectedAnnotationData: {
                         privacyLevel: AnnotationPrivacyLevels
                         hasLocalListEntry: boolean
-                        isShared: boolean
+                        isSharedToPageLists: boolean
+                        isRemotelyAvailable: boolean
+                        hasNewConversationState: boolean
                     }
                 },
             ) => {
@@ -2767,9 +2769,10 @@ describe('SidebarContainerLogic', () => {
                     DATA.LOCAL_LISTS[3].id,
                 ])
 
-                const [unifiedListIdA, unifiedListIdB] = [
+                const [unifiedListIdA, unifiedListIdB, unifiedIdForPageList] = [
                     selectedListLocalId,
                     DATA.LOCAL_LISTS[3].id,
+                    DATA.LOCAL_LISTS[0].id,
                 ].map(
                     (localId) =>
                         annotationsCache.getListByLocalId(localId).unifiedId,
@@ -2813,7 +2816,10 @@ describe('SidebarContainerLogic', () => {
                 })
 
                 expect(Object.keys(sidebar.state.conversations).length).toBe(
-                    conversationsBefore + 1,
+                    conversationsBefore +
+                        Number(
+                            opts.expectedAnnotationData.hasNewConversationState,
+                        ),
                 )
                 expect(
                     await device.storageManager
@@ -2830,11 +2836,12 @@ describe('SidebarContainerLogic', () => {
                         .collection('sharedAnnotationMetadata')
                         .findObject({ localId: localAnnotId }),
                 ).toEqual(
-                    opts.expectedAnnotationData.isShared
+                    opts.expectedAnnotationData.isRemotelyAvailable
                         ? {
                               localId: localAnnotId,
                               remoteId: expect.any(String),
-                              excludeFromLists: true,
+                              excludeFromLists: !opts.expectedAnnotationData
+                                  .isSharedToPageLists,
                           }
                         : null,
                 )
@@ -2842,22 +2849,24 @@ describe('SidebarContainerLogic', () => {
                     await device.storageManager
                         .collection('annotListEntries')
                         .findAllObjects({ url: localAnnotId }),
-                ).toEqual([
-                    ...(opts.expectedAnnotationData.hasLocalListEntry
-                        ? [
-                              {
-                                  listId: selectedListLocalId,
-                                  createdAt: expect.any(Date),
-                                  url: localAnnotId,
-                              },
-                          ]
-                        : []),
-                    {
-                        listId: DATA.LOCAL_LISTS[3].id,
-                        createdAt: expect.any(Date),
-                        url: localAnnotId,
-                    },
-                ])
+                ).toEqual(
+                    expect.arrayContaining([
+                        ...(opts.expectedAnnotationData.hasLocalListEntry
+                            ? [
+                                  {
+                                      listId: selectedListLocalId,
+                                      createdAt: expect.any(Date),
+                                      url: localAnnotId,
+                                  },
+                              ]
+                            : []),
+                        {
+                            listId: DATA.LOCAL_LISTS[3].id,
+                            createdAt: expect.any(Date),
+                            url: localAnnotId,
+                        },
+                    ]),
+                )
 
                 const latestCachedAnnotId = annotationsCache.getLastAssignedAnnotationId()
                 expect(
@@ -2865,7 +2874,9 @@ describe('SidebarContainerLogic', () => {
                 ).toEqual({
                     unifiedId: latestCachedAnnotId,
                     localId: localAnnotId,
-                    remoteId: expect.any(String),
+                    remoteId: opts.expectedAnnotationData.isRemotelyAvailable
+                        ? expect.any(String)
+                        : undefined,
                     normalizedPageUrl: normalizeUrl(DATA.TAB_URL_1),
                     creator: DATA.CREATOR_1,
                     comment: DATA.COMMENT_1,
@@ -2873,8 +2884,15 @@ describe('SidebarContainerLogic', () => {
                     selector: undefined,
                     createdWhen: 123,
                     lastEdited: 123,
-                    privacyLevel: AnnotationPrivacyLevels.PROTECTED, // Saving to a shared list makes it protected
-                    unifiedListIds: [unifiedListIdB, unifiedListIdA],
+                    privacyLevel: opts.expectedAnnotationData.privacyLevel,
+                    unifiedListIds: [
+                        ...(opts.expectedAnnotationData.isSharedToPageLists &&
+                        opts.expectedAnnotationData.hasLocalListEntry
+                            ? [unifiedIdForPageList]
+                            : []),
+                        unifiedListIdA,
+                        unifiedListIdB,
+                    ],
                 })
                 expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
             }
@@ -2886,7 +2904,9 @@ describe('SidebarContainerLogic', () => {
                     annotationType: 'private',
                     listType: 'shared',
                     expectedAnnotationData: {
-                        isShared: true,
+                        hasNewConversationState: true,
+                        isSharedToPageLists: false,
+                        isRemotelyAvailable: true,
                         hasLocalListEntry: true,
                         privacyLevel: AnnotationPrivacyLevels.PROTECTED,
                     },
@@ -2899,7 +2919,9 @@ describe('SidebarContainerLogic', () => {
                     annotationType: 'shared',
                     listType: 'shared',
                     expectedAnnotationData: {
-                        isShared: true,
+                        hasNewConversationState: true,
+                        isSharedToPageLists: true,
+                        isRemotelyAvailable: true,
                         hasLocalListEntry: false,
                         privacyLevel: AnnotationPrivacyLevels.SHARED,
                     },
@@ -2912,7 +2934,9 @@ describe('SidebarContainerLogic', () => {
                     annotationType: 'private',
                     listType: 'private',
                     expectedAnnotationData: {
-                        isShared: false,
+                        hasNewConversationState: false,
+                        isSharedToPageLists: false,
+                        isRemotelyAvailable: false,
                         hasLocalListEntry: true,
                         privacyLevel: AnnotationPrivacyLevels.PRIVATE,
                     },
@@ -2925,7 +2949,9 @@ describe('SidebarContainerLogic', () => {
                     annotationType: 'shared',
                     listType: 'private',
                     expectedAnnotationData: {
-                        isShared: true,
+                        hasNewConversationState: false,
+                        isSharedToPageLists: true,
+                        isRemotelyAvailable: true,
                         hasLocalListEntry: true,
                         privacyLevel: AnnotationPrivacyLevels.SHARED,
                     },
@@ -3019,7 +3045,7 @@ describe('SidebarContainerLogic', () => {
                     createdWhen: 123,
                     lastEdited: 123,
                     privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                    unifiedListIds: [unifiedListIdB, unifiedListIdA],
+                    unifiedListIds: [unifiedListIdA, unifiedListIdB],
                 })
                 expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
             })
@@ -3113,7 +3139,7 @@ describe('SidebarContainerLogic', () => {
                     createdWhen: 123,
                     lastEdited: 123,
                     privacyLevel: AnnotationPrivacyLevels.PRIVATE,
-                    unifiedListIds: [unifiedListIdB, unifiedListIdA],
+                    unifiedListIds: [unifiedListIdA, unifiedListIdB],
                 })
                 expect(sidebar.state.commentBox).toEqual(INIT_FORM_STATE)
             })

@@ -287,7 +287,7 @@ export class SharingTestHelper {
         setup: BackgroundIntegrationTestSetup,
         options: {
             id: number
-            shareToLists?: boolean
+            shareToParentPageLists?: boolean
             expectedSharingState: AnnotationSharingState
         },
     ) {
@@ -295,7 +295,7 @@ export class SharingTestHelper {
         const sharingState = await setup.backgroundModules.contentSharing.shareAnnotation(
             {
                 annotationUrl: localId,
-                shareToLists: options.shareToLists,
+                shareToParentPageLists: options.shareToParentPageLists,
             },
         )
         const remoteIds = await setup.backgroundModules.contentSharing.storage.getRemoteAnnotationIds(
