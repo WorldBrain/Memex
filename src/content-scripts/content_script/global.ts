@@ -979,6 +979,7 @@ export function loadTelegramUserSpaces(
     spacesBar.id = 'spacesBar'
 
     spacesBar.style.display = 'flex'
+    spacesBar.style.alignItems = 'center'
     spacesBar.style.gap = '10px'
 
     personBox.appendChild(spacesBar)
@@ -990,6 +991,9 @@ export function loadTelegramUserSpaces(
         listDiv.style.borderRadius = '5px'
         listDiv.style.cursor = 'pointer'
         listDiv.style.color = '#12131B'
+        listDiv.style.color = '14px'
+        listDiv.style.display = 'flex'
+        listDiv.style.alignItems = 'center'
         listDiv.innerText = list.name // assuming 'name' is a property of the list items
         listDiv.addEventListener('click', (event) => {
             event.preventDefault()
@@ -1131,7 +1135,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     memexButtons.style.border = '1px solid #3E3F47'
     memexButtons.style.overflow = 'hidden'
     memexButtons.style.overflowX = 'scroll'
-    memexButtons.style.backgroundColor = '#12131B80'
+    memexButtons.style.backgroundColor = '#12131B'
     memexButtons.setAttribute('class', 'memex-youtube-buttons no-scrollbar')
     // Create a <style> element
     const style = document.createElement('style')
@@ -1164,7 +1168,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     annotateButton.style.alignItems = 'center'
     annotateButton.style.cursor = 'pointer'
 
-    annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 12px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
+    annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
 
     // Summarize Button
     const summarizeButton = document.createElement('div')
@@ -1173,25 +1177,22 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     summarizeButton.style.display = 'flex'
     summarizeButton.style.alignItems = 'center'
     summarizeButton.style.cursor = 'pointer'
-    summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 12px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
+    summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
 
     // MemexIconDisplay
     const memexIcon = runtime.getURL('/img/memex-icon.svg')
     const memexIconEl = document.createElement('img')
     memexIconEl.src = memexIcon
     memexButtons.appendChild(memexIconEl)
+    memexIconEl.style.margin = '0 10px 0 15px'
     memexIconEl.style.height = '20px'
-    memexIconEl.style.margin = '0 5px 0 10px'
-    memexIconEl.style.height = '16px'
 
     // TimestampIcon
     const timestampIcon = runtime.getURL('/img/clockForYoutubeInjection.svg')
     const timeStampEl = document.createElement('img')
     timeStampEl.src = timestampIcon
     timeStampEl.style.height = '20px'
-    timeStampEl.style.margin = '0 5px 0 10px'
-    timeStampEl.style.height = '16px'
-    timeStampEl.setAttribute('fill', 'blue')
+    timeStampEl.style.margin = '0 10px 0 10px'
     annotateButton.insertBefore(timeStampEl, annotateButton.firstChild)
 
     // SummarizeIcon
@@ -1202,8 +1203,6 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     summarizeIconEl.src = summarizeIcon
     summarizeIconEl.style.height = '20px'
     summarizeIconEl.style.margin = '0 5px 0 10px'
-    summarizeIconEl.style.height = '16px'
-    summarizeIconEl.setAttribute('fill', 'blue')
     summarizeButton.insertBefore(summarizeIconEl, summarizeButton.firstChild)
 
     // Appending the right buttons
