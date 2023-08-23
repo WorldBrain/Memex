@@ -154,7 +154,7 @@ export function getTemplateDataFetchers({
         getNoteLinks: async (annotationUrls) => {
             await contentSharing.shareAnnotations({
                 annotationUrls,
-                shareToLists: true,
+                shareToParentPageLists: true,
             })
             const remoteIds = await contentSharing.storage.getRemoteAnnotationIds(
                 {
@@ -178,7 +178,7 @@ export function getTemplateDataFetchers({
             )
             await contentSharing.shareAnnotations({
                 annotationUrls,
-                shareToLists: true,
+                shareToParentPageLists: true,
             })
             const pairs = await Promise.all(
                 Object.keys(notes).map(async (normalizedPageUrl) => [

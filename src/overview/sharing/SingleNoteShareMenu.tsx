@@ -131,7 +131,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         const { annotationUrl, contentSharingBG } = this.props
         await contentSharingBG.shareAnnotation({
             annotationUrl,
-            shareToLists: true,
+            shareToParentPageLists: true,
             skipPrivacyLevelUpdate: true,
         })
 
@@ -154,7 +154,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         const { annotationUrl, contentSharingBG } = this.props
         await contentSharingBG.shareAnnotation({
             annotationUrl,
-            shareToLists: false,
+            shareToParentPageLists: false,
             skipPrivacyLevelUpdate: true,
         })
 

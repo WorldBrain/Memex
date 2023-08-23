@@ -29,7 +29,7 @@ export interface ContentSharingInterface
     waitForListShare(params: { localListId: number }): Promise<void>
     shareAnnotations(options: {
         annotationUrls: string[]
-        shareToLists?: boolean
+        shareToParentPageLists?: boolean
         setBulkShareProtected?: boolean
     }): Promise<{ sharingStates: AnnotationSharingStates }>
     unshareAnnotations(options: {

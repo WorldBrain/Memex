@@ -2043,6 +2043,50 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
+    private handleNameEditInputKeyDown: React.KeyboardEventHandler = async (
+        event,
+    ) => {
+        const selectedList = this.props.annotationsCache.lists.byId[
+            this.props.selectedListId
+        ]
+
+        const nativeEvent = event.nativeEvent as KeyboardEvent
+
+        nativeEvent.stopImmediatePropagation()
+
+        event.stopPropagation()
+        if (event.key === 'Enter') {
+            const inputValue = (event.target as HTMLInputElement).value
+
+            if (selectedList.name !== inputValue) {
+                this.props.updateListName(
+                    selectedList.unifiedId,
+                    selectedList.localId,
+                    selectedList.name,
+                    inputValue,
+                )
+            }
+            this.setState({
+                spaceTitleEditState: false,
+                spaceTitleEditValue: null,
+            })
+        } else if (event.key === 'Escape') {
+            event.stopPropagation()
+            this.setState({
+                spaceTitleEditState: false,
+                spaceTitleEditValue: selectedList.name,
+            })
+        } else if (event.key === 'space') {
+            this.setState({
+                spaceTitleEditValue: this.state.spaceTitleEditState + ' ',
+            })
+            event.stopPropagation()
+        }
+
+        // If we don't have this, events will bubble up into the page!
+        event.stopPropagation()
+    }
+
     private renderSelectedListTopBar() {
         const { selectedListId, annotationsCache } = this.props
         if (!selectedListId || !annotationsCache.lists.byId[selectedListId]) {
@@ -2126,29 +2170,7 @@ export class AnnotationsSidebar extends React.Component<
                                 spaceTitleEditValue: event.target.value,
                             })
                         }}
-                        onKeyPress={(event) => {
-                            if (event.key === 'Enter') {
-                                if (selectedList.name !== event.target.value) {
-                                    this.props.updateListName(
-                                        selectedList.unifiedId,
-                                        selectedList.localId,
-                                        selectedList.name,
-                                        event.target.value,
-                                    )
-                                }
-                                this.setState({
-                                    spaceTitleEditState: false,
-                                    spaceTitleEditValue: null,
-                                })
-                            } else if (event.key === 'Escape') {
-                                event.stopPropagation()
-                                event.preventDefault()
-                                this.setState({
-                                    spaceTitleEditState: false,
-                                    spaceTitleEditValue: selectedList.name,
-                                })
-                            }
-                        }}
+                        onKeyPress={this.handleNameEditInputKeyDown}
                         autoFocus
                     />
                 ) : (
@@ -2438,28 +2460,7 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private sidebarRef = React.createRef<HTMLDivElement>()
-
     render() {
-        if (this.sidebarRef.current != null) {
-            this.sidebarRef?.current.addEventListener(
-                'keydown',
-                function (event) {
-                    console.log('Key pressed:', event.key)
-
-                    // Prevents the event from bubbling up or capturing down
-                    event.stopPropagation()
-
-                    // Prevents any other event listeners on the same element from being executed
-                    event.stopImmediatePropagation()
-
-                    // Optional: prevent the default action associated with the event (like typing in an input)
-                    // event.preventDefault()
-                },
-                true,
-            )
-        }
-
         return (
             <ResultBodyContainer
                 ref={this.sidebarRef}

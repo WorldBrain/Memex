@@ -60,7 +60,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                 sharingStates,
             } = await this.props.contentSharingBG.shareAnnotations({
                 annotationUrls: this.annotationUrls,
-                shareToLists: true,
+                shareToParentPageLists: true,
             })
             this.props.postBulkShareHook?.(sharingStates)
         } catch (err) {}

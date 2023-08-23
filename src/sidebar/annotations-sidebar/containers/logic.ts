@@ -593,6 +593,38 @@ export class SidebarContainerLogic extends UILogic<
                             .flat(),
                     ),
             },
+            conversations: {
+                $apply: (prev: SidebarContainerState['conversations']) => {
+                    return fromPairs(
+                        normalizedStateToArray(nextAnnotations)
+                            .map((annot) => {
+                                if (annot.remoteId == null) {
+                                    return null
+                                }
+                                return annot.unifiedListIds
+                                    .map((listId) => {
+                                        const listData = this.options
+                                            .annotationsCache.lists.byId[listId]
+                                        if (listData.remoteId == null) {
+                                            return null
+                                        }
+                                        const conversationId = generateAnnotationCardInstanceId(
+                                            annot,
+                                            listId,
+                                        )
+                                        return [
+                                            conversationId,
+                                            prev[conversationId] ??
+                                                getInitialAnnotationConversationState(),
+                                        ]
+                                    })
+                                    .filter((a) => a != null)
+                            })
+                            .filter((a) => a != null)
+                            .flat(),
+                    )
+                },
+            },
         })
     }
 
@@ -1208,16 +1240,26 @@ export class SidebarContainerLogic extends UILogic<
                 return
             }
 
+            // A bunch of side-effects occur based on the types of lists this annotation will be a part of, and there's
+            //  a bunch of different IDs for lists, thus we gotta group these here to decide things further on in this logic
+            const remoteListIds: string[] = []
             const localListIds = [...commentBox.lists]
+            const unifiedListIds: UnifiedList['unifiedId'][] = []
             const maybeAddLocalListIdForCacheList = (
                 unifiedListId?: UnifiedList['unifiedId'],
             ) => {
-                if (unifiedListId != null) {
-                    const { localId } = lists.byId[unifiedListId]
-                    if (localId != null) {
-                        localListIds.push(localId)
-                    }
+                if (unifiedListId == null) {
+                    return
                 }
+
+                const { localId, remoteId } = lists.byId[unifiedListId]
+                if (localId != null) {
+                    localListIds.push(localId)
+                }
+                if (remoteId != null) {
+                    remoteListIds.push(remoteId)
+                }
+                unifiedListIds.push(unifiedListId)
             }
 
             let title: string | null = null
@@ -1230,6 +1272,17 @@ export class SidebarContainerLogic extends UILogic<
                 maybeAddLocalListIdForCacheList(selectedListId)
             }
             maybeAddLocalListIdForCacheList(event.listInstanceId)
+
+            let privacyLevel: AnnotationPrivacyLevels
+            if (remoteListIds.length) {
+                privacyLevel = event.shouldShare
+                    ? AnnotationPrivacyLevels.SHARED
+                    : AnnotationPrivacyLevels.PROTECTED
+            } else {
+                privacyLevel = event.shouldShare
+                    ? AnnotationPrivacyLevels.SHARED
+                    : AnnotationPrivacyLevels.PRIVATE
+            }
 
             const { remoteAnnotationId, savePromise } = await createAnnotation({
                 annotationData: {
@@ -1244,8 +1297,9 @@ export class SidebarContainerLogic extends UILogic<
                 contentSharingBG: this.options.contentSharingBG,
                 skipListExistenceCheck:
                     previousState.hasListDataBeenManuallyPulled,
+                privacyLevelOverride: privacyLevel,
                 shareOpts: {
-                    shouldShare: event.shouldShare,
+                    shouldShare: remoteListIds.length > 0 || event.shouldShare,
                     shouldCopyShareLink: event.shouldShare,
                     isBulkShareProtected: event.isProtected,
                 },
@@ -1255,16 +1309,31 @@ export class SidebarContainerLogic extends UILogic<
                 localId: annotationId,
                 remoteId: remoteAnnotationId ?? undefined,
                 normalizedPageUrl: normalizeUrl(fullPageUrl),
-                privacyLevel: shareOptsToPrivacyLvl({
-                    shouldShare: event.shouldShare,
-                    isBulkShareProtected: event.isProtected,
-                }),
                 creator: this.options.getCurrentUser(),
                 createdWhen: now,
                 lastEdited: now,
-                localListIds,
+                privacyLevel,
+                // These only contain lists added in the UI dropdown (to be checked in case any are shared, which should influence the annot privacy level)
+                localListIds: [...commentBox.lists],
+                unifiedListIds, // These contain the context list (selected list or list instance)
                 comment,
             })
+
+            if (remoteAnnotationId != null && remoteListIds.length > 0) {
+                this.emitMutation({
+                    conversations: {
+                        $merge: fromPairs(
+                            remoteListIds.map((remoteId) => [
+                                this.buildConversationId(remoteAnnotationId, {
+                                    type: 'shared-list-reference',
+                                    id: remoteId,
+                                }),
+                                getInitialAnnotationConversationState(),
+                            ]),
+                        ),
+                    },
+                })
+            }
 
             await savePromise
         })
