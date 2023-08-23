@@ -2790,9 +2790,6 @@ describe('SidebarContainerLogic', () => {
                     now: () => Date.now(),
                 })
 
-                const conversationsBefore = Object.keys(
-                    sidebar.state.conversations,
-                ).length
                 expect(
                     await device.storageManager
                         .collection('annotationPrivacyLevels')
@@ -2808,6 +2805,10 @@ describe('SidebarContainerLogic', () => {
                         .collection('annotListEntries')
                         .findAllObjects({ url: localAnnotId }),
                 ).toEqual([])
+
+                const conversationsBefore = Object.keys(
+                    sidebar.state.conversations,
+                ).length
 
                 await sidebar.processEvent('saveNewPageNote', {
                     annotationId: localAnnotId,
@@ -2949,7 +2950,7 @@ describe('SidebarContainerLogic', () => {
                     annotationType: 'shared',
                     listType: 'private',
                     expectedAnnotationData: {
-                        hasNewConversationState: false,
+                        hasNewConversationState: true,
                         isSharedToPageLists: true,
                         isRemotelyAvailable: true,
                         hasLocalListEntry: true,

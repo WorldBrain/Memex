@@ -593,6 +593,38 @@ export class SidebarContainerLogic extends UILogic<
                             .flat(),
                     ),
             },
+            conversations: {
+                $apply: (prev: SidebarContainerState['conversations']) => {
+                    return fromPairs(
+                        normalizedStateToArray(nextAnnotations)
+                            .map((annot) => {
+                                if (annot.remoteId == null) {
+                                    return null
+                                }
+                                return annot.unifiedListIds
+                                    .map((listId) => {
+                                        const listData = this.options
+                                            .annotationsCache.lists.byId[listId]
+                                        if (listData.remoteId == null) {
+                                            return null
+                                        }
+                                        const conversationId = generateAnnotationCardInstanceId(
+                                            annot,
+                                            listId,
+                                        )
+                                        return [
+                                            conversationId,
+                                            prev[conversationId] ??
+                                                getInitialAnnotationConversationState(),
+                                        ]
+                                    })
+                                    .filter((a) => a != null)
+                            })
+                            .filter((a) => a != null)
+                            .flat(),
+                    )
+                },
+            },
         })
     }
 
@@ -1287,7 +1319,7 @@ export class SidebarContainerLogic extends UILogic<
                 comment,
             })
 
-            if (remoteAnnotationId != null) {
+            if (remoteAnnotationId != null && remoteListIds.length > 0) {
                 this.emitMutation({
                     conversations: {
                         $merge: fromPairs(

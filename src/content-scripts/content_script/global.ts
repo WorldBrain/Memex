@@ -273,11 +273,15 @@ export async function main(
             })
 
             const localListIds: number[] = []
+            const remoteListIds: string[] = []
             if (inPageUI.selectedList) {
                 const selectedList =
                     annotationsCache.lists.byId[inPageUI.selectedList]
                 if (selectedList.localId != null) {
                     localListIds.push(selectedList.localId)
+                }
+                if (selectedList.remoteId != null) {
+                    remoteListIds.push(selectedList.remoteId)
                 }
             }
 
@@ -295,9 +299,13 @@ export async function main(
             })
 
             const createPromise = (async () => {
-                const { savePromise } = await createAnnotation({
+                const {
+                    savePromise,
+                    remoteAnnotationId,
+                } = await createAnnotation({
                     shareOpts: {
-                        shouldShare: data.shouldShare,
+                        shouldShare:
+                            remoteListIds.length > 0 || data.shouldShare,
                         shouldCopyShareLink: data.shouldShare,
                     },
                     annotationsBG,
@@ -314,6 +322,17 @@ export async function main(
                         createdWhen: new Date(data.createdWhen),
                     },
                 })
+
+                if (remoteAnnotationId != null) {
+                    const cachedAnnotation =
+                        annotationsCache.annotations.byId[unifiedId]
+                    annotationsCache.updateAnnotation({
+                        unifiedId,
+                        remoteId: remoteAnnotationId,
+                        privacyLevel: cachedAnnotation.privacyLevel,
+                        unifiedListIds: cachedAnnotation.unifiedListIds,
+                    })
+                }
                 await savePromise
             })()
             return { annotationId: unifiedId, localId: localId, createPromise }
