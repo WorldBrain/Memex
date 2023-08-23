@@ -713,6 +713,14 @@ export async function main(
                 if (spacesBar) {
                     spacesBar.remove()
                 }
+
+                const textField = document.getElementsByClassName(
+                    'input-message-input',
+                )[0]
+                if (textField) {
+                    textField.classList.add('mousetrap')
+                }
+
                 const lists = await collectionsBG.fetchPageListEntriesByUrl({
                     url: window.location.href,
                 })
