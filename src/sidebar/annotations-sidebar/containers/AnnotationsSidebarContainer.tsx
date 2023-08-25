@@ -961,7 +961,6 @@ export class AnnotationsSidebarContainer<
                             isDataLoading={
                                 this.state.remoteAnnotationsLoadState ===
                                     'running' ||
-                                this.state.loadState === 'running' ||
                                 this.state.cacheLoadState === 'running'
                             }
                             theme={this.props.theme}
