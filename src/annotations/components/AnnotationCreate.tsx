@@ -19,6 +19,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { type } from 'openpgp'
 
 interface State {
     isTagPickerShown: boolean
@@ -43,6 +44,7 @@ export interface AnnotationCreateEventProps {
 export interface AnnotationCreateGeneralProps {
     hide?: () => void
     autoFocus?: boolean
+    focusEditForm?: boolean
     comment: string
     lists: number[]
     hoverState: NoteResultHoverState
@@ -96,6 +98,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         id: number
         name: string | JSX.Element
         isShared: boolean
+        type: 'page-link' | 'user-list' | 'special-list'
     }> {
         return this.props.lists.map((id) => ({
             id,
@@ -131,7 +134,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         isProtected?: boolean,
     ) => {
         const saveP = this.props.onSave(shouldShare, isProtected)
-        this.setState({ toggleShowTutorial: false })
+        this.setState({ toggleShowTutorial: false, onEditClick: false })
 
         this.editor?.resetState()
 
@@ -144,6 +147,7 @@ export class AnnotationCreate extends React.Component<Props, State>
             if (this.props.comment.length) {
                 e.stopPropagation()
             }
+            this.setState({ onEditClick: false })
             this.props.onCancel()
             return
         }
@@ -176,9 +180,9 @@ export class AnnotationCreate extends React.Component<Props, State>
                 return this.handleSave(true, true)
             }
 
-            if (e.key === 'Enter' && e.altKey) {
-                return this.handleSave(false, true)
-            }
+            // if (e.key === 'Enter' && e.altKey) {
+            //     return this.handleSave(false, true)
+            // }
 
             if (e.key === 'Enter' && e.ctrlKey) {
                 return this.handleSave(false, false)
@@ -263,7 +267,7 @@ export class AnnotationCreate extends React.Component<Props, State>
             <>
                 <TextBoxContainerStyled>
                     <EditorContainer>
-                        {this.state.onEditClick ? (
+                        {this.state.onEditClick || this.props.autoFocus ? (
                             <MemexEditor
                                 onKeyDown={this.handleInputKeyDown}
                                 onContentUpdate={(content) =>

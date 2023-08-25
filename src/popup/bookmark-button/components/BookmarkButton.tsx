@@ -18,6 +18,7 @@ const buttonStyles = require('../../components/Button.css')
 
 export interface OwnProps {
     closePopup: () => void
+    pageUrl: string
 }
 
 interface StateProps {
@@ -57,7 +58,7 @@ class BookmarkButton extends PureComponent<Props> {
     }
 
     render() {
-        const text = this.props.isBookmarked ? 'Page Saved!' : 'Quick Save Page'
+        const text = this.props.isBookmarked ? 'Page Saved!' : 'Save Page'
 
         return (
             <ButtonItem
@@ -143,6 +144,7 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
 
             if (allowed) {
                 e.preventDefault()
+
                 await dispatch(acts.toggleBookmark())
             }
         }

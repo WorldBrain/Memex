@@ -1,4 +1,4 @@
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 import * as DATA from './index.test.data'
 import { PageUrlsByDay, AnnotationsSearchResponse } from './types'

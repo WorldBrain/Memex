@@ -78,7 +78,11 @@ class EntryRow extends React.Component<Props> {
                         </TooltipBox>
                     )}
                 </NameWrapper>
-                <IconStyleWrapper>
+                <IconStyleWrapper
+                    onClick={(e) => {
+                        e.stopPropagation()
+                    }}
+                >
                     {focused && this.props.onContextMenuBtnPress != null && (
                         <TooltipBox
                             tooltipText={'Share & Edit Space'}
@@ -87,8 +91,8 @@ class EntryRow extends React.Component<Props> {
                         >
                             <ButtonContainer ref={contextMenuBtnRef}>
                                 <Icon
-                                    filePath={icons.dots}
-                                    heightAndWidth="14px"
+                                    filePath={icons.invite}
+                                    heightAndWidth="20px"
                                     onClick={this.handleContextMenuBtnPress}
                                 />
                             </ButtonContainer>
@@ -116,7 +120,7 @@ class EntryRow extends React.Component<Props> {
                                     tooltipText={
                                         this.props.actOnAllTooltipText ?? ''
                                     }
-                                    placement="top"
+                                    placement="bottom"
                                 >
                                     <Icon
                                         filePath={icons.multiEdit}
@@ -176,9 +180,10 @@ const SelectionBox = styled.div<{ selected }>`
 
 export const IconStyleWrapper = styled.div`
     display: flex;
-    grid-gap: 10px;
+    grid-gap: 15px;
     align-items: center;
     justify-content: flex-end;
+    height: 100%;
 `
 
 const Row = styled.div<{ isFocused; zIndex }>`

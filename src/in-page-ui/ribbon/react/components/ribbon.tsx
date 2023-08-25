@@ -35,6 +35,7 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator'
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 import { logoNoText } from 'src/common-ui/components/design-library/icons'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -183,6 +184,9 @@ export default class Ribbon extends Component<Props, State> {
             this.props.sidebar.openSidebar({})
         }
     }
+    private handleSharePageAction = (event) => {
+        this.props.sidebar.sharePage()
+    }
 
     private getTooltipText(name: string): JSX.Element | string {
         const elData = this.shortcutsData.get(name)
@@ -222,6 +226,11 @@ export default class Ribbon extends Component<Props, State> {
     private renderSpacePicker() {
         if (!this.props.lists.showListsPicker) {
             return
+        }
+
+        let pageTitle
+        if (window.location.href.includes('web.telegram.org')) {
+            pageTitle = getTelegramUserDisplayName(document)
         }
 
         const topRight = this.props.ribbonPosition === 'topRight'
@@ -337,7 +346,76 @@ export default class Ribbon extends Component<Props, State> {
                             />
                         </ChatBox>
                     ) : (
-                        <>
+                        <SupportContainerBox>
+                            <TutorialContainerBox>
+                                <PrimaryAction
+                                    onClick={() =>
+                                        this.setState({
+                                            renderLiveChat: true,
+                                        })
+                                    }
+                                    label={'Chat with us'}
+                                    icon={'chatWithUs'}
+                                    type={'forth'}
+                                    size={'medium'}
+                                    fullWidth
+                                    height="40px"
+                                    iconPosition="left"
+                                />
+                                <SupportBox>
+                                    {/* <ExtraButtonRow
+                                        onClick={() =>
+                                            this.setState({
+                                                renderFeedback: true,
+                                            })
+                                        }
+                                    >
+                                        <Icon
+                                            filePath={icons.sadFace}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>
+                                            Feature Requests & Bugs
+                                        </InfoText>
+                                    </ExtraButtonRow> */}
+                                    <ExtraButtonRow
+                                        onClick={async () => {
+                                            this.setState({
+                                                renderChangeLog: true,
+                                                updatesAvailable: false,
+                                            })
+                                            await this.setUpdateFlagToRead()
+                                        }}
+                                    >
+                                        <Icon
+                                            filePath={icons.clock}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>What's new?</InfoText>
+                                        {this.state.updatesAvailable && (
+                                            <UpdateAvailablePill>
+                                                New Updates
+                                            </UpdateAvailablePill>
+                                        )}
+                                    </ExtraButtonRow>
+                                    <ExtraButtonRow
+                                        onClick={() =>
+                                            window.open(
+                                                'https://tutorials.memex.garden/tutorials',
+                                            )
+                                        }
+                                    >
+                                        <Icon
+                                            filePath={icons.helpIcon}
+                                            heightAndWidth="22px"
+                                            hoverOff
+                                        />
+                                        <InfoText>All Tutorials</InfoText>
+                                    </ExtraButtonRow>
+                                </SupportBox>
+                            </TutorialContainerBox>
                             <TutorialContainerBox>
                                 <SectionTitle>Settings</SectionTitle>
                                 <SupportBox>
@@ -468,76 +546,7 @@ export default class Ribbon extends Component<Props, State> {
                                     </ExtraButtonRow>
                                 </SupportBox>
                             </TutorialContainerBox>
-                            <TutorialContainerBox>
-                                <SectionTitle>Support</SectionTitle>
-                                <SupportBox>
-                                    <ExtraButtonRow
-                                        onClick={() =>
-                                            this.setState({
-                                                renderFeedback: true,
-                                            })
-                                        }
-                                    >
-                                        <Icon
-                                            filePath={icons.sadFace}
-                                            heightAndWidth="22px"
-                                            hoverOff
-                                        />
-                                        <InfoText>
-                                            Feature Requests & Bugs
-                                        </InfoText>
-                                    </ExtraButtonRow>
-                                    <ExtraButtonRow
-                                        onClick={async () => {
-                                            this.setState({
-                                                renderChangeLog: true,
-                                                updatesAvailable: false,
-                                            })
-                                            await this.setUpdateFlagToRead()
-                                        }}
-                                    >
-                                        <Icon
-                                            filePath={icons.clock}
-                                            heightAndWidth="22px"
-                                            hoverOff
-                                        />
-                                        <InfoText>What's new?</InfoText>
-                                        {this.state.updatesAvailable && (
-                                            <UpdateAvailablePill>
-                                                New Updates
-                                            </UpdateAvailablePill>
-                                        )}
-                                    </ExtraButtonRow>
-                                    <ExtraButtonRow
-                                        onClick={() =>
-                                            this.setState({
-                                                renderLiveChat: true,
-                                            })
-                                        }
-                                    >
-                                        <Icon
-                                            filePath={icons.chatWithUs}
-                                            heightAndWidth="22px"
-                                            hoverOff
-                                        />
-                                        <InfoText>Live Chat Support</InfoText>
-                                    </ExtraButtonRow>
-                                    <ExtraButtonRow
-                                        onClick={() =>
-                                            window.open(
-                                                'https://tutorials.memex.garden/tutorials',
-                                            )
-                                        }
-                                    >
-                                        <Icon
-                                            filePath={icons.helpIcon}
-                                            heightAndWidth="22px"
-                                            hoverOff
-                                        />
-                                        <InfoText>All Tutorials</InfoText>
-                                    </ExtraButtonRow>
-                                </SupportBox>
-                            </TutorialContainerBox>
+
                             <QuickTutorial
                                 getKeyboardShortcutsState={
                                     getKeyboardShortcutsState
@@ -549,7 +558,7 @@ export default class Ribbon extends Component<Props, State> {
                                 }
                                 hideEditorTutorials
                             />
-                        </>
+                        </SupportContainerBox>
                     )}
                 </SupportContainer>
             </PopoutBox>
@@ -673,70 +682,6 @@ export default class Ribbon extends Component<Props, State> {
         }
     }
 
-    renderCommentBox() {
-        if (!this.props.commentBox.showCommentBox) {
-            return
-        }
-
-        const topRight = this.props.ribbonPosition === 'topRight'
-        const bottomRight = this.props.ribbonPosition === 'bottomRight'
-
-        return (
-            <PopoutBox
-                targetElementRef={this.sidebarButtonRef.current}
-                placement={
-                    this.props.sidebar.isSidebarOpen
-                        ? 'left'
-                        : topRight
-                        ? 'bottom'
-                        : bottomRight
-                        ? 'top'
-                        : 'left-start'
-                }
-                offsetX={
-                    topRight ||
-                    (bottomRight && !this.props.sidebar.isSidebarOpen)
-                        ? 18
-                        : 10
-                }
-            >
-                <CommentBoxContainer
-                    hasComment={this.props.commentBox.commentText.length > 0}
-                >
-                    <AnnotationCreate
-                        ref={(ref) => (this.annotationCreateRef = ref)}
-                        hide={() =>
-                            this.props.commentBox.setShowCommentBox(false)
-                        }
-                        onSave={this.props.commentBox.saveComment}
-                        onCancel={this.props.commentBox.cancelComment}
-                        onCommentChange={this.props.commentBox.changeComment}
-                        comment={this.props.commentBox.commentText}
-                        lists={this.props.commentBox.lists}
-                        getListDetailsById={this.props.getListDetailsById}
-                        isRibbonCommentBox
-                        autoFocus
-                        renderSpacePicker={() => (
-                            <CollectionPicker
-                                showPageLinks
-                                shouldHydrateCacheOnInit
-                                localStorageAPI={browser.storage.local}
-                                selectEntry={this.props.lists.selectEntry}
-                                unselectEntry={this.props.lists.unselectEntry}
-                                createNewEntry={this.props.lists.createNewEntry}
-                                pageActivityIndicatorBG={
-                                    this.props.pageActivityIndicatorBG
-                                }
-                                contentSharingBG={this.props.contentSharingBG}
-                                spacesBG={this.props.spacesBG}
-                                authBG={this.props.authBG}
-                            />
-                        )}
-                    />
-                </CommentBoxContainer>
-            </PopoutBox>
-        )
-    }
     renderRemoveMenu() {
         if (!this.props.showRemoveMenu) {
             return
@@ -1151,7 +1096,7 @@ export default class Ribbon extends Component<Props, State> {
 
         return (
             <TooltipBox
-                tooltipText={this.getTooltipText('addToCollection')}
+                tooltipText={this.getTooltipText('sharePage')}
                 placement={
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
@@ -1285,6 +1230,42 @@ export default class Ribbon extends Component<Props, State> {
                                 }
                             </SpacesCounter>
                         )}
+                    </IconBox>
+                )}
+            </TooltipBox>
+        )
+    }
+    renderSharePageButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+
+        return (
+            <TooltipBox
+                targetElementRef={this.sidebarButtonRef.current}
+                tooltipText={this.getTooltipText('sharePage')}
+                placement={topRight ? 'top' : bottomRight ? 'bottom' : 'left'}
+                offsetX={10}
+            >
+                {(topRight || bottomRight) &&
+                !this.props.sidebar.isSidebarOpen ? (
+                    <IconBox onClick={(e) => this.handleSharePageAction(e)}>
+                        <PrimaryAction
+                            size={'medium'}
+                            type="tertiary"
+                            label={'Share Page'}
+                            fontColor={'greyScale7'}
+                            onClick={null}
+                            icon={'invite'}
+                        />
+                    </IconBox>
+                ) : (
+                    <IconBox onClick={(e) => this.handleSharePageAction(e)}>
+                        <Icon
+                            color={'greyScale6'}
+                            heightAndWidth="20px"
+                            filePath={'peopleFine'}
+                            containerRef={this.sidebarButtonRef}
+                        />
                     </IconBox>
                 )}
             </TooltipBox>
@@ -1697,6 +1678,10 @@ export default class Ribbon extends Component<Props, State> {
                                                     this.renderAItriggerButton()}
                                                 {!this.props.sidebar
                                                     .isSidebarOpen &&
+                                                    this.renderSharePageButton()}
+
+                                                {!this.props.sidebar
+                                                    .isSidebarOpen &&
                                                     this.renderSidebarToggle()}
 
                                                 {this.renderSpacesButton()}
@@ -1712,7 +1697,6 @@ export default class Ribbon extends Component<Props, State> {
                     {this.renderSpacePicker()}
                     {this.renderTutorial()}
                     {this.renderFeedInfo()}
-                    {this.renderCommentBox()}
                     {this.renderRemoveMenu()}
                 </>
             )
@@ -1811,7 +1795,6 @@ export default class Ribbon extends Component<Props, State> {
                 {this.renderSpacePicker()}
                 {this.renderTutorial()}
                 {this.renderFeedInfo()}
-                {this.renderCommentBox()}
                 {this.renderRemoveMenu()}
             </>
         )
@@ -1894,7 +1877,7 @@ const IconContainer = styled.div<{ ribbonPosition }>`
     grid-gap: 5px;
     height: 100%;
     width: fit-content;
-    background: ${(props) => props.theme.colors.greyScale1}90;
+    background: ${(props) => props.theme.colors.greyScale1}95;
     backdrop-filter: blur(4px);
 
     ${(props) =>
@@ -1911,6 +1894,11 @@ const IconContainer = styled.div<{ ribbonPosition }>`
 `
 
 const SupportContainer = styled.div`
+    max-height: 600px;
+    height: fit-content;
+    overflow: scroll;
+`
+const SupportContainerBox = styled.div`
     max-height: 600px;
     height: fit-content;
     overflow: scroll;
@@ -1933,6 +1921,7 @@ const SupportBox = styled.div`
     display: flex;
     flex-direction: column;
     margin-top: 10px;
+    grid-gap: 5px;
 `
 
 const RemoveMenuContainer = styled.div<{
@@ -2379,7 +2368,6 @@ const ExtraButtonRow = styled.div<{ deactivateHover }>`
     cursor: pointer;
     border-radius: 3px;
     padding: 0 10px;
-    margin: 0 -5px;
     position: relative;
 
     &:hover {
@@ -2411,7 +2399,7 @@ const VerticalLine = styled.div<{ sidebaropen: boolean }>`
 
 const PageAction = styled.div<{ ribbonPosition; isSidebarOpen }>`
     display: grid;
-    grid-gap: 10px;
+    grid-gap: 5px;
     grid-auto-flow: row;
     align-items: center;
     justify-content: center;
@@ -2518,6 +2506,7 @@ const SectionTitle = styled.div`
     font-weight: bold;
     justify-content: space-between;
     align-items: center;
+    margin-top: 20px;
 `
 const SectionDescription = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};

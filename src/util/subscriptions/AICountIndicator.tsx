@@ -15,6 +15,7 @@ import { COUNTER_STORAGE_KEY, DEFAULT_COUNTER_STORAGE_KEY } from './constants'
 
 export interface Props {
     syncSettingsBG: RemoteSyncSettingsInterface
+    position?: 'top' | 'bottom'
 }
 
 interface State {
@@ -33,7 +34,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
     state: State = {
         currentCount: DEFAULT_COUNTER_STORAGE_KEY.cQ,
         totalCount: DEFAULT_COUNTER_STORAGE_KEY.sQ,
-        shouldShow: false,
+        shouldShow: true,
         showTooltip: false,
         openAIKey: '',
         showSaveButton: false,
@@ -59,7 +60,6 @@ export class AICounterIndicator extends React.Component<Props, State> {
             })
         }
 
-        this.setState({ shouldShow: true })
         browser.storage.onChanged.addListener(this.counterStorageListener)
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
 
@@ -140,7 +140,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                             <strong>
                                                 {this.leftOverBlocks}
                                             </strong>{' '}
-                                            AI requests left
+                                            AI requests left this month
                                         </InfoTooltipTitle>
                                         <InfoTooltipSubTitle>
                                             Resets on the 1st of every month
@@ -263,12 +263,12 @@ export class AICounterIndicator extends React.Component<Props, State> {
             return this.state.totalCount < 10000 &&
                 this.state.openAIKey?.length === 0 ? (
                 <TooltipBox
-                    placement="top"
+                    placement={this.props.position === 'top' ? 'bottom' : 'top'}
                     tooltipText={
                         <TooltipTextContainer>
                             <TooltipTextTop>
                                 You have <strong>{this.leftOverBlocks}</strong>{' '}
-                                queries left
+                                queries left this month
                             </TooltipTextTop>
                             <TooltipTextBottom>
                                 Click for more info
@@ -287,7 +287,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                 </TooltipBox>
             ) : (
                 <TooltipBox
-                    placement="top"
+                    placement="bottom"
                     tooltipText={
                         <TooltipTextContainer>
                             <TooltipTextTop>Change your API key</TooltipTextTop>
@@ -348,12 +348,15 @@ const TooltipTextTop = styled.div`
 
 const TooltipTextBottom = styled.div`
     display: flex;
+    text-align: center;
+    width: 100%;
+    justify-content: center;
 `
 
 const TooltipTextContainer = styled.div`
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     white-space: nowrap;
     width: fit-content;

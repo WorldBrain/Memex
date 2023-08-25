@@ -86,10 +86,10 @@ export class AnnotationsSidebarContainer<
                 ...props,
                 analytics,
                 copyToClipboard,
-                focusCreateForm: () =>
-                    (this.sidebarRef?.current[
-                        'instanceRef'
-                    ] as AnnotationsSidebarComponent)?.focusCreateForm(),
+                focusCreateForm: () => {
+                    ;(this.sidebarRef
+                        ?.current as AnnotationsSidebarComponent)?.focusCreateForm()
+                },
                 focusEditNoteForm: (annotationId) => {
                     ;(this.sidebarRef?.current[
                         'instanceRef'
@@ -141,6 +141,7 @@ export class AnnotationsSidebarContainer<
             name: list?.name ?? 'Missing list',
             isShared: list?.remoteId != null,
             description: list?.description,
+            type: list?.type ?? null,
         }
     }
 
@@ -590,8 +591,11 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderAICounter = () => (
-        <AICounterIndicator syncSettingsBG={this.props.syncSettingsBG} />
+    private renderAICounter = (position) => (
+        <AICounterIndicator
+            position={position}
+            syncSettingsBG={this.props.syncSettingsBG}
+        />
     )
 
     protected renderTopBanner() {
@@ -895,6 +899,22 @@ export class AnnotationsSidebarContainer<
                                     null,
                                 )
                             }}
+                            updateListName={async (
+                                unifiedListId,
+                                localId,
+                                oldName,
+                                newName,
+                            ) => {
+                                this.processEvent('editListName', {
+                                    unifiedListId: unifiedListId,
+                                    newName,
+                                })
+                                await this.props.customListsBG.updateListName({
+                                    id: localId,
+                                    oldName: oldName,
+                                    newName: newName,
+                                })
+                            }}
                             updatePromptState={(prompt) => {
                                 this.processEvent('updatePromptState', {
                                     prompt,
@@ -941,11 +961,12 @@ export class AnnotationsSidebarContainer<
                             isDataLoading={
                                 this.state.remoteAnnotationsLoadState ===
                                     'running' ||
-                                this.state.loadState === 'running' ||
                                 this.state.cacheLoadState === 'running'
                             }
                             theme={this.props.theme}
-                            renderAICounter={this.renderAICounter}
+                            renderAICounter={(position) =>
+                                this.renderAICounter(position)
+                            }
                             renderCopyPasterForAnnotation={
                                 this.renderCopyPasterManagerForAnnotation
                             }
@@ -962,12 +983,12 @@ export class AnnotationsSidebarContainer<
                                     disableWriteOps={
                                         this.state.hasListDataBeenManuallyPulled
                                     }
-                                    onConfirmSpaceNameEdit={(newName) =>
+                                    onConfirmSpaceNameEdit={(newName) => {
                                         this.processEvent('editListName', {
                                             unifiedListId: listData.unifiedId,
                                             newName,
                                         })
-                                    }
+                                    }}
                                     onSpaceShare={(remoteListId) =>
                                         this.processEvent('shareList', {
                                             unifiedListId: listData.unifiedId,

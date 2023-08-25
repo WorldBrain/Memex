@@ -4,6 +4,7 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import type { Anchor } from 'src/highlighting/types'
 import { copyToClipboard } from './content_script/utils'
 import { shareOptsToPrivacyLvl } from './utils'
+import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
@@ -36,6 +37,7 @@ export interface SaveAnnotationParams<
     skipPageIndexing?: boolean
     keepListsIfUnsharing?: boolean
     skipListExistenceCheck?: boolean
+    privacyLevelOverride?: AnnotationPrivacyLevels
 }
 
 export interface SaveAnnotationReturnValue {
@@ -43,13 +45,13 @@ export interface SaveAnnotationReturnValue {
     savePromise: Promise<string>
 }
 
-// TODO: Allow this function to return the generated annotation URL before the Promise resolves
 export async function createAnnotation({
     annotationData,
     annotationsBG,
     contentSharingBG,
     skipPageIndexing,
     skipListExistenceCheck,
+    privacyLevelOverride,
     shareOpts,
 }: SaveAnnotationParams<AnnotationCreateData>): Promise<
     SaveAnnotationReturnValue
@@ -59,7 +61,11 @@ export async function createAnnotation({
         remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
 
         if (shareOpts.shouldCopyShareLink) {
-            await copyToClipboard(getNoteShareUrl({ remoteAnnotationId }))
+            try {
+                await copyToClipboard(getNoteShareUrl({ remoteAnnotationId }))
+            } catch (e) {
+                console.error(e)
+            }
         }
     }
 
@@ -87,14 +93,15 @@ export async function createAnnotation({
                 await contentSharingBG.shareAnnotation({
                     annotationUrl,
                     remoteAnnotationId,
-                    shareToLists: true,
+                    shareToParentPageLists: false,
                     skipPrivacyLevelUpdate: true,
                 })
             }
 
             await contentSharingBG.setAnnotationPrivacyLevel({
                 annotationUrl,
-                privacyLevel: shareOptsToPrivacyLvl(shareOpts),
+                privacyLevel:
+                    privacyLevelOverride ?? shareOptsToPrivacyLvl(shareOpts),
             })
 
             if (annotationData.localListIds?.length) {
@@ -153,7 +160,7 @@ export async function updateAnnotation({
                     contentSharingBG.shareAnnotation({
                         remoteAnnotationId,
                         annotationUrl: annotationData.localId,
-                        shareToLists: true,
+                        shareToParentPageLists: true,
                     }),
                 !shareOpts?.skipPrivacyLevelUpdate &&
                     contentSharingBG.setAnnotationPrivacyLevel({

@@ -78,14 +78,15 @@ import initSentry, { captureException } from 'src/util/raven'
 import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
 import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
-import {
-    generateAnnotationUrl,
-    shareOptsToPrivacyLvl,
-} from 'src/annotations/utils'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { generateAnnotationUrl } from 'src/annotations/utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import checkBrowser from 'src/util/check-browser'
+import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type { UnifiedList } from 'src/annotations/cache/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -153,7 +154,9 @@ export async function main(
                     ])
                     return
                 } else {
-                    highlightRenderer.removeAnnotationHighlight(lastAction.id)
+                    await highlightRenderer.removeAnnotationHighlight({
+                        id: lastAction.id,
+                    })
                     lastActions.shift()
                     await globalThis['browser'].storage.local.set({
                         [`${UNDO_HISTORY}`]: lastActions,
@@ -162,7 +165,9 @@ export async function main(
 
                 const existing =
                     annotationsCache.annotations.byId[lastAction.id]
-                annotationsCache.removeAnnotation({ unifiedId: lastAction.id })
+                annotationsCache.removeAnnotation({
+                    unifiedId: existing.unifiedId,
+                })
 
                 if (existing?.localId != null) {
                     await annotationsBG.deleteAnnotation(existing.localId)
@@ -209,6 +214,29 @@ export async function main(
     const annotationsManager = new AnnotationsManager()
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
+
+    // 2.5 load cache
+
+    const _currentUser = await authBG.getCurrentUser()
+    const currentUser: UserReference = _currentUser
+        ? { type: 'user-reference', id: _currentUser.id }
+        : null
+    const fullPageUrl = await pageInfo.getFullPageUrl()
+    const annotationsCache = new PageAnnotationsCache({})
+    window['__annotationsCache'] = annotationsCache
+
+    const loadCacheDataPromise = hydrateCacheForPageAnnotations({
+        fullPageUrl,
+        user: currentUser,
+        cache: annotationsCache,
+        bgModules: {
+            annotations: annotationsBG,
+            customLists: collectionsBG,
+            contentSharing: contentSharingBG,
+            pageActivityIndicator: pageActivityIndicatorBG,
+        },
+    })
+
     const highlightRenderer = new HighlightRenderer({
         captureException,
         getUndoHistory: async () => {
@@ -244,36 +272,59 @@ export async function main(
             })
 
             const localListIds: number[] = []
+            const remoteListIds: string[] = []
+            const unifiedListIds: UnifiedList['unifiedId'][] = []
             if (inPageUI.selectedList) {
                 const selectedList =
                     annotationsCache.lists.byId[inPageUI.selectedList]
                 if (selectedList.localId != null) {
                     localListIds.push(selectedList.localId)
                 }
+                if (selectedList.remoteId != null) {
+                    remoteListIds.push(selectedList.remoteId)
+                }
+                unifiedListIds.push(selectedList.unifiedId)
+            }
+
+            let privacyLevel: AnnotationPrivacyLevels
+            if (remoteListIds.length) {
+                privacyLevel = data.shouldShare
+                    ? AnnotationPrivacyLevels.SHARED
+                    : AnnotationPrivacyLevels.PROTECTED
+            } else {
+                privacyLevel = data.shouldShare
+                    ? AnnotationPrivacyLevels.SHARED
+                    : AnnotationPrivacyLevels.PRIVATE
             }
 
             const { unifiedId } = annotationsCache.addAnnotation({
                 localId,
-                localListIds,
+                privacyLevel,
+                localListIds: [],
+                unifiedListIds,
                 body: data.body,
                 comment: data.comment,
                 creator: data.creator,
                 selector: data.selector,
                 lastEdited: data.updatedWhen,
                 createdWhen: data.createdWhen,
-                privacyLevel: shareOptsToPrivacyLvl(data),
                 normalizedPageUrl: normalizeUrl(data.fullPageUrl),
             })
 
             const createPromise = (async () => {
-                const { savePromise } = await createAnnotation({
+                const {
+                    savePromise,
+                    remoteAnnotationId,
+                } = await createAnnotation({
                     shareOpts: {
-                        shouldShare: data.shouldShare,
+                        shouldShare:
+                            remoteListIds.length > 0 || data.shouldShare,
                         shouldCopyShareLink: data.shouldShare,
                     },
                     annotationsBG,
                     contentSharingBG,
                     skipPageIndexing: false,
+                    privacyLevelOverride: privacyLevel,
                     annotationData: {
                         localId,
                         localListIds,
@@ -285,11 +336,23 @@ export async function main(
                         createdWhen: new Date(data.createdWhen),
                     },
                 })
+
+                if (remoteAnnotationId != null) {
+                    const cachedAnnotation =
+                        annotationsCache.annotations.byId[unifiedId]
+                    annotationsCache.updateAnnotation({
+                        unifiedId,
+                        remoteId: remoteAnnotationId,
+                        privacyLevel: cachedAnnotation.privacyLevel,
+                        unifiedListIds: cachedAnnotation.unifiedListIds,
+                    })
+                }
                 await savePromise
             })()
-            return { annotationId: unifiedId, createPromise }
+            return { annotationId: unifiedId, localId: localId, createPromise }
         },
     })
+
     const sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
 
     const isSidebarEnabled =
@@ -317,14 +380,10 @@ export async function main(
             delete components[component]
         },
     })
-    const _currentUser = await authBG.getCurrentUser()
-    const currentUser: UserReference = _currentUser
-        ? { type: 'user-reference', id: _currentUser.id }
-        : null
-    const fullPageUrl = await pageInfo.getFullPageUrl()
-    const normalizedPageUrl = await pageInfo.getNormalizedPageUrl()
-    const annotationsCache = new PageAnnotationsCache({})
-    window['__annotationsCache'] = annotationsCache
+
+    await loadCacheDataPromise
+        .then(inPageUI.cacheLoadPromise.resolve)
+        .catch(inPageUI.cacheLoadPromise.reject)
 
     const pageHasBookark =
         (await bookmarks.pageHasBookmark(fullPageUrl)) ||
@@ -335,18 +394,6 @@ export async function main(
             .getAllAnnotationsByUrl({ url: fullPageUrl })
             .then((annotations) => annotations.length > 0))
     await bookmarks.setBookmarkStatusInBrowserIcon(pageHasBookark, fullPageUrl)
-
-    const loadCacheDataPromise = hydrateCacheForPageAnnotations({
-        fullPageUrl,
-        user: currentUser,
-        cache: annotationsCache,
-        bgModules: {
-            annotations: annotationsBG,
-            customLists: collectionsBG,
-            contentSharing: contentSharingBG,
-            pageActivityIndicator: pageActivityIndicatorBG,
-        },
-    })
 
     async function saveHighlight(shouldShare: boolean): Promise<AutoPk> {
         let highlightId: AutoPk
@@ -377,7 +424,10 @@ export async function main(
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
         ) => async (selection: Selection, shouldShare: boolean) => {
-            if (!(await pageActionAllowed())) {
+            if (
+                !(await pageActionAllowed()) ||
+                window.getSelection().toString().length === 0
+            ) {
                 return
             }
             await saveHighlight(shouldShare)
@@ -394,23 +444,35 @@ export async function main(
             selection: Selection,
             shouldShare: boolean,
             showSpacePicker?: boolean,
+            commentText?: string,
         ) => {
             if (!(await pageActionAllowed())) {
                 return
             }
-            const annotationId = await saveHighlight(shouldShare)
-            await inPageUI.showSidebar(
-                annotationId
-                    ? {
-                          annotationCacheId: annotationId.toString(),
-                          action: showSpacePicker
-                              ? 'edit_annotation_spaces'
-                              : 'edit_annotation',
-                      }
-                    : {
-                          action: 'comment',
-                      },
-            )
+
+            if (selection && window.getSelection().toString().length > 0) {
+                const annotationId = await saveHighlight(shouldShare)
+                await inPageUI.showSidebar(
+                    annotationId
+                        ? {
+                              annotationCacheId: annotationId.toString(),
+                              action: showSpacePicker
+                                  ? 'edit_annotation_spaces'
+                                  : 'edit_annotation',
+                          }
+                        : {
+                              action: 'comment',
+                              commentText: commentText ?? '',
+                          },
+                )
+            } else {
+                await inPageUI.showSidebar({
+                    action: 'youtube_timestamp',
+                    commentText:
+                        commentText ?? getTimestampNoteContentForYoutubeNotes(),
+                })
+            }
+
             await inPageUI.hideTooltip()
         },
         askAI: () => (highlightedText: string) => {
@@ -424,6 +486,38 @@ export async function main(
 
     if (window.location.hostname === 'www.youtube.com') {
         loadYoutubeButtons(annotationsFunctions)
+    }
+    if (window.location.href.includes('web.telegram.org/k/')) {
+        const spacesBar = document.getElementById('spacesBar')
+        if (spacesBar) {
+            spacesBar.remove()
+        }
+
+        const textField = document.getElementsByClassName(
+            'input-message-input',
+        )[0]
+        if (textField) {
+            textField.classList.add('mousetrap')
+        }
+
+        const lists = await collectionsBG.fetchPageListEntriesByUrl({
+            url: window.location.href,
+        })
+        if (lists.length > 0) {
+            const updatedLists = await Promise.all(
+                lists
+                    .filter((list) => list.listId !== 20201014)
+                    .map(async (list) => {
+                        const listData = await collectionsBG.fetchListById({
+                            id: list.listId,
+                        })
+                        ;(list as any).name = listData.name // Add the list name to the original list object.
+                        return list
+                    }),
+            )
+
+            loadTelegramUserSpaces(updatedLists, bgScriptBG)
+        }
     }
 
     // if (window.location.hostname === 'www.youtube.com') {
@@ -597,10 +691,6 @@ export async function main(
 
     globalThis['contentScriptRegistry'] = contentScriptRegistry
 
-    await loadCacheDataPromise
-        .then(inPageUI.cacheLoadPromise.resolve)
-        .catch(inPageUI.cacheLoadPromise.reject)
-
     // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
     // so it is included in this global content script where it adds less than 500kb.
     await contentScriptRegistry.registerHighlightingScript(highlightMain)
@@ -651,6 +741,41 @@ export async function main(
             resetKeyboardShortcuts()
         },
         handleHistoryStateUpdate: async (tabId) => {
+            await inPageUI.hideRibbon()
+            if (window.location.href.includes('web.telegram.org/k/')) {
+                const spacesBar = document.getElementById('spacesBar')
+                if (spacesBar) {
+                    spacesBar.remove()
+                }
+
+                const textField = document.getElementsByClassName(
+                    'input-message-input',
+                )[0]
+                if (textField) {
+                    textField.classList.add('mousetrap')
+                }
+
+                const lists = await collectionsBG.fetchPageListEntriesByUrl({
+                    url: window.location.href,
+                })
+                if (lists.length > 0) {
+                    const updatedLists = await Promise.all(
+                        lists
+                            .filter((list) => list.listId !== 20201014)
+                            .map(async (list) => {
+                                const listData = await collectionsBG.fetchListById(
+                                    {
+                                        id: list.listId,
+                                    },
+                                )
+                                ;(list as any).name = listData.name // Add the list name to the original list object.
+                                return list
+                            }),
+                    )
+
+                    loadTelegramUserSpaces(updatedLists, bgScriptBG)
+                }
+            }
             const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
             if (isPageBlacklisted || !isSidebarEnabled) {
                 await inPageUI.removeRibbon()
@@ -811,16 +936,94 @@ class PageInfo {
 
     getFullPageUrl = async () => {
         await this.refreshIfNeeded()
-        return this._identifier.fullUrl
+        let fullURL = this._identifier.fullUrl
+        return fullURL
     }
 
     getPageTitle = () => {
-        return document.title
+        let title = document.title
+
+        if (window.location.href.includes('web.telegram.org')) {
+            title = getTelegramUserDisplayName(document)
+        }
+
+        return title
     }
 
     getNormalizedPageUrl = async () => {
         await this.refreshIfNeeded()
         return this._identifier.normalizedUrl
+    }
+}
+
+export function loadTelegramUserSpaces(
+    lists,
+    bgScriptBG: RemoteBGScriptInterface,
+) {
+    let spacesBarOld = document.getElementById('spacesBar')
+
+    if (spacesBarOld) {
+        spacesBarOld.remove()
+    }
+
+    // Clear out the existing child elements of spacesBar (if any)
+
+    const chatInfoBox = document.getElementsByClassName(
+        'chat-info',
+    )[0] as HTMLElement
+
+    chatInfoBox.style.gap = '10px'
+    chatInfoBox.style.display = 'flex'
+    chatInfoBox.style.flexDirection = 'column'
+    chatInfoBox.style.justifyContent = 'flex-start'
+
+    const contentBox = document.getElementsByClassName(
+        'content',
+    )[0] as HTMLElement
+
+    contentBox.style.maxWidth = 'fit-content'
+    contentBox.style.minWidth = '210px'
+    contentBox.style.paddingRight = '30px'
+
+    const personBox = document.getElementsByClassName(
+        'person',
+    )[0] as HTMLElement
+
+    const spacesBar = document.createElement('div')
+
+    spacesBar.id = 'spacesBar'
+
+    spacesBar.style.display = 'flex'
+    spacesBar.style.alignItems = 'center'
+    spacesBar.style.gap = '10px'
+
+    personBox.appendChild(spacesBar)
+
+    lists.forEach((list) => {
+        const listDiv = document.createElement('div')
+        listDiv.style.background = '#C6F0D4'
+        listDiv.style.padding = '3px 10px'
+        listDiv.style.borderRadius = '5px'
+        listDiv.style.cursor = 'pointer'
+        listDiv.style.color = '#12131B'
+        listDiv.style.fontSize = '14px'
+        listDiv.style.display = 'flex'
+        listDiv.style.alignItems = 'center'
+        listDiv.innerText = list.name // assuming 'name' is a property of the list items
+        listDiv.addEventListener('click', (event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            bgScriptBG.openOverviewTab({
+                selectedSpace: list.listId as number,
+            })
+        })
+        spacesBar.appendChild(listDiv)
+    })
+
+    // If spacesBar wasn't part of the DOM already, you might want to append it somewhere.
+    if (!document.getElementById('spacesBar')) {
+        const chatInfoBox = document.getElementsByClassName('person')[0] // gets the first 'person' element
+        chatInfoBox.appendChild(spacesBar)
     }
 }
 
@@ -877,6 +1080,7 @@ export function loadYoutubeButtons(annotationsFunctions) {
 export function injectYoutubeContextMenu(annotationsFunctions: any) {
     const config = { attributes: true, childList: true, subtree: true }
     const icon = runtime.getURL('/img/memex-icon.svg')
+
     const observer = new MutationObserver((mutation) => {
         const targetObject = mutation[0]
         if (
@@ -887,8 +1091,13 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
             const newEntry = document.createElement('div')
             newEntry.setAttribute('class', 'ytp-menuitem')
             newEntry.onclick = () =>
-                annotationsFunctions.createAnnotation()(false, false)
-            newEntry.innerHTML = `<div class="ytp-menuitem-icon"><img src=${icon} style="height: 23px; padding-left: 2px; display: flex; width: auto"/></div><div class="ytp-menuitem-label" style="white-space: nowrap">Add Note to timestamp with Memex</div>`
+                annotationsFunctions.createAnnotation()(
+                    false,
+                    false,
+                    false,
+                    getTimestampNoteContentForYoutubeNotes(),
+                )
+            newEntry.innerHTML = `<div class="ytp-menuitem-icon"><img src=${icon} style="height: 23px; padding-left: 2px; display: flex; width: auto"/></div><div class="ytp-menuitem-label" style="white-space: nowrap">Add Note to current time</div>`
             panel.prepend(newEntry)
             // panel.style.height = "320px"
             observer.disconnect()
@@ -897,6 +1106,21 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
 
     observer.observe(document, config)
 }
+
+export function getTimestampNoteContentForYoutubeNotes() {
+    let videoTimeStampForComment: string | null
+
+    const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
+
+    if (videoURLWithTime != null) {
+        videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`
+
+        return videoTimeStampForComment
+    } else {
+        return null
+    }
+}
+
 export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     const YTchapterContainer = document.getElementsByClassName(
         'ytp-chapter-container',
@@ -916,10 +1140,18 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
         existingMemexButtons[0].remove()
     }
 
-    const icon = runtime.getURL('/img/memex-icon.svg')
     const panel = document.getElementsByClassName('ytp-time-display')[0]
     // Memex Button Container
     const memexButtons = document.createElement('div')
+    memexButtons.style.display = 'flex'
+    memexButtons.style.alignItems = 'center'
+    memexButtons.style.margin = '10px 0px'
+    memexButtons.style.borderRadius = '6px'
+    memexButtons.style.border = '1px solid #3E3F47'
+    memexButtons.style.overflow = 'hidden'
+    memexButtons.style.overflowX = 'scroll'
+    memexButtons.style.backgroundColor = '#12131B'
+    memexButtons.setAttribute('class', 'memex-youtube-buttons no-scrollbar')
     // Create a <style> element
     const style = document.createElement('style')
 
@@ -937,68 +1169,67 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
 
     document.head.appendChild(style)
 
-    memexButtons.style.display = 'flex'
-    memexButtons.style.alignItems = 'center'
-    memexButtons.style.margin = '5px'
-    memexButtons.style.borderRadius = '6px'
-    memexButtons.style.border = '1px solid #3E3F47'
-    memexButtons.style.overflow = 'hidden'
-    memexButtons.style.overflowX = 'scroll'
-    memexButtons.style.backgroundColor = '#12131B80'
-
-    // MemexIconDisplay
-    const memexIcon = document.createElement('img')
-    memexButtons.setAttribute('class', 'memex-youtube-buttons no-scrollbar')
-    memexIcon.src = icon
-    memexButtons.appendChild(memexIcon)
-
-    memexIcon.style.height = '20px'
-    memexIcon.style.margin = '0 5px 0 10px'
-
     // Add Note Button
     const annotateButton = document.createElement('div')
     annotateButton.setAttribute('class', 'ytp-menuitem')
     annotateButton.onclick = () =>
-        annotationsFunctions.createAnnotation()(false, false)
+        annotationsFunctions.createAnnotation()(
+            false,
+            false,
+            false,
+            getTimestampNoteContentForYoutubeNotes(),
+        )
     annotateButton.style.display = 'flex'
+    annotateButton.style.alignItems = 'center'
+    annotateButton.style.cursor = 'pointer'
+
+    annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
 
     // Summarize Button
     const summarizeButton = document.createElement('div')
     summarizeButton.setAttribute('class', 'ytp-menuitem')
     summarizeButton.onclick = () => annotationsFunctions.askAI()(false, false)
     summarizeButton.style.display = 'flex'
+    summarizeButton.style.alignItems = 'center'
+    summarizeButton.style.cursor = 'pointer'
+    summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
+
+    // MemexIconDisplay
+    const memexIcon = runtime.getURL('/img/memex-icon.svg')
+    const memexIconEl = document.createElement('img')
+    memexIconEl.src = memexIcon
+    memexButtons.appendChild(memexIconEl)
+    memexIconEl.style.margin = '0 10px 0 15px'
+    memexIconEl.style.height = '20px'
+
+    // TimestampIcon
+    const timestampIcon = runtime.getURL('/img/clockForYoutubeInjection.svg')
+    const timeStampEl = document.createElement('img')
+    timeStampEl.src = timestampIcon
+    timeStampEl.style.height = '20px'
+    timeStampEl.style.margin = '0 10px 0 10px'
+    annotateButton.insertBefore(timeStampEl, annotateButton.firstChild)
+
+    // SummarizeIcon
+    const summarizeIcon = runtime.getURL(
+        '/img/summarizeIconForYoutubeInjection.svg',
+    )
+    const summarizeIconEl = document.createElement('img')
+    summarizeIconEl.src = summarizeIcon
+    summarizeIconEl.style.height = '20px'
+    summarizeIconEl.style.margin = '0 5px 0 10px'
+    summarizeButton.insertBefore(summarizeIconEl, summarizeButton.firstChild)
 
     // Appending the right buttons
     memexButtons.appendChild(annotateButton)
     memexButtons.appendChild(summarizeButton)
+    memexButtons.style.color = '#f4f4f4'
+    memexButtons.style.width = 'fit-content'
 
     const leftControls = document.getElementsByClassName('ytp-left-controls')[0]
-
-    if (leftControls.clientWidth < 500) {
-        const aboveFold = document.getElementById('below')
-        aboveFold.insertAdjacentElement('afterbegin', memexButtons)
-        const elements = document.getElementsByClassName('ytp-menuitem')
-
-        for (var i = 0; i < elements.length; i++) {
-            ;(elements[i] as HTMLElement).style.height = '30px'
-        }
-        memexButtons.style.color = '#f4f4f4'
-        summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 10px;padding: 0px 5px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
-        annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 10px;padding: 0px 5px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
-        memexButtons.style.width = 'fit-content'
-        memexIcon.style.height = '16px'
-    } else {
-        annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
-        summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 10px; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
-        if (YTchapterContainer.length > 0) {
-            YTchapterContainer[0].insertAdjacentElement(
-                'afterend',
-                memexButtons,
-            )
-        } else {
-            panel.parentNode.insertBefore(memexButtons, panel.nextSibling)
-        }
-    }
+    const aboveFold = document.getElementById('below')
+    const elements = document.getElementsByClassName('ytp-menuitem')
+    aboveFold.insertAdjacentElement('afterbegin', memexButtons)
 }
 
 export function setupWebUIActions(args: {

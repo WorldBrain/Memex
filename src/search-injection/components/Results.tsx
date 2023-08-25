@@ -107,7 +107,7 @@ const MemexContainer = styled.div`
     background: ${(props) => props.theme.colors.black};
     font-family: ${(props) => props.theme.fonts.primary};
     border-radius: 12px;
-    overflow: hidden;
+    overflow: visible;
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};

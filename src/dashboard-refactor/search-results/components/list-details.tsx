@@ -21,6 +21,7 @@ export interface Props {
     isOwnedList?: boolean
     isJoinedList?: boolean
     description: string | null
+    type: 'page-link' | 'user-list' | 'special-list'
     listData: Pick<UnifiedList, 'unifiedId' | 'localId' | 'name'>
     saveDescription: (description: string) => void
     saveTitle: (title: string, listId: string) => void
@@ -109,7 +110,28 @@ export default class ListDetails extends PureComponent<Props, State> {
         if (this.props.listData.localId === 20201015) {
             return (
                 <SubtitleText>
-                    {'Things you saved from your mobile devices'}
+                    Pages you saved on your mobile devices for{' '}
+                    <DownloadLink
+                        onClick={() => {
+                            window.open(
+                                'https://apps.apple.com/app/id1471860331',
+                                '_blank',
+                            )
+                        }}
+                    >
+                        iOS
+                    </DownloadLink>{' '}
+                    and{' '}
+                    <DownloadLink
+                        onClick={() => {
+                            window.open(
+                                'https://play.google.com/store/apps/details?id=io.worldbrain',
+                                '_blank',
+                            )
+                        }}
+                    >
+                        Android
+                    </DownloadLink>
                 </SubtitleText>
             )
         }
@@ -118,7 +140,7 @@ export default class ListDetails extends PureComponent<Props, State> {
             return (
                 <SubtitleText>
                     {
-                        'Everything you save, annotate or organise appears here so you have a chance to go through it again.'
+                        'A getting-things-done style inbox for everything you save, annotate or organise.'
                     }
                 </SubtitleText>
             )
@@ -356,7 +378,11 @@ export default class ListDetails extends PureComponent<Props, State> {
                         )}
                         {this.props.isOwnedList &&
                             !this.props.description?.length &&
-                            !this.state.isEditingDescription && (
+                            !this.state.isEditingDescription &&
+                            !(
+                                this.props.listData.localId === 20201015 ||
+                                this.props.listData.localId === 20201014
+                            ) && (
                                 <>
                                     <EditDescriptionButton
                                         onClick={() =>
@@ -400,6 +426,13 @@ export default class ListDetails extends PureComponent<Props, State> {
         )
     }
 }
+
+const DownloadLink = styled.span`
+    color: ${(props) => props.theme.colors.prime2};
+    font-size: inherit;
+    margin: 0 3px;
+    cursor: pointer;
+`
 
 const SubtitleText = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};

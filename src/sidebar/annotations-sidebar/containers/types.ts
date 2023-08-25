@@ -109,6 +109,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     isLocked: boolean
     isWidthLocked: boolean
     showAISuggestionsDropDown: boolean
+    showAICounter: boolean
     AIsuggestions: { prompt: string; focused: boolean | null }[]
 
     activeTab: SidebarTab
@@ -228,6 +229,12 @@ interface SidebarEvents {
         tab: SidebarTab
         textToProcess?: string
         url?: string
+        prompt?: string
+    }
+    askAIviaInPageInteractions: {
+        textToProcess?: string
+        url?: string
+        prompt?: string
     }
     selectAISuggestion: { suggestion: string }
     queryAIwithPrompt: {

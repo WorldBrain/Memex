@@ -5,7 +5,6 @@ import {
     UIEventHandler,
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import type { Dependencies, State, Event } from './types'
-import delay from 'src/util/delay'
 import { checkStripePlan } from 'src/util/subscriptions/storage'
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -42,10 +41,18 @@ export default class Logic extends UILogic<State, Event> {
         pageLimit: '',
         subscriptionStatus: null,
         subscriptionStatusLoading: 'running',
+        loginToken: null,
+        loadQRCode: 'pristine',
+        systemSelectMenuState: false,
+        generateTokenDisplay: null,
+        copyToClipBoardState: 'pristine',
     })
 
     async init() {
         const { authBG } = this.dependencies
+        this.emitMutation({
+            loadState: { $set: 'running' },
+        })
 
         this.emitMutation({
             mode: { $set: 'signup' },
@@ -53,6 +60,9 @@ export default class Logic extends UILogic<State, Event> {
 
         await loadInitial(this, async () => {
             const user = await authBG.getCurrentUser()
+            this.emitMutation({
+                loadState: { $set: 'success' },
+            })
             if (user != null) {
                 this.isExistingUser = true
                 await this._onUserLogIn(false)
@@ -76,6 +86,52 @@ export default class Logic extends UILogic<State, Event> {
     getCurrentUser: EventHandler<'getCurrentUser'> = ({ event }) => {
         this.emitMutation({
             currentUser: { $set: event.currentUser },
+            loadState: { $set: 'success' },
+        })
+    }
+    toggleGenerateTokenSystemSelectMenu: EventHandler<
+        'toggleGenerateTokenSystemSelectMenu'
+    > = ({ event, previousState }) => {
+        this.emitMutation({
+            systemSelectMenuState: {
+                $set: !previousState.systemSelectMenuState,
+            },
+        })
+    }
+    copyCodeToClipboard: EventHandler<'copyCodeToClipboard'> = ({
+        previousState,
+    }) => {
+        this.emitMutation({
+            copyToClipBoardState: {
+                $set: 'success',
+            },
+        })
+        navigator.clipboard.writeText(previousState.loginToken)
+        setTimeout(() => {
+            this.emitMutation({
+                copyToClipBoardState: {
+                    $set: 'pristine',
+                },
+            })
+        }, 3000)
+    }
+
+    generateLoginToken: EventHandler<'generateLoginToken'> = async ({
+        event,
+    }) => {
+        if (event.system === 'iOs') {
+            this.emitMutation({
+                generateTokenDisplay: { $set: 'text' },
+            })
+        }
+        if (event.system === 'android') {
+            this.emitMutation({
+                generateTokenDisplay: { $set: 'qr' },
+            })
+        }
+        await executeUITask(this, 'loadQRCode', async () => {
+            const token = await this.dependencies.authBG.generateLoginToken()
+            this.emitMutation({ loginToken: { $set: token } })
         })
     }
 

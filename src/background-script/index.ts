@@ -359,11 +359,38 @@ class BackgroundScript {
     private openDashboardPage: RemoteBGScriptInterface['openOverviewTab'] = async (
         params,
     ) => {
-        await this.chooseTabOpenFn(params)({
-            url:
-                OVERVIEW_URL +
-                (params?.missingPdf ? `?${MISSING_PDF_QUERY_PARAM}` : ''),
-        })
+        let addedQuery
+        if (params?.selectedSpace) {
+            addedQuery = `selectedSpace=${params.selectedSpace}`
+        }
+
+        const selectedSpacesString = addedQuery ?? null
+        const missingPDFString = params?.missingPdf
+            ? MISSING_PDF_QUERY_PARAM
+            : null
+
+        if (selectedSpacesString && missingPDFString) {
+            await this.chooseTabOpenFn(params)({
+                url:
+                    OVERVIEW_URL +
+                    '?' +
+                    selectedSpacesString +
+                    '&' +
+                    missingPDFString,
+            })
+        } else if (selectedSpacesString) {
+            await this.chooseTabOpenFn(params)({
+                url: OVERVIEW_URL + '?' + selectedSpacesString,
+            })
+        } else if (missingPDFString) {
+            await this.chooseTabOpenFn(params)({
+                url: OVERVIEW_URL + '?' + missingPDFString,
+            })
+        } else {
+            await this.chooseTabOpenFn(params)({
+                url: OVERVIEW_URL,
+            })
+        }
     }
 
     private openOptionsPage: RemoteBGScriptInterface['openOptionsTab'] = async (

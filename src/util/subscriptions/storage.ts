@@ -87,7 +87,34 @@ export async function upgradePlan(pageLimit, AILimit) {
     return
 }
 
+async function enforceTrialPeriod30Days() {
+    const installTimeData = await browser.storage.local.get(
+        'localSettings.installTimestamp',
+    )
+    const installTimestamp = installTimeData['localSettings.installTimestamp']
+
+    if (!installTimestamp) {
+        console.error('Install timestamp not found!')
+        return
+    }
+
+    const currentTime = new Date().getTime()
+    const thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
+    if (currentTime - installTimestamp < thirtyDaysInMillis) {
+        return true // Return the function if the install time is less than 30 days ago
+    } else {
+        return false // Return the function if the install time is more than 30 days ago
+    }
+}
+
 export async function updatePageCounter() {
+    const isTrial = await enforceTrialPeriod30Days()
+    console.log('isTrial', isTrial)
+
+    if (isTrial) {
+        return
+    }
+
     const currentCount = await browser.storage.local.get(COUNTER_STORAGE_KEY)
 
     if (currentCount[COUNTER_STORAGE_KEY] === undefined) {
@@ -110,6 +137,12 @@ export async function updatePageCounter() {
     return
 }
 export async function updateAICounter() {
+    const isTrial = await enforceTrialPeriod30Days()
+
+    if (isTrial) {
+        return
+    }
+
     const currentCount = await browser.storage.local.get(COUNTER_STORAGE_KEY)
 
     if (
@@ -136,9 +169,21 @@ export async function updateAICounter() {
 }
 
 export async function checkStatus() {
-    const currentStatus = await browser.storage.local.get(COUNTER_STORAGE_KEY)
+    const isTrial = await enforceTrialPeriod30Days()
     const currentDate = new Date(Date.now())
     const currentMonth = currentDate.getMonth()
+
+    if (isTrial) {
+        return {
+            pageLimit: 20000,
+            AIlimit: 20000,
+            pageCounter: 0,
+            AIcounter: 0,
+            m: currentMonth,
+        }
+    }
+
+    const currentStatus = await browser.storage.local.get(COUNTER_STORAGE_KEY)
 
     if (
         currentStatus[COUNTER_STORAGE_KEY] === undefined ||

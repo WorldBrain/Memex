@@ -7,6 +7,8 @@ import { runInBackground } from 'src/util/webextensionRPC'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import Logic from './logic'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
+import { LoadingContainer } from 'src/dashboard-refactor/styled-components'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 // interface Props {
 //     initiallyShowSubscriptionModal?: boolean
@@ -87,37 +89,43 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     }
 
     render() {
-        return (
-            <>
-                {this.state.currentUser === null ? (
-                    <div>
-                        <SettingSection
-                            icon={this.getIcon()}
-                            title={this.getTitle()}
-                            description={this.getDescription()}
-                        >
-                            <AuthDialog
-                                onAuth={() => {
-                                    window.location.reload()
-                                }}
-                                onModeChange={({ mode }) => {
-                                    this.processEvent('setAuthDialogMode', {
-                                        mode,
-                                    })
-                                }}
-                            />
-                        </SettingSection>
-                    </div>
-                ) : (
-                    <AccountInfo
-                        setAuthMode={(mode) => {
-                            this.processEvent('setAuthDialogMode', {
-                                mode: mode,
-                            })
-                        }}
-                    />
-                )}
-            </>
+        return this.state.loadState === 'running' ? (
+            <LoadingContainer>
+                <LoadingIndicator size={50} />
+            </LoadingContainer>
+        ) : (
+            this.state.loadState === 'success' && (
+                <>
+                    {this.state.currentUser === null ? (
+                        <div>
+                            <SettingSection
+                                icon={this.getIcon()}
+                                title={this.getTitle()}
+                                description={this.getDescription()}
+                            >
+                                <AuthDialog
+                                    onAuth={() => {
+                                        window.location.reload()
+                                    }}
+                                    onModeChange={({ mode }) => {
+                                        this.processEvent('setAuthDialogMode', {
+                                            mode,
+                                        })
+                                    }}
+                                />
+                            </SettingSection>
+                        </div>
+                    ) : (
+                        <AccountInfo
+                            setAuthMode={(mode) => {
+                                this.processEvent('setAuthDialogMode', {
+                                    mode: mode,
+                                })
+                            }}
+                        />
+                    )}
+                </>
+            )
         )
     }
 }

@@ -36,7 +36,7 @@ export const main: TooltipScriptMain = async (options) => {
             createMount()
             await bodyLoader()
             await insertTooltip({ ...options, mount })
-            await insertTutorial()
+            // await insertTutorial()
         }
     })
     options.inPageUI.events.on('componentShouldDestroy', async (event) => {

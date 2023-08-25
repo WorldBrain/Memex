@@ -29,7 +29,7 @@ export interface ContentSharingInterface
     waitForListShare(params: { localListId: number }): Promise<void>
     shareAnnotations(options: {
         annotationUrls: string[]
-        shareToLists?: boolean
+        shareToParentPageLists?: boolean
         setBulkShareProtected?: boolean
     }): Promise<{ sharingStates: AnnotationSharingStates }>
     unshareAnnotations(options: {
@@ -83,6 +83,7 @@ export interface RemoteContentSharingByTabsInterface<
         {
             fullPageUrl: string
             now?: number
+            customPageTitle: string
         },
         {
             listTitle: string
@@ -90,6 +91,7 @@ export interface RemoteContentSharingByTabsInterface<
             remoteListId: string
             remoteListEntryId: string
             collabKey: string
+            pageTitle?: string | null
         }
     >
     waitForPageLinkCreation: RemoteFunction<Role, { fullPageUrl: string }, void>

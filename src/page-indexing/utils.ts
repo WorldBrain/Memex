@@ -42,6 +42,7 @@ export async function maybeIndexTabs(
         createPage: PageIndexingBackground['indexPage']
         waitForContentIdentifier: PageIndexingBackground['waitForContentIdentifier']
         time: number | '$now'
+        pageTitle?: string
     },
 ) {
     const indexed: { fullUrl: string }[] = []
@@ -67,6 +68,7 @@ export async function maybeIndexTabs(
                     fullUrl,
                     allowScreenshot: false,
                     visitTime: options.time,
+                    metaData: { pageTitle: options.pageTitle ?? null },
                 },
                 { addInboxEntryOnCreate: true },
             )

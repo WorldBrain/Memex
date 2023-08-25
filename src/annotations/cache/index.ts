@@ -572,9 +572,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 [updates.unifiedId]: nextList,
             },
         }
+
         this.events.emit('updatedList', nextList)
         this.events.emit('newListsState', this.lists)
-
         // If share status changed, reflect updates in any public annotations
         if (previousList.remoteId != nextList.remoteId) {
             this.updateSharedAnnotationsWithSharedPageLists()
@@ -583,8 +583,14 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     removeAnnotation: PageAnnotationsCacheInterface['removeAnnotation'] = ({
         unifiedId,
+        localId,
     }) => {
-        const previousAnnotation = this.annotations.byId[unifiedId]
+        let unifiedIdInferred = unifiedId
+        if (localId != null) {
+            unifiedIdInferred = this.localAnnotIdsToCacheIds.get(localId)
+        }
+
+        const previousAnnotation = this.annotations.byId[unifiedIdInferred]
         if (!previousAnnotation) {
             throw new Error('No existing cached annotation found to remove')
         }
@@ -597,7 +603,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
         delete this.annotations.byId[previousAnnotation.unifiedId]
         this.annotations.allIds = this.annotations.allIds.filter(
-            (id) => id !== unifiedId,
+            (id) => id !== unifiedIdInferred,
         )
 
         this.events.emit('removedAnnotation', previousAnnotation)

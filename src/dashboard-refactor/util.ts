@@ -43,11 +43,19 @@ export const areSearchFiltersEmpty = ({
 
 function getDomainsFilterIncludeSearchType(searchType) {
     if (searchType === 'videos') {
-        return ['youtube.com', 'vimeo.com']
+        return [
+            'youtube.com',
+            'vimeo.com',
+            'odysee.com',
+            'bitchute.com',
+            'rumble.com',
+            'crowdbunker.com',
+            'dailymotion.com',
+        ]
     }
 
     if (searchType === 'twitter') {
-        return ['mobile.twitter.com', 'twitter.com']
+        return ['mobile.twitter.com', 'twitter.com', 'x.com', 'mobile.x.com']
     }
 
     if (searchType === 'events') {

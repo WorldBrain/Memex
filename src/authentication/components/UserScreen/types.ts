@@ -3,8 +3,7 @@ import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { AuthDialogMode } from 'src/authentication/components/AuthDialog/types'
-import { AuthBackground } from 'src/authentication/background'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
@@ -33,6 +32,11 @@ export interface State {
     AILimit: string
     subscriptionStatus: string
     subscriptionStatusLoading: UITaskState
+    loadQRCode: UITaskState
+    loginToken: string
+    generateTokenDisplay: string
+    systemSelectMenuState: boolean
+    copyToClipBoardState: UITaskState
 }
 
 export type Event = UIEvent<{
@@ -43,7 +47,10 @@ export type Event = UIEvent<{
     setAuthDialogMode: { mode: AuthDialogMode }
     getCurrentUser: { currentUser: AuthenticatedUser }
     sendPasswordReset: null
+    generateLoginToken: { system: string }
     setSubscriptionStatus: {
         email: string
     }
+    toggleGenerateTokenSystemSelectMenu: null
+    copyCodeToClipboard: null
 }>

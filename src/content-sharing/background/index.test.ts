@@ -1,6 +1,6 @@
 import expect from 'expect'
 import type StorageManager from '@worldbrain/storex'
-import { normalizeUrl } from '@worldbrain/memex-url-utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 import {
     backgroundIntegrationTestSuite,
@@ -1391,7 +1391,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.shareAnnotation(setup, {
                                     id: 1,
-                                    shareToLists: true,
+                                    shareToParentPageLists: true,
                                     expectedSharingState: {
                                         sharedListIds: [1],
                                         privateListIds: [],
@@ -1487,7 +1487,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.shareAnnotation(setup, {
                                     id: 1,
-                                    shareToLists: true,
+                                    shareToParentPageLists: true,
                                     expectedSharingState: {
                                         sharedListIds: [1],
                                         privateListIds: [],
@@ -1629,7 +1629,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.shareAnnotation(setup, {
                                     id: 1,
-                                    shareToLists: true,
+                                    shareToParentPageLists: true,
                                     expectedSharingState: {
                                         sharedListIds: [1],
                                         privateListIds: [],
@@ -1711,7 +1711,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 await helper.shareAnnotation(setup, {
                                     id: 1,
-                                    shareToLists: true,
+                                    shareToParentPageLists: true,
                                     expectedSharingState: {
                                         sharedListIds: [1, 2],
                                         privateListIds: [],
@@ -1816,7 +1816,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.shareAnnotation(setup, {
                                     id: 1,
-                                    shareToLists: true,
+                                    shareToParentPageLists: true,
                                     expectedSharingState: {
                                         sharedListIds: [1, 2],
                                         privateListIds: [],
@@ -1913,7 +1913,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
                                 await helper.shareAnnotation(setup, {
                                     id: 1,
-                                    shareToLists: true,
+                                    shareToParentPageLists: true,
                                     expectedSharingState: {
                                         sharedListIds: [1, 2],
                                         privateListIds: [],
@@ -2620,6 +2620,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         fullPageUrl,
                                         now,
+                                        customPageTitle: null,
                                     },
                                 )
                                 await contentSharing.waitForPageLinkCreation(
@@ -3550,6 +3551,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         fullPageUrl,
                                         now,
+                                        customPageTitle: null,
                                     },
                                 )
                                 await contentSharing.waitForPageLinkCreation(

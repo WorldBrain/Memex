@@ -72,7 +72,9 @@ export interface PageAnnotationsCacheInterface {
                 >
             >,
     ) => void
-    removeAnnotation: (annotation: Pick<UnifiedAnnotation, 'unifiedId'>) => void
+    removeAnnotation: (
+        annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'localId'>,
+    ) => void
     removeList: (list: Pick<UnifiedList, 'unifiedId'>) => void
     sortLists: (sortingFn?: any) => void
     sortAnnotations: (sortingFn?: AnnotationsSorter) => void

@@ -43,7 +43,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
 
     private whichCheckOutURL = () => {
         if (process.env.NODE_ENV === 'production') {
-            return 'https://memex.garden/upgradeNotification'
+            return 'https://memex.garden/upgrade'
         } else {
             return 'https://memex.garden/upgradeStaging'
         }
@@ -86,7 +86,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
                         <InfoTooltipTitleBox>
                             <InfoTooltipTitle>
                                 You have <strong>{leftOverBlocks}</strong> pages
-                                left
+                                left this month
                             </InfoTooltipTitle>
                             <InfoTooltipSubTitle>
                                 Resets on the 1st of every month
@@ -242,7 +242,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
                         <TooltipTextContainer>
                             <TooltipTextTop>
                                 You have <strong>{leftOverBlocks}</strong> pages
-                                left
+                                left this month
                             </TooltipTextTop>
                             <TooltipTextBottom>
                                 Click for more info
@@ -271,6 +271,8 @@ const TooltipTextTop = styled.div`
 
 const TooltipTextBottom = styled.div`
     display: flex;
+    width: 100%;
+    text-align: center;
 `
 
 const TooltipTextContainer = styled.div`

@@ -445,14 +445,14 @@ export default class ContentSharingBackground {
                 localId,
                 remoteId:
                     remoteIds[localId] ?? this.generateRemoteAnnotationId(),
-                excludeFromLists: !options.shareToLists ?? true,
+                excludeFromLists: !options.shareToParentPageLists ?? true,
             })),
         )
 
         await this.storage.setAnnotationPrivacyLevelBulk({
             annotations: nonProtectedAnnotations,
             privacyLevel: makeAnnotationPrivacyLevel({
-                public: options.shareToLists,
+                public: options.shareToParentPageLists,
                 protected: options.setBulkShareProtected,
             }),
         })
@@ -798,7 +798,7 @@ export default class ContentSharingBackground {
         'provider'
     >['schedulePageLinkCreation'] = async (
         { tab },
-        { fullPageUrl, now = Date.now() },
+        { fullPageUrl, now = Date.now(), customPageTitle },
     ) => {
         if (this.pageLinkCreationPromises[fullPageUrl]) {
             throw new Error(
@@ -822,6 +822,7 @@ export default class ContentSharingBackground {
         const collabKey = this.options
             .generateServerId('sharedListKey')
             .toString()
+        const pageTitle = customPageTitle
 
         // Start but don't wait for the storage logic
         this.pageLinkCreationPromises[
@@ -836,6 +837,7 @@ export default class ContentSharingBackground {
             tabId: tab?.id,
             fullPageUrl,
             now,
+            pageTitle,
         })
 
         return {
@@ -844,6 +846,7 @@ export default class ContentSharingBackground {
             listTitle,
             localListId,
             collabKey,
+            pageTitle,
         }
     }
 
@@ -857,6 +860,7 @@ export default class ContentSharingBackground {
         creator,
         tabId,
         now,
+        pageTitle: customPageTitle,
     }: Awaited<
         ReturnType<
             RemoteContentSharingByTabsInterface<
@@ -877,13 +881,22 @@ export default class ContentSharingBackground {
                 fullUrl: fullPageUrl,
                 visitTime: now,
                 tabId,
+                metaData: {
+                    pageTitle: customPageTitle,
+                },
             },
             { addInboxEntryOnCreate: false },
         )
-        const pageTitle = await bgModules.pages.lookupPageTitleForUrl({
-            fullPageUrl: indexedPage.fullUrl,
-        })
 
+        let pageTitle: string
+
+        if (customPageTitle) {
+            pageTitle = customPageTitle
+        } else {
+            pageTitle = await bgModules.pages.lookupPageTitleForUrl({
+                fullPageUrl: indexedPage.fullUrl,
+            })
+        }
         await bgModules.customLists.createCustomList({
             id: localListId,
             name: listTitle,
@@ -898,6 +911,7 @@ export default class ContentSharingBackground {
                 skipPageIndexing: true,
                 suppressInboxEntry: true,
                 suppressVisitCreation: true,
+                pageTitle: pageTitle,
             }),
             this.performListShare({
                 localListId,

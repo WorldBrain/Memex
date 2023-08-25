@@ -133,7 +133,9 @@ class SpacePicker extends StatefulUIElement<
     }
 
     handleNewListPress = () => {
-        this.processEvent('newEntryPress', { entry: this.state.newEntryName })
+        this.processEvent('newEntryPress', {
+            entry: this.state.newEntryName,
+        })
     }
 
     private handleKeyPress = (event: KeyboardEvent) => {
@@ -219,7 +221,9 @@ class SpacePicker extends StatefulUIElement<
                 id={`ListKeyName-${entry.unifiedId}`}
                 onPress={() => {
                     this.displayListRef.current.scrollTo(0, 0)
-                    this.processEvent('resultEntryPress', { entry })
+                    this.processEvent('resultEntryPress', {
+                        entry,
+                    })
                 }}
                 onPressActOnAll={
                     this.props.actOnAllTabs
@@ -342,7 +346,7 @@ class SpacePicker extends StatefulUIElement<
                                 type="secondary"
                                 size="small"
                                 label="Open Space"
-                                icon="goTo"
+                                icon="globe"
                                 onClick={() =>
                                     this.processEvent('openListInWebUI', {
                                         unifiedListId: list.unifiedId,

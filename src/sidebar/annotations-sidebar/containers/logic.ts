@@ -82,6 +82,10 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import {
+    convertMemexURLintoTelegramURL,
+    getTelegramUserDisplayName,
+} from '@worldbrain/memex-common/lib/telegram/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -279,6 +283,7 @@ export class SidebarContainerLogic extends UILogic<
             queryMode: 'glanceSummary',
             showLengthError: false,
             showAISuggestionsDropDown: false,
+            showAICounter: false,
             AIsuggestions: [],
         }
     }
@@ -450,7 +455,7 @@ export class SidebarContainerLogic extends UILogic<
             .getElementById('memex-sidebar-container')
             ?.shadowRoot.getElementById('annotationSidebarContainer')
         this.readingViewState =
-            (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
+            (await browser.storage.local.get('@Sidebar-reading_view')) ?? true
         // this.readingViewStorageListener(true)
 
         await loadInitial<SidebarContainerState>(this, async () => {
@@ -587,6 +592,38 @@ export class SidebarContainerLogic extends UILogic<
                             })
                             .flat(),
                     ),
+            },
+            conversations: {
+                $apply: (prev: SidebarContainerState['conversations']) => {
+                    return fromPairs(
+                        normalizedStateToArray(nextAnnotations)
+                            .map((annot) => {
+                                if (annot.remoteId == null) {
+                                    return null
+                                }
+                                return annot.unifiedListIds
+                                    .map((listId) => {
+                                        const listData = this.options
+                                            .annotationsCache.lists.byId[listId]
+                                        if (listData.remoteId == null) {
+                                            return null
+                                        }
+                                        const conversationId = generateAnnotationCardInstanceId(
+                                            annot,
+                                            listId,
+                                        )
+                                        return [
+                                            conversationId,
+                                            prev[conversationId] ??
+                                                getInitialAnnotationConversationState(),
+                                        ]
+                                    })
+                                    .filter((a) => a != null)
+                            })
+                            .filter((a) => a != null)
+                            .flat(),
+                    )
+                },
             },
         })
     }
@@ -815,15 +852,21 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
 
-        const webUIUrl =
+        let webUIUrl =
             listData.type === 'page-link'
                 ? getSinglePageShareUrl({
                       remoteListId: listData.remoteId,
                       remoteListEntryId: listData.sharedListEntryId,
-                  }) + '?noAutoOpen=true'
+                  })
                 : getListShareUrl({
                       remoteListId: listData.remoteId,
                   })
+
+        if (webUIUrl.includes('?') && listData.type === 'page-link') {
+            webUIUrl = webUIUrl + '&noAutoOpen=true'
+        } else if (listData.type === 'page-link') {
+            webUIUrl = webUIUrl + '?noAutoOpen=true'
+        }
         window.open(webUIUrl, '_blank')
     }
 
@@ -1197,22 +1240,49 @@ export class SidebarContainerLogic extends UILogic<
                 return
             }
 
+            // A bunch of side-effects occur based on the types of lists this annotation will be a part of, and there's
+            //  a bunch of different IDs for lists, thus we gotta group these here to decide things further on in this logic
+            const remoteListIds: string[] = []
             const localListIds = [...commentBox.lists]
+            const unifiedListIds: UnifiedList['unifiedId'][] = []
             const maybeAddLocalListIdForCacheList = (
                 unifiedListId?: UnifiedList['unifiedId'],
             ) => {
-                if (unifiedListId != null) {
-                    const { localId } = lists.byId[unifiedListId]
-                    if (localId != null) {
-                        localListIds.push(localId)
-                    }
+                if (unifiedListId == null) {
+                    return
                 }
+
+                const { localId, remoteId } = lists.byId[unifiedListId]
+                if (localId != null) {
+                    localListIds.push(localId)
+                }
+                if (remoteId != null) {
+                    remoteListIds.push(remoteId)
+                }
+                unifiedListIds.push(unifiedListId)
             }
+
+            let title: string | null = null
+            if (window.location.href.includes('web.telegram.org')) {
+                title = getTelegramUserDisplayName(document)
+            }
+
             // Adding a new annot in selected space mode should only work on the "Spaces" tab
             if (activeTab === 'spaces') {
                 maybeAddLocalListIdForCacheList(selectedListId)
             }
             maybeAddLocalListIdForCacheList(event.listInstanceId)
+
+            let privacyLevel: AnnotationPrivacyLevels
+            if (remoteListIds.length) {
+                privacyLevel = event.shouldShare
+                    ? AnnotationPrivacyLevels.SHARED
+                    : AnnotationPrivacyLevels.PROTECTED
+            } else {
+                privacyLevel = event.shouldShare
+                    ? AnnotationPrivacyLevels.SHARED
+                    : AnnotationPrivacyLevels.PRIVATE
+            }
 
             const { remoteAnnotationId, savePromise } = await createAnnotation({
                 annotationData: {
@@ -1221,13 +1291,15 @@ export class SidebarContainerLogic extends UILogic<
                     localListIds,
                     localId: annotationId,
                     createdWhen: new Date(now),
+                    pageTitle: title,
                 },
                 annotationsBG: this.options.annotationsBG,
                 contentSharingBG: this.options.contentSharingBG,
                 skipListExistenceCheck:
                     previousState.hasListDataBeenManuallyPulled,
+                privacyLevelOverride: privacyLevel,
                 shareOpts: {
-                    shouldShare: event.shouldShare,
+                    shouldShare: remoteListIds.length > 0 || event.shouldShare,
                     shouldCopyShareLink: event.shouldShare,
                     isBulkShareProtected: event.isProtected,
                 },
@@ -1237,16 +1309,31 @@ export class SidebarContainerLogic extends UILogic<
                 localId: annotationId,
                 remoteId: remoteAnnotationId ?? undefined,
                 normalizedPageUrl: normalizeUrl(fullPageUrl),
-                privacyLevel: shareOptsToPrivacyLvl({
-                    shouldShare: event.shouldShare,
-                    isBulkShareProtected: event.isProtected,
-                }),
                 creator: this.options.getCurrentUser(),
                 createdWhen: now,
                 lastEdited: now,
-                localListIds,
+                privacyLevel,
+                // These only contain lists added in the UI dropdown (to be checked in case any are shared, which should influence the annot privacy level)
+                localListIds: [...commentBox.lists],
+                unifiedListIds, // These contain the context list (selected list or list instance)
                 comment,
             })
+
+            if (remoteAnnotationId != null && remoteListIds.length > 0) {
+                this.emitMutation({
+                    conversations: {
+                        $merge: fromPairs(
+                            remoteListIds.map((remoteId) => [
+                                this.buildConversationId(remoteAnnotationId, {
+                                    type: 'shared-list-reference',
+                                    id: remoteId,
+                                }),
+                                getInitialAnnotationConversationState(),
+                            ]),
+                        ),
+                    },
+                })
+            }
 
             await savePromise
         })
@@ -1381,11 +1468,16 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
 
+        let fullPageURL =
+            this.fullPageUrl ?? 'https://' + annotation.normalizedPageUrl
+
+        if (fullPageURL.includes('web.telegram.org')) {
+            fullPageURL = convertMemexURLintoTelegramURL(fullPageURL)
+        }
+
         return this.options.contentScriptsBG.goToAnnotationFromDashboardSidebar(
             {
-                fullPageUrl:
-                    this.fullPageUrl ??
-                    'https://' + annotation.normalizedPageUrl,
+                fullPageUrl: fullPageURL,
                 annotationCacheId: event.unifiedAnnotationId,
             },
         )
@@ -1560,12 +1652,14 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         let queryPrompt = prompt ? prompt : undefined
+        await updateAICounter()
         this.emitMutation({
             selectedTextAIPreview: {
                 $set: highlightedText ? highlightedText : '',
             },
             loadState: { $set: 'running' },
             prompt: { $set: queryPrompt },
+            showAICounter: { $set: true },
         })
 
         if (
@@ -1600,7 +1694,6 @@ export class SidebarContainerLogic extends UILogic<
             apiKey: openAIKey ? openAIKey : undefined,
             shortSummary: shortSummary,
         })
-        await updateAICounter()
     }
 
     removeAISuggestion: EventHandler<'removeAISuggestion'> = async ({
@@ -1860,6 +1953,18 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    askAIviaInPageInteractions: EventHandler<
+        'askAIviaInPageInteractions'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({ activeTab: { $set: 'summary' } })
+
+        this.emitMutation({
+            pageSummary: { $set: '' },
+            selectedTextAIPreview: { $set: event.textToProcess },
+            prompt: { $set: undefined },
+        })
+    }
+
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
         previousState,
@@ -1887,35 +1992,44 @@ export class SidebarContainerLogic extends UILogic<
             await this.loadRemoteAnnototationReferencesForCachedLists(
                 previousState,
             )
-        } else if (event.tab === 'summary') {
-            let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
-            let fullTextToProcess
-            if (isPagePDF) {
-                fullTextToProcess = document.body.innerText
-            }
-            if (event.textToProcess) {
-                this.emitMutation({
-                    prompt: { $set: '' },
-                })
-                await this.queryAI(
-                    undefined,
-                    event.textToProcess,
-                    undefined,
-                    undefined,
-                    previousState,
+        } else if (
+            event.tab === 'summary' &&
+            (event.prompt.length > 0 || event.textToProcess.length > 0)
+        ) {
+            if (previousState.pageSummary.length === 0) {
+                let isPagePDF = window.location.href.includes(
+                    '/pdfjs/viewer.html?',
                 )
-            } else {
-                this.emitMutation({
-                    prompt: { $set: '' },
-                })
-                await this.queryAI(
-                    isPagePDF ? undefined : previousState.fullPageUrl,
-                    undefined,
-                    undefined,
-                    previousState.queryMode === 'glanceSummary' ? true : false,
-                    previousState,
-                    isPagePDF ? fullTextToProcess : undefined,
-                )
+                let fullTextToProcess
+                if (isPagePDF) {
+                    fullTextToProcess = document.body.innerText
+                }
+                if (event.textToProcess) {
+                    this.emitMutation({
+                        prompt: { $set: '' },
+                    })
+                    await this.queryAI(
+                        undefined,
+                        event.textToProcess,
+                        undefined,
+                        undefined,
+                        previousState,
+                    )
+                } else {
+                    this.emitMutation({
+                        prompt: { $set: event.prompt },
+                    })
+                    await this.queryAI(
+                        isPagePDF ? undefined : previousState.fullPageUrl,
+                        undefined,
+                        undefined,
+                        previousState.queryMode === 'glanceSummary'
+                            ? true
+                            : false,
+                        previousState,
+                        isPagePDF ? fullTextToProcess : undefined,
+                    )
+                }
             }
         }
     }
@@ -2488,6 +2602,12 @@ export class SidebarContainerLogic extends UILogic<
             throw new Error('Cannot create page link - User not logged in')
         }
 
+        let title
+
+        if (window.location.href.includes('web.telegram.org')) {
+            title = getTelegramUserDisplayName(document)
+        }
+
         await executeUITask(this, 'pageLinkCreateState', async () => {
             const {
                 collabKey,
@@ -2498,6 +2618,7 @@ export class SidebarContainerLogic extends UILogic<
             } = await this.options.contentSharingByTabsBG.schedulePageLinkCreation(
                 {
                     fullPageUrl,
+                    customPageTitle: title,
                 },
             )
 
