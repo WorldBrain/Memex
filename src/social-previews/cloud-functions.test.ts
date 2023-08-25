@@ -3,10 +3,17 @@ import { renderTemplate } from '@worldbrain/memex-common/lib/firebase-backend/so
 import { SocialPreviewHTMLRenderer } from '@worldbrain/memex-common/lib/firebase-backend/social-previews/html-renderer'
 import type {
     SharedAnnotation,
+    SharedList,
+    SharedListEntry,
     SharedPageInfo,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import { generateOgImgUrl } from '@worldbrain/memex-common/lib/firebase-backend/social-previews/utils'
+import {
+    generateAnnotationPreviewUrl,
+    generateListPreviewUrl,
+    generatePagePreviewUrl,
+} from '@worldbrain/memex-common/lib/firebase-backend/social-previews/utils'
+import { createPageLinkListTitle } from 'src/content-sharing/utils'
 
 const TEST_BUNDLES_STR = 'test-1.js test-2.js test-1.css'
 const TEST_BUNDLES_ARR = TEST_BUNDLES_STR.split(' ')
@@ -69,7 +76,7 @@ describe('Social previews tests', () => {
             .collection('sharedAnnotation')
             .createObject(sharedAnnotationData)
 
-        const ogImgSrc = generateOgImgUrl({
+        const ogImgSrc = generateAnnotationPreviewUrl({
             pageInfo: sharedPageInfoData,
             annotation: sharedAnnotationData,
         })
@@ -91,6 +98,92 @@ describe('Social previews tests', () => {
         )
     })
 
+    it('should generate HTML containing OG tags, web UI JS bundles, and list data for an existing list', async () => {
+        const { storageManager, htmlRenderer } = await setupTest({})
+        const now = Date.now()
+        const sharedListData: SharedList & {
+            id: AutoPk
+            creator: AutoPk
+        } = {
+            id: 1,
+            creator: 1,
+            title: 'my test list',
+            description: 'great list',
+            createdWhen: now,
+            updatedWhen: now,
+        }
+
+        await storageManager
+            .collection('sharedList')
+            .createObject(sharedListData)
+
+        const ogImgSrc = generateListPreviewUrl({ list: sharedListData })
+
+        expect(
+            await htmlRenderer.renderListPreview({
+                listId: sharedListData.id,
+            }),
+        ).toEqual(
+            renderTemplate({
+                ogImgSrc,
+                bundleSrcs: TEST_BUNDLES_ARR,
+                listData: sharedListData,
+            }),
+        )
+    })
+
+    it('should generate HTML containing OG tags, web UI JS bundles, and list+list entry data for an existing page link list', async () => {
+        const { storageManager, htmlRenderer } = await setupTest({})
+        const now = Date.now()
+        const sharedListData: SharedList & {
+            id: AutoPk
+            creator: AutoPk
+        } = {
+            id: 1,
+            creator: 1,
+            title: createPageLinkListTitle(new Date(now)),
+            type: 'page-link',
+            createdWhen: now,
+            updatedWhen: now,
+        }
+        const sharedListEntryData: SharedListEntry & {
+            id: AutoPk
+            creator: AutoPk
+        } = {
+            id: 1,
+            creator: 1,
+            originalUrl: 'https://test.com/test',
+            normalizedUrl: 'test.com/test',
+            createdWhen: now,
+            updatedWhen: now,
+        }
+
+        await storageManager
+            .collection('sharedList')
+            .createObject(sharedListData)
+        await storageManager
+            .collection('sharedListEntry')
+            .createObject(sharedListEntryData)
+
+        const ogImgSrc = generatePagePreviewUrl({
+            listEntry: sharedListEntryData,
+        })
+
+        expect(
+            await htmlRenderer.renderPagePreview({
+                listId: sharedListData.id,
+                listEntryId: sharedListEntryData.id,
+            }),
+        ).toEqual(
+            renderTemplate({
+                ogImgSrc,
+                bundleSrcs: TEST_BUNDLES_ARR,
+                listData: sharedListData,
+                listEntryData: sharedListEntryData,
+            }),
+        )
+    })
+
     it('should return base HTML without OG tags and annot data when called for a non-existent annotation', async () => {
         const { storageManager, htmlRenderer } = await setupTest({})
 
@@ -103,6 +196,40 @@ describe('Social previews tests', () => {
 
         expect(
             await htmlRenderer.renderAnnotationPreview({ annotationId }),
+        ).toEqual(renderTemplate({ bundleSrcs: TEST_BUNDLES_ARR }))
+    })
+
+    it('should return base HTML without OG tags and annot data when called for a non-existent list', async () => {
+        const { storageManager, htmlRenderer } = await setupTest({})
+
+        const listId = 'non-existent-list-id'
+        expect(
+            await storageManager.collection('sharedList').findObject({
+                id: listId,
+            }),
+        ).toEqual(null)
+
+        expect(await htmlRenderer.renderListPreview({ listId })).toEqual(
+            renderTemplate({ bundleSrcs: TEST_BUNDLES_ARR }),
+        )
+    })
+
+    it('should return base HTML without OG tags and annot data when called for a non-existent page link list+list entry', async () => {
+        const { storageManager, htmlRenderer } = await setupTest({})
+
+        const listId = 'non-existent-page-link-list-id'
+        const listEntryId = 'non-existent-list-entry-id'
+        expect([
+            await storageManager.collection('sharedList').findObject({
+                id: listId,
+            }),
+            await storageManager.collection('sharedListEntry').findObject({
+                id: listEntryId,
+            }),
+        ]).toEqual([null, null])
+
+        expect(
+            await htmlRenderer.renderPagePreview({ listId, listEntryId }),
         ).toEqual(renderTemplate({ bundleSrcs: TEST_BUNDLES_ARR }))
     })
 })
