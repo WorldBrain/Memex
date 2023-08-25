@@ -78,16 +78,15 @@ import initSentry, { captureException } from 'src/util/raven'
 import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
 import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
-import {
-    generateAnnotationUrl,
-    shareOptsToPrivacyLvl,
-} from 'src/annotations/utils'
+import { generateAnnotationUrl } from 'src/annotations/utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import checkBrowser from 'src/util/check-browser'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type { UnifiedList } from 'src/annotations/cache/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -274,6 +273,7 @@ export async function main(
 
             const localListIds: number[] = []
             const remoteListIds: string[] = []
+            const unifiedListIds: UnifiedList['unifiedId'][] = []
             if (inPageUI.selectedList) {
                 const selectedList =
                     annotationsCache.lists.byId[inPageUI.selectedList]
@@ -283,18 +283,31 @@ export async function main(
                 if (selectedList.remoteId != null) {
                     remoteListIds.push(selectedList.remoteId)
                 }
+                unifiedListIds.push(selectedList.unifiedId)
+            }
+
+            let privacyLevel: AnnotationPrivacyLevels
+            if (remoteListIds.length) {
+                privacyLevel = data.shouldShare
+                    ? AnnotationPrivacyLevels.SHARED
+                    : AnnotationPrivacyLevels.PROTECTED
+            } else {
+                privacyLevel = data.shouldShare
+                    ? AnnotationPrivacyLevels.SHARED
+                    : AnnotationPrivacyLevels.PRIVATE
             }
 
             const { unifiedId } = annotationsCache.addAnnotation({
                 localId,
-                localListIds,
+                privacyLevel,
+                localListIds: [],
+                unifiedListIds,
                 body: data.body,
                 comment: data.comment,
                 creator: data.creator,
                 selector: data.selector,
                 lastEdited: data.updatedWhen,
                 createdWhen: data.createdWhen,
-                privacyLevel: shareOptsToPrivacyLvl(data),
                 normalizedPageUrl: normalizeUrl(data.fullPageUrl),
             })
 
@@ -311,6 +324,7 @@ export async function main(
                     annotationsBG,
                     contentSharingBG,
                     skipPageIndexing: false,
+                    privacyLevelOverride: privacyLevel,
                     annotationData: {
                         localId,
                         localListIds,

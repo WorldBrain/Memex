@@ -26,6 +26,9 @@ import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/bloc
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import { browser } from 'webextension-polyfill-ts'
+
+const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')
 
 export interface Props
     extends Omit<PageData, 'lists'>,
@@ -355,6 +358,7 @@ export default class PageResultView extends PureComponent<Props> {
                                     ? this.props.hoverState
                                     : undefined
                             }
+                            memexIcon={MemexIcon}
                         />
                     </PageContentBox>
                     {this.hasLists && (
