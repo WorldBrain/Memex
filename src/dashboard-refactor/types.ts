@@ -39,6 +39,7 @@ import type { SummarizationInterface } from 'src/summarization-llm/background'
 import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
+import { AnalyticsInterface } from 'src/analytics/background/types'
 
 export interface RootState {
     loadState: TaskState
@@ -71,6 +72,7 @@ export interface DashboardDependencies {
     location: Location
     history: History
     analytics: Analytics
+    analyticsBG: AnalyticsInterface
     tagsBG: RemoteTagsInterface
     authBG: AuthRemoteFunctionsInterface
     backupBG: BackupInterface<'caller'>

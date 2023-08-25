@@ -10,6 +10,7 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { AnalyticsInterface } from 'src/analytics/background/types'
 
 export interface Dependencies {
     contentSharingBG: ContentSharingInterface
@@ -24,6 +25,7 @@ export interface Dependencies {
     onConfirmSpaceNameEdit: (newName: string) => void
     onDeleteSpaceIntent?: React.MouseEventHandler
     onDeleteSpaceConfirm?: React.MouseEventHandler
+    analyticsBG: AnalyticsInterface
 }
 
 export type Event = UIEvent<{
@@ -222,6 +224,9 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             () => this.emitMutation({ showSuccessMsg: { $set: false } }),
             SpaceContextMenuLogic.MSG_TIMEOUT,
         )
+        await this.dependencies.analyticsBG.trackBqEvent({
+            eventName: 'shareSpace',
+        })
     }
 
     confirmSpaceDelete: EventHandler<'confirmSpaceDelete'> = async ({
@@ -300,6 +305,17 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             })
 
         showInviteLinkCopyMsg(true)
+
+        if (event.linkIndex === 0) {
+            await this.dependencies.analyticsBG.trackBqEvent({
+                eventName: 'copyInviteLink_Read',
+            })
+        }
+        if (event.linkIndex === 1) {
+            await this.dependencies.analyticsBG.trackBqEvent({
+                eventName: 'copyInviteLink_Contribute',
+            })
+        }
 
         setTimeout(
             () => showInviteLinkCopyMsg(false),

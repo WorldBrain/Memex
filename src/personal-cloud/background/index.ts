@@ -93,7 +93,6 @@ export class PersonalCloudBackground {
     }
 
     constructor(public options: PersonalCloudBackgroundOptions) {
-        console.log('add test')
         this.actionQueue = new ActionQueue({
             storageManager: options.storageManager,
             collectionName: 'personalCloudAction',

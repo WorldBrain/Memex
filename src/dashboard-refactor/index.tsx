@@ -317,6 +317,7 @@ export class DashboardContainer extends StatefulUIElement<
                     onClickOutside: toggleSpacesFilter,
                     localStorageAPI: this.props.localStorage,
                     contentSharingBG: this.props.contentShareBG,
+                    analyticsBG: this.props.analyticsBG,
                     annotationsCache: this.props.annotationsCache,
                     pageActivityIndicatorBG: this.props.pageActivityIndicatorBG,
                     createNewEntry: () => undefined,
@@ -544,6 +545,7 @@ export class DashboardContainer extends StatefulUIElement<
                             listId,
                             remoteListId,
                         }),
+                    analyticsBG: this.props.analyticsBG,
                 })}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () => {
@@ -626,6 +628,7 @@ export class DashboardContainer extends StatefulUIElement<
                         listId: listData.unifiedId,
                     })
                 }}
+                analyticsBG={this.props.analyticsBG}
                 clearInbox={() => this.processEvent('clearInbox', null)}
                 isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 activePage={this.state.activePageID && true}

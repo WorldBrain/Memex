@@ -36,6 +36,7 @@ import { BlockCounterIndicator } from 'src/util/subscriptions/pageCountIndicator
 import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/constants'
 import { logoNoText } from 'src/common-ui/components/design-library/icons'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
+import { AnalyticsInterface } from 'src/analytics/background/types'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -60,6 +61,7 @@ export interface Props extends RibbonSubcomponentProps {
     openPDFinViewer: () => void
     selectRibbonPositionOption: (option) => void
     hasFeedActivity: boolean
+    analyticsBG: AnalyticsInterface
 }
 
 interface State {
@@ -260,6 +262,7 @@ export default class Ribbon extends Component<Props, State> {
                     spacesBG={this.props.spacesBG}
                     annotationsCache={this.props.annotationsCache}
                     contentSharingBG={this.props.contentSharingBG}
+                    analyticsBG={this.props.analyticsBG}
                     pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
                     localStorageAPI={browser.storage.local}
                     actOnAllTabs={this.props.lists.listAllTabs}

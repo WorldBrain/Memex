@@ -9,14 +9,13 @@ export interface Props {
 
 class Overview extends PureComponent<Props> {
     render() {
-        return (
-            <DashboardContainer
-                services={this.props.services}
-                renderUpdateNotifBanner={() => (
-                    <UpdateNotifBanner theme={{ position: 'fixed' }} />
-                )}
-            />
-        )
+        return null
+        // <DashboardContainer
+        //     services={this.props.services}
+        //     renderUpdateNotifBanner={() => (
+        //         <UpdateNotifBanner theme={{ position: 'fixed' }} />
+        //     )}
+        // />
     }
 }
 
