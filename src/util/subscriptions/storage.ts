@@ -100,7 +100,6 @@ async function enforceTrialPeriod30Days() {
 
     const currentTime = new Date().getTime()
     const thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
-    console.log(currentTime, installTimestamp, thirtyDaysInMillis)
     if (currentTime - installTimestamp < thirtyDaysInMillis) {
         return true // Return the function if the install time is less than 30 days ago
     } else {
