@@ -152,8 +152,8 @@ describe('Social previews tests', () => {
         } = {
             id: 1,
             creator: 1,
-            originalUrl: 'https://test.com/test',
             normalizedUrl: 'test.com/test',
+            originalUrl: 'https://test.com/test',
             createdWhen: now,
             updatedWhen: now,
         }
