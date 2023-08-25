@@ -575,6 +575,7 @@ export async function main(
                 customLists: collectionsBG,
                 authBG,
                 bgScriptBG,
+                analyticsBG,
                 pageActivityIndicatorBG,
                 activityIndicatorBG: runInBackground(),
                 contentSharing: contentSharingBG,

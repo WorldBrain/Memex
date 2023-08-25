@@ -47,6 +47,7 @@ export const main: RibbonScriptMain = async (options) => {
             },
             inPageUI: options.inPageUI,
             setUpOptions,
+            analyticsBG: options.analyticsBG,
         })
     }
 

@@ -350,6 +350,7 @@ export class AnnotationsSidebarContainer<
                     annotationsCache={this.props.annotationsCache}
                     pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
                     contentSharingBG={this.props.contentSharingBG}
+                    analyticsBG={this.props.analyticsBG}
                     spacesBG={this.props.customListsBG}
                     authBG={this.props.authBG}
                     normalizedPageUrlToFilterPageLinksBy={normalizeUrl(
@@ -398,6 +399,7 @@ export class AnnotationsSidebarContainer<
             authBG,
             annotationsCache,
             contentSharingBG,
+            analyticsBG: this.props.analyticsBG,
             pageActivityIndicatorBG,
             spacesBG: customListsBG,
             showPageLinks: true,
@@ -961,6 +963,7 @@ export class AnnotationsSidebarContainer<
                             isDataLoading={
                                 this.state.remoteAnnotationsLoadState ===
                                     'running' ||
+                                this.state.loadState === 'running' ||
                                 this.state.cacheLoadState === 'running'
                             }
                             theme={this.props.theme}
@@ -1000,6 +1003,7 @@ export class AnnotationsSidebarContainer<
                                             unifiedListId: listData.unifiedId,
                                         })
                                     }
+                                    analyticsBG={this.props.analyticsBG}
                                 />
                             )}
                             activeShareMenuNoteId={

@@ -55,6 +55,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import { AnalyticsInterface } from 'src/analytics/background/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -86,6 +87,7 @@ export type Props = RootState &
         toggleListShareMenu: () => void
         selectedListId?: string
         areAllNotesShown: boolean
+        analyticsBG: AnalyticsInterface
         toggleSortMenuShown: () => void
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
@@ -348,6 +350,7 @@ export default class SearchResultsContainer extends React.Component<
                         }
                         createNewEntry={interactionProps.createNewList}
                         normalizedPageUrlToFilterPageLinksBy={pageId}
+                        analyticsBG={this.props.analyticsBG}
                     />
                 )}
                 renderShareMenuForAnnotation={() => (
@@ -383,6 +386,7 @@ export default class SearchResultsContainer extends React.Component<
                                     selected: [],
                                 }),
                             createNewEntry: interactionProps.createNewList,
+                            analyticsBG: this.props.analyticsBG,
                         }}
                     />
                 )}
@@ -453,6 +457,7 @@ export default class SearchResultsContainer extends React.Component<
                                 boundAnnotCreateProps.removePageFromList
                             }
                             normalizedPageUrlToFilterPageLinksBy={normalizedUrl}
+                            analyticsBG={this.props.analyticsBG}
                         />
                     )}
                 />
@@ -575,6 +580,7 @@ export default class SearchResultsContainer extends React.Component<
                             : undefined
                     }
                     filterbyList={this.props.filterByList}
+                    analyticsBG={this.props.analyticsBG}
                 />
                 {this.renderPageNotes(page, day, interactionProps)}
             </ResultBox>

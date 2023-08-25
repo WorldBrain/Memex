@@ -2631,10 +2631,6 @@ export class SidebarContainerLogic extends UILogic<
             title = getTelegramUserDisplayName(document, window.location.href)
         }
 
-        await this.options.analyticsBG.trackBqEvent({
-            eventName: 'createPageLink',
-        })
-
         await executeUITask(this, 'pageLinkCreateState', async () => {
             const {
                 collabKey,
@@ -2684,6 +2680,10 @@ export class SidebarContainerLogic extends UILogic<
                     unifiedId,
                 ),
             ])
+        })
+
+        await this.options.analyticsBG.trackBqEvent({
+            eventName: 'createPageLink',
         })
     }
 }

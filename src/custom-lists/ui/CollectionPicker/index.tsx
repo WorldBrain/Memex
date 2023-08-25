@@ -373,6 +373,7 @@ class SpacePicker extends StatefulUIElement<
                         listData={list}
                         ref={this.contextMenuRef}
                         contentSharingBG={this.props.contentSharingBG}
+                        analyticsBG={this.props.analyticsBG}
                         spacesBG={this.props.spacesBG}
                         onDeleteSpaceConfirm={() =>
                             this.processEvent('deleteList', {
