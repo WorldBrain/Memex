@@ -404,6 +404,8 @@ export default class SpacePickerLogic extends UILogic<
         if (event.key === 'Escape') {
             this.dependencies.closePicker()
         }
+        event.stopImmediatePropagation()
+        event.stopPropagation()
     }
 
     openListInWebUI: EventHandler<'openListInWebUI'> = async ({ event }) => {
@@ -554,6 +556,8 @@ export default class SpacePickerLogic extends UILogic<
         } else {
             this.querySpaces(query, previousState)
         }
+        event.stopImmediatePropagation()
+        event.stopPropagation()
     }
 
     /**

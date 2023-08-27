@@ -230,7 +230,10 @@ export default class Ribbon extends Component<Props, State> {
 
         let pageTitle
         if (window.location.href.includes('web.telegram.org')) {
-            pageTitle = getTelegramUserDisplayName(document)
+            pageTitle = getTelegramUserDisplayName(
+                document,
+                window.location.href,
+            )
         }
 
         const topRight = this.props.ribbonPosition === 'topRight'

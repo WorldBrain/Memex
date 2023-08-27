@@ -86,7 +86,11 @@ import checkBrowser from 'src/util/check-browser'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { UnifiedList } from 'src/annotations/cache/types'
+import type {
+    PageAnnotationsCacheInterface,
+    UnifiedList,
+} from 'src/annotations/cache/types'
+import { page } from 'src/sidebar-overlay/sidebar/selectors'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -487,37 +491,19 @@ export async function main(
     if (window.location.hostname === 'www.youtube.com') {
         loadYoutubeButtons(annotationsFunctions)
     }
-    if (window.location.href.includes('web.telegram.org/k/')) {
-        const spacesBar = document.getElementById('spacesBar')
-        if (spacesBar) {
-            spacesBar.remove()
-        }
-
-        const textField = document.getElementsByClassName(
-            'input-message-input',
-        )[0]
-        if (textField) {
-            textField.classList.add('mousetrap')
-        }
-
-        const lists = await collectionsBG.fetchPageListEntriesByUrl({
-            url: window.location.href,
-        })
-        if (lists.length > 0) {
-            const updatedLists = await Promise.all(
-                lists
-                    .filter((list) => list.listId !== 20201014)
-                    .map(async (list) => {
-                        const listData = await collectionsBG.fetchListById({
-                            id: list.listId,
-                        })
-                        ;(list as any).name = listData.name // Add the list name to the original list object.
-                        return list
-                    }),
-            )
-
-            loadTelegramUserSpaces(updatedLists, bgScriptBG)
-        }
+    if (window.location.href.includes('web.telegram.org/')) {
+        injectTelegramCustomUI(
+            collectionsBG,
+            bgScriptBG,
+            annotationsCache,
+            window.location.href,
+        )
+    }
+    if (
+        window.location.href.includes('twitter.com/') ||
+        window.location.href.includes('x.com/')
+    ) {
+        await injectTwitterCustomUI(collectionsBG, bgScriptBG, annotationsCache)
     }
 
     // if (window.location.hostname === 'www.youtube.com') {
@@ -742,39 +728,24 @@ export async function main(
         },
         handleHistoryStateUpdate: async (tabId) => {
             await inPageUI.hideRibbon()
-            if (window.location.href.includes('web.telegram.org/k/')) {
-                const spacesBar = document.getElementById('spacesBar')
-                if (spacesBar) {
-                    spacesBar.remove()
-                }
+            if (window.location.href.includes('web.telegram.org/')) {
+                injectTelegramCustomUI(
+                    collectionsBG,
+                    bgScriptBG,
+                    annotationsCache,
+                    window.location.href,
+                )
+            }
 
-                const textField = document.getElementsByClassName(
-                    'input-message-input',
-                )[0]
-                if (textField) {
-                    textField.classList.add('mousetrap')
-                }
-
-                const lists = await collectionsBG.fetchPageListEntriesByUrl({
-                    url: window.location.href,
-                })
-                if (lists.length > 0) {
-                    const updatedLists = await Promise.all(
-                        lists
-                            .filter((list) => list.listId !== 20201014)
-                            .map(async (list) => {
-                                const listData = await collectionsBG.fetchListById(
-                                    {
-                                        id: list.listId,
-                                    },
-                                )
-                                ;(list as any).name = listData.name // Add the list name to the original list object.
-                                return list
-                            }),
-                    )
-
-                    loadTelegramUserSpaces(updatedLists, bgScriptBG)
-                }
+            if (
+                window.location.href.includes('twitter.com/') ||
+                window.location.href.includes('x.com/')
+            ) {
+                await injectTwitterCustomUI(
+                    collectionsBG,
+                    bgScriptBG,
+                    annotationsCache,
+                )
             }
             const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
             if (isPageBlacklisted || !isSidebarEnabled) {
@@ -943,8 +914,9 @@ class PageInfo {
     getPageTitle = () => {
         let title = document.title
 
-        if (window.location.href.includes('web.telegram.org')) {
-            title = getTelegramUserDisplayName(document)
+        if (window.location.href.includes('web.telegram.org/')) {
+            const url = window.location.href
+            title = getTelegramUserDisplayName(document, url)
         }
 
         return title
@@ -956,48 +928,188 @@ class PageInfo {
     }
 }
 
-export function loadTelegramUserSpaces(
-    lists,
+export async function injectTelegramCustomUI(
+    collectionsBG,
     bgScriptBG: RemoteBGScriptInterface,
+    annotationsCache: PageAnnotationsCacheInterface,
+    url: string,
 ) {
+    try {
+        if (window.location.href.includes('/k/')) {
+            const textField = document.getElementsByClassName(
+                'input-message-input',
+            )[0]
+            if (textField) {
+                textField.classList.add('mousetrap')
+            }
+        } else if (window.location.href.includes('/a/')) {
+            const textField = document.getElementById('editable-message-text')
+            if (textField) {
+                textField.classList.add('mousetrap')
+            }
+        }
+
+        let selector
+
+        if (url.includes('/k/')) {
+            selector = '[class="person"]'
+        } else if (url.includes('/a/')) {
+            selector = '[class="ChatInfo"]'
+        }
+        const maxRetries = 10
+        const delayInMilliseconds = 500 // adjust this based on your needs
+
+        const userNameBox = (await findElementWithRetries(
+            selector,
+            maxRetries,
+            delayInMilliseconds,
+        )) as HTMLElement
+
+        const chatInfoBox = document.getElementsByClassName(
+            'chat-info',
+        )[0] as HTMLElement
+
+        chatInfoBox.style.gap = '10px'
+        chatInfoBox.style.display = 'flex'
+        chatInfoBox.style.flexDirection = 'column'
+        chatInfoBox.style.justifyContent = 'flex-start'
+
+        // make sure to properly size the regular chat info box with the name and user name
+        const contentBox = document.getElementsByClassName(
+            'content',
+        )[0] as HTMLElement
+        contentBox.style.maxWidth = 'fit-content'
+        contentBox.style.minWidth = '210px'
+        contentBox.style.paddingRight = '30px'
+        ////////////////////////////////////////////
+
+        if (userNameBox != null) {
+            console.log('found user name box')
+            const pageLists = await fetchListDataForSocialProfiles(
+                collectionsBG,
+            )
+
+            let spacesBar: HTMLElement
+
+            if (pageLists) {
+                spacesBar = renderSpacesBar(pageLists, bgScriptBG)
+            }
+
+            annotationsCache.events.on('updatedPageData', () => {
+                const pageLists = annotationsCache.pageListIds.entries()
+                for (const [key, valueSet] of pageLists) {
+                    const updatedLists = Array.from(valueSet).map((listId) => {
+                        return annotationsCache.lists.byId[listId]
+                    })
+                    spacesBar = renderSpacesBar(updatedLists, bgScriptBG)
+                    userNameBox.appendChild(spacesBar)
+                }
+            })
+            userNameBox.appendChild(spacesBar)
+        }
+    } catch (error) {
+        console.error(error.message)
+    }
+}
+export async function injectTwitterCustomUI(
+    collectionsBG,
+    bgScriptBG: RemoteBGScriptInterface,
+    annotationsCache: PageAnnotationsCacheInterface,
+) {
+    const selector = '[data-testid="UserDescription"]'
+    const maxRetries = 10
+    const delayInMilliseconds = 500 // adjust this based on your needs
+
+    try {
+        const userNameBox = (await findElementWithRetries(
+            selector,
+            maxRetries,
+            delayInMilliseconds,
+        )) as HTMLElement
+
+        if (userNameBox != null) {
+            userNameBox.style.marginBottom = '10px'
+            const pageLists = await fetchListDataForSocialProfiles(
+                collectionsBG,
+            )
+
+            let spacesBar: HTMLElement
+
+            if (pageLists) {
+                spacesBar = renderSpacesBar(pageLists, bgScriptBG)
+            }
+
+            annotationsCache.events.on('updatedPageData', () => {
+                const pageLists = annotationsCache.pageListIds.entries()
+                for (const [key, valueSet] of pageLists) {
+                    const updatedLists = Array.from(valueSet).map((listId) => {
+                        return annotationsCache.lists.byId[listId]
+                    })
+                    spacesBar = renderSpacesBar(updatedLists, bgScriptBG)
+                    userNameBox.insertAdjacentElement('afterend', spacesBar)
+                }
+            })
+            userNameBox.insertAdjacentElement('afterend', spacesBar)
+        }
+    } catch (error) {
+        console.error(error.message)
+    }
+}
+
+async function fetchListDataForSocialProfiles(collectionsBG) {
+    const lists = await collectionsBG.fetchPageListEntriesByUrl({
+        url: window.location.href,
+    })
+    if (lists.length > 0) {
+        const updatedLists = await Promise.all(
+            lists
+                .filter((list) => list.listId !== 20201014)
+                .map(async (list) => {
+                    const listData = await collectionsBG.fetchListById({
+                        id: list.listId,
+                    })
+                    ;(list as any).name = listData.name // Add the list name to the original list object.
+                    return list
+                }),
+        )
+        return updatedLists
+    }
+}
+
+async function findElementWithRetries(selector, retries, delay) {
+    return new Promise((resolve, reject) => {
+        const attempt = () => {
+            const element = document.querySelector(selector)
+
+            if (element) {
+                resolve(element)
+            } else if (retries > 0) {
+                setTimeout(() => {
+                    retries--
+                    attempt()
+                }, delay)
+            } else {
+                reject(new Error('Element not found after maximum retries.'))
+            }
+        }
+
+        attempt()
+    })
+}
+
+function renderSpacesBar(lists, bgScriptBG: RemoteBGScriptInterface) {
     let spacesBarOld = document.getElementById('spacesBar')
 
     if (spacesBarOld) {
         spacesBarOld.remove()
     }
 
-    // Clear out the existing child elements of spacesBar (if any)
-
-    const chatInfoBox = document.getElementsByClassName(
-        'chat-info',
-    )[0] as HTMLElement
-
-    chatInfoBox.style.gap = '10px'
-    chatInfoBox.style.display = 'flex'
-    chatInfoBox.style.flexDirection = 'column'
-    chatInfoBox.style.justifyContent = 'flex-start'
-
-    const contentBox = document.getElementsByClassName(
-        'content',
-    )[0] as HTMLElement
-
-    contentBox.style.maxWidth = 'fit-content'
-    contentBox.style.minWidth = '210px'
-    contentBox.style.paddingRight = '30px'
-
-    const personBox = document.getElementsByClassName(
-        'person',
-    )[0] as HTMLElement
-
     const spacesBar = document.createElement('div')
 
     spacesBar.id = 'spacesBar'
-
     spacesBar.style.display = 'flex'
     spacesBar.style.alignItems = 'center'
-    spacesBar.style.gap = '10px'
-
-    personBox.appendChild(spacesBar)
+    spacesBar.style.gap = '5px'
 
     lists.forEach((list) => {
         const listDiv = document.createElement('div')
@@ -1009,6 +1121,7 @@ export function loadTelegramUserSpaces(
         listDiv.style.fontSize = '14px'
         listDiv.style.display = 'flex'
         listDiv.style.alignItems = 'center'
+        listDiv.style.fontFamily = 'Arial'
         listDiv.innerText = list.name // assuming 'name' is a property of the list items
         listDiv.addEventListener('click', (event) => {
             event.preventDefault()
@@ -1020,11 +1133,7 @@ export function loadTelegramUserSpaces(
         spacesBar.appendChild(listDiv)
     })
 
-    // If spacesBar wasn't part of the DOM already, you might want to append it somewhere.
-    if (!document.getElementById('spacesBar')) {
-        const chatInfoBox = document.getElementsByClassName('person')[0] // gets the first 'person' element
-        chatInfoBox.appendChild(spacesBar)
-    }
+    return spacesBar
 }
 
 export function loadYoutubeButtons(annotationsFunctions) {
