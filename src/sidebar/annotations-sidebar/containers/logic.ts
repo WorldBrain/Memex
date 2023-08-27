@@ -17,6 +17,7 @@ import {
     detectAnnotationConversationThreads,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/logic'
 import type { ConversationIdBuilder } from '@worldbrain/memex-common/lib/content-conversations/ui/types'
+import { trackPageRead } from '@worldbrain/memex-common/lib/analytics/events'
 import type { Annotation } from 'src/annotations/types'
 import type {
     SidebarContainerDependencies,
@@ -366,6 +367,9 @@ export class SidebarContainerLogic extends UILogic<
         this.options.events?.emit('renderHighlights', {
             highlights,
         })
+
+        // REMOVE: Example analytics event
+        trackPageRead(this.options.analyticsBG, { readTime: 123 })
     }
 
     private setupRemoteEventListeners() {
