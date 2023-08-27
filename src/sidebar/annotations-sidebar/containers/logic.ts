@@ -1264,7 +1264,10 @@ export class SidebarContainerLogic extends UILogic<
 
             let title: string | null = null
             if (window.location.href.includes('web.telegram.org')) {
-                title = getTelegramUserDisplayName(document)
+                title = getTelegramUserDisplayName(
+                    document,
+                    window.location.href,
+                )
             }
 
             // Adding a new annot in selected space mode should only work on the "Spaces" tab
@@ -2605,7 +2608,7 @@ export class SidebarContainerLogic extends UILogic<
         let title
 
         if (window.location.href.includes('web.telegram.org')) {
-            title = getTelegramUserDisplayName(document)
+            title = getTelegramUserDisplayName(document, window.location.href)
         }
 
         await executeUITask(this, 'pageLinkCreateState', async () => {
