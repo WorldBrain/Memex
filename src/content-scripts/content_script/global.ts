@@ -728,8 +728,9 @@ export async function main(
         },
         handleHistoryStateUpdate: async (tabId) => {
             await inPageUI.hideRibbon()
+
             if (window.location.href.includes('web.telegram.org/')) {
-                injectTelegramCustomUI(
+                await injectTelegramCustomUI(
                     collectionsBG,
                     bgScriptBG,
                     annotationsCache,
@@ -747,15 +748,17 @@ export async function main(
                     annotationsCache,
                 )
             }
+            if (window.location.hostname === 'www.youtube.com') {
+                loadYoutubeButtons(annotationsFunctions)
+            }
+
             const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
             if (isPageBlacklisted || !isSidebarEnabled) {
                 await inPageUI.removeRibbon()
             } else {
                 await inPageUI.reloadRibbon()
             }
-            if (window.location.hostname === 'www.youtube.com') {
-                loadYoutubeButtons(annotationsFunctions)
-            }
+
             if (inPageUI.componentsShown.sidebar) {
                 await inPageUI.showSidebar()
             }
