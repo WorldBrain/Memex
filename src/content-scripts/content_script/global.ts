@@ -736,10 +736,10 @@ export async function main(
                     window.location.href,
                 )
             }
-
             if (
                 window.location.href.includes('twitter.com/') ||
-                window.location.href.includes('x.com/')
+                (window.location.href.includes('x.com/') &&
+                    !window.location.href.includes('/status/'))
             ) {
                 await injectTwitterCustomUI(
                     collectionsBG,
@@ -762,6 +762,7 @@ export async function main(
             highlightRenderer.resetHighlightsStyles()
             await bookmarks.autoSetBookmarkStatusInBrowserIcon(tabId)
             await sleepPromise(500)
+
             await pageInfo.refreshIfNeeded()
         },
     })
