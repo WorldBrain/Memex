@@ -988,7 +988,6 @@ export async function injectTelegramCustomUI(
         ////////////////////////////////////////////
 
         if (userNameBox != null) {
-            console.log('found user name box')
             const pageLists = await fetchListDataForSocialProfiles(
                 collectionsBG,
             )
@@ -997,6 +996,12 @@ export async function injectTelegramCustomUI(
 
             if (pageLists) {
                 spacesBar = renderSpacesBar(pageLists, bgScriptBG)
+            } else {
+                let spacesBarOld = document.getElementById('spacesBar')
+
+                if (spacesBarOld) {
+                    spacesBarOld.remove()
+                }
             }
 
             annotationsCache.events.on('updatedPageData', () => {
@@ -1041,6 +1046,12 @@ export async function injectTwitterCustomUI(
 
             if (pageLists) {
                 spacesBar = renderSpacesBar(pageLists, bgScriptBG)
+            } else {
+                let spacesBarOld = document.getElementById('spacesBar')
+
+                if (spacesBarOld) {
+                    spacesBarOld.remove()
+                }
             }
 
             annotationsCache.events.on('updatedPageData', () => {
