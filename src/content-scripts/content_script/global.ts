@@ -488,24 +488,6 @@ export async function main(
         },
     }
 
-    if (window.location.hostname === 'www.youtube.com') {
-        loadYoutubeButtons(annotationsFunctions)
-    }
-    if (window.location.href.includes('web.telegram.org/')) {
-        injectTelegramCustomUI(
-            collectionsBG,
-            bgScriptBG,
-            annotationsCache,
-            window.location.href,
-        )
-    }
-    if (
-        window.location.href.includes('twitter.com/') ||
-        window.location.href.includes('x.com/')
-    ) {
-        await injectTwitterCustomUI(collectionsBG, bgScriptBG, annotationsCache)
-    }
-
     // if (window.location.hostname === 'www.youtube.com') {
     //     injectYoutubeButtonMenu(annotationsFunctions)
     //     injectYoutubeContextMenu(annotationsFunctions)
@@ -772,6 +754,7 @@ export async function main(
 
     // 6. Setup other interactions with this page (things that always run)
     // setupScrollReporter()
+
     initKeyboardShortcuts({
         inPageUI,
         createHighlight: annotationsFunctions.createHighlight({
@@ -830,6 +813,25 @@ export async function main(
     }
 
     setupWebUIActions({ contentScriptsBG, bgScriptBG, pageActivityIndicatorBG })
+
+    if (window.location.hostname === 'www.youtube.com') {
+        loadYoutubeButtons(annotationsFunctions)
+    }
+    if (window.location.href.includes('web.telegram.org/')) {
+        injectTelegramCustomUI(
+            collectionsBG,
+            bgScriptBG,
+            annotationsCache,
+            window.location.href,
+        )
+    }
+    if (
+        window.location.href.includes('twitter.com/') ||
+        window.location.href.includes('x.com/')
+    ) {
+        await injectTwitterCustomUI(collectionsBG, bgScriptBG, annotationsCache)
+    }
+
     return inPageUI
 }
 
@@ -1068,6 +1070,7 @@ export async function injectTwitterCustomUI(
     } catch (error) {
         console.error(error.message)
     }
+    return
 }
 
 async function fetchListDataForSocialProfiles(collectionsBG) {
