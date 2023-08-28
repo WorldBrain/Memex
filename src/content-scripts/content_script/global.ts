@@ -939,6 +939,12 @@ export async function injectTelegramCustomUI(
     url: string,
 ) {
     try {
+        let spacesBarOld = document.getElementById('spacesBar')
+
+        if (spacesBarOld) {
+            spacesBarOld.remove()
+        }
+
         if (window.location.href.includes('/k/')) {
             const textField = document.getElementsByClassName(
                 'input-message-input',
@@ -996,12 +1002,6 @@ export async function injectTelegramCustomUI(
 
             if (pageLists) {
                 spacesBar = renderSpacesBar(pageLists, bgScriptBG)
-            } else {
-                let spacesBarOld = document.getElementById('spacesBar')
-
-                if (spacesBarOld) {
-                    spacesBarOld.remove()
-                }
             }
 
             annotationsCache.events.on('updatedPageData', () => {
@@ -1028,6 +1028,11 @@ export async function injectTwitterCustomUI(
     const selector = '[data-testid="UserDescription"]'
     const maxRetries = 10
     const delayInMilliseconds = 500 // adjust this based on your needs
+    let spacesBarOld = document.getElementById('spacesBar')
+
+    if (spacesBarOld) {
+        spacesBarOld.remove()
+    }
 
     try {
         const userNameBox = (await findElementWithRetries(
@@ -1046,12 +1051,6 @@ export async function injectTwitterCustomUI(
 
             if (pageLists) {
                 spacesBar = renderSpacesBar(pageLists, bgScriptBG)
-            } else {
-                let spacesBarOld = document.getElementById('spacesBar')
-
-                if (spacesBarOld) {
-                    spacesBarOld.remove()
-                }
             }
 
             annotationsCache.events.on('updatedPageData', () => {
