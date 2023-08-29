@@ -2070,6 +2070,7 @@ export class AnnotationsSidebar extends React.Component<
                 spaceTitleEditState: false,
                 spaceTitleEditValue: null,
             })
+            this.spaceTitleEditFieldRef.current.blur()
         } else if (event.key === 'Escape') {
             event.stopPropagation()
             this.setState({
@@ -2161,31 +2162,26 @@ export class AnnotationsSidebar extends React.Component<
                         {this.renderPermissionStatusButton()}
                     </RightSideButtonsTopBar>
                 </IsolatedViewHeaderTopBar>
-                {this.state.spaceTitleEditState ? (
-                    <SpaceTitleEditField
-                        ref={this.spaceTitleEditFieldRef}
-                        value={this.state.spaceTitleEditValue}
-                        onChange={(event) => {
-                            this.setState({
-                                spaceTitleEditValue: event.target.value,
-                            })
-                        }}
-                        onKeyDown={this.handleNameEditInputKeyDown}
-                        autoFocus
-                    />
-                ) : (
-                    <SpaceTitle
-                        onClick={() =>
-                            this.setState({
-                                spaceTitleEditState: true,
-                                spaceTitleEditValue: this.props.annotationsCache
-                                    .lists.byId[this.props.selectedListId].name,
-                            })
-                        }
-                    >
-                        {selectedList.name}
-                    </SpaceTitle>
-                )}
+                {/* {this.state.spaceTitleEditState ? ( */}
+                <SpaceTitleEditField
+                    ref={this.spaceTitleEditFieldRef}
+                    value={this.state.spaceTitleEditValue ?? selectedList.name}
+                    onChange={(event) => {
+                        this.setState({
+                            spaceTitleEditValue: event.target.value,
+                        })
+                    }}
+                    isActivated={this.state.spaceTitleEditState}
+                    onClick={() =>
+                        !this.state.spaceTitleEditState &&
+                        this.setState({
+                            spaceTitleEditState: true,
+                            spaceTitleEditValue: this.props.annotationsCache
+                                .lists.byId[this.props.selectedListId].name,
+                        })
+                    }
+                    onKeyDown={this.handleNameEditInputKeyDown}
+                />
                 <SpaceDescription>{selectedList.description}</SpaceDescription>
                 {/* {totalAnnotsCountJSX}
                 {othersAnnotsCountJSX} */}
@@ -2978,7 +2974,7 @@ const SpaceTitle = styled.div`
         background: ${(props) => props.theme.colors.greyScale1};
     }
 `
-const SpaceTitleEditField = styled.input`
+const SpaceTitleEditField = styled.input<{ isActivated: boolean }>`
     font-size: 18px;
     font-weight: 500;
     width: fill-available;
@@ -2991,6 +2987,29 @@ const SpaceTitleEditField = styled.input`
     outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on;
     border: none;
+
+    ${(props) =>
+        !props.isActivated &&
+        css`
+            font-size: 18px;
+            font-weight: 500;
+            width: fill-available;
+            color: ${(props) => props.theme.colors.white};
+            background: transparent;
+            letter-spacing: 1px;
+            padding: 5px 3px 5px 5px;
+            margin: -5px -3px -5px -5px;
+            border-radius: 5px;
+            outline: 1px solid transparent;
+            font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+                'ss04' on;
+            border: none;
+
+            &:hover {
+                cursor: pointer;
+                background: ${(props) => props.theme.colors.greyScale1};
+            }
+        `};
 `
 
 const SpaceDescription = styled(Markdown)`

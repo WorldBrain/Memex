@@ -1270,6 +1270,13 @@ export class SidebarContainerLogic extends UILogic<
                 )
             }
 
+            if (
+                window.location.href.includes('x.com/messages/') ||
+                window.location.href.includes('twitter.com/messages/')
+            ) {
+                title = document.title
+            }
+
             // Adding a new annot in selected space mode should only work on the "Spaces" tab
             if (activeTab === 'spaces') {
                 maybeAddLocalListIdForCacheList(selectedListId)
