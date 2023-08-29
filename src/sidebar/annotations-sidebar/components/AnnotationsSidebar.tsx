@@ -2050,10 +2050,6 @@ export class AnnotationsSidebar extends React.Component<
             this.props.selectedListId
         ]
 
-        const nativeEvent = event.nativeEvent as KeyboardEvent
-
-        nativeEvent.stopImmediatePropagation()
-
         event.stopPropagation()
         if (event.key === 'Enter') {
             const inputValue = (event.target as HTMLInputElement).value
@@ -2166,19 +2162,15 @@ export class AnnotationsSidebar extends React.Component<
                 {/* {this.state.spaceTitleEditState ? ( */}
                 <SpaceTitleEditField
                     ref={this.spaceTitleEditFieldRef}
-                    value={this.state.spaceTitleEditValue ?? selectedList.name}
+                    value={this.props.spaceTitleEditValue ?? selectedList.name}
                     onChange={(event) => {
-                        this.setState({
-                            spaceTitleEditValue: event.target.value,
-                        })
+                        this.props.setSpaceTitleEditValue(event.target.value)
                     }}
                     isActivated={this.state.spaceTitleEditState}
                     onClick={() =>
                         !this.state.spaceTitleEditState &&
                         this.setState({
                             spaceTitleEditState: true,
-                            spaceTitleEditValue: this.props.annotationsCache
-                                .lists.byId[this.props.selectedListId].name,
                         })
                     }
                     onKeyDown={this.handleNameEditInputKeyDown}
