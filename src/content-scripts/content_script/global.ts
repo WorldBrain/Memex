@@ -1416,7 +1416,9 @@ function renderSpacesBar(
             event.preventDefault()
             event.stopPropagation()
             bgScriptBG.openOverviewTab({
-                selectedSpace: list.listId as number,
+                // TODO: fix type but list.localId is not working. Tetst by clicking on the pills in telegram/twitter. They should jump to the right space in the dashboard
+                /** @ts-ignore */
+                selectedSpace: list.listId,
             })
         })
         spacesBar.appendChild(listDiv)
