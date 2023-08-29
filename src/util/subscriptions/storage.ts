@@ -109,7 +109,6 @@ async function enforceTrialPeriod30Days() {
 
 export async function updatePageCounter() {
     const isTrial = await enforceTrialPeriod30Days()
-    console.log('isTrial', isTrial)
 
     if (isTrial) {
         return

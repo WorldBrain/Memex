@@ -236,6 +236,13 @@ export default class Ribbon extends Component<Props, State> {
             )
         }
 
+        if (
+            window.location.href.includes('x.com/messages/') ||
+            window.location.href.includes('twitter.com/messages/')
+        ) {
+            pageTitle = document.title
+        }
+
         const topRight = this.props.ribbonPosition === 'topRight'
         const bottomRight = this.props.ribbonPosition === 'bottomRight'
 

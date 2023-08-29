@@ -594,6 +594,12 @@ export class RibbonContainerLogic extends UILogic<
                     window.location.href,
                 )
             }
+            if (
+                window.location.href.includes('x.com/messages/') ||
+                window.location.href.includes('twitter.com/messages/')
+            ) {
+                title = document.title
+            }
 
             try {
                 if (shouldBeBookmarked) {
@@ -854,6 +860,13 @@ export class RibbonContainerLogic extends UILogic<
 
         if (window.location.href.includes('web.telegram.org')) {
             title = getTelegramUserDisplayName(document, window.location.href)
+        }
+
+        if (
+            window.location.href.includes('x.com/messages/') ||
+            window.location.href.includes('twitter.com/messages/')
+        ) {
+            title = document.title
         }
 
         return this.dependencies.customLists.updateListForPage({
