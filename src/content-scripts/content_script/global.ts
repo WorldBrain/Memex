@@ -96,8 +96,6 @@ import { page } from 'src/sidebar-overlay/sidebar/selectors'
 // on demand by the browser, as needed. This main function manages the initialisation
 // and dependencies of content scripts.
 
-export const annotationCacheListener = null
-
 export async function main(
     params: {
         loadRemotely?: boolean
@@ -858,7 +856,6 @@ export async function main(
         annotationsCache.events.on('updatedPageData', async (pageListId) => {
             const currentURL = pageInfo.getTwitterFullUrl()
             if (currentURL !== 'https://' + pageListId) {
-                console.log('inject')
                 await injectTwitterCustomUI(
                     collectionsBG,
                     bgScriptBG,
@@ -871,7 +868,7 @@ export async function main(
                     'spacesBarContainer',
                 )
                 if (!existingContainer) {
-                    await sleepPromise(500)
+                    await sleepPromise(2000)
                     await injectTwitterCustomUI(
                         collectionsBG,
                         bgScriptBG,
@@ -989,9 +986,7 @@ class PageInfo {
         let fullUrl
         let retryCount = 0
         const MAX_RETRIES = 60
-        console.log('getting', this.normalizedTwitterFullUrl)
         if (this.normalizedTwitterFullUrl == null) {
-            console.log('start')
             let chatItemsList: HTMLCollectionOf<Element>
             while (retryCount < MAX_RETRIES) {
                 const activeChatItem = document.querySelector(
@@ -1018,9 +1013,7 @@ class PageInfo {
     }
 
     setTwitterFullUrl = async (url) => {
-        console.log('setting', url)
         this.normalizedTwitterFullUrl = url
-        console.log('set', this.normalizedTwitterFullUrl)
 
         return
     }
@@ -1169,8 +1162,6 @@ export async function injectTwitterCustomUI(
     const delayInMilliseconds = 500 // adjust this based on your needs
     let pageType: string
 
-    console.log('start inject')
-
     try {
         let userNameBox: HTMLElement
 
@@ -1181,8 +1172,6 @@ export async function injectTwitterCustomUI(
                 maxRetries,
                 delayInMilliseconds,
             )) as HTMLElement
-
-            console.log('userNameBox', userNameBox)
 
             let spacesBarContainer = document.getElementById(
                 'spacesBarContainer',

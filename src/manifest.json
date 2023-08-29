@@ -44,8 +44,7 @@
         "webNavigation",
         "notifications",
         "unlimitedStorage",
-        "storage",
-        "webRequest"
+        "storage"
     ],
     "web_accessible_resources": [
         "/lib/pdf.worker.min.js",
