@@ -432,14 +432,14 @@ describe('Social previews tests', () => {
         expect(renderedHtmlA.includes(`<meta property="og:image" content="${ogImgSrcA}" />`)).toBe(true)
         expect(renderedHtmlA.includes(`<meta property="og:title" content="${sharedListEntryDataA.entryTitle}" />`)).toBe(true)
         expect(renderedHtmlA.includes(`<meta property="og:description" content="${PAGE_DESCRIPTION_FALLBACK}" />`)).toBe(true)
-        expect(renderedHtmlA.includes(`<meta property="og:url" content="${getSinglePageShareUrl({ remoteListId: sharedListData.id, remoteListEntryId: sharedListEntryDataA.id })}" />`)).toBe(true)
+        expect(renderedHtmlA.includes(`<meta property="og:url" content="${sharedListEntryDataA.originalUrl}" />`)).toBe(true)
 
         expect(renderedHtmlB.includes(`<meta property="twitter:image" content="${ogImgSrcB}" />`)).toBe(true)
         expect(renderedHtmlB.includes(`<meta property="twitter:title" content="${PAGE_TITLE_FALLBACK}" />`)).toBe(true)
         expect(renderedHtmlB.includes(`<meta property="og:image" content="${ogImgSrcB}" />`)).toBe(true)
         expect(renderedHtmlB.includes(`<meta property="og:title" content="${PAGE_TITLE_FALLBACK}" />`)).toBe(true)
         expect(renderedHtmlB.includes(`<meta property="og:description" content="${PAGE_DESCRIPTION_FALLBACK}" />`)).toBe(true)
-        expect(renderedHtmlB.includes(`<meta property="og:url" content="${getSinglePageShareUrl({ remoteListId: sharedListData.id, remoteListEntryId: sharedListEntryDataB.id })}" />`)).toBe(true)
+        expect(renderedHtmlB.includes(`<meta property="og:url" content="${sharedListEntryDataB.originalUrl}" />`)).toBe(true)
         }
     })
 })
