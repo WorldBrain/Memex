@@ -712,10 +712,18 @@ export async function main(
             await inPageUI.hideRibbon()
 
             if (window.location.href.includes('web.telegram.org/')) {
+                const existingContainer = document.getElementById(
+                    `spacesBarContainer`,
+                )
+
+                if (existingContainer) {
+                    existingContainer.remove()
+                }
+
                 await injectTelegramCustomUI(
                     collectionsBG,
                     bgScriptBG,
-                    annotationsCache,
+                    window.location.href,
                 )
             }
             if (
@@ -725,7 +733,7 @@ export async function main(
             ) {
                 await pageInfo.setTwitterFullUrl(null)
 
-                if (window.location.href.includes('/messages/')) {
+                if (window.location.href.includes('/messages')) {
                     const url = await pageInfo.getFullPageUrl()
 
                     await pageInfo.setTwitterFullUrl(url)
@@ -848,15 +856,38 @@ export async function main(
         await injectTelegramCustomUI(
             collectionsBG,
             bgScriptBG,
-            annotationsCache,
+            window.location.href,
         )
+
+        annotationsCache.events.on('updatedPageData', (url, pageListIds) => {
+            let spacesBar: HTMLElement
+            let existingContainer: HTMLElement
+            const pageListIdURL = 'https://' + url
+
+            existingContainer = document.getElementById('spacesBarContainer')
+            spacesBar = document.getElementById('spacesBar')
+
+            if (spacesBar) {
+                spacesBar.remove()
+            }
+
+            const lists = Array.from(pageListIds).map((listId) => {
+                return annotationsCache.lists.byId[listId]
+            })
+
+            spacesBar = renderSpacesBar(lists, bgScriptBG, pageListIdURL)
+
+            if (existingContainer) {
+                existingContainer.appendChild(spacesBar)
+            }
+        })
     }
     if (
         window.location.href.includes('twitter.com/') ||
         (window.location.href.includes('x.com/') &&
             !window.location.href.includes('/status/'))
     ) {
-        if (window.location.href.includes('/messages/')) {
+        if (window.location.href.includes('/messages')) {
             await trackTwitterMessageList(collectionsBG, bgScriptBG)
         } else {
             await injectTwitterProfileUI(
@@ -875,7 +906,7 @@ export async function main(
 
             let spacesBar: HTMLElement
 
-            if (window.location.href.includes('/messages/')) {
+            if (window.location.href.includes('/messages')) {
                 spacesBar = renderSpacesBar(lists, bgScriptBG, pageListIdURL)
             } else {
                 spacesBar = renderSpacesBar(lists, bgScriptBG, pageListIdURL)
@@ -883,7 +914,7 @@ export async function main(
 
             let existingContainer: HTMLElement
 
-            if (window.location.href.includes('/messages/')) {
+            if (window.location.href.includes('/messages')) {
                 existingContainer = document.getElementById(
                     `spacesBarContainer_${pageListIdURL}`,
                 )
@@ -959,7 +990,7 @@ class PageInfo {
         })
         let fullUrl = getUnderlyingResourceUrl(window.location.href)
 
-        if (window.location.href.includes('twitter.com/messages/')) {
+        if (window.location.href.includes('twitter.com/messages')) {
             fullUrl = await this.normalizeTwitterCurrentFullURL()
         }
 
@@ -987,6 +1018,9 @@ class PageInfo {
         let fullUrl
         let retryCount = 0
         const MAX_RETRIES = 60
+        if (window.location.href === 'https://twitter.com/messages') {
+            return 'https://twitter.com/messages'
+        }
         while (retryCount < MAX_RETRIES) {
             const activeChatItem = document.querySelector(
                 '[aria-selected="true"]',
@@ -1021,7 +1055,7 @@ class PageInfo {
         await this.refreshIfNeeded()
         let fullUrl = this._identifier.fullUrl
 
-        if (window.location.href.includes('twitter.com/messages/')) {
+        if (window.location.href.includes('twitter.com/messages')) {
             fullUrl = await this.normalizeTwitterCurrentFullURL()
             return fullUrl
         } else {
@@ -1049,36 +1083,20 @@ class PageInfo {
 export async function injectTelegramCustomUI(
     collectionsBG,
     bgScriptBG: RemoteBGScriptInterface,
-    annotationsCache: PageAnnotationsCacheInterface,
+    url: string,
 ) {
     try {
-        let spacesBarOld = document.getElementById('spacesBar')
-
-        if (spacesBarOld) {
-            spacesBarOld.remove()
-        }
-
-        if (window.location.href.includes('/k/')) {
-            const textField = document.getElementsByClassName(
-                'input-message-input',
-            )[0]
-            if (textField) {
-                textField.classList.add('mousetrap')
-            }
-        } else if (window.location.href.includes('/a/')) {
-            const textField = document.getElementById('editable-message-text')
-            if (textField) {
-                textField.classList.add('mousetrap')
-            }
+        const textField = document.getElementsByClassName(
+            'input-message-input',
+        )[0]
+        if (textField) {
+            textField.classList.add('mousetrap')
         }
 
         let selector
 
-        if (window.location.href.includes('/k/')) {
-            selector = '[class="person"]'
-        } else if (window.location.href.includes('/a/')) {
-            selector = '[class="ChatInfo"]'
-        }
+        selector = '[class="person"]'
+
         const maxRetries = 10
         const delayInMilliseconds = 500 // adjust this based on your needs
 
@@ -1107,28 +1125,23 @@ export async function injectTelegramCustomUI(
         ////////////////////////////////////////////
 
         if (userNameBox != null) {
+            let spacesBar: HTMLElement
+            let spacesBarContainer = document.createElement('div')
+            spacesBarContainer.id = `spacesBarContainer`
+
+            userNameBox.insertAdjacentElement('beforeend', spacesBarContainer)
+
             const pageLists = await fetchListDataForSocialProfiles(
                 collectionsBG,
-                window.location.href,
+                url,
             )
 
-            let spacesBar: HTMLElement
-
-            if (pageLists) {
+            if (pageLists != null && pageLists.length > 0) {
                 spacesBar = renderSpacesBar(pageLists, bgScriptBG)
+                spacesBarContainer.appendChild(spacesBar)
+            } else {
+                return
             }
-
-            annotationsCache.events.on('updatedPageData', () => {
-                const pageLists = annotationsCache.pageListIds.entries()
-                for (const [key, valueSet] of pageLists) {
-                    const updatedLists = Array.from(valueSet).map((listId) => {
-                        return annotationsCache.lists.byId[listId]
-                    })
-                    spacesBar = renderSpacesBar(updatedLists, bgScriptBG)
-                    userNameBox.appendChild(spacesBar)
-                }
-            })
-            userNameBox.appendChild(spacesBar)
         }
     } catch (error) {
         console.error(error.message)
@@ -1174,6 +1187,7 @@ export async function trackTwitterMessageList(
                     let spacesBarContainer = document.createElement('div')
                     spacesBarContainer.id = `spacesBarContainer_${fullUrl}`
                     spacesBarContainer.style.display = 'flex'
+                    spacesBarContainer.style.marginTop = '5px'
 
                     const pageLists = await fetchListDataForSocialProfiles(
                         collectionsBG,
@@ -1203,6 +1217,8 @@ export async function trackTwitterMessageList(
                 }
             }
         }
+
+        console.log('tabdiv', tabListDiv)
 
         // Initial processing
         tabListDiv.childNodes.forEach((node) => processNode(node))
@@ -1246,6 +1262,7 @@ export async function injectTwitterProfileUI(
             let spacesBar: HTMLElement
             let spacesBarContainer = document.createElement('div')
             spacesBarContainer.id = `spacesBarContainer_${url}`
+            spacesBarContainer.style.marginTop = '5px'
 
             userNameBox.insertAdjacentElement('beforeend', spacesBarContainer)
 
@@ -1370,13 +1387,12 @@ function renderSpacesBar(
     }
 
     if (lists.length > 0) {
-        spacesBar.id = `spacesBar_${url}`
+        spacesBar.id = url ? `spacesBar_${url}` : `spacesBar`
         spacesBar.style.display = 'flex'
         spacesBar.style.alignItems = 'center'
         spacesBar.style.gap = '5px'
-        spacesBar.style.marginTop = '5px'
     } else {
-        spacesBar.id = `spacesBar_${url}`
+        spacesBar.id = url ? `spacesBar_${url}` : `spacesBar`
         spacesBar.style.display = 'flex'
         spacesBar.style.alignItems = 'center'
         spacesBar.style.gap = '0px'
