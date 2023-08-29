@@ -233,6 +233,7 @@ export class SidebarContainerLogic extends UILogic<
             showAllNotesCopyPaster: false,
             pageSummary: '',
             selectedListId: null,
+            spaceTitleEditValue: '',
             activeListContextMenuId: null,
 
             commentBox: { ...INIT_FORM_STATE },
@@ -2233,6 +2234,15 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
+    setSpaceTitleEditValue: EventHandler<'setSpaceTitleEditValue'> = ({
+        event,
+    }) => {
+        console.log('event.value', event.value)
+        this.emitMutation({
+            spaceTitleEditValue: { $set: event.value },
+        })
+    }
+
     markFeedAsRead: EventHandler<'markFeedAsRead'> = async () => {
         // const activityindicator = await this.options.activityIndicatorBG.markActivitiesAsSeen()
         // await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
@@ -2258,9 +2268,12 @@ export class SidebarContainerLogic extends UILogic<
             return state
         }
 
+        const listTitle = list.name
+
         let nextState = this.applyAndEmitMutation(state, {
             activeTab: { $set: 'spaces' },
             selectedListId: { $set: unifiedListId },
+            spaceTitleEditValue: { $set: listTitle },
         })
 
         this.options.events?.emit('renderHighlights', {

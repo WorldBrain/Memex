@@ -1064,6 +1064,12 @@ export class AnnotationsSidebarContainer<
                                         },
                                     ),
                             })}
+                            setSpaceTitleEditValue={(value) =>
+                                this.processEvent('setSpaceTitleEditValue', {
+                                    value,
+                                })
+                            }
+                            spaceTitleEditValue={this.state.spaceTitleEditValue}
                         />
                     </Rnd>
                 </ContainerStyled>

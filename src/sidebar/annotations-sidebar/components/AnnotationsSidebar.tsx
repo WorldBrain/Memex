@@ -188,12 +188,14 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     saveAIPrompt: (prompt) => void
     removeAISuggestion: (prompt) => void
     navigateFocusInList: (direction: 'up' | 'down') => void
+    spaceTitleEditValue: string
     updateListName: (
         unifiedId: string,
         localId: number,
         oldName: string,
         newName: string,
     ) => void
+    setSpaceTitleEditValue: (value) => void
 }
 
 interface AnnotationsSidebarState {
@@ -214,7 +216,6 @@ interface AnnotationsSidebarState {
     AIsuggestions: []
     autoFocusCreateForm: boolean
     spaceTitleEditState: boolean
-    spaceTitleEditValue: string
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -251,7 +252,6 @@ export class AnnotationsSidebar extends React.Component<
         AIsuggestions: [],
         autoFocusCreateForm: false,
         spaceTitleEditState: false,
-        spaceTitleEditValue: null,
     }
 
     private maybeCreateContextBtnRef({
@@ -305,19 +305,19 @@ export class AnnotationsSidebar extends React.Component<
         ) {
             if (
                 this.props.lists.byId[this.props.selectedListId].name !==
-                this.state.spaceTitleEditValue
+                this.props.spaceTitleEditValue
             ) {
                 this.props.updateListName(
                     this.props.lists.byId[this.props.selectedListId].unifiedId,
                     this.props.lists.byId[this.props.selectedListId].localId,
                     this.props.lists.byId[this.props.selectedListId].name,
-                    this.state.spaceTitleEditValue,
+                    this.props.spaceTitleEditValue,
                 )
             }
             this.setState({
                 spaceTitleEditState: false,
-                spaceTitleEditValue: null, // Reset to the original value
             })
+            this.props.setSpaceTitleEditValue(null)
         }
     }
     focusCreateForm = () => {
@@ -2050,10 +2050,6 @@ export class AnnotationsSidebar extends React.Component<
             this.props.selectedListId
         ]
 
-        const nativeEvent = event.nativeEvent as KeyboardEvent
-
-        nativeEvent.stopImmediatePropagation()
-
         event.stopPropagation()
         if (event.key === 'Enter') {
             const inputValue = (event.target as HTMLInputElement).value
@@ -2068,23 +2064,22 @@ export class AnnotationsSidebar extends React.Component<
             }
             this.setState({
                 spaceTitleEditState: false,
-                spaceTitleEditValue: null,
             })
+            this.props.setSpaceTitleEditValue(null)
             this.spaceTitleEditFieldRef.current.blur()
         } else if (event.key === 'Escape') {
             event.stopPropagation()
             this.setState({
                 spaceTitleEditState: false,
-                spaceTitleEditValue: selectedList.name,
             })
-        } else if (event.key === 'space') {
-            this.setState({
-                spaceTitleEditValue: this.state.spaceTitleEditState + ' ',
-            })
-            event.stopPropagation()
+            this.props.setSpaceTitleEditValue(selectedList.name)
         }
 
         // If we don't have this, events will bubble up into the page!
+
+        const nativeEvent = event.nativeEvent as KeyboardEvent
+
+        nativeEvent.stopImmediatePropagation()
         event.stopPropagation()
     }
 
@@ -2165,21 +2160,22 @@ export class AnnotationsSidebar extends React.Component<
                 {/* {this.state.spaceTitleEditState ? ( */}
                 <SpaceTitleEditField
                     ref={this.spaceTitleEditFieldRef}
-                    value={this.state.spaceTitleEditValue ?? selectedList.name}
+                    value={this.props.spaceTitleEditValue ?? selectedList.name}
                     onChange={(event) => {
-                        this.setState({
-                            spaceTitleEditValue: event.target.value,
-                        })
+                        {
+                            this.props.setSpaceTitleEditValue(
+                                event.target.value,
+                            )
+                        }
                     }}
                     isActivated={this.state.spaceTitleEditState}
-                    onClick={() =>
+                    onClick={() => {
+                        this.props.setSpaceTitleEditValue(selectedList.name)
                         !this.state.spaceTitleEditState &&
-                        this.setState({
-                            spaceTitleEditState: true,
-                            spaceTitleEditValue: this.props.annotationsCache
-                                .lists.byId[this.props.selectedListId].name,
-                        })
-                    }
+                            this.setState({
+                                spaceTitleEditState: true,
+                            })
+                    }}
                     onKeyDown={this.handleNameEditInputKeyDown}
                 />
                 <SpaceDescription>{selectedList.description}</SpaceDescription>

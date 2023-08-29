@@ -116,6 +116,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     pillVisibility: string
 
     sidebarWidth?: string
+    spaceTitleEditValue?: string
 
     // Indicates what is the currently selected space in the leaf screen
     // for the side bar, also known as the isolated view. When a space
@@ -224,6 +225,7 @@ interface SidebarEvents {
     saveAIPrompt: { prompt: string }
     removeAISuggestion: { suggestion: string }
     navigateFocusInList: { direction: 'up' | 'down' }
+    setSpaceTitleEditValue: { value: string }
 
     setActiveSidebarTab: {
         tab: SidebarTab
