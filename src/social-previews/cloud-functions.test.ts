@@ -22,7 +22,6 @@ import {
     createPageLinkListTitle,
     getListShareUrl,
     getNoteShareUrl,
-    getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 
 const TEST_BUNDLES_STR = 'test-1.js test-2.js test-1.css'
@@ -33,6 +32,7 @@ async function setupTest(opts: {}) {
     const setup = await setupBackgroundIntegrationTest()
     const serverStorage = await setup.getServerStorage()
     const htmlRenderer = new SocialPreviewHTMLRenderer({
+        fetch: setup.fetch as any,
         storage: serverStorage.modules,
         captureException: async (err) => {
             capturedError = err
@@ -143,7 +143,16 @@ describe('Social previews tests', () => {
     })
 
     it('should generate HTML containing OG tags, web UI JS bundles, and list+list entry data for an existing page link list', async () => {
-        const { storageManager, htmlRenderer } = await setupTest({})
+        const { storageManager, htmlRenderer, fetchMock } = await setupTest({})
+        const previewImage = './some-preview-img.png'
+        const previewDescription = 'some page description'
+        fetchMock.mock('*', 200, {
+            response: `<html><head>
+            <meta property="og:image" content="${previewImage}" />
+            <meta property="og:description" content="${previewDescription}" />
+        </head></html>`,
+        })
+
         const now = Date.now()
         const sharedListData: SharedList & {
             id: AutoPk
@@ -164,6 +173,7 @@ describe('Social previews tests', () => {
             creator: 1,
             normalizedUrl: 'test.com/test',
             originalUrl: 'https://test.com/test',
+            entryTitle: 'some title',
             createdWhen: now,
             updatedWhen: now,
         }
@@ -176,7 +186,10 @@ describe('Social previews tests', () => {
             .createObject(sharedListEntryData)
 
         const ogImgSrc = generatePagePreviewUrl({
-            listEntry: sharedListEntryData,
+            data: {
+                image: previewImage,
+                title: sharedListEntryData.entryTitle,
+            },
         })
 
         expect(
@@ -189,7 +202,10 @@ describe('Social previews tests', () => {
                 ogImgSrc,
                 bundleSrcs: TEST_BUNDLES_ARR,
                 listData: sharedListData,
-                listEntryData: sharedListEntryData,
+                listEntryData: {
+                    ...sharedListEntryData,
+                    description: previewDescription,
+                },
             }),
         )
     })
@@ -360,7 +376,9 @@ describe('Social previews tests', () => {
     })
 
     it('should render HTML correct OG tags for a page', async () => {
-        const { storageManager, htmlRenderer } = await setupTest({})
+        const { storageManager, htmlRenderer, fetchMock } = await setupTest({})
+        const previewImage = './some-preview-img.png'
+        const previewDescription = 'some page description'
 
         const now = Date.now()
         const sharedListData: SharedList & {
@@ -410,15 +428,34 @@ describe('Social previews tests', () => {
             .createObject(sharedListEntryDataB)
 
         const ogImgSrcA = generatePagePreviewUrl({
-            listEntry: sharedListEntryDataA,
+            data: {
+                title: sharedListEntryDataA.entryTitle,
+                image: previewImage,
+            },
         })
         const ogImgSrcB = generatePagePreviewUrl({
-            listEntry: sharedListEntryDataB,
+            data: {
+                image: previewImage,
+            },
         })
 
+        fetchMock.mock('*', 200, {
+            response: `<html><head>
+            <meta property="og:image" content="${previewImage}" />
+            <meta property="og:description" content="${previewDescription}" />
+        </head></html>`,
+        })
         const renderedHtmlA = await htmlRenderer.renderPagePreview({
             listId: sharedListData.id,
             listEntryId: sharedListEntryDataA.id,
+        })
+
+        // This one responds with HTML lacking og:description data
+        fetchMock.mock('*', 200, {
+            overwriteRoutes: true,
+            response: `<html><head>
+            <meta property="og:image" content="${previewImage}" />
+        </head></html>`,
         })
         const renderedHtmlB = await htmlRenderer.renderPagePreview({
             listId: sharedListData.id,
@@ -431,7 +468,7 @@ describe('Social previews tests', () => {
         expect(renderedHtmlA.includes(`<meta property="twitter:title" content="${sharedListEntryDataA.entryTitle}" />`)).toBe(true)
         expect(renderedHtmlA.includes(`<meta property="og:image" content="${ogImgSrcA}" />`)).toBe(true)
         expect(renderedHtmlA.includes(`<meta property="og:title" content="${sharedListEntryDataA.entryTitle}" />`)).toBe(true)
-        expect(renderedHtmlA.includes(`<meta property="og:description" content="${PAGE_DESCRIPTION_FALLBACK}" />`)).toBe(true)
+        expect(renderedHtmlA.includes(`<meta property="og:description" content="${previewDescription}" />`)).toBe(true)
         expect(renderedHtmlA.includes(`<meta property="og:url" content="${sharedListEntryDataA.originalUrl}" />`)).toBe(true)
 
         expect(renderedHtmlB.includes(`<meta property="twitter:image" content="${ogImgSrcB}" />`)).toBe(true)
