@@ -566,9 +566,15 @@ export class PageIndexingBackground {
         if (pageData.isExisting) {
             return { fullUrl: pageData.fullUrl }
         }
-        if (props.metaData.pageTitle) {
+
+        // Override title with in-page CS derived title for telegram pages - TODO: Move this somewhere else
+        if (
+            props.fullUrl.includes('web.telegram.org/') &&
+            props.metaData.pageTitle
+        ) {
             pageData.fullTitle = props.metaData.pageTitle
         }
+
         await this.createOrUpdatePage(pageData, opts)
 
         if (props.visitTime) {
