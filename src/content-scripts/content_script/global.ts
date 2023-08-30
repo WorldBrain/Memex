@@ -1205,8 +1205,6 @@ export async function trackTwitterMessageList(
             }
         }
 
-        console.log('tabdiv', tabListDiv)
-
         // Initial processing
         tabListDiv.childNodes.forEach((node) => processNode(node))
 
@@ -1369,7 +1367,6 @@ function renderSpacesBar(
     if (!spacesBar) {
         spacesBar = document.createElement('div')
     } else {
-        console.log('delete')
         spacesBar.innerHTML = ''
     }
 
@@ -1425,9 +1422,6 @@ export function loadYoutubeButtons(annotationsFunctions) {
         injectYoutubeContextMenu(annotationsFunctions)
     }
 
-    console.log('below', below)
-    console.log('player', player)
-
     if (!below || !player) {
         // Create a new MutationObserver instance
         const observer = new MutationObserver(function (
@@ -1440,7 +1434,6 @@ export function loadYoutubeButtons(annotationsFunctions) {
                     if (node instanceof HTMLElement) {
                         // Check if the "player" element is in the added node or its descendants
                         if (node.querySelector('#player')) {
-                            console.log('player added')
                             injectYoutubeContextMenu(annotationsFunctions)
 
                             if (below && player) {
@@ -1450,7 +1443,6 @@ export function loadYoutubeButtons(annotationsFunctions) {
 
                         // Check if the "below" element is in the added node or its descendants
                         if (node.querySelector('#below')) {
-                            console.log('player added')
                             injectYoutubeButtonMenu(annotationsFunctions)
 
                             if (below && player) {
