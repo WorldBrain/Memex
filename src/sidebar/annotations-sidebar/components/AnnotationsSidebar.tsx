@@ -60,7 +60,6 @@ import {
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
-import DiscordNotification from '@worldbrain/memex-common/lib/common-ui/components/discord-notification-banner'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
@@ -222,7 +221,7 @@ export class AnnotationsSidebar extends React.Component<
     AnnotationsSidebarProps,
     AnnotationsSidebarState
 > {
-    private annotationCreateRef = React.createRef() // TODO: Figure out how to properly type refs to onClickOutside HOCs
+    private annotationCreateRef = React.createRef<AnnotationCreate>()
     private annotationEditRefs: {
         [annotationUrl: string]: React.RefObject<_AnnotationEditable>
     } = {}
@@ -252,6 +251,10 @@ export class AnnotationsSidebar extends React.Component<
         AIsuggestions: [],
         autoFocusCreateForm: false,
         spaceTitleEditState: false,
+    }
+
+    addYoutubeTimestampToEditor() {
+        this.annotationCreateRef.current?.addYoutubeTimestampToEditor()
     }
 
     private maybeCreateContextBtnRef({
@@ -455,7 +458,7 @@ export class AnnotationsSidebar extends React.Component<
                     onCancel={() =>
                         this.setState({ autoFocusCreateForm: false })
                     }
-                    ref={this.annotationCreateRef as any}
+                    ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
                 />

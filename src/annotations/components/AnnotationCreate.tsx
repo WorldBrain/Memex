@@ -19,7 +19,7 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
-import { type } from 'openpgp'
+import delay from 'src/util/delay'
 
 interface State {
     isTagPickerShown: boolean
@@ -108,6 +108,20 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     private get hasSharedLists(): boolean {
         return this.displayLists.some((list) => list.isShared)
+    }
+
+    addYoutubeTimestampToEditor() {
+        // This is a hack to patch over a race condition between the state update and the rendering of the Editor which is dependent on that state.
+        //  Ideally we avoid this race condition by making the editor's state controlled (vs uncontrolled) then we can
+        //  add the timestamp to the state at a higher level rather than needing to do this call chain going down deeper into the comp tree.
+        if (!this.state.onEditClick) {
+            this.setState({ onEditClick: true }, async () => {
+                await delay(300)
+                this.editor?.addYoutubeTimestamp()
+            })
+        } else {
+            this.editor?.addYoutubeTimestamp()
+        }
     }
 
     focus() {
