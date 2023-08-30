@@ -320,7 +320,6 @@ export class AnnotationsSidebar extends React.Component<
             this.setState({
                 spaceTitleEditState: false,
             })
-            this.props.setSpaceTitleEditValue(null)
         }
     }
     focusCreateForm = () => {
