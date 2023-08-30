@@ -282,8 +282,6 @@ export class AnnotationsSidebar extends React.Component<
                 showIsolatedViewNotif: isolatedViewNotifVisible,
             })
         }
-        document.addEventListener('mousedown', this.handleClickOutside)
-        document.addEventListener('touchstart', this.handleClickOutside)
     }
 
     async componentDidUpdate(
@@ -296,31 +294,28 @@ export class AnnotationsSidebar extends React.Component<
         }
     }
 
-    componentWillUnmount() {
-        document.removeEventListener('mousedown', this.handleClickOutside)
-        document.removeEventListener('touchstart', this.handleClickOutside)
-    }
+    componentWillUnmount() {}
 
     handleClickOutside = (event) => {
+        this.spaceTitleEditFieldRef.current.removeEventListener(
+            'blur',
+            this.handleClickOutside,
+        )
+
         if (
-            this.spaceTitleEditFieldRef.current &&
-            !this.spaceTitleEditFieldRef.current.contains(event.target)
+            this.props.lists.byId[this.props.selectedListId].name !==
+            this.props.spaceTitleEditValue
         ) {
-            if (
-                this.props.lists.byId[this.props.selectedListId].name !==
-                this.props.spaceTitleEditValue
-            ) {
-                this.props.updateListName(
-                    this.props.lists.byId[this.props.selectedListId].unifiedId,
-                    this.props.lists.byId[this.props.selectedListId].localId,
-                    this.props.lists.byId[this.props.selectedListId].name,
-                    this.props.spaceTitleEditValue,
-                )
-            }
-            this.setState({
-                spaceTitleEditState: false,
-            })
+            this.props.updateListName(
+                this.props.lists.byId[this.props.selectedListId].unifiedId,
+                this.props.lists.byId[this.props.selectedListId].localId,
+                this.props.lists.byId[this.props.selectedListId].name,
+                this.props.spaceTitleEditValue,
+            )
         }
+        this.setState({
+            spaceTitleEditState: false,
+        })
     }
     focusCreateForm = () => {
         this.setState({ autoFocusCreateForm: true })
@@ -1011,9 +1006,10 @@ export class AnnotationsSidebar extends React.Component<
                 offsetX={10}
                 offsetY={0}
                 targetElementRef={refObject?.current}
-                closeComponent={() =>
+                closeComponent={() => {
+                    this.props.setSpaceTitleEditValue(listData.name)
                     this.props.openContextMenuForList(listData.unifiedId)
-                }
+                }}
             >
                 {this.props.renderContextMenuForList(listData)}
             </PopoutBox>
@@ -2054,21 +2050,12 @@ export class AnnotationsSidebar extends React.Component<
 
         event.stopPropagation()
         if (event.key === 'Enter') {
-            const inputValue = (event.target as HTMLInputElement).value
-
-            if (selectedList.name !== inputValue) {
-                this.props.updateListName(
-                    selectedList.unifiedId,
-                    selectedList.localId,
-                    selectedList.name,
-                    inputValue,
-                )
-            }
+            // this blurring is tracked and will automatically save it
+            this.spaceTitleEditFieldRef.current.blur()
             this.setState({
                 spaceTitleEditState: false,
             })
             this.props.setSpaceTitleEditValue(null)
-            this.spaceTitleEditFieldRef.current.blur()
         } else if (event.key === 'Escape') {
             event.stopPropagation()
             this.setState({
@@ -2173,6 +2160,10 @@ export class AnnotationsSidebar extends React.Component<
                     isActivated={this.state.spaceTitleEditState}
                     onClick={() => {
                         this.props.setSpaceTitleEditValue(selectedList.name)
+                        this.spaceTitleEditFieldRef.current.addEventListener(
+                            'blur',
+                            this.handleClickOutside,
+                        )
                         !this.state.spaceTitleEditState &&
                             this.setState({
                                 spaceTitleEditState: true,
