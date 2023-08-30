@@ -304,7 +304,8 @@ export class AnnotationsSidebar extends React.Component<
 
         if (
             this.props.lists.byId[this.props.selectedListId].name !==
-            this.props.spaceTitleEditValue
+                this.props.spaceTitleEditValue &&
+            this.props.spaceTitleEditValue.length > 0
         ) {
             this.props.updateListName(
                 this.props.lists.byId[this.props.selectedListId].unifiedId,
