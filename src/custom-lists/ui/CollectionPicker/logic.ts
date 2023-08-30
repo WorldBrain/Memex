@@ -28,6 +28,7 @@ import {
 } from 'src/content-sharing/utils'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { sleepPromise } from 'src/util/promises'
 
 type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     SpacePickerState,
@@ -147,6 +148,7 @@ export default class SpacePickerLogic extends UILogic<
         contextMenuListId: null,
         contextMenuPositionX: 0,
         contextMenuPositionY: 0,
+        keyboardNavActive: false,
     })
 
     private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState']
@@ -357,7 +359,7 @@ export default class SpacePickerLogic extends UILogic<
         if (
             (currentKeys.includes('Enter') && currentKeys.includes('Meta')) ||
             (event.key === 'Enter' &&
-                previousState.listEntries.allIds.length === 0)
+                previousState.filteredListIds?.length === 0)
         ) {
             if (previousState.newEntryName !== '') {
                 await this.newEntryPress({
@@ -393,12 +395,18 @@ export default class SpacePickerLogic extends UILogic<
         }
 
         if (event.key === 'ArrowUp') {
+            this.emitMutation({ keyboardNavActive: { $set: true } })
             this.setFocusedEntryIndex(this.focusIndex - 1, previousState)
+            await sleepPromise(50)
+            this.emitMutation({ keyboardNavActive: { $set: false } })
             return
         }
 
         if (event.key === 'ArrowDown') {
+            this.emitMutation({ keyboardNavActive: { $set: true } })
             this.setFocusedEntryIndex(this.focusIndex + 1, previousState)
+            await sleepPromise(50)
+            this.emitMutation({ keyboardNavActive: { $set: false } })
             return
         }
         if (event.key === 'Escape') {
@@ -552,6 +560,7 @@ export default class SpacePickerLogic extends UILogic<
 
         if (!query || query === '') {
             this.emitMutation({ filteredListIds: { $set: null } })
+            this.querySpaces(query, previousState)
         } else {
             this.querySpaces(query, previousState)
         }
@@ -582,8 +591,18 @@ export default class SpacePickerLogic extends UILogic<
         this.emitMutation({ filteredListIds: { $set: matchingEntryIds } })
         this.maybeSetCreateEntryDisplay(query, state)
 
-        if (matchingEntryIds.length > 0) {
-            this.setFocusedEntryIndex(0, state)
+        const mutation: UIMutation<SpacePickerState> = {
+            filteredListIds: { $set: matchingEntryIds },
+        }
+
+        this.emitMutation(mutation)
+        const nextState = this.withMutation(state, mutation)
+
+        if (
+            state.filteredListIds != null &&
+            state.filteredListIds?.length != nextState.filteredListIds?.length
+        ) {
+            this.setFocusedEntryIndex(0, nextState, true)
         }
     }
 
@@ -607,7 +626,7 @@ export default class SpacePickerLogic extends UILogic<
             // enter keys will action it. But we don't emit that focus
             // to the user, because otherwise the style of the button changes
             // showing the tick and it might seem like it's already selected.
-            this.setFocusedEntryIndex(0, state, false)
+            this.setFocusedEntryIndex(1, state, false)
             return
         }
 
@@ -631,11 +650,11 @@ export default class SpacePickerLogic extends UILogic<
             )
         }
 
-        if (nextFocusIndex < -1 || nextFocusIndex >= entries.length) {
+        if (nextFocusIndex < 0 || nextFocusIndex >= entries.length) {
             return
         }
 
-        this.focusIndex = nextFocusIndex ?? -1
+        this.focusIndex = nextFocusIndex ?? 0
         const focusEntryData = entries[nextFocusIndex]
 
         if (emit) {
@@ -646,7 +665,7 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     resultEntryPress: EventHandler<'resultEntryPress'> = async ({
-        event: { entry },
+        event: { entry, shouldRerender },
         previousState,
     }) => {
         if (!(await pageActionAllowed())) {
@@ -695,9 +714,11 @@ export default class SpacePickerLogic extends UILogic<
             nextState = this.withMutation(previousState, mutation)
 
             // Manually trigger list subscription - which does the list state mutation - as it won't be auto-triggered here
-            this.cacheListsSubscription(
-                this.dependencies.annotationsCache.lists,
-            )
+            if (shouldRerender) {
+                this.cacheListsSubscription(
+                    this.dependencies.annotationsCache.lists,
+                )
+            }
             await entrySelectPromise
         } catch (e) {
             this.selectedListIds = previousState.selectedListIds
@@ -711,7 +732,7 @@ export default class SpacePickerLogic extends UILogic<
         }
 
         await this.searchInputChanged({
-            event: { query: '' },
+            event: { query: previousState.query },
             previousState: nextState,
         })
     }

@@ -253,6 +253,7 @@ class SpacePicker extends StatefulUIElement<
                 }
                 allTabsButtonPressed={this.state.allTabsButtonPressed}
                 index={index}
+                keyboardNavActive={this.state.keyboardNavActive}
                 selected={this.state.selectedListIds.includes(entry.localId)}
                 focused={this.state.focusedListId === entry.unifiedId}
                 resultItem={<ListResultItem>{entry.name}</ListResultItem>}
@@ -450,7 +451,7 @@ class SpacePicker extends StatefulUIElement<
                     <AddNewEntry
                         resultItem={this.state.newEntryName}
                         onPress={this.handleNewListPress}
-                        resultsCount={this.state.listEntries.allIds.length}
+                        resultsCount={this.state.filteredListIds?.length}
                         commandKey={SpacePicker.MOD_KEY}
                     />
                 )}

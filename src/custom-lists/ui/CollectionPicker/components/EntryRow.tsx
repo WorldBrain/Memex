@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { createRef } from 'react'
 import styled, { css } from 'styled-components'
 import { Layers } from '@styled-icons/feather'
 import * as icons from 'src/common-ui/components/design-library/icons'
@@ -21,6 +21,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     selected?: boolean
     allTabsButtonPressed?: number
     focused?: boolean
+    keyboardNavActive?: boolean
 }
 
 class EntryRow extends React.Component<Props> {
@@ -38,6 +39,23 @@ class EntryRow extends React.Component<Props> {
         return false
     }
 
+    private resultEntryRef = createRef<HTMLDivElement>()
+
+    private handleResultPress: React.MouseEventHandler = (e) => {
+        this.props.onPress()
+
+        this.resultEntryRef.current.scrollTo({
+            top: this.resultEntryRef.current.offsetTop,
+        })
+        e.stopPropagation()
+    }
+
+    private scrollIntoView = () => {
+        this.resultEntryRef.current.scrollIntoView({
+            block: 'center',
+        })
+    }
+
     render() {
         const {
             id,
@@ -47,15 +65,25 @@ class EntryRow extends React.Component<Props> {
             resultItem,
             onPressActOnAll,
             contextMenuBtnRef,
+            keyboardNavActive,
         } = this.props
 
         let cleanID = parseInt(id.split('ListKeyName-')[1])
 
+        if (keyboardNavActive && focused && this.resultEntryRef.current) {
+            this.scrollIntoView()
+        }
+
         return (
             <Row
-                onClick={this.props.onPress}
-                onMouseOver={this.props.onFocus}
-                onMouseLeave={this.props.onUnfocus}
+                onClick={this.handleResultPress}
+                ref={this.resultEntryRef}
+                onMouseEnter={() => {
+                    if (!keyboardNavActive) {
+                        this.props.onFocus()
+                    }
+                }}
+                // onMouseLeave={!keyboardNavActive && this.props.onUnfocus}
                 isFocused={focused}
                 id={id}
                 title={resultItem['props'].children}
@@ -132,7 +160,10 @@ class EntryRow extends React.Component<Props> {
                         </ButtonContainer>
                     )}
                     {selected ? (
-                        <ButtonContainer selected={selected}>
+                        <ButtonContainer
+                            onClick={this.handleResultPress}
+                            selected={selected}
+                        >
                             <SelectionBox selected={selected}>
                                 <Icon
                                     icon={icons.check}
@@ -142,7 +173,7 @@ class EntryRow extends React.Component<Props> {
                             </SelectionBox>
                         </ButtonContainer>
                     ) : focused ? (
-                        <ButtonContainer>
+                        <ButtonContainer onClick={this.handleResultPress}>
                             <SelectionBox selected={selected} />
                         </ButtonContainer>
                     ) : null}
@@ -204,10 +235,10 @@ const Row = styled.div<{ isFocused; zIndex }>`
         border-bottom: none;
     }
 
-    &:hover {
+    /* &:hover {
         outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         background: transparent;
-    }
+    } */
 
     ${(props) =>
         props.isFocused &&

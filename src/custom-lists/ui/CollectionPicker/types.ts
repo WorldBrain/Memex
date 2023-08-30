@@ -31,6 +31,7 @@ export interface SpacePickerState {
     loadState: TaskState
     renameListErrorMessage: string | null
     allTabsButtonPressed?: number
+    keyboardNavActive: boolean
 }
 
 export type SpacePickerEvent = UIEvent<{
@@ -38,7 +39,10 @@ export type SpacePickerEvent = UIEvent<{
     searchInputChanged: { query: string; skipDebounce?: boolean }
     resultEntryAllPress: { entry: UnifiedList }
     newEntryAllPress: { entry: string }
-    resultEntryPress: { entry: Pick<UnifiedList, 'localId'> }
+    resultEntryPress: {
+        entry: Pick<UnifiedList, 'localId'>
+        shouldRerender?: boolean
+    }
     resultEntryFocus: { entry: UnifiedList; index: number }
     setListRemoteId: { localListId: number; remoteListId: string }
     toggleEntryContextMenu: { listId: number }
