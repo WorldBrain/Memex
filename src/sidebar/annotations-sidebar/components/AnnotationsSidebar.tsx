@@ -2049,7 +2049,10 @@ export class AnnotationsSidebar extends React.Component<
         ]
 
         event.stopPropagation()
-        if (event.key === 'Enter') {
+        if (
+            (event.target as HTMLInputElement).value.length > 0 &&
+            event.key === 'Enter'
+        ) {
             // this blurring is tracked and will automatically save it
             this.spaceTitleEditFieldRef.current.blur()
             this.setState({
