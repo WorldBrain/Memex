@@ -745,19 +745,6 @@ export async function main(
                         await trackTwitterMessageList(collectionsBG, bgScriptBG)
                     }
                 } else {
-                    // let spacesBarContainer = document.getElementById(
-                    //     'spacesBarContainer',
-                    // )
-
-                    // if (spacesBarContainer) {
-                    //     spacesBarContainer.remove()
-                    // }
-
-                    // let spacesBarOld = document.getElementById('spacesBar')
-
-                    // if (spacesBarOld) {
-                    //     spacesBarOld.remove()
-                    // }
                     await injectTwitterProfileUI(
                         collectionsBG,
                         bgScriptBG,
@@ -1435,9 +1422,11 @@ export function loadYoutubeButtons(annotationsFunctions) {
         injectYoutubeButtonMenu(annotationsFunctions)
     }
     if (player) {
-        injectYoutubeButtonMenu(annotationsFunctions)
         injectYoutubeContextMenu(annotationsFunctions)
     }
+
+    console.log('below', below)
+    console.log('player', player)
 
     if (!below || !player) {
         // Create a new MutationObserver instance
@@ -1451,8 +1440,8 @@ export function loadYoutubeButtons(annotationsFunctions) {
                     if (node instanceof HTMLElement) {
                         // Check if the "player" element is in the added node or its descendants
                         if (node.querySelector('#player')) {
+                            console.log('player added')
                             injectYoutubeContextMenu(annotationsFunctions)
-                            injectYoutubeButtonMenu(annotationsFunctions)
 
                             if (below && player) {
                                 observer.disconnect()
@@ -1461,6 +1450,7 @@ export function loadYoutubeButtons(annotationsFunctions) {
 
                         // Check if the "below" element is in the added node or its descendants
                         if (node.querySelector('#below')) {
+                            console.log('player added')
                             injectYoutubeButtonMenu(annotationsFunctions)
 
                             if (below && player) {
@@ -1625,10 +1615,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     memexButtons.appendChild(summarizeButton)
     memexButtons.style.color = '#f4f4f4'
     memexButtons.style.width = 'fit-content'
-
-    const leftControls = document.getElementsByClassName('ytp-left-controls')[0]
     const aboveFold = document.getElementById('below')
-    const elements = document.getElementsByClassName('ytp-menuitem')
     aboveFold.insertAdjacentElement('afterbegin', memexButtons)
 }
 
