@@ -559,7 +559,7 @@ export class PageIndexingBackground {
             }
         }
 
-        const pageData = await (props.tabId != null
+        let pageData = await (props.tabId != null
             ? this.processPageDataFromTab(props)
             : this.processPageDataFromUrl(props))
 
@@ -567,13 +567,24 @@ export class PageIndexingBackground {
             return { fullUrl: pageData.fullUrl }
         }
 
+        console.log('pageData: ', pageData)
+
         // Override title with in-page CS derived title for telegram pages - TODO: Move this somewhere else
         if (
-            props.fullUrl.includes('web.telegram.org/') &&
+            (props.fullUrl.includes('web.telegram.org/') ||
+                props.fullUrl.includes('x.com/') ||
+                props.fullUrl.includes('twitter.com/')) &&
             props.metaData.pageTitle
         ) {
             pageData.fullTitle = props.metaData.pageTitle
+            console.log(
+                'pageData.fullTitle: ',
+                pageData.fullTitle,
+                props.metaData.pageTitle,
+            )
         }
+
+        console.log('Indexing page: ', pageData.fullUrl, pageData.fullTitle)
 
         await this.createOrUpdatePage(pageData, opts)
 
