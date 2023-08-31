@@ -224,6 +224,7 @@ class SpacePicker extends StatefulUIElement<
                         entry,
                     })
                 }}
+                addedToAllIds={this.state.addedToAllIds}
                 keepScrollPosition={this.keepScrollPosition}
                 onPressActOnAll={
                     this.props.actOnAllTabs

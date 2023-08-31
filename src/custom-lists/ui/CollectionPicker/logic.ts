@@ -150,6 +150,7 @@ export default class SpacePickerLogic extends UILogic<
         contextMenuPositionX: 0,
         contextMenuPositionY: 0,
         keyboardNavActive: false,
+        addedToAllIds: [],
     })
 
     private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState']
@@ -793,14 +794,16 @@ export default class SpacePickerLogic extends UILogic<
             entry.localId,
         )
 
-        const selectedIds = isAlreadySelected
-            ? previousState.selectedListIds.filter(
-                  (entryId) => entryId !== entry.localId,
-              )
-            : [entry.localId, ...previousState.selectedListIds]
+        const selectedIds = [entry.localId, ...previousState.selectedListIds]
+
+        let addedToAllIdsnew = [
+            parseFloat(entry.unifiedId),
+            ...(previousState.addedToAllIds ?? []),
+        ]
+
         this.emitMutation({
-            selectedListIds: { $set: this.selectedListIds },
-            allTabsButtonPressed: { $set: entry.unifiedId },
+            selectedListIds: { $set: selectedIds },
+            addedToAllIds: { $set: addedToAllIdsnew },
         })
         this.selectedListIds = selectedIds
     }

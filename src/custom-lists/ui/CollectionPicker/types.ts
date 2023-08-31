@@ -32,6 +32,7 @@ export interface SpacePickerState {
     renameListErrorMessage: string | null
     allTabsButtonPressed?: string
     keyboardNavActive: boolean
+    addedToAllIds: number[]
 }
 
 export type SpacePickerEvent = UIEvent<{

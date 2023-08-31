@@ -1,4 +1,4 @@
-import React, { createRef } from 'react'
+import React, { createRef, useRef } from 'react'
 import styled, { css } from 'styled-components'
 import { Layers } from '@styled-icons/feather'
 import * as icons from 'src/common-ui/components/design-library/icons'
@@ -23,6 +23,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     focused?: boolean
     keyboardNavActive?: boolean
     keepScrollPosition?: () => void
+    addedToAllIds?: number[]
 }
 
 class EntryRow extends React.Component<Props> {
@@ -41,14 +42,22 @@ class EntryRow extends React.Component<Props> {
     }
 
     private resultEntryRef = createRef<HTMLDivElement>()
-    private inviteButtonRef = createRef<HTMLDivElement>()
+    private pressAllButtonRef = createRef<HTMLDivElement>()
+
+    state = {
+        checkBoxHover: false,
+    }
 
     private handleResultPress: React.MouseEventHandler = (e) => {
-        if (this.inviteButtonRef.current.contains(e.target as Node)) {
+        if (this.props.contextMenuBtnRef.current.contains(e.target as Node)) {
+            return
+        }
+        if (this.pressAllButtonRef.current.contains(e.target as Node)) {
             return
         }
         this.props.onPress()
 
+        this.setState({ checkBoxHover: false })
         this.props.keepScrollPosition()
         e.stopPropagation()
     }
@@ -109,13 +118,7 @@ class EntryRow extends React.Component<Props> {
                         </TooltipBox>
                     )}
                 </NameWrapper>
-                <IconStyleWrapper
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        e.stopImmediatePropagation()
-                    }}
-                    ref={this.inviteButtonRef}
-                >
+                <IconStyleWrapper>
                     {focused && this.props.onContextMenuBtnPress != null && (
                         <TooltipBox
                             tooltipText={'Share & Edit Space'}
@@ -133,8 +136,7 @@ class EntryRow extends React.Component<Props> {
                     )}
                     {focused && onPressActOnAll && (
                         <ButtonContainer>
-                            {parseFloat(this.props.allTabsButtonPressed) ===
-                            cleanID ? (
+                            {this.props.addedToAllIds.includes(cleanID) ? (
                                 <TooltipBox
                                     tooltipText={
                                         <>
@@ -147,6 +149,7 @@ class EntryRow extends React.Component<Props> {
                                     <Icon
                                         filePath={icons.checkRound}
                                         heightAndWidth="20px"
+                                        containerRef={this.pressAllButtonRef}
                                     />
                                 </TooltipBox>
                             ) : (
@@ -160,29 +163,85 @@ class EntryRow extends React.Component<Props> {
                                         filePath={icons.multiEdit}
                                         heightAndWidth="20px"
                                         onClick={this.handleActOnAllPress}
+                                        containerRef={this.pressAllButtonRef}
                                     />
                                 </TooltipBox>
                             )}
                         </ButtonContainer>
                     )}
-                    {selected ? (
-                        <ButtonContainer
-                            onClick={this.handleResultPress}
-                            selected={selected}
-                        >
-                            <SelectionBox selected={selected}>
+                    {/* 
+                    {selected && !focused && (
+                        <ButtonContainer selected={selected}>
+                            <SelectionBox
+                                onMouseEnter={() =>
+                                    this.setState({ checkBoxHover: true })
+                                }
+                                onMouseLeave={() =>
+                                    this.setState({ checkBoxHover: false })
+                                }
+                                selected={selected}
+                            >
                                 <Icon
                                     icon={icons.check}
                                     heightAndWidth="16px"
-                                    color="black"
+                                    hoverOff
+                                    color={
+                                        !this.state.checkBoxHover
+                                            ? 'black'
+                                            : 'greyScale2'
+                                    }
                                 />
                             </SelectionBox>
                         </ButtonContainer>
-                    ) : focused ? (
-                        <ButtonContainer onClick={this.handleResultPress}>
-                            <SelectionBox selected={selected} />
+                    )} */}
+                    {selected && (
+                        <ButtonContainer selected={selected}>
+                            <SelectionBox
+                                onMouseEnter={() =>
+                                    this.setState({ checkBoxHover: true })
+                                }
+                                onMouseLeave={() =>
+                                    this.setState({ checkBoxHover: false })
+                                }
+                                selected={selected}
+                            >
+                                <Icon
+                                    icon={icons.check}
+                                    heightAndWidth="16px"
+                                    hoverOff
+                                    color={
+                                        !this.state.checkBoxHover
+                                            ? 'black'
+                                            : 'greyScale5'
+                                    }
+                                />
+                            </SelectionBox>
                         </ButtonContainer>
-                    ) : null}
+                    )}
+                    {!selected && focused && (
+                        <ButtonContainer>
+                            <SelectionBox
+                                onMouseEnter={() =>
+                                    this.setState({ checkBoxHover: true })
+                                }
+                                onMouseLeave={() =>
+                                    this.setState({ checkBoxHover: false })
+                                }
+                                selected={selected}
+                            >
+                                <Icon
+                                    icon={icons.check}
+                                    heightAndWidth="16px"
+                                    hoverOff
+                                    color={
+                                        !this.state.checkBoxHover
+                                            ? 'greyScale1'
+                                            : 'white'
+                                    }
+                                />
+                            </SelectionBox>
+                        </ButtonContainer>
+                    )}
                 </IconStyleWrapper>
             </Row>
         )
@@ -200,6 +259,11 @@ const ButtonContainer = styled.div<{ selected }>`
     justify-content: center;
     border-radius: 5px;
     align-items: center;
+    cursor: pointer;
+
+    * {
+        cursor: pointer;
+    }
 `
 
 const SelectionBox = styled.div<{ selected }>`
@@ -211,7 +275,7 @@ const SelectionBox = styled.div<{ selected }>`
     border-radius: 5px;
     background: ${(props) =>
         props.selected
-            ? props.theme.colors.white
+            ? props.theme.colors.greyScale7
             : props.theme.colors.greyScale3};
 `
 
@@ -236,7 +300,8 @@ const Row = styled.div<{ isFocused; zIndex }>`
     margin: 0 -5px;
     overflow: visible;
     color: ${(props) => props.isFocused && props.theme.colors.greyScale6};
-    z-index: ${(props) => props.zIndex};
+    z-index: ${(props) =>
+        props.isFocused ? props.zIndex + 1000 : props.zIndex};
     &:last-child {
         border-bottom: none;
     }
