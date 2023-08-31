@@ -751,7 +751,7 @@ export default class SpacePickerLogic extends UILogic<
             entry.localId,
         )
 
-        this.selectedListIds = isAlreadySelected
+        const selectedIds = isAlreadySelected
             ? previousState.selectedListIds.filter(
                   (entryId) => entryId !== entry.localId,
               )
@@ -760,6 +760,7 @@ export default class SpacePickerLogic extends UILogic<
             selectedListIds: { $set: this.selectedListIds },
             allTabsButtonPressed: { $set: entry.localId },
         })
+        this.selectedListIds = selectedIds
     }
 
     private async createAndDisplayNewList(
