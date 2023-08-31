@@ -198,8 +198,13 @@ export default class Ribbon extends Component<Props, State> {
 
         let source = elData.tooltip
 
-        if (['createBookmark', 'toggleSidebar'].includes(name)) {
+        if (['createBookmark'].includes(name)) {
             source = this.props.bookmark.isBookmarked
+                ? elData.toggleOff
+                : elData.toggleOn
+        }
+        if (['toggleSidebar'].includes(name)) {
+            source = this.props.sidebar.isSidebarOpen
                 ? elData.toggleOff
                 : elData.toggleOn
         }
@@ -939,7 +944,16 @@ export default class Ribbon extends Component<Props, State> {
                 targetElementRef={this.feedButtonRef.current}
                 tooltipText={
                     <TooltipContent>
-                        Close <KeyboardShortcuts keys={['Esc']} size="small" />
+                        <TooltipContentBox>
+                            <CloseTooltipInnerBox>
+                                Close{' '}
+                                <KeyboardShortcuts
+                                    keys={['Esc']}
+                                    size="small"
+                                />{' '}
+                            </CloseTooltipInnerBox>
+                            and {this.getTooltipText('toggleSidebar')}
+                        </TooltipContentBox>
                     </TooltipContent>
                 }
                 placement={
@@ -1831,6 +1845,19 @@ export default class Ribbon extends Component<Props, State> {
         return null
     }
 }
+
+const TooltipContentBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 5px;
+`
+const CloseTooltipInnerBox = styled.div`
+    display: flex;
+    flex-direction: row;
+    grid-gap: 5px;
+    align-items: center;
+    justify-content: center;
+`
 
 const SelectionItem = styled.option``
 const SelectionDropDown = styled.select`
