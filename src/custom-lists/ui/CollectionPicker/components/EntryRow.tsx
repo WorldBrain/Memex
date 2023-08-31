@@ -27,9 +27,9 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
 
 class EntryRow extends React.Component<Props> {
     private handleActOnAllPress: React.MouseEventHandler = (e) => {
+        this.props.onPressActOnAll?.()
         e.preventDefault()
         e.stopPropagation()
-        this.props.onPressActOnAll?.()
         return false
     }
 
