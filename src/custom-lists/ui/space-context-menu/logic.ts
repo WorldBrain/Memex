@@ -21,7 +21,7 @@ export interface Dependencies {
     onSpaceShare?: (remoteListId: string) => void
     copyToClipboard: (text: string) => Promise<boolean>
     onSpaceNameChange?: (newName: string) => void
-    onConfirmSpaceNameEdit: (newName: string) => void
+    onConfirmSpaceNameEdit: (name: string) => void
     onDeleteSpaceIntent?: React.MouseEventHandler
     onDeleteSpaceConfirm?: React.MouseEventHandler
 }
@@ -261,7 +261,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         this.dependencies.onCancelEdit?.()
     }
 
-    confirmSpaceNameEdit: EventHandler<'confirmSpaceNameEdit'> = async ({
+    confirmSpaceNameEdit: EventHandler<'confirmSpaceNameEdit'> = ({
         event,
         previousState,
     }) => {
@@ -271,11 +271,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
 
         if (newName.length && newName !== oldName) {
             this.dependencies.onConfirmSpaceNameEdit(newName)
-            await this.dependencies.spacesBG.updateListName({
-                id: this.dependencies.listData.localId,
-                oldName,
-                newName,
-            })
         }
     }
 

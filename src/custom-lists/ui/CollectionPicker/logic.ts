@@ -503,6 +503,7 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     renameList: EventHandler<'renameList'> = async ({ event }) => {
+        console.log('renamelist')
         const newName = event.name.trim()
         const listData = __getListDataByLocalId(
             event.listId,
@@ -525,6 +526,12 @@ export default class SpacePickerLogic extends UILogic<
         this.dependencies.annotationsCache.updateList({
             unifiedId: listData.unifiedId,
             name: newName,
+        })
+
+        await this.dependencies.spacesBG.updateListName({
+            id: listData.localId,
+            oldName: listData.name,
+            newName,
         })
 
         // NOTE: Done in SpaceContextMenuLogic
@@ -630,9 +637,11 @@ export default class SpacePickerLogic extends UILogic<
             return
         }
 
-        const { valid } = this.validateSpaceName(_input)
-        if (!valid) {
-            return
+        if (state.query.length > 0) {
+            const { valid } = this.validateSpaceName(_input)
+            if (!valid) {
+                return
+            }
         }
         this.emitMutation({ newEntryName: { $set: _input } })
         this.setFocusedEntryIndex(-1, state)

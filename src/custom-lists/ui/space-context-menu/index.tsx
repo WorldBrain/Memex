@@ -66,9 +66,11 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         }
 
         if (e.key === 'Enter') {
-            e.preventDefault()
-            e.stopPropagation()
-            await this.processEvent('confirmSpaceNameEdit', null)
+            if (this.state.nameValue.trim().length > 0) {
+                e.preventDefault()
+                e.stopPropagation()
+                await this.processEvent('confirmSpaceNameEdit', null)
+            }
         }
 
         // If we don't have this, events will bubble up into the page!
@@ -304,19 +306,20 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         }
                     />
                     <>
-                        {this.state?.showSaveButton && (
-                            <Icon
-                                filePath="check"
-                                color="prime1"
-                                heightAndWidth="24px"
-                                onClick={() =>
-                                    this.processEvent(
-                                        'confirmSpaceNameEdit',
-                                        null,
-                                    )
-                                }
-                            />
-                        )}
+                        {this.state?.showSaveButton &&
+                            this.state.nameValue.length > 0 && (
+                                <Icon
+                                    filePath="check"
+                                    color="prime1"
+                                    heightAndWidth="24px"
+                                    onClick={() =>
+                                        this.processEvent(
+                                            'confirmSpaceNameEdit',
+                                            null,
+                                        )
+                                    }
+                                />
+                            )}
                     </>
                 </ButtonBox>
             </ContextMenuContainer>
@@ -553,7 +556,7 @@ const ErrMsg = styled.div`
     color: red;
     width: 100%;
     text-align: center;
-    margin-top: -5px;
+    margin-top: 5px;
     margin-bottom: 5px;
 `
 
