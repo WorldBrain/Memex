@@ -8,6 +8,7 @@ import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/con
 import type { GetContentFingerprints } from './types'
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
+import { getPDFTitle } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/get-title'
 
 const waitForDocument = async () => {
     while (true) {
@@ -16,6 +17,21 @@ const waitForDocument = async () => {
         const pdfDocument: { fingerprint?: string; fingerprints?: string[] } =
             pdfViewer?.pdfDocument
         if (pdfDocument) {
+            const searchParams = new URLSearchParams(location.search)
+            const filePath = searchParams.get('file')
+
+            if (!filePath?.length) {
+                return null
+            }
+
+            const pdf: PDFDocumentProxy = await (globalThis as any)[
+                'pdfjsLib'
+            ].getDocument(filePath).promise
+
+            const title = await getPDFTitle(pdf)
+
+            document.title = title
+
             return pdfDocument
         }
         await new Promise((resolve) => setTimeout(resolve, 200))
