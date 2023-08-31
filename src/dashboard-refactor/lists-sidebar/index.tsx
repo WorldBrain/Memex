@@ -42,6 +42,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     ownListsGroup: ListGroup
     joinedListsGroup: ListGroup
     followedListsGroup: ListGroup
+    onConfirmListEdit: (listId: string, value: string) => void
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -157,6 +158,12 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         errorMessage={
                                             this.props.editListErrorMessage
                                         }
+                                        onConfirmSpaceNameEdit={(newName) => {
+                                            this.props.onConfirmListEdit(
+                                                list.unifiedId,
+                                                newName,
+                                            )
+                                        }}
                                     />
                                 )}
                             />
