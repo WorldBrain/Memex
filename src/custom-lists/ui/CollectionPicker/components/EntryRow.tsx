@@ -19,7 +19,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     resultItem: React.ReactNode
     contextMenuBtnRef?: React.RefObject<HTMLDivElement>
     selected?: boolean
-    allTabsButtonPressed?: number
+    allTabsButtonPressed?: string
     focused?: boolean
     keyboardNavActive?: boolean
     keepScrollPosition?: () => void
@@ -41,8 +41,12 @@ class EntryRow extends React.Component<Props> {
     }
 
     private resultEntryRef = createRef<HTMLDivElement>()
+    private inviteButtonRef = createRef<HTMLDivElement>()
 
     private handleResultPress: React.MouseEventHandler = (e) => {
+        if (this.inviteButtonRef.current.contains(e.target as Node)) {
+            return
+        }
         this.props.onPress()
 
         this.props.keepScrollPosition()
@@ -108,7 +112,9 @@ class EntryRow extends React.Component<Props> {
                 <IconStyleWrapper
                     onClick={(e) => {
                         e.stopPropagation()
+                        e.stopImmediatePropagation()
                     }}
+                    ref={this.inviteButtonRef}
                 >
                     {focused && this.props.onContextMenuBtnPress != null && (
                         <TooltipBox
@@ -127,7 +133,8 @@ class EntryRow extends React.Component<Props> {
                     )}
                     {focused && onPressActOnAll && (
                         <ButtonContainer>
-                            {this.props.allTabsButtonPressed === cleanID ? (
+                            {parseFloat(this.props.allTabsButtonPressed) ===
+                            cleanID ? (
                                 <TooltipBox
                                     tooltipText={
                                         <>

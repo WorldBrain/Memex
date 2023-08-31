@@ -30,7 +30,7 @@ export interface SpacePickerState {
     contextMenuListId: number | null
     loadState: TaskState
     renameListErrorMessage: string | null
-    allTabsButtonPressed?: number
+    allTabsButtonPressed?: string
     keyboardNavActive: boolean
 }
 

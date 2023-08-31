@@ -1095,26 +1095,6 @@ export async function injectTelegramCustomUI(
             )
         )[0] as HTMLElement
 
-        // const chatInfoBox = document.getElementsByClassName(
-        //     'chat-info',
-        // )[0] as HTMLElement
-
-        // console.log(userNameBox)
-
-        // chatInfoBox.style.gap = '10px'
-        // chatInfoBox.style.display = 'flex'
-        // chatInfoBox.style.flexDirection = 'column'
-        // chatInfoBox.style.justifyContent = 'flex-start'
-
-        // // make sure to properly size the regular chat info box with the name and user name
-        // const contentBox = document.getElementsByClassName(
-        //     'content',
-        // )[0] as HTMLElement
-        // contentBox.style.maxWidth = 'fit-content'
-        // contentBox.style.minWidth = '210px'
-        // contentBox.style.paddingRight = '30px'
-        // ////////////////////////////////////////////
-
         if (userNameBox != null) {
             let spacesBar: HTMLElement
             let spacesBarContainer = document.createElement('div')

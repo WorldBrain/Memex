@@ -800,7 +800,7 @@ export default class SpacePickerLogic extends UILogic<
             : [entry.localId, ...previousState.selectedListIds]
         this.emitMutation({
             selectedListIds: { $set: this.selectedListIds },
-            allTabsButtonPressed: { $set: entry.localId },
+            allTabsButtonPressed: { $set: entry.unifiedId },
         })
         this.selectedListIds = selectedIds
     }
