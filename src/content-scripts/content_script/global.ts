@@ -1082,41 +1082,51 @@ export async function injectTelegramCustomUI(
 
         let selector
 
-        selector = '[class="person"]'
+        selector = '[class="topbar"]'
 
         const maxRetries = 10
         const delayInMilliseconds = 500 // adjust this based on your needs
 
-        const userNameBox = (await findElementWithRetries(
-            selector,
-            maxRetries,
-            delayInMilliseconds,
-        )) as HTMLElement
-
-        const chatInfoBox = document.getElementsByClassName(
-            'chat-info',
+        const userNameBox = (
+            await findClassElementSWithRetries(
+                'topbar',
+                maxRetries,
+                delayInMilliseconds,
+            )
         )[0] as HTMLElement
 
-        chatInfoBox.style.gap = '10px'
-        chatInfoBox.style.display = 'flex'
-        chatInfoBox.style.flexDirection = 'column'
-        chatInfoBox.style.justifyContent = 'flex-start'
+        // const chatInfoBox = document.getElementsByClassName(
+        //     'chat-info',
+        // )[0] as HTMLElement
 
-        // make sure to properly size the regular chat info box with the name and user name
-        const contentBox = document.getElementsByClassName(
-            'content',
-        )[0] as HTMLElement
-        contentBox.style.maxWidth = 'fit-content'
-        contentBox.style.minWidth = '210px'
-        contentBox.style.paddingRight = '30px'
-        ////////////////////////////////////////////
+        // console.log(userNameBox)
+
+        // chatInfoBox.style.gap = '10px'
+        // chatInfoBox.style.display = 'flex'
+        // chatInfoBox.style.flexDirection = 'column'
+        // chatInfoBox.style.justifyContent = 'flex-start'
+
+        // // make sure to properly size the regular chat info box with the name and user name
+        // const contentBox = document.getElementsByClassName(
+        //     'content',
+        // )[0] as HTMLElement
+        // contentBox.style.maxWidth = 'fit-content'
+        // contentBox.style.minWidth = '210px'
+        // contentBox.style.paddingRight = '30px'
+        // ////////////////////////////////////////////
 
         if (userNameBox != null) {
             let spacesBar: HTMLElement
             let spacesBarContainer = document.createElement('div')
-            spacesBarContainer.id = `spacesBarContainer`
+            spacesBarContainer.id = 'spacesBarContainer'
+            spacesBarContainer.style.width = '100%'
+            spacesBarContainer.style.zIndex = '3'
+            spacesBarContainer.style.height = 'fit-content'
+            spacesBarContainer.style.overflow = 'scroll'
+            spacesBarContainer.style.padding = '10px 15px 15px 15px'
+            spacesBarContainer.style.width = '100%'
 
-            userNameBox.insertAdjacentElement('beforeend', spacesBarContainer)
+            userNameBox.insertAdjacentElement('afterend', spacesBarContainer)
 
             const pageLists = await fetchListDataForSocialProfiles(
                 collectionsBG,
@@ -1125,6 +1135,7 @@ export async function injectTelegramCustomUI(
 
             if (pageLists != null && pageLists.length > 0) {
                 spacesBar = renderSpacesBar(pageLists, bgScriptBG)
+
                 spacesBarContainer.appendChild(spacesBar)
             } else {
                 return
@@ -1174,7 +1185,6 @@ export async function trackTwitterMessageList(
                     let spacesBarContainer = document.createElement('div')
                     spacesBarContainer.id = `spacesBarContainer_${fullUrl}`
                     spacesBarContainer.style.display = 'flex'
-                    spacesBarContainer.style.marginTop = '5px'
 
                     const pageLists = await fetchListDataForSocialProfiles(
                         collectionsBG,
@@ -1187,7 +1197,8 @@ export async function trackTwitterMessageList(
                             bgScriptBG,
                             fullUrl,
                         ) as HTMLElement
-
+                        spacesBar.style.flexWrap = 'wrap'
+                        spacesBarContainer.style.marginTop = '5px'
                         spacesBarContainer.appendChild(spacesBar)
                     }
                     let element = node as HTMLElement
@@ -1375,6 +1386,7 @@ function renderSpacesBar(
         spacesBar.style.display = 'flex'
         spacesBar.style.alignItems = 'center'
         spacesBar.style.gap = '5px'
+        spacesBar.style.flexWrap = 'wrap'
     } else {
         spacesBar.id = url ? `spacesBar_${url}` : `spacesBar`
         spacesBar.style.display = 'flex'

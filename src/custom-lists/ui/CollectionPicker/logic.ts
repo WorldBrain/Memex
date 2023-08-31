@@ -503,7 +503,6 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     renameList: EventHandler<'renameList'> = async ({ event }) => {
-        console.log('renamelist')
         const newName = event.name.trim()
         const listData = __getListDataByLocalId(
             event.listId,
