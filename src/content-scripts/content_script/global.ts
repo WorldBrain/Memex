@@ -1174,7 +1174,6 @@ export async function trackTwitterMessageList(
                     let spacesBarContainer = document.createElement('div')
                     spacesBarContainer.id = `spacesBarContainer_${fullUrl}`
                     spacesBarContainer.style.display = 'flex'
-                    spacesBarContainer.style.marginTop = '5px'
 
                     const pageLists = await fetchListDataForSocialProfiles(
                         collectionsBG,
@@ -1187,7 +1186,7 @@ export async function trackTwitterMessageList(
                             bgScriptBG,
                             fullUrl,
                         ) as HTMLElement
-
+                        spacesBarContainer.style.marginTop = '5px'
                         spacesBarContainer.appendChild(spacesBar)
                     }
                     let element = node as HTMLElement
