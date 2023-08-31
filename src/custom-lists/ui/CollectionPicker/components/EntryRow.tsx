@@ -22,6 +22,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     allTabsButtonPressed?: number
     focused?: boolean
     keyboardNavActive?: boolean
+    keepScrollPosition?: () => void
 }
 
 class EntryRow extends React.Component<Props> {
@@ -44,9 +45,7 @@ class EntryRow extends React.Component<Props> {
     private handleResultPress: React.MouseEventHandler = (e) => {
         this.props.onPress()
 
-        this.resultEntryRef.current.scrollTo({
-            top: this.resultEntryRef.current.offsetTop,
-        })
+        this.props.keepScrollPosition()
         e.stopPropagation()
     }
 
@@ -76,7 +75,7 @@ class EntryRow extends React.Component<Props> {
 
         return (
             <Row
-                onClick={this.handleResultPress}
+                onMouseDown={this.handleResultPress}
                 ref={this.resultEntryRef}
                 onMouseEnter={() => {
                     if (!keyboardNavActive) {

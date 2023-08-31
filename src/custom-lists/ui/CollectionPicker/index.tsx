@@ -126,10 +126,10 @@ class SpacePicker extends StatefulUIElement<
     handleResultListFocus = (list: UnifiedList, index?: number) => {
         this.processEvent('resultEntryFocus', { entry: list, index })
 
-        const el = document.getElementById(`ListKeyName-${list.localId}`)
-        if (el != null) {
-            el.scrollTop = el.offsetTop
-        }
+        // const el = document.getElementById(`ListKeyName-${list.localId}`)
+        // if (el != null) {
+        //     el.scrollTop = el.offsetTop
+        // }
     }
 
     handleNewListPress = () => {
@@ -220,11 +220,11 @@ class SpacePicker extends StatefulUIElement<
             <EntryRow
                 id={`ListKeyName-${entry.unifiedId}`}
                 onPress={() => {
-                    this.displayListRef.current.scrollTo(0, 0)
                     this.processEvent('resultEntryPress', {
                         entry,
                     })
                 }}
+                keepScrollPosition={this.keepScrollPosition}
                 onPressActOnAll={
                     this.props.actOnAllTabs
                         ? () =>
@@ -234,12 +234,12 @@ class SpacePicker extends StatefulUIElement<
                         : undefined
                 }
                 onFocus={async () => {
-                    const el = document.getElementById(
-                        `ListKeyName-${entry.unifiedId}`,
-                    )
-                    if (el != null) {
-                        el.scrollTop = el.offsetTop
-                    }
+                    // const el = document.getElementById(
+                    //     `ListKeyName-${entry.unifiedId}`,
+                    // )
+                    // if (el != null) {
+                    //     el.scrollTop = el.offsetTop
+                    // }
                     await this.processEvent('resultEntryFocus', {
                         entry,
                         index,
@@ -274,6 +274,16 @@ class SpacePicker extends StatefulUIElement<
             />
         </EntryRowContainer>
     )
+
+    private keepScrollPosition = () => {
+        const el = this.displayListRef.current
+        const scrollTop = el.scrollTop
+        if (el != null) {
+            if (scrollTop === 0) {
+                el.scroll({ top: 0 })
+            }
+        }
+    }
 
     private renderListEntries() {
         let listEntries = getEntriesForCurrentPickerTab(this.state)
