@@ -11,7 +11,6 @@ import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-in
 import { getPDFTitle } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/get-title'
 
 const waitForDocument = async () => {
-    console.log('Waiting for document...')
     while (true) {
         const pdfApplication = (globalThis as any)['PDFViewerApplication']
         const pdfViewer = pdfApplication?.pdfViewer
