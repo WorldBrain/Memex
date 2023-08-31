@@ -30,15 +30,16 @@ export const isUrlSupported = (params: {
     }
 
     // Ignore PDFs that are just urls and not the reader
-    if (
-        params.fullUrl.endsWith('.pdf') &&
-        !params.fullUrl.includes('pdfjs/viewer.html?file')
-    ) {
-        console.log('pdf and not supported ', params.fullUrl, fullUrl)
-        return false
+    if (params.fullUrl.endsWith('.pdf')) {
+        if (!params.fullUrl.includes('pdfjs/viewer.html?file')) {
+            console.log('pdf and not supported ', params.fullUrl, fullUrl)
+            return false
+        }
+        if (params.fullUrl.includes('pdfjs/viewer.html?file')) {
+            console.log('pdf & supported ', params.fullUrl, fullUrl)
+            return true
+        }
     }
-
-    console.log('isUrlSupported ', params.fullUrl, fullUrl)
 
     for (const prefix of unsupportedUrlPrefixes) {
         if (fullUrl.startsWith(prefix)) {

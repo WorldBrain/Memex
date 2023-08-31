@@ -773,7 +773,17 @@ export default class CustomListBackground {
             throw new Error('No list found for ID:' + args.listId)
         }
 
+        // if (
+        //     tabs.url.endsWith('.pdf') &&
+        //     !tabs.url.includes('pdfjs/viewer.html?file')
+        // ) {
+        //     console.log('isPDF ')
+        //     return null
+        // }
+
         const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
+
+        console.log('tabs ', tabs)
 
         // Ensure content scripts are injected into each tab, so they can init page content identifier
         await Promise.all(
