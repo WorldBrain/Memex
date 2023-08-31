@@ -10,6 +10,7 @@ import type {
 } from 'src/annotations/cache/types'
 import { siftListsIntoCategories } from 'src/annotations/cache/utils'
 import {
+    NormalizedState,
     initNormalizedState,
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
@@ -599,6 +600,7 @@ export default class SpacePickerLogic extends UILogic<
 
         const mutation: UIMutation<SpacePickerState> = {
             filteredListIds: { $set: matchingEntryIds },
+            query: { $set: query },
         }
 
         this.emitMutation(mutation)
@@ -609,6 +611,38 @@ export default class SpacePickerLogic extends UILogic<
             state.filteredListIds?.length != nextState.filteredListIds?.length
         ) {
             this.setFocusedEntryIndex(0, nextState, true)
+        }
+
+        if (state.query.length > 0 && nextState.query.length === 0) {
+            const listData: NormalizedState<UnifiedList> = this.dependencies
+                .annotationsCache.lists
+
+            const userLists = normalizedStateToArray(listData)
+            const sortPredicate = sortDisplayEntries(
+                this.selectedListIds,
+                this.localListIdsMRU,
+            )
+
+            const toSet = initNormalizedState({
+                getId: (list) => list.unifiedId,
+                seedData: [...userLists]
+                    .filter(
+                        (list) =>
+                            list.type === 'user-list' && list.localId != null,
+                    )
+                    .sort(sortPredicate) as UnifiedList<'user-list'>[],
+            })
+
+            const mutation: UIMutation<SpacePickerState> = {
+                selectedListIds: { $set: this.selectedListIds },
+                filteredListIds: { $set: null },
+                listEntries: { $set: toSet },
+            }
+
+            this.emitMutation(mutation)
+
+            const nextState = this.withMutation(state, mutation)
+            this.setFocusedEntryIndex(0, nextState)
         }
     }
 
@@ -776,16 +810,6 @@ export default class SpacePickerLogic extends UILogic<
         previousState: SpacePickerState,
     ): Promise<number> {
         const localListId = await this.dependencies.createNewEntry(name)
-
-        this.localListIdsMRU.unshift(localListId)
-        this.selectedListIds.unshift(localListId)
-        this.emitMutation({
-            query: { $set: '' },
-            newEntryName: { $set: '' },
-            selectedListIds: { $set: this.selectedListIds },
-        })
-        this.setFocusedEntryIndex(0, previousState)
-
         this.dependencies.annotationsCache.addList({
             name,
             localId: localListId,
@@ -795,6 +819,44 @@ export default class SpacePickerLogic extends UILogic<
             unifiedAnnotationIds: [],
             creator: previousState.currentUser ?? undefined,
         })
+
+        this.localListIdsMRU.unshift(localListId)
+        this.selectedListIds.unshift(localListId)
+
+        const listData: NormalizedState<UnifiedList> = this.dependencies
+            .annotationsCache.lists
+
+        const userLists = normalizedStateToArray(listData)
+        const sortPredicate = sortDisplayEntries(
+            this.selectedListIds,
+            this.localListIdsMRU,
+        )
+
+        const toSet = initNormalizedState({
+            getId: (list) => list.unifiedId,
+            seedData: [...userLists]
+                .filter(
+                    (list) => list.type === 'user-list' && list.localId != null,
+                )
+                .sort(sortPredicate) as UnifiedList<'user-list'>[],
+        })
+
+        this.emitMutation({
+            query: { $set: '' },
+            newEntryName: { $set: '' },
+            selectedListIds: { $set: this.selectedListIds },
+        })
+
+        const mutation: UIMutation<SpacePickerState> = {
+            selectedListIds: { $set: this.selectedListIds },
+            filteredListIds: { $set: null },
+            listEntries: { $set: toSet },
+        }
+
+        this.emitMutation(mutation)
+        const nextState = this.withMutation(previousState, mutation)
+
+        this.setFocusedEntryIndex(0, nextState)
 
         return localListId
     }
