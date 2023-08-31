@@ -1106,7 +1106,7 @@ export default class Ribbon extends Component<Props, State> {
 
         return (
             <TooltipBox
-                tooltipText={this.getTooltipText('sharePage')}
+                tooltipText={this.getTooltipText('addToCollection')}
                 placement={
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
