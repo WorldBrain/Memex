@@ -550,6 +550,14 @@ export class PageIndexingBackground {
         // PDF pages should always have their tab IDs set, so don't fetch them from the tabs API
         //   TODO: have PDF pages pass down their original URLs here, instead of the memex.cloud/ct/ ones,
         //     so we don't have to do this dance
+
+        if (
+            props.fullUrl.endsWith('.pdf') &&
+            !props.fullUrl.includes('pdfjs/viewer.html?file')
+        ) {
+            return null
+        }
+
         if (!isMemexPageAPdf({ url: props.fullUrl })) {
             const foundTabId = await this._findTabId(props.fullUrl)
             if (foundTabId) {
