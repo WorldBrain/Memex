@@ -967,32 +967,30 @@ class PageInfo {
 
     async refreshIfNeeded() {
         let fullUrl = null
-        this.isPdf = isUrlPDFViewerUrl(window.location.href, {
-            runtimeAPI: runtime,
-        })
-        fullUrl = getUnderlyingResourceUrl(window.location.href)
 
         if (window.location.href === this._href) {
             return
         }
-        if (
-            (fullUrl.includes('twitter.com/messages') ||
-                fullUrl.includes('x.com/messages')) &&
-            !this.normalizedTwitterFullUrl
-        ) {
-            fullUrl = await this.normalizeTwitterCurrentFullURL()
-        }
 
-        if (fullUrl.includes('youtube.com/')) {
-            await sleepPromise(300)
+        if (window.location.href.includes('youtube.com/')) {
+            await sleepPromise(500)
+            fullUrl = getUnderlyingResourceUrl(window.location.href)
         } else if (
-            fullUrl.includes('twitter.com/messages') ||
-            fullUrl.includes('x.com/messages')
+            window.location.href.includes('twitter.com/messages') ||
+            window.location.href.includes('x.com/messages')
         ) {
+            if (!this.normalizedTwitterFullUrl) {
+                fullUrl = await this.normalizeTwitterCurrentFullURL()
+            }
             await sleepPromise(0)
         } else {
+            fullUrl = getUnderlyingResourceUrl(window.location.href)
             await sleepPromise(50)
         }
+
+        this.isPdf = isUrlPDFViewerUrl(window.location.href, {
+            runtimeAPI: runtime,
+        })
 
         this._identifier = await runInBackground<
             PageIndexingInterface<'caller'>
