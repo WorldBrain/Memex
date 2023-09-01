@@ -49,10 +49,14 @@ class EntryRow extends React.Component<Props> {
     }
 
     private handleResultPress: React.MouseEventHandler = (e) => {
-        if (this.props.contextMenuBtnRef.current.contains(e.target as Node)) {
+        if (this.props.contextMenuBtnRef?.current.contains(e.target as Node)) {
             return
         }
-        if (this.pressAllButtonRef.current.contains(e.target as Node)) {
+        if (
+            this.props.onPressActOnAll &&
+            this.pressAllButtonRef != null &&
+            this.pressAllButtonRef?.current.contains(e.target as Node)
+        ) {
             return
         }
         this.props.onPress()
