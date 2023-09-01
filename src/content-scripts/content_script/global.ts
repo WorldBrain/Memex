@@ -710,6 +710,7 @@ export async function main(
         },
         handleHistoryStateUpdate: async (tabId) => {
             await inPageUI.hideRibbon()
+            console.log('change history')
 
             if (window.location.href.includes('web.telegram.org/')) {
                 const existingContainer = document.getElementById(
@@ -732,11 +733,11 @@ export async function main(
                 !window.location.href.includes('/status/')
             ) {
                 await pageInfo.setTwitterFullUrl(null)
+                console.log('set url')
 
                 if (window.location.href.includes('/messages')) {
                     const url = await pageInfo.getFullPageUrl()
-
-                    await pageInfo.setTwitterFullUrl(url)
+                    console.log('get url', url)
 
                     const existingContainer = document.getElementById(
                         `spacesBarContainer_${url}`,
@@ -885,6 +886,7 @@ export async function main(
         }
 
         annotationsCache.events.on('updatedPageData', (url, pageListIds) => {
+            console.log('cache executed')
             const pageListIdURL = 'https://' + url
 
             const lists = Array.from(pageListIds).map((listId) => {
@@ -905,6 +907,7 @@ export async function main(
                 existingContainer = document.getElementById(
                     `spacesBarContainer_${pageListIdURL}`,
                 )
+                console.log('exisitng container', existingContainer)
             } else {
                 existingContainer = document.getElementById(
                     `spacesBarContainer_${pageListIdURL}`,
@@ -968,17 +971,28 @@ class PageInfo {
     }
 
     async refreshIfNeeded() {
-        if (window.location.href === this._href) {
-            return
-        }
-        await sleepPromise(500)
+        let fullUrl = null
         this.isPdf = isUrlPDFViewerUrl(window.location.href, {
             runtimeAPI: runtime,
         })
-        let fullUrl = getUnderlyingResourceUrl(window.location.href)
+        fullUrl = getUnderlyingResourceUrl(window.location.href)
+        console.log('full url', fullUrl)
 
-        if (window.location.href.includes('twitter.com/messages')) {
+        if (window.location.href === this._href) {
+            return
+        }
+        if (
+            window.location.href.includes('twitter.com/messages') &&
+            !this.normalizedTwitterFullUrl
+        ) {
             fullUrl = await this.normalizeTwitterCurrentFullURL()
+            console.log('full url', fullUrl)
+        }
+
+        if (fullUrl.includes('youtube.com/')) {
+            await sleepPromise(300)
+        } else {
+            await sleepPromise(50)
         }
 
         this._identifier = await runInBackground<
@@ -1005,6 +1019,9 @@ class PageInfo {
         let fullUrl
         let retryCount = 0
         const MAX_RETRIES = 60
+        if (this.normalizedTwitterFullUrl != null) {
+            return this.normalizedTwitterFullUrl
+        }
         if (window.location.href === 'https://twitter.com/messages') {
             return 'https://twitter.com/messages'
         }
@@ -1012,6 +1029,7 @@ class PageInfo {
             const activeChatItem = document.querySelector(
                 '[aria-selected="true"]',
             )
+            console.log('active chat item', activeChatItem)
             if (activeChatItem) {
                 const userName = activeChatItem.textContent
                     .split('@')[1]
