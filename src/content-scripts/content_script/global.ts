@@ -736,8 +736,6 @@ export async function main(
                 if (window.location.href.includes('/messages')) {
                     const url = await pageInfo.getFullPageUrl()
 
-                    await pageInfo.setTwitterFullUrl(url)
-
                     const existingContainer = document.getElementById(
                         `spacesBarContainer_${url}`,
                     )
@@ -968,18 +966,31 @@ class PageInfo {
     }
 
     async refreshIfNeeded() {
+        let fullUrl = null
+
         if (window.location.href === this._href) {
             return
         }
-        await sleepPromise(500)
+
+        if (window.location.href.includes('youtube.com/')) {
+            await sleepPromise(500)
+            fullUrl = getUnderlyingResourceUrl(window.location.href)
+        } else if (
+            window.location.href.includes('twitter.com/messages') ||
+            window.location.href.includes('x.com/messages')
+        ) {
+            if (!this.normalizedTwitterFullUrl) {
+                fullUrl = await this.normalizeTwitterCurrentFullURL()
+            }
+            await sleepPromise(0)
+        } else {
+            fullUrl = getUnderlyingResourceUrl(window.location.href)
+            await sleepPromise(50)
+        }
+
         this.isPdf = isUrlPDFViewerUrl(window.location.href, {
             runtimeAPI: runtime,
         })
-        let fullUrl = getUnderlyingResourceUrl(window.location.href)
-
-        if (window.location.href.includes('twitter.com/messages')) {
-            fullUrl = await this.normalizeTwitterCurrentFullURL()
-        }
 
         this._identifier = await runInBackground<
             PageIndexingInterface<'caller'>
@@ -1005,6 +1016,9 @@ class PageInfo {
         let fullUrl
         let retryCount = 0
         const MAX_RETRIES = 60
+        if (this.normalizedTwitterFullUrl != null) {
+            return this.normalizedTwitterFullUrl
+        }
         if (window.location.href === 'https://twitter.com/messages') {
             return 'https://twitter.com/messages'
         }
