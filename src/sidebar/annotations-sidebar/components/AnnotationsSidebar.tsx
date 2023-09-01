@@ -60,7 +60,6 @@ import {
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
-import DiscordNotification from '@worldbrain/memex-common/lib/common-ui/components/discord-notification-banner'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
@@ -188,12 +187,14 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     saveAIPrompt: (prompt) => void
     removeAISuggestion: (prompt) => void
     navigateFocusInList: (direction: 'up' | 'down') => void
+    spaceTitleEditValue: string
     updateListName: (
         unifiedId: string,
         localId: number,
         oldName: string,
         newName: string,
     ) => void
+    setSpaceTitleEditValue: (value) => void
 }
 
 interface AnnotationsSidebarState {
@@ -214,14 +215,13 @@ interface AnnotationsSidebarState {
     AIsuggestions: []
     autoFocusCreateForm: boolean
     spaceTitleEditState: boolean
-    spaceTitleEditValue: string
 }
 
 export class AnnotationsSidebar extends React.Component<
     AnnotationsSidebarProps,
     AnnotationsSidebarState
 > {
-    private annotationCreateRef = React.createRef() // TODO: Figure out how to properly type refs to onClickOutside HOCs
+    private annotationCreateRef = React.createRef<AnnotationCreate>()
     private annotationEditRefs: {
         [annotationUrl: string]: React.RefObject<_AnnotationEditable>
     } = {}
@@ -251,7 +251,10 @@ export class AnnotationsSidebar extends React.Component<
         AIsuggestions: [],
         autoFocusCreateForm: false,
         spaceTitleEditState: false,
-        spaceTitleEditValue: null,
+    }
+
+    addYoutubeTimestampToEditor() {
+        this.annotationCreateRef.current?.addYoutubeTimestampToEditor()
     }
 
     private maybeCreateContextBtnRef({
@@ -279,8 +282,6 @@ export class AnnotationsSidebar extends React.Component<
                 showIsolatedViewNotif: isolatedViewNotifVisible,
             })
         }
-        document.addEventListener('mousedown', this.handleClickOutside)
-        document.addEventListener('touchstart', this.handleClickOutside)
     }
 
     async componentDidUpdate(
@@ -293,32 +294,29 @@ export class AnnotationsSidebar extends React.Component<
         }
     }
 
-    componentWillUnmount() {
-        document.removeEventListener('mousedown', this.handleClickOutside)
-        document.removeEventListener('touchstart', this.handleClickOutside)
-    }
+    componentWillUnmount() {}
 
     handleClickOutside = (event) => {
+        this.spaceTitleEditFieldRef.current.removeEventListener(
+            'blur',
+            this.handleClickOutside,
+        )
+
         if (
-            this.spaceTitleEditFieldRef.current &&
-            !this.spaceTitleEditFieldRef.current.contains(event.target)
+            this.props.lists.byId[this.props.selectedListId].name !==
+                this.props.spaceTitleEditValue &&
+            this.props.spaceTitleEditValue.length > 0
         ) {
-            if (
-                this.props.lists.byId[this.props.selectedListId].name !==
-                this.state.spaceTitleEditValue
-            ) {
-                this.props.updateListName(
-                    this.props.lists.byId[this.props.selectedListId].unifiedId,
-                    this.props.lists.byId[this.props.selectedListId].localId,
-                    this.props.lists.byId[this.props.selectedListId].name,
-                    this.state.spaceTitleEditValue,
-                )
-            }
-            this.setState({
-                spaceTitleEditState: false,
-                spaceTitleEditValue: null, // Reset to the original value
-            })
+            this.props.updateListName(
+                this.props.lists.byId[this.props.selectedListId].unifiedId,
+                this.props.lists.byId[this.props.selectedListId].localId,
+                this.props.lists.byId[this.props.selectedListId].name,
+                this.props.spaceTitleEditValue,
+            )
         }
+        this.setState({
+            spaceTitleEditState: false,
+        })
     }
     focusCreateForm = () => {
         this.setState({ autoFocusCreateForm: true })
@@ -455,7 +453,7 @@ export class AnnotationsSidebar extends React.Component<
                     onCancel={() =>
                         this.setState({ autoFocusCreateForm: false })
                     }
-                    ref={this.annotationCreateRef as any}
+                    ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
                 />
@@ -1009,9 +1007,10 @@ export class AnnotationsSidebar extends React.Component<
                 offsetX={10}
                 offsetY={0}
                 targetElementRef={refObject?.current}
-                closeComponent={() =>
+                closeComponent={() => {
+                    this.props.setSpaceTitleEditValue(listData.name)
                     this.props.openContextMenuForList(listData.unifiedId)
-                }
+                }}
             >
                 {this.props.renderContextMenuForList(listData)}
             </PopoutBox>
@@ -2050,40 +2049,30 @@ export class AnnotationsSidebar extends React.Component<
             this.props.selectedListId
         ]
 
-        const nativeEvent = event.nativeEvent as KeyboardEvent
-
-        nativeEvent.stopImmediatePropagation()
-
         event.stopPropagation()
-        if (event.key === 'Enter') {
-            const inputValue = (event.target as HTMLInputElement).value
-
-            if (selectedList.name !== inputValue) {
-                this.props.updateListName(
-                    selectedList.unifiedId,
-                    selectedList.localId,
-                    selectedList.name,
-                    inputValue,
-                )
-            }
+        if (
+            (event.target as HTMLInputElement).value.length > 0 &&
+            event.key === 'Enter'
+        ) {
+            // this blurring is tracked and will automatically save it
+            this.spaceTitleEditFieldRef.current.blur()
             this.setState({
                 spaceTitleEditState: false,
-                spaceTitleEditValue: null,
             })
+            this.props.setSpaceTitleEditValue(null)
         } else if (event.key === 'Escape') {
             event.stopPropagation()
             this.setState({
                 spaceTitleEditState: false,
-                spaceTitleEditValue: selectedList.name,
             })
-        } else if (event.key === 'space') {
-            this.setState({
-                spaceTitleEditValue: this.state.spaceTitleEditState + ' ',
-            })
-            event.stopPropagation()
+            this.props.setSpaceTitleEditValue(selectedList.name)
         }
 
         // If we don't have this, events will bubble up into the page!
+
+        const nativeEvent = event.nativeEvent as KeyboardEvent
+
+        nativeEvent.stopImmediatePropagation()
         event.stopPropagation()
     }
 
@@ -2161,31 +2150,31 @@ export class AnnotationsSidebar extends React.Component<
                         {this.renderPermissionStatusButton()}
                     </RightSideButtonsTopBar>
                 </IsolatedViewHeaderTopBar>
-                {this.state.spaceTitleEditState ? (
-                    <SpaceTitleEditField
-                        ref={this.spaceTitleEditFieldRef}
-                        value={this.state.spaceTitleEditValue}
-                        onChange={(event) => {
-                            this.setState({
-                                spaceTitleEditValue: event.target.value,
-                            })
-                        }}
-                        onKeyDown={this.handleNameEditInputKeyDown}
-                        autoFocus
-                    />
-                ) : (
-                    <SpaceTitle
-                        onClick={() =>
+                {/* {this.state.spaceTitleEditState ? ( */}
+                <SpaceTitleEditField
+                    ref={this.spaceTitleEditFieldRef}
+                    value={this.props.spaceTitleEditValue ?? selectedList.name}
+                    onChange={(event) => {
+                        {
+                            this.props.setSpaceTitleEditValue(
+                                event.target.value,
+                            )
+                        }
+                    }}
+                    isActivated={this.state.spaceTitleEditState}
+                    onClick={() => {
+                        this.props.setSpaceTitleEditValue(selectedList.name)
+                        this.spaceTitleEditFieldRef.current.addEventListener(
+                            'blur',
+                            this.handleClickOutside,
+                        )
+                        !this.state.spaceTitleEditState &&
                             this.setState({
                                 spaceTitleEditState: true,
-                                spaceTitleEditValue: this.props.annotationsCache
-                                    .lists.byId[this.props.selectedListId].name,
                             })
-                        }
-                    >
-                        {selectedList.name}
-                    </SpaceTitle>
-                )}
+                    }}
+                    onKeyDown={this.handleNameEditInputKeyDown}
+                />
                 <SpaceDescription>{selectedList.description}</SpaceDescription>
                 {/* {totalAnnotsCountJSX}
                 {othersAnnotsCountJSX} */}
@@ -2978,7 +2967,7 @@ const SpaceTitle = styled.div`
         background: ${(props) => props.theme.colors.greyScale1};
     }
 `
-const SpaceTitleEditField = styled.input`
+const SpaceTitleEditField = styled.input<{ isActivated: boolean }>`
     font-size: 18px;
     font-weight: 500;
     width: fill-available;
@@ -2991,6 +2980,29 @@ const SpaceTitleEditField = styled.input`
     outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on;
     border: none;
+
+    ${(props) =>
+        !props.isActivated &&
+        css`
+            font-size: 18px;
+            font-weight: 500;
+            width: fill-available;
+            color: ${(props) => props.theme.colors.white};
+            background: transparent;
+            letter-spacing: 1px;
+            padding: 5px 3px 5px 5px;
+            margin: -5px -3px -5px -5px;
+            border-radius: 5px;
+            outline: 1px solid transparent;
+            font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on,
+                'ss04' on;
+            border: none;
+
+            &:hover {
+                cursor: pointer;
+                background: ${(props) => props.theme.colors.greyScale1};
+            }
+        `};
 `
 
 const SpaceDescription = styled(Markdown)`

@@ -10,6 +10,7 @@ import type {
 } from 'src/annotations/cache/types'
 import { siftListsIntoCategories } from 'src/annotations/cache/utils'
 import {
+    NormalizedState,
     initNormalizedState,
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
@@ -28,6 +29,7 @@ import {
 } from 'src/content-sharing/utils'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { sleepPromise } from 'src/util/promises'
 
 type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     SpacePickerState,
@@ -147,6 +149,8 @@ export default class SpacePickerLogic extends UILogic<
         contextMenuListId: null,
         contextMenuPositionX: 0,
         contextMenuPositionY: 0,
+        keyboardNavActive: false,
+        addedToAllIds: [],
     })
 
     private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState']
@@ -357,7 +361,7 @@ export default class SpacePickerLogic extends UILogic<
         if (
             (currentKeys.includes('Enter') && currentKeys.includes('Meta')) ||
             (event.key === 'Enter' &&
-                previousState.listEntries.allIds.length === 0)
+                previousState.filteredListIds?.length === 0)
         ) {
             if (previousState.newEntryName !== '') {
                 await this.newEntryPress({
@@ -393,17 +397,24 @@ export default class SpacePickerLogic extends UILogic<
         }
 
         if (event.key === 'ArrowUp') {
+            this.emitMutation({ keyboardNavActive: { $set: true } })
             this.setFocusedEntryIndex(this.focusIndex - 1, previousState)
+            await sleepPromise(50)
+            this.emitMutation({ keyboardNavActive: { $set: false } })
             return
         }
 
         if (event.key === 'ArrowDown') {
+            this.emitMutation({ keyboardNavActive: { $set: true } })
             this.setFocusedEntryIndex(this.focusIndex + 1, previousState)
+            await sleepPromise(50)
+            this.emitMutation({ keyboardNavActive: { $set: false } })
             return
         }
         if (event.key === 'Escape') {
             this.dependencies.closePicker()
         }
+        event.stopPropagation()
     }
 
     openListInWebUI: EventHandler<'openListInWebUI'> = async ({ event }) => {
@@ -518,6 +529,12 @@ export default class SpacePickerLogic extends UILogic<
             name: newName,
         })
 
+        await this.dependencies.spacesBG.updateListName({
+            id: listData.localId,
+            oldName: listData.name,
+            newName,
+        })
+
         // NOTE: Done in SpaceContextMenuLogic
         // await this.dependencies.spacesBG.updateListName({
         //     id: event.listId,
@@ -551,6 +568,7 @@ export default class SpacePickerLogic extends UILogic<
 
         if (!query || query === '') {
             this.emitMutation({ filteredListIds: { $set: null } })
+            this.querySpaces(query, previousState)
         } else {
             this.querySpaces(query, previousState)
         }
@@ -581,8 +599,51 @@ export default class SpacePickerLogic extends UILogic<
         this.emitMutation({ filteredListIds: { $set: matchingEntryIds } })
         this.maybeSetCreateEntryDisplay(query, state)
 
-        if (matchingEntryIds.length > 0) {
-            this.setFocusedEntryIndex(0, state)
+        const mutation: UIMutation<SpacePickerState> = {
+            filteredListIds: { $set: matchingEntryIds },
+            query: { $set: query },
+        }
+
+        this.emitMutation(mutation)
+        const nextState = this.withMutation(state, mutation)
+
+        if (
+            state.filteredListIds != null &&
+            state.filteredListIds?.length != nextState.filteredListIds?.length
+        ) {
+            this.setFocusedEntryIndex(0, nextState, true)
+        }
+
+        if (state.query.length > 0 && nextState.query.length === 0) {
+            const listData: NormalizedState<UnifiedList> = this.dependencies
+                .annotationsCache.lists
+
+            const userLists = normalizedStateToArray(listData)
+            const sortPredicate = sortDisplayEntries(
+                this.selectedListIds,
+                this.localListIdsMRU,
+            )
+
+            const toSet = initNormalizedState({
+                getId: (list) => list.unifiedId,
+                seedData: [...userLists]
+                    .filter(
+                        (list) =>
+                            list.type === 'user-list' && list.localId != null,
+                    )
+                    .sort(sortPredicate) as UnifiedList<'user-list'>[],
+            })
+
+            const mutation: UIMutation<SpacePickerState> = {
+                selectedListIds: { $set: this.selectedListIds },
+                filteredListIds: { $set: null },
+                listEntries: { $set: toSet },
+            }
+
+            this.emitMutation(mutation)
+
+            const nextState = this.withMutation(state, mutation)
+            this.setFocusedEntryIndex(0, nextState)
         }
     }
 
@@ -606,13 +667,15 @@ export default class SpacePickerLogic extends UILogic<
             // enter keys will action it. But we don't emit that focus
             // to the user, because otherwise the style of the button changes
             // showing the tick and it might seem like it's already selected.
-            this.setFocusedEntryIndex(0, state, false)
+            this.setFocusedEntryIndex(1, state, false)
             return
         }
 
-        const { valid } = this.validateSpaceName(_input)
-        if (!valid) {
-            return
+        if (state.query.length > 0) {
+            const { valid } = this.validateSpaceName(_input)
+            if (!valid) {
+                return
+            }
         }
         this.emitMutation({ newEntryName: { $set: _input } })
         this.setFocusedEntryIndex(-1, state)
@@ -630,11 +693,11 @@ export default class SpacePickerLogic extends UILogic<
             )
         }
 
-        if (nextFocusIndex < -1 || nextFocusIndex >= entries.length) {
+        if (nextFocusIndex < 0 || nextFocusIndex >= entries.length) {
             return
         }
 
-        this.focusIndex = nextFocusIndex ?? -1
+        this.focusIndex = nextFocusIndex ?? 0
         const focusEntryData = entries[nextFocusIndex]
 
         if (emit) {
@@ -645,7 +708,7 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     resultEntryPress: EventHandler<'resultEntryPress'> = async ({
-        event: { entry },
+        event: { entry, shouldRerender },
         previousState,
     }) => {
         if (!(await pageActionAllowed())) {
@@ -694,9 +757,11 @@ export default class SpacePickerLogic extends UILogic<
             nextState = this.withMutation(previousState, mutation)
 
             // Manually trigger list subscription - which does the list state mutation - as it won't be auto-triggered here
-            this.cacheListsSubscription(
-                this.dependencies.annotationsCache.lists,
-            )
+            if (shouldRerender) {
+                this.cacheListsSubscription(
+                    this.dependencies.annotationsCache.lists,
+                )
+            }
             await entrySelectPromise
         } catch (e) {
             this.selectedListIds = previousState.selectedListIds
@@ -710,7 +775,7 @@ export default class SpacePickerLogic extends UILogic<
         }
 
         await this.searchInputChanged({
-            event: { query: '' },
+            event: { query: previousState.query },
             previousState: nextState,
         })
     }
@@ -729,15 +794,18 @@ export default class SpacePickerLogic extends UILogic<
             entry.localId,
         )
 
-        this.selectedListIds = isAlreadySelected
-            ? previousState.selectedListIds.filter(
-                  (entryId) => entryId !== entry.localId,
-              )
-            : [entry.localId, ...previousState.selectedListIds]
+        const selectedIds = [entry.localId, ...previousState.selectedListIds]
+
+        let addedToAllIdsnew = [
+            parseFloat(entry.unifiedId),
+            ...(previousState.addedToAllIds ?? []),
+        ]
+
         this.emitMutation({
-            selectedListIds: { $set: this.selectedListIds },
-            allTabsButtonPressed: { $set: entry.localId },
+            selectedListIds: { $set: selectedIds },
+            addedToAllIds: { $set: addedToAllIdsnew },
         })
+        this.selectedListIds = selectedIds
     }
 
     private async createAndDisplayNewList(
@@ -745,16 +813,6 @@ export default class SpacePickerLogic extends UILogic<
         previousState: SpacePickerState,
     ): Promise<number> {
         const localListId = await this.dependencies.createNewEntry(name)
-
-        this.localListIdsMRU.unshift(localListId)
-        this.selectedListIds.unshift(localListId)
-        this.emitMutation({
-            query: { $set: '' },
-            newEntryName: { $set: '' },
-            selectedListIds: { $set: this.selectedListIds },
-        })
-        this.setFocusedEntryIndex(0, previousState)
-
         this.dependencies.annotationsCache.addList({
             name,
             localId: localListId,
@@ -764,6 +822,44 @@ export default class SpacePickerLogic extends UILogic<
             unifiedAnnotationIds: [],
             creator: previousState.currentUser ?? undefined,
         })
+
+        this.localListIdsMRU.unshift(localListId)
+        this.selectedListIds.unshift(localListId)
+
+        const listData: NormalizedState<UnifiedList> = this.dependencies
+            .annotationsCache.lists
+
+        const userLists = normalizedStateToArray(listData)
+        const sortPredicate = sortDisplayEntries(
+            this.selectedListIds,
+            this.localListIdsMRU,
+        )
+
+        const toSet = initNormalizedState({
+            getId: (list) => list.unifiedId,
+            seedData: [...userLists]
+                .filter(
+                    (list) => list.type === 'user-list' && list.localId != null,
+                )
+                .sort(sortPredicate) as UnifiedList<'user-list'>[],
+        })
+
+        this.emitMutation({
+            query: { $set: '' },
+            newEntryName: { $set: '' },
+            selectedListIds: { $set: this.selectedListIds },
+        })
+
+        const mutation: UIMutation<SpacePickerState> = {
+            selectedListIds: { $set: this.selectedListIds },
+            filteredListIds: { $set: null },
+            listEntries: { $set: toSet },
+        }
+
+        this.emitMutation(mutation)
+        const nextState = this.withMutation(previousState, mutation)
+
+        this.setFocusedEntryIndex(0, nextState)
 
         return localListId
     }

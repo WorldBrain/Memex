@@ -589,7 +589,16 @@ export class RibbonContainerLogic extends UILogic<
             let title: string = null
 
             if (window.location.href.includes('web.telegram.org')) {
-                title = getTelegramUserDisplayName(document)
+                title = getTelegramUserDisplayName(
+                    document,
+                    window.location.href,
+                )
+            }
+            if (
+                window.location.href.includes('x.com/messages/') ||
+                window.location.href.includes('twitter.com/messages/')
+            ) {
+                title = document.title
             }
 
             try {
@@ -850,7 +859,14 @@ export class RibbonContainerLogic extends UILogic<
         let title
 
         if (window.location.href.includes('web.telegram.org')) {
-            title = getTelegramUserDisplayName(document)
+            title = getTelegramUserDisplayName(document, window.location.href)
+        }
+
+        if (
+            window.location.href.includes('x.com/messages/') ||
+            window.location.href.includes('twitter.com/messages/')
+        ) {
+            title = document.title
         }
 
         return this.dependencies.customLists.updateListForPage({

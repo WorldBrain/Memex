@@ -69,7 +69,7 @@ export interface Props extends SidebarContainerOptions {
 export class AnnotationsSidebarContainer<
     P extends Props = Props
 > extends StatefulUIElement<P, SidebarContainerState, SidebarContainerEvents> {
-    private sidebarRef = React.createRef<AnnotationsSidebarComponent>()
+    protected sidebarRef = React.createRef<AnnotationsSidebarComponent>()
     private annotationInstanceRefs: {
         [instanceId: string]: AnnotationInstanceRefs
     } = {}
@@ -1064,6 +1064,12 @@ export class AnnotationsSidebarContainer<
                                         },
                                     ),
                             })}
+                            setSpaceTitleEditValue={(value) =>
+                                this.processEvent('setSpaceTitleEditValue', {
+                                    value,
+                                })
+                            }
+                            spaceTitleEditValue={this.state.spaceTitleEditValue}
                         />
                     </Rnd>
                 </ContainerStyled>

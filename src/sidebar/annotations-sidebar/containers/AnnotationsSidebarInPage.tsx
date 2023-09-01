@@ -23,7 +23,6 @@ import type {
 import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
-import type { SidebarContainerLogic } from './logic'
 import type { UnifiedAnnotation } from 'src/annotations/cache/types'
 import { ANNOT_BOX_ID_PREFIX } from '../constants'
 import browser from 'webextension-polyfill'
@@ -303,15 +302,13 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 textToProcess: event.highlightedText,
             })
         } else if (event.action === 'youtube_timestamp') {
+            this.sidebarRef.current?.addYoutubeTimestampToEditor()
             await this.processEvent('setActiveSidebarTab', {
                 tab:
                     this.state.selectedListId &&
                     this.state.activeTab === 'spaces'
                         ? 'spaces'
                         : 'annotations',
-            })
-            await this.processEvent('setNewPageNoteText', {
-                comment: event.commentText ?? '',
             })
         } else if (event.action === 'check_sidebar_status') {
             return true

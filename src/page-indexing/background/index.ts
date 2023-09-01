@@ -550,6 +550,7 @@ export class PageIndexingBackground {
         // PDF pages should always have their tab IDs set, so don't fetch them from the tabs API
         //   TODO: have PDF pages pass down their original URLs here, instead of the memex.cloud/ct/ ones,
         //     so we don't have to do this dance
+
         if (!isMemexPageAPdf({ url: props.fullUrl })) {
             const foundTabId = await this._findTabId(props.fullUrl)
             if (foundTabId) {
@@ -558,17 +559,40 @@ export class PageIndexingBackground {
                 delete props.tabId
             }
         }
+        console.log('Indexing page: ', props.fullUrl)
 
-        const pageData = await (props.tabId != null
+        let pageData = await (props.tabId != null
             ? this.processPageDataFromTab(props)
             : this.processPageDataFromUrl(props))
 
         if (pageData.isExisting) {
             return { fullUrl: pageData.fullUrl }
         }
-        if (props.metaData.pageTitle) {
+
+        console.log('pageData: ', pageData)
+
+        // Override title with in-page CS derived title for telegram pages - TODO: Move this somewhere else
+        if (
+            (props.fullUrl.includes('web.telegram.org/') ||
+                props.fullUrl.includes('x.com/') ||
+                props.fullUrl.includes('twitter.com/')) &&
+            props.metaData.pageTitle
+        ) {
             pageData.fullTitle = props.metaData.pageTitle
+            console.log(
+                'pageData.fullTitle: ',
+                pageData.fullTitle,
+                props.metaData.pageTitle,
+            )
         }
+
+        console.log(
+            'Indexing page: ',
+            props.fullUrl,
+            pageData.fullUrl,
+            pageData.fullTitle,
+        )
+
         await this.createOrUpdatePage(pageData, opts)
 
         if (props.visitTime) {

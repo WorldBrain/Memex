@@ -233,6 +233,7 @@ export class SidebarContainerLogic extends UILogic<
             showAllNotesCopyPaster: false,
             pageSummary: '',
             selectedListId: null,
+            spaceTitleEditValue: '',
             activeListContextMenuId: null,
 
             commentBox: { ...INIT_FORM_STATE },
@@ -1264,7 +1265,17 @@ export class SidebarContainerLogic extends UILogic<
 
             let title: string | null = null
             if (window.location.href.includes('web.telegram.org')) {
-                title = getTelegramUserDisplayName(document)
+                title = getTelegramUserDisplayName(
+                    document,
+                    window.location.href,
+                )
+            }
+
+            if (
+                window.location.href.includes('x.com/messages/') ||
+                window.location.href.includes('twitter.com/messages/')
+            ) {
+                title = document.title
             }
 
             // Adding a new annot in selected space mode should only work on the "Spaces" tab
@@ -2223,6 +2234,15 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
+    setSpaceTitleEditValue: EventHandler<'setSpaceTitleEditValue'> = ({
+        event,
+    }) => {
+        console.log('event.value', event.value)
+        this.emitMutation({
+            spaceTitleEditValue: { $set: event.value },
+        })
+    }
+
     markFeedAsRead: EventHandler<'markFeedAsRead'> = async () => {
         // const activityindicator = await this.options.activityIndicatorBG.markActivitiesAsSeen()
         // await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
@@ -2248,9 +2268,12 @@ export class SidebarContainerLogic extends UILogic<
             return state
         }
 
+        const listTitle = list.name
+
         let nextState = this.applyAndEmitMutation(state, {
             activeTab: { $set: 'spaces' },
             selectedListId: { $set: unifiedListId },
+            spaceTitleEditValue: { $set: listTitle },
         })
 
         this.options.events?.emit('renderHighlights', {
@@ -2605,7 +2628,7 @@ export class SidebarContainerLogic extends UILogic<
         let title
 
         if (window.location.href.includes('web.telegram.org')) {
-            title = getTelegramUserDisplayName(document)
+            title = getTelegramUserDisplayName(document, window.location.href)
         }
 
         await executeUITask(this, 'pageLinkCreateState', async () => {

@@ -126,10 +126,10 @@ class SpacePicker extends StatefulUIElement<
     handleResultListFocus = (list: UnifiedList, index?: number) => {
         this.processEvent('resultEntryFocus', { entry: list, index })
 
-        const el = document.getElementById(`ListKeyName-${list.localId}`)
-        if (el != null) {
-            el.scrollTop = el.offsetTop
-        }
+        // const el = document.getElementById(`ListKeyName-${list.localId}`)
+        // if (el != null) {
+        //     el.scrollTop = el.offsetTop
+        // }
     }
 
     handleNewListPress = () => {
@@ -220,11 +220,12 @@ class SpacePicker extends StatefulUIElement<
             <EntryRow
                 id={`ListKeyName-${entry.unifiedId}`}
                 onPress={() => {
-                    this.displayListRef.current.scrollTo(0, 0)
                     this.processEvent('resultEntryPress', {
                         entry,
                     })
                 }}
+                addedToAllIds={this.state.addedToAllIds}
+                keepScrollPosition={this.keepScrollPosition}
                 onPressActOnAll={
                     this.props.actOnAllTabs
                         ? () =>
@@ -234,12 +235,12 @@ class SpacePicker extends StatefulUIElement<
                         : undefined
                 }
                 onFocus={async () => {
-                    const el = document.getElementById(
-                        `ListKeyName-${entry.unifiedId}`,
-                    )
-                    if (el != null) {
-                        el.scrollTop = el.offsetTop
-                    }
+                    // const el = document.getElementById(
+                    //     `ListKeyName-${entry.unifiedId}`,
+                    // )
+                    // if (el != null) {
+                    //     el.scrollTop = el.offsetTop
+                    // }
                     await this.processEvent('resultEntryFocus', {
                         entry,
                         index,
@@ -253,6 +254,7 @@ class SpacePicker extends StatefulUIElement<
                 }
                 allTabsButtonPressed={this.state.allTabsButtonPressed}
                 index={index}
+                keyboardNavActive={this.state.keyboardNavActive}
                 selected={this.state.selectedListIds.includes(entry.localId)}
                 focused={this.state.focusedListId === entry.unifiedId}
                 resultItem={<ListResultItem>{entry.name}</ListResultItem>}
@@ -273,6 +275,16 @@ class SpacePicker extends StatefulUIElement<
             />
         </EntryRowContainer>
     )
+
+    private keepScrollPosition = () => {
+        const el = this.displayListRef.current
+        const scrollTop = el.scrollTop
+        if (el != null) {
+            if (scrollTop === 0) {
+                el.scroll({ top: 0 })
+            }
+        }
+    }
 
     private renderListEntries() {
         let listEntries = getEntriesForCurrentPickerTab(this.state)
@@ -368,8 +380,8 @@ class SpacePicker extends StatefulUIElement<
                             })
                         }
                         errorMessage={this.state.renameListErrorMessage}
-                        onConfirmSpaceNameEdit={async (name) => {
-                            await this.processEvent('renameList', {
+                        onConfirmSpaceNameEdit={(name) => {
+                            this.processEvent('renameList', {
                                 listId: list.localId,
                                 name,
                             })
@@ -414,6 +426,7 @@ class SpacePicker extends StatefulUIElement<
                 <EntryList
                     shouldScroll={this.state.listEntries.allIds.length < 5}
                     ref={this.displayListRef}
+                    context={this.props.context}
                 >
                     {this.props.showPageLinks && (
                         <OutputSwitcherContainer>
@@ -449,7 +462,7 @@ class SpacePicker extends StatefulUIElement<
                     <AddNewEntry
                         resultItem={this.state.newEntryName}
                         onPress={this.handleNewListPress}
-                        resultsCount={this.state.listEntries.allIds.length}
+                        resultsCount={this.state.filteredListIds?.length}
                         commandKey={SpacePicker.MOD_KEY}
                     />
                 )}
@@ -521,18 +534,27 @@ const EntryListHeader = styled.div`
     margin-bottom: 5px;
 `
 
-const EntryList = styled.div<{ shouldScroll: boolean }>`
+const EntryList = styled.div<{ shouldScroll: boolean; context: string }>`
     position: relative;
+    height: 100%;
 
-    max-height: 280px;
     padding: 5px 10px 10px 10px;
     overflow: scroll;
+    max-height: 300px;
 
     scrollbar-width: none;
 
     &::-webkit-scrollbar {
         display: none;
     }
+
+    ${(props) =>
+        props.context === 'popup' &&
+        css`
+            width: fill-available;
+            height: 100%;
+            max-height: 400px;
+        `};
 
     ${(props) =>
         props.shouldScroll &&

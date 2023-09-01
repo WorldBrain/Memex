@@ -254,7 +254,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         let title
 
         if (window.location.href.includes('web.telegram.org')) {
-            title = getTelegramUserDisplayName(document)
+            title = getTelegramUserDisplayName(document, window.location.href)
         }
 
         if (this.props.showCollectionsPicker) {

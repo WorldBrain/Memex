@@ -20,12 +20,23 @@ export const isUrlSupported = (params: {
         'chrome://',
         'moz-extension://',
         'chrome-extension://',
+        'chrome://extensions/',
     ]
     const fullUrl = getUnderlyingResourceUrl(params.fullUrl)
 
     // Ignore file URLs, though check `params.url` as the processed `fullUrl` may be a valid file URL (local PDF opened in PDF reader)
     if (params.fullUrl.startsWith('file://') && !params.allowFileUrls) {
         return false
+    }
+
+    // Ignore PDFs that are just urls and not the reader
+    if (params.fullUrl.endsWith('.pdf')) {
+        if (!params.fullUrl.includes('pdfjs/viewer.html?file')) {
+            return false
+        }
+        if (params.fullUrl.includes('pdfjs/viewer.html?file')) {
+            return true
+        }
     }
 
     for (const prefix of unsupportedUrlPrefixes) {

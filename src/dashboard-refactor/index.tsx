@@ -460,6 +460,9 @@ export class DashboardContainer extends StatefulUIElement<
                 openRemoteListPage={(remoteListId) =>
                     this.props.openCollectionPage(remoteListId)
                 }
+                onConfirmListEdit={(listId: string, value: string) => {
+                    this.processEvent('confirmListEdit', { value, listId })
+                }}
                 switchToFeed={() => this.processEvent('switchToFeed', null)}
                 onListSelection={(listId) => {
                     this.processEvent('setSelectedListId', { listId })

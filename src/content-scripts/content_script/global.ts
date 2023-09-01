@@ -86,7 +86,11 @@ import checkBrowser from 'src/util/check-browser'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { UnifiedList } from 'src/annotations/cache/types'
+import type {
+    PageAnnotationsCacheInterface,
+    UnifiedList,
+} from 'src/annotations/cache/types'
+import { page } from 'src/sidebar-overlay/sidebar/selectors'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -484,42 +488,6 @@ export async function main(
         },
     }
 
-    if (window.location.hostname === 'www.youtube.com') {
-        loadYoutubeButtons(annotationsFunctions)
-    }
-    if (window.location.href.includes('web.telegram.org/k/')) {
-        const spacesBar = document.getElementById('spacesBar')
-        if (spacesBar) {
-            spacesBar.remove()
-        }
-
-        const textField = document.getElementsByClassName(
-            'input-message-input',
-        )[0]
-        if (textField) {
-            textField.classList.add('mousetrap')
-        }
-
-        const lists = await collectionsBG.fetchPageListEntriesByUrl({
-            url: window.location.href,
-        })
-        if (lists.length > 0) {
-            const updatedLists = await Promise.all(
-                lists
-                    .filter((list) => list.listId !== 20201014)
-                    .map(async (list) => {
-                        const listData = await collectionsBG.fetchListById({
-                            id: list.listId,
-                        })
-                        ;(list as any).name = listData.name // Add the list name to the original list object.
-                        return list
-                    }),
-            )
-
-            loadTelegramUserSpaces(updatedLists, bgScriptBG)
-        }
-    }
-
     // if (window.location.hostname === 'www.youtube.com') {
     //     injectYoutubeButtonMenu(annotationsFunctions)
     //     injectYoutubeContextMenu(annotationsFunctions)
@@ -742,61 +710,71 @@ export async function main(
         },
         handleHistoryStateUpdate: async (tabId) => {
             await inPageUI.hideRibbon()
-            if (window.location.href.includes('web.telegram.org/k/')) {
-                const spacesBar = document.getElementById('spacesBar')
-                if (spacesBar) {
-                    spacesBar.remove()
+
+            if (window.location.href.includes('web.telegram.org/')) {
+                const existingContainer = document.getElementById(
+                    `spacesBarContainer`,
+                )
+
+                if (existingContainer) {
+                    existingContainer.remove()
                 }
 
-                const textField = document.getElementsByClassName(
-                    'input-message-input',
-                )[0]
-                if (textField) {
-                    textField.classList.add('mousetrap')
-                }
+                await injectTelegramCustomUI(
+                    collectionsBG,
+                    bgScriptBG,
+                    window.location.href,
+                )
+            }
+            if (
+                (window.location.href.includes('twitter.com/') ||
+                    window.location.href.includes('x.com/')) &&
+                !window.location.href.includes('/status/')
+            ) {
+                await pageInfo.setTwitterFullUrl(null)
 
-                const lists = await collectionsBG.fetchPageListEntriesByUrl({
-                    url: window.location.href,
-                })
-                if (lists.length > 0) {
-                    const updatedLists = await Promise.all(
-                        lists
-                            .filter((list) => list.listId !== 20201014)
-                            .map(async (list) => {
-                                const listData = await collectionsBG.fetchListById(
-                                    {
-                                        id: list.listId,
-                                    },
-                                )
-                                ;(list as any).name = listData.name // Add the list name to the original list object.
-                                return list
-                            }),
+                if (window.location.href.includes('/messages')) {
+                    const url = await pageInfo.getFullPageUrl()
+
+                    const existingContainer = document.getElementById(
+                        `spacesBarContainer_${url}`,
                     )
-
-                    loadTelegramUserSpaces(updatedLists, bgScriptBG)
+                    if (!existingContainer) {
+                        await trackTwitterMessageList(collectionsBG, bgScriptBG)
+                    }
+                } else {
+                    await injectTwitterProfileUI(
+                        collectionsBG,
+                        bgScriptBG,
+                        await pageInfo.getFullPageUrl(),
+                    )
                 }
             }
+            if (window.location.hostname === 'www.youtube.com') {
+                loadYoutubeButtons(annotationsFunctions)
+            }
+
             const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
             if (isPageBlacklisted || !isSidebarEnabled) {
                 await inPageUI.removeRibbon()
             } else {
                 await inPageUI.reloadRibbon()
             }
-            if (window.location.hostname === 'www.youtube.com') {
-                loadYoutubeButtons(annotationsFunctions)
-            }
+
             if (inPageUI.componentsShown.sidebar) {
                 await inPageUI.showSidebar()
             }
             highlightRenderer.resetHighlightsStyles()
             await bookmarks.autoSetBookmarkStatusInBrowserIcon(tabId)
             await sleepPromise(500)
+
             await pageInfo.refreshIfNeeded()
         },
     })
 
     // 6. Setup other interactions with this page (things that always run)
     // setupScrollReporter()
+
     initKeyboardShortcuts({
         inPageUI,
         createHighlight: annotationsFunctions.createHighlight({
@@ -855,6 +833,87 @@ export async function main(
     }
 
     setupWebUIActions({ contentScriptsBG, bgScriptBG, pageActivityIndicatorBG })
+
+    if (window.location.hostname === 'www.youtube.com') {
+        loadYoutubeButtons(annotationsFunctions)
+    }
+    if (window.location.href.includes('web.telegram.org/')) {
+        await injectTelegramCustomUI(
+            collectionsBG,
+            bgScriptBG,
+            window.location.href,
+        )
+
+        annotationsCache.events.on('updatedPageData', (url, pageListIds) => {
+            let spacesBar: HTMLElement
+            let existingContainer: HTMLElement
+            const pageListIdURL = 'https://' + url
+
+            existingContainer = document.getElementById('spacesBarContainer')
+            spacesBar = document.getElementById('spacesBar')
+
+            if (spacesBar) {
+                spacesBar.remove()
+            }
+
+            const lists = Array.from(pageListIds).map((listId) => {
+                return annotationsCache.lists.byId[listId]
+            })
+
+            spacesBar = renderSpacesBar(lists, bgScriptBG, pageListIdURL)
+
+            if (existingContainer) {
+                existingContainer.appendChild(spacesBar)
+            }
+        })
+    }
+    if (
+        window.location.href.includes('twitter.com/') ||
+        (window.location.href.includes('x.com/') &&
+            !window.location.href.includes('/status/'))
+    ) {
+        if (window.location.href.includes('/messages')) {
+            await trackTwitterMessageList(collectionsBG, bgScriptBG)
+        } else {
+            await injectTwitterProfileUI(
+                collectionsBG,
+                bgScriptBG,
+                await pageInfo.getFullPageUrl(),
+            )
+        }
+
+        annotationsCache.events.on('updatedPageData', (url, pageListIds) => {
+            const pageListIdURL = 'https://' + url
+
+            const lists = Array.from(pageListIds).map((listId) => {
+                return annotationsCache.lists.byId[listId]
+            })
+
+            let spacesBar: HTMLElement
+
+            if (window.location.href.includes('/messages')) {
+                spacesBar = renderSpacesBar(lists, bgScriptBG, pageListIdURL)
+            } else {
+                spacesBar = renderSpacesBar(lists, bgScriptBG, pageListIdURL)
+            }
+
+            let existingContainer: HTMLElement
+
+            if (window.location.href.includes('/messages')) {
+                existingContainer = document.getElementById(
+                    `spacesBarContainer_${pageListIdURL}`,
+                )
+            } else {
+                existingContainer = document.getElementById(
+                    `spacesBarContainer_${pageListIdURL}`,
+                )
+            }
+            if (existingContainer) {
+                existingContainer.appendChild(spacesBar)
+            }
+        })
+    }
+
     return inPageUI
 }
 
@@ -896,6 +955,7 @@ class PageInfo {
     isPdf: boolean
     _href?: string
     _identifier?: ContentIdentifier
+    private normalizedTwitterFullUrl?: string
 
     constructor(
         public options?: { getContentFingerprints?: GetContentFingerprints },
@@ -906,14 +966,32 @@ class PageInfo {
     }
 
     async refreshIfNeeded() {
+        let fullUrl = null
+
         if (window.location.href === this._href) {
             return
         }
-        await sleepPromise(500)
+
+        if (window.location.href.includes('youtube.com/')) {
+            await sleepPromise(500)
+            fullUrl = getUnderlyingResourceUrl(window.location.href)
+        } else if (
+            window.location.href.includes('twitter.com/messages') ||
+            window.location.href.includes('x.com/messages')
+        ) {
+            if (!this.normalizedTwitterFullUrl) {
+                fullUrl = await this.normalizeTwitterCurrentFullURL()
+            }
+            await sleepPromise(0)
+        } else {
+            fullUrl = getUnderlyingResourceUrl(window.location.href)
+            await sleepPromise(50)
+        }
+
         this.isPdf = isUrlPDFViewerUrl(window.location.href, {
             runtimeAPI: runtime,
         })
-        const fullUrl = getUnderlyingResourceUrl(window.location.href)
+
         this._identifier = await runInBackground<
             PageIndexingInterface<'caller'>
         >().initContentIdentifier({
@@ -934,17 +1012,64 @@ class PageInfo {
         this._href = window.location.href
     }
 
+    normalizeTwitterCurrentFullURL = async () => {
+        let fullUrl
+        let retryCount = 0
+        const MAX_RETRIES = 60
+        if (this.normalizedTwitterFullUrl != null) {
+            return this.normalizedTwitterFullUrl
+        }
+        if (window.location.href === 'https://twitter.com/messages') {
+            return 'https://twitter.com/messages'
+        }
+        while (retryCount < MAX_RETRIES) {
+            const activeChatItem = document.querySelector(
+                '[aria-selected="true"]',
+            )
+            if (activeChatItem) {
+                const userName = activeChatItem.textContent
+                    .split('@')[1]
+                    .split('·')[0]
+
+                if (userName) {
+                    fullUrl = `https://twitter.com/${userName}`
+                    this.normalizedTwitterFullUrl = fullUrl
+                    return fullUrl
+                }
+            } else {
+                retryCount++ // Increment retry count if no valid item found
+                await sleepPromise(50) // Wait for 1 second before next try
+            }
+        }
+    }
+
+    setTwitterFullUrl = async (url) => {
+        this.normalizedTwitterFullUrl = url
+
+        return
+    }
+    getTwitterFullUrl = () => {
+        return this.normalizedTwitterFullUrl
+    }
+
     getFullPageUrl = async () => {
         await this.refreshIfNeeded()
-        let fullURL = this._identifier.fullUrl
-        return fullURL
+        let fullUrl = this._identifier.fullUrl
+
+        if (window.location.href.includes('twitter.com/messages')) {
+            fullUrl = await this.normalizeTwitterCurrentFullURL()
+            return fullUrl
+        } else {
+            return fullUrl
+        }
     }
 
     getPageTitle = () => {
         let title = document.title
 
-        if (window.location.href.includes('web.telegram.org')) {
-            title = getTelegramUserDisplayName(document)
+        if (window.location.href.includes('web.telegram.org/')) {
+            const url = window.location.href
+            title = getTelegramUserDisplayName(document, url)
         }
 
         return title
@@ -956,75 +1081,340 @@ class PageInfo {
     }
 }
 
-export function loadTelegramUserSpaces(
-    lists,
+export async function injectTelegramCustomUI(
+    collectionsBG,
+    bgScriptBG: RemoteBGScriptInterface,
+    url: string,
+) {
+    try {
+        const textField = document.getElementsByClassName(
+            'input-message-input',
+        )[0]
+        if (textField) {
+            textField.classList.add('mousetrap')
+        }
+
+        let selector
+
+        selector = '[class="topbar"]'
+
+        const maxRetries = 10
+        const delayInMilliseconds = 500 // adjust this based on your needs
+
+        const userNameBox = (
+            await findClassElementSWithRetries(
+                'topbar',
+                maxRetries,
+                delayInMilliseconds,
+            )
+        )[0] as HTMLElement
+
+        if (userNameBox != null) {
+            let spacesBar: HTMLElement
+            let spacesBarContainer = document.createElement('div')
+            spacesBarContainer.id = 'spacesBarContainer'
+            spacesBarContainer.style.width = '100%'
+            spacesBarContainer.style.zIndex = '3'
+            spacesBarContainer.style.height = 'fit-content'
+            spacesBarContainer.style.overflow = 'scroll'
+            spacesBarContainer.style.padding = '10px 15px 15px 15px'
+            spacesBarContainer.style.width = '100%'
+
+            userNameBox.insertAdjacentElement('afterend', spacesBarContainer)
+
+            const pageLists = await fetchListDataForSocialProfiles(
+                collectionsBG,
+                url,
+            )
+
+            if (pageLists != null && pageLists.length > 0) {
+                spacesBar = renderSpacesBar(pageLists, bgScriptBG)
+
+                spacesBarContainer.appendChild(spacesBar)
+            } else {
+                return
+            }
+        }
+    } catch (error) {
+        console.error(error.message)
+    }
+}
+
+export async function getActiveTwitterUserName(
+    maxRetries,
+    delayInMilliseconds,
+) {
+    const filteredElements = await findElementWithRetries(
+        '[aria-selected="true"]',
+        maxRetries,
+        delayInMilliseconds,
+    )
+
+    return filteredElements
+}
+
+export async function trackTwitterMessageList(
+    collectionsBG,
     bgScriptBG: RemoteBGScriptInterface,
 ) {
-    let spacesBarOld = document.getElementById('spacesBar')
+    const maxRetries = 40
+    const delayInMilliseconds = 500
 
-    if (spacesBarOld) {
-        spacesBarOld.remove()
+    const tabListDiv = (await findElementWithRetries(
+        '[role="tablist"]',
+        maxRetries,
+        delayInMilliseconds,
+    )) as HTMLElement
+
+    if (tabListDiv) {
+        // Your main logic encapsulated in a function
+        const processNode = async (node) => {
+            if (!node?.textContent.includes(`’s message with`)) {
+                const userName =
+                    node?.textContent.split('@')[1]?.split('·')[0] ?? ''
+
+                if (userName) {
+                    let fullUrl = `https://twitter.com/${userName}`
+
+                    let spacesBarContainer = document.createElement('div')
+                    spacesBarContainer.id = `spacesBarContainer_${fullUrl}`
+                    spacesBarContainer.style.display = 'flex'
+
+                    const pageLists = await fetchListDataForSocialProfiles(
+                        collectionsBG,
+                        fullUrl,
+                    )
+
+                    if (pageLists != null && pageLists.length > 0) {
+                        const spacesBar = renderSpacesBar(
+                            pageLists,
+                            bgScriptBG,
+                            fullUrl,
+                        ) as HTMLElement
+                        spacesBar.style.flexWrap = 'wrap'
+                        spacesBarContainer.style.marginTop = '5px'
+                        spacesBarContainer.appendChild(spacesBar)
+                    }
+                    let element = node as HTMLElement
+                    let conversationElement = element.querySelector(
+                        '[data-testid="conversation"]',
+                    ) as HTMLElement
+
+                    if (conversationElement) {
+                        conversationElement.insertAdjacentElement(
+                            'beforeend',
+                            spacesBarContainer,
+                        )
+                    }
+                }
+            }
+        }
+
+        // Initial processing
+        tabListDiv.childNodes.forEach((node) => processNode(node))
+
+        // Mutation Observer
+        const observer = new MutationObserver((mutationsList, observer) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            processNode(node)
+                        }
+                    })
+                }
+            }
+        })
+
+        observer.observe(tabListDiv, { childList: true })
+    }
+}
+
+export async function injectTwitterProfileUI(
+    collectionsBG,
+    bgScriptBG: RemoteBGScriptInterface,
+    url: string,
+) {
+    const maxRetries = 40
+    const delayInMilliseconds = 500 // adjust this based on your needs
+    let pageType: string
+
+    try {
+        let userNameBox: HTMLElement
+        const selector = '[data-testid="UserDescription"]'
+        userNameBox = (await findElementWithRetries(
+            selector,
+            maxRetries,
+            delayInMilliseconds,
+        )) as HTMLElement
+
+        if (userNameBox != null) {
+            let spacesBar: HTMLElement
+            let spacesBarContainer = document.createElement('div')
+            spacesBarContainer.id = `spacesBarContainer_${url}`
+            spacesBarContainer.style.marginTop = '5px'
+
+            userNameBox.insertAdjacentElement('beforeend', spacesBarContainer)
+
+            const pageLists = await fetchListDataForSocialProfiles(
+                collectionsBG,
+                url,
+            )
+
+            if (pageLists != null && pageLists.length > 0) {
+                spacesBar = renderSpacesBar(pageLists, bgScriptBG, url)
+                spacesBarContainer.appendChild(spacesBar)
+                userNameBox.style.marginBottom = '10px'
+            } else {
+                return
+            }
+        }
+    } catch (error) {
+        console.error(error.message)
+    }
+    return
+}
+
+async function fetchListDataForSocialProfiles(collectionsBG, fullUrl: string) {
+    const lists = await collectionsBG.fetchPageListEntriesByUrl({
+        url: fullUrl,
+    })
+    if (lists.length > 0) {
+        const updatedLists = await Promise.all(
+            lists
+                .filter((list) => list.listId !== 20201014)
+                .map(async (list) => {
+                    const listData = await collectionsBG.fetchListById({
+                        id: list.listId,
+                    })
+                    ;(list as any).name = listData.name // Add the list name to the original list object.
+                    return list
+                }),
+        )
+        return updatedLists
+    }
+}
+
+async function findElementWithRetries(selector, retries, delay) {
+    return new Promise((resolve, reject) => {
+        const attempt = () => {
+            const element = document.querySelector(selector)
+
+            if (element) {
+                resolve(element)
+            } else if (retries > 0) {
+                setTimeout(() => {
+                    retries--
+                    attempt()
+                }, delay)
+            } else {
+                reject(new Error('Element not found after maximum retries.'))
+            }
+        }
+
+        attempt()
+    })
+}
+
+async function findElementSWithRetries(selector, retries, delay) {
+    return new Promise((resolve, reject) => {
+        const attempt = () => {
+            const element = document.querySelectorAll(selector)
+
+            if (element) {
+                resolve(element)
+            } else if (retries > 0) {
+                setTimeout(() => {
+                    retries--
+                    attempt()
+                }, delay)
+            } else {
+                reject(new Error('Element not found after maximum retries.'))
+            }
+        }
+
+        attempt()
+    })
+}
+async function findClassElementSWithRetries(className, retries, delay) {
+    return new Promise((resolve, reject) => {
+        const attempt = () => {
+            const element = document.getElementsByClassName(className)
+            if (element) {
+                resolve(element)
+            } else if (retries > 0) {
+                setTimeout(() => {
+                    retries--
+                    attempt()
+                }, delay)
+            } else {
+                reject(new Error('Element not found after maximum retries.'))
+            }
+        }
+
+        attempt()
+    })
+}
+
+function renderSpacesBar(
+    lists: UnifiedList[],
+    bgScriptBG: RemoteBGScriptInterface,
+    url?: string,
+) {
+    let spacesBar: HTMLElement
+
+    if (url) {
+        spacesBar = document.getElementById(`spacesBar_${url}`)
+    } else {
+        spacesBar = document.getElementById(`spacesBar`)
     }
 
-    // Clear out the existing child elements of spacesBar (if any)
+    if (!spacesBar) {
+        spacesBar = document.createElement('div')
+    } else {
+        spacesBar.innerHTML = ''
+    }
 
-    const chatInfoBox = document.getElementsByClassName(
-        'chat-info',
-    )[0] as HTMLElement
-
-    chatInfoBox.style.gap = '10px'
-    chatInfoBox.style.display = 'flex'
-    chatInfoBox.style.flexDirection = 'column'
-    chatInfoBox.style.justifyContent = 'flex-start'
-
-    const contentBox = document.getElementsByClassName(
-        'content',
-    )[0] as HTMLElement
-
-    contentBox.style.maxWidth = 'fit-content'
-    contentBox.style.minWidth = '210px'
-    contentBox.style.paddingRight = '30px'
-
-    const personBox = document.getElementsByClassName(
-        'person',
-    )[0] as HTMLElement
-
-    const spacesBar = document.createElement('div')
-
-    spacesBar.id = 'spacesBar'
-
-    spacesBar.style.display = 'flex'
-    spacesBar.style.alignItems = 'center'
-    spacesBar.style.gap = '10px'
-
-    personBox.appendChild(spacesBar)
+    if (lists.length > 0) {
+        spacesBar.id = url ? `spacesBar_${url}` : `spacesBar`
+        spacesBar.style.display = 'flex'
+        spacesBar.style.alignItems = 'center'
+        spacesBar.style.gap = '5px'
+        spacesBar.style.flexWrap = 'wrap'
+    } else {
+        spacesBar.id = url ? `spacesBar_${url}` : `spacesBar`
+        spacesBar.style.display = 'flex'
+        spacesBar.style.alignItems = 'center'
+        spacesBar.style.gap = '0px'
+        spacesBar.style.marginTop = '0px'
+    }
 
     lists.forEach((list) => {
         const listDiv = document.createElement('div')
         listDiv.style.background = '#C6F0D4'
         listDiv.style.padding = '3px 10px'
+        listDiv.style.marginTop = '5px'
         listDiv.style.borderRadius = '5px'
         listDiv.style.cursor = 'pointer'
         listDiv.style.color = '#12131B'
         listDiv.style.fontSize = '14px'
         listDiv.style.display = 'flex'
         listDiv.style.alignItems = 'center'
+        listDiv.style.fontFamily = 'Arial'
         listDiv.innerText = list.name // assuming 'name' is a property of the list items
         listDiv.addEventListener('click', (event) => {
             event.preventDefault()
             event.stopPropagation()
             bgScriptBG.openOverviewTab({
-                selectedSpace: list.listId as number,
+                // TODO: fix type but list.localId is not working. Tetst by clicking on the pills in telegram/twitter. They should jump to the right space in the dashboard
+                /** @ts-ignore */
+                selectedSpace: list.listId,
             })
         })
         spacesBar.appendChild(listDiv)
     })
 
-    // If spacesBar wasn't part of the DOM already, you might want to append it somewhere.
-    if (!document.getElementById('spacesBar')) {
-        const chatInfoBox = document.getElementsByClassName('person')[0] // gets the first 'person' element
-        chatInfoBox.appendChild(spacesBar)
-    }
+    return spacesBar
 }
 
 export function loadYoutubeButtons(annotationsFunctions) {
@@ -1035,7 +1425,6 @@ export function loadYoutubeButtons(annotationsFunctions) {
         injectYoutubeButtonMenu(annotationsFunctions)
     }
     if (player) {
-        injectYoutubeButtonMenu(annotationsFunctions)
         injectYoutubeContextMenu(annotationsFunctions)
     }
 
@@ -1052,7 +1441,6 @@ export function loadYoutubeButtons(annotationsFunctions) {
                         // Check if the "player" element is in the added node or its descendants
                         if (node.querySelector('#player')) {
                             injectYoutubeContextMenu(annotationsFunctions)
-                            injectYoutubeButtonMenu(annotationsFunctions)
 
                             if (below && player) {
                                 observer.disconnect()
@@ -1225,10 +1613,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     memexButtons.appendChild(summarizeButton)
     memexButtons.style.color = '#f4f4f4'
     memexButtons.style.width = 'fit-content'
-
-    const leftControls = document.getElementsByClassName('ytp-left-controls')[0]
     const aboveFold = document.getElementById('below')
-    const elements = document.getElementsByClassName('ytp-menuitem')
     aboveFold.insertAdjacentElement('afterbegin', memexButtons)
 }
 
