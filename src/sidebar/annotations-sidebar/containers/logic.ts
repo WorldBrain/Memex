@@ -17,7 +17,6 @@ import {
     detectAnnotationConversationThreads,
 } from '@worldbrain/memex-common/lib/content-conversations/ui/logic'
 import type { ConversationIdBuilder } from '@worldbrain/memex-common/lib/content-conversations/ui/types'
-import { trackPageRead } from '@worldbrain/memex-common/lib/analytics/events'
 import type { Annotation } from 'src/annotations/types'
 import type {
     SidebarContainerDependencies,

@@ -26,11 +26,7 @@ import { Analytics } from 'src/analytics/types'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import { ServerStorageModules } from 'src/storage/types'
 import { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/user-management/types'
-import { AnalyticsInterface } from 'src/analytics/background/types'
-import {
-    trackAnnotationCreate,
-    trackPageRead,
-} from '@worldbrain/memex-common/lib/analytics/events'
+import { trackAnnotationCreate } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 interface TabArg {

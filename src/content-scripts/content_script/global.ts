@@ -92,8 +92,6 @@ import type {
 } from 'src/annotations/cache/types'
 import { page } from 'src/sidebar-overlay/sidebar/selectors'
 import { AnalyticsInterface } from 'src/analytics/background/types'
-import type { UnifiedList } from 'src/annotations/cache/types'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import {
     trackAnnotationCreate,
     trackPageActivityIndicatorHit,
