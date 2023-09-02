@@ -17,6 +17,7 @@ import browser, { Storage } from 'webextension-polyfill'
 import { pageActionAllowed } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -101,6 +102,7 @@ export interface RibbonContainerOptions extends RibbonContainerDependencies {
 export interface RibbonLogicOptions extends RibbonContainerOptions {
     focusCreateForm: FocusableComponent['focus']
     analytics: Analytics
+    analyticsBG: AnalyticsCoreInterface
 }
 
 type EventHandler<
@@ -564,7 +566,7 @@ export class RibbonContainerLogic extends UILogic<
     toggleBookmark: EventHandler<'toggleBookmark'> = async ({
         previousState,
     }) => {
-        const allowed = await pageActionAllowed()
+        const allowed = await pageActionAllowed(this.dependencies.analyticsBG)
 
         if (allowed) {
             const postInitState = await this.waitForPostInitState(previousState)

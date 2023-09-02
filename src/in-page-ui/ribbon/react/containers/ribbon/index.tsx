@@ -34,6 +34,7 @@ export default class RibbonContainer extends StatefulUIElement<
             new RibbonContainerLogic({
                 ...props,
                 analytics,
+                analyticsBG: props.analyticsBG,
                 focusCreateForm: () =>
                     this.ribbonRef?.current?.focusCreateForm(),
             }),

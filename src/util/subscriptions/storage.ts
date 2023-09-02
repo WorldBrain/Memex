@@ -6,6 +6,7 @@ import {
     FREE_PLAN_LIMIT,
     AI_SUMMARY_URLS,
 } from './constants'
+import { trackHitPaywall } from '@worldbrain/memex-common/lib/analytics/events'
 
 export async function checkStripePlan(email) {
     const isStaging =
@@ -233,7 +234,7 @@ export async function checkStatus() {
     }
 }
 
-export async function pageActionAllowed() {
+export async function pageActionAllowed(analyticsBG) {
     const isStaging =
         process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
         process.env.NODE_ENV === 'development'
@@ -241,15 +242,33 @@ export async function pageActionAllowed() {
         ? 'https://memex.garden/upgradeStaging'
         : 'https://memex.garden/upgrade'
 
+    if (analyticsBG) {
+        try {
+            trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
+        } catch (error) {
+            console.error(`Error tracking space Entry create event', ${error}`)
+        }
+    }
+
     const status = await checkStatus()
     if (status.pageLimit > 10000 || status.pageLimit > status.pageCounter) {
         return true
     } else {
+        if (analyticsBG) {
+            try {
+                trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
+            } catch (error) {
+                console.error(
+                    `Error tracking space Entry create event', ${error}`,
+                )
+            }
+        }
+
         window.open(urlToOpen, '_blank')
         return false
     }
 }
-export async function AIActionAllowed() {
+export async function AIActionAllowed(analyticsBG) {
     const isStaging =
         process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
         process.env.NODE_ENV === 'development'
@@ -258,9 +277,26 @@ export async function AIActionAllowed() {
         : 'https://memex.garden/upgradeNotification'
 
     const status = await checkStatus()
+
+    if (analyticsBG) {
+        try {
+            trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
+        } catch (error) {
+            console.error(`Error tracking space Entry create event', ${error}`)
+        }
+    }
     if (status.AIlimit > 10000 || status.AIlimit > status.AIcounter) {
         return true
     } else {
+        if (analyticsBG) {
+            try {
+                trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
+            } catch (error) {
+                console.error(
+                    `Error tracking space Entry create event', ${error}`,
+                )
+            }
+        }
         window.open(urlToOpen, '_blank')
         return false
     }

@@ -435,7 +435,7 @@ export async function main(
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
         ) => async (selection: Selection, shouldShare: boolean) => {
             if (
-                !(await pageActionAllowed()) ||
+                !(await pageActionAllowed(analyticsBG)) ||
                 window.getSelection().toString().length === 0
             ) {
                 return
@@ -467,7 +467,7 @@ export async function main(
             showSpacePicker?: boolean,
             commentText?: string,
         ) => {
-            if (!(await pageActionAllowed())) {
+            if (!(await pageActionAllowed(analyticsBG))) {
                 return
             }
 

@@ -86,6 +86,7 @@ import {
     convertMemexURLintoTelegramURL,
     getTelegramUserDisplayName,
 } from '@worldbrain/memex-common/lib/telegram/utils'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -1653,7 +1654,7 @@ export class SidebarContainerLogic extends UILogic<
 
         let canQueryAI = false
         if (!hasAPIKey) {
-            canQueryAI = await AIActionAllowed()
+            canQueryAI = await AIActionAllowed(this.options.analyticsBG)
             if (!canQueryAI) {
                 this.emitMutation({
                     showUpgradeModal: { $set: true },

@@ -65,6 +65,7 @@ describe('Ribbon logic', () => {
             activityIndicatorBG: backgroundModules.activityIndicator,
             getFullPageUrl: () => currentTab.normalizedUrl,
             analytics,
+            analyticsBG: backgroundModules.analyticsBG,
             syncSettings,
             setRibbonShouldAutoHide: () => undefined,
             getSidebarEnabled: async () => true,
