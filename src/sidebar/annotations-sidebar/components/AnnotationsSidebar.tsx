@@ -1469,6 +1469,7 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.prompt.length > 0 &&
                                 addPromptButton(this.props.prompt)
                             }
+                            autoFocus={this.props.activeTab === 'summary'}
                         />
                         {this.props.showAISuggestionsDropDown &&
                             this.props.AIsuggestions.length > 0 && (
@@ -1481,7 +1482,8 @@ export class AnnotationsSidebar extends React.Component<
                             <TooltipBox
                                 tooltipText={
                                     <>
-                                        Just takes the first few paragraphs for
+                                        Just takes the first few paragraphs or
+                                        roughly the first video 10minutes for
                                         the summary. Much faster.
                                     </>
                                 }
