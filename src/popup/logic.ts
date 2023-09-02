@@ -11,6 +11,7 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { getCurrentTab } from './utils'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface Dependencies {
     extensionAPI: Pick<Extension.Static, 'isAllowedFileSchemeAccess'>
@@ -20,6 +21,7 @@ export interface Dependencies {
     customListsBG: RemoteCollectionsInterface
     pdfIntegrationBG: PDFRemoteInterface
     pageIndexingBG: PageIndexingInterface<'caller'>
+    analyticsBG: AnalyticsCoreInterface
 }
 
 export interface Event {
@@ -40,6 +42,7 @@ export interface State {
     isPDFReaderEnabled: boolean
     isFileAccessAllowed: boolean
     showAutoSaved: boolean
+    analyticsBG: AnalyticsCoreInterface
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -63,6 +66,7 @@ export default class PopupLogic extends UILogic<State, Event> {
         isPDFReaderEnabled: false,
         isFileAccessAllowed: false,
         showAutoSaved: false,
+        analyticsBG: null,
     })
 
     async init() {
@@ -72,6 +76,7 @@ export default class PopupLogic extends UILogic<State, Event> {
             runtimeAPI,
             extensionAPI,
             customListsBG,
+            analyticsBG,
             pageIndexingBG,
         } = this.dependencies
 
@@ -93,6 +98,7 @@ export default class PopupLogic extends UILogic<State, Event> {
 
             const isFileAccessAllowed = await extensionAPI.isAllowedFileSchemeAccess()
             this.emitMutation({
+                analyticsBG: { $set: analyticsBG },
                 pageListIds: { $set: pageListIds },
                 currentTabFullUrl: { $set: currentTab.originalUrl },
                 identifierFullUrl: { $set: identifier.fullUrl },

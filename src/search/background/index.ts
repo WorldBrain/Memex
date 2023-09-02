@@ -21,6 +21,8 @@ import {
     pickBestLocator,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import { ContentLocatorType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import { trackSearchExecution } from '@worldbrain/memex-common/lib/analytics/events'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export default class SearchBackground {
     storage: SearchStorage
@@ -66,6 +68,7 @@ export default class SearchBackground {
             bookmarks: BookmarksBackground
             queryBuilder?: () => QueryBuilder
             browserAPIs: Pick<Browser, 'bookmarks'>
+            analyticsBG: AnalyticsCoreInterface
         },
     ) {
         this.searchIndex = options.idx
@@ -210,6 +213,16 @@ export default class SearchBackground {
         params: BackgroundSearchParams,
     ): Promise<StandardSearchResponse> {
         let searchParams
+
+        if (this.options.analyticsBG) {
+            try {
+                trackSearchExecution(this.options.analyticsBG)
+            } catch (error) {
+                console.error(
+                    `Error tracking search execution create event', ${error}`,
+                )
+            }
+        }
 
         try {
             searchParams = this.processSearchParams(params)

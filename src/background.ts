@@ -198,6 +198,7 @@ export async function main(): Promise<void> {
         contentSharing: backgroundModules.contentSharing.remoteFunctions,
         personalCloud: backgroundModules.personalCloud.remoteFunctions,
         pdf: backgroundModules.pdfBg.remoteFunctions,
+        analyticsBG: backgroundModules.analyticsBG,
     })
     __debugCounter++
 

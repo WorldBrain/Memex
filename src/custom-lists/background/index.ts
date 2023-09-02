@@ -26,6 +26,9 @@ import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexi
 import { isExtensionTab } from 'src/tab-management/utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { PersonalList } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import ContentSharingBackground from 'src/content-sharing/background'
 
 const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 25
@@ -40,6 +43,8 @@ export default class CustomListBackground {
         private options: {
             storageManager: Storex
             searchIndex: SearchIndex
+            analyticsBG: AnalyticsCoreInterface
+            contentSharing: ContentSharingBackground
             pages: PageIndexingBackground
             tabManagement: TabManagementBackground
             analytics: Analytics
@@ -603,6 +608,7 @@ export default class CustomListBackground {
         id: _id,
         type,
         createdAt,
+        dontTrack,
     }) => {
         const id = _id ?? this.generateListId()
         const inserted = await this.storage.insertCustomList({
@@ -610,6 +616,8 @@ export default class CustomListBackground {
             type,
             name,
             createdAt,
+            analyticsBG: this.options.analyticsBG,
+            dontTrack,
         })
         await this.updateListSuggestionsCache({ added: id })
 
@@ -640,6 +648,7 @@ export default class CustomListBackground {
             suppressVisitCreation?: boolean
             suppressInboxEntry?: boolean
             pageTitle?: string
+            dontTrack?: boolean
         },
     ): Promise<{ object: PageListEntry }> => {
         const { id } = params
@@ -654,6 +663,7 @@ export default class CustomListBackground {
             )
         }
 
+        await this.updateListSuggestionsCache({ added: id })
         if (!params.skipPageIndexing) {
             await this.options.pages.indexPage(
                 {
@@ -672,6 +682,17 @@ export default class CustomListBackground {
 
         const pageUrl = normalizeUrl(url)
         const existing = await this.storage.fetchListEntry(id, pageUrl)
+        let remoteID = null
+        try {
+            remoteID = await this.options.contentSharing.storage.getRemoteListId(
+                {
+                    localId: id,
+                },
+            )
+        } catch (error) {
+            console.error(error)
+        }
+
         if (existing != null) {
             return { object: existing }
         }
@@ -682,14 +703,10 @@ export default class CustomListBackground {
             fullUrl: url,
             createdAt: params.createdAt,
             pageTitle: params.pageTitle,
+            analyticsBG: this.options.analyticsBG,
+            isShared: remoteID != null ?? false,
+            dontTrack: params.dontTrack,
         })
-
-        this.options.analytics.trackEvent({
-            category: 'Collections',
-            action: 'addPageToList',
-        })
-
-        await this.updateListSuggestionsCache({ added: id })
 
         return retVal
     }
@@ -772,18 +789,7 @@ export default class CustomListBackground {
         if (!(await this.fetchListById({ id: args.listId }))) {
             throw new Error('No list found for ID:' + args.listId)
         }
-
-        // if (
-        //     tabs.url.endsWith('.pdf') &&
-        //     !tabs.url.includes('pdfjs/viewer.html?file')
-        // ) {
-        //     console.log('isPDF ')
-        //     return null
-        // }
-
         const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
-
-        console.log('tabs ', tabs)
 
         // Ensure content scripts are injected into each tab, so they can init page content identifier
         await Promise.all(
@@ -824,6 +830,7 @@ export default class CustomListBackground {
                         fullUrl,
                         pageUrl: normalizeUrl(fullUrl),
                         pageTitle: args.pageTitle,
+                        analyticsBG: this.options.analyticsBG,
                     })
                 }),
         )

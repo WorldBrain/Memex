@@ -1,7 +1,9 @@
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { UIServices } from 'src/services/ui/types'
 
 export interface DashboardResultsDependencies {
     services: UIServices
+    analyticsBG: AnalyticsCoreInterface
 }
 
 export interface DashboardResultsState {

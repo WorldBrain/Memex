@@ -21,7 +21,7 @@ ReactDOM.render(
     <Provider store={store}>
         <ThemeProvider theme={theme}>
             <ErrorBoundary component={RuntimeError}>
-                <Popup />
+                <Popup analyticsBG={null} />
             </ErrorBoundary>
         </ThemeProvider>
     </Provider>,

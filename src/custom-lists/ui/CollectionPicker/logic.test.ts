@@ -96,6 +96,7 @@ const setupLogicHelper = async ({
         pageActivityIndicatorBG:
             device.backgroundModules.pageActivityIndicator.remoteFunctions,
         onSubmit,
+        analyticsBG: device.backgroundModules.analytics.remoteFunctions,
     })
 
     const testLogic = device.createElement(entryPickerLogic)

@@ -10,6 +10,8 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/events'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface Dependencies {
     contentSharingBG: ContentSharingInterface
@@ -24,6 +26,7 @@ export interface Dependencies {
     onConfirmSpaceNameEdit: (name: string) => void
     onDeleteSpaceIntent?: React.MouseEventHandler
     onDeleteSpaceConfirm?: React.MouseEventHandler
+    analyticsBG: AnalyticsCoreInterface
 }
 
 export type Event = UIEvent<{
@@ -31,7 +34,7 @@ export type Event = UIEvent<{
     cancelSpaceNameEdit: null
     confirmSpaceNameEdit: null
     updateSpaceName: { name: string }
-    copyInviteLink: { linkIndex: number }
+    copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
     confirmSpaceDelete: { reactEvent: React.MouseEvent }
     intendToDeleteSpace: { reactEvent: React.MouseEvent }
     cancelDeleteSpace: null
@@ -295,6 +298,22 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             })
 
         showInviteLinkCopyMsg(true)
+
+        if (this.dependencies.analyticsBG) {
+            try {
+                trackCopyInviteLink(this.dependencies.analyticsBG, {
+                    inviteType:
+                        event.linkIndex === 0 ? 'reader' : 'contributer',
+                    linkType:
+                        event.linkType === 'page-link'
+                            ? 'page-link'
+                            : 'space-link',
+                    source: 'extension',
+                })
+            } catch (error) {
+                console.error(`Error tracking space create event', ${error}`)
+            }
+        }
 
         setTimeout(
             () => showInviteLinkCopyMsg(false),

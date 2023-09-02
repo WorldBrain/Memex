@@ -2237,7 +2237,6 @@ export class SidebarContainerLogic extends UILogic<
     setSpaceTitleEditValue: EventHandler<'setSpaceTitleEditValue'> = ({
         event,
     }) => {
-        console.log('event.value', event.value)
         this.emitMutation({
             spaceTitleEditValue: { $set: event.value },
         })

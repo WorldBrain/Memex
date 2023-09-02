@@ -74,6 +74,7 @@ export interface RemoteCollectionsInterface {
         id?: number
         type?: 'page-link'
         createdAt?: Date
+        dontTrack?: boolean
     }): Promise<number>
     insertPageToList(args: {
         id: number

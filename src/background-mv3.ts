@@ -45,7 +45,6 @@ declare var self: ServiceWorkerGlobalScope & {
 global['XMLHttpRequest'] = XMLHttpRequest
 
 async function main() {
-    console.log('starting background worker')
     const rpcManager = setupRpcConnection({
         sideName: 'background',
         role: 'background',
@@ -188,6 +187,7 @@ async function main() {
         pageActivityIndicator:
             backgroundModules.pageActivityIndicator.remoteFunctions,
         pdf: backgroundModules.pdfBg.remoteFunctions,
+        analyticsBG: backgroundModules.analyticsBG,
     })
     rpcManager.unpause()
 

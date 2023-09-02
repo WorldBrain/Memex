@@ -91,6 +91,11 @@ import type {
     UnifiedList,
 } from 'src/annotations/cache/types'
 import { page } from 'src/sidebar-overlay/sidebar/selectors'
+import {
+    trackAnnotationCreate,
+    trackPageActivityIndicatorHit,
+} from '@worldbrain/memex-common/lib/analytics/events'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -196,6 +201,7 @@ export async function main(
     } = {}
 
     // 2. Initialise dependencies required by content scripts
+    const analyticsBG = runInBackground<AnalyticsCoreInterface>()
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
     const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()
@@ -440,6 +446,17 @@ export async function main(
                     action: 'show_annotation',
                 })
             }
+            if (analyticsBG) {
+                try {
+                    trackAnnotationCreate(analyticsBG, {
+                        annotationType: 'highlight',
+                    })
+                } catch (error) {
+                    console.error(
+                        `Error tracking space create event', ${error}`,
+                    )
+                }
+            }
             await inPageUI.hideTooltip()
         },
         createAnnotation: (
@@ -452,6 +469,19 @@ export async function main(
         ) => {
             if (!(await pageActionAllowed())) {
                 return
+            }
+
+            if (analyticsBG) {
+                // tracking highlight here too bc I determine annotations by them having content added, tracked elsewhere
+                try {
+                    trackAnnotationCreate(analyticsBG, {
+                        annotationType: 'highlight',
+                    })
+                } catch (error) {
+                    console.error(
+                        `Error tracking space create event', ${error}`,
+                    )
+                }
             }
 
             if (selection && window.getSelection().toString().length > 0) {
@@ -571,6 +601,7 @@ export async function main(
                 customLists: collectionsBG,
                 authBG,
                 bgScriptBG,
+                analyticsBG,
                 pageActivityIndicatorBG,
                 activityIndicatorBG: runInBackground(),
                 contentSharing: contentSharingBG,
@@ -613,6 +644,7 @@ export async function main(
                 getCurrentUser: () => currentUser,
                 annotationsCache,
                 highlighter: highlightRenderer,
+                analyticsBG,
                 authBG,
                 annotationsBG,
                 summarizeBG,
@@ -912,6 +944,14 @@ export async function main(
                 existingContainer.appendChild(spacesBar)
             }
         })
+    }
+
+    if (analyticsBG && hasActivity) {
+        try {
+            trackPageActivityIndicatorHit(analyticsBG)
+        } catch (error) {
+            console.error(`Error tracking space create event', ${error}`)
+        }
     }
 
     return inPageUI

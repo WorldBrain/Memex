@@ -40,8 +40,11 @@ import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
-export interface OwnProps {}
+export interface OwnProps {
+    analyticsBG: AnalyticsCoreInterface
+}
 
 interface StateProps {
     showCollectionsPicker: boolean
@@ -72,6 +75,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 extensionAPI: browser.extension,
                 customListsBG: collections,
                 pageIndexingBG: runInBackground(),
+                analyticsBG: runInBackground(),
                 pdfIntegrationBG: runInBackground(),
                 syncSettings: createSyncSettingsStore({
                     syncSettingsBG: runInBackground(),
@@ -292,6 +296,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         localStorageAPI={browser.storage.local}
                         shouldHydrateCacheOnInit
                         context={'popup'}
+                        analyticsBG={this.state.analyticsBG}
                     />
                 </SpacePickerContainer>
             )

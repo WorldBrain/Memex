@@ -212,6 +212,7 @@ export async function setupTest(
         openCollectionPage: () => {},
         renderUpdateNotifBanner: args.renderUpdateNotifBanner ?? (() => null),
         services: createUIServices(),
+        analyticsBG: device.backgroundModules.analyticsBG,
     })
 
     if (args.overrideSearchTrigger) {

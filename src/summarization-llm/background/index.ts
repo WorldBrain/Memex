@@ -6,6 +6,8 @@ import {
 } from 'src/sync-settings/util'
 import { makeRemotelyCallable, RemoteFunction } from 'src/util/webextensionRPC'
 import type { RemoteEventEmitter } from '../../util/webextensionRPC'
+import { trackQueryAI } from '@worldbrain/memex-common/lib/analytics/events'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
     startPageSummaryStream: RemoteFunction<
@@ -32,10 +34,13 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
 
 export interface summarizePageBackgroundOptions {
     remoteEventEmitter: RemoteEventEmitter<'pageSummary'>
+    analyticsBG?: AnalyticsCoreInterface
 }
 
 export default class SummarizeBackground {
     remoteFunctions: SummarizationInterface<'provider'>
+    analyticsBG: AnalyticsCoreInterface
+
     private summarizationService = new SummarizationService({
         serviceURL:
             process.env.NODE_ENV === 'production'
@@ -61,6 +66,14 @@ export default class SummarizeBackground {
         { fullPageUrl, textToProcess, queryPrompt, apiKey, shortSummary },
     ) => {
         this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
+
+        if (this.options.analyticsBG) {
+            try {
+                trackQueryAI(this.options.analyticsBG)
+            } catch (error) {
+                console.error(`Error tracking space create event', ${error}`)
+            }
+        }
 
         for await (const result of this.summarizationService.queryAI(
             fullPageUrl,
@@ -90,6 +103,14 @@ export default class SummarizeBackground {
             text,
             prompt,
         )
+        if (this.options.analyticsBG) {
+            try {
+                trackQueryAI(this.options.analyticsBG)
+            } catch (error) {
+                console.error(`Error tracking space create event', ${error}`)
+            }
+        }
+
         return summary
     }
 }

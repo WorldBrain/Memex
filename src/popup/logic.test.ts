@@ -37,6 +37,7 @@ async function setupTest(
         ) as any,
         pdfIntegrationBG: backgroundModules.pdfBg.remoteFunctions,
         customListsBG: backgroundModules.customLists.remoteFunctions,
+        analyticsBG: backgroundModules.analyticsBG,
         extensionAPI: { isAllowedFileSchemeAccess: async () => true },
     })
 

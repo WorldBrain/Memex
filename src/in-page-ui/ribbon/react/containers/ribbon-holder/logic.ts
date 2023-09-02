@@ -6,6 +6,7 @@ import type {
     ShouldSetUpOptions,
     InPageErrorType,
 } from 'src/in-page-ui/shared-state/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface RibbonHolderState {
     state: 'visible' | 'hidden'
@@ -28,6 +29,7 @@ export interface RibbonHolderDependencies {
     setUpOptions: ShouldSetUpOptions
     inPageUI: SharedInPageUIInterface
     containerDependencies: RibbonContainerDependencies
+    analyticsBG: AnalyticsCoreInterface
 }
 
 type EventHandler<EventName extends keyof RibbonHolderEvents> = UIEventHandler<

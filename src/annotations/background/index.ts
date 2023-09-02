@@ -26,6 +26,8 @@ import { Analytics } from 'src/analytics/types'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import { ServerStorageModules } from 'src/storage/types'
 import { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/user-management/types'
+import { trackAnnotationCreate } from '@worldbrain/memex-common/lib/analytics/events'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -41,6 +43,7 @@ export default class DirectLinkingBackground {
         private options: {
             browserAPIs: Pick<Browser, 'tabs'>
             storageManager: Storex
+            analyticsBG: AnalyticsCoreInterface
             pages: PageIndexingBackground
             socialBg: SocialBG
             normalizeUrl?: URLNormalizer
@@ -54,7 +57,6 @@ export default class DirectLinkingBackground {
         },
     ) {
         this.socialBg = options.socialBg
-
         this.annotationStorage = new AnnotationStorage({
             storageManager: options.storageManager,
         })
@@ -310,22 +312,14 @@ export default class DirectLinkingBackground {
             createdWhen: new Date(toCreate.createdWhen ?? Date.now()),
         })
 
-        if (toCreate.isBookmarked) {
-            await this.toggleAnnotBookmark({ tab }, { url: annotationUrl })
-        }
-
-        if (toCreate.comment && !toCreate.body) {
-            this.options.analytics.trackEvent({
-                category: 'Notes',
-                action: 'createNoteGlobally',
-            })
-        }
-
-        if (!toCreate.comment && toCreate.body) {
-            this.options.analytics.trackEvent({
-                category: 'Highlights',
-                action: 'createHighlightGlobally',
-            })
+        try {
+            if (toCreate.comment && !toCreate.body) {
+                trackAnnotationCreate(this.options.analyticsBG, {
+                    annotationType: 'note',
+                })
+            }
+        } catch (e) {
+            console.error('Error tracking annotation create event', e)
         }
 
         return annotationUrl
@@ -410,11 +404,19 @@ export default class DirectLinkingBackground {
         const existingAnnotation = await this.getAnnotationByPk(pk)
 
         if (!existingAnnotation?.comment?.length) {
-            this.options.analytics.trackEvent({
-                category: 'Annotations',
-                action: 'createAnnotationGlobally',
-            })
+            if (this.options.analyticsBG) {
+                try {
+                    trackAnnotationCreate(this.options.analyticsBG, {
+                        annotationType: 'annotation',
+                    })
+                } catch (error) {
+                    console.error(
+                        `Error tracking space create event', ${error}`,
+                    )
+                }
+            }
         }
+
         return this.annotationStorage.editAnnotation(pk, comment)
     }
 

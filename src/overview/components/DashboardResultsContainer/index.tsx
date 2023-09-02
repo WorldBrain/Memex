@@ -52,6 +52,7 @@ export default class DashboardResultsContainer extends StatefulUIElement<
                     renderUpdateNotifBanner={() => (
                         <UpdateNotifBanner theme={{ position: 'fixed' }} />
                     )}
+                    analyticsBG={this.props.analyticsBG}
                 />
 
                 {this.state.readerShow && (
