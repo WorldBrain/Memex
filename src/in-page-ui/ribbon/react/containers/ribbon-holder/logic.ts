@@ -6,7 +6,6 @@ import type {
     ShouldSetUpOptions,
     InPageErrorType,
 } from 'src/in-page-ui/shared-state/types'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface RibbonHolderState {

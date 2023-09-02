@@ -101,7 +101,6 @@ import { PageActivityIndicatorBackground } from 'src/page-activity-indicator/bac
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { handleIncomingData } from 'src/personal-cloud/background/handle-incoming-data'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface BackgroundModules {

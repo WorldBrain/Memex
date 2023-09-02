@@ -39,7 +39,6 @@ import type { SummarizationInterface } from 'src/summarization-llm/background'
 import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface RootState {

@@ -9,7 +9,6 @@ import type { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-c
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import type { MaybePromise } from 'src/util/types'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface ContentScriptRegistry {

@@ -11,7 +11,6 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { getCurrentTab } from './utils'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface Dependencies {

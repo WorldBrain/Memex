@@ -55,7 +55,6 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 const timestampToString = (timestamp: number) =>

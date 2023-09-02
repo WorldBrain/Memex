@@ -10,7 +10,6 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 

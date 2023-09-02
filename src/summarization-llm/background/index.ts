@@ -7,7 +7,6 @@ import {
 import { makeRemotelyCallable, RemoteFunction } from 'src/util/webextensionRPC'
 import type { RemoteEventEmitter } from '../../util/webextensionRPC'
 import { trackQueryAI } from '@worldbrain/memex-common/lib/analytics/events'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface SummarizationInterface<Role extends 'provider' | 'caller'> {

@@ -91,11 +91,11 @@ import type {
     UnifiedList,
 } from 'src/annotations/cache/types'
 import { page } from 'src/sidebar-overlay/sidebar/selectors'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import {
     trackAnnotationCreate,
     trackPageActivityIndicatorHit,
 } from '@worldbrain/memex-common/lib/analytics/events'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -201,7 +201,7 @@ export async function main(
     } = {}
 
     // 2. Initialise dependencies required by content scripts
-    const analyticsBG = runInBackground<AnalyticsInterface>()
+    const analyticsBG = runInBackground<AnalyticsCoreInterface>()
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
     const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()

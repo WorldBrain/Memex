@@ -19,7 +19,6 @@ import {
     trackSpaceCreate,
     trackSpaceEntryCreate,
 } from '@worldbrain/memex-common/lib/analytics/events'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export default class CustomListStorage extends StorageModule {

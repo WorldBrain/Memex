@@ -27,7 +27,6 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import { browser } from 'webextension-polyfill-ts'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')

@@ -26,7 +26,6 @@ import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexi
 import { isExtensionTab } from 'src/tab-management/utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { PersonalList } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import ContentSharingBackground from 'src/content-sharing/background'

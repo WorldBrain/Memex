@@ -37,7 +37,6 @@ import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtu
 import type { Storage, Runtime } from 'webextension-polyfill'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface SidebarContainerDependencies {

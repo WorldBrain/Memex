@@ -16,7 +16,6 @@ import {
     trackAnnotationCreate,
     trackBookmarkCreate,
 } from '@worldbrain/memex-common/lib/analytics/events'
-import { AnalyticsInterface } from 'src/analytics/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 const BOOKMARK_SYNC_STORAGE_NAME = 'memex:settings:bookmarkSync'
