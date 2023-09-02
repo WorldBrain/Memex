@@ -906,7 +906,6 @@ export class AnnotationsSidebar extends React.Component<
                     })
                 }
                 onMouseLeave={() => {
-                    console.log('leave')
                     this.setState({
                         hoveredListId: null,
                     })

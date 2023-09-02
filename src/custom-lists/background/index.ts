@@ -29,12 +29,9 @@ import type { PersonalList } from '@worldbrain/memex-common/lib/web-interface/ty
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import ContentSharingBackground from 'src/content-sharing/background'
-import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 
 const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 25
-
-injectFakeTabs
 
 export default class CustomListBackground {
     storage: CustomListStorage
