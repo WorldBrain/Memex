@@ -260,6 +260,7 @@ export function createBackgroundModules(options: {
         idx: searchIndex,
         browserAPIs: options.browserAPIs,
         bookmarks,
+        analyticsBG,
     })
 
     const tags = new TagsBackground({
