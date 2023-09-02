@@ -440,7 +440,6 @@ export default class CustomListStorage extends StorageModule {
         })
 
         if (analyticsBG && dontTrack == null) {
-            console.log('shouldcrate')
             try {
                 trackSpaceCreate(analyticsBG, { type: 'private' })
             } catch (error) {

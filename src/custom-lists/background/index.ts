@@ -613,7 +613,6 @@ export default class CustomListBackground {
         createdAt,
         dontTrack,
     }) => {
-        console.log('1', dontTrack)
         const id = _id ?? this.generateListId()
         const inserted = await this.storage.insertCustomList({
             id,
@@ -694,7 +693,7 @@ export default class CustomListBackground {
                 },
             )
         } catch (error) {
-            console.log(error)
+            console.error(error)
         }
 
         if (existing != null) {
@@ -711,8 +710,6 @@ export default class CustomListBackground {
             isShared: remoteID != null ?? false,
             dontTrack: params.dontTrack,
         })
-
-        console.log(retVal)
 
         return retVal
     }
@@ -795,18 +792,7 @@ export default class CustomListBackground {
         if (!(await this.fetchListById({ id: args.listId }))) {
             throw new Error('No list found for ID:' + args.listId)
         }
-
-        // if (
-        //     tabs.url.endsWith('.pdf') &&
-        //     !tabs.url.includes('pdfjs/viewer.html?file')
-        // ) {
-        //     console.log('isPDF ')
-        //     return null
-        // }
-
         const tabs = await this.options.tabManagement.getOpenTabsInCurrentWindow()
-
-        console.log('tabs ', tabs)
 
         // Ensure content scripts are injected into each tab, so they can init page content identifier
         await Promise.all(

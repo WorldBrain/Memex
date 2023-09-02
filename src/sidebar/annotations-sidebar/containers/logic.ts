@@ -367,9 +367,6 @@ export class SidebarContainerLogic extends UILogic<
         this.options.events?.emit('renderHighlights', {
             highlights,
         })
-
-        // REMOVE: Example analytics event
-        trackPageRead(this.options.analyticsBG, { readTime: 123 })
     }
 
     private setupRemoteEventListeners() {
@@ -1398,7 +1395,6 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             unifiedListIds.add(cacheList.unifiedId)
-            console.log('adding list to annotation', event.added)
             bgPromise = contentSharingBG.shareAnnotationToSomeLists({
                 annotationUrl: existing.localId,
                 localListIds: [event.added],
@@ -1413,7 +1409,6 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             unifiedListIds.delete(cacheList.unifiedId)
-            console.log('deleting list to annotation', event.deleted)
             bgPromise = contentSharingBG.unshareAnnotationFromList({
                 annotationUrl: existing.localId,
                 localListId: event.deleted,
@@ -2242,7 +2237,6 @@ export class SidebarContainerLogic extends UILogic<
     setSpaceTitleEditValue: EventHandler<'setSpaceTitleEditValue'> = ({
         event,
     }) => {
-        console.log('event.value', event.value)
         this.emitMutation({
             spaceTitleEditValue: { $set: event.value },
         })
