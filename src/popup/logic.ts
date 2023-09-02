@@ -12,6 +12,7 @@ import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { getCurrentTab } from './utils'
 import { AnalyticsInterface } from 'src/analytics/background/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface Dependencies {
     extensionAPI: Pick<Extension.Static, 'isAllowedFileSchemeAccess'>
@@ -21,7 +22,7 @@ export interface Dependencies {
     customListsBG: RemoteCollectionsInterface
     pdfIntegrationBG: PDFRemoteInterface
     pageIndexingBG: PageIndexingInterface<'caller'>
-    analyticsBG: AnalyticsInterface
+    analyticsBG: AnalyticsCoreInterface
 }
 
 export interface Event {
@@ -42,7 +43,7 @@ export interface State {
     isPDFReaderEnabled: boolean
     isFileAccessAllowed: boolean
     showAutoSaved: boolean
-    analyticsBG: AnalyticsInterface
+    analyticsBG: AnalyticsCoreInterface
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<

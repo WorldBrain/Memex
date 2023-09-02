@@ -28,6 +28,7 @@ import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import { browser } from 'webextension-polyfill-ts'
 import { AnalyticsInterface } from 'src/analytics/background/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')
 
@@ -47,7 +48,7 @@ export interface Props
         'annotationsBG' | 'contentSharingBG' | 'customListsBG'
     >
     filterbyList: (listId: number) => void
-    analyticsBG: AnalyticsInterface
+    analyticsBG: AnalyticsCoreInterface
 }
 
 export default class PageResultView extends PureComponent<Props> {

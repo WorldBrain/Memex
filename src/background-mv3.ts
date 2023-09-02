@@ -188,6 +188,7 @@ async function main() {
         pageActivityIndicator:
             backgroundModules.pageActivityIndicator.remoteFunctions,
         pdf: backgroundModules.pdfBg.remoteFunctions,
+        analyticsBG: backgroundModules.analyticsBG,
     })
     rpcManager.unpause()
 

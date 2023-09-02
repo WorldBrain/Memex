@@ -1399,6 +1399,7 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             unifiedListIds.add(cacheList.unifiedId)
+            console.log('adding list to annotation', event.added)
             bgPromise = contentSharingBG.shareAnnotationToSomeLists({
                 annotationUrl: existing.localId,
                 localListIds: [event.added],
@@ -1413,6 +1414,7 @@ export class SidebarContainerLogic extends UILogic<
             }
 
             unifiedListIds.delete(cacheList.unifiedId)
+            console.log('deleting list to annotation', event.deleted)
             bgPromise = contentSharingBG.unshareAnnotationFromList({
                 annotationUrl: existing.localId,
                 localListId: event.deleted,
@@ -2684,10 +2686,6 @@ export class SidebarContainerLogic extends UILogic<
                     unifiedId,
                 ),
             ])
-        })
-
-        await this.options.analyticsBG.trackBqEvent({
-            eventName: 'createPageLink',
         })
     }
 }

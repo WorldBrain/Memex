@@ -15,6 +15,7 @@ import type { PDFRemoteInterface } from 'src/pdf/background/types'
 import type { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 import type { AnalyticsInterface } from 'src/analytics/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface RemoteFunctionImplementations<
     Role extends 'provider' | 'caller'
@@ -34,6 +35,7 @@ export interface RemoteFunctionImplementations<
     personalCloud: PersonalCloudRemoteInterface
     pageActivityIndicator: RemotePageActivityIndicatorInterface
     pdf: PDFRemoteInterface
+    analyticsBG: AnalyticsCoreInterface
 }
 
 // See `src/background.ts` for the concrete remote function bindings
@@ -54,6 +56,7 @@ export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     contentSharing: runInBackground(),
     personalCloud: runInBackground(),
     pdf: runInBackground(),
+    analyticsBG: runInBackground(),
 }
 
 export const notifications = remoteFunctions.notifications
@@ -71,3 +74,4 @@ export const readable = remoteFunctions.readablePageArchives
 export const contentSharing = remoteFunctions.contentSharing
 export const annotations = runInBackground<AnnotationInterface<'caller'>>()
 export const pdf = remoteFunctions.pdf
+export const analyticsBG = remoteFunctions.analyticsBG

@@ -102,9 +102,10 @@ import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { handleIncomingData } from 'src/personal-cloud/background/handle-incoming-data'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 import { AnalyticsInterface } from 'src/analytics/background/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface BackgroundModules {
-    analyticsBG: AnalyticsInterface
+    analyticsBG: AnalyticsCoreInterface
     auth: AuthBackground
     analytics: AnalyticsBackground
     notifications: NotificationBackground
@@ -224,6 +225,8 @@ export function createBackgroundModules(options: {
             callFirebaseFunction('analytics-trackEvent', event),
     })
 
+    const analyticsBG = analytics
+
     const pages = new PageIndexingBackground({
         persistentStorageManager: options.persistentStorageManager,
         pageIndexingSettingsStore: new BrowserSettingsStore(
@@ -245,6 +248,7 @@ export function createBackgroundModules(options: {
         pages,
         analytics,
         browserAPIs: options.browserAPIs,
+        analyticsBG,
     })
     const searchIndex = combineSearchIndex({
         getDb: async () => storageManager,
@@ -304,26 +308,11 @@ export function createBackgroundModules(options: {
         socialBg: social,
         pages,
         analytics,
+        analyticsBG,
         getServerStorage,
         preAnnotationDelete: async (params) => {
             await contentSharing.deleteAnnotationShare(params)
         },
-    })
-
-    const customLists = new CustomListBackground({
-        analytics,
-        storageManager,
-        tabManagement,
-        queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
-        windows: options.browserAPIs.windows,
-        searchIndex: search.searchIndex,
-        pages,
-        localBrowserStorage: options.browserAPIs.storage.local,
-        getServerStorage,
-        authServices: options.authServices,
-        removeChildAnnotationsFromList: directLinking.removeChildAnnotationsFromList.bind(
-            directLinking,
-        ),
     })
 
     const auth =
@@ -376,6 +365,55 @@ export function createBackgroundModules(options: {
     }
     const userMessages = options.userMessageService
 
+    const contentSharing = new ContentSharingBackground({
+        backend:
+            options.contentSharingBackend ??
+            firebaseService<ContentSharingBackend>(
+                'contentSharing',
+                callFirebaseFunction,
+            ),
+        remoteEmitter: createRemoteEventEmitter('contentSharing', {
+            broadcastToTabs: true,
+        }),
+        analyticsBG,
+        waitForSync: () => personalCloud.waitForSync(),
+        storageManager,
+        contentSharingSettingsStore: new BrowserSettingsStore(
+            options.browserAPIs.storage.local,
+            { prefix: 'contentSharing.' },
+        ),
+        analytics: options.analyticsManager,
+        servicesPromise: options.servicesPromise,
+        captureException: options.captureException,
+        getServerStorage,
+        generateServerId,
+        getBgModules: () => ({
+            auth,
+            customLists,
+            directLinking,
+            pageActivityIndicator,
+            pages,
+            contentSharing,
+        }),
+    })
+
+    const customLists = new CustomListBackground({
+        analytics,
+        storageManager,
+        tabManagement,
+        contentSharing,
+        queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
+        windows: options.browserAPIs.windows,
+        searchIndex: search.searchIndex,
+        pages,
+        localBrowserStorage: options.browserAPIs.storage.local,
+        getServerStorage,
+        authServices: options.authServices,
+        removeChildAnnotationsFromList: directLinking.removeChildAnnotationsFromList.bind(
+            directLinking,
+        ),
+        analyticsBG,
+    })
     const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(
         syncSettings,
         { prefix: 'readwise.' },
@@ -430,6 +468,7 @@ export function createBackgroundModules(options: {
     })
     const summarizeBG = new SummarizeBackground({
         remoteEventEmitter: createRemoteEventEmitter('pageSummary'),
+        analyticsBG,
     })
 
     const uaParser = new UAParser(options.userAgentString)
@@ -506,36 +545,6 @@ export function createBackgroundModules(options: {
         }),
     })
 
-    const contentSharing = new ContentSharingBackground({
-        backend:
-            options.contentSharingBackend ??
-            firebaseService<ContentSharingBackend>(
-                'contentSharing',
-                callFirebaseFunction,
-            ),
-        remoteEmitter: createRemoteEventEmitter('contentSharing', {
-            broadcastToTabs: true,
-        }),
-        waitForSync: () => personalCloud.waitForSync(),
-        storageManager,
-        contentSharingSettingsStore: new BrowserSettingsStore(
-            options.browserAPIs.storage.local,
-            { prefix: 'contentSharing.' },
-        ),
-        analytics: options.analyticsManager,
-        servicesPromise: options.servicesPromise,
-        captureException: options.captureException,
-        getServerStorage,
-        generateServerId,
-        getBgModules: () => ({
-            auth,
-            customLists,
-            directLinking,
-            pageActivityIndicator,
-            pages,
-        }),
-    })
-
     const copyPaster = new CopyPasterBackground({
         storageManager,
         contentSharing,
@@ -570,6 +579,7 @@ export function createBackgroundModules(options: {
         social,
         analytics,
         jobScheduler,
+        analyticsBG,
         notifications,
         // connectivityChecker,
         readable: reader,

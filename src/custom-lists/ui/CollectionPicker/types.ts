@@ -13,6 +13,7 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { AnalyticsInterface } from 'src/analytics/background/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 type SpacePickerTab = 'user-lists' | 'page-links'
 
@@ -88,7 +89,7 @@ export interface SpacePickerDependencies {
     authBG: AuthRemoteFunctionsInterface
     spacesBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface
-    analyticsBG: AnalyticsInterface
+    analyticsBG: AnalyticsCoreInterface
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     normalizedPageUrlToFilterPageLinksBy?: string
     width?: string

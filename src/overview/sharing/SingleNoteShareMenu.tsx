@@ -21,6 +21,8 @@ import {
 } from './constants'
 import type { AnnotationSharingState } from 'src/content-sharing/background/types'
 import { TaskState } from 'ui-logic-core/lib/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { trackSharedAnnotation } from '@worldbrain/memex-common/lib/analytics/events'
 
 type SelectType = 'select' | 'unselect'
 
@@ -41,6 +43,7 @@ export interface Props extends ShareMenuCommonProps {
     showLink?: boolean
     isShared?: boolean
     annotationUrl: string
+    analyticsBG?: AnalyticsCoreInterface
     shareImmediately?: boolean
     annotationData?: any
     getRemoteListIdForLocalId: (localListId: number) => string | null
@@ -168,6 +171,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         const link = await contentSharingBG.getRemoteAnnotationLink({
             annotationUrl,
         })
+
         await this.props.copyLink(link)
 
         this.props.postShareHook?.(sharingState)
@@ -198,6 +202,18 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         )
 
         await p
+
+        if (this.props.analyticsBG) {
+            try {
+                trackSharedAnnotation(this.props.analyticsBG, {
+                    type: 'single',
+                })
+            } catch (error) {
+                console.error(
+                    `Error tracking single annotation link share event', ${error}`,
+                )
+            }
+        }
 
         this.setState({
             shareState: 'success',

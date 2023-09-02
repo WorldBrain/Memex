@@ -15,6 +15,12 @@ import type { SuggestResult } from 'src/search/types'
 import type { PageList, PageListEntry, ListDescription } from './types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/lib/constants'
+import {
+    trackSpaceCreate,
+    trackSpaceEntryCreate,
+} from '@worldbrain/memex-common/lib/analytics/events'
+import { AnalyticsInterface } from 'src/analytics/background/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export default class CustomListStorage extends StorageModule {
     static LIST_DESCRIPTIONS_COLL = COLLECTION_NAMES.listDescription
@@ -412,6 +418,8 @@ export default class CustomListStorage extends StorageModule {
         isDeletable = true,
         isNestable = true,
         createdAt = new Date(),
+        analyticsBG,
+        dontTrack,
     }: {
         id: number
         type?: string
@@ -419,6 +427,8 @@ export default class CustomListStorage extends StorageModule {
         isDeletable?: boolean
         isNestable?: boolean
         createdAt?: Date
+        analyticsBG?: AnalyticsCoreInterface
+        dontTrack?: boolean
     }): Promise<number> {
         const { object } = await this.operation('createList', {
             id,
@@ -429,6 +439,15 @@ export default class CustomListStorage extends StorageModule {
             searchableName: name,
             createdAt,
         })
+
+        if (analyticsBG && dontTrack == null) {
+            console.log('shouldcrate')
+            try {
+                trackSpaceCreate(analyticsBG, { type: 'private' })
+            } catch (error) {
+                console.error(`Error tracking space create event', ${error}`)
+            }
+        }
 
         return object.id
     }
@@ -477,16 +496,35 @@ export default class CustomListStorage extends StorageModule {
         fullUrl,
         createdAt = new Date(),
         pageTitle,
+        analyticsBG,
+        isShared,
+        dontTrack,
     }: {
         listId: number
         pageUrl: string
         fullUrl: string
         createdAt?: Date
         pageTitle?: string
+        analyticsBG?: AnalyticsCoreInterface
+        isShared?: boolean
+        dontTrack?: boolean
     }) {
         const idExists = Boolean(await this.fetchListById(listId))
 
         if (idExists) {
+            if (analyticsBG && dontTrack == null) {
+                try {
+                    if (isShared) {
+                        trackSpaceEntryCreate(analyticsBG, { type: 'shared' })
+                    } else {
+                        trackSpaceEntryCreate(analyticsBG, { type: 'private' })
+                    }
+                } catch (error) {
+                    console.error(
+                        `Error tracking space Entry create event', ${error}`,
+                    )
+                }
+            }
             return this.operation('createListEntry', {
                 listId,
                 pageUrl,

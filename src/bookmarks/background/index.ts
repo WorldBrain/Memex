@@ -12,6 +12,12 @@ import { Analytics } from 'src/analytics/types'
 import checkBrowser from '../../util/check-browser'
 import browser from 'webextension-polyfill'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import {
+    trackAnnotationCreate,
+    trackBookmarkCreate,
+} from '@worldbrain/memex-common/lib/analytics/events'
+import { AnalyticsInterface } from 'src/analytics/background/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 const BOOKMARK_SYNC_STORAGE_NAME = 'memex:settings:bookmarkSync'
 
@@ -25,6 +31,7 @@ export default class BookmarksBackground {
             pages: PageIndexingBackground
             browserAPIs: Pick<Browser, 'bookmarks' | 'tabs' | 'storage'>
             analytics: Analytics
+            analyticsBG: AnalyticsCoreInterface
         },
     ) {
         this.storage = new BookmarksStorage(pick(options, 'storageManager'))
@@ -109,10 +116,7 @@ export default class BookmarksBackground {
 
         await this.storage.createBookmarkIfNeeded(fullUrl, params.timestamp)
 
-        this.options.analytics.trackEvent({
-            category: 'Bookmarks',
-            action: 'createBookmarkForPage',
-        })
+        trackBookmarkCreate(this.options.analyticsBG)
     }
 
     delPageBookmark = async ({ url }: { url: string }) => {

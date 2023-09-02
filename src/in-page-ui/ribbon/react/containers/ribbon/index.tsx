@@ -11,6 +11,7 @@ import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
 import analytics from 'src/analytics'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { AnalyticsInterface } from 'src/analytics/background/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -18,7 +19,7 @@ export interface RibbonContainerProps extends RibbonContainerOptions {
     setRef?: (el: HTMLElement) => void
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
     selectRibbonPositionOption: (option) => void
-    analyticsBG: AnalyticsInterface
+    analyticsBG: AnalyticsCoreInterface
 }
 
 export default class RibbonContainer extends StatefulUIElement<

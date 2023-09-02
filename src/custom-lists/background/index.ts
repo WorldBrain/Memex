@@ -26,9 +26,16 @@ import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexi
 import { isExtensionTab } from 'src/tab-management/utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { PersonalList } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
+import { AnalyticsInterface } from 'src/analytics/background/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import ContentSharingBackground from 'src/content-sharing/background'
+import { injectFakeTabs } from 'src/tab-management/background/index.tests'
 
 const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 25
+
+injectFakeTabs
 
 export default class CustomListBackground {
     storage: CustomListStorage
@@ -40,6 +47,8 @@ export default class CustomListBackground {
         private options: {
             storageManager: Storex
             searchIndex: SearchIndex
+            analyticsBG: AnalyticsCoreInterface
+            contentSharing: ContentSharingBackground
             pages: PageIndexingBackground
             tabManagement: TabManagementBackground
             analytics: Analytics
@@ -603,13 +612,17 @@ export default class CustomListBackground {
         id: _id,
         type,
         createdAt,
+        dontTrack,
     }) => {
+        console.log('1', dontTrack)
         const id = _id ?? this.generateListId()
         const inserted = await this.storage.insertCustomList({
             id,
             type,
             name,
             createdAt,
+            analyticsBG: this.options.analyticsBG,
+            dontTrack,
         })
         await this.updateListSuggestionsCache({ added: id })
 
@@ -640,6 +653,7 @@ export default class CustomListBackground {
             suppressVisitCreation?: boolean
             suppressInboxEntry?: boolean
             pageTitle?: string
+            dontTrack?: boolean
         },
     ): Promise<{ object: PageListEntry }> => {
         const { id } = params
@@ -654,6 +668,7 @@ export default class CustomListBackground {
             )
         }
 
+        await this.updateListSuggestionsCache({ added: id })
         if (!params.skipPageIndexing) {
             await this.options.pages.indexPage(
                 {
@@ -672,6 +687,17 @@ export default class CustomListBackground {
 
         const pageUrl = normalizeUrl(url)
         const existing = await this.storage.fetchListEntry(id, pageUrl)
+        let remoteID = null
+        try {
+            remoteID = await this.options.contentSharing.storage.getRemoteListId(
+                {
+                    localId: id,
+                },
+            )
+        } catch (error) {
+            console.log(error)
+        }
+
         if (existing != null) {
             return { object: existing }
         }
@@ -682,14 +708,12 @@ export default class CustomListBackground {
             fullUrl: url,
             createdAt: params.createdAt,
             pageTitle: params.pageTitle,
+            analyticsBG: this.options.analyticsBG,
+            isShared: remoteID != null ?? false,
+            dontTrack: params.dontTrack,
         })
 
-        this.options.analytics.trackEvent({
-            category: 'Collections',
-            action: 'addPageToList',
-        })
-
-        await this.updateListSuggestionsCache({ added: id })
+        console.log(retVal)
 
         return retVal
     }
@@ -824,6 +848,7 @@ export default class CustomListBackground {
                         fullUrl,
                         pageUrl: normalizeUrl(fullUrl),
                         pageTitle: args.pageTitle,
+                        analyticsBG: this.options.analyticsBG,
                     })
                 }),
         )

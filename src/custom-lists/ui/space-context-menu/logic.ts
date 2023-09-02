@@ -11,6 +11,8 @@ import {
 } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { AnalyticsInterface } from 'src/analytics/background/types'
+import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/events'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface Dependencies {
     contentSharingBG: ContentSharingInterface
@@ -25,7 +27,7 @@ export interface Dependencies {
     onConfirmSpaceNameEdit: (name: string) => void
     onDeleteSpaceIntent?: React.MouseEventHandler
     onDeleteSpaceConfirm?: React.MouseEventHandler
-    analyticsBG: AnalyticsInterface
+    analyticsBG: AnalyticsCoreInterface
 }
 
 export type Event = UIEvent<{
@@ -33,7 +35,7 @@ export type Event = UIEvent<{
     cancelSpaceNameEdit: null
     confirmSpaceNameEdit: null
     updateSpaceName: { name: string }
-    copyInviteLink: { linkIndex: number }
+    copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
     confirmSpaceDelete: { reactEvent: React.MouseEvent }
     intendToDeleteSpace: { reactEvent: React.MouseEvent }
     cancelDeleteSpace: null
@@ -224,9 +226,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             () => this.emitMutation({ showSuccessMsg: { $set: false } }),
             SpaceContextMenuLogic.MSG_TIMEOUT,
         )
-        await this.dependencies.analyticsBG.trackBqEvent({
-            eventName: 'shareSpace',
-        })
     }
 
     confirmSpaceDelete: EventHandler<'confirmSpaceDelete'> = async ({
@@ -301,15 +300,20 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
 
         showInviteLinkCopyMsg(true)
 
-        if (event.linkIndex === 0) {
-            await this.dependencies.analyticsBG.trackBqEvent({
-                eventName: 'copyInviteLink_Read',
-            })
-        }
-        if (event.linkIndex === 1) {
-            await this.dependencies.analyticsBG.trackBqEvent({
-                eventName: 'copyInviteLink_Contribute',
-            })
+        if (this.dependencies.analyticsBG) {
+            try {
+                trackCopyInviteLink(this.dependencies.analyticsBG, {
+                    inviteType:
+                        event.linkIndex === 0 ? 'reader' : 'contributer',
+                    linkType:
+                        event.linkType === 'page-link'
+                            ? 'page-link'
+                            : 'space-link',
+                    source: 'extension',
+                })
+            } catch (error) {
+                console.error(`Error tracking space create event', ${error}`)
+            }
         }
 
         setTimeout(

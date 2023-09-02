@@ -129,6 +129,9 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                                     'copyInviteLink',
                                                     {
                                                         linkIndex,
+                                                        linkType: isPageLink
+                                                            ? 'page-link'
+                                                            : 'space-link',
                                                     },
                                                 ),
                                             )}
@@ -148,7 +151,12 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                                     onClick={wrapClick(() =>
                                                         this.processEvent(
                                                             'copyInviteLink',
-                                                            { linkIndex },
+                                                            {
+                                                                linkIndex,
+                                                                linkType: isPageLink
+                                                                    ? 'page-link'
+                                                                    : 'space-link',
+                                                            },
                                                         ),
                                                     )}
                                                 />

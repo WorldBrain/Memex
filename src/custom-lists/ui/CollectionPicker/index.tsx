@@ -18,6 +18,7 @@ import { ListResultItem } from './components/ListResultItem'
 import {
     auth,
     collections,
+    analyticsBG,
     contentSharing,
     pageActivityIndicator,
 } from 'src/util/remote-functions-background'
@@ -51,9 +52,11 @@ class SpacePicker extends StatefulUIElement<
         | 'annotationsCache'
         | 'localStorageAPI'
         | 'createNewEntry'
+        | 'analyticsBG'
     > = {
         authBG: auth,
         spacesBG: collections,
+        analyticsBG: analyticsBG,
         contentSharingBG: contentSharing,
         localStorageAPI: browser.storage.local,
         pageActivityIndicatorBG: pageActivityIndicator,

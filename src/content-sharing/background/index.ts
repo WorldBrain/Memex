@@ -32,6 +32,14 @@ import type { BrowserSettingsStore } from 'src/util/settings'
 import type { BackgroundModules } from 'src/background-script/setup'
 import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import {
+    trackAddPageToSharedSpace,
+    trackPageLinkCreate,
+    trackSharedAnnotation,
+    trackSpaceCreate,
+    trackUnSharedAnnotation,
+} from '@worldbrain/memex-common/lib/analytics/events'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface LocalContentSharingSettings {
     remotePageIdLookup: {
@@ -62,6 +70,7 @@ export default class ContentSharingBackground {
             storageManager: StorageManager
             backend: ContentSharingBackend
             analytics: Analytics
+            analyticsBG: AnalyticsCoreInterface
             servicesPromise: Promise<Pick<Services, 'contentSharing'>>
             remoteEmitter: RemoteEventEmitter<'contentSharing'>
             contentSharingSettingsStore: BrowserSettingsStore<
@@ -74,6 +83,7 @@ export default class ContentSharingBackground {
                 | 'customLists'
                 | 'directLinking'
                 | 'pageActivityIndicator'
+                | 'contentSharing'
             >
             captureException?: (e: Error) => void
             getServerStorage: () => Promise<
@@ -194,6 +204,7 @@ export default class ContentSharingBackground {
                                 listId,
                                 fullUrl: fullPageUrl,
                                 pageUrl: normalizedPageUrl,
+                                isShared: true,
                             }),
                 },
                 annotationStorage: {
@@ -403,6 +414,7 @@ export default class ContentSharingBackground {
         remoteListId: string
         localListId: number
         collabKey: string
+        dontTrack?: boolean
     }): Promise<void> {
         await this.options.servicesPromise
         const {
@@ -415,6 +427,14 @@ export default class ContentSharingBackground {
         this.listShareAnnotationSharePromises[
             options.localListId
         ] = annotationSharingStatesPromise
+
+        if (this.options.analyticsBG && options.dontTrack == null) {
+            try {
+                trackSpaceCreate(this.options.analyticsBG, { type: 'shared' })
+            } catch (error) {
+                console.error(`Error tracking space share event', ${error}`)
+            }
+        }
     }
 
     shareAnnotation: ContentSharingInterface['shareAnnotation'] = async (
@@ -457,6 +477,16 @@ export default class ContentSharingBackground {
             }),
         })
 
+        if (this.options.analyticsBG) {
+            try {
+                trackSharedAnnotation(this.options.analyticsBG, {
+                    type: 'bulk',
+                })
+            } catch (error) {
+                console.error(`Error tracking space create event', ${error}`)
+            }
+        }
+
         return { sharingStates: await this.getAnnotationSharingStates(options) }
     }
 
@@ -477,6 +507,18 @@ export default class ContentSharingBackground {
             annotations: nonPublicAnnotations,
             privacyLevel: AnnotationPrivacyLevels.SHARED,
         })
+
+        if (this.options.analyticsBG) {
+            try {
+                trackSharedAnnotation(this.options.analyticsBG, {
+                    type: 'autoShared',
+                })
+            } catch (error) {
+                console.error(
+                    `Error tracking autoshare annotation event'', ${error}`,
+                )
+            }
+        }
 
         return { sharingStates: await this.getAnnotationSharingStates(options) }
     }
@@ -570,6 +612,18 @@ export default class ContentSharingBackground {
                 setBulkShareProtected: options.setBulkShareProtected,
             },
         )
+
+        if (this.options.analyticsBG) {
+            try {
+                trackUnSharedAnnotation(this.options.analyticsBG, {
+                    type: 'autoShared',
+                })
+            } catch (error) {
+                console.error(
+                    `Error tracking unshare autoshared annotation event', ${error}`,
+                )
+            }
+        }
         return { sharingStates: { [options.annotationUrls[0]]: sharingState } }
     }
 
@@ -584,6 +638,17 @@ export default class ContentSharingBackground {
                 skipListExistenceCheck: options.skipListExistenceCheck,
             },
         )
+        if (this.options.analyticsBG) {
+            try {
+                trackSharedAnnotation(this.options.analyticsBG, {
+                    type: 'shared',
+                })
+            } catch (error) {
+                console.error(
+                    `Error tracking nshare annotation to some lists event', ${error}`,
+                )
+            }
+        }
         return { sharingState }
     }
 
@@ -596,6 +661,17 @@ export default class ContentSharingBackground {
                 listId: options.localListId,
             },
         )
+        if (this.options.analyticsBG) {
+            try {
+                trackUnSharedAnnotation(this.options.analyticsBG, {
+                    type: 'shared',
+                })
+            } catch (error) {
+                console.error(
+                    `Error tracking unshare annotation to some lists event', ${error}`,
+                )
+            }
+        }
         return { sharingState }
     }
 
@@ -629,6 +705,16 @@ export default class ContentSharingBackground {
                 ? AnnotationPrivacyLevels.PROTECTED
                 : AnnotationPrivacyLevels.PRIVATE,
         })
+
+        if (this.options.analyticsBG) {
+            try {
+                trackUnSharedAnnotation(this.options.analyticsBG, {
+                    type: 'bulk',
+                })
+            } catch (error) {
+                console.error(`Error tracking space create event', ${error}`)
+            }
+        }
 
         return { sharingStates: await this.getAnnotationSharingStates(options) }
     }
@@ -693,6 +779,23 @@ export default class ContentSharingBackground {
     setAnnotationPrivacyLevel: ContentSharingInterface['setAnnotationPrivacyLevel'] = async (
         params,
     ) => {
+        if (
+            params.privacyLevel === AnnotationPrivacyLevels.SHARED ||
+            params.privacyLevel === AnnotationPrivacyLevels.SHARED_PROTECTED
+        ) {
+            if (this.options.analyticsBG) {
+                try {
+                    trackSharedAnnotation(this.options.analyticsBG, {
+                        type: 'autoShared',
+                    })
+                } catch (error) {
+                    console.error(
+                        `Error tracking space create event', ${error}`,
+                    )
+                }
+            }
+        }
+
         return this.annotationSharingService.setAnnotationPrivacyLevel(params)
     }
 
@@ -902,6 +1005,7 @@ export default class ContentSharingBackground {
             name: listTitle,
             type: 'page-link',
             createdAt: new Date(now),
+            dontTrack: true,
         })
         await Promise.all([
             bgModules.customLists.insertPageToList({
@@ -912,11 +1016,13 @@ export default class ContentSharingBackground {
                 suppressInboxEntry: true,
                 suppressVisitCreation: true,
                 pageTitle: pageTitle,
+                dontTrack: true,
             }),
             this.performListShare({
                 localListId,
                 remoteListId,
                 collabKey,
+                dontTrack: true,
             }),
         ])
 
@@ -950,5 +1056,15 @@ export default class ContentSharingBackground {
             listId: remoteListId,
             keyString: collabKey.toString(),
         })
+
+        if (this.options.analyticsBG) {
+            try {
+                trackPageLinkCreate(this.options.analyticsBG, {
+                    source: 'extension',
+                })
+            } catch (error) {
+                console.error(`Error tracking space create event', ${error}`)
+            }
+        }
     }
 }
