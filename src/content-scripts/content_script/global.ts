@@ -557,7 +557,7 @@ export async function main(
         fullPageUrl === 'https://memex.garden/upgradeStaging' ||
         fullPageUrl === 'https://memex.garden/upgradeNotification' ||
         fullPageUrl === 'https://memex.garden/upgrade' ||
-        fullPageUrl === 'https://memex.garden/' ||
+        fullPageUrl.startsWith('https://memex.garden/') ||
         fullPageUrl === 'https://memex.garden/copilot' ||
         fullPageUrl === 'https://memex.garden/hivemind'
     ) {
@@ -574,15 +574,6 @@ export async function main(
                 }
             }
         }, 200)
-    }
-
-    if (
-        fullPageUrl.includes('memex.garden') &&
-        document.body.innerText.includes(
-            'Icons by Smashicons from Flaticons.com',
-        )
-    ) {
-        await contentScriptsBG.reloadTab({ bypassCache: true })
     }
 
     // 4. Create a contentScriptRegistry object with functions for each content script

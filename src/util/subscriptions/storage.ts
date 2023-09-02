@@ -280,7 +280,7 @@ export async function AIActionAllowed(analyticsBG) {
 
     if (analyticsBG) {
         try {
-            trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
+            trackHitPaywall(analyticsBG, { type: 'aiLimit' })
         } catch (error) {
             console.error(`Error tracking space Entry create event', ${error}`)
         }
