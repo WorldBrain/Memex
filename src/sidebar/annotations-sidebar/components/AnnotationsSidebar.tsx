@@ -215,6 +215,7 @@ interface AnnotationsSidebarState {
     AIsuggestions: []
     autoFocusCreateForm: boolean
     spaceTitleEditState: boolean
+    hoveredListId: string | null
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -235,6 +236,9 @@ export class AnnotationsSidebar extends React.Component<
     private spaceContextBtnRefs: {
         [unifiedListId: string]: React.RefObject<HTMLDivElement>
     } = {}
+    private spaceUnfoldButtonRef: {
+        [unifiedListId: string]: React.RefObject<HTMLDivElement>
+    } = {}
 
     state: AnnotationsSidebarState = {
         searchText: '',
@@ -251,6 +255,7 @@ export class AnnotationsSidebar extends React.Component<
         AIsuggestions: [],
         autoFocusCreateForm: false,
         spaceTitleEditState: false,
+        hoveredListId: null,
     }
 
     addYoutubeTimestampToEditor() {
@@ -264,6 +269,14 @@ export class AnnotationsSidebar extends React.Component<
             return
         }
         this.spaceContextBtnRefs[unifiedId] = React.createRef()
+    }
+    private maybeCreatespaceUnfoldButtonRef({
+        unifiedId,
+    }: Pick<UnifiedList, 'unifiedId'>): void {
+        if (this.spaceUnfoldButtonRef[unifiedId]) {
+            return
+        }
+        this.spaceUnfoldButtonRef[unifiedId] = React.createRef()
     }
 
     async componentDidMount() {
@@ -887,6 +900,18 @@ export class AnnotationsSidebar extends React.Component<
                 bottom={listInstance.isOpen ? '0px' : '0px'}
                 key={listData.unifiedId}
                 top="5px"
+                onMouseOver={() =>
+                    this.setState({
+                        hoveredListId: listData.unifiedId,
+                    })
+                }
+                onMouseLeave={() => {
+                    console.log('leave')
+                    this.setState({
+                        hoveredListId: null,
+                    })
+                }}
+                isHovered={this.state.hoveredListId === listData.unifiedId}
             >
                 <FollowedListRow
                     title={title}
@@ -895,17 +920,33 @@ export class AnnotationsSidebar extends React.Component<
                     }
                 >
                     <FollowedListTitleContainer>
-                        <Icon
-                            icon={icons.arrowRight}
-                            heightAndWidth="20px"
-                            rotation={listInstance.isOpen && 90}
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                this.props.expandFollowedListNotes(
-                                    listData.unifiedId,
-                                )
-                            }}
-                        />
+                        <TooltipBox
+                            tooltipText={
+                                <span>
+                                    Click here to unfold
+                                    <br /> click entire bar to go into Focus
+                                    Mode
+                                </span>
+                            }
+                            placement="bottom"
+                        >
+                            <Icon
+                                icon={icons.arrowRight}
+                                heightAndWidth="20px"
+                                rotation={listInstance.isOpen && 90}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    this.props.expandFollowedListNotes(
+                                        listData.unifiedId,
+                                    )
+                                }}
+                                containerRef={
+                                    this.spaceUnfoldButtonRef[
+                                        listData.unifiedId
+                                    ]
+                                }
+                            />
+                        </TooltipBox>
                         <FollowedListTitle>{title}</FollowedListTitle>
                     </FollowedListTitleContainer>
                     <ButtonContainer>
@@ -1076,6 +1117,7 @@ export class AnnotationsSidebar extends React.Component<
                         <SpaceTypeSectionContainer>
                             {pageLinkLists.map((listData) => {
                                 this.maybeCreateContextBtnRef(listData)
+                                this.maybeCreatespaceUnfoldButtonRef(listData)
                                 return this.renderSpacesItem(
                                     listData,
                                     listInstances[listData.unifiedId],
@@ -3174,13 +3216,22 @@ const SearchIcon = styled.span`
     background-color: transparent;
 `
 
-const FollowedListNotesContainer = styled(Margin)<{ key: number }>`
+const FollowedListNotesContainer = styled(Margin)<{
+    key: number
+    isHovered: boolean
+}>`
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
     height: 100%;
     z-index: ${(props) => 1000 - props.key};
+
+    ${(props) =>
+        props.isHovered &&
+        css`
+            z-index: 100000;
+        `};
 `
 
 const sidebarContentOpen = keyframes`
