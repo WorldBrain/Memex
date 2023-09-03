@@ -101,6 +101,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     cacheLoadState: TaskState
     noteCreateState: TaskState
     pageLinkCreateState: TaskState
+    firstTimeSharingPageLink: boolean
     secondarySearchState: TaskState
     remoteAnnotationsLoadState: TaskState
     foreignSelectedListLoadState: TaskState
@@ -231,6 +232,7 @@ interface SidebarEvents {
     removeAISuggestion: { suggestion: string }
     navigateFocusInList: { direction: 'up' | 'down' }
     setSpaceTitleEditValue: { value: string }
+    setSharingTutorialVisibility: null
 
     createNewNoteFromAISummary: { comment: string }
 

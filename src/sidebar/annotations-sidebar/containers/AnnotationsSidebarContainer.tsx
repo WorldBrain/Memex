@@ -536,6 +536,7 @@ export class AnnotationsSidebarContainer<
         const {
             confirmPrivatizeNoteArgs,
             confirmSelectNoteSpaceArgs,
+            firstTimeSharingPageLink,
         } = this.state
 
         return (
@@ -588,6 +589,29 @@ export class AnnotationsSidebarContainer<
                                     ...confirmSelectNoteSpaceArgs,
                                     options: { protectAnnotation: affirmative },
                                 })}
+                        />
+                    </ConfirmModal>
+                )}
+                {firstTimeSharingPageLink && (
+                    <ConfirmModal
+                        isShown
+                        ignoreReactPortal={
+                            this.props.sidebarContext !== 'dashboard'
+                        }
+                        onClose={() =>
+                            this.processEvent(
+                                'setSharingTutorialVisibility',
+                                null,
+                            )
+                        }
+                        message={' 🎉 Your first time sharing something!'}
+                        submessage="Learn the basics of sharing & collaborating"
+                    >
+                        <OnboardingVideo
+                            src="https://share.descript.com/embed/6OLjZqSa4JK"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
                         />
                     </ConfirmModal>
                 )}
@@ -802,9 +826,13 @@ export class AnnotationsSidebarContainer<
                             clickFeedActivityIndicator={() =>
                                 this.processEvent('markFeedAsRead', null)
                             }
-                            clickCreatePageLinkBtn={() =>
+                            clickCreatePageLinkBtn={() => {
                                 this.processEvent('createPageLink', null)
-                            }
+                                this.processEvent(
+                                    'setSharingTutorialVisibility',
+                                    null,
+                                )
+                            }}
                             showSharePageTooltip={
                                 this.state.showSharePageTooltip
                             }
@@ -1019,12 +1047,16 @@ export class AnnotationsSidebarContainer<
                                             oldName: listData.name,
                                         })
                                     }}
-                                    onSpaceShare={(remoteListId) =>
+                                    onSpaceShare={(remoteListId) => {
                                         this.processEvent('shareList', {
                                             unifiedListId: listData.unifiedId,
                                             remoteListId,
                                         })
-                                    }
+                                        this.processEvent(
+                                            'setSharingTutorialVisibility',
+                                            null,
+                                        )
+                                    }}
                                     onDeleteSpaceConfirm={() =>
                                         this.processEvent('deleteList', {
                                             unifiedListId: listData.unifiedId,
@@ -1043,11 +1075,15 @@ export class AnnotationsSidebarContainer<
                                     disableWriteOps={
                                         this.state.hasListDataBeenManuallyPulled
                                     }
-                                    onSpaceShare={() =>
+                                    onSpaceShare={() => {
                                         this.processEvent('createPageLink', {
                                             forceCreate: true,
                                         })
-                                    }
+                                        this.processEvent(
+                                            'setSharingTutorialVisibility',
+                                            null,
+                                        )
+                                    }}
                                     pageLinkCreateState={
                                         this.state.pageLinkCreateState
                                     }
@@ -1174,6 +1210,13 @@ const GlobalStyle = createGlobalStyle<{
     #outerContainer {
         width: ${(props) => props.sidebarWidth};
     }
+`
+
+const OnboardingVideo = styled.iframe`
+    width: 800px;
+    height: 450px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale1};
+    border-radius: 20px;
 `
 
 const TooltipContent = styled.div`

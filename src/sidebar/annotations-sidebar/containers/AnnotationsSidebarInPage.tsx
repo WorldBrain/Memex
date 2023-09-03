@@ -26,6 +26,7 @@ import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
 import type { UnifiedAnnotation } from 'src/annotations/cache/types'
 import { ANNOT_BOX_ID_PREFIX } from '../constants'
 import browser from 'webextension-polyfill'
+import { sleepPromise } from 'src/util/promises'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -42,6 +43,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     > = {
         runtimeAPI: browser.runtime,
         storageAPI: browser.storage,
+
         sidebarContext: 'in-page',
         isLockable: true,
         theme: {
@@ -296,6 +298,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 tab: this.state.selectedListId ? 'spaces' : 'annotations',
             })
         } else if (event.action === 'share_page') {
+            await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+            await sleepPromise(500)
             await this.processEvent('createPageLink', null)
         } else if (event.action === 'show_page_summary') {
             await this.processEvent('askAIviaInPageInteractions', {

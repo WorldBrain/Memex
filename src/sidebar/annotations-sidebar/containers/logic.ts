@@ -296,6 +296,8 @@ export class SidebarContainerLogic extends UILogic<
             isTrial: false,
             signupDate: null,
             showSharePageTooltip: false,
+            firstTimeSharingPageLink: false,
+            selectedListForShareMenu: null,
         }
     }
 
@@ -2671,6 +2673,32 @@ export class SidebarContainerLogic extends UILogic<
         'setSelectNoteSpaceConfirmArgs'
     > = ({ event }) => {
         this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: event } })
+    }
+
+    setSharingTutorialVisibility: EventHandler<
+        'setSharingTutorialVisibility'
+    > = async ({ previousState, event }) => {
+        const hasEverSharedPageLink = await browser.storage.local.get(
+            'hasEverSharedPageLink',
+        )
+
+        if (!hasEverSharedPageLink.hasEverSharedPageLink) {
+            await browser.storage.local.set({ hasEverSharedPageLink: true })
+            this.emitMutation({
+                firstTimeSharingPageLink: { $set: true },
+            })
+            this.emitMutation({
+                firstTimeSharingPageLink: {
+                    $set: true,
+                },
+            })
+        } else {
+            this.emitMutation({
+                firstTimeSharingPageLink: {
+                    $set: false,
+                },
+            })
+        }
     }
 
     updateAllAnnotationsShareInfo: EventHandler<

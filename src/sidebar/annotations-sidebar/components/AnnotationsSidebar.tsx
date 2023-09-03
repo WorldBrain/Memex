@@ -2122,6 +2122,7 @@ export class AnnotationsSidebar extends React.Component<
                         iconColor="prime1"
                         fontColor="white"
                         size="medium"
+                        active={this.props.showSharePageTooltip}
                         icon={
                             this.props.pageLinkCreateState === 'running' ? (
                                 <LoadingIndicator
