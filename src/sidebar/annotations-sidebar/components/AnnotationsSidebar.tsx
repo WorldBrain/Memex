@@ -2003,7 +2003,7 @@ export class AnnotationsSidebar extends React.Component<
                 <TopBarTabsContainer>
                     <PrimaryAction
                         onClick={this.props.setActiveTab('annotations')}
-                        label={'My Annotations'}
+                        label={'Notes'}
                         active={this.props.activeTab === 'annotations'}
                         type={'tertiary'}
                         size={'medium'}
@@ -2444,17 +2444,20 @@ export class AnnotationsSidebar extends React.Component<
                 {this.renderAllNotesShareMenu()}
                 <TopBarActionBtns>
                     <TooltipBox tooltipText={'Sort Notes'} placement={'bottom'}>
-                        <Icon
-                            filePath={icons.sort}
+                        <PrimaryAction
+                            icon={'sort'}
+                            iconSize="20px"
+                            size={'small'}
+                            type={'tertiary'}
+                            label={'Sort'}
+                            padding={'0px 6px 0 0'}
+                            innerRef={this.sortDropDownButtonRef}
                             onClick={async () => {
                                 await this.setState({
                                     showSortDropDown: true,
                                 })
                                 this.setPopoutsActive()
                             }}
-                            height="18px"
-                            width="20px"
-                            containerRef={this.sortDropDownButtonRef}
                             active={this.state.showSortDropDown}
                         />
                     </TooltipBox>
@@ -2462,26 +2465,35 @@ export class AnnotationsSidebar extends React.Component<
                         tooltipText={'Copy & Paste Note'}
                         placement={'bottom'}
                     >
-                        <Icon
-                            filePath={icons.copy}
+                        <PrimaryAction
+                            icon={'copy'}
+                            size={'small'}
+                            iconSize="18px"
+                            padding={'0px 6px 0 0'}
+                            type={'tertiary'}
+                            label={'Copy'}
+                            innerRef={this.copyButtonRef}
                             onClick={async () => {
                                 await this.setState({
                                     showAllNotesCopyPaster: true,
                                 })
                                 this.setPopoutsActive()
                             }}
-                            height="18px"
-                            width="20px"
-                            containerRef={this.copyButtonRef}
                             active={this.state.showAllNotesCopyPaster}
                         />
                     </TooltipBox>
                     <TooltipBox
                         tooltipText={'Bulk Share Notes'}
-                        placement={'bottom-end'}
+                        placement={'bottom'}
                     >
-                        <Icon
-                            filePath={icons.multiEdit}
+                        <PrimaryAction
+                            icon={'multiEdit'}
+                            size={'small'}
+                            iconSize="18px"
+                            padding={'0px 6px 0 0'}
+                            type={'tertiary'}
+                            label={'Bulk Share'}
+                            innerRef={this.bulkEditButtonRef}
                             onClick={async () => {
                                 await this.setState({
                                     showAllNotesShareMenu: true,
@@ -2489,9 +2501,6 @@ export class AnnotationsSidebar extends React.Component<
                                 this.setPopoutsActive()
                             }}
                             active={this.state.showAllNotesShareMenu}
-                            height="18px"
-                            width="20px"
-                            containerRef={this.bulkEditButtonRef}
                         />
                     </TooltipBox>
                 </TopBarActionBtns>
@@ -3011,8 +3020,6 @@ const CreatorActionButtons = styled.div`
 const NewAnnotationBoxMyAnnotations = styled.div`
     display: flex;
     margin-bottom: 5px;
-    margin-top: 5px;
-    padding: 0 5px;
 `
 
 const OthersAnnotationCounter = styled.div``
@@ -3104,16 +3111,17 @@ const TopAreaContainer = styled.div`
     flex-direction: column;
     width: fill-available;
     z-index: 20;
+    padding: 5px 0px;
+    grid-gap: 5px;
     background: ${(props) => props.theme.colors.black};
 `
 
 const AnnotationActions = styled.div`
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
-    padding: 5px 10px 5px 10px;
     width: fill-available;
-    height: 20px;
+    height: 24px;
 `
 
 const ActionButtons = styled.div`
@@ -3173,7 +3181,7 @@ const TopBar = styled.div`
     height: ${(props) =>
         props.sidebarContext === 'dashboard' ? '40px' : '32px'};
     z-index: 11300;
-    padding: 10px 10px 10px 10px;
+    padding: 10px 15px 10px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     background: ${(props) => props.theme.colors.black};
 `
