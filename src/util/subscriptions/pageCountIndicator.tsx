@@ -71,20 +71,20 @@ export class BlockCounterIndicator extends React.Component<Props> {
     }
 
     daysUntilNextMonth() {
-        const currentDate = new Date()
+        const currentDate: any = new Date()
 
         // Get the next month (or advance to January of the next year if current month is December)
-        let nextMonth = currentDate.getMonth() + 1
-        let nextYear = currentDate.getFullYear()
+        let nextMonth: any = currentDate.getMonth() + 1
+        let nextYear: any = currentDate.getFullYear()
         if (nextMonth === 12) {
             nextMonth = 0 // January is month 0 in JavaScript's Date
             nextYear += 1
         }
 
-        const nextMonthFirstDay = new Date(nextYear, nextMonth, 1)
+        const nextMonthFirstDay: any = new Date(nextYear, nextMonth, 1)
 
         // Calculate the difference in milliseconds
-        const differenceInMilliseconds = nextMonthFirstDay - currentDate
+        const differenceInMilliseconds: any = nextMonthFirstDay - currentDate
 
         // Convert the difference from milliseconds to days
         const differenceInDays =

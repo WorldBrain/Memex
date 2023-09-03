@@ -289,6 +289,7 @@ export class SidebarContainerLogic extends UILogic<
             showAICounter: false,
             AIsuggestions: [],
             isTrial: false,
+            signupDate: null,
         }
     }
 

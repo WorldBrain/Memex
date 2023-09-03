@@ -182,6 +182,8 @@ export class RibbonContainerLogic extends UILogic<
                 isPaused: false,
             },
             hasFeedActivity: false,
+            isTrial: false,
+            signupDate: null,
         }
     }
 
