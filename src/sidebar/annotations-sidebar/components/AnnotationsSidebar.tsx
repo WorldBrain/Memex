@@ -2103,6 +2103,7 @@ export class AnnotationsSidebar extends React.Component<
                                     type="secondary"
                                     size="small"
                                     icon={'invite'}
+                                    padding={'0px 12px 0 6px'}
                                 />
                             )}
                         </>
