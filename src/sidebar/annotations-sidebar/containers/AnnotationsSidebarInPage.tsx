@@ -302,7 +302,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 textToProcess: event.highlightedText,
             })
         } else if (event.action === 'youtube_timestamp') {
-            this.sidebarRef.current?.addYoutubeTimestampToEditor()
             await this.processEvent('setActiveSidebarTab', {
                 tab:
                     this.state.selectedListId &&
@@ -310,6 +309,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                         ? 'spaces'
                         : 'annotations',
             })
+            this.sidebarRef.current?.addYoutubeTimestampToEditor()
         } else if (event.action === 'check_sidebar_status') {
             return true
         }

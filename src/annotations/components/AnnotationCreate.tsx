@@ -142,7 +142,11 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
     // private toggleMarkdownHelp = () => this.props.toggleMarkdownHelp
-    private handleCancel = () => this.props.onCancel()
+    private handleCancel = () => {
+        this.setState({ onEditClick: false })
+        this.editor?.resetState()
+        this.props.onCancel()
+    }
     private handleSave = async (
         shouldShare: boolean,
         isProtected?: boolean,
@@ -314,25 +318,30 @@ export class AnnotationCreate extends React.Component<Props, State>
                             </EditorDummy>
                         )}
                     </EditorContainer>
-                    {this.props.comment === '' ? null : (
-                        <FooterContainer>
-                            <ListsSegment
-                                newLineOrientation={true}
-                                lists={this.displayLists}
-                                onMouseEnter={this.props.onListsHover}
-                                onListClick={undefined}
-                                onEditBtnClick={() =>
-                                    this.setState({ isListPickerShown: true })
-                                }
-                                spacePickerButtonRef={this.spacePickerButtonRef}
-                                renderSpacePicker={this.renderSpacePicker}
-                            />
-                            {this.renderSpacePicker()}
-                            <SaveActionBar>
-                                {this.renderActionButtons()}
-                            </SaveActionBar>
-                        </FooterContainer>
-                    )}
+                    {this.props.comment.length > 0 &&
+                        (this.state.onEditClick || this.props.autoFocus) && (
+                            <FooterContainer>
+                                <ListsSegment
+                                    newLineOrientation={true}
+                                    lists={this.displayLists}
+                                    onMouseEnter={this.props.onListsHover}
+                                    onListClick={undefined}
+                                    onEditBtnClick={() =>
+                                        this.setState({
+                                            isListPickerShown: true,
+                                        })
+                                    }
+                                    spacePickerButtonRef={
+                                        this.spacePickerButtonRef
+                                    }
+                                    renderSpacePicker={this.renderSpacePicker}
+                                />
+                                {this.renderSpacePicker()}
+                                <SaveActionBar>
+                                    {this.renderActionButtons()}
+                                </SaveActionBar>
+                            </FooterContainer>
+                        )}
                 </TextBoxContainerStyled>
             </>
         )

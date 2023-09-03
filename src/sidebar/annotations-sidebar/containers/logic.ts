@@ -87,6 +87,7 @@ import {
     getTelegramUserDisplayName,
 } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { enforceTrialPeriod30Days } from 'src/util/subscriptions/storage'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -287,6 +288,7 @@ export class SidebarContainerLogic extends UILogic<
             showAISuggestionsDropDown: false,
             showAICounter: false,
             AIsuggestions: [],
+            isTrial: false,
         }
     }
 
@@ -499,6 +501,15 @@ export class SidebarContainerLogic extends UILogic<
                 })
             }, 1000)
         }
+
+        const signupDate = new Date(
+            await (await this.options.authBG.getCurrentUser()).creationTime,
+        ).getTime()
+
+        this.emitMutation({
+            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
+            signupDate: { $set: signupDate },
+        })
     }
 
     cleanup = () => {
@@ -1194,6 +1205,18 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    createNewNoteFromAISummary: EventHandler<
+        'createNewNoteFromAISummary'
+    > = async ({ event }) => {
+        this.emitMutation({
+            activeTab: { $set: 'annotations' },
+            commentBox: {
+                commentText: { $set: event.comment },
+            },
+        })
+        this.options.focusCreateForm()
+    }
+
     setNewPageNoteText: EventHandler<'setNewPageNoteText'> = async ({
         event,
     }) => {
@@ -1652,9 +1675,13 @@ export class SidebarContainerLogic extends UILogic<
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
         const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
 
-        let canQueryAI = false
         if (!hasAPIKey) {
-            canQueryAI = await AIActionAllowed(this.options.analyticsBG)
+            let canQueryAI = false
+            if (previousState.isTrial) {
+                canQueryAI = true
+            } else if (await AIActionAllowed(this.options.analyticsBG)) {
+                canQueryAI = true
+            }
             if (!canQueryAI) {
                 this.emitMutation({
                     showUpgradeModal: { $set: true },
@@ -1664,7 +1691,10 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         let queryPrompt = prompt ? prompt : undefined
-        await updateAICounter()
+
+        if (!previousState.isTrial) {
+            await updateAICounter()
+        }
         this.emitMutation({
             selectedTextAIPreview: {
                 $set: highlightedText ? highlightedText : '',

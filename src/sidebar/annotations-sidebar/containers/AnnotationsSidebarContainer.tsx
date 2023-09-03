@@ -598,6 +598,8 @@ export class AnnotationsSidebarContainer<
         <AICounterIndicator
             position={position}
             syncSettingsBG={this.props.syncSettingsBG}
+            isTrial={this.state.isTrial}
+            signupDate={this.state.signupDate}
         />
     )
 
@@ -933,6 +935,12 @@ export class AnnotationsSidebarContainer<
                             onShareAllNotesClick={() =>
                                 this.handleCopyAllNotesClick
                             }
+                            createNewNoteFromAISummary={(summary) => {
+                                this.processEvent(
+                                    'createNewNoteFromAISummary',
+                                    { comment: summary },
+                                )
+                            }}
                             sharingAccess={this.state.annotationSharingAccess}
                             needsWaypoint={!this.state.noResults}
                             appendLoader={

@@ -106,7 +106,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     foreignSelectedListLoadState: TaskState
     selectedTextAIPreview: string
     queryMode: string
-
+    isTrial: boolean
+    signupDate: number
     showState: 'visible' | 'hidden'
     isLocked: boolean
     isWidthLocked: boolean
@@ -228,6 +229,8 @@ interface SidebarEvents {
     removeAISuggestion: { suggestion: string }
     navigateFocusInList: { direction: 'up' | 'down' }
     setSpaceTitleEditValue: { value: string }
+
+    createNewNoteFromAISummary: { comment: string }
 
     setActiveSidebarTab: {
         tab: SidebarTab

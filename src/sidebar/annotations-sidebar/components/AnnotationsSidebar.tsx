@@ -195,6 +195,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         newName: string,
     ) => void
     setSpaceTitleEditValue: (value) => void
+    createNewNoteFromAISummary: (summary) => void
 }
 
 interface AnnotationsSidebarState {
@@ -463,9 +464,9 @@ export class AnnotationsSidebar extends React.Component<
                         )
                         this.setState({ autoFocusCreateForm: false })
                     }}
-                    onCancel={() =>
+                    onCancel={() => {
                         this.setState({ autoFocusCreateForm: false })
-                    }
+                    }}
                     ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
@@ -1461,14 +1462,8 @@ export class AnnotationsSidebar extends React.Component<
                                 'Type a prompt like "Summarize in 2 paragraphs"'
                             }
                             value={this.props.prompt}
-                            icon={
-                                !this.props.showAICounter ? 'openAIicon' : null
-                            }
-                            element={
-                                this.props.showAICounter
-                                    ? this.props.renderAICounter('top')
-                                    : null
-                            }
+                            icon="feed"
+                            element={null}
                             iconSize="18px"
                             onChange={async (event) => {
                                 await this.props.updatePromptState(
@@ -1519,77 +1514,109 @@ export class AnnotationsSidebar extends React.Component<
                     </QueryContainer>
                     {!this.props.selectedTextAIPreview && (
                         <OptionsContainer>
-                            Mode
-                            <TooltipBox
-                                tooltipText={
-                                    <>
-                                        Just takes the first few paragraphs or
-                                        roughly the first video 10minutes for
-                                        the summary. Much faster.
-                                    </>
-                                }
-                                placement="bottom"
-                                width="150px"
-                            >
-                                <SelectionPill
-                                    onClick={async () => {
-                                        this.props.setQueryMode('glanceSummary')
-                                        await this.props.queryAIwithPrompt(
-                                            this.props.prompt,
-                                        )
-                                    }}
-                                    selected={
-                                        this.props.queryMode === 'glanceSummary'
+                            <OptionsContainerLeft>
+                                <TooltipBox
+                                    tooltipText={
+                                        <>
+                                            Just takes the first few paragraphs
+                                            or roughly the first 10 minutes of a
+                                            video for the summary. Much faster.
+                                        </>
                                     }
+                                    placement="bottom"
+                                    width="150px"
                                 >
-                                    Quick Glance
-                                </SelectionPill>
-                            </TooltipBox>
-                            <TooltipBox
-                                tooltipText={
-                                    <>
-                                        Takes in the whole article or video.
-                                        Much slower.
-                                    </>
-                                }
-                                placement="bottom"
-                                width="150px"
-                            >
-                                <SelectionPill
-                                    onClick={async () => {
-                                        this.props.setQueryMode('summarize')
-                                        await this.props.queryAIwithPrompt(
-                                            this.props.prompt,
-                                        )
-                                    }}
-                                    selected={
-                                        this.props.queryMode === 'summarize'
+                                    <SelectionPill
+                                        onClick={async () => {
+                                            this.props.setQueryMode(
+                                                'glanceSummary',
+                                            )
+                                            await this.props.queryAIwithPrompt(
+                                                this.props.prompt,
+                                            )
+                                        }}
+                                        selected={
+                                            this.props.queryMode ===
+                                            'glanceSummary'
+                                        }
+                                    >
+                                        Quick Glance
+                                    </SelectionPill>
+                                </TooltipBox>
+                                <TooltipBox
+                                    tooltipText={
+                                        <>
+                                            Takes in the whole article or video.
+                                            Much slower.
+                                        </>
                                     }
+                                    placement="bottom"
+                                    width="150px"
                                 >
-                                    Full Page
-                                </SelectionPill>
-                            </TooltipBox>
-                            <TooltipBox
-                                tooltipText={
-                                    <>
-                                        This mode is ideal for general questions{' '}
-                                        that are not specific to this page
-                                    </>
-                                }
-                                placement="bottom"
-                                width="150px"
-                            >
-                                <SelectionPill
-                                    onClick={() =>
-                                        this.props.setQueryMode('question')
+                                    <SelectionPill
+                                        onClick={async () => {
+                                            this.props.setQueryMode('summarize')
+                                            await this.props.queryAIwithPrompt(
+                                                this.props.prompt,
+                                            )
+                                        }}
+                                        selected={
+                                            this.props.queryMode === 'summarize'
+                                        }
+                                    >
+                                        Full Page
+                                    </SelectionPill>
+                                </TooltipBox>
+                                <TooltipBox
+                                    tooltipText={
+                                        <>
+                                            This mode is ideal for general
+                                            questions that are not specific to
+                                            this page
+                                        </>
                                     }
-                                    selected={
-                                        this.props.queryMode === 'question'
-                                    }
+                                    placement="bottom"
+                                    width="150px"
                                 >
-                                    General Question
-                                </SelectionPill>
-                            </TooltipBox>
+                                    <SelectionPill
+                                        onClick={() =>
+                                            this.props.setQueryMode('question')
+                                        }
+                                        selected={
+                                            this.props.queryMode === 'question'
+                                        }
+                                    >
+                                        General Question
+                                    </SelectionPill>
+                                </TooltipBox>
+                            </OptionsContainerLeft>
+                            <OptionsContainerRight>
+                                {this.props.pageSummary.length > 0 && (
+                                    <TooltipBox
+                                        tooltipText={
+                                            <>
+                                                Create new note <br /> from
+                                                output
+                                            </>
+                                        }
+                                        placement="bottom-end"
+                                    >
+                                        <Icon
+                                            icon={'commentAdd'}
+                                            onClick={() => {
+                                                let summary = `# AI Summary\n\n ## Prompt:\n  ${this.props.prompt}\n\n ## Answer: \n ${this.props.pageSummary}`
+
+                                                this.props.createNewNoteFromAISummary(
+                                                    this.props.pageSummary,
+                                                )
+                                            }}
+                                            heightAndWidth="22px"
+                                            color="prime1"
+                                        />
+                                    </TooltipBox>
+                                )}
+                                {this.props.renderAICounter('top')}
+                            </OptionsContainerRight>
                         </OptionsContainer>
                     )}
                     {this.props.loadState === 'running' ? (
@@ -2507,6 +2534,13 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const OptionsContainerRight = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    grid-gap: 10px;
+`
+
 const AIContainerNotif = styled.div`
     display: flex;
     align-items: center;
@@ -2558,9 +2592,17 @@ const RightSideButtonsTopBar = styled.div`
 const OptionsContainer = styled.div`
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding: 0 15px 10px 15px;
+    z-index: 100;
+    height: 24px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
+`
+const OptionsContainerLeft = styled.div`
+    display: flex;
+    align-items: center;
     justify-content: flex-start;
     color: ${(props) => props.theme.colors.greyScale4};
-    padding: 0 10px 10px 20px;
     font-size: 12px;
     grid-gap: 10px;
     z-index: 100;
@@ -2672,7 +2714,7 @@ const QueryContainer = styled.div<{
     AIDropDownShown: boolean
 }>`
     height: 40px;
-    padding: 15px;
+    padding: 15px 15px 10px 15px;
     display: flex;
     flex-direction: column;
     z-index: 101;
@@ -2783,6 +2825,7 @@ const SummaryContainer = styled.div`
     min-height: 60px;
     height: 100%;
     overflow: scroll;
+    padding-top: 10px;
 `
 
 const SummaryFooter = styled.div`

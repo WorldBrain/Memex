@@ -13,12 +13,10 @@ if (window.location.href.includes('memex.garden')) {
 
     let checkCondition = async function () {
         if (tries >= maxTries) {
-            console.log('new try')
             clearInterval(checkInterval)
             return
         }
         if (document.getElementById('___gatsby')) {
-            console.log('aftercheck')
             await contentScriptsBG.reloadTab({ bypassCache: true })
             // Clear the interval once the condition is met to stop further checking.
             clearInterval(checkInterval)
@@ -28,7 +26,6 @@ if (window.location.href.includes('memex.garden')) {
         if (document.getElementById('main')) {
             clearInterval(checkInterval)
         }
-        console.log('newtry')
         tries++
     }
 

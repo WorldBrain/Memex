@@ -14,7 +14,10 @@ import { FocusableComponent } from 'src/annotations/components/types'
 import { Analytics } from 'src/analytics'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import browser, { Storage } from 'webextension-polyfill'
-import { pageActionAllowed } from 'src/util/subscriptions/storage'
+import {
+    enforceTrialPeriod30Days,
+    pageActionAllowed,
+} from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
@@ -62,6 +65,8 @@ export interface RibbonContainerState {
     search: ValuesOf<componentTypes.RibbonSearchProps>
     pausing: ValuesOf<componentTypes.RibbonPausingProps>
     hasFeedActivity: boolean
+    isTrial: boolean
+    signupDate: number
 }
 
 export type RibbonContainerEvents = UIEvent<
@@ -182,6 +187,7 @@ export class RibbonContainerLogic extends UILogic<
 
     init: EventHandler<'init'> = async (incoming) => {
         const { getFullPageUrl } = this.dependencies
+
         await loadInitial<RibbonContainerState>(this, async () => {
             let fullPageUrl = await getFullPageUrl()
 
@@ -224,7 +230,24 @@ export class RibbonContainerLogic extends UILogic<
         // await this.hydrateStateFromDB({
         //     ...incoming,
         //     event: { url: fullPageUrl },
-        // })
+        // }
+
+        try {
+            const signupDate = new Date(
+                await (await this.dependencies.authBG.getCurrentUser())
+                    .creationTime,
+            ).getTime()
+            const isTrial = (await enforceTrialPeriod30Days(signupDate)) ?? null
+
+            if (isTrial) {
+                this.emitMutation({
+                    isTrial: { $set: isTrial },
+                    signupDate: { $set: signupDate },
+                })
+            }
+        } catch (error) {
+            console.error('error in updatePageCounter', error)
+        }
     }
 
     async initReadingViewListeners() {

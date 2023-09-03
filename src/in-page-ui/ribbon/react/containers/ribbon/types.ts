@@ -43,4 +43,6 @@ export interface RibbonContainerDependencies {
     >
     currentUser?: UserReference
     openPDFinViewer: (url: string) => Promise<void>
+    isTrial: boolean
+    signupDate: number
 }

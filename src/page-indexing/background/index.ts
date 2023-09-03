@@ -55,9 +55,15 @@ import {
 } from '../../util/webextensionRPC'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import { isUrlSupported } from '../utils'
-import { updatePageCounter } from 'src/util/subscriptions/storage'
+import {
+    enforceTrialPeriod30Days,
+    updatePageCounter,
+} from 'src/util/subscriptions/storage'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { AuthBackground } from 'src/authentication/background'
+import { AuthServices } from 'src/services/types'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -90,6 +96,7 @@ export class PageIndexingBackground {
 
     constructor(
         public options: {
+            authBG: AuthRemoteFunctionsInterface
             tabManagement: TabManagementBackground
             storageManager: StorageManager
             persistentStorageManager: StorageManager
@@ -559,7 +566,6 @@ export class PageIndexingBackground {
                 delete props.tabId
             }
         }
-        console.log('Indexing page: ', props.fullUrl)
 
         let pageData = await (props.tabId != null
             ? this.processPageDataFromTab(props)
@@ -569,8 +575,6 @@ export class PageIndexingBackground {
             return { fullUrl: pageData.fullUrl }
         }
 
-        console.log('pageData: ', pageData)
-
         // Override title with in-page CS derived title for telegram pages - TODO: Move this somewhere else
         if (
             (props.fullUrl.includes('web.telegram.org/') ||
@@ -579,19 +583,7 @@ export class PageIndexingBackground {
             props.metaData.pageTitle
         ) {
             pageData.fullTitle = props.metaData.pageTitle
-            console.log(
-                'pageData.fullTitle: ',
-                pageData.fullTitle,
-                props.metaData.pageTitle,
-            )
         }
-
-        console.log(
-            'Indexing page: ',
-            props.fullUrl,
-            pageData.fullUrl,
-            pageData.fullTitle,
-        )
 
         await this.createOrUpdatePage(pageData, opts)
 
@@ -606,7 +598,18 @@ export class PageIndexingBackground {
             // })
         }
 
-        await updatePageCounter()
+        try {
+            const signupDate = new Date(
+                await (await this.options.authBG.getCurrentUser()).creationTime,
+            ).getTime()
+            const isTrial = await enforceTrialPeriod30Days(signupDate)
+
+            if (!isTrial) {
+                await updatePageCounter()
+            }
+        } catch (error) {
+            console.error('error in updatePageCounter', error)
+        }
         // Note that we're returning URLs as they could have changed in the case of PDFs
         return {
             fullUrl: pageData.fullUrl,

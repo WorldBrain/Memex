@@ -62,6 +62,8 @@ export interface Props extends RibbonSubcomponentProps {
     selectRibbonPositionOption: (option) => void
     hasFeedActivity: boolean
     analyticsBG: AnalyticsCoreInterface
+    isTrial: boolean
+    signupDate?: number
 }
 
 interface State {
@@ -1648,6 +1650,10 @@ export default class Ribbon extends Component<Props, State> {
                                                     this.props.sidebar
                                                         .isSidebarOpen
                                                 }
+                                                isTrial={this.props.isTrial}
+                                                signupDate={
+                                                    this.props.signupDate
+                                                }
                                             />
                                             {this.renderTutorialButton()}
                                         </BottomSection>
@@ -1811,6 +1817,8 @@ export default class Ribbon extends Component<Props, State> {
                                         isSidebarOpen={
                                             this.props.sidebar.isSidebarOpen
                                         }
+                                        isTrial={this.props.isTrial}
+                                        signupDate={this.props.signupDate}
                                     />
                                     {this.renderTutorialButton()}
                                     {this.renderCloseRibbonButton()}
