@@ -17,6 +17,7 @@ export interface ContentScriptRegistry {
     registerHighlightingScript(main: HighlightsScriptMain): Promise<void>
     registerTooltipScript(main: TooltipScriptMain): Promise<void>
     registerSearchInjectionScript(main: SearchInjectionMain): Promise<void>
+    registerYoutubeInjectionScript(main: YoutubeInjectionMain): Promise<void>
 }
 
 export type SidebarScriptMain = (
@@ -51,6 +52,10 @@ export interface SearchInjectionDependencies {
     syncSettingsBG: RemoteSyncSettingsInterface
 }
 
+export interface SearchInjectionDependencies {
+    requestSearcher: any
+}
+
 export type HighlightsScriptMain = (
     options: HighlightDependencies,
 ) => Promise<void>
@@ -60,6 +65,10 @@ export type TooltipScriptMain = (
 ) => Promise<void>
 
 export type SearchInjectionMain = (
+    dependencies: SearchInjectionDependencies,
+) => Promise<void>
+
+export type YoutubeInjectionMain = (
     dependencies: SearchInjectionDependencies,
 ) => Promise<void>
 

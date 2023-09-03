@@ -38,6 +38,7 @@ import type { Storage, Runtime } from 'webextension-polyfill'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { RefObject } from 'react'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -181,6 +182,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
 
     annotCount?: number
     showLengthError?: boolean
+    youtubeTranscriptSummary?: string
+    youtubeTranscriptSummaryloadState: TaskState
 
     // Search result props
     shouldShowCount: boolean
@@ -210,6 +213,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
      * sidebar loads. This state signifies that condition.
      */
     hasListDataBeenManuallyPulled?: boolean
+    annotationCreateEditorRef?: any
 }
 
 export type AnnotationEvent<T> = {
@@ -234,6 +238,10 @@ interface SidebarEvents {
     navigateFocusInList: { direction: 'up' | 'down' }
     setSpaceTitleEditValue: { value: string }
     setSharingTutorialVisibility: null
+    getAnnotationEditorIntoState: { ref: any }
+    createYoutubeTimestampWithAISummary: {
+        timeStampANDSummaryJSON: string[]
+    }
 
     createNewNoteFromAISummary: { comment: string }
 

@@ -819,6 +819,12 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
+                            passUpEditorRef={(ref) =>
+                                this.processEvent(
+                                    'getAnnotationEditorIntoState',
+                                    { ref },
+                                )
+                            }
                             setSpacePickerAnnotationInstance={(state) =>
                                 this.processEvent(
                                     'setSpacePickerAnnotationInstance',

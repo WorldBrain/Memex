@@ -202,6 +202,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     setSpaceTitleEditValue: (value) => void
     createNewNoteFromAISummary: (summary) => void
     showSharePageTooltip: boolean
+    passUpEditorRef: (ref) => void
 }
 
 interface AnnotationsSidebarState {
@@ -247,6 +248,7 @@ export class AnnotationsSidebar extends React.Component<
     private spaceUnfoldButtonRef: {
         [unifiedListId: string]: React.RefObject<HTMLDivElement>
     } = {}
+    private editorPassedUp = false
 
     state: AnnotationsSidebarState = {
         searchText: '',
@@ -312,6 +314,10 @@ export class AnnotationsSidebar extends React.Component<
     ) {
         if (prevProps.pageSummary != this.props.pageSummary) {
             this.pageSummaryText.current.scrollTop = this.pageSummaryText.current.scrollHeight
+        }
+        if (this.annotationCreateRef.current != null && !this.editorPassedUp) {
+            this.editorPassedUp = true
+            this.props.passUpEditorRef(this.annotationCreateRef.current)
         }
     }
 
@@ -477,6 +483,9 @@ export class AnnotationsSidebar extends React.Component<
                     ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
+                    youtubeTranscriptSummary={
+                        this.props.youtubeTranscriptSummary
+                    }
                 />
             </NewAnnotationSection>
         )

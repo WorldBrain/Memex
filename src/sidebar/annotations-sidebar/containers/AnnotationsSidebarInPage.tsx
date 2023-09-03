@@ -330,6 +330,13 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 unifiedListId: unifiedListId,
             })
             return true
+        } else if (
+            event.action === 'create_youtube_timestamp_with_AI_summary'
+        ) {
+            this.processEvent('createYoutubeTimestampWithAISummary', {
+                timeStampANDSummaryJSON: event.timeStampANDSummaryJSON,
+            })
+            return true
         }
 
         this.forceUpdate()
