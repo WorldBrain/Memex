@@ -37,6 +37,7 @@ import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/co
 import { logoNoText } from 'src/common-ui/components/design-library/icons'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { UnifiedList } from 'src/annotations/cache/types'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -288,6 +289,9 @@ export default class Ribbon extends Component<Props, State> {
                     }
                     closePicker={this.hideListPicker}
                     onListShare={this.props.onListShare}
+                    onListFocus={(listId: UnifiedList['localId']) => {
+                        this.props.sidebar.handleSidebarOpenInFocusMode(listId)
+                    }}
                 />
             </PopoutBox>
         )

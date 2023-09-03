@@ -7,7 +7,10 @@ import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
-import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import type {
+    PageAnnotationsCacheInterface,
+    UnifiedList,
+} from 'src/annotations/cache/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 
@@ -46,6 +49,7 @@ export interface RibbonTooltipProps {
 export interface RibbonSidebarProps {
     isSidebarOpen: boolean
     openSidebar: (args: any) => void
+    handleSidebarOpenInFocusMode: (listId: UnifiedList['localId']) => void
     sharePage: () => void
     closeSidebar: () => void
     setShowSidebarCommentBox: (value: boolean) => void

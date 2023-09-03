@@ -1,6 +1,10 @@
 import browser from 'webextension-polyfill'
 import { createAction } from 'redux-act'
-import { remoteFunction, runInBackground } from '../util/webextensionRPC'
+import {
+    remoteFunction,
+    runInBackground,
+    runInTabViaBg,
+} from '../util/webextensionRPC'
 import type { Thunk } from './types'
 import { getCurrentTab } from './utils'
 import { acts as bookmarkActs } from './bookmark-button'
@@ -8,6 +12,8 @@ import { acts as collectionActs } from './collections-button'
 import type { BookmarksInterface } from 'src/bookmarks/background/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { isUrlSupported } from 'src/page-indexing/utils'
+import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import * as popup from './selectors'
 
 const fetchPageTagsRPC = remoteFunction('fetchPageTags')
 const fetchListsRPC = remoteFunction('fetchListPagesByUrl')
@@ -17,6 +23,7 @@ const fetchInitTagSuggRPC = remoteFunction('extendedSuggest')
 const bookmarks = runInBackground<BookmarksInterface>()
 
 export const setTabId = createAction<number>('popup/setTabId')
+export const openSidebar = createAction<number>('popup/openSidebar')
 export const setUrl = createAction<string>('popup/setUrl')
 export const setSearchVal = createAction<string>('popup/setSearchVal')
 
@@ -25,6 +32,16 @@ const setTabAndUrl: (id: number, url: string) => Thunk = (id, url) => async (
 ) => {
     await dispatch(setTabId(id))
     await dispatch(setUrl(url))
+}
+
+export const openSideBar: () => Thunk = () => async (dispatch, getState) => {
+    const state = getState()
+
+    const tabId = popup.tabId(state)
+
+    await runInTabViaBg<InPageUIContentScriptRemoteInterface>(
+        tabId,
+    ).showSidebar()
 }
 
 const setTabIsBookmarked: (pageUrl: string) => Thunk = (pageUrl) => async (

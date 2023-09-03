@@ -36,6 +36,7 @@ import type { UnifiedList } from 'src/annotations/cache/types'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
+    onListFocus?: (listId: UnifiedList['localId']) => void
 }
 
 class SpacePicker extends StatefulUIElement<
@@ -230,6 +231,7 @@ class SpacePicker extends StatefulUIElement<
                         analyticsBG: this.props.analyticsBG,
                     })
                 }}
+                onListFocus={() => this.props.onListFocus(entry.localId)}
                 addedToAllIds={this.state.addedToAllIds}
                 keepScrollPosition={this.keepScrollPosition}
                 onPressActOnAll={

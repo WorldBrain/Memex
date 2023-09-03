@@ -24,6 +24,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     keyboardNavActive?: boolean
     keepScrollPosition?: () => void
     addedToAllIds?: number[]
+    onListFocus?: (listId) => void
 }
 
 class EntryRow extends React.Component<Props> {
@@ -49,17 +50,23 @@ class EntryRow extends React.Component<Props> {
     }
 
     private handleResultPress: React.MouseEventHandler = (e) => {
-        if (this.props.contextMenuBtnRef?.current.contains(e.target as Node)) {
-            return
+        if (!e.shiftKey) {
+            if (
+                this.props.contextMenuBtnRef?.current.contains(e.target as Node)
+            ) {
+                return
+            }
+            if (
+                this.props.onPressActOnAll &&
+                this.pressAllButtonRef != null &&
+                this.pressAllButtonRef?.current.contains(e.target as Node)
+            ) {
+                return
+            }
+            this.props.onPress()
+        } else {
+            this.props.onListFocus(this.props.id)
         }
-        if (
-            this.props.onPressActOnAll &&
-            this.pressAllButtonRef != null &&
-            this.pressAllButtonRef?.current.contains(e.target as Node)
-        ) {
-            return
-        }
-        this.props.onPress()
 
         this.setState({ checkBoxHover: false })
         this.props.keepScrollPosition()

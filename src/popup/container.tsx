@@ -41,6 +41,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { UnifiedList } from 'src/annotations/cache/types'
 
 export interface OwnProps {
     analyticsBG: AnalyticsCoreInterface
@@ -59,6 +60,7 @@ interface DispatchProps {
     toggleShowCollectionsPicker: () => void
     onCollectionAdd: (collection: string) => void
     onCollectionDel: (collection: string) => void
+    openSidebar: (listId) => void
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
@@ -297,6 +299,9 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                         shouldHydrateCacheOnInit
                         context={'popup'}
                         analyticsBG={this.state.analyticsBG}
+                        onListFocus={(listId: UnifiedList['localId']) => {
+                            this.props.openSidebar(listId)
+                        }}
                     />
                 </SpacePickerContainer>
             )
@@ -538,6 +543,10 @@ const mapDispatch = (dispatch): DispatchProps => ({
         e.preventDefault()
         const input = e.target as HTMLInputElement
         dispatch(acts.setSearchVal(input.value))
+    },
+    openSidebar: async (e, listId) => {
+        e.preventDefault()
+        await dispatch(acts.openSidebar(listId))
     },
     toggleShowCollectionsPicker: () =>
         dispatch(collectionActs.toggleShowTagsPicker()),

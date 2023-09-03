@@ -298,6 +298,7 @@ export class SidebarContainerLogic extends UILogic<
             showSharePageTooltip: false,
             firstTimeSharingPageLink: false,
             selectedListForShareMenu: null,
+            renameListErrorMessage: null,
         }
     }
 

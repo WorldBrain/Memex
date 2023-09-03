@@ -45,7 +45,10 @@ import {
     SELECT_SPACE_NEGATIVE_LABEL,
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
-import type { UnifiedAnnotation } from 'src/annotations/cache/types'
+import type {
+    UnifiedAnnotation,
+    UnifiedList,
+} from 'src/annotations/cache/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import * as cacheUtils from 'src/annotations/cache/utils'
@@ -357,6 +360,13 @@ export class AnnotationsSidebarContainer<
                     normalizedPageUrlToFilterPageLinksBy={normalizeUrl(
                         this.state.fullPageUrl,
                     )}
+                    onListFocus={(listId: UnifiedList['localId']) => {
+                        const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
+                            listId,
+                        ).unifiedId
+
+                        this.processEvent('setSelectedList', { unifiedListId })
+                    }}
                 />
             ),
             getListDetailsById: this.getListDetailsById,
@@ -472,6 +482,14 @@ export class AnnotationsSidebarContainer<
                     showExternalConfirmations: true,
                 })}
                 closePicker={closePicker}
+                onListFocus={(listId: UnifiedList['localId']) => {
+                    const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
+                        listId,
+                    ).unifiedId
+
+                    this.processEvent('setSelectedList', { unifiedListId })
+                    closePicker()
+                }}
             />
         )
     }

@@ -23,7 +23,10 @@ import type {
 import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
-import type { UnifiedAnnotation } from 'src/annotations/cache/types'
+import type {
+    UnifiedAnnotation,
+    UnifiedList,
+} from 'src/annotations/cache/types'
 import { ANNOT_BOX_ID_PREFIX } from '../constants'
 import browser from 'webextension-polyfill'
 import { sleepPromise } from 'src/util/promises'
@@ -232,6 +235,8 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             this.props.inPageUI.cacheLoadPromise,
         ])
 
+        console.log('executed', event.action)
+
         if (event.action === 'comment') {
             await this.processEvent('setActiveSidebarTab', {
                 tab:
@@ -315,6 +320,15 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
             this.sidebarRef.current?.addYoutubeTimestampToEditor()
         } else if (event.action === 'check_sidebar_status') {
+            return true
+        } else if (event.action === 'set_focus_mode') {
+            const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
+                event.listId,
+            ).unifiedId
+
+            this.processEvent('setSelectedList', {
+                unifiedListId: unifiedListId,
+            })
             return true
         }
 

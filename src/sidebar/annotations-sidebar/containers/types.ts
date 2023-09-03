@@ -118,6 +118,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
 
     activeTab: SidebarTab
     pillVisibility: string
+    renameListErrorMessage: string | null
 
     sidebarWidth?: string
     spaceTitleEditValue?: string
