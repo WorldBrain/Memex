@@ -516,6 +516,13 @@ export async function main(
             })
             inPageUI.hideTooltip()
         },
+        createTimestampWithAISummary: async () => {
+            inPageUI.showSidebar({
+                action: 'create_youtube_timestamp_with_AI_summary',
+                timeStampANDSummaryJSON: await getTimestampedNoteWithAIsummaryForYoutubeNotes(),
+            })
+            inPageUI.hideTooltip()
+        },
     }
 
     // if (window.location.hostname === 'www.youtube.com') {
@@ -1526,10 +1533,65 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
     observer.observe(document, config)
 }
 
-export function getTimestampNoteContentForYoutubeNotes() {
+export async function getTimestampedNoteWithAIsummaryForYoutubeNotes() {
+    const videoId = new URL(window.location.href).searchParams.get('v')
+    const isStaging =
+        process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+        process.env.NODE_ENV === 'development'
+
+    const baseUrl = isStaging
+        ? 'https://cloudflare-memex-staging.memex.workers.dev'
+        : 'https://cloudfare-memex.memex.workers.dev'
+
+    const normalisedYoutubeURL = 'https://www.youtube.com/watch?v=' + videoId
+
+    const response = await fetch(baseUrl + '/youtube-transcripts', {
+        method: 'POST',
+        body: JSON.stringify({
+            originalUrl: normalisedYoutubeURL,
+            getRawTranscript: true,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+    })
+
+    let responseContent = await response.text()
+
+    const transcriptJSON = JSON.parse(responseContent).transcriptText
+
+    const [startTimeURL, humanTimestamp] = getHTML5VideoTimestamp(60)
+    const [endTimeURL] = getHTML5VideoTimestamp(0)
+
+    const startTimeSecs = parseFloat(
+        new URL(startTimeURL).searchParams.get('t'),
+    )
+    const endTimeSecs = parseFloat(new URL(endTimeURL).searchParams.get('t'))
+
+    console.log('start', startTimeSecs, 'end', endTimeSecs)
+    const videoTimeStampForComment = `[${humanTimestamp}](${startTimeURL})`
+
+    console.log('transcriptJSON', transcriptJSON)
+
+    const relevantTranscriptItems = transcriptJSON.filter((item) => {
+        const flooredStart = Math.floor(item.start)
+        const flooredEnd = Math.floor(item.end)
+
+        return (
+            (flooredStart >= startTimeSecs && flooredStart <= endTimeSecs) ||
+            (flooredEnd >= startTimeSecs && flooredEnd <= endTimeSecs)
+        )
+    })
+
+    console.log(relevantTranscriptItems)
+
+    return [videoTimeStampForComment, JSON.stringify(relevantTranscriptItems)]
+}
+
+export function getTimestampNoteContentForYoutubeNotes(jumpBackinSec?: number) {
     let videoTimeStampForComment: string | null
 
-    const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
+    const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp(
+        jumpBackinSec,
+    )
 
     if (videoURLWithTime != null) {
         videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`
@@ -1592,7 +1654,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     const annotateButton = document.createElement('div')
     annotateButton.setAttribute('class', 'ytp-menuitem')
     annotateButton.onclick = () =>
-        annotationsFunctions.createAnnotation()(
+        annotationsFunctions.createTimestampWithAISummary()(
             false,
             false,
             false,
@@ -1613,6 +1675,21 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     summarizeButton.style.cursor = 'pointer'
     summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
 
+    // AI timestamp Button
+    const AItimeStampButton = document.createElement('div')
+    AItimeStampButton.setAttribute('class', 'ytp-menuitem')
+    AItimeStampButton.onclick = () =>
+        annotationsFunctions.createTimestampWithAISummary()(
+            false,
+            false,
+            false,
+            getTimestampNoteContentForYoutubeNotes(),
+        )
+    AItimeStampButton.style.display = 'flex'
+    AItimeStampButton.style.alignItems = 'center'
+    AItimeStampButton.style.cursor = 'pointer'
+    AItimeStampButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">AI Timestamp</div>`
+
     // MemexIconDisplay
     const memexIcon = runtime.getURL('/img/memex-icon.svg')
     const memexIconEl = document.createElement('img')
@@ -1629,6 +1706,17 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     timeStampEl.style.margin = '0 10px 0 10px'
     annotateButton.insertBefore(timeStampEl, annotateButton.firstChild)
 
+    // AI timestamp icon
+    const AItimestampIcon = runtime.getURL('/img/feed.svg')
+    const AItimestampIconEl = document.createElement('img')
+    AItimestampIconEl.src = AItimestampIcon
+    AItimestampIconEl.style.height = '20px'
+    AItimestampIconEl.style.margin = '0 10px 0 10px'
+    AItimeStampButton.insertBefore(
+        AItimestampIconEl,
+        AItimeStampButton.firstChild,
+    )
+
     // SummarizeIcon
     const summarizeIcon = runtime.getURL(
         '/img/summarizeIconForYoutubeInjection.svg',
@@ -1641,6 +1729,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
 
     // Appending the right buttons
     memexButtons.appendChild(annotateButton)
+    memexButtons.appendChild(AItimeStampButton)
     memexButtons.appendChild(summarizeButton)
     memexButtons.style.color = '#f4f4f4'
     memexButtons.style.width = 'fit-content'

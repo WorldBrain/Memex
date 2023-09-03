@@ -93,6 +93,10 @@ import {
     SpacePickerEvent,
 } from 'src/custom-lists/ui/CollectionPicker/types'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
+import {
+    getAnnotationVideoLink,
+    getVideoLinkInfo,
+} from '@worldbrain/memex-common/lib/editor/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -148,6 +152,8 @@ export class SidebarContainerLogic extends UILogic<
     AIpromptSuggestions: { prompt: string; focused: boolean | null }[]
     // NOTE: this mirrors the state key of the same name. Only really exists as the cache's `updatedPageData` event listener can't access state :/
     private fullPageUrl: string
+    private youtubeTranscriptSummary: string = ''
+    private editor = null
 
     constructor(private options: SidebarLogicOptions) {
         super()
@@ -398,7 +404,24 @@ export class SidebarContainerLogic extends UILogic<
             })
         })
         this.summarisePageEvents.on('startSummaryStream', () => {
-            this.emitMutation({ pageSummary: { $set: '' } })
+            this.emitMutation({
+                pageSummary: { $set: '' },
+            })
+        })
+
+        this.summarisePageEvents.on('newSummaryTokenEditor', ({ token }) => {
+            let newToken = token
+            if (isPageSummaryEmpty) {
+                newToken = newToken.trimStart() // Remove the first two characters
+            }
+            isPageSummaryEmpty = false
+            this.youtubeTranscriptSummary =
+                this.youtubeTranscriptSummary + newToken
+            this.emitMutation({
+                youtubeTranscriptSummaryloadState: { $set: 'success' },
+                youtubeTranscriptSummary: { $apply: (prev) => prev + newToken },
+            })
+            this.editor.addYoutubeTimestampWithText(newToken)
         })
     }
 
@@ -856,6 +879,16 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         await this.options.copyToClipboard(link)
+    }
+
+    getAnnotationEditorIntoState: EventHandler<
+        'getAnnotationEditorIntoState'
+    > = (event) => {
+        const editorRef = event
+
+        this.emitMutation({
+            annotationCreateEditorRef: { $set: editorRef },
+        })
     }
 
     openWebUIPageForSpace: EventHandler<'openWebUIPageForSpace'> = async ({
@@ -1753,6 +1786,7 @@ export class SidebarContainerLogic extends UILogic<
         shortSummary?: boolean,
         previousState?: SidebarContainerState,
         textAsAlternative?: string,
+        outputLocation?: 'editor' | 'summaryContainer' | null,
     ) {
         const isPagePDF =
             fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
@@ -1789,7 +1823,9 @@ export class SidebarContainerLogic extends UILogic<
             selectedTextAIPreview: {
                 $set: highlightedText ? highlightedText : '',
             },
-            loadState: { $set: 'running' },
+            loadState: {
+                $set: outputLocation != 'editor' ? 'running' : 'pristine',
+            },
             prompt: { $set: queryPrompt },
             showAICounter: { $set: true },
         })
@@ -1815,7 +1851,9 @@ export class SidebarContainerLogic extends UILogic<
             ? highlightedText
             : undefined
 
-        await this.options.summarizeBG.startPageSummaryStream({
+        console.log('outputLocation1', outputLocation)
+
+        const response = await this.options.summarizeBG.startPageSummaryStream({
             fullPageUrl: isPagePDF
                 ? undefined
                 : fullPageUrl && fullPageUrl
@@ -1825,8 +1863,15 @@ export class SidebarContainerLogic extends UILogic<
             queryPrompt: queryPrompt,
             apiKey: openAIKey ? openAIKey : undefined,
             shortSummary: shortSummary,
+            outputLocation: outputLocation ?? null,
         })
+
+        console.log('response', response)
+
+        return response
     }
+
+    async executeAIquery() {}
 
     removeAISuggestion: EventHandler<'removeAISuggestion'> = async ({
         event,
@@ -2416,6 +2461,50 @@ export class SidebarContainerLogic extends UILogic<
         return nextState
     }
 
+    createYoutubeTimestampWithAISummary: EventHandler<
+        'createYoutubeTimestampWithAISummary'
+    > = async ({ previousState, event }) => {
+        this.emitMutation({
+            loadState: { $set: 'success' },
+            activeTab: { $set: 'annotations' },
+        })
+        this.options.focusCreateForm()
+        this.emitMutation({
+            commentBox: {
+                commentText: { $set: '' },
+            },
+        })
+        const timestampToInsert = event.timeStampANDSummaryJSON[0]
+        previousState.annotationCreateEditorRef.event.ref.editor.addYoutubeTimestampWithText(
+            timestampToInsert + ' ',
+        )
+
+        const filteredSegments = JSON.parse(event.timeStampANDSummaryJSON[1])
+
+        console.log('filteredSegments', filteredSegments)
+
+        const combinedText = filteredSegments.map((item) => item.text).join(' ')
+
+        const prompt =
+            'The following is an excerpt from an auto-generated youtube transcript. It may contain errors. Please correct and output it as much as possible in its original form: '
+
+        console.log('timestampToInsert', combinedText)
+
+        this.editor = previousState.annotationCreateEditorRef.event.ref.editor
+
+        await this.queryAI(
+            undefined,
+            combinedText,
+            prompt,
+            undefined,
+            previousState,
+            null,
+            'editor',
+        )
+
+        let newSummary = this.youtubeTranscriptSummary ?? ''
+    }
+
     setSelectedList: EventHandler<'setSelectedList'> = async ({
         event,
         previousState,
@@ -2438,6 +2527,8 @@ export class SidebarContainerLogic extends UILogic<
             previousState,
             event.unifiedListId,
         )
+
+        this.emitMutation({})
     }
 
     setSelectedListFromWebUI: EventHandler<
