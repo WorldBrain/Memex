@@ -88,6 +88,11 @@ import {
 } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { enforceTrialPeriod30Days } from 'src/util/subscriptions/storage'
+import {
+    SpacePickerDependencies,
+    SpacePickerEvent,
+} from 'src/custom-lists/ui/CollectionPicker/types'
+import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -290,6 +295,7 @@ export class SidebarContainerLogic extends UILogic<
             AIsuggestions: [],
             isTrial: false,
             signupDate: null,
+            showSharePageTooltip: false,
         }
     }
 
@@ -903,10 +909,90 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ activeListContextMenuId: { $set: nextActiveId } })
     }
 
+    openPageListMenuForList: EventHandler<'openPageListMenuForList'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            showSharePageTooltip: { $set: !previousState.showSharePageTooltip },
+        })
+    }
+
+    validateSpaceName(name: string, listIdToSkip?: number) {
+        const validationResult = validateSpaceName(
+            name,
+            normalizedStateToArray(this.options.annotationsCache.lists).map(
+                (entry) => ({
+                    id: entry.localId,
+                    name: entry.name,
+                }),
+            ),
+            { listIdToSkip },
+        )
+
+        this.emitMutation({
+            renameListErrorMessage: {
+                $set:
+                    validationResult.valid === false
+                        ? validationResult.reason
+                        : null,
+            },
+        })
+
+        return validationResult
+    }
+
+    __getListDataByLocalId = (
+        localId: number,
+        { annotationsCache }: Pick<SpacePickerDependencies, 'annotationsCache'>,
+        opts?: {
+            source?: keyof SpacePickerEvent
+            mustBeLocal?: boolean
+        },
+    ): UnifiedList => {
+        const listData = annotationsCache.getListByLocalId(localId)
+        const source = opts?.source ? `for ${opts.source} ` : ''
+
+        if (!listData) {
+            throw new Error(`Specified list data ${source}could not be found`)
+        }
+        if (opts?.mustBeLocal && listData.localId == null) {
+            throw new Error(
+                `Specified list data ${source}could not be found locally`,
+            )
+        }
+        return listData
+    }
+
     editListName: EventHandler<'editListName'> = async ({ event }) => {
+        const newName = event.newName.trim()
+        const listData = this.__getListDataByLocalId(
+            event.localId,
+            this.options,
+            { source: 'renameList', mustBeLocal: true },
+        )
+        if (listData.name === newName) {
+            return
+        }
+        const validationResult = this.validateSpaceName(newName)
+        if (validationResult.valid === false) {
+            this.emitMutation({
+                renameListErrorMessage: {
+                    $set: validationResult.reason,
+                },
+            })
+            return
+        }
+
         this.options.annotationsCache.updateList({
             unifiedId: event.unifiedListId,
-            name: event.newName,
+            name: newName,
+        })
+
+        await this.options.customListsBG.updateListName({
+            id: event.localId,
+            oldName: event.oldName,
+            newName,
         })
     }
 
@@ -2643,6 +2729,7 @@ export class SidebarContainerLogic extends UILogic<
 
     createPageLink: EventHandler<'createPageLink'> = async ({
         previousState,
+        event,
     }) => {
         const fullPageUrl = previousState.fullPageUrl
 
@@ -2660,6 +2747,28 @@ export class SidebarContainerLogic extends UILogic<
 
         if (window.location.href.includes('web.telegram.org')) {
             title = getTelegramUserDisplayName(document, window.location.href)
+        }
+
+        this.emitMutation({
+            showSharePageTooltip: { $set: true },
+        })
+
+        const existingPageLink = this.options.annotationsCache.getSharedPageListIds(
+            normalizeUrl(fullPageUrl),
+        )
+
+        if (existingPageLink.length > 0) {
+            this.emitMutation({
+                showSharePageTooltip: { $set: true },
+            })
+            this.emitMutation({
+                selectedListForShareMenu: {
+                    $set: existingPageLink[existingPageLink.length - 1],
+                },
+            })
+            if (!event.forceCreate) {
+                return
+            }
         }
 
         await executeUITask(this, 'pageLinkCreateState', async () => {
@@ -2691,6 +2800,10 @@ export class SidebarContainerLogic extends UILogic<
             const { unifiedId } = this.options.annotationsCache.addList(
                 cacheListData,
             )
+
+            this.emitMutation({
+                selectedListForShareMenu: { $set: unifiedId },
+            })
 
             await Promise.all([
                 this.options.contentSharingByTabsBG.waitForPageLinkCreation({

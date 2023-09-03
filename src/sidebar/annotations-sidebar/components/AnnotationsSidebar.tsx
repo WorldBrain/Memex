@@ -69,6 +69,7 @@ import {
     getListShareUrl,
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -111,6 +112,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         [instanceId: string]: AnnotationInstanceRefs
     }
     activeShareMenuNoteId: string
+    selectedListForShareMenu: UnifiedList['unifiedId']
     renderAICounter: (position) => JSX.Element
     renderShareMenuForAnnotation: (
         instanceLocation: AnnotationCardInstanceLocation,
@@ -123,9 +125,11 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         referenceElement?: React.RefObject<HTMLDivElement>,
     ) => JSX.Element
     renderContextMenuForList: (listData: UnifiedList) => JSX.Element
+    renderPageLinkMenuForList: (listData: UnifiedList) => JSX.Element
 
     setActiveTab: (tab: SidebarTab) => React.MouseEventHandler
     expandFollowedListNotes: (listId: string) => void
+    selectedListId: string
 
     bindAnnotationFooterEventProps: (
         annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'body'>,
@@ -151,6 +155,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     openContextMenuForList: (
         unifiedListId: UnifiedList['unifiedId'] | null,
     ) => void
+    openPageListMenuForList: () => void
     openWebUIPage: (unifiedListId: UnifiedList['unifiedId']) => void
     onShareAllNotesClick: () => void
     onCopyBtnClick: () => void
@@ -196,6 +201,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     ) => void
     setSpaceTitleEditValue: (value) => void
     createNewNoteFromAISummary: (summary) => void
+    showSharePageTooltip: boolean
 }
 
 interface AnnotationsSidebarState {
@@ -232,6 +238,7 @@ export class AnnotationsSidebar extends React.Component<
     private pageSummaryText = React.createRef<HTMLDivElement>()
     private pageShareButtonRef = React.createRef<HTMLDivElement>()
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
+    private editPageLinkButtonRef = React.createRef<HTMLDivElement>()
     private sharePageLinkButtonRef = React.createRef<HTMLDivElement>()
     private spaceTitleEditFieldRef = React.createRef<HTMLInputElement>()
     private spaceContextBtnRefs: {
@@ -784,7 +791,7 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         return (
-            <FollowedNotesContainer>
+            <FollowedNotesContainer zIndex={listData.unifiedId}>
                 {(cacheUtils.deriveListOwnershipStatus(
                     listData,
                     this.props.currentUser,
@@ -914,17 +921,17 @@ export class AnnotationsSidebar extends React.Component<
                 isHovered={this.state.hoveredListId === listData.unifiedId}
             >
                 <FollowedListRow
-                    title={title}
                     onClick={() =>
                         this.props.onUnifiedListSelect(listData.unifiedId)
                     }
+                    zIndex={listData.unifiedId}
                 >
                     <FollowedListTitleContainer>
                         <TooltipBox
                             tooltipText={
                                 <span>
-                                    Click here to unfold
-                                    <br /> click entire bar to go into Focus
+                                    Click here to unfold.
+                                    <br /> Click entire bar to go into Focus
                                     Mode
                                 </span>
                             }
@@ -947,7 +954,9 @@ export class AnnotationsSidebar extends React.Component<
                                 }
                             />
                         </TooltipBox>
-                        <FollowedListTitle>{title}</FollowedListTitle>
+                        <FollowedListTitleBox title={title}>
+                            <FollowedListTitle>{title}</FollowedListTitle>
+                        </FollowedListTitleBox>
                     </FollowedListTitleContainer>
                     <ButtonContainer>
                         <ActionButtons>
@@ -999,7 +1008,7 @@ export class AnnotationsSidebar extends React.Component<
                             listData.remoteId != null && (
                                 <TooltipBox
                                     tooltipText="Space is Shared"
-                                    placement="bottom"
+                                    placement="bottom-end"
                                 >
                                     <Icon
                                         hoverOff
@@ -1054,6 +1063,34 @@ export class AnnotationsSidebar extends React.Component<
                 }}
             >
                 {this.props.renderContextMenuForList(listData)}
+            </PopoutBox>
+        )
+    }
+    private renderPageLinkMenu(listData: UnifiedList) {
+        let selectedList
+        if (this.props.selectedListForShareMenu != null) {
+            selectedList = this.props.annotationsCache.lists.byId[
+                this.props.selectedListForShareMenu
+            ]
+        }
+        return (
+            <PopoutBox
+                strategy="fixed"
+                placement="bottom-end"
+                offsetX={10}
+                offsetY={0}
+                targetElementRef={this.sharePageLinkButtonRef.current}
+                closeComponent={() => {
+                    this.props.openPageListMenuForList()
+                }}
+            >
+                {!this.props.selectedListForShareMenu || !selectedList ? (
+                    <LoadingIndicatorContainer>
+                        <LoadingIndicatorStyled size={20} />
+                    </LoadingIndicatorContainer>
+                ) : (
+                    this.props.renderPageLinkMenuForList(selectedList)
+                )}
             </PopoutBox>
         )
     }
@@ -2077,37 +2114,28 @@ export class AnnotationsSidebar extends React.Component<
                         }
                     />
                 </TopBarTabsContainer>
-                <TopBarBtnsContainer>
-                    {this.props.pageLinkCreateState === 'running' ? (
-                        <TooltipBox
-                            tooltipText={
-                                <span>
-                                    Preparing Page Link
-                                    <br />
-                                    link can be copied but web interface not
-                                    ready
-                                </span>
-                            }
-                            placement={'bottom-end'}
-                        >
-                            <LoadingPageLinkBox>
-                                <LoadingIndicator size={18} />
-                            </LoadingPageLinkBox>
-                        </TooltipBox>
-                    ) : (
-                        <>
-                            {listData?.type !== 'page-link' && (
-                                <PrimaryAction
-                                    label={'Share Page'}
-                                    onClick={this.props.clickCreatePageLinkBtn}
-                                    type="secondary"
-                                    size="small"
-                                    icon={'invite'}
-                                    padding={'0px 12px 0 6px'}
+                <TopBarBtnsContainer ref={this.sharePageLinkButtonRef}>
+                    <PrimaryAction
+                        label={'Share Page'}
+                        onClick={this.props.clickCreatePageLinkBtn}
+                        type="tertiary"
+                        iconColor="prime1"
+                        fontColor="white"
+                        size="medium"
+                        icon={
+                            this.props.pageLinkCreateState === 'running' ? (
+                                <LoadingIndicator
+                                    margin={'0 5px 0 0'}
+                                    size={14}
                                 />
-                            )}
-                        </>
-                    )}
+                            ) : (
+                                'invite'
+                            )
+                        }
+                        padding={'0px 12px 0 6px'}
+                    />
+                    {this.props.showSharePageTooltip &&
+                        this.renderPageLinkMenu(listData ?? null)}
                 </TopBarBtnsContainer>
             </TopBarContainer>
         )
@@ -2172,7 +2200,7 @@ export class AnnotationsSidebar extends React.Component<
                     <RightSideButtonsTopBar>
                         {this.renderContextMenu(
                             selectedList,
-                            this.sharePageLinkButtonRef,
+                            this.editPageLinkButtonRef,
                         )}
                         <TooltipBox
                             tooltipText={'Copy Invite Links'}
@@ -2180,7 +2208,7 @@ export class AnnotationsSidebar extends React.Component<
                         >
                             <Icon
                                 icon="link"
-                                containerRef={this.sharePageLinkButtonRef}
+                                containerRef={this.editPageLinkButtonRef}
                                 onClick={() =>
                                     this.props.openContextMenuForList(
                                         selectedList.unifiedId,
@@ -2413,27 +2441,6 @@ export class AnnotationsSidebar extends React.Component<
                     }
                 />
             </PopoutBox>
-        )
-    }
-
-    private renderSharePageButton() {
-        return (
-            <>
-                <PrimaryAction
-                    label={'Share Page'}
-                    onClick={async () => {
-                        await this.setState({
-                            showPageSpacePicker: !this.state
-                                .showPageSpacePicker,
-                        })
-                        this.setPopoutsActive()
-                    }}
-                    icon={'invite'}
-                    type={'primary'}
-                    size={'medium'}
-                    innerRef={this.pageShareButtonRef}
-                />
-            </>
         )
     }
 
@@ -3113,7 +3120,7 @@ const TopAreaContainer = styled.div`
     width: fill-available;
     z-index: 20;
     padding: 5px 0px;
-    grid-gap: 5px;
+    grid-gap: 7px;
     background: ${(props) => props.theme.colors.black};
 `
 
@@ -3182,7 +3189,7 @@ const TopBar = styled.div`
     height: ${(props) =>
         props.sidebarContext === 'dashboard' ? '40px' : '32px'};
     z-index: 11300;
-    padding: 10px 15px 10px 10px;
+    padding: 10px 10px 10px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     background: ${(props) => props.theme.colors.black};
 `
@@ -3193,7 +3200,7 @@ const IsolatedViewHeaderContainer = styled.div`
     justify-content: flex-start;
     grid-gap: 10px;
     flex-direction: column;
-    padding: 0px 20px 0 20px;
+    padding: 0px 15px 0 15px;
     z-index: 20;
     background: ${(props) => props.theme.colors.black};
 `
@@ -3275,7 +3282,6 @@ const FollowedListNotesContainer = styled(Margin)<{
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    height: 100%;
     z-index: ${(props) => 1000 - props.key};
 
     ${(props) =>
@@ -3326,7 +3332,7 @@ const AnnotationBox = styled.div<{
     zIndex: number
     order: number
 }>`
-    width: 99%;
+    width: 100%;
     z-index: ${(props) => props.zIndex};
 
     animation-name: ${openAnimation};
@@ -3337,12 +3343,12 @@ const AnnotationBox = styled.div<{
     position: relative;
 `
 
-const FollowedNotesContainer = styled.div`
+const FollowedNotesContainer = styled.div<{ zIndex: number }>`
     display: flex;
     flex-direction: column;
     width: 100%;
     padding-bottom: 60px;
-    z-index: 60;
+    z-index: ${(props) => 999 - props.zIndex};
 `
 
 const FollowedListsMsgContainer = styled.div`
@@ -3375,7 +3381,11 @@ const FollowedListsMsg = styled.span`
     line-height: 17px;
 `
 
-const FollowedListRow = styled(Margin)<{ key: number; context: string }>`
+const FollowedListRow = styled(Margin)<{
+    key: number
+    context: string
+    zIndex?: number
+}>`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -3384,9 +3394,9 @@ const FollowedListRow = styled(Margin)<{ key: number; context: string }>`
     width: fill-available;
     cursor: pointer;
     border-radius: 8px;
-    height: 40px;
+    height: 44px;
     padding: 5px 15px 5px 10px;
-    z-index: 40;
+    z-index: ${(props) => 1000 - props.zIndex};
 
     &:first-child {
         margin-top: 5px;
@@ -3454,6 +3464,7 @@ const FollowedListTitleContainer = styled(Margin)`
     justify-content: flex-start;
     flex: 1;
     grid-gap: 10px;
+    height: 100%;
 `
 
 const FollowedListTitleContainerMyNotes = styled(Margin)`
@@ -3481,6 +3492,14 @@ const FollowedListTitle = styled.span<{ context: string }>`
     text-overflow: ellipsis;
     overflow: hidden;
     display: block;
+`
+const FollowedListTitleBox = styled.div<{ context: string }>`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 30px;
+    flex: 1;
+    height: 100%;
 `
 const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
     font-weight: bold;
@@ -3533,6 +3552,7 @@ const TopBarStyled = styled.div`
 
 const LoadingIndicatorContainer = styled.div`
     width: 100%;
+    min-width: 15px;
     height: 100px;
     display: flex;
     justify-content: center;

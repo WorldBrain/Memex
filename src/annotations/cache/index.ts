@@ -254,7 +254,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         this.updateSharedAnnotationsWithSharedPageLists()
     }
 
-    private getSharedPageListIds(
+    getSharedPageListIds(
         normalizedPageUrl: string,
     ): UnifiedList['unifiedId'][] {
         return [...(this.pageListIds.get(normalizedPageUrl) ?? [])].filter(
@@ -437,6 +437,12 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         this.lists.byId = {
             ...this.lists.byId,
             [nextList.unifiedId]: nextList,
+        }
+
+        if (nextList.type === 'page-link') {
+            this.ensurePageListsSet(nextList.normalizedPageUrl, [
+                nextList.unifiedId,
+            ])
         }
 
         this.events.emit('addedList', nextList)

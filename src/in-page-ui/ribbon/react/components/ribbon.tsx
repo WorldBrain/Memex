@@ -1810,6 +1810,7 @@ export default class Ribbon extends Component<Props, State> {
                                     }
                                     ribbonPosition={this.props.ribbonPosition}
                                 >
+                                    {this.renderTutorialButton()}
                                     <BlockCounterIndicator
                                         ribbonPosition={
                                             this.props.ribbonPosition
@@ -1820,7 +1821,6 @@ export default class Ribbon extends Component<Props, State> {
                                         isTrial={this.props.isTrial}
                                         signupDate={this.props.signupDate}
                                     />
-                                    {this.renderTutorialButton()}
                                     {this.renderCloseRibbonButton()}
                                 </BottomSection>
                             </>

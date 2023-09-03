@@ -193,17 +193,6 @@ export class RibbonContainerLogic extends UILogic<
         await loadInitial<RibbonContainerState>(this, async () => {
             let fullPageUrl = await getFullPageUrl()
 
-            // // TElegram URL Support
-            // if (window.location.href.includes('web.telegram.org')) {
-            //     try {
-            //         fullPageUrl = convertTelegramURLintoMemexPageURL(
-            //             fullPageUrl,
-            //         )
-            //     } catch (error) {
-            //         console.log('error', error)
-            //     }
-            // }
-            // // Telegram URL Support
             this.emitMutation({ fullPageUrl: { $set: fullPageUrl } })
             await this.hydrateStateFromDB({
                 ...incoming,
@@ -212,27 +201,7 @@ export class RibbonContainerLogic extends UILogic<
         })
         this.initLogicResolvable.resolve()
 
-        // this.sidebar = document
-        //     .getElementById('memex-sidebar-container')
-        //     ?.shadowRoot.getElementById('annotationSidebarContainer')
         this.initReadingViewListeners()
-        // let fullPageUrl = await getFullPageUrl()
-
-        // // TElegram URL Support
-        // if (window.location.href.includes('web.telegram.org')) {
-        //     try {
-        //         fullPageUrl = fullPageUrl.replace('#@', '@')
-        //     } catch (error) {
-        //         console.log('error', error)
-        //     }
-        // }
-
-        // // Telegram URL Support
-
-        // await this.hydrateStateFromDB({
-        //     ...incoming,
-        //     event: { url: fullPageUrl },
-        // }
 
         try {
             const signupDate = new Date(

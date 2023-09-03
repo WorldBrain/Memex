@@ -56,6 +56,7 @@ import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/lib/com
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
+import PageLinkMenu from 'src/custom-lists/ui/page-link-share-menu'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -782,6 +783,9 @@ export class AnnotationsSidebarContainer<
                                     { state },
                                 )
                             }
+                            selectedListForShareMenu={
+                                this.state.selectedListForShareMenu
+                            }
                             setShareMenuAnnotationInstance={(instanceId) =>
                                 this.processEvent(
                                     'setShareMenuAnnotationInstanceId',
@@ -801,6 +805,10 @@ export class AnnotationsSidebarContainer<
                             clickCreatePageLinkBtn={() =>
                                 this.processEvent('createPageLink', null)
                             }
+                            showSharePageTooltip={
+                                this.state.showSharePageTooltip
+                            }
+                            selectedListId={this.state.selectedListId}
                             currentUser={this.props.getCurrentUser()}
                             annotationsCache={this.props.annotationsCache}
                             onUnifiedListSelect={(unifiedListId) =>
@@ -836,6 +844,12 @@ export class AnnotationsSidebarContainer<
                                 this.processEvent('openContextMenuForList', {
                                     unifiedListId,
                                 })
+                            }
+                            openPageListMenuForList={() =>
+                                this.processEvent(
+                                    'openPageListMenuForList',
+                                    null,
+                                )
                             }
                             openWebUIPage={(unifiedListId) =>
                                 this.processEvent('openWebUIPageForSpace', {
@@ -912,7 +926,9 @@ export class AnnotationsSidebarContainer<
                             ) => {
                                 this.processEvent('editListName', {
                                     unifiedListId: unifiedListId,
+                                    localId: localId,
                                     newName,
+                                    oldName: oldName,
                                 })
                                 await this.props.customListsBG.updateListName({
                                     id: localId,
@@ -998,7 +1014,9 @@ export class AnnotationsSidebarContainer<
                                     onConfirmSpaceNameEdit={(newName) => {
                                         this.processEvent('editListName', {
                                             unifiedListId: listData.unifiedId,
+                                            localId: listData.localId,
                                             newName,
+                                            oldName: listData.name,
                                         })
                                     }}
                                     onSpaceShare={(remoteListId) =>
@@ -1012,6 +1030,40 @@ export class AnnotationsSidebarContainer<
                                             unifiedListId: listData.unifiedId,
                                         })
                                     }
+                                    analyticsBG={this.props.analyticsBG}
+                                />
+                            )}
+                            renderPageLinkMenuForList={(listData) => (
+                                <PageLinkMenu
+                                    contentSharingBG={
+                                        this.props.contentSharingBG
+                                    }
+                                    spacesBG={this.props.customListsBG}
+                                    listData={listData}
+                                    disableWriteOps={
+                                        this.state.hasListDataBeenManuallyPulled
+                                    }
+                                    onSpaceShare={() =>
+                                        this.processEvent('createPageLink', {
+                                            forceCreate: true,
+                                        })
+                                    }
+                                    pageLinkCreateState={
+                                        this.state.pageLinkCreateState
+                                    }
+                                    showSpacesTab={() => {
+                                        this.processEvent(
+                                            'openPageListMenuForList',
+                                            null,
+                                        )
+                                        this.processEvent(
+                                            'setActiveSidebarTab',
+                                            { tab: 'spaces' },
+                                        )
+                                        this.processEvent('setSelectedList', {
+                                            unifiedListId: null,
+                                        })
+                                    }}
                                     analyticsBG={this.props.analyticsBG}
                                 />
                             )}
