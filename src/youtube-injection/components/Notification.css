@@ -1,0 +1,48 @@
+.mainContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    background-color: white;
+    margin: 30px;
+    justify-content: flex-start;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
+}
+
+.alertIcon {
+    width: 60px;
+    margin-top: 4px;
+    margin-right: 5px;
+}
+
+.messageTitle {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    width: 100%;
+    margin: 0px 0 20px 0;
+}
+
+.message {
+    composes: subTitleColor from '../../common-ui/colors.css';
+    font-size: 16px;
+    margin-top: 5px;
+    width: 100%;
+    align-items: flex-start;
+    line-height: 22px;
+}
+
+.title {
+    composes: h2Color from '../../common-ui/colors.css';
+    font-weight: 600;
+    font-size: 21px;
+}
+
+.tick {
+    composes: cancelNaked from '../../common-ui/elements.css';
+    margin-top: 10px;
+    font-size: 14px;
+    cursor: pointer;
+}

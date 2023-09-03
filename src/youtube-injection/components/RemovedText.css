@@ -1,0 +1,45 @@
+.removed {
+    padding: 10px;
+    color: #757475;
+    border-radius: 3px;
+    border: 1px solid #4abf9dad;
+    margin-bottom: 20px;
+}
+
+.removed-side {
+    display: flex;
+}
+
+.removedP {
+    display: inline-block;
+    width: 75%;
+    font-size: 15px;
+    text-align: left;
+    margin-left: 42px;
+}
+
+.removedP-side {
+    font-size: 12px;
+    margin-left: 25px;
+    margin-right: 25px;
+}
+
+.removedA {
+    display: inline-block;
+    font-size: 18px;
+    padding: 10px;
+    vertical-align: middle;
+    text-decoration: none;
+    color: #757475;
+    cursor: pointer;
+    margin-right: 15px;
+
+    &:hover {
+        color: #4abf9dad;
+        text-decoration: none !important; /* stylelint-disable-line declaration-no-important */
+    }
+}
+
+.removedA-side {
+    font-size: 15px;
+}

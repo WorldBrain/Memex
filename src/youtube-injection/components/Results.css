@@ -1,0 +1,294 @@
+@import url('/fonts/Satoshi/satoshi.css');
+
+:root {
+    --memex-green: #4abf9d;
+}
+
+.MEMEX_CONTAINER * {
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
+}
+
+.MEMEX_CONTAINER {
+    /* Base size of the children elements */
+    position: relative;
+    animation: fadeIn 1s ease-in;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    border-bottom: #dedede solid 1px;
+    margin-bottom: 20px;
+    background: #fff;
+    padding: 0px 5px 20px 5px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.MEMEX_CONTAINER_SMALL {
+    padding: 0px 5px 0px 5px;
+
+    & .header {
+        border: none;
+    }
+}
+
+.MEMEX_CONTAINER_SIDE {
+    margin-right: 0px;
+    width: 440px;
+}
+
+.resultLength {
+    font-weight: 800;
+    composes: darkMintGreen from '../../common-ui/colors.css';
+    font-size: 16px;
+    vertical-align: inherit;
+}
+
+.linksContainer {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.links {
+    color: #3a2f45;
+    text-decoration: none !important;
+    /* stylelint-disable-line declaration-no-important */
+    font-size: 16px;
+    display: inline-block;
+    font-weight: 600;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.logo {
+    width: 75px;
+    height: 20px;
+    vertical-align: middle;
+    margin-left: 6px;
+}
+
+.settingsButton {
+    composes: hoverColor from '../../common-ui/colors.css';
+    position: absolute;
+    border: none;
+    cursor: pointer;
+    background-image: url('/img/settings.svg');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    background-color: #fff;
+    height: 25px;
+    width: 25px;
+    background-position: center;
+    vertical-align: middle;
+    border-radius: 3px;
+    margin-right: 5px;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.resultsBox {
+    height: 500px;
+    overflow-y: scroll;
+}
+
+.resultsBoxHidden {
+    height: 0px;
+    overflow-y: hidden;
+}
+
+.loadingBox {
+    border-radius: 3px;
+    margin-bottom: 30px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.resultsText {
+    composes: darkBlue from '../../common-ui/colors.css';
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 600;
+    width: 67%;
+    margin-right: 10px;
+    padding-left: 11px;
+}
+
+.resultsText > a {
+    margin-left: 10px;
+}
+
+.noDisplay {
+    display: none;
+}
+
+.notification {
+    composes: boxShadowOverlays from '../../common-ui/colors.css';
+    position: absolute;
+    background: white;
+    z-index: 2000;
+    width: 95%;
+    min-width: 05%;
+    display: flex;
+    top: 70px;
+    margin: auto;
+    justify-self: center;
+    align-self: center;
+    border-radius: 3px;
+    max-width: 95%;
+}
+
+.isBlurred {
+    filter: blur(2px);
+    background: white;
+    z-index: 1000;
+}
+
+.google_above {
+    & .settingsButton {
+        right: 5px;
+    }
+
+    & .resultsText {
+        width: 76%;
+    }
+
+    & .mainContainer {
+        width: 93.8%;
+
+        & .messageTitle {
+            width: 64%;
+        }
+    }
+
+    .resultLength {
+        vertical-align: middle;
+    }
+}
+
+.google_side {
+    width: 435px;
+
+    & .settingsButton {
+        right: 5px;
+    }
+
+    & .mainContainer {
+        width: 90.8%;
+
+        & .messageTitle {
+            width: 64%;
+        }
+    }
+}
+
+.duckduckgo_above {
+    margin-top: 7px;
+    margin-bottom: 15px;
+
+    & .resultsText {
+        width: 73%;
+        padding-left: 11px;
+    }
+
+    & .settingsButton {
+        right: 5px;
+        top: 9px;
+    }
+
+    & .dropdown {
+        right: 5px;
+    }
+}
+
+.duckduckgo_side {
+    margin-top: 7px;
+    margin-bottom: 15px;
+
+    & .resultsText {
+        font-size: 1.05em;
+        width: 65%;
+    }
+
+    & .links {
+        font-size: 0.85em;
+    }
+
+    & .settingsButton {
+        right: 5px;
+        top: 8px;
+    }
+
+    & .dropdown {
+        top: 30px;
+        right: 5px;
+    }
+}
+
+.proTip {
+    margin-left: 1px;
+    color: #3eb995;
+    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    margin-top: 14px;
+}
+
+.shortcut {
+    margin-left: 2px;
+    margin-right: 2px;
+    vertical-align: middle;
+    width: 35%;
+    height: 35%;
+    margin-top: -2px;
+}
+
+.emoji {
+    font-size: 20px;
+    vertical-align: middle;
+    margin-top: -7px;
+}
+
+.upgradeButton {
+    padding: 5px 25px;
+    color: white !important;
+    /* stylelint-disable-line declaration-no-important */
+    text-decoration: none !important;
+    /* stylelint-disable-line declaration-no-important */
+    background-color: #3eb995;
+    margin-bottom: 10px;
+    border-radius: 2px;
+    margin-top: 13px;
+    display: flex;
+    width: 40%;
+    padding-bottom: 5px;
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: center;
+}
+
+.voteIcon {
+    width: 15px;
+    height: 15px;
+    margin-right: 12px;
+    vertical-align: bottom;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}

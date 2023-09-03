@@ -1,0 +1,29 @@
+/* Dropdown */
+
+.dropdownContainer {
+    composes: toolTips from '../../common-ui/elements.css';
+    padding: 10px 0;
+    background: white;
+    display: block;
+    position: absolute;
+    top: 40px;
+    right: 0px;
+    z-index: 10000;
+}
+
+.dropdown {
+    list-style-type: none;
+    z-index: 20000;
+}
+
+.dropdownElement {
+    composes: hoversidebaropen from '../../common-ui/colors.css';
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 400;
+    color: #222;
+    padding: 10px 20px;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
+}
