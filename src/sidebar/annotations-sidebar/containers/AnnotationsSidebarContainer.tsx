@@ -1264,7 +1264,11 @@ const PickerWrapper = styled.div`
     z-index: 5;
 `
 
-const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
+const ContainerStyled = styled.div<{
+    sidebarContext: string
+    isShown: string
+    theme
+}>`
     height: 100vh;
     overflow-x: visible;
     position: ${(props) =>
@@ -1308,6 +1312,15 @@ font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'l
             right: 0px;
         `}
 
+          
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            box-shadow: ${(props) => props.theme.borderStyles.boxShadowLeft};
+            border-left: 1px solid
+                ${(props) =>
+                    props.theme.borderStyles.borderLineColorBigElements};
+        `};
 
 
     scrollbar-width: none;

@@ -124,7 +124,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
                 }
                 targetElementRef={this.tooltipButtonRef.current}
                 closeComponent={() => this.setState({ showTooltip: false })}
-                offsetX={10}
+                offsetX={20}
             >
                 <InfoTooltipContainer>
                     <InfoTooltipTitleArea>
@@ -354,7 +354,7 @@ const InfoTooltipContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    width: 400px;
+    width: 420px;
     height: fit-content;
     grid-gap: 20px;
 `

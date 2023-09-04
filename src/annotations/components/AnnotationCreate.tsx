@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { createRef } from 'react'
 
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import MemexEditor, {
@@ -360,7 +360,7 @@ export default AnnotationCreate
 
 const EditorContainer = styled(Margin)`
     z-index: 1000;
-    border-radius: 5px;
+    border-radius: 8px;
 
     &:focus-within {
         background-color: ${(props) => props.theme.colors.greyScale2};
@@ -370,6 +370,19 @@ const EditorContainer = styled(Margin)`
         background-color: ${(props) => props.theme.colors.greyScale2};
         outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     }
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            &:focus-within {
+                outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+            }
+            &:hover {
+                background-color: ${(props) => props.theme.colors.greyScale2};
+                outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+            }
+            caret-color: ${(props) => props.theme.colors.greyScale5};
+        `};
 `
 
 const EditorDummy = styled.div`

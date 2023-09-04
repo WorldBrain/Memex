@@ -3219,6 +3219,16 @@ const TopBar = styled.div`
     padding: 10px 10px 10px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     background: ${(props) => props.theme.colors.black};
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            /* box-shadow: ${(props) =>
+                props.theme.borderStyles.boxShadowBottom}; */
+            border-bottom: 1px solid
+                ${(props) =>
+                    props.theme.borderStyles.borderLineColorBigElements};
+        `};
 `
 
 const IsolatedViewHeaderContainer = styled.div`
@@ -3675,6 +3685,16 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
         css`
             border-right: 'unset';
             border-left: 'unset';
+        `};
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            /* box-shadow: ${(props) =>
+                props.theme.borderStyles.boxShadowLeft}; */
+            border-right: 1px solid
+                ${(props) =>
+                    props.theme.borderStyles.borderLineColorBigElements};
         `};
 `
 

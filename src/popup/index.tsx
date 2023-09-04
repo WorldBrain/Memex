@@ -31,16 +31,6 @@ class Root extends React.Component<RootProps, RootState> {
             themeVariant: await loadThemeVariant(),
         })
     }
-ReactDOM.render(
-    <Provider store={store}>
-        <ThemeProvider theme={theme}>
-            <ErrorBoundary component={RuntimeError}>
-                <Popup analyticsBG={null} />
-            </ErrorBoundary>
-        </ThemeProvider>
-    </Provider>,
-    document.getElementById('app'),
-)
 
     render() {
         const { themeVariant } = this.state

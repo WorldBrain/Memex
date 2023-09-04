@@ -333,6 +333,26 @@ const Row = styled.div<{ isFocused; zIndex }>`
         outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         background: transparent;
     }
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            &:focus {
+                outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+            }
+            &:hover {
+                outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+                background: transparent;
+            }
+
+            ${(props) =>
+                props.isFocused &&
+                css`
+                    outline: 1px solid
+                        ${(props) => props.theme.colors.greyScale2};
+                    background: transparent;
+                `}
+        `};
 `
 
 const NameWrapper = styled.div`
