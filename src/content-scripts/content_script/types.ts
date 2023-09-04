@@ -17,7 +17,6 @@ export interface ContentScriptRegistry {
     registerHighlightingScript(main: HighlightsScriptMain): Promise<void>
     registerTooltipScript(main: TooltipScriptMain): Promise<void>
     registerSearchInjectionScript(main: SearchInjectionMain): Promise<void>
-    registerYoutubeInjectionScript(main: YoutubeInjectionMain): Promise<void>
 }
 
 export type SidebarScriptMain = (

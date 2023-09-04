@@ -305,6 +305,7 @@ export class SidebarContainerLogic extends UILogic<
             firstTimeSharingPageLink: false,
             selectedListForShareMenu: null,
             renameListErrorMessage: null,
+            youtubeTranscriptSummaryloadState: 'pristine',
         }
     }
 

@@ -485,9 +485,6 @@ export class AnnotationsSidebar extends React.Component<
                     ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
-                    youtubeTranscriptSummary={
-                        this.props.youtubeTranscriptSummary
-                    }
                 />
             </NewAnnotationSection>
         )

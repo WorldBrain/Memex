@@ -1680,7 +1680,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     annotateButton.style.cursor = 'pointer'
     annotateButton.style.borderLeft = '1px solid #24252C'
 
-    annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Timestamp + Note</div>`
+    annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Timestamped Note</div>`
 
     // Summarize Button
     const summarizeButton = document.createElement('div')
@@ -1752,7 +1752,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     textField.setAttribute('pattern', '\\d{1,3}') // 1 to 3 digit numbers
     textFieldNote.setAttribute('pattern', '\\d{1,3}') // 1 to 3 digit numbers
 
-    textField.addEventListener('input', (event) => {
+    textField.addEventListener('input', (event: Event) => {
         let value = event.target.value
 
         // Replace non-digit characters
@@ -1763,11 +1763,11 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
             value = '999'
         }
 
-        event.target.value = value
+        ;(event.target as HTMLElement).value = value
     })
 
     textFieldNote.addEventListener('input', (event) => {
-        let value = event.target.value
+        let value = (event.target as HTMLElement).value
 
         // Replace non-digit characters
         value = value.replace(/[^0-9]/g, '')
@@ -1777,7 +1777,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
             value = '999'
         }
 
-        event.target.value = value
+        ;(event.target as Element).value = value
     })
 
     // Rewind Icon
