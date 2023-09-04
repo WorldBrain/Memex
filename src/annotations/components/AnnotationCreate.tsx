@@ -110,17 +110,25 @@ export class AnnotationCreate extends React.Component<Props, State>
         return this.displayLists.some((list) => list.isShared)
     }
 
-    addYoutubeTimestampToEditor() {
+    addYoutubeTimestampToEditor(commentText) {
         // This is a hack to patch over a race condition between the state update and the rendering of the Editor which is dependent on that state.
         //  Ideally we avoid this race condition by making the editor's state controlled (vs uncontrolled) then we can
         //  add the timestamp to the state at a higher level rather than needing to do this call chain going down deeper into the comp tree.
         if (!this.state.onEditClick) {
             this.setState({ onEditClick: true }, async () => {
                 await delay(300)
-                this.editor?.addYoutubeTimestamp()
+                if (commentText) {
+                    this.editor?.addYoutubeTimestampWithText(commentText)
+                } else {
+                    this.editor?.addYoutubeTimestamp()
+                }
             })
         } else {
-            this.editor?.addYoutubeTimestamp()
+            if (commentText) {
+                this.editor?.addYoutubeTimestampWithText(commentText)
+            } else {
+                this.editor?.addYoutubeTimestamp()
+            }
         }
     }
 

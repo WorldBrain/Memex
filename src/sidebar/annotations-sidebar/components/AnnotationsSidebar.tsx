@@ -268,8 +268,10 @@ export class AnnotationsSidebar extends React.Component<
         hoveredListId: null,
     }
 
-    addYoutubeTimestampToEditor() {
-        this.annotationCreateRef.current?.addYoutubeTimestampToEditor()
+    addYoutubeTimestampToEditor(commentText) {
+        this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
+            commentText,
+        )
     }
 
     private maybeCreateContextBtnRef({

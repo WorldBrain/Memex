@@ -825,6 +825,9 @@ export class AnnotationsSidebarContainer<
                                     { ref },
                                 )
                             }
+                            youtubeTranscriptSummary={
+                                this.state.youtubeTranscriptSummary
+                            }
                             setSpacePickerAnnotationInstance={(state) =>
                                 this.processEvent(
                                     'setSpacePickerAnnotationInstance',

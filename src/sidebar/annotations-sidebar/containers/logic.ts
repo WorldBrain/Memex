@@ -1851,8 +1851,6 @@ export class SidebarContainerLogic extends UILogic<
             ? highlightedText
             : undefined
 
-        console.log('outputLocation1', outputLocation)
-
         const response = await this.options.summarizeBG.startPageSummaryStream({
             fullPageUrl: isPagePDF
                 ? undefined
@@ -1865,8 +1863,6 @@ export class SidebarContainerLogic extends UILogic<
             shortSummary: shortSummary,
             outputLocation: outputLocation ?? null,
         })
-
-        console.log('response', response)
 
         return response
     }
@@ -2478,17 +2474,17 @@ export class SidebarContainerLogic extends UILogic<
         previousState.annotationCreateEditorRef.event.ref.editor.addYoutubeTimestampWithText(
             timestampToInsert + ' ',
         )
+        previousState.annotationCreateEditorRef.event.ref.editor.addYoutubeTimestampWithText(
+            '',
+            true,
+        )
 
         const filteredSegments = JSON.parse(event.timeStampANDSummaryJSON[1])
 
-        console.log('filteredSegments', filteredSegments)
-
         const combinedText = filteredSegments.map((item) => item.text).join(' ')
 
-        const prompt =
-            'The following is an excerpt from an auto-generated youtube transcript. It may contain errors. Please correct and output it as much as possible in its original form: '
-
-        console.log('timestampToInsert', combinedText)
+        let prompt =
+            'The following text an excerpt of an auto-generated video transcript. Please refer to it as "video sections" or "video" and not as text when talking about it. Also, the transcript will contain transcription errors. Please correct and output it as much as possible and keep it in its original meaning. Try to be short and conscise as the purpose of this summary is to help people to mark a video section and what it was saying: '
 
         this.editor = previousState.annotationCreateEditorRef.event.ref.editor
 

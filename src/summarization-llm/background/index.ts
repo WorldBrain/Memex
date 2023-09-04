@@ -102,7 +102,6 @@ export default class SummarizeBackground {
                         },
                     )
                 } else {
-                    console.log('token old', token)
                     this.options.remoteEventEmitter.emitToTab(
                         'newSummaryToken',
                         tab.id,

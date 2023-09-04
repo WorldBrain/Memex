@@ -235,8 +235,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             this.props.inPageUI.cacheLoadPromise,
         ])
 
-        console.log('executed', event.action)
-
         if (event.action === 'comment') {
             await this.processEvent('setActiveSidebarTab', {
                 tab:
@@ -318,7 +316,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                         ? 'spaces'
                         : 'annotations',
             })
-            this.sidebarRef.current?.addYoutubeTimestampToEditor()
+            this.sidebarRef.current?.addYoutubeTimestampToEditor(
+                event.commentText,
+            )
         } else if (event.action === 'check_sidebar_status') {
             return true
         } else if (event.action === 'set_focus_mode') {
