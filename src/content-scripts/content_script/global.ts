@@ -1604,7 +1604,7 @@ export function getTimestampNoteContentForYoutubeNotes(
     }
 }
 
-export function injectYoutubeButtonMenu(annotationsFunctions: any) {
+export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     const YTchapterContainer = document.getElementsByClassName(
         'ytp-chapter-container',
     )
@@ -1655,7 +1655,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     // Add Note Button
     const annotateButton = document.createElement('div')
     annotateButton.setAttribute('class', 'ytp-menuitem')
-    annotateButton.onclick = () => {
+    annotateButton.onclick = async () => {
         const secondsInPastFieldNote = document.getElementById(
             'secondsInPastFieldNote',
         ) as HTMLInputElement
@@ -1666,6 +1666,10 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
         const includeLastFewSecs = secondsInPastFieldNote.value
             ? parseInt(secondsInPastFieldNote.value)
             : 0
+
+        await globalThis['browser'].storage.local.set({
+            ['noteSecondsStorage']: includeLastFewSecs,
+        })
 
         annotationsFunctions.createAnnotation()(
             false,
@@ -1695,7 +1699,15 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     // Textfield for Smart Note
     const textField = document.createElement('input')
     textField.id = 'secondsInPastSetting'
+    const smartNoteSecondsStorage = await globalThis[
+        'browser'
+    ].storage.local.get('smartNoteSecondsStorage')
 
+    const smartNoteSeconds = smartNoteSecondsStorage.smartNoteSecondsStorage
+
+    if (smartNoteSeconds) {
+        textField.value = smartNoteSeconds
+    }
     textField.setAttribute('type', 'text')
     textField.setAttribute('placeholder', '60s')
     textField.style.height = '100%'
@@ -1712,6 +1724,18 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     // Textfield for Regular Note
     const textFieldNote = document.createElement('input')
     textFieldNote.id = 'secondsInPastFieldNote'
+
+    const noteSecondsStorage = await globalThis['browser'].storage.local.get(
+        'noteSecondsStorage',
+    )
+
+    const noteSeconds = noteSecondsStorage.noteSecondsStorage
+
+    console.log('noteSeconds', noteSeconds)
+
+    if (noteSeconds) {
+        textFieldNote.value = noteSeconds
+    }
 
     textFieldNote.setAttribute('type', 'text')
     textFieldNote.setAttribute('placeholder', '0s')
@@ -1837,7 +1861,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     const AItimeStampButton = document.createElement('div')
     AItimeStampButton.setAttribute('class', 'ytp-menuitem')
 
-    AItimeStampButton.onclick = () => {
+    AItimeStampButton.onclick = async () => {
         const secondsInPastField = document.getElementById(
             'secondsInPastSetting',
         ) as HTMLInputElement
@@ -1848,6 +1872,10 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
         const includeLastFewSecs = secondsInPastField.value
             ? parseInt(secondsInPastField.value)
             : 60
+        await globalThis['browser'].storage.local.set({
+            ['smartNoteSecondsStorage']: includeLastFewSecs,
+        })
+
         annotationsFunctions.createTimestampWithAISummary(includeLastFewSecs)(
             false,
             false,
