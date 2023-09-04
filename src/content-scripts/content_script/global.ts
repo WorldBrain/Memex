@@ -1776,8 +1776,8 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     textField.setAttribute('pattern', '\\d{1,3}') // 1 to 3 digit numbers
     textFieldNote.setAttribute('pattern', '\\d{1,3}') // 1 to 3 digit numbers
 
-    textField.addEventListener('input', (event: Event) => {
-        let value = event.target.value
+    textField.addEventListener('input', (event) => {
+        let value = (event.target as HTMLInputElement).value
 
         // Replace non-digit characters
         value = value.replace(/[^0-9]/g, '')
@@ -1787,11 +1787,11 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
             value = '999'
         }
 
-        ;(event.target as HTMLElement).value = value
+        ;(event.target as HTMLInputElement).value = value
     })
 
     textFieldNote.addEventListener('input', (event) => {
-        let value = (event.target as HTMLElement).value
+        let value = (event.target as HTMLInputElement).value
 
         // Replace non-digit characters
         value = value.replace(/[^0-9]/g, '')
@@ -1801,7 +1801,7 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
             value = '999'
         }
 
-        ;(event.target as Element).value = value
+        ;(event.target as HTMLInputElement).value = value
     })
 
     // Rewind Icon
