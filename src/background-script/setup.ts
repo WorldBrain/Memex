@@ -102,10 +102,13 @@ import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { handleIncomingData } from 'src/personal-cloud/background/handle-incoming-data'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { remoteFunctions } from 'src/util/remote-functions-background'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
     auth: AuthBackground
+    authBG: AuthRemoteFunctionsInterface
     analytics: AnalyticsBackground
     notifications: NotificationBackground
     social: SocialBackground
@@ -226,6 +229,36 @@ export function createBackgroundModules(options: {
 
     const analyticsBG = analytics
 
+    const notifications = new NotificationBackground({ storageManager })
+
+    const jobScheduler = new JobSchedulerBackground({
+        storagePrefix: JobScheduler.STORAGE_PREFIX,
+        storageAPI: options.browserAPIs.storage,
+        alarmsAPI: options.browserAPIs.alarms,
+        notifications,
+        jobs,
+    })
+
+    const auth =
+        options.auth ||
+        new AuthBackground({
+            runtimeAPI: options.browserAPIs.runtime,
+            authServices: options.authServices,
+            jobScheduler: jobScheduler.scheduler,
+            remoteEmitter: createRemoteEventEmitter('auth'),
+            localStorageArea: options.browserAPIs.storage.local,
+            getFCMRegistrationToken: options.getFCMRegistrationToken,
+            backendFunctions: {
+                registerBetaUser: async (params) =>
+                    callFirebaseFunction('registerBetaUser', params),
+            },
+            getUserManagement: async () =>
+                (await options.getServerStorage()).modules.users,
+        })
+
+    const getCurrentUserId = async (): Promise<AutoPk | null> =>
+        (await auth.authService.getCurrentUser())?.id ?? null
+
     const pages = new PageIndexingBackground({
         persistentStorageManager: options.persistentStorageManager,
         pageIndexingSettingsStore: new BrowserSettingsStore(
@@ -238,6 +271,7 @@ export function createBackgroundModules(options: {
         storageManager,
         tabManagement,
         getNow,
+        authBG: auth.remoteFunctions,
     })
     tabManagement.events.on('tabRemoved', async (event) => {
         await pages.handleTabClose(event)
@@ -282,16 +316,6 @@ export function createBackgroundModules(options: {
         syncSettings: syncSettingsStore,
     })
 
-    const notifications = new NotificationBackground({ storageManager })
-
-    const jobScheduler = new JobSchedulerBackground({
-        storagePrefix: JobScheduler.STORAGE_PREFIX,
-        storageAPI: options.browserAPIs.storage,
-        alarmsAPI: options.browserAPIs.alarms,
-        notifications,
-        jobs,
-    })
-
     const social = new SocialBackground({ storageManager })
 
     const activityIndicator = new ActivityIndicatorBackground({
@@ -314,26 +338,6 @@ export function createBackgroundModules(options: {
             await contentSharing.deleteAnnotationShare(params)
         },
     })
-
-    const auth =
-        options.auth ||
-        new AuthBackground({
-            runtimeAPI: options.browserAPIs.runtime,
-            authServices: options.authServices,
-            jobScheduler: jobScheduler.scheduler,
-            remoteEmitter: createRemoteEventEmitter('auth'),
-            localStorageArea: options.browserAPIs.storage.local,
-            getFCMRegistrationToken: options.getFCMRegistrationToken,
-            backendFunctions: {
-                registerBetaUser: async (params) =>
-                    callFirebaseFunction('registerBetaUser', params),
-            },
-            getUserManagement: async () =>
-                (await options.getServerStorage()).modules.users,
-        })
-
-    const getCurrentUserId = async (): Promise<AutoPk | null> =>
-        (await auth.authService.getCurrentUser())?.id ?? null
 
     const activityStreams = new ActivityStreamsBackground({
         storageManager,
@@ -576,6 +580,7 @@ export function createBackgroundModules(options: {
 
     return {
         auth,
+        authBG: remoteFunctions.auth,
         social,
         analytics,
         jobScheduler,

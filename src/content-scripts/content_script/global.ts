@@ -435,7 +435,7 @@ export async function main(
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
         ) => async (selection: Selection, shouldShare: boolean) => {
             if (
-                !(await pageActionAllowed()) ||
+                !(await pageActionAllowed(analyticsBG)) ||
                 window.getSelection().toString().length === 0
             ) {
                 return
@@ -466,8 +466,9 @@ export async function main(
             shouldShare: boolean,
             showSpacePicker?: boolean,
             commentText?: string,
+            includeLastFewSecs?: number,
         ) => {
-            if (!(await pageActionAllowed())) {
+            if (!(await pageActionAllowed(analyticsBG))) {
                 return
             }
 
@@ -502,8 +503,7 @@ export async function main(
             } else {
                 await inPageUI.showSidebar({
                     action: 'youtube_timestamp',
-                    commentText:
-                        commentText ?? getTimestampNoteContentForYoutubeNotes(),
+                    commentText: commentText,
                 })
             }
 
@@ -513,6 +513,15 @@ export async function main(
             inPageUI.showSidebar({
                 action: 'show_page_summary',
                 highlightedText,
+            })
+            inPageUI.hideTooltip()
+        },
+        createTimestampWithAISummary: async (includeLastFewSecs) => {
+            inPageUI.showSidebar({
+                action: 'create_youtube_timestamp_with_AI_summary',
+                timeStampANDSummaryJSON: await getTimestampedNoteWithAIsummaryForYoutubeNotes(
+                    includeLastFewSecs,
+                ),
             })
             inPageUI.hideTooltip()
         },
@@ -557,7 +566,7 @@ export async function main(
         fullPageUrl === 'https://memex.garden/upgradeStaging' ||
         fullPageUrl === 'https://memex.garden/upgradeNotification' ||
         fullPageUrl === 'https://memex.garden/upgrade' ||
-        fullPageUrl === 'https://memex.garden/' ||
+        fullPageUrl.startsWith('https://memex.garden/') ||
         fullPageUrl === 'https://memex.garden/copilot' ||
         fullPageUrl === 'https://memex.garden/hivemind'
     ) {
@@ -574,15 +583,6 @@ export async function main(
                 }
             }
         }, 200)
-    }
-
-    if (
-        fullPageUrl.includes('memex.garden') &&
-        document.body.innerText.includes(
-            'Icons by Smashicons from Flaticons.com',
-        )
-    ) {
-        await contentScriptsBG.reloadTab({ bypassCache: true })
     }
 
     // 4. Create a contentScriptRegistry object with functions for each content script
@@ -1535,10 +1535,65 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
     observer.observe(document, config)
 }
 
-export function getTimestampNoteContentForYoutubeNotes() {
+export async function getTimestampedNoteWithAIsummaryForYoutubeNotes(
+    includeLastFewSecs,
+) {
+    const videoId = new URL(window.location.href).searchParams.get('v')
+    const isStaging =
+        process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+        process.env.NODE_ENV === 'development'
+
+    const baseUrl = isStaging
+        ? 'https://cloudflare-memex-staging.memex.workers.dev'
+        : 'https://cloudfare-memex.memex.workers.dev'
+
+    const normalisedYoutubeURL = 'https://www.youtube.com/watch?v=' + videoId
+
+    const response = await fetch(baseUrl + '/youtube-transcripts', {
+        method: 'POST',
+        body: JSON.stringify({
+            originalUrl: normalisedYoutubeURL,
+            getRawTranscript: true,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+    })
+
+    let responseContent = await response.text()
+
+    const transcriptJSON = JSON.parse(responseContent).transcriptText
+
+    const [startTimeURL, humanTimestamp] = getHTML5VideoTimestamp(
+        includeLastFewSecs,
+    )
+    const [endTimeURL] = getHTML5VideoTimestamp(0)
+
+    const startTimeSecs = parseFloat(
+        new URL(startTimeURL).searchParams.get('t'),
+    )
+    const endTimeSecs = parseFloat(new URL(endTimeURL).searchParams.get('t'))
+    const videoTimeStampForComment = `[${humanTimestamp}](${startTimeURL})`
+
+    const relevantTranscriptItems = transcriptJSON.filter((item) => {
+        const flooredStart = Math.floor(item.start)
+        const flooredEnd = Math.floor(item.end)
+
+        return (
+            (flooredStart >= startTimeSecs && flooredStart <= endTimeSecs) ||
+            (flooredEnd >= startTimeSecs && flooredEnd <= endTimeSecs)
+        )
+    })
+
+    return [videoTimeStampForComment, JSON.stringify(relevantTranscriptItems)]
+}
+
+export function getTimestampNoteContentForYoutubeNotes(
+    includeLastFewSecs?: number,
+) {
     let videoTimeStampForComment: string | null
 
-    const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
+    const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp(
+        includeLastFewSecs ?? 0,
+    )
 
     if (videoURLWithTime != null) {
         videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`
@@ -1549,7 +1604,7 @@ export function getTimestampNoteContentForYoutubeNotes() {
     }
 }
 
-export function injectYoutubeButtonMenu(annotationsFunctions: any) {
+export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     const YTchapterContainer = document.getElementsByClassName(
         'ytp-chapter-container',
     )
@@ -1600,18 +1655,36 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     // Add Note Button
     const annotateButton = document.createElement('div')
     annotateButton.setAttribute('class', 'ytp-menuitem')
-    annotateButton.onclick = () =>
+    annotateButton.onclick = async () => {
+        const secondsInPastFieldNote = document.getElementById(
+            'secondsInPastFieldNote',
+        ) as HTMLInputElement
+        const secondsInPastContainerNote = document.getElementById(
+            'secondsInPastContainerNote',
+        ) as HTMLInputElement
+
+        const includeLastFewSecs = secondsInPastFieldNote.value
+            ? parseInt(secondsInPastFieldNote.value)
+            : 0
+
+        await globalThis['browser'].storage.local.set({
+            ['noteSecondsStorage']: includeLastFewSecs,
+        })
+
         annotationsFunctions.createAnnotation()(
             false,
             false,
             false,
-            getTimestampNoteContentForYoutubeNotes(),
+            getTimestampNoteContentForYoutubeNotes(includeLastFewSecs),
+            includeLastFewSecs,
         )
+    }
     annotateButton.style.display = 'flex'
     annotateButton.style.alignItems = 'center'
     annotateButton.style.cursor = 'pointer'
+    annotateButton.style.borderLeft = '1px solid #24252C'
 
-    annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Add Note</div>`
+    annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Timestamped Note</div>`
 
     // Summarize Button
     const summarizeButton = document.createElement('div')
@@ -1620,7 +1693,205 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     summarizeButton.style.display = 'flex'
     summarizeButton.style.alignItems = 'center'
     summarizeButton.style.cursor = 'pointer'
-    summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize</div>`
+    summarizeButton.style.borderLeft = '1px solid #24252C'
+    summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize Video</div>`
+
+    // Textfield for Smart Note
+    const textField = document.createElement('input')
+    textField.id = 'secondsInPastSetting'
+    const smartNoteSecondsStorage = await globalThis[
+        'browser'
+    ].storage.local.get('smartNoteSecondsStorage')
+
+    const smartNoteSeconds = smartNoteSecondsStorage.smartNoteSecondsStorage
+
+    if (smartNoteSeconds) {
+        textField.value = smartNoteSeconds
+    }
+    textField.setAttribute('type', 'text')
+    textField.setAttribute('placeholder', '60s')
+    textField.style.height = '100%'
+    textField.style.width = '84px'
+    textField.style.borderRadius = '6px'
+    textField.style.padding = '5px 10px'
+    textField.style.overflow = 'hidden'
+    textField.style.background = 'transparent'
+    textField.style.outline = 'none'
+    textField.style.color = '#f4f4f4'
+    textField.style.textAlign = 'center'
+    textField.style.position = 'absolute'
+
+    // Textfield for Regular Note
+    const textFieldNote = document.createElement('input')
+    textFieldNote.id = 'secondsInPastFieldNote'
+
+    const noteSecondsStorage = await globalThis['browser'].storage.local.get(
+        'noteSecondsStorage',
+    )
+
+    const noteSeconds = noteSecondsStorage.noteSecondsStorage
+
+    console.log('noteSeconds', noteSeconds)
+
+    if (noteSeconds) {
+        textFieldNote.value = noteSeconds
+    }
+
+    textFieldNote.setAttribute('type', 'text')
+    textFieldNote.setAttribute('placeholder', '0s')
+    textFieldNote.style.height = '100%'
+    textFieldNote.style.width = '84px'
+    textFieldNote.style.borderRadius = '6px'
+    textFieldNote.style.padding = '5px 10px'
+    textFieldNote.style.overflow = 'hidden'
+    textFieldNote.style.background = 'transparent'
+    textFieldNote.style.outline = 'none'
+    textFieldNote.style.color = '#f4f4f4'
+    textFieldNote.style.textAlign = 'center'
+    textFieldNote.style.position = 'absolute'
+
+    // Stop click event propagation on the textfield to its parent
+    textFieldNote.addEventListener('click', (event) => {
+        event.stopPropagation()
+    })
+
+    // Add keyup event to the textfield for the "Enter" key
+    textFieldNote.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            annotateButton.click()
+        }
+    })
+
+    textField.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            AItimeStampButton.click()
+        }
+    })
+
+    // Set maxLength to 3 to limit input to 999
+    textField.setAttribute('maxlength', '3')
+    textFieldNote.setAttribute('maxlength', '3')
+
+    // Optional: use pattern attribute for native validation
+    textField.setAttribute('pattern', '\\d{1,3}') // 1 to 3 digit numbers
+    textFieldNote.setAttribute('pattern', '\\d{1,3}') // 1 to 3 digit numbers
+
+    textField.addEventListener('input', (event: Event) => {
+        let value = event.target.value
+
+        // Replace non-digit characters
+        value = value.replace(/[^0-9]/g, '')
+
+        // If number is greater than 999, set it to 999
+        if (parseInt(value) > 999) {
+            value = '999'
+        }
+
+        ;(event.target as HTMLElement).value = value
+    })
+
+    textFieldNote.addEventListener('input', (event) => {
+        let value = (event.target as HTMLElement).value
+
+        // Replace non-digit characters
+        value = value.replace(/[^0-9]/g, '')
+
+        // If number is greater than 999, set it to 999
+        if (parseInt(value) > 999) {
+            value = '999'
+        }
+
+        ;(event.target as Element).value = value
+    })
+
+    // Rewind Icon
+    const rewindIcon = runtime.getURL('/img/historyYoutubeInjection.svg')
+    const rewindIconEl = document.createElement('img')
+    rewindIconEl.src = rewindIcon
+    rewindIconEl.style.height = '18px'
+    rewindIconEl.style.margin = '0 10px 0 10px'
+    // Rewind Icon
+    const rewindIcon2 = runtime.getURL('/img/historyYoutubeInjection.svg')
+    const rewindIconEl2 = document.createElement('img')
+    rewindIconEl2.src = rewindIcon2
+    rewindIconEl2.style.height = '18px'
+    rewindIconEl2.style.margin = '0 10px 0 10px'
+
+    // TextField ADd NOTE Container
+    const textFieldContainerNote = document.createElement('div')
+    textFieldContainerNote.id = 'secondsInPastContainerNote'
+    textFieldContainerNote.appendChild(rewindIconEl2)
+    textFieldContainerNote.appendChild(textFieldNote)
+    textFieldContainerNote.style.display = 'flex'
+    textFieldContainerNote.style.alignItems = 'center'
+    textFieldContainerNote.style.margin = '0 10px'
+    textFieldContainerNote.style.borderRadius = '6px'
+    textFieldContainerNote.style.outline = '1px solid #3E3F47'
+    textFieldContainerNote.style.overflow = 'hidden'
+    textFieldContainerNote.style.background = '#1E1F26'
+    textFieldContainerNote.style.width = '84px'
+    textFieldContainerNote.style.height = '26px'
+    textFieldContainerNote.style.position = 'relative'
+
+    textFieldContainerNote.addEventListener('click', (event) => {
+        event.stopPropagation()
+    })
+
+    // TextField Smart Note Container
+    const textFieldContainer = document.createElement('div')
+    textFieldContainer.id = 'secondsInPastSettingContainer'
+    textFieldContainer.appendChild(rewindIconEl)
+    textFieldContainer.appendChild(textField)
+    textFieldContainer.style.display = 'flex'
+    textFieldContainer.style.alignItems = 'center'
+    textFieldContainer.style.margin = '0 10px'
+    textFieldContainer.style.borderRadius = '6px'
+    textFieldContainer.style.outline = '1px solid #3E3F47'
+    textFieldContainer.style.overflow = 'hidden'
+    textFieldContainer.style.background = '#1E1F26'
+    textFieldContainer.style.width = '84px'
+    textFieldContainer.style.height = '26px'
+    textFieldContainer.style.position = 'relative'
+
+    textFieldContainer.addEventListener('click', (event) => {
+        event.stopPropagation()
+    })
+
+    // AI timestamp Button
+    const AItimeStampButton = document.createElement('div')
+    AItimeStampButton.setAttribute('class', 'ytp-menuitem')
+
+    AItimeStampButton.onclick = async () => {
+        const secondsInPastField = document.getElementById(
+            'secondsInPastSetting',
+        ) as HTMLInputElement
+        const secondsInPastSettingContainer = document.getElementById(
+            'secondsInPastSettingContainer',
+        ) as HTMLInputElement
+
+        const includeLastFewSecs = secondsInPastField.value
+            ? parseInt(secondsInPastField.value)
+            : 60
+        await globalThis['browser'].storage.local.set({
+            ['smartNoteSecondsStorage']: includeLastFewSecs,
+        })
+
+        annotationsFunctions.createTimestampWithAISummary(includeLastFewSecs)(
+            false,
+            false,
+            false,
+            getTimestampNoteContentForYoutubeNotes(includeLastFewSecs),
+        )
+    }
+    AItimeStampButton.style.borderLeft = '1px solid #24252C'
+
+    AItimeStampButton.style.display = 'flex'
+    AItimeStampButton.style.alignItems = 'center'
+    AItimeStampButton.style.cursor = 'pointer'
+
+    AItimeStampButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Smart Note</div>`
+    AItimeStampButton.appendChild(textFieldContainer)
+    annotateButton.appendChild(textFieldContainerNote)
 
     // MemexIconDisplay
     const memexIcon = runtime.getURL('/img/memex-icon.svg')
@@ -1638,6 +1909,17 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
     timeStampEl.style.margin = '0 10px 0 10px'
     annotateButton.insertBefore(timeStampEl, annotateButton.firstChild)
 
+    // AI timestamp icon
+    const AItimestampIcon = runtime.getURL('/img/starsYoutube.svg')
+    const AItimestampIconEl = document.createElement('img')
+    AItimestampIconEl.src = AItimestampIcon
+    AItimestampIconEl.style.height = '20px'
+    AItimestampIconEl.style.margin = '0 10px 0 10px'
+    AItimeStampButton.insertBefore(
+        AItimestampIconEl,
+        AItimeStampButton.firstChild,
+    )
+
     // SummarizeIcon
     const summarizeIcon = runtime.getURL(
         '/img/summarizeIconForYoutubeInjection.svg',
@@ -1650,6 +1932,7 @@ export function injectYoutubeButtonMenu(annotationsFunctions: any) {
 
     // Appending the right buttons
     memexButtons.appendChild(annotateButton)
+    memexButtons.appendChild(AItimeStampButton)
     memexButtons.appendChild(summarizeButton)
     memexButtons.style.color = '#f4f4f4'
     memexButtons.style.width = 'fit-content'

@@ -37,6 +37,7 @@ import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/co
 import { logoNoText } from 'src/common-ui/components/design-library/icons'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { UnifiedList } from 'src/annotations/cache/types'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -62,6 +63,8 @@ export interface Props extends RibbonSubcomponentProps {
     selectRibbonPositionOption: (option) => void
     hasFeedActivity: boolean
     analyticsBG: AnalyticsCoreInterface
+    isTrial: boolean
+    signupDate?: number
 }
 
 interface State {
@@ -286,6 +289,9 @@ export default class Ribbon extends Component<Props, State> {
                     }
                     closePicker={this.hideListPicker}
                     onListShare={this.props.onListShare}
+                    onListFocus={(listId: UnifiedList['localId']) => {
+                        this.props.sidebar.handleSidebarOpenInFocusMode(listId)
+                    }}
                 />
             </PopoutBox>
         )
@@ -1648,6 +1654,10 @@ export default class Ribbon extends Component<Props, State> {
                                                     this.props.sidebar
                                                         .isSidebarOpen
                                                 }
+                                                isTrial={this.props.isTrial}
+                                                signupDate={
+                                                    this.props.signupDate
+                                                }
                                             />
                                             {this.renderTutorialButton()}
                                         </BottomSection>
@@ -1804,6 +1814,7 @@ export default class Ribbon extends Component<Props, State> {
                                     }
                                     ribbonPosition={this.props.ribbonPosition}
                                 >
+                                    {this.renderTutorialButton()}
                                     <BlockCounterIndicator
                                         ribbonPosition={
                                             this.props.ribbonPosition
@@ -1811,8 +1822,9 @@ export default class Ribbon extends Component<Props, State> {
                                         isSidebarOpen={
                                             this.props.sidebar.isSidebarOpen
                                         }
+                                        isTrial={this.props.isTrial}
+                                        signupDate={this.props.signupDate}
                                     />
-                                    {this.renderTutorialButton()}
                                     {this.renderCloseRibbonButton()}
                                 </BottomSection>
                             </>

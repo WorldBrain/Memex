@@ -1293,6 +1293,7 @@ export class DashboardContainer extends StatefulUIElement<
                 <Onboarding
                     contentScriptsBG={this.props.contentScriptsBG}
                     authBG={this.props.authBG}
+                    analyticsBG={this.props.analyticsBG}
                 />
             )
         }

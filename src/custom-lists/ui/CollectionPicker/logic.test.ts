@@ -96,7 +96,7 @@ const setupLogicHelper = async ({
         pageActivityIndicatorBG:
             device.backgroundModules.pageActivityIndicator.remoteFunctions,
         onSubmit,
-        analyticsBG: device.backgroundModules.analytics.remoteFunctions,
+        analyticsBG: device.backgroundModules.analyticsBG,
     })
 
     const testLogic = device.createElement(entryPickerLogic)
@@ -670,6 +670,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.processEvent('resultEntryAllPress', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            analyticsBG: device.backgroundModules.analyticsBG,
         })
         await entryPickerLogic.processingUpstreamOperation
 
@@ -704,6 +705,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.processEvent('resultEntryPress', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[1],
+            analyticsBG: device.backgroundModules.analyticsBG,
         })
 
         expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
@@ -722,6 +724,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.processEvent('resultEntryPress', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[1],
+            analyticsBG: device.backgroundModules.analyticsBG,
         })
 
         expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
@@ -740,6 +743,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.processEvent('resultEntryPress', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            analyticsBG: device.backgroundModules.analyticsBG,
         })
 
         expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
@@ -760,6 +764,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.processEvent('resultEntryPress', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[3],
+            analyticsBG: device.backgroundModules.analyticsBG,
         })
 
         expect(normalizedStateToArray(testLogic.state.listEntries)).toEqual([
@@ -797,6 +802,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.processEvent('resultEntryPress', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            analyticsBG: device.backgroundModules.analyticsBG,
         })
 
         expect(testLogic.state).toEqual(
@@ -815,6 +821,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.processEvent('resultEntryPress', {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
+            analyticsBG: device.backgroundModules.analyticsBG,
         })
 
         expect(testLogic.state).toEqual(
@@ -870,7 +877,10 @@ describe('SpacePickerLogic', () => {
             }),
         )
 
-        await testLogic.processEvent('newEntryPress', { entry: newEntryText })
+        await testLogic.processEvent('newEntryPress', {
+            entry: newEntryText,
+            analyticsBG: device.backgroundModules.analyticsBG,
+        })
 
         expect(selectedEntry).toBe(newEntryId)
         expect(newEntryName).toBe(newEntryText)
@@ -933,6 +943,7 @@ describe('SpacePickerLogic', () => {
 
         await testLogic.processEvent('newEntryAllPress', {
             entry: newEntryText,
+            analyticsBG: device.backgroundModules.analyticsBG,
         })
         expect(newEntryName).toBe(newEntryText)
 

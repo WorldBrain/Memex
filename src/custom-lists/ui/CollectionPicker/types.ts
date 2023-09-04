@@ -39,10 +39,14 @@ export interface SpacePickerState {
 export type SpacePickerEvent = UIEvent<{
     setSearchInputRef: { ref: HTMLInputElement }
     searchInputChanged: { query: string; skipDebounce?: boolean }
-    resultEntryAllPress: { entry: UnifiedList }
-    newEntryAllPress: { entry: string }
+    resultEntryAllPress: {
+        entry: UnifiedList
+        analyticsBG: AnalyticsCoreInterface
+    }
+    newEntryAllPress: { entry: string; analyticsBG: AnalyticsCoreInterface }
     resultEntryPress: {
         entry: Pick<UnifiedList, 'localId'>
+        analyticsBG: AnalyticsCoreInterface
         shouldRerender?: boolean
     }
     resultEntryFocus: { entry: UnifiedList; index: number }
@@ -52,7 +56,7 @@ export type SpacePickerEvent = UIEvent<{
     updateContextMenuPosition: { x?: number; y?: number }
     renameList: { listId: number; name: string }
     deleteList: { listId: number }
-    newEntryPress: { entry: string }
+    newEntryPress: { entry: string; analyticsBG: AnalyticsCoreInterface }
     switchTab: { tab: SpacePickerTab }
     keyPress: { event: KeyboardEvent }
     onKeyUp: { event: KeyboardEvent }

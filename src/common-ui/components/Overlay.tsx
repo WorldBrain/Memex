@@ -107,7 +107,7 @@ export const OuterDiv = styled.div`
     right: 0;
     z-index: 2147483647;
     background: rgba(18, 19, 27, 0.6);
-    backdrop-filter: blur(30px);
+    backdrop-filter: blur(15px);
     cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
     justify-content: center;
     align-items: center;

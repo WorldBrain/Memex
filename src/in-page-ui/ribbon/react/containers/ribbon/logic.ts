@@ -14,9 +14,13 @@ import { FocusableComponent } from 'src/annotations/components/types'
 import { Analytics } from 'src/analytics'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import browser, { Storage } from 'webextension-polyfill'
-import { pageActionAllowed } from 'src/util/subscriptions/storage'
+import {
+    enforceTrialPeriod30Days,
+    pageActionAllowed,
+} from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -61,6 +65,8 @@ export interface RibbonContainerState {
     search: ValuesOf<componentTypes.RibbonSearchProps>
     pausing: ValuesOf<componentTypes.RibbonPausingProps>
     hasFeedActivity: boolean
+    isTrial: boolean
+    signupDate: number
 }
 
 export type RibbonContainerEvents = UIEvent<
@@ -101,6 +107,7 @@ export interface RibbonContainerOptions extends RibbonContainerDependencies {
 export interface RibbonLogicOptions extends RibbonContainerOptions {
     focusCreateForm: FocusableComponent['focus']
     analytics: Analytics
+    analyticsBG: AnalyticsCoreInterface
 }
 
 type EventHandler<
@@ -175,25 +182,17 @@ export class RibbonContainerLogic extends UILogic<
                 isPaused: false,
             },
             hasFeedActivity: false,
+            isTrial: false,
+            signupDate: null,
         }
     }
 
     init: EventHandler<'init'> = async (incoming) => {
         const { getFullPageUrl } = this.dependencies
+
         await loadInitial<RibbonContainerState>(this, async () => {
             let fullPageUrl = await getFullPageUrl()
 
-            // // TElegram URL Support
-            // if (window.location.href.includes('web.telegram.org')) {
-            //     try {
-            //         fullPageUrl = convertTelegramURLintoMemexPageURL(
-            //             fullPageUrl,
-            //         )
-            //     } catch (error) {
-            //         console.log('error', error)
-            //     }
-            // }
-            // // Telegram URL Support
             this.emitMutation({ fullPageUrl: { $set: fullPageUrl } })
             await this.hydrateStateFromDB({
                 ...incoming,
@@ -202,27 +201,24 @@ export class RibbonContainerLogic extends UILogic<
         })
         this.initLogicResolvable.resolve()
 
-        // this.sidebar = document
-        //     .getElementById('memex-sidebar-container')
-        //     ?.shadowRoot.getElementById('annotationSidebarContainer')
         this.initReadingViewListeners()
-        // let fullPageUrl = await getFullPageUrl()
 
-        // // TElegram URL Support
-        // if (window.location.href.includes('web.telegram.org')) {
-        //     try {
-        //         fullPageUrl = fullPageUrl.replace('#@', '@')
-        //     } catch (error) {
-        //         console.log('error', error)
-        //     }
-        // }
+        try {
+            const signupDate = new Date(
+                await (await this.dependencies.authBG.getCurrentUser())
+                    .creationTime,
+            ).getTime()
+            const isTrial = (await enforceTrialPeriod30Days(signupDate)) ?? null
 
-        // // Telegram URL Support
-
-        // await this.hydrateStateFromDB({
-        //     ...incoming,
-        //     event: { url: fullPageUrl },
-        // })
+            if (isTrial) {
+                this.emitMutation({
+                    isTrial: { $set: isTrial },
+                    signupDate: { $set: signupDate },
+                })
+            }
+        } catch (error) {
+            console.error('error in updatePageCounter', error)
+        }
     }
 
     async initReadingViewListeners() {
@@ -564,7 +560,7 @@ export class RibbonContainerLogic extends UILogic<
     toggleBookmark: EventHandler<'toggleBookmark'> = async ({
         previousState,
     }) => {
-        const allowed = await pageActionAllowed()
+        const allowed = await pageActionAllowed(this.dependencies.analyticsBG)
 
         if (allowed) {
             const postInitState = await this.waitForPostInitState(previousState)

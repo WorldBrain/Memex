@@ -29,6 +29,7 @@ export interface PageAnnotationsCacheInterface {
         normalizedPageUrl: string,
         unifiedListIds: UnifiedList['unifiedId'][],
     ) => void
+    getSharedPageListIds: (normalizedPageUrl: string) => string[]
     setAnnotations: (
         annotations: UnifiedAnnotationForCache[],
         opts?: { now?: number },

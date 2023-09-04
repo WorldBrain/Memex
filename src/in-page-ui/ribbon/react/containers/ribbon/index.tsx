@@ -34,6 +34,7 @@ export default class RibbonContainer extends StatefulUIElement<
             new RibbonContainerLogic({
                 ...props,
                 analytics,
+                analyticsBG: props.analyticsBG,
                 focusCreateForm: () =>
                     this.ribbonRef?.current?.focusCreateForm(),
             }),
@@ -94,6 +95,12 @@ export default class RibbonContainer extends StatefulUIElement<
             },
         })
     }
+    private handleSidebarOpenInFocusMode = (listId) => {
+        this.props.inPageUI.showSidebar({
+            action: 'set_focus_mode',
+            listId,
+        })
+    }
     private handlePageShare = () => {
         this.props.inPageUI.showSidebar({
             action: 'share_page',
@@ -121,6 +128,8 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
+                isTrial={this.state.isTrial}
+                signupDate={this.state.signupDate}
                 pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
                 contentSharingBG={this.props.contentSharing}
                 analyticsBG={this.props.analyticsBG}
@@ -197,6 +206,8 @@ export default class RibbonContainer extends StatefulUIElement<
                     setShowSidebarCommentBox: () =>
                         this.props.inPageUI.showSidebar({ action: 'comment' }),
                     openSidebar: this.handleSidebarOpen,
+                    handleSidebarOpenInFocusMode: this
+                        .handleSidebarOpenInFocusMode,
                     sharePage: this.handlePageShare,
                     closeSidebar: () => this.props.inPageUI.hideSidebar(),
                     toggleReadingView: () =>
