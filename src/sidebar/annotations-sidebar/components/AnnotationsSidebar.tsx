@@ -3291,6 +3291,8 @@ const FollowedListNotesContainer = styled(Margin)<{
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
+    width: fill-available;
+    width: -moz-available;
     z-index: ${(props) => 1000 - props.key};
 
     ${(props) =>
