@@ -1,6 +1,6 @@
 import * as React from 'react'
 import cx from 'classnames'
-import styled from 'styled-components'
+import styled, { ThemeProps, css } from 'styled-components'
 
 const styles = require('./Checkbox.css')
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -188,6 +188,19 @@ const LabelCheck = styled.span<{ isChecked; mode; size }>`
     &:focus {
         outline: none;
     }
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css<any>`
+            background-color: ${(props) =>
+                props.isChecked
+                    ? props.theme.colors.greyScale4
+                    : props.theme.colors.greyScale3};
+            border-color: ${(props) =>
+                props.isChecked
+                    ? props.theme.colors.greyScale4
+                    : props.theme.colors.greyScale3};
+        `};
 `
 
 export default Checkbox

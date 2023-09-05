@@ -181,9 +181,9 @@ export class BlockCounterIndicator extends React.Component<Props> {
                                     Use everything as much as you want.
                                     <br />
                                     <br />
-                                    After the trial: 60 days money-back-guarntee
-                                    and a free tier with 25 saved pages per
-                                    month.
+                                    After the trial: 60 days
+                                    money-back-guarantee and a free tier with 25
+                                    saved pages per month.
                                     <br />
                                     Each saved page counts only once - forever.
                                 </InfoTooltipSubTitle>

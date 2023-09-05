@@ -15,6 +15,7 @@ import {
     MemexTheme,
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { browser } from 'webextension-polyfill-ts'
 
 interface RootProps {
     mount: InPageUIRootMount
@@ -38,6 +39,25 @@ class Root extends React.Component<RootProps, RootState> {
             console.error('Could not load theme, falling back to dark mode')
         }
         this.setState({ themeVariant, theme: theme({ variant: themeVariant }) })
+
+        await browser.storage.onChanged.addListener(
+            async (changes, areaName) => {
+                if (areaName !== 'local') {
+                    return
+                }
+
+                if (changes.themeVariant) {
+                    const { themeVariant } = await browser.storage.local.get(
+                        'themeVariant',
+                    )
+
+                    this.setState({
+                        themeVariant,
+                        theme: theme({ variant: themeVariant }),
+                    })
+                }
+            },
+        )
     }
 
     render() {

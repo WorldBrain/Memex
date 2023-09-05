@@ -102,6 +102,15 @@ const Banner = styled.div<{
     animation-duration: 0.2s;
 
     ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            border-color: ${(props) =>
+                props.theme.borderStyles.borderHoverElements};
+            box-shadow: ${(props) =>
+                props.theme.borderStyles.boxShadowHoverElements};
+        `};
+
+    ${(props) =>
         props.location === 'sidebar' &&
         css`
             grid-gap: 10px;

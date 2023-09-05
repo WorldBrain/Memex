@@ -417,7 +417,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <PopoutBox
                 targetElementRef={this.copyButtonRef.current}
-                placement={'bottom-end'}
+                placement={'bottom'}
                 offsetX={5}
                 offsetY={5}
                 closeComponent={() => {
@@ -451,7 +451,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <PopoutBox
                 targetElementRef={this.bulkEditButtonRef.current}
-                placement={'bottom-end'}
+                placement={'bottom'}
                 offsetX={5}
                 offsetY={5}
                 closeComponent={() =>
@@ -2447,7 +2447,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <PopoutBox
                 targetElementRef={this.sortDropDownButtonRef.current}
-                placement={'bottom-end'}
+                placement={'bottom'}
                 offsetX={5}
                 offsetY={5}
                 closeComponent={() =>
@@ -2913,6 +2913,12 @@ const SummaryText = styled.div`
     white-space: break-spaces;
     flex-direction: column-reverse;
     margin-bottom: 200px;
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            color: ${(props) => props.theme.colors.greyScale5};
+        `};
 `
 
 const FocusModeNotifContainer = styled.div`

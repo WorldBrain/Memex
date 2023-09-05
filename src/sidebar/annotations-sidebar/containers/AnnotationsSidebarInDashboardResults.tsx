@@ -2,12 +2,14 @@ import * as React from 'react'
 
 import { AnnotationsSidebarContainer } from './AnnotationsSidebarContainer'
 import { SidebarContainerOptions } from 'src/sidebar/annotations-sidebar/containers/logic'
+import { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 type Props = SidebarContainerOptions & {
     refSidebar?: React.Ref<AnnotationsSidebarContainer>
     setLoginModalShown: (isShown: boolean) => void
     setDisplayNameModalShown: (isShown: boolean) => void
     onNotesSidebarClose?: () => void
+    theme: MemexTheme
 }
 
 export class AnnotationsSidebarInDashboardResults extends React.Component<
@@ -30,6 +32,12 @@ export class AnnotationsSidebarInDashboardResults extends React.Component<
 
     render() {
         const { refSidebar, ...props } = this.props
-        return <AnnotationsSidebarContainer ref={refSidebar} {...props} />
+        return (
+            <AnnotationsSidebarContainer
+                {...props}
+                theme={props.theme}
+                ref={refSidebar}
+            />
+        )
     }
 }

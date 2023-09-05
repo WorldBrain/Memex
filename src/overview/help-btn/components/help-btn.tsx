@@ -6,8 +6,12 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
-export interface Props {}
+export interface Props {
+    theme: MemexThemeVariant
+    toggleTheme: () => void
+}
 export interface State {
     isOpen: boolean
     showChat: boolean
@@ -186,9 +190,21 @@ export class HelpBtn extends React.PureComponent<Props, State> {
         return (
             <HelpIconPosition>
                 {this.renderMenu()}
+                {window.location.href.includes('/overview') && (
+                    <Icon
+                        heightAndWidth="24px"
+                        color={
+                            this.props.theme === 'dark'
+                                ? 'greyScale5'
+                                : 'greyScale4'
+                        }
+                        filePath={this.props.theme === 'dark' ? 'moon' : 'sun'}
+                        onClick={() => this.props.toggleTheme()}
+                    />
+                )}
                 <Icon
                     filePath={icons.helpIcon}
-                    heightAndWidth={'34px'}
+                    heightAndWidth={'24px'}
                     onClick={this.handleClick}
                     containerRef={this.helpButtonRef}
                 />
@@ -233,6 +249,7 @@ const HelpIconPosition = styled.div`
     bottom: 10px;
     right: 10px;
     z-index: 100;
+    grid-gap: 10px;
 
     @media (max-width: 1100px) {
         display: none;

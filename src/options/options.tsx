@@ -18,7 +18,11 @@ import { OverlayContainer } from '@worldbrain/memex-common/lib/main-ui/container
 import { runInBackground, setupRpcConnection } from 'src/util/webextensionRPC'
 import { createUIServices } from 'src/services/ui'
 import { UIServices } from 'src/services/ui/types'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import {
+    MemexTheme,
+    MemexThemeVariant,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { browser } from 'webextension-polyfill-ts'
 
 // Include development tools if we are not building for production
 
@@ -58,6 +62,7 @@ interface RootProps {
 
 interface RootState {
     themeVariant?: MemexThemeVariant
+    theme?: MemexTheme
 }
 
 class Root extends React.Component<RootProps, RootState> {
@@ -67,6 +72,25 @@ class Root extends React.Component<RootProps, RootState> {
         this.setState({
             themeVariant: await loadThemeVariant(),
         })
+
+        await browser.storage.onChanged.addListener(
+            async (changes, areaName) => {
+                if (areaName !== 'local') {
+                    return
+                }
+
+                if (changes.themeVariant) {
+                    const { themeVariant } = await browser.storage.local.get(
+                        'themeVariant',
+                    )
+
+                    this.setState({
+                        themeVariant,
+                        theme: theme({ variant: themeVariant }),
+                    })
+                }
+            },
+        )
     }
 
     render() {

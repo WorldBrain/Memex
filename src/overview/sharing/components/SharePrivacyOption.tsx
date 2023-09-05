@@ -47,7 +47,7 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
         return (
             <TooltipBox
                 tooltipText={this.props.description}
-                placement={'bottom'}
+                placement={'bottom-start'}
             >
                 <PrivacyOptionItem
                     onClick={() => this.props.onClick(false)}

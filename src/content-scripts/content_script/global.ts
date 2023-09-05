@@ -98,8 +98,6 @@ import {
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -1734,8 +1732,6 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     )
 
     const noteSeconds = noteSecondsStorage.noteSecondsStorage
-
-    console.log('noteSeconds', noteSeconds)
 
     if (noteSeconds) {
         textFieldNote.value = noteSeconds

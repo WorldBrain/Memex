@@ -57,6 +57,7 @@ import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
 import type { AnnotationsSearchResponse } from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { browser } from 'webextension-polyfill-ts'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -3577,6 +3578,17 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             modals: { deletingListId: { $set: event.listId } },
             listsSidebar: { showMoreMenuListId: { $set: undefined } },
+        })
+    }
+    toggleTheme: EventHandler<'toggleTheme'> = async ({ previousState }) => {
+        await browser.storage.local.set({
+            themeVariant:
+                previousState.themeVariant === 'dark' ? 'light' : 'dark',
+        })
+        this.emitMutation({
+            themeVariant: {
+                $set: previousState.themeVariant === 'dark' ? 'light' : 'dark',
+            },
         })
     }
 

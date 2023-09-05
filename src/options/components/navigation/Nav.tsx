@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 const Nav = ({ children }) => {
     return (
@@ -25,6 +25,13 @@ const Root = styled.div`
     justify-content: space-between;
     border-right: 1px solid ${(props) => props.theme.colors.greyScale3};
     background-color: ${(props) => props.theme.colors.greyScale1};
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            border-color: ${(props) => props.theme.colors.greyScale3};
+            box-shadow: ${(props) => props.theme.borderStyles.boxShadowRight};
+        `};
 `
 
 const NavItem = styled.ul`

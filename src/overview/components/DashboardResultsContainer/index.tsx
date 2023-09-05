@@ -12,7 +12,21 @@ import { OVERVIEW_URL } from 'src/constants'
 import ViewerModal from 'src/reader/components/ViewerModal'
 import { DashboardContainer } from 'src/dashboard-refactor'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
+import { ThemeProvider } from 'styled-components'
+import {
+    MemexTheme,
+    MemexThemeVariant,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import {
+    loadThemeVariant,
+    theme,
+} from 'src/common-ui/components/design-library/theme'
+import { browser } from 'webextension-polyfill-ts'
 
+interface RootState extends DashboardResultsState {
+    themeVariant?: MemexThemeVariant
+    theme?: MemexTheme
+}
 export default class DashboardResultsContainer extends StatefulUIElement<
     DashboardResultsDependencies,
     DashboardResultsState,
@@ -20,6 +34,35 @@ export default class DashboardResultsContainer extends StatefulUIElement<
 > {
     constructor(props: DashboardResultsDependencies) {
         super(props, new DashboardResultsLogic(props))
+    }
+
+    async componentDidMount() {
+        let themeVariant: MemexThemeVariant = 'dark'
+        try {
+            themeVariant = await loadThemeVariant()
+        } catch (err) {
+            console.error('Could not load theme, falling back to dark mode')
+        }
+        this.setState({ themeVariant, theme: theme({ variant: themeVariant }) })
+
+        await browser.storage.onChanged.addListener(
+            async (changes, areaName) => {
+                if (areaName !== 'local') {
+                    return
+                }
+
+                if (changes.themeVariant) {
+                    const { themeVariant } = await browser.storage.local.get(
+                        'themeVariant',
+                    )
+
+                    this.setState({
+                        themeVariant,
+                        theme: theme({ variant: themeVariant }),
+                    })
+                }
+            },
+        )
     }
 
     handleToggleAnnotationsSidebar = (args: {
@@ -45,30 +88,36 @@ export default class DashboardResultsContainer extends StatefulUIElement<
             return <Onboarding navToDashboard={this.handleOnboardingComplete} />
         }
 
-        return (
-            <>
-                <DashboardContainer
-                    services={this.props.services}
-                    theme={this.props.theme}
-                    renderUpdateNotifBanner={() => (
-                        <UpdateNotifBanner
-                            theme={{
-                                ...this.props.theme,
-                                position: 'fixed',
-                            }}
+        if (this.state.theme == null) {
+            return null
+        } else {
+            return (
+                <>
+                    <ThemeProvider theme={this.state.theme ?? null}>
+                        <DashboardContainer
+                            services={this.props.services}
+                            theme={this.state.theme}
+                            renderUpdateNotifBanner={() => (
+                                <UpdateNotifBanner
+                                    theme={{
+                                        ...this.state.theme,
+                                        position: 'fixed',
+                                    }}
+                                />
+                            )}
+                            analyticsBG={this.props.analyticsBG}
                         />
-                    )}
-                    analyticsBG={this.props.analyticsBG}
-                />
 
-                {this.state.readerShow && (
-                    <ViewerModal
-                        fullUrl={this.state.readerUrl}
-                        handleClose={this.readerClose}
-                        onInit={this.readerLoaded}
-                    />
-                )}
-            </>
-        )
+                        {this.state.readerShow && (
+                            <ViewerModal
+                                fullUrl={this.state.readerUrl}
+                                handleClose={this.readerClose}
+                                onInit={this.readerLoaded}
+                            />
+                        )}
+                    </ThemeProvider>
+                </>
+            )
+        }
     }
 }

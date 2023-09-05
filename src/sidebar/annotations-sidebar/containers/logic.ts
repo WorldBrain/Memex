@@ -678,26 +678,30 @@ export class SidebarContainerLogic extends UILogic<
     private readingViewStorageListener = async (enable: boolean) => {
         this.resizeObserver = new ResizeObserver(this.debounceReadingWidth)
 
-        if (this.readingViewState['@Sidebar-reading_view']) {
-            this.emitMutation({
-                readingView: { $set: true },
-            })
-            this.resizeObserver.observe(this.sidebar)
-            window.addEventListener('resize', this.debounceReadingWidth)
-            this.setReadingWidth()
-        }
-        if (!this.readingViewState['@Sidebar-reading_view']) {
-            this.emitMutation({
-                readingView: { $set: false },
-            })
-        }
+        try {
+            if (this.readingViewState['@Sidebar-reading_view']) {
+                this.emitMutation({
+                    readingView: { $set: true },
+                })
+                this.resizeObserver.observe(this.sidebar)
+                window.addEventListener('resize', this.debounceReadingWidth)
+                this.setReadingWidth()
+            }
+            if (!this.readingViewState['@Sidebar-reading_view']) {
+                this.emitMutation({
+                    readingView: { $set: false },
+                })
+            }
 
-        const { storageAPI } = this.options
-        if (enable) {
-            storageAPI.onChanged.addListener(this.toggleReadingView)
-        } else {
-            storageAPI.onChanged.removeListener(this.toggleReadingView)
-            this.resizeObserver.disconnect()
+            const { storageAPI } = this.options
+            if (enable) {
+                storageAPI.onChanged.addListener(this.toggleReadingView)
+            } else {
+                storageAPI.onChanged.removeListener(this.toggleReadingView)
+                this.resizeObserver.disconnect()
+            }
+        } catch (e) {
+            console.error(e)
         }
     }
 

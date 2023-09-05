@@ -21,6 +21,7 @@ import {
 import { sleepPromise } from 'src/util/promises'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -67,6 +68,7 @@ export interface RibbonContainerState {
     hasFeedActivity: boolean
     isTrial: boolean
     signupDate: number
+    themeVariant: MemexThemeVariant
 }
 
 export type RibbonContainerEvents = UIEvent<
@@ -82,6 +84,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleFeed: null
         toggleReadingView: null
         toggleAskAI: null
+        toggleTheme: { themeVariant: MemexThemeVariant }
         openPDFinViewer: null
         hydrateStateFromDB: { url: string }
     } & SubcomponentHandlers<'highlights'> &
@@ -184,6 +187,7 @@ export class RibbonContainerLogic extends UILogic<
             hasFeedActivity: false,
             isTrial: false,
             signupDate: null,
+            themeVariant: null,
         }
     }
 
@@ -203,6 +207,12 @@ export class RibbonContainerLogic extends UILogic<
 
         this.initReadingViewListeners()
 
+        const themeVariant = await this.initThemeVariant()
+
+        this.emitMutation({
+            themeVariant: { $set: themeVariant },
+        })
+
         try {
             const signupDate = new Date(
                 await (await this.dependencies.authBG.getCurrentUser())
@@ -219,6 +229,12 @@ export class RibbonContainerLogic extends UILogic<
         } catch (error) {
             console.error('error in updatePageCounter', error)
         }
+    }
+
+    async initThemeVariant() {
+        const variantStorage = await browser.storage.local.get('themeVariant')
+        const variant = variantStorage['themeVariant']
+        return variant
     }
 
     async initReadingViewListeners() {
@@ -350,6 +366,17 @@ export class RibbonContainerLogic extends UILogic<
     toggleAskAI: EventHandler<'toggleAskAI'> = async ({ previousState }) => {
         await this.dependencies.inPageUI.showSidebar({
             action: 'show_page_summary',
+        })
+    }
+    toggleTheme: EventHandler<'toggleTheme'> = async ({ previousState }) => {
+        await browser.storage.local.set({
+            themeVariant:
+                previousState.themeVariant === 'dark' ? 'light' : 'dark',
+        })
+        this.emitMutation({
+            themeVariant: {
+                $set: previousState.themeVariant === 'dark' ? 'light' : 'dark',
+            },
         })
     }
 
