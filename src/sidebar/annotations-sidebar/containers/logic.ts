@@ -746,7 +746,7 @@ export class SidebarContainerLogic extends UILogic<
             let currentsidebarWidth = sidebar.offsetWidth
             let currentWindowWidth = window.innerWidth
             let readingWidth =
-                currentWindowWidth - currentsidebarWidth - 50 + 'px'
+                currentWindowWidth - currentsidebarWidth - 30 + 'px'
 
             document.body.style.width = readingWidth
         }
