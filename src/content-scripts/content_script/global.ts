@@ -517,11 +517,21 @@ export async function main(
             inPageUI.hideTooltip()
         },
         createTimestampWithAISummary: async (includeLastFewSecs) => {
+            const timestampToPass = await getTimestampedNoteWithAIsummaryForYoutubeNotes(
+                includeLastFewSecs,
+            )
+
+            if (timestampToPass === null) {
+                const aIbutton = document.getElementById(
+                    'AItimeStampButtonInner',
+                )
+                aIbutton.innerHTML = `<div class="ytp-menuitem-label" id="AItimeStampButtonInner" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">No Transcript Available</div>`
+                return
+            }
+
             inPageUI.showSidebar({
                 action: 'create_youtube_timestamp_with_AI_summary',
-                timeStampANDSummaryJSON: await getTimestampedNoteWithAIsummaryForYoutubeNotes(
-                    includeLastFewSecs,
-                ),
+                timeStampANDSummaryJSON: timestampToPass,
             })
             inPageUI.hideTooltip()
         },
@@ -783,11 +793,9 @@ export async function main(
                 }
             }
             if (window.location.hostname === 'www.youtube.com') {
-                console.log('update')
                 const existingButtons = document.getElementsByClassName(
                     'memex-youtube-buttons',
                 )[0]
-                console.log('existingButtons', existingButtons)
 
                 if (existingButtons) {
                     existingButtons.remove()
@@ -1576,6 +1584,10 @@ export async function getTimestampedNoteWithAIsummaryForYoutubeNotes(
 
     const transcriptJSON = JSON.parse(responseContent).transcriptText
 
+    if (transcriptJSON === null) {
+        return null
+    }
+
     const [startTimeURL, humanTimestamp] = getHTML5VideoTimestamp(
         includeLastFewSecs,
     )
@@ -1745,8 +1757,6 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
 
     const noteSeconds = noteSecondsStorage.noteSecondsStorage
 
-    console.log('noteSeconds', noteSeconds)
-
     if (noteSeconds) {
         textFieldNote.value = noteSeconds
     }
@@ -1873,6 +1883,7 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
 
     // AI timestamp Button
     const AItimeStampButton = document.createElement('div')
+    AItimeStampButton.id = 'AItimeStampButton'
     AItimeStampButton.setAttribute('class', 'ytp-menuitem')
 
     AItimeStampButton.onclick = async () => {
@@ -1903,7 +1914,7 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     AItimeStampButton.style.alignItems = 'center'
     AItimeStampButton.style.cursor = 'pointer'
 
-    AItimeStampButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Smart Note</div>`
+    AItimeStampButton.innerHTML = `<div class="ytp-menuitem-label"  id="AItimeStampButtonInner" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Smart Note</div>`
     AItimeStampButton.appendChild(textFieldContainer)
     annotateButton.appendChild(textFieldContainerNote)
 
@@ -1951,11 +1962,9 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     memexButtons.style.color = '#f4f4f4'
     memexButtons.style.width = 'fit-content'
     const aboveFold = document.getElementById('below')
-    console.log('update')
     const existingButtons = document.getElementsByClassName(
         'memex-youtube-buttons',
     )[0]
-    console.log('existingButtons', existingButtons)
 
     if (existingButtons) {
         existingButtons.remove()

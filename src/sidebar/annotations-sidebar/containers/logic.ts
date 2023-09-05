@@ -2485,7 +2485,7 @@ export class SidebarContainerLogic extends UILogic<
         const combinedText = filteredSegments.map((item) => item.text).join(' ')
 
         let prompt =
-            'The following text an excerpt of an auto-generated video transcript. Please refer to it as "video sections" or "video" and not as text when talking about it. Also, the transcript will contain transcription errors. Please correct and output it as much as possible and keep it in its original meaning. Try to be short and conscise as the purpose of this summary is to help people to mark a video section and what it was saying: '
+            'The following text an excerpt of an auto-generated video transcript. Please refer to it as "video sections" or "video" and not as text when talking about it. Also, the transcript will contain transcription errors. Please correct and output it as much as possible and keep it in its original meaning. Try to be short and conscise as the purpose of this summary is to help people to mark a video section and what it was saying. Do not use any lists as outputs: '
 
         this.editor = previousState.annotationCreateEditorRef.event.ref.editor
 
