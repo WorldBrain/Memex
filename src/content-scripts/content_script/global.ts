@@ -783,6 +783,15 @@ export async function main(
                 }
             }
             if (window.location.hostname === 'www.youtube.com') {
+                console.log('update')
+                const existingButtons = document.getElementsByClassName(
+                    'memex-youtube-buttons',
+                )[0]
+                console.log('existingButtons', existingButtons)
+
+                if (existingButtons) {
+                    existingButtons.remove()
+                }
                 loadYoutubeButtons(annotationsFunctions)
             }
 
@@ -1477,22 +1486,27 @@ export function loadYoutubeButtons(annotationsFunctions) {
             mutationsList.forEach(function (mutation) {
                 mutation.addedNodes.forEach((node) => {
                     // Check if the added node is an HTMLElement
-                    if (node instanceof HTMLElement) {
-                        // Check if the "player" element is in the added node or its descendants
-                        if (node.querySelector('#player')) {
-                            injectYoutubeContextMenu(annotationsFunctions)
+                    if (!player) {
+                        if (node instanceof HTMLElement) {
+                            // Check if the "player" element is in the added node or its descendants
+                            if (node.querySelector('#player')) {
+                                injectYoutubeContextMenu(annotationsFunctions)
 
-                            if (below && player) {
-                                observer.disconnect()
+                                if (below && player) {
+                                    observer.disconnect()
+                                }
                             }
                         }
+                    }
+                    if (!below) {
+                        if (node instanceof HTMLElement) {
+                            // Check if the "below" element is in the added node or its descendants
+                            if (node.querySelector('#below')) {
+                                injectYoutubeButtonMenu(annotationsFunctions)
 
-                        // Check if the "below" element is in the added node or its descendants
-                        if (node.querySelector('#below')) {
-                            injectYoutubeButtonMenu(annotationsFunctions)
-
-                            if (below && player) {
-                                observer.disconnect()
+                                if (below && player) {
+                                    observer.disconnect()
+                                }
                             }
                         }
                     }
@@ -1776,8 +1790,8 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     textField.setAttribute('pattern', '\\d{1,3}') // 1 to 3 digit numbers
     textFieldNote.setAttribute('pattern', '\\d{1,3}') // 1 to 3 digit numbers
 
-    textField.addEventListener('input', (event: Event) => {
-        let value = event.target.value
+    textField.addEventListener('input', (event) => {
+        let value = (event.target as HTMLInputElement).value
 
         // Replace non-digit characters
         value = value.replace(/[^0-9]/g, '')
@@ -1787,11 +1801,11 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
             value = '999'
         }
 
-        ;(event.target as HTMLElement).value = value
+        ;(event.target as HTMLInputElement).value = value
     })
 
     textFieldNote.addEventListener('input', (event) => {
-        let value = (event.target as HTMLElement).value
+        let value = (event.target as HTMLInputElement).value
 
         // Replace non-digit characters
         value = value.replace(/[^0-9]/g, '')
@@ -1801,7 +1815,7 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
             value = '999'
         }
 
-        ;(event.target as Element).value = value
+        ;(event.target as HTMLInputElement).value = value
     })
 
     // Rewind Icon
@@ -1937,6 +1951,16 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     memexButtons.style.color = '#f4f4f4'
     memexButtons.style.width = 'fit-content'
     const aboveFold = document.getElementById('below')
+    console.log('update')
+    const existingButtons = document.getElementsByClassName(
+        'memex-youtube-buttons',
+    )[0]
+    console.log('existingButtons', existingButtons)
+
+    if (existingButtons) {
+        existingButtons.remove()
+    }
+
     aboveFold.insertAdjacentElement('afterbegin', memexButtons)
 }
 
