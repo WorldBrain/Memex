@@ -288,6 +288,15 @@ const SelectionBox = styled.div<{ selected }>`
         props.selected
             ? props.theme.colors.greyScale7
             : props.theme.colors.greyScale3};
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css<any>`
+            background: ${(props) =>
+                props.selected
+                    ? props.theme.colors.greyScale4
+                    : props.theme.colors.greyScale3};
+        `};
 `
 
 export const IconStyleWrapper = styled.div`

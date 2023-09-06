@@ -203,7 +203,7 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
             return (
                 <ContextMenuContainer>
                     <LoadingContainer>
-                        <LoadingIndicator size={20} />
+                        <LoadingIndicator size={30} />
                     </LoadingContainer>
                 </ContextMenuContainer>
             )
@@ -387,8 +387,10 @@ const ContextMenuContainer = styled.div`
     grid-gap: 5px;
     flex-direction: column;
     width: fill-available;
-    min-height: fit-content;
+    min-height: 180px;
+    min-width: 330px;
     height: fit-content;
+    width: fit-content;
     justify-content: center;
     align-items: flex-start;
     /* width: 250px; */
@@ -396,7 +398,10 @@ const ContextMenuContainer = styled.div`
 
 const SectionTitle = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.greyScale7};
+    color: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.greyScale5
+            : props.theme.colors.greyScale7};
     font-weight: 500;
     width: 100%;
     display: flex;
@@ -440,6 +445,7 @@ const MenuContainer = styled.div`
     flex-direction: column;
     border-radius: 12px;
     width: 330px;
+    height: 180px;
 `
 
 const LinkAndRoleBox = styled.div<{

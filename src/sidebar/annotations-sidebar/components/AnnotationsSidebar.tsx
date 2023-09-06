@@ -1107,7 +1107,7 @@ export class AnnotationsSidebar extends React.Component<
                 }}
             >
                 {!this.props.selectedListForShareMenu || !selectedList ? (
-                    <LoadingIndicatorContainer>
+                    <LoadingIndicatorContainer height="180px" width="330px">
                         <LoadingIndicatorStyled size={20} />
                     </LoadingIndicatorContainer>
                 ) : (
@@ -1524,6 +1524,7 @@ export class AnnotationsSidebar extends React.Component<
                             icon="feed"
                             element={null}
                             iconSize="18px"
+                            padding={'10px 10px'}
                             onChange={async (event) => {
                                 await this.props.updatePromptState(
                                     (event.target as HTMLInputElement).value,
@@ -2637,7 +2638,7 @@ const OptionsContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 15px 10px 15px;
+    padding: 5px 15px 10px 15px;
     z-index: 100;
     height: 24px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
@@ -2717,7 +2718,10 @@ const DropDownItem = styled.div<{ focused: boolean }>`
     min-height: 24px;
     align-items: center;
     padding: 10px 20px;
-    color: ${(props) => props.theme.colors.greyScale7};
+    color: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.greyScale5
+            : props.theme.colors.greyScale7};
     justify-content: space-between;
     position: relative;
     font-size: 14px;
@@ -2903,6 +2907,7 @@ const SummarySection = styled.div`
     align-items: start;
     height: fill-available;
     flex: 1;
+    height: 30%;
 `
 
 const SummaryText = styled.div`
@@ -3594,10 +3599,10 @@ const TopBarStyled = styled.div`
     width: 100%;
 `
 
-const LoadingIndicatorContainer = styled.div`
+const LoadingIndicatorContainer = styled.div<{ height: string; width: string }>`
     width: 100%;
-    min-width: 15px;
-    height: 100px;
+    width: ${(props) => (props.width ? props.width : '15px')};
+    height: ${(props) => (props.height ? props.height : '15px')};
     display: flex;
     justify-content: center;
     align-items: center;
