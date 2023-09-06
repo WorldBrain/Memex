@@ -564,6 +564,7 @@ export function createBackgroundModules(options: {
         localExtSettingStore,
         syncSettingsStore,
         storageManager,
+        analyticsBG,
         bgModules: {
             readwise,
             copyPaster,
