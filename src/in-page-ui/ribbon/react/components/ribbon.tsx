@@ -1835,6 +1835,7 @@ export default class Ribbon extends Component<Props, State> {
                                     }
                                     ribbonPosition={this.props.ribbonPosition}
                                 >
+                                    {this.renderDarkLightModeToggle()}
                                     {this.renderTutorialButton()}
                                     <BlockCounterIndicator
                                         ribbonPosition={
@@ -1847,7 +1848,6 @@ export default class Ribbon extends Component<Props, State> {
                                         signupDate={this.props.signupDate}
                                     />
                                     {this.renderCloseRibbonButton()}
-                                    {this.renderDarkLightModeToggle()}
                                 </BottomSection>
                             </>
                         )}
