@@ -124,7 +124,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
                 }
                 targetElementRef={this.tooltipButtonRef.current}
                 closeComponent={() => this.setState({ showTooltip: false })}
-                offsetX={10}
+                offsetX={20}
             >
                 <InfoTooltipContainer>
                     <InfoTooltipTitleArea>
@@ -181,9 +181,9 @@ export class BlockCounterIndicator extends React.Component<Props> {
                                     Use everything as much as you want.
                                     <br />
                                     <br />
-                                    After the trial: 60 days money-back-guarntee
-                                    and a free tier with 25 saved pages per
-                                    month.
+                                    After the trial: 60 days
+                                    money-back-guarantee and a free tier with 25
+                                    saved pages per month.
                                     <br />
                                     Each saved page counts only once - forever.
                                 </InfoTooltipSubTitle>
@@ -354,7 +354,7 @@ const InfoTooltipContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    width: 400px;
+    width: 420px;
     height: fit-content;
     grid-gap: 20px;
 `

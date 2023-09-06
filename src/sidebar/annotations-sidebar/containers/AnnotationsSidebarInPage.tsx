@@ -42,19 +42,13 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 > {
     static defaultProps: Pick<
         Props,
-        'isLockable' | 'theme' | 'sidebarContext' | 'runtimeAPI' | 'storageAPI'
+        'isLockable' | 'sidebarContext' | 'runtimeAPI' | 'storageAPI'
     > = {
         runtimeAPI: browser.runtime,
         storageAPI: browser.storage,
 
         sidebarContext: 'in-page',
         isLockable: true,
-        theme: {
-            ...theme,
-            rightOffsetPx: 0,
-            canClickAnnotations: true,
-            paddingRight: 0,
-        },
     }
 
     private initLogicPromise = resolvablePromise()
@@ -62,6 +56,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     constructor(props: Props) {
         super({
             ...props,
+            theme: {
+                ...props.theme,
+                rightOffsetPx: 0,
+                canClickAnnotations: true,
+                paddingRight: 0,
+            },
             showAnnotationShareModal: () =>
                 this.processEvent('setAnnotationShareModalShown', {
                     shown: true,

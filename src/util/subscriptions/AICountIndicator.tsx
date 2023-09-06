@@ -250,9 +250,9 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                     Make as many AI queries & summaries you
                                     want.
                                     <br />
-                                    After the trial: 60 days money-back-guarntee
-                                    and a free tier with 25 AI queries per
-                                    month.
+                                    After the trial: 60 days
+                                    money-back-guarantee and a free tier with 25
+                                    AI queries per month.
                                 </InfoTooltipSubTitle>
                             )}
                         </InfoTooltipSubTitleBox>

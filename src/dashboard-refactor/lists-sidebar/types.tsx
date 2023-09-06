@@ -3,6 +3,7 @@ import type { ListsSidebarSearchBarProps } from './components/search-bar'
 import type { TaskState } from 'ui-logic-core/lib/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     lists: NormalizedState<UnifiedList & { wasPageDropped?: boolean }>
@@ -30,6 +31,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     listDeleteState: TaskState
     listCreateState: TaskState
     listShareLoadingState: TaskState
+    themeVariant: MemexThemeVariant
 }
 
 export type Events = UIEvent<{
@@ -60,6 +62,7 @@ export type Events = UIEvent<{
     cancelListDelete: null
 
     updateSelectedListDescription: { description: string }
+    toggleTheme: { themeVariant: MemexThemeVariant }
     switchToFeed: null
 }>
 

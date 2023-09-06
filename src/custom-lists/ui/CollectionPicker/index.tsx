@@ -507,7 +507,10 @@ const OutputSwitcher = styled.div<{
     active: boolean
 }>`
     display: flex;
-    color: ${(props) => props.theme.colors.greyScale7};
+    color: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.greyScale5
+            : props.theme.colors.greyScale7};
     padding: 5px 10px;
     font-size: 12px;
     cursor: pointer;
@@ -582,6 +585,12 @@ const SectionCircle = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css<any>`
+            border-color: ${props.theme.colors.greyScale3};
+        `};
 `
 
 const InfoText = styled.div`

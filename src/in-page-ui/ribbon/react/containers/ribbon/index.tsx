@@ -11,6 +11,10 @@ import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
 import analytics from 'src/analytics'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import {
+    MemexTheme,
+    MemexThemeVariant,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -19,6 +23,7 @@ export interface RibbonContainerProps extends RibbonContainerOptions {
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
     selectRibbonPositionOption: (option) => void
     analyticsBG: AnalyticsCoreInterface
+    theme: MemexThemeVariant
 }
 
 export default class RibbonContainer extends StatefulUIElement<
@@ -137,6 +142,13 @@ export default class RibbonContainer extends StatefulUIElement<
                 bgScriptBG={this.props.bgScriptBG}
                 spacesBG={this.props.customLists}
                 authBG={this.props.authBG}
+                theme={this.state.themeVariant || this.props.theme}
+                toggleTheme={() => {
+                    this.processEvent('toggleTheme', {
+                        themeVariant:
+                            this.state.themeVariant || this.props.theme,
+                    })
+                }}
                 ref={this.ribbonRef}
                 setRef={this.props.setRef}
                 getListDetailsById={(id) => {
