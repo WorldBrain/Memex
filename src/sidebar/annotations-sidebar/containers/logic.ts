@@ -2467,13 +2467,15 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ previousState, event }) => {
         this.emitMutation({
             loadState: { $set: 'success' },
-            activeTab: { $set: 'annotations' },
+            // activeTab: { $set: 'annotations' },
         })
         this.options.focusCreateForm()
         this.emitMutation({
             commentBox: {
                 commentText: { $set: '' },
             },
+            pageSummary: { $set: '' },
+            prompt: { $set: null },
         })
         const timestampToInsert = event.timeStampANDSummaryJSON[0]
         previousState.annotationCreateEditorRef.event.ref.editor.addYoutubeTimestampWithText(
@@ -2503,7 +2505,13 @@ export class SidebarContainerLogic extends UILogic<
             'editor',
         )
 
-        let newSummary = this.youtubeTranscriptSummary ?? ''
+        this.emitMutation({
+            pageSummary: { $set: '' },
+            prompt: { $set: null },
+            selectedTextAIPreview: {
+                $set: '',
+            },
+        })
     }
 
     setSelectedList: EventHandler<'setSelectedList'> = async ({
