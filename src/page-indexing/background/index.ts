@@ -604,7 +604,7 @@ export class PageIndexingBackground {
             ).getTime()
             const isTrial = await enforceTrialPeriod30Days(signupDate)
 
-            if (!isTrial) {
+            if (!isTrial && !props.skipUpdatePageCount) {
                 await updatePageCounter()
             }
         } catch (error) {
