@@ -3,7 +3,6 @@ import * as ReactDOM from 'react-dom'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
 
 import {
-    listenToThemeChanges,
     loadThemeVariant,
     theme,
 } from 'src/common-ui/components/design-library/theme'

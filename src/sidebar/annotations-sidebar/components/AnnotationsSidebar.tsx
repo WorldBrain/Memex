@@ -206,7 +206,6 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     createNewNoteFromAISummary: (summary) => void
     showSharePageTooltip: boolean
     passUpEditorRef: (ref) => void
-    doAItimestampSummary: (editorReference: MemexEditorInstance) => void
 }
 
 interface AnnotationsSidebarState {
@@ -498,7 +497,6 @@ export class AnnotationsSidebar extends React.Component<
                     ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
-                    doAItimestampSummary={() => this.doAItimestampSummary()}
                 />
             </NewAnnotationSection>
         )

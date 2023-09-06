@@ -4,7 +4,6 @@ import {
     MemexTheme,
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import React from 'react'
 import {
     loadThemeVariant,
     theme,

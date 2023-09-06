@@ -283,6 +283,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             showDropArea: this.options.location.href.includes(
                 MISSING_PDF_QUERY_PARAM,
             ),
+            themeVariant: null,
 
             modals: {
                 showLogin: false,
@@ -362,6 +363,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 areFollowedListsExpanded: true,
                 areJoinedListsExpanded: true,
                 selectedListId: null,
+                themeVariant: null,
             },
             syncMenu: {
                 isDisplayed: false,

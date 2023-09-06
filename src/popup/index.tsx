@@ -41,7 +41,7 @@ class Root extends React.Component<RootProps, RootState> {
             <Provider store={this.props.store}>
                 <ThemeProvider theme={theme({ variant: themeVariant })}>
                     <ErrorBoundary component={RuntimeError}>
-                        <Popup />
+                        <Popup analyticsBG={null} />
                     </ErrorBoundary>
                 </ThemeProvider>
             </Provider>

@@ -407,7 +407,8 @@ const StyledPageResult = styled.div`
     ${(props) =>
         props.theme.variant === 'light' &&
         css`
-            box-shadow: ${props.theme.borderStyles.boxShadowHoverElements};
+            box-shadow: ${props.theme.borderStyles
+                .boxShadowHoverElementsLighter};
             border: 1px solid ${props.theme.colors.greyScale2};
         `};
 `
