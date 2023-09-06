@@ -10,8 +10,61 @@ import Container from './components/container'
 import * as constants from './constants'
 import { injectCSS } from '../util/content-injection'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { theme } from 'src/common-ui/components/design-library/theme'
+import {
+    loadThemeVariant,
+    theme,
+} from 'src/common-ui/components/design-library/theme'
 import type { SyncSettingsStoreInterface } from 'src/sync-settings/types'
+import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+
+interface RootProps {
+    target: HTMLDivElement
+    query: any
+    requestSearcher: any
+    renderComponent: () => Promise<void>
+    searchEngine: any
+    syncSettings: SyncSettingsStoreInterface
+    position: 'side' | 'above'
+}
+
+interface RootState {
+    themeVariant?: MemexThemeVariant
+}
+
+class Root extends React.Component<RootProps, RootState> {
+    state: RootState = {}
+
+    async componentDidMount() {
+        this.setState({
+            themeVariant: await loadThemeVariant(),
+        })
+    }
+
+    render() {
+        const { themeVariant } = this.state
+        if (!themeVariant) {
+            return null
+        }
+        const { props } = this
+
+        return (
+            <StyleSheetManager target={props.target}>
+                <ThemeProvider theme={theme({ variant: themeVariant })}>
+                    <Container
+                        query={props.query}
+                        requestSearcher={props.requestSearcher}
+                        // results={searchRes.docs.slice(0, limit)}
+                        // len={searchRes.totalCount}
+                        rerender={props.renderComponent}
+                        searchEngine={props.searchEngine}
+                        syncSettings={props.syncSettings}
+                        position={props.position}
+                    />
+                </ThemeProvider>
+            </StyleSheetManager>
+        )
+    }
+}
 
 export const handleRender = async (
     query,
@@ -192,20 +245,17 @@ export const handleRender = async (
         // Passing this same function so that it can change position
 
         ReactDOM.render(
-            <StyleSheetManager target={target}>
-                <ThemeProvider theme={theme}>
-                    <Container
-                        query={query}
-                        requestSearcher={requestSearcher}
-                        // results={searchRes.docs.slice(0, limit)}
-                        // len={searchRes.totalCount}
-                        rerender={renderComponent}
-                        searchEngine={searchEngine}
-                        syncSettings={syncSettings}
-                        position={position}
-                    />
-                </ThemeProvider>
-            </StyleSheetManager>,
+            <Root
+                {...{
+                    searchEngine,
+                    position,
+                    query,
+                    renderComponent,
+                    requestSearcher,
+                    syncSettings,
+                    target,
+                }}
+            />,
             target,
         )
     }

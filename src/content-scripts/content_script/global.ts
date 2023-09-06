@@ -96,6 +96,8 @@ import {
     trackPageActivityIndicatorHit,
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation

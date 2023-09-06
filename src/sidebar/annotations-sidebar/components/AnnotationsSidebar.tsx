@@ -70,6 +70,9 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import { TaskState } from 'ui-logic-core/lib/types'
+import { MemexEditorInstance } from '@worldbrain/memex-common/lib/editor'
+import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -203,6 +206,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     createNewNoteFromAISummary: (summary) => void
     showSharePageTooltip: boolean
     passUpEditorRef: (ref) => void
+    doAItimestampSummary: (editorReference: MemexEditorInstance) => void
 }
 
 interface AnnotationsSidebarState {
@@ -220,6 +224,7 @@ interface AnnotationsSidebarState {
     }
     showAIhighlight: boolean
     showAISuggestionsDropDown: boolean
+    themeVariant?: MemexThemeVariant
     AIsuggestions: []
     autoFocusCreateForm: boolean
     spaceTitleEditState: boolean
@@ -307,6 +312,14 @@ export class AnnotationsSidebar extends React.Component<
                 showIsolatedViewNotif: isolatedViewNotifVisible,
             })
         }
+
+        let themeVariant: MemexThemeVariant = 'dark'
+        try {
+            themeVariant = await loadThemeVariant()
+        } catch (err) {
+            console.error('Could not load theme, falling back to dark mode')
+        }
+        this.setState({ themeVariant })
     }
 
     async componentDidUpdate(
@@ -404,7 +417,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <PopoutBox
                 targetElementRef={this.copyButtonRef.current}
-                placement={'bottom-end'}
+                placement={'bottom'}
                 offsetX={5}
                 offsetY={5}
                 closeComponent={() => {
@@ -438,7 +451,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <PopoutBox
                 targetElementRef={this.bulkEditButtonRef.current}
-                placement={'bottom-end'}
+                placement={'bottom'}
                 offsetX={5}
                 offsetY={5}
                 closeComponent={() =>
@@ -485,6 +498,7 @@ export class AnnotationsSidebar extends React.Component<
                     ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
+                    doAItimestampSummary={() => this.doAItimestampSummary()}
                 />
             </NewAnnotationSection>
         )
@@ -1093,7 +1107,7 @@ export class AnnotationsSidebar extends React.Component<
                 }}
             >
                 {!this.props.selectedListForShareMenu || !selectedList ? (
-                    <LoadingIndicatorContainer>
+                    <LoadingIndicatorContainer height="180px" width="330px">
                         <LoadingIndicatorStyled size={20} />
                     </LoadingIndicatorContainer>
                 ) : (
@@ -1369,7 +1383,7 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderResultsBody() {
+    private renderResultsBody(themeVariant: MemexThemeVariant) {
         const listData = this.props.lists.byId[this.props.selectedListId]
 
         if (this.props.activeTab === 'feed') {
@@ -1510,6 +1524,7 @@ export class AnnotationsSidebar extends React.Component<
                             icon="feed"
                             element={null}
                             iconSize="18px"
+                            padding={'10px 10px'}
                             onChange={async (event) => {
                                 await this.props.updatePromptState(
                                     (event.target as HTMLInputElement).value,
@@ -1735,7 +1750,7 @@ export class AnnotationsSidebar extends React.Component<
                 )}
                 <UpdateNotifBanner
                     location={'sidebar'}
-                    theme={{ position: 'fixed' }}
+                    theme={{ variant: themeVariant, position: 'fixed' }}
                     sidebarContext={this.props.sidebarContext}
                 />
             </>
@@ -2433,7 +2448,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <PopoutBox
                 targetElementRef={this.sortDropDownButtonRef.current}
-                placement={'bottom-end'}
+                placement={'bottom'}
                 offsetX={5}
                 offsetY={5}
                 closeComponent={() =>
@@ -2546,6 +2561,10 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     render() {
+        if (!this.state.themeVariant) {
+            return null
+        }
+
         return (
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
                 <TopBar sidebarContext={this.props.sidebarContext}>
@@ -2554,7 +2573,7 @@ export class AnnotationsSidebar extends React.Component<
                     {/* {this.props.sidebarActions()} */}
                 </TopBar>
                 {this.renderPageShareModal()}
-                {this.renderResultsBody()}
+                {this.renderResultsBody(this.state.themeVariant)}
             </ResultBodyContainer>
         )
     }
@@ -2619,7 +2638,7 @@ const OptionsContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 15px 10px 15px;
+    padding: 5px 15px 10px 15px;
     z-index: 100;
     height: 24px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
@@ -2699,7 +2718,10 @@ const DropDownItem = styled.div<{ focused: boolean }>`
     min-height: 24px;
     align-items: center;
     padding: 10px 20px;
-    color: ${(props) => props.theme.colors.greyScale7};
+    color: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.greyScale5
+            : props.theme.colors.greyScale7};
     justify-content: space-between;
     position: relative;
     font-size: 14px;
@@ -2885,6 +2907,7 @@ const SummarySection = styled.div`
     align-items: start;
     height: fill-available;
     flex: 1;
+    height: 30%;
 `
 
 const SummaryText = styled.div`
@@ -2895,6 +2918,12 @@ const SummaryText = styled.div`
     white-space: break-spaces;
     flex-direction: column-reverse;
     margin-bottom: 200px;
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            color: ${(props) => props.theme.colors.greyScale5};
+        `};
 `
 
 const FocusModeNotifContainer = styled.div`
@@ -3201,6 +3230,16 @@ const TopBar = styled.div`
     padding: 10px 10px 10px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     background: ${(props) => props.theme.colors.black};
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            /* box-shadow: ${(props) =>
+                props.theme.borderStyles.boxShadowBottom}; */
+            border-bottom: 1px solid
+                ${(props) =>
+                    props.theme.borderStyles.borderLineColorBigElements};
+        `};
 `
 
 const IsolatedViewHeaderContainer = styled.div`
@@ -3294,6 +3333,7 @@ const FollowedListNotesContainer = styled(Margin)<{
     width: fill-available;
     width: -moz-available;
     z-index: ${(props) => 1000 - props.key};
+    height: -webkit-fill-available;
 
     ${(props) =>
         props.isHovered &&
@@ -3561,10 +3601,10 @@ const TopBarStyled = styled.div`
     width: 100%;
 `
 
-const LoadingIndicatorContainer = styled.div`
+const LoadingIndicatorContainer = styled.div<{ height: string; width: string }>`
     width: 100%;
-    min-width: 15px;
-    height: 100px;
+    width: ${(props) => (props.width ? props.width : '15px')};
+    height: ${(props) => (props.height ? props.height : '15px')};
     display: flex;
     justify-content: center;
     align-items: center;
@@ -3658,6 +3698,16 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
         css`
             border-right: 'unset';
             border-left: 'unset';
+        `};
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            /* box-shadow: ${(props) =>
+                props.theme.borderStyles.boxShadowLeft}; */
+            border-right: 1px solid
+                ${(props) =>
+                    props.theme.borderStyles.borderLineColorBigElements};
         `};
 `
 

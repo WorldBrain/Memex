@@ -1285,7 +1285,7 @@ const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     max-width: calc(${sizeConstants.searchResults.widthPx}px);
     z-index: 3000;
     position: sticky;
-    top: 0px;
+    top: -1px;
     background: ${(props) => props.theme.colors.black};
     width: fill-available;
 `

@@ -1081,6 +1081,13 @@ const AnnotationStyled = styled.div`
         `
         outline: 1px solid ${theme.colors.prime1}60;
     `};
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            box-shadow: ${props.theme.borderStyles.boxShadowHoverElements};
+            border: 1px solid ${props.theme.colors.greyScale2};
+        `};
 `
 
 const ContentContainer = styled.div<{ isEditMode: boolean }>`

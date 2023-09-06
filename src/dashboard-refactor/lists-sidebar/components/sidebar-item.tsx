@@ -149,6 +149,11 @@ const SidebarItem = styled.div<Props>`
             css`
                 background: ${(props) => props.theme.colors.greyScale2};
             `}
+        ${(props) =>
+            props.theme.variant === 'light' &&
+            css`
+                background: ${(props) => props.theme.colors.greyScale3};
+            `};
     }
 
     ${(props) =>

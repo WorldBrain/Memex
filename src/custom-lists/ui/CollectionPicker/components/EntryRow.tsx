@@ -288,6 +288,15 @@ const SelectionBox = styled.div<{ selected }>`
         props.selected
             ? props.theme.colors.greyScale7
             : props.theme.colors.greyScale3};
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css<any>`
+            background: ${(props) =>
+                props.selected
+                    ? props.theme.colors.greyScale4
+                    : props.theme.colors.greyScale3};
+        `};
 `
 
 export const IconStyleWrapper = styled.div`
@@ -333,6 +342,26 @@ const Row = styled.div<{ isFocused; zIndex }>`
         outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         background: transparent;
     }
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            &:focus {
+                outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+            }
+            &:hover {
+                outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+                background: transparent;
+            }
+
+            ${(props) =>
+                props.isFocused &&
+                css`
+                    outline: 1px solid
+                        ${(props) => props.theme.colors.greyScale2};
+                    background: transparent;
+                `}
+        `};
 `
 
 const NameWrapper = styled.div`
