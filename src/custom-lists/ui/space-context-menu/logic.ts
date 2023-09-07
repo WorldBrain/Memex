@@ -17,6 +17,7 @@ export interface Dependencies {
     contentSharingBG: ContentSharingInterface
     spacesBG: RemoteCollectionsInterface
     listData: UnifiedList
+    isCreator?: boolean
     errorMessage?: string
     loadOwnershipData?: boolean
     onCancelEdit?: () => void

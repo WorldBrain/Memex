@@ -1144,6 +1144,10 @@ export class AnnotationsSidebarContainer<
                             }
                             renderContextMenuForList={(listData) => (
                                 <SpaceContextMenu
+                                    isCreator={
+                                        listData.creator.id ===
+                                        this.state.currentUserReference.id
+                                    }
                                     contentSharingBG={
                                         this.props.contentSharingBG
                                     }

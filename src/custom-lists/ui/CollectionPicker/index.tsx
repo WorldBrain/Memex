@@ -379,6 +379,9 @@ class SpacePicker extends StatefulUIElement<
                     </PrimaryActionBox>
                     <SpaceContextMenu
                         loadOwnershipData
+                        isCreator={
+                            list.creator?.id === this.state.currentUser?.id
+                        }
                         listData={list}
                         ref={this.contextMenuRef}
                         contentSharingBG={this.props.contentSharingBG}
