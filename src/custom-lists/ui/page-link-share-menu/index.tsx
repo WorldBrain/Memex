@@ -445,7 +445,7 @@ const MenuContainer = styled.div`
     flex-direction: column;
     border-radius: 12px;
     width: 330px;
-    height: 180px;
+    min-height: 180px;
 `
 
 const LinkAndRoleBox = styled.div<{

@@ -483,6 +483,12 @@ export class AnnotationsSidebar extends React.Component<
     private renderNewAnnotation(
         toggledListInstanceId?: UnifiedList['unifiedId'],
     ) {
+        console.log(
+            'annotationcreateprops',
+            this.props.annotationCreateProps,
+            this.state.autoFocusCreateForm,
+            this.props.events,
+        )
         return (
             <NewAnnotationSection>
                 <AnnotationCreate
@@ -501,14 +507,14 @@ export class AnnotationsSidebar extends React.Component<
                     ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
-                    sidebarEvents={this.props.events}
+                    sidebarEvents={this.props.events && this.props.events}
                 />
             </NewAnnotationSection>
         )
     }
 
     private renderLoader = (key?: string, size?: number) => (
-        <LoadingIndicatorContainer key={key}>
+        <LoadingIndicatorContainer width={'100%'} height={'200px'} key={key}>
             <LoadingIndicatorStyled size={size ? size : undefined} />
         </LoadingIndicatorContainer>
     )
