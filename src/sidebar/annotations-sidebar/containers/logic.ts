@@ -418,9 +418,17 @@ export class SidebarContainerLogic extends UILogic<
                 youtubeTranscriptSummaryloadState: { $set: 'success' },
                 youtubeTranscriptSummary: { $apply: (prev) => prev + newToken },
             })
-            this.options.events.emit('triggerYoutubeTimestampSummary', {
-                text: newToken,
-            })
+            let handledSuccessfully = false
+
+            this.options.events.emit(
+                'triggerYoutubeTimestampSummary',
+                {
+                    text: newToken,
+                },
+                (success) => {
+                    handledSuccessfully = success
+                },
+            )
         })
     }
 
