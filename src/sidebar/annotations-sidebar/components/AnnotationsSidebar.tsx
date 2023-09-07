@@ -20,7 +20,11 @@ import AnnotationEditable, {
 import type _AnnotationEditable from 'src/annotations/components/AnnotationEditable'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
-import type { AnnotationCardInstanceLocation, SidebarTheme } from '../types'
+import type {
+    AnnotationCardInstanceLocation,
+    AnnotationsSidebarInPageEventEmitter,
+    SidebarTheme,
+} from '../types'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import {
     AnnotationEditGeneralProps,
@@ -205,7 +209,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     setSpaceTitleEditValue: (value) => void
     createNewNoteFromAISummary: (summary) => void
     showSharePageTooltip: boolean
-    passUpEditorRef: (ref) => void
+    events: AnnotationsSidebarInPageEventEmitter
 }
 
 interface AnnotationsSidebarState {
@@ -328,10 +332,6 @@ export class AnnotationsSidebar extends React.Component<
     ) {
         if (prevProps.pageSummary != this.props.pageSummary) {
             this.pageSummaryText.current.scrollTop = this.pageSummaryText.current.scrollHeight
-        }
-        if (this.annotationCreateRef.current != null && !this.editorPassedUp) {
-            this.editorPassedUp = true
-            this.props.passUpEditorRef(this.annotationCreateRef.current)
         }
     }
 

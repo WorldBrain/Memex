@@ -819,12 +819,7 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
-                            passUpEditorRef={(ref) =>
-                                this.processEvent(
-                                    'getAnnotationEditorIntoState',
-                                    { ref },
-                                )
-                            }
+                            events={this.props.events}
                             youtubeTranscriptSummary={
                                 this.state.youtubeTranscriptSummary
                             }

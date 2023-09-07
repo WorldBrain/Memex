@@ -86,17 +86,13 @@ import {
     convertMemexURLintoTelegramURL,
     getTelegramUserDisplayName,
 } from '@worldbrain/memex-common/lib/telegram/utils'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { enforceTrialPeriod30Days } from 'src/util/subscriptions/storage'
 import {
     SpacePickerDependencies,
     SpacePickerEvent,
 } from 'src/custom-lists/ui/CollectionPicker/types'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
-import {
-    getAnnotationVideoLink,
-    getVideoLinkInfo,
-} from '@worldbrain/memex-common/lib/editor/utils'
+import { sleepPromise } from 'src/util/promises'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -422,7 +418,9 @@ export class SidebarContainerLogic extends UILogic<
                 youtubeTranscriptSummaryloadState: { $set: 'success' },
                 youtubeTranscriptSummary: { $apply: (prev) => prev + newToken },
             })
-            this.editor.addYoutubeTimestampWithText(newToken)
+            this.options.events.emit('triggerYoutubeTimestampSummary', {
+                text: newToken,
+            })
         })
     }
 
@@ -2467,7 +2465,7 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ previousState, event }) => {
         this.emitMutation({
             loadState: { $set: 'success' },
-            // activeTab: { $set: 'annotations' },
+            activeTab: { $set: 'annotations' },
         })
         this.options.focusCreateForm()
         this.emitMutation({
@@ -2478,13 +2476,27 @@ export class SidebarContainerLogic extends UILogic<
             prompt: { $set: null },
         })
         const timestampToInsert = event.timeStampANDSummaryJSON[0]
-        previousState.annotationCreateEditorRef.event.ref.editor.addYoutubeTimestampWithText(
-            timestampToInsert + ' ',
-        )
-        previousState.annotationCreateEditorRef.event.ref.editor.addYoutubeTimestampWithText(
-            '',
-            true,
-        )
+
+        const maxRetries = 30
+        let handledSuccessfully = false
+
+        for (let i = 0; i < maxRetries; i++) {
+            if (
+                this.options.events.emit(
+                    'triggerYoutubeTimestampSummary',
+                    {
+                        text: timestampToInsert + ' ',
+                        showLoadingSpinner: true,
+                    },
+                    (success) => {
+                        handledSuccessfully = success
+                    },
+                )
+            ) {
+                break
+            }
+            await sleepPromise(50) // wait for half a second before trying again
+        }
 
         const filteredSegments = JSON.parse(event.timeStampANDSummaryJSON[1])
 
@@ -2492,8 +2504,6 @@ export class SidebarContainerLogic extends UILogic<
 
         let prompt =
             'The following text an excerpt of an auto-generated video transcript. Please refer to it as "video sections" or "video" and not as text when talking about it. Also, the transcript will contain transcription errors. Please correct and output it as much as possible and keep it in its original meaning. Try to be short and conscise as the purpose of this summary is to help people to mark a video section and what it was saying. Do not use any lists as outputs: '
-
-        this.editor = previousState.annotationCreateEditorRef.event.ref.editor
 
         await this.queryAI(
             undefined,
