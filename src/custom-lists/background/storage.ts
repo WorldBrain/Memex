@@ -509,7 +509,11 @@ export default class CustomListStorage extends StorageModule {
     }) {
         const idExists = Boolean(await this.fetchListById(listId))
 
-        if (idExists) {
+        if (
+            idExists &&
+            listId !== SPECIAL_LIST_IDS.INBOX &&
+            listId != SPECIAL_LIST_IDS.MOBILE
+        ) {
             if (analyticsBG && dontTrack == null) {
                 try {
                     if (isShared) {
