@@ -463,7 +463,7 @@ export default class SearchResultsContainer extends React.Component<
                     )}
                 />
                 <NoteResultContainer>
-                    {noteIds[notesType].length > 0 && (
+                    {/* {noteIds[notesType].length > 0 && (
                         <SortButtonContainer>
                             <TooltipBox
                                 tooltipText="Sort Annotations"
@@ -482,7 +482,7 @@ export default class SearchResultsContainer extends React.Component<
                             </TooltipBox>
                             {this.renderSortingMenuDropDown(normalizedUrl, day)}
                         </SortButtonContainer>
-                    )}
+                    )} */}
                     {noteIds[notesType].map((noteId, index) => {
                         const zIndex = noteIds[notesType].length - index
                         return this.renderNoteResult(

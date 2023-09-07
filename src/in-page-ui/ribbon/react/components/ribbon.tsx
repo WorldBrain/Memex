@@ -2037,7 +2037,10 @@ const UpdateAvailablePill = styled.div`
     align-items: center;
     justify-content: center;
     padding: 2px 8px;
-    color: ${(props) => props.theme.colors.black};
+    color: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.greyscale5
+            : props.theme.colors.black};
     background-color: ${(props) => props.theme.colors.prime2};
     border-radius: 30px;
     font-size: 12px;
