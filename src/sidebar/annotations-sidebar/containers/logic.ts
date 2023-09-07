@@ -166,6 +166,8 @@ export class SidebarContainerLogic extends UILogic<
                     buildConversationId: this.buildConversationId,
                     loadUserByReference: options.authBG?.getUserByReference,
                     submitNewReply: options.contentConversationsBG.submitReply,
+                    deleteReply: options.contentConversationsBG.deleteReply,
+                    editReply: options.contentConversationsBG.editReply,
                     isAuthorizedToConverse: async () => true,
                     getCurrentUser: async () => {
                         const user = await options.authBG.getCurrentUser()
