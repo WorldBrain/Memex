@@ -1346,14 +1346,12 @@ export class SidebarContainerLogic extends UILogic<
     setNewPageNoteText: EventHandler<'setNewPageNoteText'> = async ({
         event,
     }) => {
-        if (event.comment.length) {
-            this.emitMutation({
-                showCommentBox: { $set: true },
-                commentBox: {
-                    commentText: { $set: event.comment },
-                },
-            })
-        }
+        this.emitMutation({
+            showCommentBox: { $set: true },
+            commentBox: {
+                commentText: { $set: event.comment },
+            },
+        })
 
         this.options.focusCreateForm()
     }
@@ -2170,7 +2168,8 @@ export class SidebarContainerLogic extends UILogic<
             )
         } else if (
             event.tab === 'summary' &&
-            (event.prompt.length > 0 || event.textToProcess.length > 0)
+            ((event.prompt && event.prompt.length > 0) ||
+                event.textToProcess.length > 0)
         ) {
             if (previousState.pageSummary.length === 0) {
                 let isPagePDF = window.location.href.includes(

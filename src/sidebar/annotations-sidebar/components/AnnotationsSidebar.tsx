@@ -496,7 +496,11 @@ export class AnnotationsSidebar extends React.Component<
                     }}
                     ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
-                    autoFocus={this.state.autoFocusCreateForm}
+                    autoFocus={
+                        this.state.autoFocusCreateForm ||
+                        this.props.commentBox.commentText != null
+                    }
+                    sidebarEvents={this.props.events}
                 />
             </NewAnnotationSection>
         )
