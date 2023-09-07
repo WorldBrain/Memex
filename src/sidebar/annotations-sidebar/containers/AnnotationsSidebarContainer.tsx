@@ -819,6 +819,97 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
+                            initGetReplyEditProps={(sharedListReference) => (
+                                replyReference,
+                                annotationReference,
+                            ) => ({
+                                isDeleting: this.state.replyDeleteStates[
+                                    replyReference.id
+                                ]?.isDeleting,
+                                isEditing: this.state.replyEditStates[
+                                    replyReference.id
+                                ]?.isEditing,
+                                isHovering: this.state.replyHoverStates[
+                                    replyReference.id
+                                ]?.isHovering,
+                                isOwner:
+                                    this.state.conversations[
+                                        (this
+                                            .logic as SidebarContainerLogic).buildConversationId(
+                                            annotationReference.id,
+                                            sharedListReference,
+                                        )
+                                    ].replies.find(
+                                        (reply) =>
+                                            reply.reference.id ===
+                                            replyReference.id,
+                                    )?.userReference?.id ===
+                                    this.state.currentUserReference?.id,
+                                comment:
+                                    this.state.replyEditStates[
+                                        replyReference.id
+                                    ]?.text ?? '',
+                                setAnnotationDeleting: (isDeleting) => (
+                                    event,
+                                ) =>
+                                    this.processEvent(
+                                        'setReplyToAnnotationDeleting',
+                                        {
+                                            isDeleting,
+                                            replyReference,
+                                        },
+                                    ),
+                                setAnnotationEditing: (isEditing) => (event) =>
+                                    this.processEvent(
+                                        'setReplyToAnnotationEditing',
+                                        {
+                                            isEditing,
+                                            replyReference,
+                                        },
+                                    ),
+                                setAnnotationHovering: (isHovering) => (
+                                    event,
+                                ) => {
+                                    this.processEvent(
+                                        'setReplyToAnnotationHovering',
+                                        {
+                                            isHovering,
+                                            replyReference,
+                                        },
+                                    )
+                                },
+                                onCommentChange: (comment) =>
+                                    this.processEvent('editReplyToAnnotation', {
+                                        replyText: comment,
+                                        replyReference,
+                                    }),
+                                onDeleteConfim: () =>
+                                    this.processEvent(
+                                        'confirmDeleteReplyToAnnotation',
+                                        {
+                                            replyReference,
+                                            annotationReference,
+                                            sharedListReference,
+                                        },
+                                    ),
+                                onEditConfirm: () => () =>
+                                    this.processEvent(
+                                        'confirmEditReplyToAnnotation',
+                                        {
+                                            replyReference,
+                                            annotationReference,
+                                            sharedListReference,
+                                        },
+                                    ),
+                                onEditCancel: () =>
+                                    this.processEvent(
+                                        'setReplyToAnnotationEditing',
+                                        {
+                                            isEditing: false,
+                                            replyReference,
+                                        },
+                                    ),
+                            })}
                             events={this.props.events}
                             youtubeTranscriptSummary={
                                 this.state.youtubeTranscriptSummary

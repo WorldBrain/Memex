@@ -3,7 +3,10 @@ import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import styled, { css, keyframes } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { ConversationReplies } from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
+import {
+    ConversationReplies,
+    SharedProps as RepliesProps,
+} from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
 import type {
     SharedAnnotationReference,
     SharedListReference,
@@ -73,9 +76,7 @@ import {
     getListShareUrl,
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
-import { TaskState } from 'ui-logic-core/lib/types'
-import { MemexEditorInstance } from '@worldbrain/memex-common/lib/editor'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
@@ -210,6 +211,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     createNewNoteFromAISummary: (summary) => void
     showSharePageTooltip: boolean
     events: AnnotationsSidebarInPageEventEmitter
+    initGetReplyEditProps: (
+        sharedListReference: SharedListReference,
+    ) => RepliesProps['getReplyEditProps']
 }
 
 interface AnnotationsSidebarState {
@@ -804,6 +808,12 @@ export class AnnotationsSidebar extends React.Component<
                                     getYoutubePlayer={
                                         this.props.getYoutubePlayer
                                     }
+                                    getReplyEditProps={this.props.initGetReplyEditProps(
+                                        {
+                                            type: 'shared-list-reference',
+                                            id: listData.remoteId,
+                                        },
+                                    )}
                                 />
                             )}
                     </AnnotationBox>

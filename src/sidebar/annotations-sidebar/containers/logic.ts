@@ -233,6 +233,7 @@ export class SidebarContainerLogic extends UILogic<
             selectedTextAIPreview: undefined,
 
             users: {},
+            currentUserReference: null,
             pillVisibility: 'unhover',
 
             isWidthLocked: false,
@@ -307,7 +308,7 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    private buildConversationId: ConversationIdBuilder = (
+    buildConversationId: ConversationIdBuilder = (
         remoteAnnotId,
         { id: remoteListId },
     ) => {
@@ -496,6 +497,11 @@ export class SidebarContainerLogic extends UILogic<
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.cacheAnnotationsSubscription(annotationsCache.annotations)
         this.cacheListsSubscription(annotationsCache.lists)
+
+        const userReference = this.options.getCurrentUser()
+        this.emitMutation({
+            currentUserReference: { $set: userReference ?? null },
+        })
 
         this.sidebar = document
             .getElementById('memex-sidebar-container')
