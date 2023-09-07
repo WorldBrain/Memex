@@ -124,6 +124,14 @@ export class AnnotationCreate extends React.Component<Props, State>
         }
     }
 
+    componentWillUnmount(): void {
+        const youtubeSummariseEvents = this.props.sidebarEvents
+
+        youtubeSummariseEvents.removeAllListeners(
+            'triggerYoutubeTimestampSummary',
+        )
+    }
+
     private get displayLists(): Array<{
         id: number
         name: string | JSX.Element
