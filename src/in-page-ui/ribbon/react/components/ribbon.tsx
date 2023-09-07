@@ -1626,13 +1626,21 @@ export default class Ribbon extends Component<Props, State> {
                         <Icon
                             icon={icons.heartFull}
                             heightAndWidth="18px"
-                            color="prime1"
+                            color={
+                                this.props.theme !== 'light'
+                                    ? 'prime1'
+                                    : 'greyScale5'
+                            }
                         />
                     ) : (
                         <Icon
                             icon={logoNoText}
                             heightAndWidth="18px"
-                            color="prime1"
+                            color={
+                                this.props.theme !== 'light'
+                                    ? 'greyScale7'
+                                    : 'greyScale5'
+                            }
                         />
                     )}
                 </IconContainer>

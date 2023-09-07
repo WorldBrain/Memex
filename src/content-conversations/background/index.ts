@@ -19,6 +19,14 @@ export default class ContentConversationsBackground {
                 const { contentConversations } = await options.servicesPromise
                 return contentConversations.submitReply(params)
             },
+            editReply: async (params) => {
+                const { contentConversations } = await options.servicesPromise
+                return contentConversations.editReply(params)
+            },
+            deleteReply: async (params) => {
+                const { contentConversations } = await options.servicesPromise
+                return contentConversations.deleteReply(params)
+            },
             getThreadsForSharedAnnotations: async ({
                 sharedAnnotationReferences,
                 sharedListReference,

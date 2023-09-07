@@ -20,6 +20,7 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import delay from 'src/util/delay'
+import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 
 interface State {
     isTagPickerShown: boolean
@@ -52,6 +53,7 @@ export interface AnnotationCreateGeneralProps {
     isRibbonCommentBox?: boolean
     getYoutubePlayer?(): YoutubePlayer
     renderSpacePicker(): JSX.Element
+    sidebarEvents?: AnnotationsSidebarInPageEventEmitter
 }
 
 export interface Props
@@ -92,6 +94,42 @@ export class AnnotationCreate extends React.Component<Props, State>
             this.focus()
         }
         await this.setYoutubeKeyboardShortcut()
+
+        const youtubeSummariseEvents = this.props.sidebarEvents
+
+        youtubeSummariseEvents.on(
+            'triggerYoutubeTimestampSummary',
+            ({ text, showLoadingSpinner }, callback) => {
+                if (!this.editor) {
+                    callback(false) // signal that listener isn't ready
+                    return
+                }
+
+                if (text) {
+                    this.editor?.addYoutubeTimestampWithText(
+                        text,
+                        showLoadingSpinner,
+                    )
+                    callback(true) // signal successful processing
+                } else {
+                    callback(false) // signal failure or "not ready" due to missing data
+                }
+            },
+        )
+    }
+
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.autoFocus !== this.props.autoFocus) {
+            this.focus()
+        }
+    }
+
+    componentWillUnmount(): void {
+        const youtubeSummariseEvents = this.props.sidebarEvents
+
+        youtubeSummariseEvents.removeAllListeners(
+            'triggerYoutubeTimestampSummary',
+        )
     }
 
     private get displayLists(): Array<{
@@ -313,6 +351,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 }
                                 youtubeShortcut={this.state.youtubeShortcut}
                                 getYoutubePlayer={this.props.getYoutubePlayer}
+                                sidebarEvents={this.props.sidebarEvents}
                             />
                         ) : (
                             <EditorDummy

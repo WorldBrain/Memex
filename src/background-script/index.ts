@@ -37,6 +37,8 @@ import { isExtensionTab, isBrowserPageTab } from 'src/tab-management/utils'
 import { captureException } from 'src/util/raven'
 import { browser } from 'webextension-polyfill-ts'
 import { checkStripePlan } from 'src/util/subscriptions/storage'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -48,6 +50,7 @@ interface Dependencies {
     storageAPI: Storage.Static
     runtimeAPI: Runtime.Static
     tabsAPI: Tabs.Static
+    analyticsBG: AnalyticsCoreInterface
     storageManager: Storex
     bgModules: Pick<
         BackgroundModules,
@@ -173,6 +176,7 @@ class BackgroundScript {
                     await this.handleUnifiedLogic()
                     await setLocalStorage(READ_STORAGE_FLAG, true)
                     await this.setOnboardingTutorialState()
+                    this.trackInstallTime()
                     break
                 case 'update':
                     await this.runQuickAndDirtyMigrations()
@@ -182,6 +186,12 @@ class BackgroundScript {
                     break
                 default:
             }
+        })
+    }
+
+    private trackInstallTime() {
+        trackOnboardingPath(this.deps.analyticsBG, {
+            type: 'interactive',
         })
     }
 

@@ -3,7 +3,10 @@ import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import styled, { css, keyframes } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { ConversationReplies } from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
+import {
+    ConversationReplies,
+    SharedProps as RepliesProps,
+} from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
 import type {
     SharedAnnotationReference,
     SharedListReference,
@@ -20,7 +23,11 @@ import AnnotationEditable, {
 import type _AnnotationEditable from 'src/annotations/components/AnnotationEditable'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
-import type { AnnotationCardInstanceLocation, SidebarTheme } from '../types'
+import type {
+    AnnotationCardInstanceLocation,
+    AnnotationsSidebarInPageEventEmitter,
+    SidebarTheme,
+} from '../types'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import {
     AnnotationEditGeneralProps,
@@ -69,9 +76,7 @@ import {
     getListShareUrl,
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
-import { TaskState } from 'ui-logic-core/lib/types'
-import { MemexEditorInstance } from '@worldbrain/memex-common/lib/editor'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
@@ -205,7 +210,10 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     setSpaceTitleEditValue: (value) => void
     createNewNoteFromAISummary: (summary) => void
     showSharePageTooltip: boolean
-    passUpEditorRef: (ref) => void
+    events: AnnotationsSidebarInPageEventEmitter
+    initGetReplyEditProps: (
+        sharedListReference: SharedListReference,
+    ) => RepliesProps['getReplyEditProps']
 }
 
 interface AnnotationsSidebarState {
@@ -328,10 +336,6 @@ export class AnnotationsSidebar extends React.Component<
     ) {
         if (prevProps.pageSummary != this.props.pageSummary) {
             this.pageSummaryText.current.scrollTop = this.pageSummaryText.current.scrollHeight
-        }
-        if (this.annotationCreateRef.current != null && !this.editorPassedUp) {
-            this.editorPassedUp = true
-            this.props.passUpEditorRef(this.annotationCreateRef.current)
         }
     }
 
@@ -497,6 +501,7 @@ export class AnnotationsSidebar extends React.Component<
                     ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
+                    sidebarEvents={this.props.events}
                 />
             </NewAnnotationSection>
         )
@@ -803,6 +808,12 @@ export class AnnotationsSidebar extends React.Component<
                                     getYoutubePlayer={
                                         this.props.getYoutubePlayer
                                     }
+                                    getReplyEditProps={this.props.initGetReplyEditProps(
+                                        {
+                                            type: 'shared-list-reference',
+                                            id: listData.remoteId,
+                                        },
+                                    )}
                                 />
                             )}
                     </AnnotationBox>

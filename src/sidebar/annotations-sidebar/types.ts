@@ -9,6 +9,10 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
     renderHighlight: (args: { highlight: UnifiedAnnotation }) => void
     renderHighlights: (args: { highlights: UnifiedAnnotation[] }) => void
     highlightAndScroll: (args: { highlight: UnifiedAnnotation }) => void
+    triggerYoutubeTimestampSummary: (
+        args: { text: string; showLoadingSpinner?: boolean },
+        callback,
+    ) => void
     // No longer used, as of the sidebar refactor
     // removeTemporaryHighlights: () => void
     // removeAnnotationHighlight: (args: { url: string }) => void

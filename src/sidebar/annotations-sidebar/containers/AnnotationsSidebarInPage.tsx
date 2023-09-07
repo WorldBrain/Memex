@@ -333,6 +333,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         } else if (
             event.action === 'create_youtube_timestamp_with_AI_summary'
         ) {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'annotations',
+            })
+
             this.processEvent('createYoutubeTimestampWithAISummary', {
                 timeStampANDSummaryJSON: event.timeStampANDSummaryJSON,
             })
