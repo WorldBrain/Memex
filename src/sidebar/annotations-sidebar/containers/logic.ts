@@ -589,6 +589,41 @@ export class SidebarContainerLogic extends UILogic<
                         ]),
                     ),
             },
+            // Ensure conversation states exist for any shared annotation in any shared list
+            conversations: {
+                $apply: (prev: SidebarContainerState['conversations']) => {
+                    return fromPairs(
+                        normalizedStateToArray(nextLists)
+                            .map((list) => {
+                                if (list.remoteId == null) {
+                                    return null
+                                }
+                                return list.unifiedAnnotationIds
+                                    .map((annotId) => {
+                                        const annotData = this.options
+                                            .annotationsCache.annotations.byId[
+                                            annotId
+                                        ]
+                                        if (annotData.remoteId == null) {
+                                            return null
+                                        }
+                                        const conversationId = generateAnnotationCardInstanceId(
+                                            list,
+                                            annotId,
+                                        )
+                                        return [
+                                            conversationId,
+                                            prev[conversationId] ??
+                                                getInitialAnnotationConversationState(),
+                                        ]
+                                    })
+                                    .filter((a) => a != null)
+                            })
+                            .filter((a) => a != null)
+                            .flat(),
+                    )
+                },
+            },
         })
     }
 
@@ -654,6 +689,7 @@ export class SidebarContainerLogic extends UILogic<
                             .flat(),
                     ),
             },
+            // Ensure conversation states exist for any shared annotation in any shared list
             conversations: {
                 $apply: (prev: SidebarContainerState['conversations']) => {
                     return fromPairs(

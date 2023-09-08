@@ -262,7 +262,8 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         )
     }
 
-    private updateSharedAnnotationsWithSharedPageLists() {
+    private updateSharedAnnotationsWithSharedPageLists(): string[] {
+        const changedAnnots: string[] = []
         let shouldEmitAnnotUpdateEvent = false
         this.annotations = initNormalizedState({
             seedData: normalizedStateToArray(this.annotations).map((annot) => {
@@ -283,6 +284,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 ) {
                     return annot
                 }
+                changedAnnots.push(annot.unifiedId)
 
                 shouldEmitAnnotUpdateEvent = true
                 return { ...annot, unifiedListIds: nextUnifiedListIds }
@@ -293,6 +295,8 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         if (shouldEmitAnnotUpdateEvent) {
             this.events.emit('newAnnotationsState', this.annotations)
         }
+
+        return changedAnnots
     }
 
     private updateCachedListAnnotationRefsForAnnotationUpdate(
@@ -564,6 +568,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 previousList.hasRemoteAnnotationsToLoad
         }
 
+        // If list was shared, set up reverse ref from remote->cached ID
         if (previousList.remoteId !== nextList.remoteId) {
             this.remoteListIdsToCacheIds.set(
                 nextList.remoteId,
@@ -581,9 +586,19 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         this.events.emit('updatedList', nextList)
         this.events.emit('newListsState', this.lists)
-        // If share status changed, reflect updates in any public annotations
-        if (previousList.remoteId != nextList.remoteId) {
-            this.updateSharedAnnotationsWithSharedPageLists()
+
+        // If list was shared, reflect updates in any public annotations.
+        //  Note this needs to be separate to the previous condition else things go silly due to some timing issue. TODO: Figure out why and document
+        if (previousList.remoteId !== nextList.remoteId) {
+            const changedAnnots = this.updateSharedAnnotationsWithSharedPageLists()
+
+            // Ensure any annots that were added to this list have a reverse reference from this list
+            nextList.unifiedAnnotationIds = Array.from(
+                new Set([
+                    ...previousList.unifiedAnnotationIds,
+                    ...changedAnnots,
+                ]),
+            )
         }
     }
 

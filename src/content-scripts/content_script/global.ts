@@ -1988,21 +1988,64 @@ export function setupWebUIActions(args: {
         document.dispatchEvent(event)
     }
 
-    document.addEventListener(MEMEX_OPEN_LINK_EVENT_NAME, async (event) => {
-        const detail = event.detail as MemexOpenLinkDetail
-        confirmRequest(detail.requestId)
+    if (checkBrowser() === 'firefox') {
+        const observer = new MutationObserver(async (mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    const addedElement = document.getElementById(
+                        'openPageInSelectedListModeTriggerElement',
+                    ) // replace "specificID" with your actual ID
+                    if (addedElement) {
+                        const fullPageUrl = addedElement.getAttribute(
+                            'sourceurl',
+                        )
+                        const sharedListId = addedElement.getAttribute(
+                            'sharedlistid',
+                        )
+                        const manuallyPullLocalListData =
+                            addedElement.getAttribute('iscollaboratorlink') ===
+                                'true' ||
+                            addedElement.getAttribute('isownlink') === 'true' // because this will be a string
 
-        // Handle local PDFs first (memex.cloud URLs)
-        if (isMemexPageAPdf({ url: detail.originalPageUrl })) {
-            await args.bgScriptBG.openOverviewTab({ missingPdf: true })
-            return
-        }
+                        // todo maybe add timeout
 
-        await args.contentScriptsBG.openPageWithSidebarInSelectedListMode({
-            fullPageUrl: detail.originalPageUrl,
-            sharedListId: detail.sharedListId,
-            manuallyPullLocalListData:
-                detail.isCollaboratorLink || detail.isOwnLink,
+                        await sleepPromise(2000)
+
+                        await args.contentScriptsBG.openPageWithSidebarInSelectedListMode(
+                            {
+                                fullPageUrl,
+                                sharedListId,
+                                manuallyPullLocalListData,
+                            },
+                        ) // call your function here
+
+                        addedElement.remove()
+
+                        observer.disconnect() // Optionally disconnect the observer if you only want to detect the element once
+                    }
+                }
+            }
         })
-    })
+
+        // Start observing the whole document
+        observer.observe(document.body, { childList: true, subtree: true })
+    } else {
+        document.addEventListener(MEMEX_OPEN_LINK_EVENT_NAME, async (event) => {
+            const detail = event.detail as MemexOpenLinkDetail
+            confirmRequest(detail.requestId)
+
+            // Handle local PDFs first (memex.cloud URLs)
+            if (isMemexPageAPdf({ url: detail.originalPageUrl })) {
+                await args.bgScriptBG.openOverviewTab({ missingPdf: true })
+                return
+            }
+
+            await args.contentScriptsBG.openPageWithSidebarInSelectedListMode({
+                fullPageUrl: detail.originalPageUrl,
+                sharedListId: detail.sharedListId,
+                manuallyPullLocalListData:
+                    detail.isCollaboratorLink || detail.isOwnLink,
+            })
+        })
+    }
 }

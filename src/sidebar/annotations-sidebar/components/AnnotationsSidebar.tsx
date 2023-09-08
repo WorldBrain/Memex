@@ -483,12 +483,6 @@ export class AnnotationsSidebar extends React.Component<
     private renderNewAnnotation(
         toggledListInstanceId?: UnifiedList['unifiedId'],
     ) {
-        console.log(
-            'annotationcreateprops',
-            this.props.annotationCreateProps,
-            this.state.autoFocusCreateForm,
-            this.props.events,
-        )
         return (
             <NewAnnotationSection>
                 <AnnotationCreate
@@ -2291,7 +2285,11 @@ export class AnnotationsSidebar extends React.Component<
                 {/* {this.state.spaceTitleEditState ? ( */}
                 <SpaceTitleEditField
                     ref={this.spaceTitleEditFieldRef}
-                    value={this.props.spaceTitleEditValue ?? selectedList.name}
+                    value={
+                        this.props.spaceTitleEditValue
+                            ? this.props.spaceTitleEditValue
+                            : selectedList.name
+                    }
                     onChange={(event) => {
                         {
                             this.props.setSpaceTitleEditValue(
@@ -2299,17 +2297,35 @@ export class AnnotationsSidebar extends React.Component<
                             )
                         }
                     }}
+                    disabled={
+                        cacheUtils.deriveListOwnershipStatus(
+                            selectedList,
+                            this.props.currentUser,
+                        ) !== 'Creator'
+                    }
                     isActivated={this.state.spaceTitleEditState}
+                    isCreator={
+                        cacheUtils.deriveListOwnershipStatus(
+                            selectedList,
+                            this.props.currentUser,
+                        ) === 'Creator'
+                    }
                     onClick={() => {
-                        this.props.setSpaceTitleEditValue(selectedList.name)
-                        this.spaceTitleEditFieldRef.current.addEventListener(
-                            'blur',
-                            this.handleClickOutside,
+                        const permissionStatus = cacheUtils.deriveListOwnershipStatus(
+                            selectedList,
+                            this.props.currentUser,
                         )
-                        !this.state.spaceTitleEditState &&
-                            this.setState({
-                                spaceTitleEditState: true,
-                            })
+                        if (permissionStatus === 'Creator') {
+                            this.props.setSpaceTitleEditValue(selectedList.name)
+                            this.spaceTitleEditFieldRef.current.addEventListener(
+                                'blur',
+                                this.handleClickOutside,
+                            )
+                            !this.state.spaceTitleEditState &&
+                                this.setState({
+                                    spaceTitleEditState: true,
+                                })
+                        }
                     }}
                     onKeyDown={this.handleNameEditInputKeyDown}
                 />
@@ -3121,7 +3137,10 @@ const SpaceTitle = styled.div`
         background: ${(props) => props.theme.colors.greyScale1};
     }
 `
-const SpaceTitleEditField = styled.input<{ isActivated: boolean }>`
+const SpaceTitleEditField = styled.input<{
+    isActivated: boolean
+    isCreator: boolean
+}>`
     font-size: 18px;
     font-weight: 500;
     width: fill-available;
@@ -3155,6 +3174,14 @@ const SpaceTitleEditField = styled.input<{ isActivated: boolean }>`
             &:hover {
                 cursor: pointer;
                 background: ${(props) => props.theme.colors.greyScale1};
+            }
+        `};
+    ${(props) =>
+        !props.isCreator &&
+        css`
+            &:hover {
+                cursor: default;
+                background: transparent;
             }
         `};
 `

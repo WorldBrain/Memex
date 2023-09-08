@@ -211,7 +211,10 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             )
         }
 
-        if (this.state.mode === 'confirm-space-delete') {
+        if (
+            this.state.mode === 'confirm-space-delete' &&
+            this.props.isCreator
+        ) {
             return (
                 <DeleteBox>
                     <TitleBox>Delete this Space?</TitleBox>
@@ -265,54 +268,59 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                 )}
                 {this.renderShareLinks(isPageLink)}
 
-                {this.props.listData.type !== 'special-list' && (
-                    <>
-                        <SectionTitle>
-                            {isPageLink
-                                ? 'Edit Page Link Name'
-                                : 'Edit Space Name'}
-                        </SectionTitle>
-                        <EditArea>
-                            <Container
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    e.stopPropagation()
-                                }}
-                            >
-                                <EditableListTitle
+                {this.props.listData.type !== 'special-list' &&
+                    this.props.isCreator && (
+                        <>
+                            <SectionTitle>
+                                {isPageLink
+                                    ? 'Edit Page Link Name'
+                                    : 'Edit Space Name'}
+                            </SectionTitle>
+                            <EditArea>
+                                <Container
                                     onClick={(e) => {
                                         e.preventDefault()
                                         e.stopPropagation()
                                     }}
-                                    value={this.state.nameValue}
-                                    onChange={this.handleNameChange}
-                                    disabled={this.props.disableWriteOps}
-                                    onKeyDown={this.handleNameEditInputKeyDown}
-                                />
-                            </Container>
-                            {this.props.errorMessage && (
-                                <ErrMsg>{this.props.errorMessage}</ErrMsg>
-                            )}
-                        </EditArea>
-                    </>
-                )}
+                                >
+                                    <EditableListTitle
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            e.stopPropagation()
+                                        }}
+                                        value={this.state.nameValue}
+                                        onChange={this.handleNameChange}
+                                        disabled={this.props.disableWriteOps}
+                                        onKeyDown={
+                                            this.handleNameEditInputKeyDown
+                                        }
+                                    />
+                                </Container>
+                                {this.props.errorMessage && (
+                                    <ErrMsg>{this.props.errorMessage}</ErrMsg>
+                                )}
+                            </EditArea>
+                        </>
+                    )}
                 <ButtonBox>
-                    <PrimaryAction
-                        onClick={wrapClick((reactEvent) =>
-                            this.processEvent('intendToDeleteSpace', {
-                                reactEvent,
-                            }),
-                        )}
-                        disabled={this.props.disableWriteOps}
-                        icon={'trash'}
-                        size={'medium'}
-                        type={'tertiary'}
-                        label={
-                            this.props.listData.type === 'page-link'
-                                ? 'Delete Page Link'
-                                : 'Delete Space'
-                        }
-                    />
+                    {this.props.isCreator && (
+                        <PrimaryAction
+                            onClick={wrapClick((reactEvent) =>
+                                this.processEvent('intendToDeleteSpace', {
+                                    reactEvent,
+                                }),
+                            )}
+                            disabled={this.props.disableWriteOps}
+                            icon={'trash'}
+                            size={'medium'}
+                            type={'tertiary'}
+                            label={
+                                this.props.listData.type === 'page-link'
+                                    ? 'Delete Page Link'
+                                    : 'Delete Space'
+                            }
+                        />
+                    )}
                     <>
                         {this.state?.showSaveButton &&
                             this.state.nameValue.length > 0 && (
