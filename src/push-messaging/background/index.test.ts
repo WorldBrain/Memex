@@ -13,7 +13,7 @@ async function setupTest(opts: {
         bgModules: context.backgroundModules,
     })
 
-    const serverStorage = await context.getServerStorage()
+    const serverStorage = context.serverStorage
     let defaultListId: string | null = null
     if (opts.createDefaultList) {
         const { object } = await serverStorage.manager

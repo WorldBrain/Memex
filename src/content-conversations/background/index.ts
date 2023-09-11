@@ -8,32 +8,28 @@ export default class ContentConversationsBackground {
 
     constructor(
         private options: {
-            servicesPromise: Promise<Pick<Services, 'contentConversations'>>
-            getServerStorage: () => Promise<
-                Pick<ServerStorageModules, 'contentConversations'>
-            >
+            services: Pick<Services, 'contentConversations'>
+            serverStorage: Pick<ServerStorageModules, 'contentConversations'>
         },
     ) {
         this.remoteFunctions = {
             submitReply: async (params) => {
-                const { contentConversations } = await options.servicesPromise
+                const { contentConversations } = options.services
                 return contentConversations.submitReply(params)
             },
             editReply: async (params) => {
-                const { contentConversations } = await options.servicesPromise
+                const { contentConversations } = options.services
                 return contentConversations.editReply(params)
             },
             deleteReply: async (params) => {
-                const { contentConversations } = await options.servicesPromise
+                const { contentConversations } = options.services
                 return contentConversations.deleteReply(params)
             },
             getThreadsForSharedAnnotations: async ({
                 sharedAnnotationReferences,
                 sharedListReference,
             }) => {
-                const {
-                    contentConversations,
-                } = await this.options.getServerStorage()
+                const { contentConversations } = this.options.serverStorage
                 return contentConversations.getThreadsForAnnotations({
                     annotationReferences: sharedAnnotationReferences,
                     sharedListReference,
@@ -43,9 +39,7 @@ export default class ContentConversationsBackground {
                 sharedAnnotationReference,
                 sharedListReference,
             }) => {
-                const {
-                    contentConversations,
-                } = await this.options.getServerStorage()
+                const { contentConversations } = this.options.serverStorage
                 return contentConversations.getRepliesByAnnotation({
                     annotationReference: sharedAnnotationReference,
                     sharedListReference,
@@ -55,9 +49,7 @@ export default class ContentConversationsBackground {
                 sharedAnnotationReference,
                 ...params
             }) => {
-                const {
-                    contentConversations,
-                } = await this.options.getServerStorage()
+                const { contentConversations } = this.options.serverStorage
                 return contentConversations.getOrCreateThread({
                     ...params,
                     annotationReference: sharedAnnotationReference,

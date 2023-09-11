@@ -1,12 +1,12 @@
 import type { Storage } from 'webextension-polyfill-ts'
-import StorageManager from '@worldbrain/storex'
+import type StorageManager from '@worldbrain/storex'
 import { BackgroundModules } from 'src/background-script/setup'
-import { ServerStorage } from 'src/storage/types'
-import { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
+import type { ServerStorage } from 'src/storage/types'
+import type { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
-import { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
+import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
 
 type CloudSendTest =
@@ -63,7 +63,7 @@ export function createSelfTests(options: {
     backgroundModules: BackgroundModules
     storageManager: StorageManager
     persistentStorageManager: StorageManager
-    getServerStorage: () => Promise<ServerStorage>
+    serverStorage: ServerStorage
     localStorage: Storage.LocalStorageArea
 }) {
     const { backgroundModules } = options
@@ -82,8 +82,7 @@ export function createSelfTests(options: {
             throw new Error(`Could not authenticate user`)
         }
 
-        const serverStorage = await options.getServerStorage()
-        await serverStorage.modules.users.ensureUser(
+        await options.serverStorage.modules.users.ensureUser(
             {
                 displayName: `Test user (${email})`,
             },
@@ -116,9 +115,8 @@ export function createSelfTests(options: {
             const user = await ensureTestUser()
             console.log('Self test user:', user.id)
 
-            const serverStorage = await options.getServerStorage()
-            console.log('server storage:', serverStorage)
-            await clearDb(serverStorage.manager, {
+            console.log('server storage:', options.serverStorage)
+            await clearDb(options.serverStorage.manager, {
                 getWhere: async (collectionName) => {
                     if (!collectionName.startsWith('personal')) {
                         return null
@@ -133,7 +131,7 @@ export function createSelfTests(options: {
                     ) {
                         return null
                     }
-                    const objects = (await serverStorage.manager
+                    const objects = (await options.serverStorage.manager
                         .collection(collectionName)
                         .findObjects({
                             user: user.id,
@@ -321,16 +319,18 @@ export function createSelfTests(options: {
                 })
                 console.log('Shared test list #2, remote ID:', remoteListId2)
 
-                await serverStorage.modules.contentSharing.ensurePageInfo({
-                    creatorReference: {
-                        type: 'user-reference',
-                        id: user.id,
+                await options.serverStorage.modules.contentSharing.ensurePageInfo(
+                    {
+                        creatorReference: {
+                            type: 'user-reference',
+                            id: user.id,
+                        },
+                        pageInfo: {
+                            normalizedUrl: normalizedTestPageUrl,
+                            originalUrl: testPageUrl,
+                        },
                     },
-                    pageInfo: {
-                        normalizedUrl: normalizedTestPageUrl,
-                        originalUrl: testPageUrl,
-                    },
-                })
+                )
                 if (shouldTest('share.note')) {
                     await backgroundModules.contentSharing.shareAnnotation({
                         annotationUrl: publicAnnotationUrl,
@@ -365,7 +365,7 @@ export function createSelfTests(options: {
                 }
 
                 if (shouldTest('share.incoming.note')) {
-                    await serverStorage.modules.contentSharing.createAnnotations(
+                    await options.serverStorage.modules.contentSharing.createAnnotations(
                         {
                             annotationsByPage: {
                                 [normalizedTestPageUrl]: [
@@ -416,7 +416,7 @@ export function createSelfTests(options: {
             //                 },
             //                 { skipPageIndexing: true },
             //             )
-            //             await serverStorage.storageModules.contentSharing.ensurePageInfo(
+            //             await options.serverStorage.storageModules.contentSharing.ensurePageInfo(
             //                 {
             //                     creatorReference: {
             //                         type: 'user-reference',
@@ -445,7 +445,7 @@ export function createSelfTests(options: {
             console.log('Waited for sync to cloud from this device')
 
             if (shouldTest('share.incoming.note')) {
-                const sharedAnnotationEntries = await serverStorage.modules.contentSharing.getAnnotationListEntries(
+                const sharedAnnotationEntries = await options.serverStorage.modules.contentSharing.getAnnotationListEntries(
                     {
                         listReference: {
                             type: 'shared-list-reference',
@@ -463,16 +463,18 @@ export function createSelfTests(options: {
             ) {
                 backgroundModules.auth.authService.signOut()
                 await ensureTestUser('two@test.com')
-                await serverStorage.modules.activityFollows.storeFollow({
-                    collection: 'sharedList',
-                    objectId: remoteListId1,
-                    userReference: {
-                        type: 'user-reference',
-                        id: (
-                            await backgroundModules.auth.authService.getCurrentUser()
-                        ).id,
+                await options.serverStorage.modules.activityFollows.storeFollow(
+                    {
+                        collection: 'sharedList',
+                        objectId: remoteListId1,
+                        userReference: {
+                            type: 'user-reference',
+                            id: (
+                                await backgroundModules.auth.authService.getCurrentUser()
+                            ).id,
+                        },
                     },
-                })
+                )
                 console.log(
                     await backgroundModules.customLists.fetchFollowedListsWithAnnotations(
                         {

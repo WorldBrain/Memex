@@ -91,7 +91,7 @@ export class SharingTestHelper {
         setup: BackgroundIntegrationTestSetup,
         options: { id: number },
     ) {
-        await setup.backgroundModules.contentSharing.options.servicesPromise
+        await setup.backgroundModules.contentSharing.options.services
         const {
             remoteListId,
             annotationSharingStatesPromise,
@@ -742,7 +742,7 @@ export class SharingTestHelper {
         sortField: string,
     ) {
         await setup.backgroundModules.personalCloud.waitForSync()
-        const serverStorage = await setup.getServerStorage()
+        const serverStorage = setup.serverStorage
         const storageManager =
             db === 'local' ? setup.storageManager : serverStorage.manager
         const objects = await storageManager.operation(

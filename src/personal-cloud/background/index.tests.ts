@@ -13,7 +13,7 @@ import {
     BackgroundIntegrationTestSetupOpts,
 } from 'src/tests/background-integration-tests'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { createLazyTestServerStorage } from 'src/storage/server'
+import { createTestServerStorage } from 'src/storage/server'
 import {
     PersonalCloudHub,
     StorexPersonalCloudBackend,
@@ -294,17 +294,16 @@ export async function setupSyncBackgroundTest(
 
     const translationLayerTestBackend =
         process.env.TRANSLATION_LAYER_TEST_BACKEND
-    const getServerStorage =
-        options.testInstance?.getSetupOptions?.().getServerStorage ??
-        createLazyTestServerStorage({
+    const serverStorage =
+        (await options.testInstance?.getSetupOptions?.())?.serverStorage ??
+        (await createTestServerStorage({
             changeWatchSettings: !!translationLayerTestBackend
                 ? options.serverChangeWatchSettings
                 : mergeChangeWatchSettings([
                       options.serverChangeWatchSettings,
                       options.sqlChangeWatchSettings,
                   ]),
-        })
-    const serverStorage = await getServerStorage()
+        }))
     const cloudHub = new PersonalCloudHub()
 
     let now = BASE_TIMESTAMP
@@ -361,11 +360,10 @@ export async function setupSyncBackgroundTest(
     for (let i = 0; i < options.deviceCount; ++i) {
         const authServices = createAuthServices({
             backend: 'memory',
-            getServerStorage,
         })
-        const services = await createServices({
+        const services = createServices({
             backend: 'memory',
-            getServerStorage,
+            serverStorage,
             authService: authServices.auth,
         })
         const personalCloudBackend = new StorexPersonalCloudBackend({
@@ -400,7 +398,7 @@ export async function setupSyncBackgroundTest(
                 ...options,
                 services,
                 authServices,
-                getServerStorage,
+                serverStorage,
                 pushMessagingService,
                 personalCloudBackend,
                 personalCloudMediaBackend,

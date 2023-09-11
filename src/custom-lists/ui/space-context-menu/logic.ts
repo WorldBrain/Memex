@@ -202,7 +202,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                 localListId: listData.localId,
             })
             remoteListId = shareResult.remoteListId
-            onSpaceShare?.(remoteListId)
 
             this.emitMutation({
                 showSuccessMsg: { $set: true },

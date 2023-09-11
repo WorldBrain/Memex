@@ -7,12 +7,12 @@ import ListKeysService from './content-sharing'
 import ContentConversationsService from './content-conversations'
 import type { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 
-export async function createServices(options: {
+export function createServices(options: {
     authService: AuthService
     backend: 'firebase' | 'memory'
-    getServerStorage: () => Promise<ServerStorage>
-}): Promise<Services> {
-    const { modules: storageModules } = await options.getServerStorage()
+    serverStorage: ServerStorage
+}): Services {
+    const { modules: storageModules } = options.serverStorage
     if (options.backend === 'memory') {
         return {
             contentSharing: new ListKeysService({

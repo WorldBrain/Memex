@@ -5,12 +5,10 @@ import {
 } from 'src/authentication/background/setup'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
-import type { ServerStorage } from 'src/storage/types'
 import { subscriptionRedirect } from 'src/authentication/background/redirect'
 
 export function createAuthServices(options: {
     backend: 'firebase' | 'memory'
-    getServerStorage: () => Promise<ServerStorage>
 }): AuthServices {
     if (options.backend === 'memory') {
         return {

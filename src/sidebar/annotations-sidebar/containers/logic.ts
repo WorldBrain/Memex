@@ -1,4 +1,5 @@
 import fromPairs from 'lodash/fromPairs'
+import clone from 'lodash/cloneDeep'
 import browser from 'webextension-polyfill'
 import {
     UILogic,
@@ -578,6 +579,7 @@ export class SidebarContainerLogic extends UILogic<
     private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
         nextLists,
     ) => {
+        console.log('hih:', clone({ ...nextLists }))
         this.emitMutation({
             lists: { $set: nextLists },
             listInstances: {
@@ -1629,6 +1631,7 @@ export class SidebarContainerLogic extends UILogic<
         )
 
         const { sharingState } = await bgPromise
+        console.log('updatelistsFor Annot:', sharingState, event)
 
         // Update again with the calculated lists and privacy lvl from the BG ops (TODO: there's gotta be a nicer way to handle this optimistically in the UI)
         annotationsCache.updateAnnotation(
