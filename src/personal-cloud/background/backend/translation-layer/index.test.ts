@@ -1518,8 +1518,6 @@ describe('Personal cloud translation layer', () => {
                 )
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            setups[0].getServerStorage()
-
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
             const testMetadata = remoteData.personalContentMetadata
             const testLocators = remoteData.personalContentLocator
@@ -5497,7 +5495,7 @@ describe('Personal cloud translation layer', () => {
                 .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const serverStorage = await setups[0].getServerStorage()
+            const serverStorage = setups[0].serverStorage
             await serverStorage.modules.activityFollows.storeFollow({
                 collection: 'sharedList',
                 userReference: { id: TEST_USER.id, type: 'user-reference' },
@@ -5555,7 +5553,7 @@ describe('Personal cloud translation layer', () => {
                 .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const serverStorage = await setups[0].getServerStorage()
+            const serverStorage = setups[0].serverStorage
             await serverStorage.modules.activityFollows.storeFollow({
                 collection: 'sharedList',
                 userReference: { id: TEST_USER.id, type: 'user-reference' },

@@ -11,7 +11,7 @@ import {
 import * as data from './index.test.data'
 import { BackgroundIntegrationTestSetupOpts } from 'src/tests/background-integration-tests'
 import { StorageHooksChangeWatcher } from '@worldbrain/memex-common/lib/storage/hooks'
-import { createLazyMemoryServerStorage } from 'src/storage/server'
+import { createMemoryServerStorage } from 'src/storage/server'
 import { FakeFetch } from 'src/util/tests/fake-fetch'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SharingTestHelper } from './index.tests'
@@ -77,7 +77,7 @@ async function setupTest(options: {
     await personalCloud.setup()
     await personalCloud.startSync()
 
-    const serverStorage = await setup.getServerStorage()
+    const serverStorage = setup.serverStorage
     await serverStorage.manager.operation('createObject', 'user', TEST_USER)
 
     if (options.createTestList) {
@@ -2048,7 +2048,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     testData,
                                 })
 
-                                const serverStorage = await setup.getServerStorage()
+                                const serverStorage = setup.serverStorage
                                 const listReference = await serverStorage.modules.contentSharing.createSharedList(
                                     {
                                         listData: {
@@ -2125,9 +2125,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     testData,
                                 })
 
-                                const {
-                                    manager,
-                                } = await setup.getServerStorage()
+                                const { manager } = setup.serverStorage
                                 const listTitle = createPageLinkListTitle()
                                 const pageTitle = 'test page title'
                                 const fullPageUrl = 'https://memex.garden'
@@ -2560,9 +2558,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     testData,
                                 })
 
-                                const {
-                                    manager,
-                                } = await setup.getServerStorage()
+                                const { manager } = setup.serverStorage
                                 const now = Date.now()
                                 const listTitle = createPageLinkListTitle(
                                     new Date(now),
@@ -2924,9 +2920,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     testData,
                                 })
 
-                                const {
-                                    manager,
-                                } = await setup.getServerStorage()
+                                const { manager } = setup.serverStorage
                                 const now = Date.now()
                                 const listTitle = createPageLinkListTitle()
                                 const pdfTitle = 'test pdf title'
@@ -3478,9 +3472,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     testData,
                                 })
 
-                                const {
-                                    manager,
-                                } = await setup.getServerStorage()
+                                const { manager } = setup.serverStorage
                                 const now = Date.now()
                                 const listTitle = createPageLinkListTitle()
                                 const pdfTitle = data.PDF_DATA_A.title
@@ -6925,7 +6917,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             execute: async ({ setup }) => {
                                 await setupTest({ setup })
 
-                                const serverStorage = await setup.getServerStorage()
+                                const serverStorage = setup.serverStorage
 
                                 const normalizedPageUrl = normalizeUrl(
                                     data.PAGE_1_DATA.pageDoc.url,
@@ -7248,14 +7240,14 @@ function makeAnnotationFromWebUiTest(options: {
     let storageHooksChangeWatcher: StorageHooksChangeWatcher
 
     return {
-        getSetupOptions: (): BackgroundIntegrationTestSetupOpts => {
+        getSetupOptions: async (): Promise<
+            BackgroundIntegrationTestSetupOpts
+        > => {
             storageHooksChangeWatcher = new StorageHooksChangeWatcher()
-            const getServerStorage = createLazyMemoryServerStorage({
+            const serverStorage = await createMemoryServerStorage({
                 changeWatchSettings: storageHooksChangeWatcher,
             })
-            return {
-                getServerStorage,
-            }
+            return { serverStorage }
         },
         setup: async (context) => {
             const fakeFetch = new FakeFetch()
@@ -7268,8 +7260,7 @@ function makeAnnotationFromWebUiTest(options: {
                     type: 'user-reference',
                     id: (await context.setup.authService.getCurrentUser()).id,
                 }),
-                serverStorageManager: (await context.setup.getServerStorage())
-                    .manager,
+                serverStorageManager: context.setup.serverStorage.manager,
                 services: context.setup.services,
             })
             await setupPreTest(context)
@@ -7285,7 +7276,7 @@ function makeAnnotationFromWebUiTest(options: {
                     await shareTestList()
                     await personalCloud.waitForSync()
 
-                    const serverStorage = await setup.getServerStorage()
+                    const serverStorage = setup.serverStorage
                     if (!options.ownPage) {
                         await serverStorage.modules.contentSharing.ensurePageInfo(
                             {

@@ -402,8 +402,12 @@ class SpacePicker extends StatefulUIElement<
                         onCancelEdit={this.handleSpaceContextMenuClose(
                             list.localId,
                         )}
-                        onSpaceShare={(remoteListId) =>
+                        onSpaceShare={(
+                            remoteListId,
+                            annotationLocalToRemoteIdsDict,
+                        ) =>
                             this.processEvent('setListRemoteId', {
+                                annotationLocalToRemoteIdsDict,
                                 localListId: list.localId,
                                 remoteListId,
                             })

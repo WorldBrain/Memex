@@ -55,11 +55,11 @@ async function main() {
 
     const authServices = createAuthServices({
         backend: 'memory',
-        getServerStorage: () => Promise.reject(), // FIXME
     })
-    const servicesPromise = createServices({
+    const serverStorage = {} as any
+    const services = createServices({
         backend: 'memory',
-        getServerStorage: () => Promise.reject(), // FIXME
+        serverStorage,
         authService: authServices.auth,
     })
 
@@ -69,9 +69,9 @@ async function main() {
     })
     const backgroundModules = createBackgroundModules({
         manifestVersion: '3',
-        getServerStorage: () => Promise.reject(), // FIXME
+        serverStorage,
         authServices,
-        servicesPromise,
+        services,
         analyticsManager: null,
         storageManager,
         persistentStorageManager,

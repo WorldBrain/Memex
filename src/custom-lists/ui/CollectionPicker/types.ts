@@ -12,7 +12,8 @@ import type { AuthRemoteFunctionsInterface } from 'src/authentication/background
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 type SpacePickerTab = 'user-lists' | 'page-links'
 
@@ -50,7 +51,11 @@ export type SpacePickerEvent = UIEvent<{
         shouldRerender?: boolean
     }
     resultEntryFocus: { entry: UnifiedList; index: number }
-    setListRemoteId: { localListId: number; remoteListId: string }
+    setListRemoteId: {
+        localListId: number
+        remoteListId: AutoPk
+        annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
+    }
     toggleEntryContextMenu: { listId: number }
     openListInWebUI: { unifiedListId: UnifiedList['unifiedId'] }
     updateContextMenuPosition: { x?: number; y?: number }
@@ -87,7 +92,7 @@ export interface SpacePickerDependencies {
     filterMode?: boolean
     removeTooltipText?: string
     searchInputPlaceholder?: string
-    onListShare?: (ids: { localListId: number; remoteListId: string }) => void
+    onListShare?: (ids: { localListId: number; remoteListId: AutoPk }) => void
     onClickOutside?: React.MouseEventHandler
     authBG: AuthRemoteFunctionsInterface
     spacesBG: RemoteCollectionsInterface

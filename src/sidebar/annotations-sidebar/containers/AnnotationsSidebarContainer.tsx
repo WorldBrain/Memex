@@ -104,6 +104,7 @@ export class AnnotationsSidebarContainer<
             }),
         )
 
+        window['_getState'] = () => ({ ...this.state })
         this.listenToWindowChanges()
     }
 
@@ -435,12 +436,6 @@ export class AnnotationsSidebarContainer<
                     added: null,
                     deleted: listId,
                     unifiedAnnotationId: params.annotation.unifiedId,
-                }),
-            onListShare: ({ localListId, remoteListId }) =>
-                annotationsCache.updateList({
-                    remoteId: remoteListId,
-                    unifiedId: annotationsCache.getListByLocalId(localListId)
-                        ?.unifiedId,
                 }),
             normalizedPageUrlToFilterPageLinksBy: normalizeUrl(
                 this.state.fullPageUrl,
@@ -1164,10 +1159,14 @@ export class AnnotationsSidebarContainer<
                                             oldName: listData.name,
                                         })
                                     }}
-                                    onSpaceShare={(remoteListId) => {
+                                    onSpaceShare={(
+                                        remoteListId,
+                                        annotationLocalToRemoteIdsDict,
+                                    ) => {
                                         this.processEvent('shareList', {
-                                            unifiedListId: listData.unifiedId,
                                             remoteListId,
+                                            annotationLocalToRemoteIdsDict,
+                                            unifiedListId: listData.unifiedId,
                                         })
                                         this.processEvent(
                                             'setSharingTutorialVisibility',
@@ -1402,7 +1401,7 @@ font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'l
             right: 0px;
         `}
 
-          
+
     ${(props) =>
         props.theme.variant === 'light' &&
         css`

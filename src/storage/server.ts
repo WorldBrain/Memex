@@ -44,13 +44,8 @@ export function createServerStorageManager(options?: {
     return createStorageManager(serverStorageBackend, options)
 }
 
-export function createLazyServerStorage(
-    create: (options?: {
-        changeWatchSettings?: Omit<
-            ChangeWatchMiddlewareSettings,
-            'storageManager'
-        >
-    }) => StorageManager | Promise<StorageManager>,
+export async function createServerStorage(
+    storageManager: StorageManager,
     options: {
         autoPkType: 'string' | 'number'
         sharedSyncLog?: SharedSyncLogStorage
@@ -60,178 +55,155 @@ export function createLazyServerStorage(
             'storageManager'
         >
     },
-) {
-    let serverStoragePromise: Promise<ServerStorage>
-
+): Promise<ServerStorage> {
     try {
         globalThis['setServerStorageLoggingEnabled'] = (value: boolean) =>
             (shouldLogOperations = value)
     } catch (e) {}
 
-    return async () => {
-        if (serverStoragePromise) {
-            return serverStoragePromise
-        }
+    const operationExecuter = !options.skipApplicationLayer
+        ? getFirebaseOperationExecuter(storageManager)
+        : (stroageModuleName: string) =>
+              _defaultOperationExecutor(storageManager)
 
-        const storageManager = await create(options)
-        serverStoragePromise = (async () => {
-            const operationExecuter = !options.skipApplicationLayer
-                ? getFirebaseOperationExecuter(storageManager)
-                : (stroageModuleName: string) =>
-                      _defaultOperationExecutor(storageManager)
-
-            const sharedSyncLog =
-                options.sharedSyncLog ??
-                new SharedSyncLogStorage({
-                    storageManager,
-                    autoPkType: 'string',
-                })
-            const contentSharing = new ContentSharingStorage({
-                storageManager,
-                operationExecuter: operationExecuter('contentSharing'),
-                ...options,
-            })
-            const contentConversations = new ContentConversationStorage({
-                storageManager,
-                contentSharing,
-                operationExecuter: operationExecuter('contentConversations'),
-                ...options,
-            })
-            const users = new UserStorage({
-                storageManager,
-                operationExecuter: operationExecuter('users'),
-            })
-            const activityStreams = new ActivityStreamsStorage({
-                storageManager,
-            })
-            const personalCloud = new PersonalCloudStorage({
-                storageManager,
-                autoPkType: 'string',
-            })
-            const activityFollows = new ActivityFollowsStorage({
-                storageManager,
-                operationExecuter: operationExecuter('activityFollows'),
-            })
-            const discord = new DiscordStorage({
-                storageManager,
-                operationExecuter: operationExecuter('discord'),
-            })
-            const discordRetroSync = new DiscordRetroSyncStorage({
-                storageManager,
-                operationExecuter: operationExecuter('discordRetroSync'),
-            })
-            const slack = new SlackStorage({
-                storageManager,
-                operationExecuter: operationExecuter('slack'),
-            })
-            const slackRetroSync = new SlackRetroSyncStorage({
-                storageManager,
-                operationExecuter: operationExecuter('slackRetroSync'),
-            })
-            const serverStorage: ServerStorage = {
-                manager: storageManager,
-                modules: {
-                    sharedSyncLog,
-                    users,
-                    contentSharing,
-                    activityStreams,
-                    activityFollows,
-                    contentConversations,
-                    personalCloud,
-                    discordRetroSync,
-                    discord,
-                    slackRetroSync,
-                    slack,
-                },
-            }
-            registerModuleMapCollections(
-                storageManager.registry,
-                serverStorage.modules,
-            )
-            await storageManager.finishInitialization()
-
-            return serverStorage
-        })()
-
-        return serverStoragePromise
+    const sharedSyncLog =
+        options.sharedSyncLog ??
+        new SharedSyncLogStorage({
+            storageManager,
+            autoPkType: 'string',
+        })
+    const contentSharing = new ContentSharingStorage({
+        storageManager,
+        operationExecuter: operationExecuter('contentSharing'),
+        ...options,
+    })
+    const contentConversations = new ContentConversationStorage({
+        storageManager,
+        contentSharing,
+        operationExecuter: operationExecuter('contentConversations'),
+        ...options,
+    })
+    const users = new UserStorage({
+        storageManager,
+        operationExecuter: operationExecuter('users'),
+    })
+    const activityStreams = new ActivityStreamsStorage({
+        storageManager,
+    })
+    const personalCloud = new PersonalCloudStorage({
+        storageManager,
+        autoPkType: options.autoPkType,
+    })
+    const activityFollows = new ActivityFollowsStorage({
+        storageManager,
+        operationExecuter: operationExecuter('activityFollows'),
+    })
+    const discord = new DiscordStorage({
+        storageManager,
+        operationExecuter: operationExecuter('discord'),
+    })
+    const discordRetroSync = new DiscordRetroSyncStorage({
+        storageManager,
+        operationExecuter: operationExecuter('discordRetroSync'),
+    })
+    const slack = new SlackStorage({
+        storageManager,
+        operationExecuter: operationExecuter('slack'),
+    })
+    const slackRetroSync = new SlackRetroSyncStorage({
+        storageManager,
+        operationExecuter: operationExecuter('slackRetroSync'),
+    })
+    const serverStorage: ServerStorage = {
+        manager: storageManager,
+        modules: {
+            sharedSyncLog,
+            users,
+            contentSharing,
+            activityStreams,
+            activityFollows,
+            contentConversations,
+            personalCloud,
+            discordRetroSync,
+            discord,
+            slackRetroSync,
+            slack,
+        },
     }
+    registerModuleMapCollections(storageManager.registry, serverStorage.modules)
+    await storageManager.finishInitialization()
+
+    return serverStorage
 }
 
-export function createLazyMemoryServerStorage(options?: {
+export function createMemoryServerStorage(options?: {
     changeWatchSettings?: Omit<ChangeWatchMiddlewareSettings, 'storageManager'>
-}) {
-    return createLazyServerStorage(
-        () => {
-            const backend = new DexieStorageBackend({
-                dbName: 'server',
-                idbImplementation: inMemory(),
-                legacyMemexCompatibility: true,
-            })
-            return createStorageManager(backend, options)
-        },
-        {
-            autoPkType: 'number',
-            skipApplicationLayer: true,
-        },
-    )
+}): Promise<ServerStorage> {
+    const backend = new DexieStorageBackend({
+        dbName: 'server',
+        idbImplementation: inMemory(),
+        legacyMemexCompatibility: true,
+    })
+    const storageManager = createStorageManager(backend, options)
+
+    return createServerStorage(storageManager, {
+        autoPkType: 'number',
+        skipApplicationLayer: true,
+    })
 }
 
-export function createLazyTestServerStorage(options?: {
+export async function createTestServerStorage(options?: {
     firebaseProjectId?: string
     withTestUser?: { uid: string } | boolean
     superuser?: boolean
     changeWatchSettings?: Omit<ChangeWatchMiddlewareSettings, 'storageManager'>
-}) {
+}): Promise<ServerStorage> {
     if (process.env.TEST_SERVER_STORAGE === 'firebase-emulator') {
         const firebaseTesting = require('@firebase/testing')
-
-        return createLazyServerStorage(
-            async () => {
-                const userId = options?.withTestUser
-                    ? options?.withTestUser === true
-                        ? 'default-user'
-                        : options?.withTestUser.uid
-                    : undefined
-                const firebaseProjectId =
-                    options?.firebaseProjectId ?? Date.now().toString()
-                const firebaseApp = options?.superuser
-                    ? firebaseTesting.initializeAdminApp({
-                          projectId: firebaseProjectId,
-                      })
-                    : firebaseTesting.initializeTestApp({
-                          projectId: firebaseProjectId,
-                          auth: userId ? { uid: userId } : undefined,
-                      })
-                if (process.env.DISABLE_FIRESTORE_RULES === 'true') {
-                    await firebaseTesting.loadFirestoreRules({
-                        projectId: firebaseProjectId,
-                        rules: `
-                        service cloud.firestore {
-                            match /databases/{database}/documents {
-                                match /{document=**} {
-                                    allow read, write; // or allow read, write: if true;
-                                }
-                            }
-                        }
-                        `,
-                    })
+        const userId = options?.withTestUser
+            ? options?.withTestUser === true
+                ? 'default-user'
+                : options?.withTestUser.uid
+            : undefined
+        const firebaseProjectId =
+            options?.firebaseProjectId ?? Date.now().toString()
+        const firebaseApp = options?.superuser
+            ? firebaseTesting.initializeAdminApp({
+                  projectId: firebaseProjectId,
+              })
+            : firebaseTesting.initializeTestApp({
+                  projectId: firebaseProjectId,
+                  auth: userId ? { uid: userId } : undefined,
+              })
+        if (process.env.DISABLE_FIRESTORE_RULES === 'true') {
+            await firebaseTesting.loadFirestoreRules({
+                projectId: firebaseProjectId,
+                rules: `
+            service cloud.firestore {
+                match /databases/{database}/documents {
+                    match /{document=**} {
+                        allow read, write; // or allow read, write: if true;
+                    }
                 }
+            }
+            `,
+            })
+        }
 
-                const firestore = firebaseApp.firestore()
-                const backend = new FirestoreStorageBackend({
-                    firebase: firebaseApp as any,
-                    firebaseModule: firebaseTesting as any,
-                    firestore: firestore as any,
-                })
-                return createStorageManager(backend, options)
-            },
-            {
-                autoPkType: 'string',
-                skipApplicationLayer: true,
-            },
-        )
+        const firestore = firebaseApp.firestore()
+        const backend = new FirestoreStorageBackend({
+            firebase: firebaseApp as any,
+            firebaseModule: firebaseTesting as any,
+            firestore: firestore as any,
+        })
+        const storageManager = createStorageManager(backend, options)
+
+        return createServerStorage(storageManager, {
+            autoPkType: 'string',
+            skipApplicationLayer: true,
+        })
     } else {
-        return createLazyMemoryServerStorage(options)
+        return createMemoryServerStorage(options)
     }
 }
 

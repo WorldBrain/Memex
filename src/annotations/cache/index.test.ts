@@ -306,7 +306,7 @@ describe('Page annotations cache tests', () => {
         ).toEqual([unifiedIdA, unifiedIdB])
         expect(
             cache.lists.byId[testLists[2].unifiedId].unifiedAnnotationIds,
-        ).toEqual([unifiedIdA])
+        ).toEqual([])
         expect(cache.annotations.byId).toEqual({
             [unifiedIdA]: expect.objectContaining({
                 unifiedId: unifiedIdA,
