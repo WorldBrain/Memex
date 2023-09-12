@@ -9,7 +9,7 @@ import {
 import { StorageChangesManager } from './util/storage-changes'
 import initSentry, { captureException } from './util/raven'
 import {
-    createLazyServerStorage,
+    createServerStorage,
     createServerStorageManager,
 } from './storage/server'
 import createNotification from 'src/util/notifications'
@@ -62,12 +62,10 @@ async function main() {
         // TODO mv3: FB emulator setup
     }
 
-    const getServerStorage = createLazyServerStorage(
-        createServerStorageManager,
-        {
-            autoPkType: 'string',
-        },
-    )
+    const serverStorageManager = createServerStorageManager()
+    const serverStorage = await createServerStorage(serverStorageManager, {
+        autoPkType: 'string',
+    })
 
     const storageManager = initStorex()
     const persistentStorageManager = createPersistentStorageManager({
@@ -78,11 +76,10 @@ async function main() {
     })
     const authServices = createAuthServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
-        getServerStorage,
     })
     const servicesPromise = createServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
-        getServerStorage,
+        serverStorage,
         authService: authServices.auth,
     })
 
@@ -90,8 +87,8 @@ async function main() {
 
     const backgroundModules = createBackgroundModules({
         manifestVersion: '3',
-        servicesPromise,
-        getServerStorage,
+        services: servicesPromise,
+        serverStorage,
         analyticsManager: analytics,
         localStorageChangesManager,
         fetchPageData: async (url) =>

@@ -156,9 +156,9 @@ const setupLogicHelper = async ({
 
 async function setupTestData({
     storageManager,
-    getServerStorage,
+    serverStorage,
 }: UILogicTestDevice) {
-    const { manager: serverStorageManager } = await getServerStorage()
+    const { manager: serverStorageManager } = serverStorage
     for (const entry of DATA.SHARED_ANNOTATION_LIST_ENTRIES) {
         await serverStorageManager
             .collection('sharedAnnotationListEntry')
@@ -2494,9 +2494,7 @@ describe('SidebarContainerLogic', () => {
             })
 
             // Let's add a new sharedList + entries to test with
-            const {
-                manager: serverStorageManager,
-            } = await device.getServerStorage()
+            const { manager: serverStorageManager } = device.serverStorage
             const sharedListId = 'my-test-list-111'
             await serverStorageManager.collection('sharedList').createObject({
                 id: sharedListId,

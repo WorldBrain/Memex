@@ -3466,8 +3466,24 @@ export class DashboardLogic extends UILogic<State, Events> {
         // Should trigger state update on `newListsState` cache event
         this.options.annotationsCache.updateList({
             unifiedId: event.listId,
-            remoteId: event.remoteListId,
+            remoteId: event.remoteListId.toString(),
         })
+
+        for (const localAnnotId in event.annotationLocalToRemoteIdsDict) {
+            const annotData = this.options.annotationsCache.getAnnotationByLocalId(
+                localAnnotId,
+            )
+            if (!annotData) {
+                continue
+            }
+            this.options.annotationsCache.updateAnnotation({
+                unifiedId: annotData.unifiedId,
+                ...annotData,
+                remoteId: event.annotationLocalToRemoteIdsDict[
+                    localAnnotId
+                ].toString(),
+            })
+        }
 
         this.emitMutation({ searchResults: mutation })
     }

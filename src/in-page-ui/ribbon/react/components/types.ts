@@ -31,7 +31,7 @@ export interface RibbonSubcomponentProps {
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     contentSharingBG: ContentSharingInterface
     bgScriptBG: RemoteBGScriptInterface
-    onListShare: (ids: { localListId: number; remoteListId: string }) => void
+    onListShare?: SpacePickerDependencies['onListShare']
     selectRibbonPositionOption: (option) => void
     hasFeedActivity: boolean
 }

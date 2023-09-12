@@ -477,11 +477,27 @@ export default class SpacePickerLogic extends UILogic<
             { source: 'setListRemoteId', mustBeLocal: true },
         )
 
-        this.dependencies.onListShare(event)
+        this.dependencies.onListShare?.(event)
         this.dependencies.annotationsCache.updateList({
             unifiedId: listData.unifiedId,
-            remoteId: event.remoteListId,
+            remoteId: event.remoteListId.toString(),
         })
+
+        for (const localAnnotId in event.annotationLocalToRemoteIdsDict) {
+            const annotData = this.dependencies.annotationsCache.getAnnotationByLocalId(
+                localAnnotId,
+            )
+            if (!annotData) {
+                continue
+            }
+            this.dependencies.annotationsCache.updateAnnotation({
+                unifiedId: annotData.unifiedId,
+                ...annotData,
+                remoteId: event.annotationLocalToRemoteIdsDict[
+                    localAnnotId
+                ].toString(),
+            })
+        }
     }
 
     validateSpaceName(name: string, listIdToSkip?: number) {

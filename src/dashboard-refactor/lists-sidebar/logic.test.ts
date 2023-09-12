@@ -764,6 +764,7 @@ describe('Dashboard lists sidebar logic', () => {
         await searchResults.processEvent('handleListShare', {
             listId: listData.unifiedId,
             remoteListId: DATA.LISTS_1[1].remoteId,
+            annotationLocalToRemoteIdsDict: {},
         })
 
         expect(annotationsCache.lists.byId[listData.unifiedId].remoteId).toBe(

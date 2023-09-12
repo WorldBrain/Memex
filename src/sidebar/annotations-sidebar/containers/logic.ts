@@ -1,4 +1,5 @@
 import fromPairs from 'lodash/fromPairs'
+import clone from 'lodash/cloneDeep'
 import browser from 'webextension-polyfill'
 import {
     UILogic,
@@ -1090,8 +1091,24 @@ export class SidebarContainerLogic extends UILogic<
     shareList: EventHandler<'shareList'> = async ({ event }) => {
         this.options.annotationsCache.updateList({
             unifiedId: event.unifiedListId,
-            remoteId: event.remoteListId,
+            remoteId: event.remoteListId.toString(),
         })
+
+        for (const localAnnotId in event.annotationLocalToRemoteIdsDict) {
+            const annotData = this.options.annotationsCache.getAnnotationByLocalId(
+                localAnnotId,
+            )
+            if (!annotData) {
+                continue
+            }
+            this.options.annotationsCache.updateAnnotation({
+                unifiedId: annotData.unifiedId,
+                ...annotData,
+                remoteId: event.annotationLocalToRemoteIdsDict[
+                    localAnnotId
+                ].toString(),
+            })
+        }
     }
 
     deleteList: EventHandler<'deleteList'> = async ({ event }) => {

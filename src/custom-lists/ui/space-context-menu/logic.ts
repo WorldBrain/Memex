@@ -11,7 +11,8 @@ import {
 } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/events'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export interface Dependencies {
     contentSharingBG: ContentSharingInterface
@@ -21,7 +22,10 @@ export interface Dependencies {
     errorMessage?: string
     loadOwnershipData?: boolean
     onCancelEdit?: () => void
-    onSpaceShare?: (remoteListId: string) => void
+    onSpaceShare?: (
+        remoteListId: AutoPk,
+        annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk },
+    ) => void
     copyToClipboard: (text: string) => Promise<boolean>
     onSpaceNameChange?: (newName: string) => void
     onConfirmSpaceNameEdit: (name: string) => void
@@ -202,7 +206,10 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                 localListId: listData.localId,
             })
             remoteListId = shareResult.remoteListId
-            onSpaceShare?.(remoteListId)
+            onSpaceShare?.(
+                remoteListId,
+                shareResult.annotationLocalToRemoteIdsDict,
+            )
 
             this.emitMutation({
                 showSuccessMsg: { $set: true },

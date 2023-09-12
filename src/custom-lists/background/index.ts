@@ -57,8 +57,9 @@ export default class CustomListBackground {
                 normalizedPageUrl: string,
                 listId: number,
             ) => Promise<void>
-            getServerStorage: () => Promise<
-                Pick<ServerStorageModules, 'activityFollows' | 'contentSharing'>
+            serverStorage: Pick<
+                ServerStorageModules,
+                'activityFollows' | 'contentSharing'
             >
         },
     ) {
@@ -125,7 +126,7 @@ export default class CustomListBackground {
         SharedListReference[]
     > => {
         const { auth } = this.options.authServices
-        const { contentSharing } = await this.options.getServerStorage()
+        const { contentSharing } = this.options.serverStorage
 
         const currentUser = await auth.getCurrentUser()
         if (!currentUser) {
@@ -142,7 +143,7 @@ export default class CustomListBackground {
         SharedListReference[]
     > => {
         const { auth } = this.options.authServices
-        const { activityFollows } = await this.options.getServerStorage()
+        const { activityFollows } = this.options.serverStorage
 
         const currentUser = await auth.getCurrentUser()
         if (!currentUser) {
@@ -170,7 +171,7 @@ export default class CustomListBackground {
         SharedListReference[]
     > => {
         const { auth } = this.options.authServices
-        const { contentSharing } = await this.options.getServerStorage()
+        const { contentSharing } = this.options.serverStorage
 
         const currentUser = await auth.getCurrentUser()
         if (!currentUser) {
@@ -202,7 +203,7 @@ export default class CustomListBackground {
         sharedListIds,
         normalizedPageUrl,
     }) => {
-        const { contentSharing } = await this.options.getServerStorage()
+        const { contentSharing } = this.options.serverStorage
 
         const listEntriesByPageByList = await contentSharing.getAnnotationListEntriesForListsOnPage(
             {
@@ -225,7 +226,7 @@ export default class CustomListBackground {
     fetchFollowedListsWithAnnotations: RemoteCollectionsInterface['fetchFollowedListsWithAnnotations'] = async ({
         normalizedPageUrl,
     }) => {
-        const { contentSharing } = await this.options.getServerStorage()
+        const { contentSharing } = this.options.serverStorage
         const seenListIds = new Set()
         const allListReferences = [
             ...(await this.fetchOwnListReferences()),
@@ -303,7 +304,7 @@ export default class CustomListBackground {
         references: SharedListReference[],
     ): Promise<PageList[]> => {
         const { auth } = this.options.authServices
-        const { contentSharing } = await this.options.getServerStorage()
+        const { contentSharing } = this.options.serverStorage
 
         const sharedLists = await contentSharing.getListsByReferences(
             references,
@@ -343,7 +344,7 @@ export default class CustomListBackground {
             )
         }
 
-        const { contentSharing } = await this.options.getServerStorage()
+        const { contentSharing } = this.options.serverStorage
         const listReference: SharedListReference = {
             type: 'shared-list-reference',
             id: remoteListId,
@@ -402,7 +403,7 @@ export default class CustomListBackground {
         normalizedPageUrl,
         remoteListId,
     }) => {
-        const { contentSharing } = await this.options.getServerStorage()
+        const { contentSharing } = this.options.serverStorage
         const listReference: SharedListReference = {
             id: remoteListId,
             type: 'shared-list-reference',
@@ -450,7 +451,7 @@ export default class CustomListBackground {
             return null
         }
 
-        const { contentSharing } = await this.options.getServerStorage()
+        const { contentSharing } = this.options.serverStorage
         const sharedList = await contentSharing.getListByReference({
             id: remoteListId,
             type: 'shared-list-reference',
