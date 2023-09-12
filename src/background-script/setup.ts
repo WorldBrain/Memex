@@ -696,6 +696,9 @@ export function createBackgroundModules(options: {
         }),
         imageSupport: new ImageSupportBackground({
             backend: options.imageSupportBackend,
+            generateImageId() {
+                return generateServerId('UPLOADED_IMAGES') as string
+            },
         }),
     }
 }
@@ -742,6 +745,7 @@ export async function setupBackgroundModules(
     backgroundModules.pages.setupRemoteFunctions()
     backgroundModules.syncSettings.setupRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()
+    backgroundModules.imageSupport.setupRemoteFunctions()
     setupNotificationClickListener()
 
     // TODO mv3: migrate web req APIs

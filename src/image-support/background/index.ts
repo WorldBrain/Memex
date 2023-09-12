@@ -11,10 +11,15 @@ export class ImageSupportBackground {
     constructor(
         public options: {
             backend: ImageSupportBackend
+            generateImageId(): string
         },
     ) {
         this.remoteFunctions = {
+            generateImageId: remoteFunctionWithoutExtraArgs(
+                this.generateImageId,
+            ),
             uploadImage: remoteFunctionWithoutExtraArgs(this.uploadImage),
+            getImageUrl: remoteFunctionWithoutExtraArgs(this.getImageUrl),
         }
     }
 
@@ -22,9 +27,21 @@ export class ImageSupportBackground {
         registerRemoteFunctions(this.remoteFunctions)
     }
 
+    generateImageId: ImageSupportInterface<
+        'provider'
+    >['generateImageId']['function'] = async () => {
+        return this.options.generateImageId()
+    }
+
     uploadImage: ImageSupportInterface<
         'provider'
     >['uploadImage']['function'] = async (params) => {
         return this.options.backend.uploadImage(params)
+    }
+
+    getImageUrl: ImageSupportInterface<
+        'provider'
+    >['getImageUrl']['function'] = async (params) => {
+        return this.options.backend.getImageUrl(params)
     }
 }
