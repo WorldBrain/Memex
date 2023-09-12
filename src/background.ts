@@ -43,6 +43,7 @@ import { setupOmnibar } from 'src/omnibar'
 import delay from './util/delay'
 import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
 import fetchAndExtractPdfContent from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-pdf-data.browser'
+import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
 
 let __debugCounter = 0
 let __BGInitAttemptCounter = 0
@@ -100,7 +101,9 @@ export async function main(): Promise<void> {
     })
     __debugCounter++
 
-    const fetch = globalThis.fetch.bind(globalThis)
+    const fetch = globalThis.fetch.bind(
+        globalThis,
+    ) as typeof globalThis['fetch']
 
     const backgroundModules = createBackgroundModules({
         manifestVersion: '2',
@@ -133,6 +136,12 @@ export async function main(): Promise<void> {
             return result.data as Promise<Returns>
         },
         setupSyncTriggerListener: initFirestoreSyncTriggerListener(firebase),
+        imageSupportBackend: new CloudflareImageSupportBackend({
+            env:
+                process.env.NODE_ENV === 'production'
+                    ? 'production'
+                    : 'staging',
+        }),
     })
 
     __debugCounter++

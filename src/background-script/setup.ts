@@ -102,6 +102,8 @@ import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { handleIncomingData } from 'src/personal-cloud/background/handle-incoming-data'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { ImageSupportBackground } from 'src/image-support/background'
+import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
@@ -139,6 +141,7 @@ export interface BackgroundModules {
     activityStreams: ActivityStreamsBackground
     userMessages: UserMessageService
     personalCloud: PersonalCloudBackground
+    imageSupport: ImageSupportBackground
 }
 
 export function createBackgroundModules(options: {
@@ -148,6 +151,7 @@ export function createBackgroundModules(options: {
     authServices: AuthServices
     servicesPromise: Promise<Services>
     browserAPIs: Browser
+    imageSupportBackend: ImageSupportBackend
     getServerStorage: () => Promise<ServerStorage>
     localStorageChangesManager: StorageChangesManager
     callFirebaseFunction: <Returns>(
@@ -689,6 +693,9 @@ export function createBackgroundModules(options: {
         contentConversations: new ContentConversationsBackground({
             getServerStorage,
             servicesPromise: options.servicesPromise,
+        }),
+        imageSupport: new ImageSupportBackground({
+            backend: options.imageSupportBackend,
         }),
     }
 }
