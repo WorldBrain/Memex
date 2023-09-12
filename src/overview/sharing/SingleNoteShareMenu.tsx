@@ -57,7 +57,6 @@ export interface Props extends ShareMenuCommonProps {
         | 'spacesBG'
         | 'authBG'
         | 'pageActivityIndicatorBG'
-        | 'annotationsCache'
         | 'localStorageAPI'
         | 'normalizedPageUrlToFilterPageLinksBy'
     > &
@@ -67,7 +66,6 @@ export interface Props extends ShareMenuCommonProps {
             | 'spacesBG'
             | 'authBG'
             | 'pageActivityIndicatorBG'
-            | 'annotationsCache'
             | 'localStorageAPI'
             | 'normalizedPageUrlToFilterPageLinksBy'
         >
@@ -131,14 +129,25 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     }
 
     private shareAnnotation = async (isBulkShareProtected?: boolean) => {
-        const { annotationUrl, contentSharingBG } = this.props
-        await contentSharingBG.shareAnnotation({
+        const {
+            annotationUrl,
+            contentSharingBG,
+            spacePickerProps: { annotationsCache },
+        } = this.props
+        let sharingState = await contentSharingBG.shareAnnotation({
             annotationUrl,
             shareToParentPageLists: true,
             skipPrivacyLevelUpdate: true,
         })
+        const annotData = annotationsCache.getAnnotationByLocalId(annotationUrl)
+        if (annotData) {
+            annotationsCache.updateAnnotation({
+                ...annotData,
+                remoteId: sharingState.remoteId!.toString(),
+            })
+        }
 
-        const sharingState = await contentSharingBG.setAnnotationPrivacyLevel({
+        sharingState = await contentSharingBG.setAnnotationPrivacyLevel({
             annotationUrl,
             privacyLevel: shareOptsToPrivacyLvl({
                 shouldShare: true,
@@ -253,8 +262,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     private getAnnotationSharedLists = async (): Promise<string[]> => {
         let lists = []
         for (const listId of this.props.annotationData.unifiedListIds) {
-            const list = await this.props.spacePickerProps.annotationsCache
-                .lists.byId[listId]
+            const list = this.props.spacePickerProps.annotationsCache.lists
+                .byId[listId]
             if (list.remoteId != null) {
                 lists.push(list)
             }
