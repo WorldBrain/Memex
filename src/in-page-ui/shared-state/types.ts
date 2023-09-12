@@ -20,6 +20,9 @@ export type InPageUISidebarAction =
     | 'show_page_summary'
     | 'youtube_timestamp'
     | 'share_page'
+    | 'set_focus_mode'
+    | 'show_transcript'
+    | 'create_youtube_timestamp_with_AI_summary'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'
@@ -47,6 +50,8 @@ export interface SidebarActionOptions {
     annotationSharingAccess?: AnnotationSharingAccess
     highlightedText?: string
     commentText?: string
+    listId?: number
+    timeStampANDSummaryJSON?: string[]
 }
 
 export type InPageErrorType = 'annotation' // Add more specific error types here

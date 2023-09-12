@@ -160,7 +160,10 @@ export default class ImportItemProcessor {
 
         const timeAdded = normalizeTimestamp(importItem.timeAdded)
 
-        await this.options.pages.indexPage({ fullUrl: importItem.url })
+        await this.options.pages.indexPage({
+            fullUrl: importItem.url,
+            skipUpdatePageCount: true,
+        })
 
         await this.options.bookmarks.storage.createBookmarkIfNeeded(
             importItem.url,

@@ -23,9 +23,13 @@ import type {
 import ShareAnnotationOnboardingModal from 'src/overview/sharing/components/ShareAnnotationOnboardingModal'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
-import type { UnifiedAnnotation } from 'src/annotations/cache/types'
+import type {
+    UnifiedAnnotation,
+    UnifiedList,
+} from 'src/annotations/cache/types'
 import { ANNOT_BOX_ID_PREFIX } from '../constants'
 import browser from 'webextension-polyfill'
+import { sleepPromise } from 'src/util/promises'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -38,18 +42,13 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 > {
     static defaultProps: Pick<
         Props,
-        'isLockable' | 'theme' | 'sidebarContext' | 'runtimeAPI' | 'storageAPI'
+        'isLockable' | 'sidebarContext' | 'runtimeAPI' | 'storageAPI'
     > = {
         runtimeAPI: browser.runtime,
         storageAPI: browser.storage,
+
         sidebarContext: 'in-page',
         isLockable: true,
-        theme: {
-            ...theme,
-            rightOffsetPx: 0,
-            canClickAnnotations: true,
-            paddingRight: 0,
-        },
     }
 
     private initLogicPromise = resolvablePromise()
@@ -57,6 +56,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     constructor(props: Props) {
         super({
             ...props,
+            theme: {
+                ...props.theme,
+                rightOffsetPx: 0,
+                canClickAnnotations: true,
+                paddingRight: 0,
+            },
             showAnnotationShareModal: () =>
                 this.processEvent('setAnnotationShareModalShown', {
                     shown: true,
@@ -296,13 +301,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 tab: this.state.selectedListId ? 'spaces' : 'annotations',
             })
         } else if (event.action === 'share_page') {
+            await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+            await sleepPromise(500)
             await this.processEvent('createPageLink', null)
         } else if (event.action === 'show_page_summary') {
             await this.processEvent('askAIviaInPageInteractions', {
                 textToProcess: event.highlightedText,
             })
         } else if (event.action === 'youtube_timestamp') {
-            this.sidebarRef.current?.addYoutubeTimestampToEditor()
             await this.processEvent('setActiveSidebarTab', {
                 tab:
                     this.state.selectedListId &&
@@ -310,7 +316,30 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                         ? 'spaces'
                         : 'annotations',
             })
+            this.sidebarRef.current?.addYoutubeTimestampToEditor(
+                event.commentText,
+            )
         } else if (event.action === 'check_sidebar_status') {
+            return true
+        } else if (event.action === 'set_focus_mode') {
+            const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
+                event.listId,
+            ).unifiedId
+
+            this.processEvent('setSelectedList', {
+                unifiedListId: unifiedListId,
+            })
+            return true
+        } else if (
+            event.action === 'create_youtube_timestamp_with_AI_summary'
+        ) {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'annotations',
+            })
+
+            this.processEvent('createYoutubeTimestampWithAISummary', {
+                timeStampANDSummaryJSON: event.timeStampANDSummaryJSON,
+            })
             return true
         }
 

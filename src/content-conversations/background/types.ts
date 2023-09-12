@@ -11,7 +11,10 @@ import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/t
 import type { ContentConversationsServiceInterface } from '@worldbrain/memex-common/lib/content-conversations/service/types'
 
 export interface ContentConversationsInterface
-    extends Pick<ContentConversationsServiceInterface, 'submitReply'> {
+    extends Pick<
+        ContentConversationsServiceInterface,
+        'submitReply' | 'editReply' | 'deleteReply'
+    > {
     getRepliesBySharedAnnotation(params: {
         sharedAnnotationReference: SharedAnnotationReference
         sharedListReference: SharedListReference | null

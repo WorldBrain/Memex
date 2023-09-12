@@ -24,7 +24,7 @@ import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscri
 import { FakeAnalytics } from 'src/analytics/mock'
 import AnalyticsManager from 'src/analytics/analytics'
 import { setStorageMiddleware } from 'src/storage/middleware'
-import { createLazyMemoryServerStorage } from 'src/storage/server'
+import { createMemoryServerStorage } from 'src/storage/server'
 import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill'
 import { createServices } from 'src/services'
@@ -67,7 +67,7 @@ export const DEF_PAGE = {
 fetchMock.restore()
 export interface BackgroundIntegrationTestSetupOpts {
     customMiddleware?: StorageMiddleware[]
-    getServerStorage?: () => Promise<ServerStorage>
+    serverStorage?: ServerStorage
     fetchPageData?: (fullPageUrl: string) => Promise<PageDataResult>
     fetchPdfData?: (fullPageUrl: string) => Promise<ExtractedPDFData>
     personalCloudBackend?: PersonalCloudBackend
@@ -105,23 +105,21 @@ export async function setupBackgroundIntegrationTest(
         idbImplementation: inMemory(),
     })
 
-    const getServerStorage =
-        options?.getServerStorage ?? createLazyMemoryServerStorage()
-    const serverStorage = await getServerStorage()
+    const serverStorage =
+        options?.serverStorage ?? (await createMemoryServerStorage())
 
     const authServices =
         options?.authServices ??
         createAuthServices({
             backend: 'memory',
-            getServerStorage,
         })
     const services =
         options?.services ??
-        (await createServices({
+        createServices({
             backend: 'memory',
-            getServerStorage,
+            serverStorage,
             authService: authServices.auth,
-        }))
+        })
 
     const browserAPIs = ({
         webNavigation: {
@@ -183,7 +181,7 @@ export async function setupBackgroundIntegrationTest(
         backendFunctions: {
             registerBetaUser: async () => {},
         },
-        getUserManagement: async () => serverStorage.modules.users,
+        userManagement: serverStorage.modules.users,
     })
     const analyticsManager = new AnalyticsManager({
         backend: new FakeAnalytics(),
@@ -233,10 +231,9 @@ export async function setupBackgroundIntegrationTest(
         persistentStorageManager,
         analyticsManager,
         localStorageChangesManager: null,
-        getServerStorage,
+        serverStorage,
         browserAPIs,
-        servicesPromise: new Promise((res) => res(services)),
-
+        services,
         authServices,
         fetch,
         userMessageService: userMessages,
@@ -351,7 +348,7 @@ export async function setupBackgroundIntegrationTest(
         storageChangeDetector,
         authService: authServices.auth as MemoryAuthService,
         subscriptionService: authServices.subscriptions as MemorySubscriptionsService,
-        getServerStorage,
+        serverStorage,
         browserAPIs,
         injectTime: (injected) => (getTime = injected),
         services,

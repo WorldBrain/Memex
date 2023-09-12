@@ -66,7 +66,7 @@ export interface PersonalCloudBackgroundOptions {
         where?: { [key: string]: any }
         updates: { [key: string]: any }
     }): Promise<void>
-    getServerStorageManager(): Promise<StorageManager>
+    serverStorageManager: StorageManager
     jobScheduler: JobScheduler
 }
 
@@ -647,7 +647,7 @@ export class PersonalCloudBackground {
             throw new Error(`Cannot get block stats if not authenticated`)
         }
 
-        const serverStorageManager = await this.options.getServerStorageManager()
+        const serverStorageManager = this.options.serverStorageManager
         const blockStats = await serverStorageManager.operation(
             'findObject',
             'personalBlockStats',

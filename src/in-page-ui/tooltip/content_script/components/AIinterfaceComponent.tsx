@@ -23,7 +23,7 @@ export default class AIInterfaceForTooltip extends React.Component<Props> {
     }
 
     async componentDidMount() {
-        const checkCounter = updateAICounter()
+        const checkCounter = false
         if (!checkCounter) {
             this.setState({
                 loadingState: 'success',

@@ -10,11 +10,17 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
-import { getListShareUrl } from 'src/content-sharing/utils'
+import {
+    getListShareUrl,
+    getSinglePageShareUrl,
+} from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
+    onSpaceShare: () => void
+    showSpacesTab: () => void
 }
 
 // NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
@@ -28,7 +34,7 @@ const wrapClick = (
     return handler(e)
 }
 
-export default class SpaceContextMenuContainer extends StatefulUIElement<
+export default class PageLinkShareMenuContainer extends StatefulUIElement<
     Props,
     State,
     Event
@@ -41,40 +47,25 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         super(props, new Logic(props))
     }
 
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+        if (prevProps.listData !== this.props.listData) {
+            this.processEvent('reloadInviteLinks', {
+                listData: this.props.listData,
+            })
+        }
+    }
+
     private handleWebViewOpen: React.MouseEventHandler = (e) => {
         const { listData } = this.props
         if (listData.remoteId != null) {
-            window.open(getListShareUrl({ remoteListId: listData.remoteId }))
+            window.open(
+                getSinglePageShareUrl({
+                    remoteListId: listData.remoteId,
+                    remoteListEntryId: listData.remoteId,
+                }),
+                '_blank',
+            )
         }
-    }
-
-    private handleNameChange: React.KeyboardEventHandler = async (event) => {
-        const name = (event.target as HTMLInputElement).value
-        await this.processEvent('updateSpaceName', { name })
-    }
-
-    private handleNameEditInputKeyDown: React.KeyboardEventHandler = async (
-        e,
-    ) => {
-        if (e.key === 'Escape') {
-            // Allow escape keydown to bubble up to close the sidebar only if no input state
-            if (this.state.nameValue.trim().length) {
-                e.stopPropagation()
-            }
-            await this.processEvent('cancelSpaceNameEdit', null)
-            return
-        }
-
-        if (e.key === 'Enter') {
-            if (this.state.nameValue.trim().length > 0) {
-                e.preventDefault()
-                e.stopPropagation()
-                await this.processEvent('confirmSpaceNameEdit', null)
-            }
-        }
-
-        // If we don't have this, events will bubble up into the page!
-        e.stopPropagation()
     }
 
     private renderShareLinks(isPageLink: boolean) {
@@ -100,6 +91,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                 {this.state.inviteLinks.map(
                     ({ link, showCopyMsg, roleID }, linkIndex) => (
                         <ListItem zIndex={10 - linkIndex}>
+                            {}
                             <TooltipBox
                                 placement={'bottom'}
                                 tooltipText={
@@ -136,6 +128,11 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                                 ),
                                             )}
                                         >
+                                            <Icon
+                                                hoverOff
+                                                icon="link"
+                                                heightAndWidth="18px"
+                                            />
                                             <Link>
                                                 {showCopyMsg
                                                     ? 'Copied to clipboard'
@@ -199,53 +196,6 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     }
 
     private renderMainContent() {
-        if (this.state.mode === 'followed-space') {
-            return (
-                <DeleteBox>
-                    <PrimaryAction
-                        onClick={wrapClick(this.handleWebViewOpen)}
-                        label="Go to Space"
-                        fontSize={'14px'}
-                    />
-                </DeleteBox>
-            )
-        }
-
-        if (
-            this.state.mode === 'confirm-space-delete' &&
-            this.props.isCreator
-        ) {
-            return (
-                <DeleteBox>
-                    <TitleBox>Delete this Space?</TitleBox>
-                    <DetailsText>
-                        This does NOT delete the pages in it
-                    </DetailsText>
-                    <ButtonRow>
-                        <PrimaryAction
-                            onClick={wrapClick((reactEvent) =>
-                                this.processEvent('confirmSpaceDelete', {
-                                    reactEvent,
-                                }),
-                            )}
-                            label={'Delete'}
-                            icon={'trash'}
-                            type={'secondary'}
-                            size={'medium'}
-                        />
-                        <PrimaryAction
-                            onClick={wrapClick(() =>
-                                this.processEvent('cancelDeleteSpace', null),
-                            )}
-                            label={'Cancel'}
-                            type={'tertiary'}
-                            size={'medium'}
-                        />
-                    </ButtonRow>
-                </DeleteBox>
-            )
-        }
-
         if (
             this.state.loadState === 'running' ||
             this.state.inviteLinksLoadState === 'running'
@@ -263,81 +213,90 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
 
         return (
             <ContextMenuContainer>
-                {this.props.listData.remoteId != null && (
-                    <SectionTitle>Invite Links</SectionTitle>
+                {this.props.pageLinkCreateState === 'running' && (
+                    <LoadingStatusContainer>
+                        <LoadingIndicator size={24} />
+                        <LoadingStatusTextBox>
+                            <LoadingStatusTitle>
+                                Uploading shared data
+                            </LoadingStatusTitle>
+                            <LoadingStatusSubtitle>
+                                Link not online yet but you can copy it
+                            </LoadingStatusSubtitle>
+                        </LoadingStatusTextBox>
+                    </LoadingStatusContainer>
                 )}
-                {this.renderShareLinks(isPageLink)}
-
-                {this.props.listData.type !== 'special-list' &&
-                    this.props.isCreator && (
-                        <>
+                {this.props.pageLinkCreateState === 'success' && (
+                    <LoadingStatusContainer padding={'10px 10px'}>
+                        <Icon
+                            icon={'check'}
+                            heightAndWidth={'24px'}
+                            hoverOff
+                            color="prime1"
+                        />
+                        <LoadingSuccessBox>
+                            <LoadingStatusTitle>
+                                Page available online
+                            </LoadingStatusTitle>
+                            <PrimaryAction
+                                label={'Open'}
+                                icon={'globe'}
+                                onClick={() =>
+                                    window.open(
+                                        this.state.inviteLinks[0].link,
+                                        '_blank',
+                                    )
+                                }
+                                size="small"
+                                type="secondary"
+                            />
+                        </LoadingSuccessBox>
+                    </LoadingStatusContainer>
+                )}
+                <BottomSection>
+                    {this.props.listData.remoteId != null && (
+                        <SectionTopbar>
                             <SectionTitle>
-                                {isPageLink
-                                    ? 'Edit Page Link Name'
-                                    : 'Edit Space Name'}
+                                Invite Links (Most Recent)
                             </SectionTitle>
-                            <EditArea>
-                                <Container
+                            <TooltipBox
+                                tooltipText={
+                                    <span>
+                                        Create a new set of invite links for
+                                        this page. <br />
+                                        Go to "Spaces" to view all.
+                                    </span>
+                                }
+                                placement="bottom-end"
+                            >
+                                <PrimaryAction
+                                    label={'New'}
                                     onClick={(e) => {
+                                        this.props.onSpaceShare()
                                         e.preventDefault()
                                         e.stopPropagation()
                                     }}
-                                >
-                                    <EditableListTitle
-                                        onClick={(e) => {
-                                            e.preventDefault()
-                                            e.stopPropagation()
-                                        }}
-                                        value={this.state.nameValue}
-                                        onChange={this.handleNameChange}
-                                        disabled={this.props.disableWriteOps}
-                                        onKeyDown={
-                                            this.handleNameEditInputKeyDown
-                                        }
-                                    />
-                                </Container>
-                                {this.props.errorMessage && (
-                                    <ErrMsg>{this.props.errorMessage}</ErrMsg>
-                                )}
-                            </EditArea>
-                        </>
-                    )}
-                <ButtonBox>
-                    {this.props.isCreator && (
-                        <PrimaryAction
-                            onClick={wrapClick((reactEvent) =>
-                                this.processEvent('intendToDeleteSpace', {
-                                    reactEvent,
-                                }),
-                            )}
-                            disabled={this.props.disableWriteOps}
-                            icon={'trash'}
-                            size={'medium'}
-                            type={'tertiary'}
-                            label={
-                                this.props.listData.type === 'page-link'
-                                    ? 'Delete Page Link'
-                                    : 'Delete Space'
-                            }
-                        />
-                    )}
-                    <>
-                        {this.state?.showSaveButton &&
-                            this.state.nameValue.length > 0 && (
-                                <Icon
-                                    filePath="check"
-                                    color="prime1"
-                                    heightAndWidth="24px"
-                                    onClick={() =>
-                                        this.processEvent(
-                                            'confirmSpaceNameEdit',
-                                            null,
-                                        )
-                                    }
+                                    size="small"
+                                    type="forth"
+                                    icon={'plus'}
+                                    iconColor="prime1"
+                                    padding={'0px 6px 0 0'}
                                 />
-                            )}
-                    </>
-                </ButtonBox>
+                            </TooltipBox>
+                        </SectionTopbar>
+                    )}
+                    {this.renderShareLinks(isPageLink)}
+                    <PrimaryAction
+                        label={'View All'}
+                        size="medium"
+                        width="100%"
+                        type="forth"
+                        icon={'longArrowRight'}
+                        onClick={() => {
+                            this.props.showSpacesTab()
+                        }}
+                    />
+                </BottomSection>
             </ContextMenuContainer>
         )
     }
@@ -347,8 +306,69 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     }
 }
 
+const LoadingStatusContainer = styled.div<{ padding: string }>`
+    display: flex;
+    align-items: center;
+    grid-gap: 15px;
+    padding: 15px 20px;
+    width: fill-available;
+    width: -moz-available;
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
+
+    ${(props) =>
+        props.padding &&
+        css`
+            padding: ${props.padding};
+        `};
+`
+
+const LoadingStatusTextBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 5px;
+`
+const LoadingSuccessBox = styled.div`
+    display: flex;
+    flex-direction: row;
+    grid-gap: 5px;
+    width: fill-available;
+    width: -moz-available;
+    justify-content: space-between;
+    align-items: center;
+`
+
+const LoadingStatusTitle = styled.div`
+    color: ${(props) => props.theme.colors.white};
+    font-weight: 400;
+    font-size: 14px;
+`
+
+const LoadingStatusSubtitle = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-weight: 300;
+    font-size: 14px;
+`
+
+const BottomSection = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 5px;
+    padding: 10px;
+    width: fill-available;
+    width: -moz-available;
+`
+
+const SectionTopbar = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    z-index: 11;
+`
+
 const ButtonBox = styled.div`
     width: fill-available;
+    width: -moz-available;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -367,9 +387,10 @@ const ContextMenuContainer = styled.div`
     grid-gap: 5px;
     flex-direction: column;
     width: fill-available;
-    padding: 10px 10px 10px 10px;
-    min-height: fit-content;
+    min-height: 180px;
+    min-width: 330px;
     height: fit-content;
+    width: fit-content;
     justify-content: center;
     align-items: flex-start;
     /* width: 250px; */
@@ -377,11 +398,16 @@ const ContextMenuContainer = styled.div`
 
 const SectionTitle = styled.div`
     font-size: 14px;
-    color: ${(props) => props.theme.colors.greyScale5};
-    font-weight: 400;
+    color: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.greyScale5
+            : props.theme.colors.greyScale7};
+    font-weight: 500;
     width: 100%;
     display: flex;
+    padding-left: 5px;
     justify-content: flex-start;
+    letter-spacing: 0.6px;
 `
 
 const DeleteBox = styled.div`
@@ -391,17 +417,6 @@ const DeleteBox = styled.div`
     flex-direction: column;
     width: fill-available;
     padding: 15px;
-`
-
-const PermissionArea = styled.div`
-    z-index: 31;
-    position: relative;
-`
-
-const EditArea = styled.div`
-    color: ${(props) => props.theme.colors.white};
-    width: fill-available;
-    margin-bottom: 3px;
 `
 
 const IconContainer = styled.div`
@@ -414,6 +429,7 @@ const LoadingContainer = styled.div`
     justify-content: center;
     align-items: center;
     width: fill-available;
+    width: -moz-available;
     justify-self: center;
     min-width: 250px;
 `
@@ -421,24 +437,15 @@ const LoadingContainer = styled.div`
 const ShareSectionContainer = styled.div`
     margin-bottom: 10px;
     width: fill-available;
+    width: -moz-available;
 `
 
 const MenuContainer = styled.div`
     display: flex;
     flex-direction: column;
     border-radius: 12px;
-    width: 300px;
-`
-
-const TitleBox = styled.div`
-    display: flex;
-    flex: 1;
-    height: 100%;
-    align-items: center;
-    font-weight: bold;
-    color: ${(props) => props.theme.colors.white};
-    justify-content: center;
-    font-size: 16px;
+    width: 330px;
+    min-height: 180px;
 `
 
 const LinkAndRoleBox = styled.div<{
@@ -446,15 +453,20 @@ const LinkAndRoleBox = styled.div<{
     zIndex: number
 }>`
     width: fill-available;
+    width: -moz-available;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 5px;
     grid-gap: 5px;
     // z-index: ${(props) => props['zIndex']};
-    height: 40px;
+    height: 34px;
     margin: 0 -10px 5px -10px;
     padding: 0px 5px;
+
+    & * {
+        cursor: pointer;
+    }
 
 
     ${(props) =>
@@ -482,15 +494,16 @@ const LinkAndRoleBox = styled.div<{
 
 const LinkBox = styled(Margin)`
     width: fill-available;
+    width: -moz-available;
     display: flex;
     font-size: 14px;
     border-radius: 3px;
     text-align: left;
     height: 40px;
     cursor: pointer;
-    color: ${(props) => props.theme.colors.white};
+    color: ${(props) => props.theme.colors.greyScale5};
     justify-content: space-between;
-    padding-right: 10px;
+    padding: 0 5px;
 
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.greyScale3};
@@ -518,72 +531,10 @@ const CopyLinkBox = styled.div`
     justify-content: flex-start;
     align-items: center;
     width: 100%;
-`
-
-const DetailsText = styled.span`
-    opacity: 0.8;
-    font-size: 14px;
-    font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
-        'liga' off;
-    color: ${(props) => props.theme.colors.greyScale5};
-    margin-bottom: 5px;
-    margin-top: -5px;
-    text-align: center;
-`
-
-const PermissionText = styled.span<{
-    viewportBreakpoint: string
-}>`
-    color: ${(props) => props.theme.colors.white};
-    opacity: 0.8;
-    display: flex;
-    flex-direction: row;
-    white-space: nowrap;
-    justify-content: flex-end;
-    font-size: 12px;
-    z-index: 30;
-    margin-bottom: 2px;
-
-    ${(props) =>
-        (props.viewportBreakpoint === 'small' ||
-            props.viewportBreakpoint === 'mobile') &&
-        css`
-            padding-left: 0px;
-        `}
-`
-
-const EditableListTitle = styled(TextField)`
-    padding: 2px 10px;
-    border-radius: 5px;
-    outline: none;
-    flex: 2;
-    display: flex;
-    min-width: 50px;
-    margin-right: 0px;
-    font-size: 14px;
-    height: 40px;
-    outline: none;
-    border: none;
+    align-items: center;
     width: fill-available;
-`
-
-const ErrMsg = styled.div`
-    color: red;
-    width: 100%;
-    text-align: center;
-    margin-top: 5px;
-    margin-bottom: 5px;
-`
-
-const Container = styled.div`
-    height: 40px;
-    width: fill-available;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    background-color: transparent;
+    width: -moz-available;
+    padding: 0 5px;
 `
 
 const ListItem = styled.div<{ zIndex }>`

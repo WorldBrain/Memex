@@ -22,7 +22,7 @@ export interface ContentScriptRegistry {
 export type SidebarScriptMain = (
     dependencies: Omit<
         SidebarContainerDependencies,
-        'pageUrl' | 'sidebarContext' | 'runtimeAPI' | 'storageAPI'
+        'pageUrl' | 'sidebarContext' | 'runtimeAPI' | 'storageAPI' | 'theme'
     > & {
         getFullPageUrl: () => MaybePromise<string>
     },
@@ -51,6 +51,10 @@ export interface SearchInjectionDependencies {
     syncSettingsBG: RemoteSyncSettingsInterface
 }
 
+export interface SearchInjectionDependencies {
+    requestSearcher: any
+}
+
 export type HighlightsScriptMain = (
     options: HighlightDependencies,
 ) => Promise<void>
@@ -60,6 +64,10 @@ export type TooltipScriptMain = (
 ) => Promise<void>
 
 export type SearchInjectionMain = (
+    dependencies: SearchInjectionDependencies,
+) => Promise<void>
+
+export type YoutubeInjectionMain = (
     dependencies: SearchInjectionDependencies,
 ) => Promise<void>
 

@@ -11,6 +11,10 @@ import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
 import analytics from 'src/analytics'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import {
+    MemexTheme,
+    MemexThemeVariant,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export interface RibbonContainerProps extends RibbonContainerOptions {
     state: 'visible' | 'hidden'
@@ -19,6 +23,7 @@ export interface RibbonContainerProps extends RibbonContainerOptions {
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
     selectRibbonPositionOption: (option) => void
     analyticsBG: AnalyticsCoreInterface
+    theme: MemexThemeVariant
 }
 
 export default class RibbonContainer extends StatefulUIElement<
@@ -34,6 +39,7 @@ export default class RibbonContainer extends StatefulUIElement<
             new RibbonContainerLogic({
                 ...props,
                 analytics,
+                analyticsBG: props.analyticsBG,
                 focusCreateForm: () =>
                     this.ribbonRef?.current?.focusCreateForm(),
             }),
@@ -94,6 +100,12 @@ export default class RibbonContainer extends StatefulUIElement<
             },
         })
     }
+    private handleSidebarOpenInFocusMode = (listId) => {
+        this.props.inPageUI.showSidebar({
+            action: 'set_focus_mode',
+            listId,
+        })
+    }
     private handlePageShare = () => {
         this.props.inPageUI.showSidebar({
             action: 'share_page',
@@ -121,6 +133,8 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
+                isTrial={this.state.isTrial}
+                signupDate={this.state.signupDate}
                 pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
                 contentSharingBG={this.props.contentSharing}
                 analyticsBG={this.props.analyticsBG}
@@ -128,6 +142,13 @@ export default class RibbonContainer extends StatefulUIElement<
                 bgScriptBG={this.props.bgScriptBG}
                 spacesBG={this.props.customLists}
                 authBG={this.props.authBG}
+                theme={this.state.themeVariant || this.props.theme}
+                toggleTheme={() => {
+                    this.processEvent('toggleTheme', {
+                        themeVariant:
+                            this.state.themeVariant || this.props.theme,
+                    })
+                }}
                 ref={this.ribbonRef}
                 setRef={this.props.setRef}
                 getListDetailsById={(id) => {
@@ -140,14 +161,6 @@ export default class RibbonContainer extends StatefulUIElement<
                         type: listDetails?.type ?? null,
                     }
                 }}
-                onListShare={({ localListId, remoteListId }) =>
-                    this.props.annotationsCache.updateList({
-                        remoteId: remoteListId,
-                        unifiedId: this.props.annotationsCache.getListByLocalId(
-                            localListId,
-                        )?.unifiedId,
-                    })
-                }
                 toggleShowExtraButtons={() => {
                     this.processEvent('toggleShowExtraButtons', null)
                 }}
@@ -197,6 +210,8 @@ export default class RibbonContainer extends StatefulUIElement<
                     setShowSidebarCommentBox: () =>
                         this.props.inPageUI.showSidebar({ action: 'comment' }),
                     openSidebar: this.handleSidebarOpen,
+                    handleSidebarOpenInFocusMode: this
+                        .handleSidebarOpenInFocusMode,
                     sharePage: this.handlePageShare,
                     closeSidebar: () => this.props.inPageUI.hideSidebar(),
                     toggleReadingView: () =>

@@ -33,7 +33,7 @@ export interface IntegrationTest<StepContext>
     }) => IntegrationTestInstance<StepContext>
 }
 export interface IntegrationTestInstance<StepContext> {
-    getSetupOptions?(): BackgroundIntegrationTestSetupOpts
+    getSetupOptions?(): Promise<BackgroundIntegrationTestSetupOpts>
     setup?: (options: StepContext) => Promise<void>
     debug?: boolean
     steps: Array<IntegrationTestStep<StepContext>>
@@ -71,7 +71,7 @@ export interface BackgroundIntegrationTestSetup {
     pushMessagingService: MockPushMessagingService
     authService: MemoryAuthService
     subscriptionService: MemorySubscriptionsService
-    getServerStorage(): Promise<ServerStorage>
+    serverStorage: ServerStorage
     injectTime: (getNow: () => number) => void
     injectCallFirebaseFunction: (
         f: <Returns>(name: string, ...args: any[]) => Promise<Returns>,

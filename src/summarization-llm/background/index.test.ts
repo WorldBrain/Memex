@@ -4,14 +4,14 @@ import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/t
 async function setupTest() {
     const {
         backgroundModules,
-        getServerStorage,
+        serverStorage,
         authService,
         services,
     } = await setupBackgroundIntegrationTest()
 
     return {
         backgroundModules,
-        getServerStorage,
+        serverStorage,
         authService,
         services,
     }
@@ -30,7 +30,7 @@ describe('Activity indicator background tests', () => {
     it('should be able to check for unseen activities', async () => {
         const {
             backgroundModules,
-            getServerStorage,
+            serverStorage,
             services: { activityStreams },
             authService,
         } = await setupTest()
@@ -60,7 +60,7 @@ describe('Activity indicator background tests', () => {
         ).toEqual('all-seen')
 
         // Set up pre-req data
-        const { modules: storageModules } = await getServerStorage()
+        const { modules: storageModules } = serverStorage
 
         await storageModules.users.ensureUser(
             { displayName: userAReference.id as string },

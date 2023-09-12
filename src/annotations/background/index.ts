@@ -48,8 +48,9 @@ export default class DirectLinkingBackground {
             socialBg: SocialBG
             normalizeUrl?: URLNormalizer
             analytics: Analytics
-            getServerStorage: () => Promise<
-                Pick<ServerStorageModules, 'contentSharing' | 'users'>
+            serverStorage: Pick<
+                ServerStorageModules,
+                'contentSharing' | 'users'
             >
             preAnnotationDelete(params: {
                 annotationUrl: string
@@ -343,7 +344,7 @@ export default class DirectLinkingBackground {
         _,
         { sharedAnnotationReferences, withCreatorData },
     ) => {
-        const { users, contentSharing } = await this.options.getServerStorage()
+        const { users, contentSharing } = this.options.serverStorage
 
         const annotationsById = await contentSharing.getAnnotations({
             references: sharedAnnotationReferences,

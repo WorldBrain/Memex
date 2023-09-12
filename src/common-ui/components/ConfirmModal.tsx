@@ -24,7 +24,7 @@ class ConfirmModal extends PureComponent<Props> {
         }
 
         return (
-            <Modal {...this.props}>
+            <Modal onClose={this.props.onClose} {...this.props}>
                 {this.props.isLoading ? (
                     <LoadingSpinnerBox>
                         <LoadingIndicator />
@@ -112,16 +112,22 @@ const MessageContainer = styled.div`
 `
 
 const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.white};
-    font-size: 20px;
-    font-weight: 700;
+    background: ${(props) => props.theme.colors.headerGradient};
+    font-size: 30px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: left;
 `
 
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 300;
     text-align: center;
+    margin-bottom: 20px;
 `
 
 const LoadingSpinnerBox = styled.div`

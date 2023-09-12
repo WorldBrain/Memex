@@ -85,6 +85,7 @@ export interface PageCreationProps {
     tabId?: number
     allowScreenshot?: boolean
     visitTime?: number | '$now'
+    skipUpdatePageCount?: boolean
     metaData?: {
         pageTitle?: string
     }

@@ -11,38 +11,24 @@ import {
 } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/events'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
 export interface Dependencies {
     contentSharingBG: ContentSharingInterface
     spacesBG: RemoteCollectionsInterface
     listData: UnifiedList
-    isCreator?: boolean
     errorMessage?: string
     loadOwnershipData?: boolean
-    onCancelEdit?: () => void
-    onSpaceShare?: (
-        remoteListId: AutoPk,
-        annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk },
-    ) => void
+    onSpaceShare?: (remoteListId: string) => void
     copyToClipboard: (text: string) => Promise<boolean>
-    onSpaceNameChange?: (newName: string) => void
-    onConfirmSpaceNameEdit: (name: string) => void
-    onDeleteSpaceIntent?: React.MouseEventHandler
-    onDeleteSpaceConfirm?: React.MouseEventHandler
     analyticsBG: AnalyticsCoreInterface
+    pageLinkCreateState?: TaskState
 }
 
 export type Event = UIEvent<{
     shareSpace: null
-    cancelSpaceNameEdit: null
-    confirmSpaceNameEdit: null
-    updateSpaceName: { name: string }
     copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
-    confirmSpaceDelete: { reactEvent: React.MouseEvent }
-    intendToDeleteSpace: { reactEvent: React.MouseEvent }
-    cancelDeleteSpace: null
+    reloadInviteLinks: { listData: UnifiedList }
 }>
 
 export interface State {
@@ -63,7 +49,7 @@ type EventHandler<EventName extends keyof Event> = UIEventHandler<
     EventName
 >
 
-export default class SpaceContextMenuLogic extends UILogic<State, Event> {
+export default class PageLinkShareMenu extends UILogic<State, Event> {
     static MSG_TIMEOUT = 2000
 
     constructor(protected dependencies: Dependencies) {
@@ -124,8 +110,14 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         return this.withMutation(previousState, mutation)
     }
 
-    private async loadInviteLinks() {
-        const { listData, contentSharingBG } = this.dependencies
+    private async loadInviteLinks(listDataNew?: UnifiedList) {
+        const { contentSharingBG } = this.dependencies
+
+        let listData = this.dependencies.listData
+
+        if (listDataNew) {
+            listData = listDataNew
+        }
 
         const createListLink = (collaborationKey?: string): string =>
             listData.type === 'page-link'
@@ -191,6 +183,12 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         })
     }
 
+    reloadInviteLinks: EventHandler<'reloadInviteLinks'> = async ({
+        event,
+    }) => {
+        await this.loadInviteLinks(event.listData)
+    }
+
     shareSpace: EventHandler<'shareSpace'> = async ({}) => {
         const {
             listData,
@@ -206,10 +204,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                 localListId: listData.localId,
             })
             remoteListId = shareResult.remoteListId
-            onSpaceShare?.(
-                remoteListId,
-                shareResult.annotationLocalToRemoteIdsDict,
-            )
+            onSpaceShare?.(remoteListId)
 
             this.emitMutation({
                 showSuccessMsg: { $set: true },
@@ -231,58 +226,8 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
 
         setTimeout(
             () => this.emitMutation({ showSuccessMsg: { $set: false } }),
-            SpaceContextMenuLogic.MSG_TIMEOUT,
+            PageLinkShareMenu.MSG_TIMEOUT,
         )
-    }
-
-    confirmSpaceDelete: EventHandler<'confirmSpaceDelete'> = async ({
-        event,
-    }) => {
-        const { listData } = this.dependencies
-        if (!listData.localId) {
-            return
-        }
-        this.dependencies.onDeleteSpaceConfirm?.(event.reactEvent)
-        await this.dependencies.spacesBG.removeList({ id: listData.localId })
-    }
-
-    intendToDeleteSpace: EventHandler<'intendToDeleteSpace'> = async ({
-        event,
-    }) => {
-        if (this.dependencies.onDeleteSpaceIntent) {
-            this.dependencies.onDeleteSpaceIntent(event.reactEvent)
-            return
-        }
-        this.emitMutation({ mode: { $set: 'confirm-space-delete' } })
-    }
-
-    cancelDeleteSpace: EventHandler<'cancelDeleteSpace'> = async ({}) => {
-        this.emitMutation({ mode: { $set: null } })
-    }
-
-    updateSpaceName: EventHandler<'updateSpaceName'> = async ({ event }) => {
-        this.dependencies.onSpaceNameChange?.(event.name)
-        this.emitMutation({
-            nameValue: { $set: event.name },
-            showSaveButton: { $set: true },
-        })
-    }
-
-    cancelSpaceNameEdit: EventHandler<'cancelSpaceNameEdit'> = async ({}) => {
-        this.dependencies.onCancelEdit?.()
-    }
-
-    confirmSpaceNameEdit: EventHandler<'confirmSpaceNameEdit'> = ({
-        event,
-        previousState,
-    }) => {
-        const oldName = this.dependencies.listData.name
-        const newName = previousState.nameValue.trim()
-        this.emitMutation({ showSaveButton: { $set: false } })
-
-        if (newName.length && newName !== oldName) {
-            this.dependencies.onConfirmSpaceNameEdit(newName)
-        }
     }
 
     copyInviteLink: EventHandler<'copyInviteLink'> = async ({
@@ -325,7 +270,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
 
         setTimeout(
             () => showInviteLinkCopyMsg(false),
-            SpaceContextMenuLogic.MSG_TIMEOUT,
+            PageLinkShareMenu.MSG_TIMEOUT,
         )
     }
 }

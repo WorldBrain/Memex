@@ -80,7 +80,7 @@ async function setupTest(opts: {
     }
 
     if (opts?.testData) {
-        const { manager } = await context.getServerStorage()
+        const { manager } = context.serverStorage
 
         await Promise.all(
             DATA.sharedLists
@@ -163,11 +163,9 @@ describe('Page activity indicator background module tests', () => {
     })
 
     it('should be able to derive page activity status from stored followedLists data', async () => {
-        const { backgroundModules, getServerStorage } = await setupTest({
+        const { backgroundModules, serverStorage } = await setupTest({
             testData: { follows: true, ownLists: true },
         })
-
-        const serverStorage = await getServerStorage()
 
         expect(
             await backgroundModules.pageActivityIndicator[
@@ -467,7 +465,7 @@ describe('Page activity indicator background module tests', () => {
             const {
                 backgroundModules,
                 storageManager,
-                getServerStorage,
+                serverStorage,
             } = await setupTest({
                 testData: { ownLists: true },
             })
@@ -522,7 +520,6 @@ describe('Page activity indicator background module tests', () => {
             await storageManager
                 .collection('followedList')
                 .updateOneObject({ sharedList }, { lastSync: 2 })
-            const serverStorage = await getServerStorage()
             const newListEntries = [
                 {
                     id: 'test-shared-list-entry-a',
@@ -582,7 +579,7 @@ describe('Page activity indicator background module tests', () => {
             const {
                 backgroundModules,
                 storageManager,
-                getServerStorage,
+                serverStorage,
             } = await setupTest({
                 testData: { ownLists: true },
             })
@@ -653,7 +650,6 @@ describe('Page activity indicator background module tests', () => {
                 ),
             ])
 
-            const serverStorage = await getServerStorage()
             // Create an annotation list entry for one of the existing list entries, by different user
             await serverStorage.manager
                 .collection('sharedAnnotationListEntry')
@@ -806,7 +802,7 @@ describe('Page activity indicator background module tests', () => {
             const {
                 backgroundModules,
                 storageManager,
-                getServerStorage,
+                serverStorage,
             } = await setupTest({
                 testData: { ownLists: true },
             })
@@ -877,7 +873,6 @@ describe('Page activity indicator background module tests', () => {
                 ),
             ])
 
-            const serverStorage = await getServerStorage()
             // Create an annotation list entry for one of the existing list entries, by current user (should not change status)
             await serverStorage.manager
                 .collection('sharedAnnotationListEntry')
@@ -931,7 +926,7 @@ describe('Page activity indicator background module tests', () => {
             const {
                 backgroundModules,
                 storageManager,
-                getServerStorage,
+                serverStorage,
             } = await setupTest({
                 testData: { ownLists: true },
             })
@@ -982,7 +977,6 @@ describe('Page activity indicator background module tests', () => {
             ).toEqual(calcExpectedListEntries(ownListIds))
 
             // Delete an owned sharedList so that sync will result in removal of local data
-            const serverStorage = await getServerStorage()
             await serverStorage.manager
                 .collection('sharedList')
                 .deleteOneObject({ id: DATA.sharedLists[0].id })
@@ -1056,7 +1050,7 @@ describe('Page activity indicator background module tests', () => {
             const {
                 backgroundModules,
                 storageManager,
-                getServerStorage,
+                serverStorage,
             } = await setupTest({
                 testData: { follows: true },
             })
@@ -1106,7 +1100,6 @@ describe('Page activity indicator background module tests', () => {
             ).toEqual(calcExpectedListEntries(followedListIds))
 
             // Delete a follow so that sync will result in removal of local data
-            const serverStorage = await getServerStorage()
             await serverStorage.manager
                 .collection('activityFollow')
                 .deleteObjects({
@@ -1219,7 +1212,7 @@ describe('Page activity indicator background module tests', () => {
             const {
                 backgroundModules,
                 storageManager,
-                getServerStorage,
+                serverStorage,
             } = await setupTest({
                 testData: { follows: true, ownLists: true },
             })
@@ -1272,7 +1265,6 @@ describe('Page activity indicator background module tests', () => {
             ).toEqual(calcExpectedListEntries(expectedListIds))
 
             // Delete a follow + owned sharedList so that sync will result in removal of local data
-            const serverStorage = await getServerStorage()
             await serverStorage.manager
                 .collection('activityFollow')
                 .deleteObjects({
@@ -1316,7 +1308,7 @@ describe('Page activity indicator background module tests', () => {
             const {
                 backgroundModules,
                 storageManager,
-                getServerStorage,
+                serverStorage,
                 fetch,
             } = await setupTest({
                 testData: { ownLists: true },
@@ -1369,7 +1361,6 @@ describe('Page activity indicator background module tests', () => {
             ).toEqual(calcExpectedListEntries(expectedListIds))
 
             // Add newer entry for one list + mock out Cloudflare fetch to return newer activity timestamp for that list
-            const serverStorage = await getServerStorage()
             const newSharedListEntry = {
                 id: 'test-shared-list-entry-a',
                 creator: DATA.users[1].id,
@@ -1488,7 +1479,7 @@ describe('Page activity indicator background module tests', () => {
             const {
                 backgroundModules,
                 storageManager,
-                getServerStorage,
+                serverStorage: getServerStorage,
                 fetch,
             } = await setupTest({
                 testData: { ownLists: true },

@@ -227,34 +227,70 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         normalizedPageUrl: string,
         unifiedListIds: UnifiedList['unifiedId'][],
     ): void {
+        const listIds = this.pageListIds.get(normalizedPageUrl) ?? new Set()
         for (const listId of unifiedListIds) {
-            const listIds = this.pageListIds.get(normalizedPageUrl) ?? new Set()
             if (!this.lists.byId[listId] || listIds.has(listId)) {
                 continue
             }
             listIds.add(listId)
-            this.pageListIds.set(normalizedPageUrl, listIds)
         }
+        this.pageListIds.set(normalizedPageUrl, listIds)
     }
 
     setPageData: PageAnnotationsCacheInterface['setPageData'] = (
         normalizedPageUrl,
-        listIds,
+        nextPageLists,
     ) => {
+        const previousPageLists = [
+            ...(this.pageListIds.get(normalizedPageUrl) ?? []),
+        ]
         if (this.pageListIds.has(normalizedPageUrl)) {
             this.pageListIds.get(normalizedPageUrl).clear()
         }
 
-        this.ensurePageListsSet(normalizedPageUrl, listIds)
+        this.ensurePageListsSet(normalizedPageUrl, nextPageLists)
         this.events.emit(
             'updatedPageData',
             normalizedPageUrl,
             this.pageListIds.get(normalizedPageUrl) ?? new Set(),
         )
-        this.updateSharedAnnotationsWithSharedPageLists()
+        const changedAnnots = this.updateSharedAnnotationsWithSharedPageLists()
+
+        // TODO: The fact we have to do this nested loop makes me think there's a better way to structure this data
+
+        // Ensure any changed annots also have/don't have reverse references from the page lists
+        for (const listId of [...previousPageLists, ...nextPageLists]) {
+            const listData = this.lists.byId[listId]
+            if (!listData) {
+                continue
+            }
+
+            for (const annotId of changedAnnots) {
+                const annotData = this.annotations.byId[annotId]
+                if (!annotData) {
+                    continue
+                }
+
+                if (annotData.unifiedListIds.includes(listId)) {
+                    // List ref'd from annot - ensure ref to that annot from list exists
+                    listData.unifiedAnnotationIds = Array.from(
+                        new Set([...listData.unifiedAnnotationIds, annotId]),
+                    )
+                } else {
+                    // List not ref'd from annot - ensure ref to that annot from list is removed
+                    listData.unifiedAnnotationIds = listData.unifiedAnnotationIds.filter(
+                        (_annotId) => _annotId !== annotId,
+                    )
+                }
+            }
+        }
+
+        if (changedAnnots.length > 0) {
+            this.events.emit('newListsState', this.lists)
+        }
     }
 
-    private getSharedPageListIds(
+    getSharedPageListIds(
         normalizedPageUrl: string,
     ): UnifiedList['unifiedId'][] {
         return [...(this.pageListIds.get(normalizedPageUrl) ?? [])].filter(
@@ -262,9 +298,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         )
     }
 
-    private updateSharedAnnotationsWithSharedPageLists() {
+    private updateSharedAnnotationsWithSharedPageLists(): string[] {
+        const changedAnnots: string[] = []
         let shouldEmitAnnotUpdateEvent = false
         this.annotations = initNormalizedState({
+            getId: (annot) => annot.unifiedId,
             seedData: normalizedStateToArray(this.annotations).map((annot) => {
                 const nextUnifiedListIds = Array.from(
                     new Set([
@@ -283,16 +321,18 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 ) {
                     return annot
                 }
+                changedAnnots.push(annot.unifiedId)
 
                 shouldEmitAnnotUpdateEvent = true
                 return { ...annot, unifiedListIds: nextUnifiedListIds }
             }),
-            getId: (annot) => annot.unifiedId,
         })
 
         if (shouldEmitAnnotUpdateEvent) {
             this.events.emit('newAnnotationsState', this.annotations)
         }
+
+        return changedAnnots
     }
 
     private updateCachedListAnnotationRefsForAnnotationUpdate(
@@ -439,6 +479,12 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             [nextList.unifiedId]: nextList,
         }
 
+        if (nextList.type === 'page-link') {
+            this.ensurePageListsSet(nextList.normalizedPageUrl, [
+                nextList.unifiedId,
+            ])
+        }
+
         this.events.emit('addedList', nextList)
         this.events.emit('newListsState', this.lists)
         return { unifiedId: nextList.unifiedId }
@@ -558,6 +604,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 previousList.hasRemoteAnnotationsToLoad
         }
 
+        // If list was shared, set up reverse ref from remote->cached ID
         if (previousList.remoteId !== nextList.remoteId) {
             this.remoteListIdsToCacheIds.set(
                 nextList.remoteId,
@@ -575,9 +622,19 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         this.events.emit('updatedList', nextList)
         this.events.emit('newListsState', this.lists)
-        // If share status changed, reflect updates in any public annotations
-        if (previousList.remoteId != nextList.remoteId) {
-            this.updateSharedAnnotationsWithSharedPageLists()
+
+        // If list was shared, reflect updates in any public annotations.
+        //  Note this needs to be separate to the previous condition else things go silly due to some timing issue. TODO: Figure out why and document
+        if (previousList.remoteId !== nextList.remoteId) {
+            const changedAnnots = this.updateSharedAnnotationsWithSharedPageLists()
+
+            // Ensure any annots that were added to this list have a reverse reference from this list
+            nextList.unifiedAnnotationIds = Array.from(
+                new Set([
+                    ...previousList.unifiedAnnotationIds,
+                    ...changedAnnots,
+                ]),
+            )
         }
     }
 

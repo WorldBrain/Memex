@@ -24,6 +24,10 @@ reducer.on(acts.setTabId, (state, payload) => ({
     tabId: payload,
 }))
 
+reducer.on(acts.openSidebar as any, (state) => ({
+    ...state,
+}))
+
 reducer.on(acts.setUrl, (state, payload) => ({
     ...state,
     url: payload,

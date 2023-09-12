@@ -471,7 +471,7 @@ const TitleContainer = styled.div`
 `
 
 const EditDescriptionButton = styled.div`
-    color: ${(props) => props.theme.colors.prime2};
+    color: ${(props) => props.theme.colors.prime1};
     font-size: 14px;
     border: none;
     background: none;

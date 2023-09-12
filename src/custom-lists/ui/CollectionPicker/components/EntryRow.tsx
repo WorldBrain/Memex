@@ -24,6 +24,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     keyboardNavActive?: boolean
     keepScrollPosition?: () => void
     addedToAllIds?: number[]
+    onListFocus?: (listId) => void
 }
 
 class EntryRow extends React.Component<Props> {
@@ -49,17 +50,23 @@ class EntryRow extends React.Component<Props> {
     }
 
     private handleResultPress: React.MouseEventHandler = (e) => {
-        if (this.props.contextMenuBtnRef?.current.contains(e.target as Node)) {
-            return
+        if (!e.shiftKey) {
+            if (
+                this.props.contextMenuBtnRef?.current.contains(e.target as Node)
+            ) {
+                return
+            }
+            if (
+                this.props.onPressActOnAll &&
+                this.pressAllButtonRef != null &&
+                this.pressAllButtonRef?.current.contains(e.target as Node)
+            ) {
+                return
+            }
+            this.props.onPress()
+        } else {
+            this.props.onListFocus(this.props.id)
         }
-        if (
-            this.props.onPressActOnAll &&
-            this.pressAllButtonRef != null &&
-            this.pressAllButtonRef?.current.contains(e.target as Node)
-        ) {
-            return
-        }
-        this.props.onPress()
 
         this.setState({ checkBoxHover: false })
         this.props.keepScrollPosition()
@@ -281,6 +288,15 @@ const SelectionBox = styled.div<{ selected }>`
         props.selected
             ? props.theme.colors.greyScale7
             : props.theme.colors.greyScale3};
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css<any>`
+            background: ${(props) =>
+                props.selected
+                    ? props.theme.colors.greyScale4
+                    : props.theme.colors.greyScale3};
+        `};
 `
 
 export const IconStyleWrapper = styled.div`
@@ -326,6 +342,26 @@ const Row = styled.div<{ isFocused; zIndex }>`
         outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         background: transparent;
     }
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            &:focus {
+                outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+            }
+            &:hover {
+                outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+                background: transparent;
+            }
+
+            ${(props) =>
+                props.isFocused &&
+                css`
+                    outline: 1px solid
+                        ${(props) => props.theme.colors.greyScale2};
+                    background: transparent;
+                `}
+        `};
 `
 
 const NameWrapper = styled.div`

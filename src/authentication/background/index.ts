@@ -56,7 +56,7 @@ export class AuthBackground {
             localStorageArea: LimitedBrowserStorage
             backendFunctions: AuthBackendFunctions
             remoteEmitter: RemoteEventEmitter<'auth'>
-            getUserManagement: () => Promise<UserStorage>
+            userManagement: UserStorage
             getFCMRegistrationToken?: () => Promise<string>
         },
     ) {
@@ -124,16 +124,14 @@ export class AuthBackground {
                 if (!user) {
                     return null
                 }
-                const userManagement = await this.options.getUserManagement()
-                this._userProfile = userManagement.getUser({
+                this._userProfile = this.options.userManagement.getUser({
                     type: 'user-reference',
                     id: user.id,
                 })
                 return this._userProfile
             },
             getUserByReference: async (reference) => {
-                const userManagement = await this.options.getUserManagement()
-                return userManagement.getUser(reference)
+                return this.options.userManagement.getUser(reference)
             },
             updateUserProfile: async (updates) => {
                 const user = await this.authService.getCurrentUser()
@@ -142,8 +140,7 @@ export class AuthBackground {
                 }
                 delete this._userProfile
 
-                const userManagement = await this.options.getUserManagement()
-                await userManagement.updateUser(
+                await this.options.userManagement.updateUser(
                     { type: 'user-reference', id: user.id },
                     {},
                     { displayName: updates.displayName },
@@ -239,9 +236,8 @@ export class AuthBackground {
             )
 
             if (this.options.getFCMRegistrationToken != null && user != null) {
-                const userManagement = await this.options.getUserManagement()
                 const token = await this.options.getFCMRegistrationToken()
-                await userManagement.addUserFCMRegistrationToken(
+                await this.options.userManagement.addUserFCMRegistrationToken(
                     {
                         type: 'user-reference',
                         id: user.id,
@@ -285,8 +281,7 @@ export class AuthBackground {
         }
 
         if (options.displayName) {
-            const userManagement = await this.options.getUserManagement()
-            await userManagement.updateUser(
+            await this.options.userManagement.updateUser(
                 { type: 'user-reference', id: user.id },
                 { knownStatus: 'new' },
                 { displayName: options.displayName },

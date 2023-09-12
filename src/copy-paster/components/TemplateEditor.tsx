@@ -155,6 +155,12 @@ const OutputSwitcher = styled.div<{
         css`
             background: ${(props) => props.theme.colors.greyScale2};
         `}
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            color: ${(props) => props.theme.colors.greyScale5};
+        `};
 `
 
 const ButtonBox = styled.div`

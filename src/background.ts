@@ -26,7 +26,7 @@ import { setStorageMiddleware } from './storage/middleware'
 import { getFirebase } from './util/firebase-app-initialized'
 import setupDataSeeders from 'src/util/tests/seed-data'
 import {
-    createLazyServerStorage,
+    createServerStorage,
     createServerStorageManager,
 } from './storage/server'
 import { createServices } from './services'
@@ -76,12 +76,10 @@ export async function main(): Promise<void> {
         firebase.storage().useEmulator('localhost', 9199)
     }
 
-    const getServerStorage = createLazyServerStorage(
-        createServerStorageManager,
-        {
-            autoPkType: 'string',
-        },
-    )
+    const serverStorageManager = createServerStorageManager()
+    const serverStorage = await createServerStorage(serverStorageManager, {
+        autoPkType: 'string',
+    })
 
     const storageManager = initStorex()
     const persistentStorageManager = createPersistentStorageManager({
@@ -92,11 +90,10 @@ export async function main(): Promise<void> {
     })
     const authServices = createAuthServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
-        getServerStorage,
     })
-    const servicesPromise = createServices({
+    const services = createServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
-        getServerStorage,
+        serverStorage,
         authService: authServices.auth,
     })
     __debugCounter++
@@ -108,8 +105,8 @@ export async function main(): Promise<void> {
     const backgroundModules = createBackgroundModules({
         manifestVersion: '2',
         authServices,
-        servicesPromise,
-        getServerStorage,
+        services,
+        serverStorage,
         analyticsManager: analytics,
         localStorageChangesManager,
         fetchPageData: async (url) =>
@@ -211,7 +208,6 @@ export async function main(): Promise<void> {
     })
     __debugCounter++
 
-    const services = await servicesPromise
     services.contentSharing.preKeyGeneration = async (params: {
         key: Pick<SharedListKey, 'roleID' | 'disabled'>
     }) => {
@@ -226,15 +222,17 @@ export async function main(): Promise<void> {
     globalThis['getDb'] = getDb
     globalThis['storageMan'] = storageManager
     globalThis['bgModules'] = backgroundModules
+    globalThis['serverStorage'] = serverStorage
+    globalThis['services'] = services
     globalThis['analytics'] = analytics
     globalThis['dataSeeders'] = setupDataSeeders(storageManager)
     globalThis['setStorageLoggingEnabled'] = setStorageLoggingEnabled
 
     globalThis['selfTests'] = createSelfTests({
-        backgroundModules,
+        serverStorage,
         storageManager,
+        backgroundModules,
         persistentStorageManager,
-        getServerStorage,
         localStorage: browser.storage.local,
     })
 

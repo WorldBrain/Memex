@@ -91,14 +91,18 @@ export class SharingTestHelper {
         setup: BackgroundIntegrationTestSetup,
         options: { id: number },
     ) {
-        await setup.backgroundModules.contentSharing.options.servicesPromise
+        const localListId = this.lists[options.id].localId
+        const annotationLocalToRemoteIdsDict = await setup.backgroundModules.contentSharing[
+            'listSharingService'
+        ].ensureRemoteAnnotationIdsExistForList(localListId)
         const {
             remoteListId,
             annotationSharingStatesPromise,
         } = await setup.backgroundModules.contentSharing[
             'listSharingService'
         ].shareList({
-            localListId: this.lists[options.id].localId,
+            localListId,
+            annotationLocalToRemoteIdsDict,
         })
         expect(remoteListId).toBeDefined()
         this.lists[options.id].remoteId = remoteListId
@@ -742,7 +746,7 @@ export class SharingTestHelper {
         sortField: string,
     ) {
         await setup.backgroundModules.personalCloud.waitForSync()
-        const serverStorage = await setup.getServerStorage()
+        const serverStorage = setup.serverStorage
         const storageManager =
             db === 'local' ? setup.storageManager : serverStorage.manager
         const objects = await storageManager.operation(

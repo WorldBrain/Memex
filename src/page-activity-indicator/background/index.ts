@@ -32,8 +32,9 @@ export interface PageActivityIndicatorDependencies {
     storageManager: Storex
     jobScheduler: JobScheduler
     getCurrentUserId: () => Promise<AutoPk | null>
-    getServerStorage: () => Promise<
-        Pick<ServerStorageModules, 'activityFollows' | 'contentSharing'>
+    serverStorage: Pick<
+        ServerStorageModules,
+        'activityFollows' | 'contentSharing'
     >
 }
 
@@ -263,10 +264,7 @@ export class PageActivityIndicatorBackground {
     private async getAllUserFollowedSharedListsFromServer(
         userReference: UserReference,
     ): Promise<Array<SharedList & { id: AutoPk; creator: AutoPk }>> {
-        const {
-            activityFollows,
-            contentSharing,
-        } = await this.deps.getServerStorage()
+        const { activityFollows, contentSharing } = this.deps.serverStorage
 
         const [sharedListFollows, ownedSharedLists] = await Promise.all([
             activityFollows.getAllFollowsByCollection({
@@ -344,7 +342,7 @@ export class PageActivityIndicatorBackground {
             return
         }
 
-        const { contentSharing } = await this.deps.getServerStorage()
+        const { contentSharing } = this.deps.serverStorage
 
         const followedLists =
             opts?.forFollowedLists ??

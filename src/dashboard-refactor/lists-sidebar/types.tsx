@@ -3,6 +3,8 @@ import type { ListsSidebarSearchBarProps } from './components/search-bar'
 import type { TaskState } from 'ui-logic-core/lib/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     lists: NormalizedState<UnifiedList & { wasPageDropped?: boolean }>
@@ -30,6 +32,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     listDeleteState: TaskState
     listCreateState: TaskState
     listShareLoadingState: TaskState
+    themeVariant: MemexThemeVariant
 }
 
 export type Events = UIEvent<{
@@ -53,13 +56,18 @@ export type Events = UIEvent<{
     setSelectedListId: { listId: string }
     setShowMoreMenuListId: { listId: string }
     dropPageOnListItem: { listId: string; dataTransfer: DataTransfer }
-    handleListShare: { listId: string; remoteListId: string }
+    handleListShare: {
+        listId: string
+        remoteListId: AutoPk
+        annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
+    }
     setListRemoteId: { listId: string; remoteListId: string }
 
     confirmListDelete: null
     cancelListDelete: null
 
     updateSelectedListDescription: { description: string }
+    toggleTheme: { themeVariant: MemexThemeVariant }
     switchToFeed: null
 }>
 

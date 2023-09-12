@@ -3,7 +3,10 @@ import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import styled, { css, keyframes } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { ConversationReplies } from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
+import {
+    ConversationReplies,
+    SharedProps as RepliesProps,
+} from '@worldbrain/memex-common/lib/content-conversations/ui/components/annotations-in-page'
 import type {
     SharedAnnotationReference,
     SharedListReference,
@@ -20,7 +23,11 @@ import AnnotationEditable, {
 import type _AnnotationEditable from 'src/annotations/components/AnnotationEditable'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import CongratsMessage from 'src/annotations/components/parts/CongratsMessage'
-import type { AnnotationCardInstanceLocation, SidebarTheme } from '../types'
+import type {
+    AnnotationCardInstanceLocation,
+    AnnotationsSidebarInPageEventEmitter,
+    SidebarTheme,
+} from '../types'
 import { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import {
     AnnotationEditGeneralProps,
@@ -69,6 +76,8 @@ import {
     getListShareUrl,
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -111,6 +120,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         [instanceId: string]: AnnotationInstanceRefs
     }
     activeShareMenuNoteId: string
+    selectedListForShareMenu: UnifiedList['unifiedId']
     renderAICounter: (position) => JSX.Element
     renderShareMenuForAnnotation: (
         instanceLocation: AnnotationCardInstanceLocation,
@@ -123,9 +133,11 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         referenceElement?: React.RefObject<HTMLDivElement>,
     ) => JSX.Element
     renderContextMenuForList: (listData: UnifiedList) => JSX.Element
+    renderPageLinkMenuForList: (listData: UnifiedList) => JSX.Element
 
     setActiveTab: (tab: SidebarTab) => React.MouseEventHandler
     expandFollowedListNotes: (listId: string) => void
+    selectedListId: string
 
     bindAnnotationFooterEventProps: (
         annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'body'>,
@@ -151,6 +163,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     openContextMenuForList: (
         unifiedListId: UnifiedList['unifiedId'] | null,
     ) => void
+    openPageListMenuForList: () => void
     openWebUIPage: (unifiedListId: UnifiedList['unifiedId']) => void
     onShareAllNotesClick: () => void
     onCopyBtnClick: () => void
@@ -195,6 +208,12 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         newName: string,
     ) => void
     setSpaceTitleEditValue: (value) => void
+    createNewNoteFromAISummary: (summary) => void
+    showSharePageTooltip: boolean
+    events: AnnotationsSidebarInPageEventEmitter
+    initGetReplyEditProps: (
+        sharedListReference: SharedListReference,
+    ) => RepliesProps['getReplyEditProps']
 }
 
 interface AnnotationsSidebarState {
@@ -212,9 +231,11 @@ interface AnnotationsSidebarState {
     }
     showAIhighlight: boolean
     showAISuggestionsDropDown: boolean
+    themeVariant?: MemexThemeVariant
     AIsuggestions: []
     autoFocusCreateForm: boolean
     spaceTitleEditState: boolean
+    hoveredListId: string | null
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -230,11 +251,16 @@ export class AnnotationsSidebar extends React.Component<
     private pageSummaryText = React.createRef<HTMLDivElement>()
     private pageShareButtonRef = React.createRef<HTMLDivElement>()
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
+    private editPageLinkButtonRef = React.createRef<HTMLDivElement>()
     private sharePageLinkButtonRef = React.createRef<HTMLDivElement>()
     private spaceTitleEditFieldRef = React.createRef<HTMLInputElement>()
     private spaceContextBtnRefs: {
         [unifiedListId: string]: React.RefObject<HTMLDivElement>
     } = {}
+    private spaceUnfoldButtonRef: {
+        [unifiedListId: string]: React.RefObject<HTMLDivElement>
+    } = {}
+    private editorPassedUp = false
 
     state: AnnotationsSidebarState = {
         searchText: '',
@@ -251,10 +277,13 @@ export class AnnotationsSidebar extends React.Component<
         AIsuggestions: [],
         autoFocusCreateForm: false,
         spaceTitleEditState: false,
+        hoveredListId: null,
     }
 
-    addYoutubeTimestampToEditor() {
-        this.annotationCreateRef.current?.addYoutubeTimestampToEditor()
+    addYoutubeTimestampToEditor(commentText) {
+        this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
+            commentText,
+        )
     }
 
     private maybeCreateContextBtnRef({
@@ -264,6 +293,14 @@ export class AnnotationsSidebar extends React.Component<
             return
         }
         this.spaceContextBtnRefs[unifiedId] = React.createRef()
+    }
+    private maybeCreatespaceUnfoldButtonRef({
+        unifiedId,
+    }: Pick<UnifiedList, 'unifiedId'>): void {
+        if (this.spaceUnfoldButtonRef[unifiedId]) {
+            return
+        }
+        this.spaceUnfoldButtonRef[unifiedId] = React.createRef()
     }
 
     async componentDidMount() {
@@ -282,6 +319,14 @@ export class AnnotationsSidebar extends React.Component<
                 showIsolatedViewNotif: isolatedViewNotifVisible,
             })
         }
+
+        let themeVariant: MemexThemeVariant = 'dark'
+        try {
+            themeVariant = await loadThemeVariant()
+        } catch (err) {
+            console.error('Could not load theme, falling back to dark mode')
+        }
+        this.setState({ themeVariant })
     }
 
     async componentDidUpdate(
@@ -375,7 +420,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <PopoutBox
                 targetElementRef={this.copyButtonRef.current}
-                placement={'bottom-end'}
+                placement={'bottom'}
                 offsetX={5}
                 offsetY={5}
                 closeComponent={() => {
@@ -409,7 +454,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <PopoutBox
                 targetElementRef={this.bulkEditButtonRef.current}
-                placement={'bottom-end'}
+                placement={'bottom'}
                 offsetX={5}
                 offsetY={5}
                 closeComponent={() =>
@@ -450,19 +495,20 @@ export class AnnotationsSidebar extends React.Component<
                         )
                         this.setState({ autoFocusCreateForm: false })
                     }}
-                    onCancel={() =>
+                    onCancel={() => {
                         this.setState({ autoFocusCreateForm: false })
-                    }
+                    }}
                     ref={this.annotationCreateRef}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
+                    sidebarEvents={this.props.events && this.props.events}
                 />
             </NewAnnotationSection>
         )
     }
 
     private renderLoader = (key?: string, size?: number) => (
-        <LoadingIndicatorContainer key={key}>
+        <LoadingIndicatorContainer width={'100%'} height={'200px'} key={key}>
             <LoadingIndicatorStyled size={size ? size : undefined} />
         </LoadingIndicatorContainer>
     )
@@ -762,6 +808,12 @@ export class AnnotationsSidebar extends React.Component<
                                     getYoutubePlayer={
                                         this.props.getYoutubePlayer
                                     }
+                                    getReplyEditProps={this.props.initGetReplyEditProps(
+                                        {
+                                            type: 'shared-list-reference',
+                                            id: listData.remoteId,
+                                        },
+                                    )}
                                 />
                             )}
                     </AnnotationBox>
@@ -770,7 +822,7 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         return (
-            <FollowedNotesContainer>
+            <FollowedNotesContainer zIndex={listData.unifiedId}>
                 {(cacheUtils.deriveListOwnershipStatus(
                     listData,
                     this.props.currentUser,
@@ -887,26 +939,55 @@ export class AnnotationsSidebar extends React.Component<
                 bottom={listInstance.isOpen ? '0px' : '0px'}
                 key={listData.unifiedId}
                 top="5px"
+                onMouseOver={() =>
+                    this.setState({
+                        hoveredListId: listData.unifiedId,
+                    })
+                }
+                onMouseLeave={() => {
+                    this.setState({
+                        hoveredListId: null,
+                    })
+                }}
+                isHovered={this.state.hoveredListId === listData.unifiedId}
             >
                 <FollowedListRow
-                    title={title}
                     onClick={() =>
                         this.props.onUnifiedListSelect(listData.unifiedId)
                     }
+                    zIndex={listData.unifiedId}
                 >
                     <FollowedListTitleContainer>
-                        <Icon
-                            icon={icons.arrowRight}
-                            heightAndWidth="20px"
-                            rotation={listInstance.isOpen && 90}
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                this.props.expandFollowedListNotes(
-                                    listData.unifiedId,
-                                )
-                            }}
-                        />
-                        <FollowedListTitle>{title}</FollowedListTitle>
+                        <TooltipBox
+                            tooltipText={
+                                <span>
+                                    Click here to unfold.
+                                    <br /> Click entire bar to go into Focus
+                                    Mode
+                                </span>
+                            }
+                            placement="bottom"
+                        >
+                            <Icon
+                                icon={icons.arrowRight}
+                                heightAndWidth="20px"
+                                rotation={listInstance.isOpen && 90}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    this.props.expandFollowedListNotes(
+                                        listData.unifiedId,
+                                    )
+                                }}
+                                containerRef={
+                                    this.spaceUnfoldButtonRef[
+                                        listData.unifiedId
+                                    ]
+                                }
+                            />
+                        </TooltipBox>
+                        <FollowedListTitleBox title={title}>
+                            <FollowedListTitle>{title}</FollowedListTitle>
+                        </FollowedListTitleBox>
                     </FollowedListTitleContainer>
                     <ButtonContainer>
                         <ActionButtons>
@@ -958,7 +1039,7 @@ export class AnnotationsSidebar extends React.Component<
                             listData.remoteId != null && (
                                 <TooltipBox
                                     tooltipText="Space is Shared"
-                                    placement="bottom"
+                                    placement="bottom-end"
                                 >
                                     <Icon
                                         hoverOff
@@ -1013,6 +1094,34 @@ export class AnnotationsSidebar extends React.Component<
                 }}
             >
                 {this.props.renderContextMenuForList(listData)}
+            </PopoutBox>
+        )
+    }
+    private renderPageLinkMenu(listData: UnifiedList) {
+        let selectedList
+        if (this.props.selectedListForShareMenu != null) {
+            selectedList = this.props.annotationsCache.lists.byId[
+                this.props.selectedListForShareMenu
+            ]
+        }
+        return (
+            <PopoutBox
+                strategy="fixed"
+                placement="bottom-end"
+                offsetX={10}
+                offsetY={0}
+                targetElementRef={this.sharePageLinkButtonRef.current}
+                closeComponent={() => {
+                    this.props.openPageListMenuForList()
+                }}
+            >
+                {!this.props.selectedListForShareMenu || !selectedList ? (
+                    <LoadingIndicatorContainer height="180px" width="330px">
+                        <LoadingIndicatorStyled size={20} />
+                    </LoadingIndicatorContainer>
+                ) : (
+                    this.props.renderPageLinkMenuForList(selectedList)
+                )}
             </PopoutBox>
         )
     }
@@ -1076,6 +1185,7 @@ export class AnnotationsSidebar extends React.Component<
                         <SpaceTypeSectionContainer>
                             {pageLinkLists.map((listData) => {
                                 this.maybeCreateContextBtnRef(listData)
+                                this.maybeCreatespaceUnfoldButtonRef(listData)
                                 return this.renderSpacesItem(
                                     listData,
                                     listInstances[listData.unifiedId],
@@ -1282,7 +1392,7 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderResultsBody() {
+    private renderResultsBody(themeVariant: MemexThemeVariant) {
         const listData = this.props.lists.byId[this.props.selectedListId]
 
         if (this.props.activeTab === 'feed') {
@@ -1420,15 +1530,10 @@ export class AnnotationsSidebar extends React.Component<
                                 'Type a prompt like "Summarize in 2 paragraphs"'
                             }
                             value={this.props.prompt}
-                            icon={
-                                !this.props.showAICounter ? 'openAIicon' : null
-                            }
-                            element={
-                                this.props.showAICounter
-                                    ? this.props.renderAICounter('top')
-                                    : null
-                            }
+                            icon="feed"
+                            element={null}
                             iconSize="18px"
+                            padding={'10px 10px'}
                             onChange={async (event) => {
                                 await this.props.updatePromptState(
                                     (event.target as HTMLInputElement).value,
@@ -1469,6 +1574,7 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.prompt.length > 0 &&
                                 addPromptButton(this.props.prompt)
                             }
+                            autoFocus={this.props.activeTab === 'summary'}
                         />
                         {this.props.showAISuggestionsDropDown &&
                             this.props.AIsuggestions.length > 0 && (
@@ -1477,76 +1583,109 @@ export class AnnotationsSidebar extends React.Component<
                     </QueryContainer>
                     {!this.props.selectedTextAIPreview && (
                         <OptionsContainer>
-                            Mode
-                            <TooltipBox
-                                tooltipText={
-                                    <>
-                                        Just takes the first few paragraphs for
-                                        the summary. Much faster.
-                                    </>
-                                }
-                                placement="bottom"
-                                width="150px"
-                            >
-                                <SelectionPill
-                                    onClick={async () => {
-                                        this.props.setQueryMode('glanceSummary')
-                                        await this.props.queryAIwithPrompt(
-                                            this.props.prompt,
-                                        )
-                                    }}
-                                    selected={
-                                        this.props.queryMode === 'glanceSummary'
+                            <OptionsContainerLeft>
+                                <TooltipBox
+                                    tooltipText={
+                                        <>
+                                            Just takes the first few paragraphs
+                                            or roughly the first 10 minutes of a
+                                            video for the summary. Much faster.
+                                        </>
                                     }
+                                    placement="bottom"
+                                    width="150px"
                                 >
-                                    Quick Glance
-                                </SelectionPill>
-                            </TooltipBox>
-                            <TooltipBox
-                                tooltipText={
-                                    <>
-                                        Takes in the whole article or video.
-                                        Much slower.
-                                    </>
-                                }
-                                placement="bottom"
-                                width="150px"
-                            >
-                                <SelectionPill
-                                    onClick={async () => {
-                                        this.props.setQueryMode('summarize')
-                                        await this.props.queryAIwithPrompt(
-                                            this.props.prompt,
-                                        )
-                                    }}
-                                    selected={
-                                        this.props.queryMode === 'summarize'
+                                    <SelectionPill
+                                        onClick={async () => {
+                                            this.props.setQueryMode(
+                                                'glanceSummary',
+                                            )
+                                            await this.props.queryAIwithPrompt(
+                                                this.props.prompt,
+                                            )
+                                        }}
+                                        selected={
+                                            this.props.queryMode ===
+                                            'glanceSummary'
+                                        }
+                                    >
+                                        Quick Glance
+                                    </SelectionPill>
+                                </TooltipBox>
+                                <TooltipBox
+                                    tooltipText={
+                                        <>
+                                            Takes in the whole article or video.
+                                            Much slower.
+                                        </>
                                     }
+                                    placement="bottom"
+                                    width="150px"
                                 >
-                                    Full Page
-                                </SelectionPill>
-                            </TooltipBox>
-                            <TooltipBox
-                                tooltipText={
-                                    <>
-                                        This mode is ideal for general questions{' '}
-                                        that are not specific to this page
-                                    </>
-                                }
-                                placement="bottom"
-                                width="150px"
-                            >
-                                <SelectionPill
-                                    onClick={() =>
-                                        this.props.setQueryMode('question')
+                                    <SelectionPill
+                                        onClick={async () => {
+                                            this.props.setQueryMode('summarize')
+                                            await this.props.queryAIwithPrompt(
+                                                this.props.prompt,
+                                            )
+                                        }}
+                                        selected={
+                                            this.props.queryMode === 'summarize'
+                                        }
+                                    >
+                                        Full Page
+                                    </SelectionPill>
+                                </TooltipBox>
+                                <TooltipBox
+                                    tooltipText={
+                                        <>
+                                            This mode is ideal for general
+                                            questions that are not specific to
+                                            this page
+                                        </>
                                     }
-                                    selected={
-                                        this.props.queryMode === 'question'
-                                    }
+                                    placement="bottom"
+                                    width="150px"
                                 >
-                                    General Question
-                                </SelectionPill>
-                            </TooltipBox>
+                                    <SelectionPill
+                                        onClick={() =>
+                                            this.props.setQueryMode('question')
+                                        }
+                                        selected={
+                                            this.props.queryMode === 'question'
+                                        }
+                                    >
+                                        General Question
+                                    </SelectionPill>
+                                </TooltipBox>
+                            </OptionsContainerLeft>
+                            <OptionsContainerRight>
+                                {this.props.pageSummary.length > 0 && (
+                                    <TooltipBox
+                                        tooltipText={
+                                            <>
+                                                Create new note <br /> from
+                                                output
+                                            </>
+                                        }
+                                        placement="bottom-end"
+                                    >
+                                        <Icon
+                                            icon={'commentAdd'}
+                                            onClick={() => {
+                                                let summary = `# AI Summary\n\n ## Prompt:\n  ${this.props.prompt}\n\n ## Answer: \n ${this.props.pageSummary}`
+
+                                                this.props.createNewNoteFromAISummary(
+                                                    this.props.pageSummary,
+                                                )
+                                            }}
+                                            heightAndWidth="22px"
+                                            color="prime1"
+                                        />
+                                    </TooltipBox>
+                                )}
+                                {this.props.renderAICounter('top')}
+                            </OptionsContainerRight>
                         </OptionsContainer>
                     )}
                     {this.props.loadState === 'running' ? (
@@ -1620,7 +1759,7 @@ export class AnnotationsSidebar extends React.Component<
                 )}
                 <UpdateNotifBanner
                     location={'sidebar'}
-                    theme={{ position: 'fixed' }}
+                    theme={{ variant: themeVariant, position: 'fixed' }}
                     sidebarContext={this.props.sidebarContext}
                 />
             </>
@@ -1933,7 +2072,7 @@ export class AnnotationsSidebar extends React.Component<
                 <TopBarTabsContainer>
                     <PrimaryAction
                         onClick={this.props.setActiveTab('annotations')}
-                        label={'My Annotations'}
+                        label={'Notes'}
                         active={this.props.activeTab === 'annotations'}
                         type={'tertiary'}
                         size={'medium'}
@@ -2007,36 +2146,29 @@ export class AnnotationsSidebar extends React.Component<
                         }
                     />
                 </TopBarTabsContainer>
-                <TopBarBtnsContainer>
-                    {this.props.pageLinkCreateState === 'running' ? (
-                        <TooltipBox
-                            tooltipText={
-                                <span>
-                                    Preparing Page Link
-                                    <br />
-                                    link can be copied but web interface not
-                                    ready
-                                </span>
-                            }
-                            placement={'bottom-end'}
-                        >
-                            <LoadingPageLinkBox>
-                                <LoadingIndicator size={18} />
-                            </LoadingPageLinkBox>
-                        </TooltipBox>
-                    ) : (
-                        <>
-                            {listData?.type !== 'page-link' && (
-                                <PrimaryAction
-                                    label={'Share Page'}
-                                    onClick={this.props.clickCreatePageLinkBtn}
-                                    type="secondary"
-                                    size="small"
-                                    icon={'invite'}
+                <TopBarBtnsContainer ref={this.sharePageLinkButtonRef}>
+                    <PrimaryAction
+                        label={'Share Page'}
+                        onClick={this.props.clickCreatePageLinkBtn}
+                        type="tertiary"
+                        iconColor="prime1"
+                        fontColor="white"
+                        size="medium"
+                        active={this.props.showSharePageTooltip}
+                        icon={
+                            this.props.pageLinkCreateState === 'running' ? (
+                                <LoadingIndicator
+                                    margin={'0 5px 0 0'}
+                                    size={14}
                                 />
-                            )}
-                        </>
-                    )}
+                            ) : (
+                                'invite'
+                            )
+                        }
+                        padding={'0px 12px 0 6px'}
+                    />
+                    {this.props.showSharePageTooltip &&
+                        this.renderPageLinkMenu(listData ?? null)}
                 </TopBarBtnsContainer>
             </TopBarContainer>
         )
@@ -2101,7 +2233,7 @@ export class AnnotationsSidebar extends React.Component<
                     <RightSideButtonsTopBar>
                         {this.renderContextMenu(
                             selectedList,
-                            this.sharePageLinkButtonRef,
+                            this.editPageLinkButtonRef,
                         )}
                         <TooltipBox
                             tooltipText={'Copy Invite Links'}
@@ -2109,7 +2241,7 @@ export class AnnotationsSidebar extends React.Component<
                         >
                             <Icon
                                 icon="link"
-                                containerRef={this.sharePageLinkButtonRef}
+                                containerRef={this.editPageLinkButtonRef}
                                 onClick={() =>
                                     this.props.openContextMenuForList(
                                         selectedList.unifiedId,
@@ -2153,7 +2285,11 @@ export class AnnotationsSidebar extends React.Component<
                 {/* {this.state.spaceTitleEditState ? ( */}
                 <SpaceTitleEditField
                     ref={this.spaceTitleEditFieldRef}
-                    value={this.props.spaceTitleEditValue ?? selectedList.name}
+                    value={
+                        this.props.spaceTitleEditValue
+                            ? this.props.spaceTitleEditValue
+                            : selectedList.name
+                    }
                     onChange={(event) => {
                         {
                             this.props.setSpaceTitleEditValue(
@@ -2161,17 +2297,35 @@ export class AnnotationsSidebar extends React.Component<
                             )
                         }
                     }}
+                    disabled={
+                        cacheUtils.deriveListOwnershipStatus(
+                            selectedList,
+                            this.props.currentUser,
+                        ) !== 'Creator'
+                    }
                     isActivated={this.state.spaceTitleEditState}
+                    isCreator={
+                        cacheUtils.deriveListOwnershipStatus(
+                            selectedList,
+                            this.props.currentUser,
+                        ) === 'Creator'
+                    }
                     onClick={() => {
-                        this.props.setSpaceTitleEditValue(selectedList.name)
-                        this.spaceTitleEditFieldRef.current.addEventListener(
-                            'blur',
-                            this.handleClickOutside,
+                        const permissionStatus = cacheUtils.deriveListOwnershipStatus(
+                            selectedList,
+                            this.props.currentUser,
                         )
-                        !this.state.spaceTitleEditState &&
-                            this.setState({
-                                spaceTitleEditState: true,
-                            })
+                        if (permissionStatus === 'Creator') {
+                            this.props.setSpaceTitleEditValue(selectedList.name)
+                            this.spaceTitleEditFieldRef.current.addEventListener(
+                                'blur',
+                                this.handleClickOutside,
+                            )
+                            !this.state.spaceTitleEditState &&
+                                this.setState({
+                                    spaceTitleEditState: true,
+                                })
+                        }
                     }}
                     onKeyDown={this.handleNameEditInputKeyDown}
                 />
@@ -2325,7 +2479,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <PopoutBox
                 targetElementRef={this.sortDropDownButtonRef.current}
-                placement={'bottom-end'}
+                placement={'bottom'}
                 offsetX={5}
                 offsetY={5}
                 closeComponent={() =>
@@ -2345,27 +2499,6 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderSharePageButton() {
-        return (
-            <>
-                <PrimaryAction
-                    label={'Share Page'}
-                    onClick={async () => {
-                        await this.setState({
-                            showPageSpacePicker: !this.state
-                                .showPageSpacePicker,
-                        })
-                        this.setPopoutsActive()
-                    }}
-                    icon={'invite'}
-                    type={'primary'}
-                    size={'medium'}
-                    innerRef={this.pageShareButtonRef}
-                />
-            </>
-        )
-    }
-
     private renderTopBarActionButtons() {
         return (
             <>
@@ -2374,17 +2507,20 @@ export class AnnotationsSidebar extends React.Component<
                 {this.renderAllNotesShareMenu()}
                 <TopBarActionBtns>
                     <TooltipBox tooltipText={'Sort Notes'} placement={'bottom'}>
-                        <Icon
-                            filePath={icons.sort}
+                        <PrimaryAction
+                            icon={'sort'}
+                            iconSize="20px"
+                            size={'small'}
+                            type={'tertiary'}
+                            label={'Sort'}
+                            padding={'0px 6px 0 0'}
+                            innerRef={this.sortDropDownButtonRef}
                             onClick={async () => {
                                 await this.setState({
                                     showSortDropDown: true,
                                 })
                                 this.setPopoutsActive()
                             }}
-                            height="18px"
-                            width="20px"
-                            containerRef={this.sortDropDownButtonRef}
                             active={this.state.showSortDropDown}
                         />
                     </TooltipBox>
@@ -2392,26 +2528,35 @@ export class AnnotationsSidebar extends React.Component<
                         tooltipText={'Copy & Paste Note'}
                         placement={'bottom'}
                     >
-                        <Icon
-                            filePath={icons.copy}
+                        <PrimaryAction
+                            icon={'copy'}
+                            size={'small'}
+                            iconSize="18px"
+                            padding={'0px 6px 0 0'}
+                            type={'tertiary'}
+                            label={'Copy'}
+                            innerRef={this.copyButtonRef}
                             onClick={async () => {
                                 await this.setState({
                                     showAllNotesCopyPaster: true,
                                 })
                                 this.setPopoutsActive()
                             }}
-                            height="18px"
-                            width="20px"
-                            containerRef={this.copyButtonRef}
                             active={this.state.showAllNotesCopyPaster}
                         />
                     </TooltipBox>
                     <TooltipBox
                         tooltipText={'Bulk Share Notes'}
-                        placement={'bottom-end'}
+                        placement={'bottom'}
                     >
-                        <Icon
-                            filePath={icons.multiEdit}
+                        <PrimaryAction
+                            icon={'multiEdit'}
+                            size={'small'}
+                            iconSize="18px"
+                            padding={'0px 6px 0 0'}
+                            type={'tertiary'}
+                            label={'Bulk Share'}
+                            innerRef={this.bulkEditButtonRef}
                             onClick={async () => {
                                 await this.setState({
                                     showAllNotesShareMenu: true,
@@ -2419,9 +2564,6 @@ export class AnnotationsSidebar extends React.Component<
                                 this.setPopoutsActive()
                             }}
                             active={this.state.showAllNotesShareMenu}
-                            height="18px"
-                            width="20px"
-                            containerRef={this.bulkEditButtonRef}
                         />
                     </TooltipBox>
                 </TopBarActionBtns>
@@ -2450,6 +2592,10 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     render() {
+        if (!this.state.themeVariant) {
+            return null
+        }
+
         return (
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
                 <TopBar sidebarContext={this.props.sidebarContext}>
@@ -2458,11 +2604,18 @@ export class AnnotationsSidebar extends React.Component<
                     {/* {this.props.sidebarActions()} */}
                 </TopBar>
                 {this.renderPageShareModal()}
-                {this.renderResultsBody()}
+                {this.renderResultsBody(this.state.themeVariant)}
             </ResultBodyContainer>
         )
     }
 }
+
+const OptionsContainerRight = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    grid-gap: 10px;
+`
 
 const AIContainerNotif = styled.div`
     display: flex;
@@ -2515,9 +2668,17 @@ const RightSideButtonsTopBar = styled.div`
 const OptionsContainer = styled.div`
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding: 5px 15px 10px 15px;
+    z-index: 100;
+    height: 24px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
+`
+const OptionsContainerLeft = styled.div`
+    display: flex;
+    align-items: center;
     justify-content: flex-start;
     color: ${(props) => props.theme.colors.greyScale4};
-    padding: 0 10px 10px 20px;
     font-size: 12px;
     grid-gap: 10px;
     z-index: 100;
@@ -2588,7 +2749,10 @@ const DropDownItem = styled.div<{ focused: boolean }>`
     min-height: 24px;
     align-items: center;
     padding: 10px 20px;
-    color: ${(props) => props.theme.colors.greyScale7};
+    color: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.greyScale5
+            : props.theme.colors.greyScale7};
     justify-content: space-between;
     position: relative;
     font-size: 14px;
@@ -2629,7 +2793,7 @@ const QueryContainer = styled.div<{
     AIDropDownShown: boolean
 }>`
     height: 40px;
-    padding: 15px;
+    padding: 15px 15px 10px 15px;
     display: flex;
     flex-direction: column;
     z-index: 101;
@@ -2740,6 +2904,7 @@ const SummaryContainer = styled.div`
     min-height: 60px;
     height: 100%;
     overflow: scroll;
+    padding-top: 10px;
 `
 
 const SummaryFooter = styled.div`
@@ -2773,6 +2938,7 @@ const SummarySection = styled.div`
     align-items: start;
     height: fill-available;
     flex: 1;
+    height: 30%;
 `
 
 const SummaryText = styled.div`
@@ -2783,6 +2949,12 @@ const SummaryText = styled.div`
     white-space: break-spaces;
     flex-direction: column-reverse;
     margin-bottom: 200px;
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            color: ${(props) => props.theme.colors.greyScale5};
+        `};
 `
 
 const FocusModeNotifContainer = styled.div`
@@ -2925,8 +3097,6 @@ const CreatorActionButtons = styled.div`
 const NewAnnotationBoxMyAnnotations = styled.div`
     display: flex;
     margin-bottom: 5px;
-    margin-top: 5px;
-    padding: 0 5px;
 `
 
 const OthersAnnotationCounter = styled.div``
@@ -2967,7 +3137,10 @@ const SpaceTitle = styled.div`
         background: ${(props) => props.theme.colors.greyScale1};
     }
 `
-const SpaceTitleEditField = styled.input<{ isActivated: boolean }>`
+const SpaceTitleEditField = styled.input<{
+    isActivated: boolean
+    isCreator: boolean
+}>`
     font-size: 18px;
     font-weight: 500;
     width: fill-available;
@@ -3003,6 +3176,14 @@ const SpaceTitleEditField = styled.input<{ isActivated: boolean }>`
                 background: ${(props) => props.theme.colors.greyScale1};
             }
         `};
+    ${(props) =>
+        !props.isCreator &&
+        css`
+            &:hover {
+                cursor: default;
+                background: transparent;
+            }
+        `};
 `
 
 const SpaceDescription = styled(Markdown)`
@@ -3018,16 +3199,17 @@ const TopAreaContainer = styled.div`
     flex-direction: column;
     width: fill-available;
     z-index: 20;
+    padding: 5px 0px;
+    grid-gap: 7px;
     background: ${(props) => props.theme.colors.black};
 `
 
 const AnnotationActions = styled.div`
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
-    padding: 5px 10px 5px 10px;
     width: fill-available;
-    height: 20px;
+    height: 24px;
 `
 
 const ActionButtons = styled.div`
@@ -3090,6 +3272,16 @@ const TopBar = styled.div`
     padding: 10px 10px 10px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     background: ${(props) => props.theme.colors.black};
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            /* box-shadow: ${(props) =>
+                props.theme.borderStyles.boxShadowBottom}; */
+            border-bottom: 1px solid
+                ${(props) =>
+                    props.theme.borderStyles.borderLineColorBigElements};
+        `};
 `
 
 const IsolatedViewHeaderContainer = styled.div`
@@ -3098,7 +3290,7 @@ const IsolatedViewHeaderContainer = styled.div`
     justify-content: flex-start;
     grid-gap: 10px;
     flex-direction: column;
-    padding: 0px 20px 0 20px;
+    padding: 0px 15px 0 15px;
     z-index: 20;
     background: ${(props) => props.theme.colors.black};
 `
@@ -3172,13 +3364,24 @@ const SearchIcon = styled.span`
     background-color: transparent;
 `
 
-const FollowedListNotesContainer = styled(Margin)<{ key: number }>`
+const FollowedListNotesContainer = styled(Margin)<{
+    key: number
+    isHovered: boolean
+}>`
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    height: 100%;
+    width: fill-available;
+    width: -moz-available;
     z-index: ${(props) => 1000 - props.key};
+    height: -webkit-fill-available;
+
+    ${(props) =>
+        props.isHovered &&
+        css`
+            z-index: 100000;
+        `};
 `
 
 const sidebarContentOpen = keyframes`
@@ -3222,7 +3425,7 @@ const AnnotationBox = styled.div<{
     zIndex: number
     order: number
 }>`
-    width: 99%;
+    width: 100%;
     z-index: ${(props) => props.zIndex};
 
     animation-name: ${openAnimation};
@@ -3233,12 +3436,12 @@ const AnnotationBox = styled.div<{
     position: relative;
 `
 
-const FollowedNotesContainer = styled.div`
+const FollowedNotesContainer = styled.div<{ zIndex: number }>`
     display: flex;
     flex-direction: column;
     width: 100%;
     padding-bottom: 60px;
-    z-index: 60;
+    z-index: ${(props) => 999 - props.zIndex};
 `
 
 const FollowedListsMsgContainer = styled.div`
@@ -3271,7 +3474,11 @@ const FollowedListsMsg = styled.span`
     line-height: 17px;
 `
 
-const FollowedListRow = styled(Margin)<{ key: number; context: string }>`
+const FollowedListRow = styled(Margin)<{
+    key: number
+    context: string
+    zIndex?: number
+}>`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -3280,9 +3487,9 @@ const FollowedListRow = styled(Margin)<{ key: number; context: string }>`
     width: fill-available;
     cursor: pointer;
     border-radius: 8px;
-    height: 40px;
+    height: 44px;
     padding: 5px 15px 5px 10px;
-    z-index: 40;
+    z-index: ${(props) => 1000 - props.zIndex};
 
     &:first-child {
         margin-top: 5px;
@@ -3350,6 +3557,7 @@ const FollowedListTitleContainer = styled(Margin)`
     justify-content: flex-start;
     flex: 1;
     grid-gap: 10px;
+    height: 100%;
 `
 
 const FollowedListTitleContainerMyNotes = styled(Margin)`
@@ -3377,6 +3585,14 @@ const FollowedListTitle = styled.span<{ context: string }>`
     text-overflow: ellipsis;
     overflow: hidden;
     display: block;
+`
+const FollowedListTitleBox = styled.div<{ context: string }>`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 30px;
+    flex: 1;
+    height: 100%;
 `
 const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
     font-weight: bold;
@@ -3427,9 +3643,10 @@ const TopBarStyled = styled.div`
     width: 100%;
 `
 
-const LoadingIndicatorContainer = styled.div`
+const LoadingIndicatorContainer = styled.div<{ height: string; width: string }>`
     width: 100%;
-    height: 100px;
+    width: ${(props) => (props.width ? props.width : '15px')};
+    height: ${(props) => (props.height ? props.height : '15px')};
     display: flex;
     justify-content: center;
     align-items: center;
@@ -3523,6 +3740,16 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
         css`
             border-right: 'unset';
             border-left: 'unset';
+        `};
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            /* box-shadow: ${(props) =>
+                props.theme.borderStyles.boxShadowLeft}; */
+            border-right: 1px solid
+                ${(props) =>
+                    props.theme.borderStyles.borderLineColorBigElements};
         `};
 `
 

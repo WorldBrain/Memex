@@ -358,7 +358,11 @@ const DateRangeDiv = styled.div`
     }
 
     .react-datepicker__day--disabled {
-        color: ${(props) => props.theme.colors.greyScale6} !important;
+        color: ${(props) =>
+            props.theme.variant === 'light'
+                ? props.theme.colors.greyScale4
+                : props.theme.colors.greyScale6} !important;
+        font-weight: 300 !important;
     }
 
     .react-datepicker__day--selected {

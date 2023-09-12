@@ -3761,6 +3761,7 @@ describe('Dashboard search results logic', () => {
                 await searchResults.processEvent('handleListShare', {
                     listId: listDataA.unifiedId,
                     remoteListId: testRemoteListId,
+                    annotationLocalToRemoteIdsDict: {},
                 })
 
                 expect(
